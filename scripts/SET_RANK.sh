@@ -24,6 +24,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 source "${SCRIPT_DIR}/lib/common.sh"
 enable_error_trap
 
+# Running this as root would leave root-owned files the app user cannot rewrite.
+reexec_as_app_user "$@"
+
 usage() {
 	cat <<EOF
 ${C_BOLD}SET_RANK.sh${C_RESET} — set an account's rank (audited as admin:cli)

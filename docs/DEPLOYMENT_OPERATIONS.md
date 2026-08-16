@@ -57,7 +57,7 @@ All scripts read one `/srv/mistvale/.env`; no secrets in git; `.env.example` doc
 
 ## 5. Release process (per phase / content drop)
 1. Merge to `main` (CI green: lint, typecheck, engine goldens, build).
-2. SSH → `sudo -u mistvale /srv/mistvale/repo/scripts/UPDATE.sh`.
+2. SSH → `sudo -u mistvale /srv/mistvale/repo/scripts/UPDATE.sh`. Plain `sudo` works too: `UPDATE.sh`, `BACKUP.sh`, `SEED.sh` and `SET_RANK.sh` re-exec themselves as the app user when started as root, so neither form can leave root-owned files in `/var/log/mistvale` or `/var/backups/mistvale` for the next run to trip over. (`DEPLOY.sh` and `RESTORE.sh` genuinely need root and stay root.)
 3. Script prints health + new content rev; smoke: login, one battle, one summon.
 4. Tag release `ea-0.1.x`; CHANGELOG entry (script reminds).
 Rollback = `UPDATE.sh --rollback` (previous release dir + DB restore only if a migration was destructive — script warns).

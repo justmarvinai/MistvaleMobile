@@ -261,6 +261,13 @@ ensure_dir "$(dirname -- "${UPLOADS}")" "${APP_USER}:${APP_GROUP}" 0755
 ensure_dir "${UPLOADS}" "${APP_USER}:${APP_GROUP}" 0755
 ensure_dir "${LOG_DIR}" "${APP_USER}:${APP_GROUP}" 0755
 ensure_dir "${BACKUP_DIR}" "${APP_USER}:${APP_GROUP}" 0750
+
+# Repair the *contents* too, not just the directories. A box deployed before the
+# ops scripts learned to drop privileges has root-owned ops logs and backup
+# artefacts inside app-user-owned directories, which is exactly the state that
+# makes the next `sudo -u ${APP_USER} UPDATE.sh` fail on its own log and lock.
+# Re-running DEPLOY.sh is the documented repair, so it has to actually repair.
+chown -R "${APP_USER}:${APP_GROUP}" "${LOG_DIR}" "${BACKUP_DIR}"
 ok "directory layout ready"
 
 # Log rotation for the ops logs these scripts write (ops-deploy.log, ops-backup.log,

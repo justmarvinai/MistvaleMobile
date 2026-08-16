@@ -130,14 +130,26 @@ fi
 : "${QUIET:=0}"
 
 # _log_file — append a plain (colour-free) copy of every log line to
-# ${LOG_DIR}/ops-<script>.log when that directory is writable. Failures are
-# ignored on purpose: an unwritable log dir must never abort an ops script.
+# ${LOG_DIR}/ops-<script>.log when that file is writable. Failures are ignored
+# on purpose: an unwritable log must never abort an ops script, nor say so on
+# every line.
+#
+# Two subtleties, both learned the hard way:
+#   • a writable *directory* does not mean a writable *file* — one root-run of
+#     an ops script leaves an ops-<script>.log the app user cannot append to;
+#   • `cmd >>file 2>/dev/null` does NOT silence a failed redirect, because the
+#     shell reports that before cmd exists to have its stderr redirected. Doing
+#     it inside a subshell puts the message on stderr the outer redirect owns.
 _log_file() {
-	local level="$1" msg="$2"
-	[[ -d "${LOG_DIR}" && -w "${LOG_DIR}" ]] || return 0
-	printf '%s [%s] %s: %s\n' \
+	local level="$1" msg="$2" file="${LOG_DIR}/ops-${SCRIPT_NAME%.sh}.log"
+	if [[ -e "${file}" ]]; then
+		[[ -w "${file}" ]] || return 0
+	else
+		[[ -d "${LOG_DIR}" && -w "${LOG_DIR}" ]] || return 0
+	fi
+	(printf '%s [%s] %s: %s\n' \
 		"$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "${SCRIPT_NAME}" "${level}" "${msg}" \
-		>>"${LOG_DIR}/ops-${SCRIPT_NAME%.sh}.log" 2>/dev/null || true
+		>>"${file}") 2>/dev/null || true
 }
 
 log() { # informational
@@ -522,6 +534,32 @@ run_as_app_user() {
 	else
 		"${@}"
 	fi
+}
+
+# reexec_as_app_user "$@"
+# Called at the top of every ops script the docs say to run as the app user
+# (UPDATE, BACKUP, SEED, SET_RANK). Under root it replaces this process with the
+# same script running as APP_USER; otherwise it returns and the script proceeds.
+#
+# Why this exists: `sudo UPDATE.sh` and `sudo -u mistvale UPDATE.sh` look
+# interchangeable, and the first one is what a person types. It even works —
+# once. It leaves root-owned files behind in /var/log/mistvale and
+# /var/backups/mistvale, and the *next* run as the app user then cannot write
+# its own log or take the backup lock. Rather than document the distinction and
+# hope, the scripts make it not matter. The app user has a sudoers entry for its
+# own service, so nothing here needs the privileges being dropped.
+#
+# MISTVALE_REEXEC stops a loop if APP_USER somehow resolves back to root.
+reexec_as_app_user() {
+	[[ "${EUID}" -eq 0 ]] || return 0
+	[[ -z "${MISTVALE_REEXEC:-}" ]] || return 0
+	id -u "${APP_USER}" >/dev/null 2>&1 || return 0
+	need_cmd sudo
+	log "started as root — re-running as ${APP_USER} so this leaves nothing root-owned"
+	exec sudo -E -u "${APP_USER}" -H \
+		env "HOME=${APP_ROOT}" "PATH=${PATH}" "MISTVALE_REEXEC=1" \
+		"COREPACK_ENABLE_DOWNLOAD_PROMPT=0" \
+		"${SCRIPTS_DIR}/${SCRIPT_NAME}" "$@"
 }
 
 # run_server_entry <dist entry> <pnpm script> [args...]
