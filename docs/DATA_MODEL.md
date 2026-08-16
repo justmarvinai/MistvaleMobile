@@ -1,0 +1,257 @@
+# Mistvale — Data Model (PostgreSQL 16)
+
+> Status: **Planning draft** — table-by-table blueprint for the Drizzle schema built in Phase P0/P1.
+> Conventions: `snake_case`; PKs `id bigint generated always as identity` unless noted; all timestamps `timestamptz`; every table gets `created_at`/`updated_at`; FKs `on delete restrict` unless noted; JSONB columns are always Zod-validated at the API boundary (never trusted raw).
+
+Two families of tables:
+- **Content (`*_defs`)** — authored via Admin Suite, read-mostly, loaded into the server ContentCache. Rows carry `status` (`draft` | `live`) + `draft_of` self-reference for the publish workflow, and are exportable/importable as JSON (admin backup / git-versioned content).
+- **Player state** — hot tables, one source of truth for everything a player owns/did.
+
+---
+
+## 1. Content: units & skills
+
+### `faction_defs`
+| column | type | notes |
+|---|---|---|
+| key | text unique | `vale_sentinels`, `emberclan`, `wayfarers`, `hollowborn`, `sskarn` … |
+| name, lore | text | display |
+| icon | text | game-icons key |
+| sort_order | int | |
+
+### `champion_defs` (playable units; enemies reference the same skill machinery via `enemy_defs`)
+| column | type | notes |
+|---|---|---|
+| key | text unique | `anuria`, `thordakk`, … |
+| name, title, lore | text | e.g. Anuria, "Blade of the Vale" |
+| faction_key | fk | |
+| element | enum | `ember` `tide` `verdant` `mist` |
+| rarity | enum | `common` `uncommon` `rare` `epic` `legendary` (`mythic` reserved) |
+| role | enum | `attack` `defense` `hp` `support` |
+| base_stats | jsonb | `{hp, atk, def, spd, critRate, critDmg, res, acc}` — values AT max rank/level; growth curves derive lower values (COMBAT_SYSTEM.md §stats) |
+| skills | jsonb | ordered array of skill_def keys (A1..A4 + passive) |
+| aura | jsonb nullable | `{stat, value, scope: all|element|faction, area: any|campaign|arena|depths}` |
+| asset_key | text | → `asset_defs`; sprite + animation tracks |
+| summonable, starter | bool | starters: anuria/thordakk/maruan |
+| balance_version | int | bumped on stat changes (shows "updated" badge in Chronicle) |
+
+### `skill_defs`
+| column | type | notes |
+|---|---|---|
+| key | text unique | `anuria_a1_riftcut` |
+| name, description_tpl | text | template with `{dmg%}`-style placeholders auto-filled from data |
+| slot | enum | `a1` `a2` `a3` `a4` `passive` |
+| cooldown, cooldown_upgraded | int | |
+| targeting | jsonb | `{side: enemy|ally|self, mode: single|all|random_n|self, n?}` |
+| components | jsonb | ordered effect components — the engine contract, e.g. `[{type:"damage", scale:"atk", mult:3.6, element:"inherit"},{type:"applyStatus", status:"poison_5", chance:0.75, turns:2, target:"hit"}]` |
+| upgrades | jsonb | tome upgrade ladder `[{effect:"dmg+5%"},{effect:"chance+10%"},{effect:"cooldown-1"}…]` |
+| ai_hints | jsonb | `{prefer:"lowest_hp", openWith:true, dontRepeatWhileActive:"poison_5"}` |
+| animation | jsonb | `{track:"attack", vfx:"slash_red", projectile?, shake?}` |
+
+### `status_defs` (buff/debuff catalog — the ~30 EA effects)
+| column | type | notes |
+|---|---|---|
+| key | text unique | `atk_up_50`, `poison_5`, `stun`, `shield_pct`, … |
+| kind | enum | `buff` `debuff` |
+| family | text | stacking family (`atk_up` — stronger replaces weaker) |
+| params | jsonb | magnitudes, tick timing (`onTurnStart|onTurnEnd`), max_stacks |
+| icon, color | text | UI |
+| engine_type | text | which engine interpreter handles it — publish-validated against the engine registry |
+
+### `enemy_defs`
+Same shape as champions (element, role, skills, asset_key) plus:
+| column | type | notes |
+|---|---|---|
+| archetype | text | `sskarn_skirmisher`, `sskarn_shaman`, `sskarn_broodguard`, boss keys … (all share the lizard asset for now) |
+| stat_profile | jsonb | base stats at reference level + per-level growth multipliers — stages instantiate `{enemy_key, level, stars, modifiers}` |
+| is_boss | bool + boss_mechanics jsonb | e.g. turn-meter-fill immunity, shield phases (engine-known keys) |
+
+### `asset_defs` (asset registry)
+| column | type | notes |
+|---|---|---|
+| key | text unique | `champ_anuria`, `enemy_lizard` |
+| kind | enum | `unit` `vfx` `ui` `audio` |
+| source | enum | `repo` (build atlas) `upload` (admin-uploaded) |
+| tracks | jsonb | `{idle:{frames:9,fps:9,loop:true}, attack?:{...}}` + atlas refs |
+| avatar_path, still_path | text | |
+
+## 2. Content: items & gear
+
+### `gear_set_defs` (e.g. Swiftwind, Bloodthorn, Ironroot…)
+| column | type | notes |
+|---|---|---|
+| key, name, lore | | |
+| pieces | int | 2 or 4 |
+| bonus | jsonb | `{stat:"spd", pct:12}` or proc `{type:"lifesteal", pct:30}` — engine-known bonus types |
+| drop_sources | jsonb | dungeon keys (display + drop-table generation aid) |
+
+### `gear_slot_defs` (6 gear + 3 accessory slots)
+| column | type | notes |
+|---|---|---|
+| key | enum-ish | `weapon` `helm` `shield` `gauntlets` `cuirass` `boots` `ring` `amulet` `banner` |
+| allowed_main_stats | jsonb | per-slot list incl. fixed slots (weapon=flat ATK, helm=flat HP, shield=flat DEF) |
+| accessory | bool | accessories gated by ascension level |
+
+### `gear_main_stat_defs` / `gear_substat_defs`
+Per stat × rank: base value, per-upgrade-level growth (main), roll min/max (sub). Fully data-driven so balance lives in the Admin Suite.
+
+### `item_defs` (stackables)
+| column | type | notes |
+|---|---|---|
+| key | text unique | `sigil_faded`, `sigil_gleaming`, `sigil_mistwoven`, `sigil_radiant`, `essence_ember_lesser`…, `essence_pure`, `tome_rare|epic|legendary`, `emblem_bronze|silver|gold`, `energy_pack_*`, `xp_boost_*` |
+| category | enum | `sigil` `essence` `tome` `emblem` `consumable` `material` |
+| rarity, icon, description | | |
+| payload | jsonb | e.g. consumable effects `{energy:+50}` |
+
+## 3. Content: world & modes
+
+### `campaign_chapter_defs`
+`key, number (1-12), name, region_lore, background_asset, star_reward_tiers jsonb ([{stars:7,rewards:[...]},{stars:14,…},{stars:21,…}])`
+
+### `stage_defs` (campaign stages AND dungeon floors — one table, `mode` discriminates)
+| column | type | notes |
+|---|---|---|
+| key | text unique | `c01_s1_normal`, `wyrms_hollow_f07`, … |
+| mode | enum | `campaign` `dungeon` `springs` `proving` `tutorial` |
+| parent_key | text | chapter or dungeon key |
+| number, difficulty | int, enum | difficulty: `normal` `hard` `brutal` (`nightmare` reserved) |
+| energy_cost | int | |
+| waves | jsonb | `[[{enemy_key, level, stars, slot, modifiers?}…] × 1-3]` |
+| rewards | jsonb | `{silverRange, playerXp, champXpBase, dropTable: key}` |
+| star_rules | jsonb | `{noDeaths: true, maxTurns: N}` → 1-3 stars |
+| unlock | jsonb | `{prevStage?, playerLevel?}` |
+| first_clear_bonus | jsonb | one-time rewards |
+
+### `dungeon_defs`
+`key (wyrms_hollow, frostgrave_vault, cinderspire, silkmire_depths, proving_grounds, spring_ember|tide|verdant|mist, spring_pure), name, lore, boss_enemy_key, floors int (15 at EA), open_days jsonb (springs rotation), featured_drops jsonb, background_asset`
+
+### `drop_table_defs` + `drop_table_entries`
+Weighted rolls, engine-agnostic: `entries: {ref_type: gear|item|silver|champion, ref/params (set, slot?, rank, rarity_weights, level_range | item_key, qty_range), weight, rolls}`. Publish-validated (weights > 0, refs exist). Reused by stages, chests, events, login calendar, shops.
+
+### `summon_pool_defs` + `summon_pool_entries`
+| column | notes |
+|---|---|
+| pool per sigil type; entries: `{champion_key, weight}` grouped by rarity with `rarity_rates jsonb` (`{rare:0.914, epic:0.08, legendary:0.006}`-style, must sum 1, publish-validated) |
+| `pity jsonb` | mercy rules per pool: `{epic:{after:20, bonusPerSummon:0.02}, legendary:{after:200, bonusPerSummon:0.005}}` |
+
+### `quest_defs` (daily/weekly/monthly), `mission_defs` (one long chain)
+| column | notes |
+|---|---|
+| period enum (`daily`/`weekly`/`monthly`) or chain position int |
+| goal jsonb — typed goal DSL: `{type:"battle_wins", mode:"campaign", count:3}`, `{type:"upgrade_gear", toLevel:4}`, `{type:"summon", count:1}`, `{type:"use_energy", count:60}` … (goal types are an engine-side registry, publish-validated) |
+| rewards jsonb, sort, active bool |
+| daily set also feeds a completion meter → `daily_chest_defs` (all-dailies bonus) |
+
+### `event_defs` + `event_milestone_defs` (timed events framework)
+`key, name, banner_asset, starts_at, ends_at, point_rules jsonb ([{action:"champ_xp", points_per:1000}, {action:"dungeon_clear", dungeon:"any", points:10}…]), milestones: [{points, rewards}]`. Cron activates/expires; admin editor composes these freely (Champion Training / Dungeon Delve / Summon Surge are just presets).
+
+### `shop_defs` + `shop_slot_defs`
+Bazaar: rotating slots `{stock_ref (drop_table or item), price {currency, amount}, refresh_group}`; crystal shop: fixed offers (energy, silver packs, roster slots). Refresh timer + manual refresh cost in `game_config`.
+
+### `login_calendar_defs`
+`day int (1-30 cycle), rewards jsonb` + separate `welcome_days` 7-day new-player track.
+
+### `hall_of_valor_defs`
+Per element × stat: 10 levels, `{bonus_value, medal_cost}` per level.
+
+### `mastery_defs`
+Three trees (`onslaught` / `bulwark` / `insight`), 6 tiers, each node: `key, tree, tier, effect jsonb (engine-known), emblem_cost jsonb`.
+
+### `tutorial_step_defs`
+Ordered scripted steps: `{trigger, screen, highlight, text, forced_action?, rewards?}` — makes onboarding tweakable without code.
+
+### `game_config`
+Single-row-per-key `key text pk, value jsonb, schema_key text`. Every balance constant: energy regen seconds, caps by level, XP curves, gear upgrade cost/success tables, element wheel modifiers, crit caps, arena tier thresholds & weekly rewards, multi-battle cap, pity defaults, daily reset hour/timezone, rate limits… Admin edits through schema-typed forms.
+
+### `bot_defs`
+`name, avatar_champion_key, personality jsonb (team archetype, element bias), rating_band, roster jsonb (generated champion instances w/ gear tiers), refresh_policy`. A nightly job + admin editor manage the ladder population.
+
+### `news_defs`
+`title, body_md, starts_at, ends_at, pinned` — shown on Haven sidebar + login.
+
+### Content plumbing
+- `content_revisions` — `rev serial, published_at, published_by, diff_summary jsonb, snapshot ref` (last N snapshots kept for one-click revert).
+- Export/import: any `*_defs` subset ⇄ JSON file (admin feature; also how content gets from a local authoring session into git seeds).
+
+---
+
+## 4. Player state
+
+### `accounts`
+`id, account_name citext unique, password_hash, force_password_change bool, status enum(active|banned), ban_reason, last_login_at, created_ip`
+
+### `sessions`
+`id, account_id fk cascade, token_hash bytea unique, expires_at, created_at, last_seen_at, user_agent` (player) — mirrored `admin_accounts`/`admin_sessions` with `role enum(owner|editor)`.
+
+### `players` (1:1 account)
+`id, account_id unique, profile_name citext unique, level, xp, energy, energy_updated_at, silver bigint, crystals, valor_medals, roster_capacity, tutorial_step, settings jsonb, last_daily_reset_at, is_bot bool default false` — bots are players; every system (arena, leaderboards) works on them uniformly. Currencies as columns (hot, small); stackable items normalized below.
+
+### `player_items`
+`player_id, item_key, quantity bigint, unique(player_id, item_key)` — sigils, essences, tomes, emblems, consumables.
+
+### `player_champions`
+| column | notes |
+|---|---|
+| id, player_id, champion_key | |
+| level, xp, stars (rank), ascension (0-6) | |
+| skill_upgrades jsonb | per-skill tome levels |
+| masteries jsonb | picked nodes (validated vs tree rules) |
+| locked bool, favorite bool | food-protection |
+| in_vault bool (reserved), obtained_at, obtained_from | |
+| power int | cached power score for lists/bots |
+
+### `gear_instances`
+| column | notes |
+|---|---|
+| id, player_id, set_key, slot, rank (1-6), rarity, level (0-16) | |
+| main_stat jsonb `{stat, value}` | value recomputed from defs on level-up |
+| substats jsonb `[{stat, value, rolls}]` | |
+| equipped_champion_id fk nullable → player_champions (unique per slot enforced by partial unique index `(equipped_champion_id, slot)`) | |
+| source, obtained_at | |
+
+### `campaign_progress`
+`player_id, stage_key, stars (0-3), best_clear jsonb (turns, team), clears int, unique(player_id, stage_key)` + claimed star-tier flags on a per-chapter row (`chapter_star_claims`).
+
+### `dungeon_progress`
+`player_id, dungeon_key, highest_floor, clears_by_floor jsonb`
+
+### `player_quests` / `player_missions`
+`player_id, quest_key, period_anchor date (for daily/weekly/monthly instance), progress jsonb, completed_at, claimed_at`. Missions: `player_id, mission_key, progress, completed_at, claimed_at`. Progress events flow through one `ProgressService.track(tx, playerId, action, params)` fan-out (quests + missions + events + tutorial all subscribe — one integration point for every future goal type).
+
+### `player_events`
+`player_id, event_key, points, claimed_milestones int[]`
+
+### `arena_state`
+`player_id, rating, tier, tokens, tokens_updated_at, defense_team jsonb ([{player_champion_id, slot}]), weekly_high, last_weekly_claim`
+### `arena_battles`
+`id, attacker_id, defender_id, attacker_rating_delta, defender_rating_delta, result, battle_log_id, created_at` (defender may be bot — same table).
+### `arena_opponent_offers`
+Current refreshable opponent list per player (3-5 offers, regenerated on refresh/token use).
+
+### `battles` (active sessions + history header)
+`id uuid, player_id, mode, stage_key/arena ref, state enum(active|won|lost|retreat|expired), seed, content_rev, team jsonb, snapshot jsonb (latest engine state), action_count, energy_spent, rewards jsonb (granted on completion), action_id uuid (idempotency), created_at, resolved_at`
+### `battle_logs`
+`battle_id fk, events jsonb (compressed event list)` — kept 14 days for players, longer for arena disputes; admin inspector reads these. Partitioned/pruned by cron.
+
+### `summon_history`
+`player_id, pool_key, sigil_item_key, champion_key, rarity, pity_counters_after jsonb, created_at` — the pity state IS derivable but we cache counters on `players.summon_pity jsonb` for O(1) reads.
+
+### `mailbox`
+`id, player_id, title, body, attachments jsonb (rewards), sent_by (system|admin name), read_at, claimed_at, expires_at` — admin composer can target one/all players (fan-out rows at send time; player count is tiny).
+
+### `hall_of_valor_progress`
+`player_id, element, stat, level` (unique triple).
+
+### `economy_log` (append-only audit of every grant/spend)
+`id, player_id, source (battle:c01_s3|summon|quest:...|admin:<name>|mail|shop), deltas jsonb, created_at` — powers Admin player inspector + economy dashboards. Pruned to 90 days.
+
+### `audit_log` (admin actions)
+`id, admin_id, action, entity, entity_id, before jsonb, after jsonb, created_at` — every Admin mutation, no exceptions.
+
+---
+
+## 5. Indexing & ops notes (initial)
+- Hot paths: `sessions(token_hash)`, `players(account_id)`, `player_champions(player_id)`, `gear_instances(player_id)`, partial index `gear_instances(equipped_champion_id) where equipped_champion_id is not null`, `battles(player_id) where state='active'`, `player_quests(player_id, period_anchor)`, `arena_state(rating)` for matchmaking bands, `mailbox(player_id) where claimed_at is null`.
+- JSONB integrity: Zod at every boundary + CHECK constraints for enums; publish-time referential validation for content JSONB (skill→status keys, waves→enemy keys, drops→item keys).
+- Migrations: drizzle-kit generated SQL committed to git; `UPDATE.sh` runs `migrate` before restart; destructive migrations require an explicit `--allow-destructive` flag and a fresh backup (script-enforced).
+- Seeds: `apps/server/src/db/seed/` = the EA content in code-reviewable JSON/TS (7 champions, skills, lizard archetypes, 12 chapters, dungeons, quests, shops, calendar, bots, config). `SEED.sh` loads them only into empty content tables (or with `--force-content` for full refresh; player data never touched).

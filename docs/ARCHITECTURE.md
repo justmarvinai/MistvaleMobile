@@ -1,0 +1,254 @@
+# Mistvale — Technical Architecture
+
+> Status: **Planning — locked for EA-0.1 unless changed via USER_QUESTIONS.md**
+> Scope: game client, game server, shared packages, battle engine, content pipeline.
+> The Admin Suite architecture lives in `MistvaleMobile-Admin/docs/ADMIN_ARCHITECTURE.md` (it consumes the Admin API defined here).
+
+---
+
+## 1. Architecture principles
+
+1. **Authoritative server.** The client never decides outcomes. Every battle, roll, reward, upgrade, and timer is computed server-side. The client is a renderer + input device.
+2. **Content is data, not code.** Champions, skills, enemies, items, stages, quests, events, shops, balance constants — all live in PostgreSQL and are edited through the Admin Suite. Code implements *systems*; the DB describes *content*. Adding a champion or a dungeon must never require a code change.
+3. **Determinism where it matters.** Battle simulation is a pure, seeded, replayable function. Same seed + same inputs ⇒ same battle. This gives us testability, replays, audit, and cheap bug reproduction.
+4. **Sized for the box.** Production is a 1-core / 4 GB VPS. Single Node process, tuned Postgres, nginx for all static bytes, in-memory content cache, no speculative microservices, no Redis/queues unless a measured need appears.
+5. **Boring, typed, testable.** TypeScript strict everywhere, one language across the stack, pure functions for game math, thin IO layers.
+6. **Extensible by construction.** New systems plug in through the same patterns: a content table + a service + an API module + a screen. The gacha genre is content-treadmill-driven; the architecture must make "add more stuff" the cheap operation.
+
+---
+
+## 2. Tech stack (locked)
+
+| Layer | Choice | Why |
+|---|---|---|
+| Language | TypeScript 5.x `strict` everywhere | One language, shared types client/server/engine |
+| Runtime | Node.js 22 LTS | LTS until 2027, native `fetch`/`crypto`, stable perf |
+| Server framework | Fastify 5 | Fastest mainstream Node framework, schema-first validation, plugin encapsulation |
+| Validation | Zod 4 (+ `fastify-type-provider-zod`) | Single source of truth for runtime validation + static types + OpenAPI generation for the Admin API |
+| Database | PostgreSQL 16 | The brief mandates PostgreSQL; JSONB for skill/wave definitions is a perfect fit |
+| ORM / migrations | Drizzle ORM + drizzle-kit | Lightweight (no query engine binary — matters on 1 core), SQL-transparent, first-class TS types, real migration files in git |
+| Password hashing | argon2id (`argon2`) | Modern KDF; parameters tuned for the small VPS (§9) |
+| Logging | pino + pino-roll | Structured JSON logs, near-zero overhead |
+| Scheduling | node-cron (in-process) | Daily reset, shop refresh, event rotation, bot refresh — no external scheduler needed |
+| Client build | Vite 6 | Fast builds, trivial code-splitting, first-class TS |
+| UI framework | React 18 | The game is 80% menu surface; DOM+CSS is the strongest tool for complex menus |
+| Game rendering | PixiJS v8 | WebGL2 sprite rendering for battle scenes, summon animations, ambient/map effects; nearest-neighbor pixel-perfect scaling |
+| Client state | Zustand | Small, unopinionated stores per domain; no boilerplate |
+| Styling | SCSS Modules + design tokens | Hand-built pixel UI kit (no Tailwind, no component library in the game client — see UI_UX_DESIGN.md) |
+| Audio | Howler.js | Sprite-based SFX, music channels, mobile unlock handling |
+| Testing | Vitest (unit/engine), Playwright (E2E smoke) | Engine correctness is the #1 test target |
+| Lint/format | ESLint 9 (flat config) + Prettier | Enforced in CI |
+| CI | GitHub Actions | typecheck + lint + test on every push; build artifact check |
+| Package manager | pnpm 9 (workspaces) | Monorepo with strict, fast installs |
+
+**Explicitly rejected:**
+- **Phaser/Godot-web as the app shell** — UI-heavy collection RPGs are menus first; canvas-rendered UI is slower to build, worse for accessibility/text/scrolling, and fights the DOM. Pixi is used *only* where sprites live.
+- **Next.js / SSR** — no SEO need behind a login; SSR wastes RAM/CPU on the 1-core box. Static SPA + JSON API wins.
+- **Prisma** — heavier runtime and memory footprint; Drizzle is closer to SQL and lighter on the VPS.
+- **Redis** — premature. Sessions and caches fit in Postgres + process memory at our player count. The session table + in-memory content cache can be swapped for Redis later without API changes.
+- **WebSockets for EA-0.1** — every EA feature is request/response (turn-based, async PvP). The transport layer is isolated so a WS gateway can be added for Live Arena / Guilds later. No polling loops anywhere; the client only re-fetches on user action or screen entry.
+
+---
+
+## 3. Repository layout (game repo, pnpm monorepo)
+
+```
+MistvaleMobile/
+├── CLAUDE.md / AGENTS.md / ROADMAP.md / CHANGELOG.md / USER_QUESTIONS.md
+├── docs/                       # all planning + living documentation
+│   └── research/               # RSL reference research (design input)
+├── assets/                     # SOURCE art (as provided; never hand-edited)
+│   ├── champions/<key>/...     # 64x64 stills + 9-frame idle
+│   ├── enemies/<key>/...
+│   └── ui/...                  # Kenney Fantasy UI Borders
+├── apps/
+│   ├── client/                 # Vite + React + Pixi SPA
+│   │   ├── src/
+│   │   │   ├── app/            # bootstrap, router, providers, screen registry
+│   │   │   ├── screens/        # one folder per screen (login, haven, battle, ...)
+│   │   │   ├── game/           # Pixi layer: battle stage, sprite/anim system, vfx
+│   │   │   ├── ui/             # Mistvale UI kit: Panel, Button, Bar, Modal, ...
+│   │   │   ├── state/          # zustand stores (session, player, roster, content, battle)
+│   │   │   ├── api/            # typed API client (generated from shared DTOs)
+│   │   │   ├── audio/          # howler wrapper, sound registry
+│   │   │   └── styles/         # tokens.scss, mixins, global
+│   │   └── public/             # packed atlases, fonts, icons, audio (build output of asset pipeline)
+│   └── server/
+│       ├── src/
+│       │   ├── modules/        # feature modules (auth, player, battle, summon, arena, ...)
+│       │   │   └── <mod>/      #   routes.ts, service.ts, repo.ts, schemas.ts
+│       │   ├── admin/          # admin API modules (content CRUD, players, publish, ...)
+│       │   ├── content/        # ContentCache: load, validate, publish, revision
+│       │   ├── db/             # drizzle schema/, migrations/, seed/
+│       │   ├── jobs/           # cron: daily reset, shop/event/bot rotation, backups
+│       │   ├── lib/            # config, errors, logging, rng, rate-limit
+│       │   └── index.ts
+│       └── drizzle.config.ts
+├── packages/
+│   ├── shared/                 # DTOs, enums, API route constants, formulas' types
+│   └── engine/                 # PURE battle engine (no IO, no DB) + its test suite
+├── tools/
+│   ├── atlas-pack/             # sprite → texture atlas packing (build step)
+│   ├── icon-fetch/             # game-icons.net fetcher + manifest (attribution)
+│   └── balance-sim/            # CLI: headless battle simulations for tuning
+├── scripts/                    # DEPLOY.sh, UPDATE.sh, BACKUP.sh, RESTORE.sh, STATUS.sh, LOGS.sh, SEED.sh
+└── .github/workflows/ci.yml
+```
+
+**Module pattern (server):** every feature is a Fastify plugin folder with `routes.ts` (HTTP + schemas), `service.ts` (game logic, transactional), `repo.ts` (queries). Modules never import each other's repos — cross-feature calls go through services. This keeps "add a feature" mechanical.
+
+**Screen pattern (client):** every screen is a folder with `Screen.tsx`, local components, `screen.module.scss`, and an entry in the screen registry (route, required unlock, preload list). Adding a screen touches nothing global.
+
+---
+
+## 4. Client architecture
+
+### 4.1 Shell: React DOM. Stage: Pixi.
+- The **app shell** (navigation, menus, roster, inventory, summon UI chrome, quests, arena lists…) is React DOM styled by the pixel UI kit. Crisp text, native scrolling, fast iteration.
+- The **stage** is a single persistent `<PixiStage>` canvas mounted behind/within screens that need sprites:
+  - **Battle screen** — full battle rendering (units, animations, floaters, VFX).
+  - **Summon screen** — gate animation + champion reveal.
+  - **Haven (home) screen** — ambient animated backdrop (mist drift, torch flicker).
+- One Pixi `Application` instance for the app lifetime (WebGL context reuse; avoids context-loss churn). Screens acquire/release "scenes" on it.
+
+### 4.2 Pixel-perfect rendering rules
+- All sprite rendering integer-scaled (`SCALE_MODES.NEAREST`, no rotation on pixel sprites, positions snapped to whole device pixels).
+- Base sprite unit is 64×64; battle stage designs around a **virtual resolution of 960×540** (16:9), integer-zoomed to fit (×1/×2/×3) with letterboxing — the same strategy carries to mobile-landscape later.
+- DOM UI is *not* integer-locked (text needs subpixel freedom) but uses the pixel-art frames via `border-image` 9-slice from the Kenney pack.
+
+### 4.3 Animation system
+- Champion/enemy animation model: named tracks per unit — `idle` (exists today, 9 frames), and future `attack`, `hit`, `death`, `cast`. The **asset registry** (DB) maps unit → track → atlas frames + fps + loop flag.
+- **Fallback rule (EA-critical):** units that only have `idle` get procedural stand-ins — attack = forward lunge + weapon-flash overlay, hit = white-flash + knockback pixels, death = desaturate + dissolve. When real frames are uploaded later via the Admin Suite, they take over automatically because everything routes through the registry. No code change.
+- Tweens/timelines: a tiny internal tween util on Pixi tickers for battle motion; DOM micro-animations via CSS transitions/keyframes (see UI doc, §motion).
+- Floating combat text, buff/debuff icon pops, turn-meter bar, screen shake (small, configurable) are all engine-event-driven (§6.4).
+
+### 4.4 State & data flow
+- Zustand stores: `session` (auth), `content` (static content bundle + revision), `player` (profile, resources, energy), `roster`, `inventory`, `battle` (live battle playback state), `ui` (modals, toasts).
+- Server is the source of truth; every mutating API response returns the **authoritative deltas** (e.g. new resource totals, changed champion) which stores apply. No optimistic writes in EA — latency to a EU VPS is fine and correctness is simpler.
+- Energy and other timers: server returns `{ value, cap, nextTickAt, regenSeconds }`; client animates the countdown locally and never self-credits — screen entry / actions re-sync.
+- The **content bundle** (all champion/skill/item/stage definitions needed to render the game) is fetched once per content revision (`GET /api/content` with ETag), cached in IndexedDB, keyed by revision. Bundle target < 500 KB gzipped at EA content size.
+
+### 4.5 Asset pipeline (build step, `tools/atlas-pack`)
+1. Reads `assets/champions|enemies` source frames.
+2. Packs per-unit atlases (idle track = 9 frames → one 576×64 strip + JSON) and a global UI atlas for Kenney frames.
+3. Emits to `apps/client/public/atlases/` with content-hashed filenames + a manifest.
+4. Admin-uploaded art (post-deploy) lives under `/var/lib/mistvale/uploads/` and is served by nginx; the asset registry stores which source (build atlas vs upload) a unit uses. Uploads are individual frame strips packed server-side with the same tool (shared code).
+- Icons: `tools/icon-fetch` downloads the exact game-icons.net SVGs named in `docs/UI_UX_DESIGN.md §icon-map`, recolors them to token colors, and emits a single SVG sprite + attribution file (CC BY 3.0 credits page reachable from Settings).
+
+---
+
+## 5. Server architecture
+
+### 5.1 Process model
+- **One Node process** runs both the player API and the Admin API (separate Fastify plugin trees, separate auth, same content services — admin edits invalidate caches in-process, which is what makes "changes are live immediately" trivial).
+- systemd manages the process (auto-restart, journal); nginx terminates TLS and serves all static files (client build, admin build, atlases, uploads).
+- In-process `node-cron` jobs (daily reset 04:00 Europe/Berlin, shop refresh, event activation/expiry, bot refresh, energy is computed lazily — no ticking job).
+
+### 5.2 Request pipeline
+`nginx → fastify: requestId → rate-limit → session auth → zod-validate → handler(service) → typed reply | AppError`
+- All handlers validated by Zod schemas from `packages/shared` (request + response). Responses are `{ ok: true, data }` or `{ ok: false, error: { code, message, details? } }` with a closed error-code enum.
+- Rate limits (per account + per IP): login 5/min, register 3/hour/IP, general API 20/s burst, battle actions 5/s. Configurable in `game_config`.
+
+### 5.3 Transactions & integrity
+- Every mutating game action is **one Postgres transaction** with `SELECT … FOR UPDATE` on the player row (serializes a single player's actions — prevents double-spend from double-click/multi-tab, costs nothing at our scale).
+- Reward grants go through a single `RewardService.grant(tx, playerId, rewards[], source)` used by *every* system (battle, quest, mail, summon, admin grant) and always writes an `economy_log` row — one audit trail, one place to extend.
+- Idempotency: battle completion, summon, and purchase endpoints take a client-generated `actionId` (UUID); replays return the stored result instead of re-granting.
+
+### 5.4 Content cache & publish flow
+- `ContentCache` loads all `*_defs` tables at boot into typed, frozen in-memory structures (validated by the same Zod schemas the Admin API writes with — bad content cannot go live).
+- Admin edits write to **draft** rows; **Publish** copies draft → live inside a transaction, bumps `content_revision`, and hot-swaps the in-memory cache atomically. In-flight battles keep the revision they started with (cache keeps the previous revision alive until no battle references it).
+- The client learns the revision from every API response envelope (`rev` field) and re-fetches the bundle when it changes.
+
+### 5.5 Battle session management
+- Battles live in an in-memory `Map<battleId, BattleSession>` + a `battles` DB snapshot updated after each action (crash recovery = load snapshot; a restart mid-battle costs nobody anything).
+- Manual play: client sends `{ actionId, skillId, targetSlot }` → server advances the engine until the next player decision point (enemy/auto turns resolve inline) → returns the ordered `BattleEvent[]` slice.
+- Auto/multi-battle: the whole battle (or N repeats) resolves in one call; the event log(s) stream back for playback at client-chosen speed. Multi-battle summaries skip playback entirely.
+- Sessions expire after 30 min idle (counts as retreat: energy spent, no reward — same as RSL).
+- Engine CPU budget: a full 3-wave stage resolves in **< 20 ms**; even aggressive multi-battle x10 stays trivially within the 1-core budget.
+
+### 5.6 Security posture (EA)
+- Session tokens: 256-bit random, stored **hashed** (SHA-256) in `sessions`, 30-day sliding expiry, httpOnly + SameSite=Lax cookie (header fallback for PWA), logout-all support.
+- argon2id: memory 19 MiB, iterations 2, parallelism 1 (~40–60 ms on the VPS — strong enough, cheap enough).
+- Admin API: separate `admin_accounts` + sessions, stricter rate limits, optional IP allowlist (nginx), every mutation writes `audit_log` (§DATA_MODEL). Password resets for players happen here.
+- Input hygiene: Zod everywhere, Postgres parameterized via Drizzle, no raw HTML rendering of user strings (profile names rendered as text; length + charset limits `[a-zA-Z0-9_\- ]{3,16}`).
+- No secrets in the repo: `.env` on the VPS (`DATABASE_URL`, `SESSION_PEPPER`, `ADMIN_ALLOWLIST?`, `DOMAIN…`), `.env.example` in git.
+
+---
+
+## 6. The battle engine (`packages/engine`)
+
+The heart of the game. **Pure TypeScript, zero IO, zero Date.now(), zero Math.random()** — everything injected.
+
+### 6.1 Shape
+```ts
+simulateUntilDecision(state: BattleState, rng: Rng): { state: BattleState; events: BattleEvent[]; needsInput: UnitRef | null }
+applyPlayerAction(state, action: { skillId; targetSlot }, rng): { state; events }
+createBattle(setup: BattleSetup, contentView: ContentView, seed: number): BattleState
+```
+- `ContentView` is a read-only slice of the content cache (champion defs, skill defs, constants) — the engine never touches the DB.
+- `Rng` is a seeded PRNG (xoshiro128**); the seed is stored per battle ⇒ full replayability. Server-side reward rolls use crypto RNG (not the battle seed) so drop outcomes can't be predicted from replays.
+
+### 6.2 Core model (details in COMBAT_SYSTEM.md)
+- Turn-meter simulation (speed-driven tick model), element wheel (Ember > Verdant > Tide > Ember; Mist neutral), damage/mitigation formulas, ACC vs RES debuff resolution, crits, weak/strong hits.
+- **Effects are data.** A skill is a list of typed effect components (`damage`, `applyStatus`, `heal`, `shield`, `turnMeter`, `cleanse`, `revive`, `teamBuff`…) with targeting selectors and chance/scaling params — exactly what the Admin skill composer edits. The engine is an interpreter over ~30 status effect types + ~15 component types; new *skills* need no code, new *effect types* are small engine PRs.
+- Waves (1–3 per stage), auras, passives, multi-hit, extra turns, counterattacks, buff/debuff duration ticking — all specified in COMBAT_SYSTEM.md with exact rules.
+
+### 6.3 AI
+- One AI used for enemies *and* player auto-battle: skill priority (off cooldown, highest slot first — RSL-style predictable) + per-skill **AI hints** in content (`prefer: lowestHp | highestAtk | random | self`, `avoidRetarget`, `openWith`) so the Admin Suite can shape boss behavior without code.
+
+### 6.4 Event log
+- The engine emits a flat ordered list of `BattleEvent` (`turnStarted`, `skillCast`, `hit {amount, crit, weak, element}`, `statusApplied/Resisted/Expired`, `turnMeterChanged`, `unitDied`, `waveCleared`, `battleEnded`…). The client is a *player piano* for this log — rendering derives 100% from events, which is what makes replays, spectating, and battle-log inspection (Admin) free.
+
+### 6.5 Testing (the most-tested code in the project)
+- Unit tests per mechanic (turn order ties, poison ticking, resist math boundaries, shield/damage interaction order…).
+- **Golden replay tests**: canonical setups + seeds → committed event logs; any diff fails CI (catches accidental balance/behavior drift).
+- Property tests: no negative HP without death event, TM bounds, energy conservation of effects, battle always terminates (< 300 turns hard cap → draw/defeat rule).
+- `tools/balance-sim`: headless mass-simulation CLI (`--stage 3-5 --team ... --n 1000`) reporting win rates / avg turns — used to tune every stage before seeding it (see ECONOMY_BALANCE.md).
+
+---
+
+## 7. Shared packages
+
+- `packages/shared`: enums (Element, Rarity, Role, Faction, StatusType, Slot…), DTO types for every endpoint, API route constants, `BattleEvent` types, error codes. Server validates with Zod schemas co-located here; client imports the inferred types. **Formulas live in the engine, not shared** — the client never needs to compute game math (it renders server-provided numbers).
+- Versioning: client sends `X-Client-Rev` (build hash); server replies `426` if a breaking API change requires a reload — the SPA then force-refreshes. Deploys are atomic (nginx swaps the build dir symlink).
+
+## 8. Admin API (consumed by MistvaleMobile-Admin)
+
+- Mounted at `/admin/api/*` in the same process (see §5.1 for why). Full CRUD for every `*_defs` table, draft/publish, asset upload + atlas pack, player management (search, inspect, grant via RewardService, password reset, ban), bot management, mail composer, battle log inspector, health/stats endpoints.
+- Fastify + Zod generate an **OpenAPI 3.1 document** at build time, committed to this repo (`docs/openapi/admin-api.json`). The admin repo type-generates its client from that file — the two repos stay in sync through one artifact.
+
+## 9. Performance & capacity budget (1 core / 4 GB)
+
+| Budget item | Target |
+|---|---|
+| RAM: Postgres | ≤ 768 MB (`shared_buffers` 256 MB, `max_connections` 20, tuned in DEPLOYMENT_OPERATIONS.md) |
+| RAM: Node (server) | ≤ 1.2 GB (`--max-old-space-size=1024`; content cache ≈ tens of MB) |
+| RAM: nginx + OS headroom | remainder |
+| API latency (p95, on-box) | < 100 ms; battle action < 50 ms + engine < 20 ms |
+| Client first load (cold) | < 1.5 MB JS gz, < 2.5 s to login screen on desktop broadband |
+| Battle scene | 60 fps at ×2 zoom on integrated graphics |
+| Concurrent players | comfortably 100+ (design intent: dozens) |
+
+- No polling endpoints; everything event-on-action. Cron granularity ≥ 1 min. Bundle-split per screen (battle/summon Pixi chunks lazy-loaded).
+
+## 10. Observability
+
+- pino JSON logs → journald + rotated file; request logs sampled (100% errors, 10% success) to keep IO low.
+- `GET /admin/api/health`: process RSS, event-loop lag, DB pool stats, content revision, active battles, req/min, error/min — rendered on the Admin dashboard. `STATUS.sh` prints the same from the CLI.
+- Every unexpected error gets a `requestId` surfaced to the client toast ("Something broke — code X7F2K") for painless bug reports from friends.
+
+## 11. Testing & CI summary
+
+- CI on every push: `pnpm lint` → `tsc --noEmit` (all packages) → `vitest` (engine + server services with a disposable Postgres via `pg-mem`? **No** — real Postgres service container in CI; pg-mem diverges) → client build + admin OpenAPI drift check.
+- Playwright smoke suite (post-P3): register → tutorial → battle → summon → equip, run against a local compose-style stack in CI before each release tag.
+- Definition of Done for every phase includes: tests for new services, engine goldens updated deliberately (never regenerated blindly), docs updated, CHANGELOG entry.
+
+## 12. Key risks & mitigations
+
+| Risk | Mitigation |
+|---|---|
+| 1-core VPS builds are slow (Vite + tsc) | UPDATE.sh builds sequentially with nice/ionice; acceptable (~3–5 min); later: prebuilt artifacts from GitHub Actions if it hurts |
+| Content editing breaks live game | Draft/publish with Zod validation + diff preview; battles pin their revision; one-click revert to previous revision (kept in `content_revisions`) |
+| Engine/content mismatch (skill references missing effect type) | Publish-time validation walks every skill against the engine's registered component types |
+| Sprite set incomplete (only idle exists) | Procedural animation fallbacks (§4.3) — shipped as a feature, not a hack |
+| Scope creep toward RSL's 10 years of systems | ROADMAP.md locks EA-0.1 scope; everything else is parked in GAME_DESIGN.md §post-EA |
