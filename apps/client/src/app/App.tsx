@@ -7,6 +7,7 @@ import { PlaceholderScreen } from '@/screens/Placeholder/PlaceholderScreen';
 import { SettingsModal } from '@/screens/Settings/SettingsModal';
 import { useSessionStore } from '@/state/sessionStore';
 import { usePlayerStore } from '@/state/playerStore';
+import { useContentStore } from '@/state/contentStore';
 import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screens';
 import { TopBar } from './TopBar';
 import { Dock } from './Dock';
@@ -28,6 +29,8 @@ export function App() {
   const refreshPlayer = usePlayerStore((state) => state.refresh);
   const resetPlayer = usePlayerStore((state) => state.reset);
 
+  const ensureContent = useContentStore((state) => state.ensureLoaded);
+
   const [bootError, setBootError] = useState<string>();
 
   // Ask the server once whether the cookie we may be holding is still a live session.
@@ -37,12 +40,26 @@ export function App() {
     });
   }, [restore]);
 
+  // Content is public and needed by every screen, so it loads alongside the session
+  // rather than after it.
+  useEffect(() => {
+    void ensureContent().catch(() => {
+      setBootError('Could not load game content. The server may be mid-deploy.');
+    });
+  }, [ensureContent]);
+
   // Pull the full snapshot once signed in; drop it on sign-out.
   useEffect(() => {
     if (status === 'authenticated') {
-      void refreshPlayer().catch(() => {
-        setBootError('Signed in, but the player snapshot could not be loaded.');
-      });
+      void refreshPlayer()
+        .then(() => {
+          // The snapshot's envelope carries the live revision; if a publish happened
+          // while we were away, pick the new content up without a reload.
+          void useContentStore.getState().refreshIfStale();
+        })
+        .catch(() => {
+          setBootError('Signed in, but the player snapshot could not be loaded.');
+        });
     } else if (status === 'anonymous') {
       resetPlayer();
     }

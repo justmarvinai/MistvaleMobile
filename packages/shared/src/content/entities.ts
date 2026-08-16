@@ -1,0 +1,421 @@
+import { z } from 'zod';
+import { DIFFICULTIES, ELEMENTS, GEAR_SLOTS, RARITIES, ROLES, STATS } from '../enums';
+import {
+  aiHintsSchema,
+  auraSchema,
+  effectComponentSchema,
+  skillAnimationSchema,
+  skillUpgradeSchema,
+  targetingSchema,
+} from './effects';
+
+/**
+ * Content entity contracts.
+ *
+ * One Zod schema per content type, used in three places: the Admin API validates writes
+ * with it, the seed loader validates committed JSON with it, and publish re-validates
+ * everything before it goes live. Content that cannot satisfy these never reaches a
+ * player (docs/ARCHITECTURE.md §5.4).
+ */
+
+/** Keys are stable forever — the database, seeds and assets all reference them. */
+export const contentKeySchema = z
+  .string()
+  .min(2)
+  .max(64)
+  .regex(/^[a-z][a-z0-9_]*$/, 'Keys are lowercase snake_case, starting with a letter.');
+
+/** Every content row carries these. */
+export const contentMetaSchema = z.object({
+  key: contentKeySchema,
+  /** Ordering hint for lists in-game and in Admin. */
+  sortOrder: z.number().int().min(0).max(9999).default(0),
+});
+
+// ── Factions ────────────────────────────────────────────────────────────────
+
+export const factionDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  lore: z.string().max(2000).default(''),
+  icon: z.string().max(64).default(''),
+});
+export type FactionDef = z.infer<typeof factionDefSchema>;
+
+// ── Statuses ────────────────────────────────────────────────────────────────
+
+/** When a periodic status ticks. */
+export const STATUS_TICK_TIMINGS = ['none', 'ownerTurnStart', 'ownerTurnEnd'] as const;
+
+/**
+ * Which engine behaviour a status maps to.
+ *
+ * Content picks from this closed list; publish rejects anything else, so a typo can
+ * never produce a status the engine silently ignores (docs/COMBAT_SYSTEM.md §7).
+ */
+export const STATUS_ENGINE_TYPES = [
+  'statModifier', // ATK/DEF/SPD/C.RATE up or down, ACC down, Weaken, Strengthen
+  'damageOverTime', // Poison, HP Burn
+  'healOverTime', // Continuous Heal
+  'shield',
+  'skipTurn', // Stun, Freeze
+  'skipTurnBreakOnDamage', // Sleep
+  'forceTargetA1', // Provoke
+  'blockBuffs',
+  'blockDebuffs',
+  'counterattack',
+  'allyProtection',
+  'reflectDamage',
+  'lifesteal', // Vampiric (self), Leech (attackers heal off the holder)
+  'healReduction',
+  'unkillable',
+] as const;
+export type StatusEngineType = (typeof STATUS_ENGINE_TYPES)[number];
+
+export const statusDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  kind: z.enum(['buff', 'debuff']),
+  engineType: z.enum(STATUS_ENGINE_TYPES),
+  /**
+   * Stacking family. A stronger member replaces a weaker one; an equal member refreshes
+   * its duration (e.g. `atk_up` covers both the 25% and 50% variants).
+   */
+  family: z.string().min(1).max(48),
+  /** Ranks the family internally: 50% ATK Up outranks 25%. */
+  potency: z.number().int().min(1).max(10).default(1),
+  params: z
+    .object({
+      /** For statModifier: which stat and by how much (percent, or flat for ACC/RES). */
+      stat: z.enum(STATS).optional(),
+      pct: z.number().min(-100).max(200).optional(),
+      flat: z.number().min(-200).max(200).optional(),
+      /** For damage/heal over time: share of the holder's max HP per tick. */
+      tickPct: z.number().min(0).max(50).optional(),
+      tick: z.enum(STATUS_TICK_TIMINGS).default('none'),
+      /** How many independent copies may sit on one unit. */
+      maxStacks: z.number().int().min(1).max(10).default(1),
+      /** For counterattack/reflect/protection: strength as a percentage. */
+      ratio: z.number().min(0).max(100).optional(),
+    })
+    .default({ tick: 'none', maxStacks: 1 }),
+  icon: z.string().max(64).default(''),
+  description: z.string().max(400).default(''),
+});
+export type StatusDef = z.infer<typeof statusDefSchema>;
+
+// ── Skills ──────────────────────────────────────────────────────────────────
+
+export const SKILL_SLOTS = ['a1', 'a2', 'a3', 'a4', 'passive'] as const;
+export type SkillSlot = (typeof SKILL_SLOTS)[number];
+
+export const skillDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(64),
+  /** Player-facing text; `{placeholders}` are filled from the components. */
+  description: z.string().max(600).default(''),
+  slot: z.enum(SKILL_SLOTS),
+  /** A1s have no cooldown; actives are 3–6 turns. */
+  cooldown: z.number().int().min(0).max(9).default(0),
+  targeting: targetingSchema,
+  components: z.array(effectComponentSchema).min(1).max(8),
+  upgrades: z.array(skillUpgradeSchema).max(6).default([]),
+  aiHints: aiHintsSchema.default({}),
+  animation: skillAnimationSchema.default({ track: 'attack' }),
+});
+export type SkillDef = z.infer<typeof skillDefSchema>;
+
+// ── Assets ──────────────────────────────────────────────────────────────────
+
+export const animationTrackSchema = z.object({
+  frames: z.number().int().min(1).max(64),
+  fps: z.number().int().min(1).max(30).default(9),
+  loop: z.boolean().default(false),
+});
+
+export const assetDefSchema = contentMetaSchema.extend({
+  kind: z.enum(['unit', 'vfx', 'ui', 'audio']),
+  /** `repo` assets ship in the build; `upload` ones arrive through the Admin Suite. */
+  source: z.enum(['repo', 'upload']).default('repo'),
+  /** Path prefix under the atlas or uploads directory. */
+  basePath: z.string().min(1).max(200),
+  tracks: z.record(z.string(), animationTrackSchema).default({}),
+  stillPath: z.string().max(200).default(''),
+  avatarPath: z.string().max(200).default(''),
+  /**
+   * Tint applied to a placeholder sprite so art-pending champions still read as
+   * distinct (docs/ASSET_GUIDE.md). Ignored once real art is uploaded.
+   */
+  tint: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+});
+export type AssetDef = z.infer<typeof assetDefSchema>;
+
+// ── Champions ───────────────────────────────────────────────────────────────
+
+/** Base stats at ★6 / level 60 / ascension 6; lower tiers derive from these. */
+export const baseStatsSchema = z.object({
+  hp: z.number().int().min(100).max(60_000),
+  atk: z.number().int().min(10).max(5_000),
+  def: z.number().int().min(10).max(5_000),
+  spd: z.number().int().min(50).max(200),
+  critRate: z.number().int().min(0).max(100).default(15),
+  critDmg: z.number().int().min(0).max(300).default(50),
+  res: z.number().int().min(0).max(300).default(30),
+  acc: z.number().int().min(0).max(300).default(0),
+});
+export type BaseStats = z.infer<typeof baseStatsSchema>;
+
+export const championDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  title: z.string().max(64).default(''),
+  lore: z.string().max(2000).default(''),
+  factionKey: contentKeySchema,
+  element: z.enum(ELEMENTS),
+  rarity: z.enum(RARITIES),
+  role: z.enum(ROLES),
+  baseStats: baseStatsSchema,
+  /** Ordered skill keys: A1 first, passive last. */
+  skills: z.array(contentKeySchema).min(1).max(5),
+  aura: auraSchema.nullable().default(null),
+  assetKey: contentKeySchema,
+  /** Food units are excluded from the Chronicle's completion count. */
+  isFood: z.boolean().default(false),
+  summonable: z.boolean().default(true),
+  starter: z.boolean().default(false),
+  /** Bumped whenever stats change, so the Chronicle can flag "updated". */
+  balanceVersion: z.number().int().min(1).default(1),
+});
+export type ChampionDef = z.infer<typeof championDefSchema>;
+
+// ── Enemies ─────────────────────────────────────────────────────────────────
+
+/** Composable boss behaviours the engine knows how to run. */
+export const bossMechanicsSchema = z.object({
+  /** Immune to Stun/Freeze/Sleep/Provoke — the baseline for every boss. */
+  almightyImmunity: z.boolean().default(false),
+  tmReductionImmune: z.boolean().default(false),
+  /** Fire-Knight-style hit-counter shield. */
+  hitShield: z
+    .object({ hits: z.number().int().min(1).max(30), punishTmPct: z.number().min(0).max(100) })
+    .optional(),
+  /** Ice-Golem-style retaliation when crossing HP thresholds. */
+  thresholdRetaliation: z
+    .object({ perHpPct: z.number().min(1).max(50), skipIfDot: z.boolean().default(true) })
+    .optional(),
+  /** Spider-style add summoning. */
+  addSummon: z
+    .object({
+      unitKey: contentKeySchema,
+      perTurn: z.number().int().min(1).max(4),
+      cap: z.number().int().min(1).max(10),
+    })
+    .optional(),
+  /** Damage ramp after a grace period, so fights cannot stall forever. */
+  enrage: z
+    .object({
+      afterTurn: z.number().int().min(1).max(60),
+      dmgPctPerTurn: z.number().min(1).max(50),
+    })
+    .optional(),
+});
+export type BossMechanics = z.infer<typeof bossMechanicsSchema>;
+
+export const enemyDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  archetype: z.string().min(1).max(48),
+  element: z.enum(ELEMENTS),
+  role: z.enum(ROLES),
+  /** Stats at the reference level; stages scale them by level and star rank. */
+  baseStats: baseStatsSchema,
+  /** Per-level multiplicative growth, e.g. 1.045. */
+  growth: z.number().min(1).max(1.2).default(1.045),
+  skills: z.array(contentKeySchema).min(1).max(5),
+  assetKey: contentKeySchema,
+  isBoss: z.boolean().default(false),
+  bossMechanics: bossMechanicsSchema.default({
+    almightyImmunity: false,
+    tmReductionImmune: false,
+  }),
+});
+export type EnemyDef = z.infer<typeof enemyDefSchema>;
+
+// ── Gear ────────────────────────────────────────────────────────────────────
+
+/** Set bonuses the engine implements. */
+export const GEAR_BONUS_TYPES = [
+  'stat', // flat or percentage stat bonus
+  'lifesteal',
+  'regen',
+  'provokeOnHit',
+  'stunOnHit',
+  'burnOnHit',
+  'counterOnHit',
+  'tmOnDamageTaken',
+] as const;
+
+export const gearSetDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  lore: z.string().max(600).default(''),
+  /** How many pieces complete the set. */
+  pieces: z.union([z.literal(2), z.literal(4)]),
+  bonusType: z.enum(GEAR_BONUS_TYPES),
+  bonus: z.object({
+    stat: z.enum(STATS).optional(),
+    pct: z.number().min(0).max(100).optional(),
+    flat: z.number().min(0).max(200).optional(),
+    /** Proc probability 0–1 for on-hit bonuses. */
+    chance: z.number().min(0).max(1).optional(),
+    turns: z.number().int().min(1).max(4).optional(),
+  }),
+});
+export type GearSetDef = z.infer<typeof gearSetDefSchema>;
+
+export const gearSlotDefSchema = z.object({
+  key: z.enum(GEAR_SLOTS),
+  name: z.string().min(1).max(32),
+  /** Which main stats may roll here; weapon/helm/shield are fixed to one. */
+  allowedMainStats: z.array(z.enum(STATS)).min(1),
+  /** Percentage-variant availability, mirroring the source game's slot rules. */
+  allowsPercentMain: z.boolean().default(false),
+  accessory: z.boolean().default(false),
+  /** Ascension level required before the slot may be used at all. */
+  ascensionRequired: z.number().int().min(0).max(6).default(0),
+  sortOrder: z.number().int().min(0).max(99).default(0),
+});
+export type GearSlotDef = z.infer<typeof gearSlotDefSchema>;
+
+// ── Campaign & stages ───────────────────────────────────────────────────────
+
+export const campaignChapterDefSchema = contentMetaSchema.extend({
+  number: z.number().int().min(1).max(24),
+  name: z.string().min(1).max(64),
+  region: z.string().max(64).default(''),
+  lore: z.string().max(2000).default(''),
+  backgroundAsset: z.string().max(64).default(''),
+  /** Which relic set this chapter drops. */
+  setKey: contentKeySchema.optional(),
+  starRewards: z
+    .array(
+      z.object({
+        stars: z.number().int().min(1).max(252),
+        rewards: z.record(z.string(), z.number()),
+      }),
+    )
+    .default([]),
+});
+export type CampaignChapterDef = z.infer<typeof campaignChapterDefSchema>;
+
+/** One enemy placed in a wave. */
+export const waveUnitSchema = z.object({
+  enemyKey: contentKeySchema,
+  level: z.number().int().min(1).max(100),
+  stars: z.number().int().min(1).max(6).default(1),
+  /** Battlefield position 0–3. */
+  slot: z.number().int().min(0).max(3),
+});
+
+export const STAGE_MODES = ['campaign', 'dungeon', 'springs', 'proving', 'tutorial'] as const;
+
+export const stageDefSchema = contentMetaSchema.extend({
+  mode: z.enum(STAGE_MODES),
+  /** Chapter or dungeon this stage belongs to. */
+  parentKey: contentKeySchema,
+  number: z.number().int().min(1).max(30),
+  difficulty: z.enum(DIFFICULTIES).default('normal'),
+  energyCost: z.number().int().min(0).max(40),
+  waves: z.array(z.array(waveUnitSchema).min(1).max(4)).min(1).max(3),
+  rewards: z.object({
+    silverMin: z.number().int().min(0).max(1_000_000),
+    silverMax: z.number().int().min(0).max(1_000_000),
+    playerXp: z.number().int().min(0).max(10_000),
+    championXp: z.number().int().min(0).max(50_000),
+    dropTableKey: contentKeySchema.optional(),
+  }),
+  /** 3-star criteria: no deaths, and inside the turn limit. */
+  starRules: z.object({
+    noDeaths: z.boolean().default(true),
+    maxTurns: z.number().int().min(1).max(60).default(12),
+  }),
+  firstClearRewards: z.record(z.string(), z.number()).default({}),
+  unlock: z
+    .object({
+      previousStageKey: contentKeySchema.optional(),
+      playerLevel: z.number().int().min(1).max(60).optional(),
+    })
+    .default({}),
+});
+export type StageDef = z.infer<typeof stageDefSchema>;
+
+// ── Items ───────────────────────────────────────────────────────────────────
+
+export const ITEM_CATEGORIES = [
+  'sigil',
+  'essence',
+  'tome',
+  'emblem',
+  'consumable',
+  'material',
+] as const;
+
+export const itemDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  category: z.enum(ITEM_CATEGORIES),
+  rarity: z.enum(RARITIES).default('common'),
+  description: z.string().max(400).default(''),
+  icon: z.string().max(64).default(''),
+  /** Category-specific payload, e.g. `{ energy: 50 }` for a refill. */
+  payload: z.record(z.string(), z.unknown()).default({}),
+});
+export type ItemDef = z.infer<typeof itemDefSchema>;
+
+// ── Game configuration ──────────────────────────────────────────────────────
+
+/**
+ * A single tunable constant.
+ *
+ * Everything the design docs mark as tunable lives here rather than in code, so balance
+ * changes are an Admin edit and a publish — never a deploy (CLAUDE.md hard rules).
+ */
+export const gameConfigEntrySchema = z.object({
+  key: z.string().min(2).max(64),
+  value: z.union([
+    z.number(),
+    z.string(),
+    z.boolean(),
+    z.record(z.string(), z.unknown()),
+    z.array(z.unknown()),
+  ]),
+  /** Grouping for the Admin form: `energy`, `combat`, `economy`, … */
+  group: z.string().min(1).max(32),
+  label: z.string().min(1).max(96),
+  help: z.string().max(400).default(''),
+});
+export type GameConfigEntry = z.infer<typeof gameConfigEntrySchema>;
+
+// ── Authoring shapes ────────────────────────────────────────────────────────
+
+/**
+ * What an author may *write*, as opposed to what the game *reads*.
+ *
+ * Every `…Def` above is the parsed shape: schema defaults are already filled in, so the
+ * engine can read `component.hits` without a fallback. The input shapes below are the
+ * same schemas before parsing, where anything with a default is optional — which is the
+ * whole point of giving it a default.
+ *
+ * Use these for content on its way *in*: the committed seeds, the Admin Suite's form
+ * values, fixtures. Never for content on its way *out* — validation normalises at the
+ * persistence boundary, so everything read back from the database or the content bundle
+ * is a full `…Def`.
+ */
+export type FactionDefInput = z.input<typeof factionDefSchema>;
+export type StatusDefInput = z.input<typeof statusDefSchema>;
+export type SkillDefInput = z.input<typeof skillDefSchema>;
+export type AssetDefInput = z.input<typeof assetDefSchema>;
+export type ChampionDefInput = z.input<typeof championDefSchema>;
+export type EnemyDefInput = z.input<typeof enemyDefSchema>;
+export type GearSetDefInput = z.input<typeof gearSetDefSchema>;
+export type GearSlotDefInput = z.input<typeof gearSlotDefSchema>;
+export type CampaignChapterDefInput = z.input<typeof campaignChapterDefSchema>;
+export type StageDefInput = z.input<typeof stageDefSchema>;
+export type ItemDefInput = z.input<typeof itemDefSchema>;
+export type GameConfigEntryInput = z.input<typeof gameConfigEntrySchema>;

@@ -1,0 +1,338 @@
+import type {
+  AssetDefInput,
+  FactionDefInput,
+  GearSetDefInput,
+  GearSlotDefInput,
+} from '@mistvale/shared';
+
+/**
+ * World scaffolding: factions, the asset registry, and the relic system's shape.
+ * Content follows docs/GAME_DESIGN.md §3 and docs/CONTENT_PLAN_EA01.md §5.
+ */
+
+export const FACTIONS: FactionDefInput[] = [
+  {
+    key: 'vale_sentinels',
+    name: 'Vale Sentinels',
+    lore: 'Knight-remnants of the old federation, still keeping oaths sworn to kingdoms the mist swallowed. Discipline, steel, and a refusal to yield ground twice.',
+    icon: 'mv-nav-haven',
+    sortOrder: 10,
+  },
+  {
+    key: 'emberclan',
+    name: 'Emberclan',
+    lore: 'A mountain warhost of feuding fire-cults, united only by their hatred of the fog. They burn the mist back one ridge at a time.',
+    icon: 'mv-element-ember',
+    sortOrder: 20,
+  },
+  {
+    key: 'wayfarers',
+    name: 'The Wayfarers',
+    lore: 'An itinerant conclave of mist-scholars, hedge-wizards and pilgrims who study the Worldmist rather than flee it.',
+    icon: 'mv-nav-chronicle',
+    sortOrder: 30,
+  },
+  {
+    key: 'hollowborn',
+    name: 'Hollowborn',
+    lore: 'The mist keeps its dead, and sometimes gives them back. They walk out with their memories half-intact and their oaths wholly so.',
+    icon: 'mv-element-mist',
+    sortOrder: 40,
+  },
+  {
+    key: 'sskarn',
+    name: 'Sskarn Broods',
+    lore: 'Serpentfolk of the Sunken Marches, who thrive inside the fog that drowns everyone else. Their warqueen has decided the vale is theirs.',
+    icon: 'mv-element-verdant',
+    sortOrder: 50,
+  },
+  {
+    key: 'thornweald',
+    name: 'Thornweald Court',
+    lore: 'Fey of the deepwood, who bargain in favours and briars and have never once explained their terms plainly.',
+    icon: 'mv-element-verdant',
+    sortOrder: 60,
+  },
+  {
+    key: 'runebound',
+    name: 'Runebound Halls',
+    lore: 'Dwarven vault-holds beneath the peaks, sealed since the mist rose. Some doors have started opening from the inside.',
+    icon: 'mv-stat-def',
+    sortOrder: 70,
+  },
+  {
+    key: 'drowned_choir',
+    name: 'The Drowned Choir',
+    lore: 'A tide-cult of the flooded coast who sing to the water and insist, unsettlingly, that it answers.',
+    icon: 'mv-element-tide',
+    sortOrder: 80,
+  },
+];
+
+/**
+ * Asset registry.
+ *
+ * Champions without final art point at `enemy_lizard` with a per-champion tint — the
+ * placeholder convention from docs/ASSET_GUIDE.md. Uploading real sprites through the
+ * Admin Suite reassigns the key; no code changes.
+ */
+const unitAsset = (
+  key: string,
+  folder: string,
+  options: { frames?: number; avatar?: boolean; tint?: string } = {},
+): AssetDefInput => ({
+  key,
+  kind: 'unit',
+  source: 'repo',
+  basePath: folder,
+  tracks: { idle: { frames: options.frames ?? 9, fps: 9, loop: true } },
+  stillPath: `${folder}/still`,
+  avatarPath: options.avatar ? `${folder}/avatar` : '',
+  ...(options.tint ? { tint: options.tint } : {}),
+  sortOrder: 0,
+});
+
+export const ASSETS: AssetDefInput[] = [
+  unitAsset('champ_anuria', 'champions/epic_anuria', { avatar: true }),
+  unitAsset('champ_thordakk', 'champions/epic_thordakk', { avatar: true }),
+  unitAsset('champ_maruan', 'champions/epic_maruan', { avatar: true }),
+  unitAsset('champ_darius', 'champions/epic_darius'),
+  unitAsset('champ_khazgor', 'champions/epic_khazgor'),
+  unitAsset('champ_rattledagger', 'champions/epic_rattledagger'),
+  unitAsset('champ_sethlurias', 'champions/epic_sethlurias'),
+  // The one enemy model, which every art-pending unit borrows.
+  unitAsset('enemy_lizard', 'enemies/teritorial_lizard'),
+];
+
+/** The nine relic slots, with the source game's main-stat rules. */
+export const GEAR_SLOTS: GearSlotDefInput[] = [
+  {
+    key: 'weapon',
+    name: 'Weapon',
+    allowedMainStats: ['atk'],
+    allowsPercentMain: false,
+    accessory: false,
+    ascensionRequired: 0,
+    sortOrder: 10,
+  },
+  {
+    key: 'helm',
+    name: 'Helm',
+    allowedMainStats: ['hp'],
+    allowsPercentMain: false,
+    accessory: false,
+    ascensionRequired: 0,
+    sortOrder: 20,
+  },
+  {
+    key: 'shield',
+    name: 'Shield',
+    allowedMainStats: ['def'],
+    allowsPercentMain: false,
+    accessory: false,
+    ascensionRequired: 0,
+    sortOrder: 30,
+  },
+  {
+    key: 'gauntlets',
+    name: 'Gauntlets',
+    allowedMainStats: ['hp', 'atk', 'def', 'critRate', 'critDmg'],
+    allowsPercentMain: true,
+    accessory: false,
+    ascensionRequired: 0,
+    sortOrder: 40,
+  },
+  {
+    key: 'cuirass',
+    name: 'Cuirass',
+    allowedMainStats: ['hp', 'atk', 'def', 'acc', 'res'],
+    allowsPercentMain: true,
+    accessory: false,
+    ascensionRequired: 0,
+    sortOrder: 50,
+  },
+  {
+    key: 'boots',
+    name: 'Boots',
+    allowedMainStats: ['hp', 'atk', 'def', 'spd'],
+    allowsPercentMain: true,
+    accessory: false,
+    ascensionRequired: 0,
+    sortOrder: 60,
+  },
+  {
+    key: 'ring',
+    name: 'Ring',
+    allowedMainStats: ['hp', 'atk', 'def'],
+    allowsPercentMain: false,
+    accessory: true,
+    ascensionRequired: 2,
+    sortOrder: 70,
+  },
+  {
+    key: 'amulet',
+    name: 'Amulet',
+    allowedMainStats: ['hp', 'atk', 'def', 'critDmg'],
+    allowsPercentMain: false,
+    accessory: true,
+    ascensionRequired: 4,
+    sortOrder: 80,
+  },
+  {
+    key: 'banner',
+    name: 'Banner',
+    allowedMainStats: ['hp', 'atk', 'def', 'acc', 'res'],
+    allowsPercentMain: false,
+    accessory: true,
+    ascensionRequired: 6,
+    sortOrder: 90,
+  },
+];
+
+/** The 16 EA relic sets (docs/CONTENT_PLAN_EA01.md §5). */
+export const GEAR_SETS: GearSetDefInput[] = [
+  {
+    key: 'ironroot',
+    name: 'Ironroot',
+    lore: 'Roots that outlived the forest above them.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'hp', pct: 15 },
+    sortOrder: 10,
+  },
+  {
+    key: 'wolfsfang',
+    name: 'Wolfsfang',
+    lore: 'Taken from something that hunted in the fog.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'atk', pct: 15 },
+    sortOrder: 20,
+  },
+  {
+    key: 'stoneguard',
+    name: 'Stoneguard',
+    lore: 'Quarried from a wall that never fell.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'def', pct: 15 },
+    sortOrder: 30,
+  },
+  {
+    key: 'swiftwind',
+    name: 'Swiftwind',
+    lore: 'Light enough to outrun the mist itself.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'spd', pct: 12 },
+    sortOrder: 40,
+  },
+  {
+    key: 'hawkeye',
+    name: 'Hawkeye',
+    lore: 'Sights the gap before it opens.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'critRate', pct: 12 },
+    sortOrder: 50,
+  },
+  {
+    key: 'reaver',
+    name: 'Reaver',
+    lore: 'Made for finishing, not fighting.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'critDmg', pct: 20 },
+    sortOrder: 60,
+  },
+  {
+    key: 'truestrike',
+    name: 'Truestrike',
+    lore: 'The mist cannot turn a blow it never sees coming.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'acc', flat: 40 },
+    sortOrder: 70,
+  },
+  {
+    key: 'wardweave',
+    name: 'Wardweave',
+    lore: 'Woven against curses older than the vale.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'res', flat: 40 },
+    sortOrder: 80,
+  },
+  {
+    key: 'pathfinder',
+    name: 'Pathfinder',
+    lore: 'For those who go first and come back.',
+    pieces: 2,
+    bonusType: 'stat',
+    bonus: { stat: 'spd', pct: 5, flat: 20 },
+    sortOrder: 90,
+  },
+  {
+    key: 'bloodthorn',
+    name: 'Bloodthorn',
+    lore: 'It drinks, and passes some back.',
+    pieces: 4,
+    bonusType: 'lifesteal',
+    bonus: { pct: 30 },
+    sortOrder: 100,
+  },
+  {
+    key: 'mendersong',
+    name: 'Mendersong',
+    lore: 'A hymn that closes wounds slowly.',
+    pieces: 4,
+    bonusType: 'regen',
+    bonus: { pct: 10 },
+    sortOrder: 110,
+  },
+  {
+    key: 'gravebind',
+    name: 'Gravebind',
+    lore: 'The dead insist on being looked at.',
+    pieces: 4,
+    bonusType: 'provokeOnHit',
+    bonus: { chance: 0.25, turns: 1 },
+    sortOrder: 120,
+  },
+  {
+    key: 'stormcoil',
+    name: 'Stormcoil',
+    lore: 'Stores every blow it takes.',
+    pieces: 4,
+    bonusType: 'tmOnDamageTaken',
+    bonus: { pct: 8 },
+    sortOrder: 130,
+  },
+  {
+    key: 'leadenscale',
+    name: 'Leadenscale',
+    lore: 'Heavy enough to stop a thought mid-sentence.',
+    pieces: 4,
+    bonusType: 'stunOnHit',
+    bonus: { chance: 0.18, turns: 1 },
+    sortOrder: 140,
+  },
+  {
+    key: 'emberheart',
+    name: 'Emberheart',
+    lore: 'Keeps a coal burning where a heart should be.',
+    pieces: 4,
+    bonusType: 'burnOnHit',
+    bonus: { chance: 0.25, turns: 2 },
+    sortOrder: 150,
+  },
+  {
+    key: 'bulwark_of_thorns',
+    name: 'Bulwark of Thorns',
+    lore: 'Strike it and it strikes back.',
+    pieces: 4,
+    bonusType: 'counterOnHit',
+    bonus: { chance: 0.2 },
+    sortOrder: 160,
+  },
+];

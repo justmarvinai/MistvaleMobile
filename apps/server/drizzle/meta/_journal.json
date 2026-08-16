@@ -8,6 +8,13 @@
       "when": 1786868180617,
       "tag": "0000_high_liz_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786874444164,
+      "tag": "0001_slimy_vin_gonzales",
+      "breakpoints": true
     }
   ]
 }
