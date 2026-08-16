@@ -488,13 +488,22 @@ MISTVALE_SERVER_DIR="${NEW_RELEASE}/server" run_server_entry "${ENTRY_MIGRATE}" 
 	die "migrations failed — the live release is still running the previous build"
 ok "migrations applied"
 
-# --- Seeds (fresh install only) ---------------------------------------------
+# --- Seeds (bootstrap only; never overwrites authored content) ---------------
+# SEED.sh's default mode fills content tables that are EMPTY and does nothing
+# otherwise, so running it on every update is safe and is what makes a release
+# that introduces a new content family arrive populated. Restricting it to
+# --initial used to mean such a release migrated the tables in and then left
+# them empty, with no champions in game and nothing to edit in Admin.
+# Replacing authored content still requires an explicit SEED.sh --force-content.
 if ((INITIAL == 1)); then
 	step "5b/7 Seeding content (first deployment)"
-	# Seed with the bundle from the release being deployed, exactly like the
-	# migration above — the live symlink does not exist yet on a fresh box.
-	MISTVALE_SERVER_DIR="${NEW_RELEASE}/server" "${SCRIPTS_DIR}/SEED.sh" || die "seeding failed"
+else
+	step "5b/7 Bootstrapping any empty content tables"
 fi
+# Seed with the bundle from the release being deployed, exactly like the
+# migration above — on a fresh box the live symlink does not exist yet, and on
+# an update the new seeds are the ones that match the new schema.
+MISTVALE_SERVER_DIR="${NEW_RELEASE}/server" "${SCRIPTS_DIR}/SEED.sh" || die "seeding failed"
 
 # --- 6. Swap -----------------------------------------------------------------
 step "6/7 Activating the new release"
