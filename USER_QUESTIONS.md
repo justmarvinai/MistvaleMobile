@@ -10,6 +10,18 @@ Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
 - **O2. Offsite backup target** — BACKUP.sh keeps local dumps; give an rclone remote anytime for offsite copies. (DEPLOYMENT_OPERATIONS §2)
 
+## Known gaps, scheduled (no answer needed)
+
+Raised while building P1; each has a phase and a default, so none of them blocks anything. Listed here so they are not rediscovered later.
+
+| # | Gap | Plan |
+|---|---|---|
+| G1 | **Audit visibility is thin.** Only the 10 most recent entries, via `/stats/overview`; ADMIN_SUITE_DESIGN §2.17 wants a searchable log and per-entity history. | Paginated `/admin/api/audit` with entity/actor/date filters — **P8**, when the audit volume justifies it. |
+| G2 | **The publish diff is shallow.** Nested objects compare as wholes, so changing one champion stat renders the entire `baseStats` on both sides. Readable, but noisier than it should be. | Deep field-level diff, done **server-side** so the diff stays the single source of truth — **P2**, alongside the balance work that will lean on it. |
+| G3 | **Dashboard counters are thin** versus ADMIN_SUITE_DESIGN §2.1 — no battle, summon or economy figures. | Correct for now: those systems do not exist yet. Grows with **P2/P5/P8**. |
+| G4 | **No balance-sim endpoint**, so the champion Balance tab and stage Simulate are absent. | **P2**, with `tools/balance-sim` (Admin A2). |
+| G5 | **`/api/health` sits on the player prefix**, so the Admin dashboard needs a second proxy rule and a prefix override. | Deliberate — `STATUS.sh` reads the same endpoint. No change planned. |
+
 ---
 
 ## Decision record (owner answers, 2026-08-16 — folded into docs)
