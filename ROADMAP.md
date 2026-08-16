@@ -27,7 +27,7 @@ Monorepo scaffold (pnpm: `apps/client`, `apps/server`, `packages/shared`, `packa
 **Exit:** fresh VPS → DEPLOY.sh → register, log in, see an empty Haven at 60 fps; CI green.
 
 ### P1 — Content backbone (+ Admin A0–A1)
-Full content schema (`*_defs` per DATA_MODEL.md) + Zod contracts in shared. ContentCache with draft→validate→publish→revert + revisions + client bundle endpoint (ETag/IndexedDB). Seed v1: 7 champions (kits from CONTENT_PLAN), lizard archetypes, chapter 1 stages, sets/slots/stat tables, game_config defaults. Asset registry + admin upload → pack pipeline. Admin Suite reaches A1 (auth, shell, Game-config editor, Champion/Skills/Enemy/Gear editors, asset manager, dashboard v1).
+Full content schema (`*_defs` per DATA_MODEL.md) + Zod contracts in shared. ContentCache with draft→validate→publish→revert + revisions + client bundle endpoint (ETag/IndexedDB). Seed v1: the full 37-champion roster + 6 food units (7 final-art kits verbatim from CONTENT_PLAN §1; §1b kits from the skill-template library; placeholder-asset convention per ASSET_GUIDE), lizard archetypes, chapter 1 stages, sets/slots/stat tables, game_config defaults. Asset registry + admin upload → pack pipeline. Admin Suite reaches A1 (auth, shell, Game-config editor, Champion/Skills/Enemy/Gear editors, asset manager, dashboard v1).
 **Exit:** edit a champion in Admin → publish → client bundle updates without redeploy; seeds reviewed in git.
 
 ### P2 — Battle engine
@@ -43,11 +43,11 @@ Roster + champion detail screens (stats breakdown from server, skills/tomes, lor
 **Exit:** the full RPG management loop closes: farm → equip → upgrade → stronger → farther.
 
 ### P5 — Summoning & collection
-Mistgate screen with portal reveal cinematics by rarity (skippable), ×1/×10, all four sigils, pools + weights + **mercy counters** (server) + "Odds & Mercy" transparency panel, summon history, roster capacity + expansion, Chronicle (owned/seen/teasers), NEW-champion flow. Broodlings in or out per owner's answer (either path ready).
+Mistgate screen with portal reveal cinematics by rarity (skippable), ×1/×10, all four sigils, pools + weights + **mercy counters** (server) + "Odds & Mercy" transparency panel, summon history, roster capacity + expansion, Chronicle (owned/seen; food units excluded), NEW-champion flow. Pools span the full roster incl. Broodlings/Broodguards (owner-approved).
 **Exit:** pull loop feels premium; pity provably correct (unit-tested counters); Chronicle registers everything.
 
 ### P6 — The Depths (+ masteries, multi-battle, difficulties)
-Depths hub + 4 relic dungeons (15 floors, bosses with real mechanics per CONTENT_PLAN), Proving Grounds (Emblems), Essence Springs (day rotation + first-7-days-all-open). Masteries system + trees UI + reset. Multi-battle (server loop, daily cap, summary UI). Campaign Hard/Brutal + stars/star-chests + first-clears everywhere. Seeds: all dungeons + chapters 1–12 across difficulties (generator-assisted).
+Depths hub + 4 relic dungeons (15 floors, bosses with real mechanics per CONTENT_PLAN), Proving Grounds (Emblems), Essence Springs (day rotation + first-7-days-all-open). Masteries system + trees UI + reset. Multi-battle (server loop, daily cap, summary UI). **Practice sandbox** (zero-energy/zero-reward re-fights of cleared stages). Campaign Hard/Brutal + stars/star-chests + first-clears everywhere. Seeds: all dungeons + chapters 1–12 across difficulties (generator-assisted).
 **Exit:** the PvE endgame treadmill runs: farm springs on rotation, push floors, spec masteries, multi-battle farms.
 
 ### P7 — Arena & bots (+ Hall of Valor)
@@ -55,7 +55,7 @@ Arena screens (defense editor, offers + refresh, token meter, tier ladder, weekl
 **Exit:** at 0 real friends online, Arena still feels alive and fair; medals→Valor loop closes.
 
 ### P8 — Meta & retention
-ProgressService fan-out + quest/mission/event/tutorial goal tracking. Daily/weekly/monthly quests + chest; Missions (80, arcs); Events framework + 3 presets + admin scheduling; login calendar + welcome track; mailbox + admin mail composer; news feed; player profile card + settings (audio/speed/motion/credits/password); daily reset job wired to everything. Admin reaches A4/A5 completeness.
+ProgressService fan-out + quest/mission/event/tutorial goal tracking. Daily/weekly/monthly quests + chest + **daily first-win-of-mode bonuses**; Missions (80 arcs, finale: exclusive Legendary Aureleth); Events framework + 3 presets + admin scheduling; login calendar + welcome track; mailbox + admin mail composer; news feed; player profile card + **battle replays with shareable links** + settings (audio/speed/motion/credits/password); daily reset job wired to everything. Admin reaches A4/A5 completeness.
 **Exit:** a day in Mistvale has structure: log in → calendar → quests → energy plan → events — the retention layer breathes.
 
 ### P9 — Onboarding & FTUE

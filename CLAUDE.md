@@ -26,7 +26,7 @@
 - **Icons only from game-icons.net** (via `tools/icon-fetch`, attributed) until custom icons exist. Never invent icons.
 - **Assets:** only from `assets/` + the documented CC0/CC-BY sources in ASSET_GUIDE.md (owner holds rights to `assets/`). Track every third-party source in `CREDITS.md`.
 - **Highly animated.** Idle loops always play; every action acknowledges within 100 ms; motion rules in UI_UX §1.2.
-- **Auth:** account name + password + profile name. No e-mail anywhere; password resets happen via the Admin Suite only.
+- **Auth:** account name + password + profile name. No e-mail anywhere; password resets happen via the Admin Suite only. One account system with ranks **Player / GameMaster / Admin** — only Admin rank can access the Admin Panel (`play.pathlands.cc/admin`).
 
 ## Locked technical decisions (change only via USER_QUESTIONS.md)
 pnpm monorepo · TypeScript strict everywhere · Node 22 + Fastify 5 + Zod 4 + Drizzle + PostgreSQL 16 · React 18 + Vite + PixiJS v8 + Zustand + SCSS Modules · Howler · Vitest/Playwright · deterministic pure battle engine in `packages/engine` (seeded xoshiro128**, event-log contract) · REST JSON `{ok,data|error,rev}` envelope · sessions (opaque tokens, hashed) · in-process Admin API at `/admin/api` with draft→validate→publish→revert content flow · nginx + systemd + bare-metal VPS (no Docker) · no Redis, no WebSockets at EA.

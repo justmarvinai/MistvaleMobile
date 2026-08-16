@@ -2,16 +2,16 @@
 
 > Status: **Planning.** The concrete content inventory that gets authored into seed files (and later tuned via Admin). Numbers are initial values feeding `tools/balance-sim`; ⚙ = tunable. Where a value bands by stage, the seed generator (a build-time script) expands the band tables below into per-stage rows — hand-authoring 252 campaign stages is not the plan; *reviewing generated content* is.
 
-## 1. The seven champions — full kits
+## 1. The showcase seven (final-art champions) — full kits
 
 All Epic. Format: multiplier × scaling stat; chances are pre-ACC/RES; CD = cooldown. Tome ladders: 4 upgrades per A-skill (Epic champions use Epic Tomes). Base stats (at ★6/L60/Asc6) chosen per role archetype ⚙.
 
-### Anuria, Blade of the Vale — Vale Sentinels · Tide · Attack (starter)
+### Anuria, Arrow of the Vale — Vale Sentinels · Tide · Attack (starter, **archer/ranger**)
 Base: HP 15.5k · ATK 1,390 · DEF 990 · SPD 103 · CR 15 · CD 50 · RES 30 · ACC 0
-- **A1 Cleaving Arc** — 2 hits, ×0.95 ATK each; each hit 20% chance → Weaken 15% (1t). Ladder: dmg+5%, chance+10%, dmg+10%, chance+15%.
-- **A2 Sentinel's Oath** (CD4) — instant: self ATK Up 50% + C.RATE Up 30% (2t) + extra turn? no 〔too strong〕 → +30% TM. Ladder: CD−1, buffs 3t (kit upgrade @Asc6), TM+20%… final ladder: CD−1 only ×1 + minor. Locked ladder: `tm+10%`, `cd−1`.
-- **A3 Mistpiercer** (CD4) — AoE ×2.2 ATK; 75% chance → Weaken 25% (2t). Ladder: dmg+5%, chance+10%, dmg+10%, cd−1.
-- Aura: team ATK +15% (Campaign). AI hints: A2 opener, A3 on cooldown.
+- **A1 Twinshot** — 2 arrows, ×0.95 ATK each; each hit 20% chance → Weaken 15% (1t). Ladder: dmg+5%, chance+10%, dmg+10%, chance+15%.
+- **A2 Warden's Aim** (CD4) — instant: self ATK Up 50% + C.RATE Up 30% (2t) + 30% TM. Ladder: tm+10%, cd−1.
+- **A3 Arrowstorm** (CD4) — AoE volley ×2.2 ATK; 75% chance → Weaken 25% (2t). Ladder: dmg+5%, chance+10%, dmg+10%, cd−1.
+- Aura: team ATK +15% (Campaign). AI hints: A2 opener, A3 on cooldown. Battle visuals: ranged attack lane (projectile arrows via VFX preset — she holds position, arrows travel).
 
 ### Thordakk Cindermaw — Emberclan · Ember · Attack (starter)
 Base: HP 17.5k · ATK 1,330 · DEF 1,050 · SPD 98 · CR 15 · CD 50 · RES 35 · ACC 0
@@ -54,6 +54,46 @@ Base: HP 21.5k · ATK 900 · DEF 1,100 · SPD 100 · CR 15 · CD 50 · RES 40 ·
 - **A2 Scalesong Ward** (CD4) — team Shield 20% of Seth's MaxHP (2t) + SPD Up 15% (2t). Ladder: shield+5%, cd−1, shield+5%, buff 30%〔Asc6 empowerment: SPD Up 30%〕→ ladder: shield+5%, cd−1, shield+5%.
 - **A3 Coilguard** (CD4) — heal lowest ally 30% of Seth's MaxHP + Ally Protection 25% on them (2t) + cleanse 1. Ladder: heal+5%, heal+10%, cd−1.
 - Aura: team RES +30 (Depths). Hints: A3 → lowest_hp_ally, A2 opener.
+
+## 1b. The extended roster (owner-approved: placeholder art until sprites arrive)
+
+30 more champions complete the EA-0.1 gacha. **All use the territorial-lizard model with per-champion tints + framed tinted avatars** until Marvin uploads real sprites/avatars via the Admin asset manager (registry swap, zero code). Kit depth by rarity: Uncommon 2 skills · Rare 3 · Epic 3 (+Asc6 empowerment) · Legendary 4 (A4 or passive). Kits are authored in P1 seeds from the hooks below (skill-template library + per-champion tweaks); every kit passes the COMBAT §14 role-benchmark gates.
+
+| Champion | Faction | El. | Role | Rar. | Kit hook |
+|---|---|---|---|---|---|
+| Ashka Torchhand | Emberclan | 🔥 | Attack | U | fast A1 + small HP Burn chance |
+| Grib the Unburied | Hollowborn | 🔥 | HP | U | thorny bruiser, self Continuous Heal |
+| Ssiv Quickfang | Sskarn | 🌿 | Attack | U | double-hit A1, +SPD self |
+| Serjeant Bramwell | Vale Sentinels | 🔥 | Defense | R | shield-bearer: self Shield + single Provoke |
+| Kerra Palewatch | Vale Sentinels | 🌿 | Attack | R | duelist: DEF Down opener + nuke |
+| Brekka Foehammer | Emberclan | 🔥 | HP | R | hammer Stun chance, HP-scaled hits |
+| Maddoc Threefingers | Hollowborn | 🔥 | Attack | R | counter-brawler: self Counterattack + Weaken |
+| Wisp of Old Hallen | Hollowborn | 🌫 | Support | R | Leech + Heal Reduction spreader |
+| Petta Lanternmaid | Wayfarers | 🌊 | Support | R | single-heal + cleanse bot, Continuous Heal |
+| Sylvi Mistreader | Wayfarers | 🌫 | Support | R | TM control: team +15%, enemy −20% |
+| Old Gharssa | Sskarn | 🌿 | Support | R | poison shaman: AoE Poison + ally heal |
+| Krosska Shieldback | Sskarn | 🌊 | Defense | R | team Shield + self taunt |
+| Bracken Puck | Thornweald | 🌿 | Attack | R | TM thief, high SPD |
+| Torvi Anvilborn | Runebound | 🔥 | Defense | R | DEF-scaled AoE + DEF Up |
+| Hodrek Deepline | Runebound | 🌫 | Attack | R | rune nuker: ignore-DEF single |
+| Sister Nerissa | Drowned Choir | 🌊 | Support | R | team Continuous Heal + RES Up |
+| Castellan Ordwin | Vale Sentinels | 🌊 | Defense | E | wall: AoE Provoke + team DEF Up + counter |
+| Ugrim Pyrechant | Emberclan | 🔥 | Support | E | war-drummer: team ATK Up + HP Burn spread |
+| Aldemar the Cartographer | Wayfarers | 🌿 | HP | E | pathfinder: team Shield + Weaken AoE |
+| Lady Merrow of the Fen | Hollowborn | 🌊 | Support | E | Sleep controller + big heal |
+| Vessk the Unchained | Sskarn | 🔥 | Attack | E | rage multi-hit (3× random) + self ATK Up |
+| The Briar Knight | Thornweald | 🌿 | Defense | E | Reflect + Provoke thorns tank |
+| Cantor Maelis | Drowned Choir | 🌊 | Attack | E | AoE + SPD Down chorus |
+| Warden-Cmdr. Elstan | Vale Sentinels | 🌊 | Defense | L | Ally Protection on team + Shield engine + counter aura |
+| Vulkas Emberlord | Emberclan | 🔥 | Attack | L | AoE burn nuker: HP Burn + big AoE, enrage passive |
+| Orenna Veilmother | Wayfarers | 🌫 | Support | L | mass cleanse + Block Debuffs + team SPD Up |
+| The Pale Duke | Hollowborn | 🌫 | HP | L | Leech aura passive + AoE Weaken + self-sustain |
+| Szarran Coilfather | Sskarn | 🌿 | HP | L | poison king: mass Poison + poison-scaling nuke (Sethlurias lore link) |
+| Vess'aryn of the Deep Thorn | Thornweald | 🌫 | Attack | L | assassin: Stealth-analog + execute vs <40% HP |
+| **Aureleth, Voice of the Vale** | Vale Sentinels | 🌫 | Support | L (exclusive) | missions-chain reward, unsummonable (Arbiter-analog): revive-lite (heal+TM surge), team ATK Up, SPD aura |
+
+**Food units (not in Chronicle):** Sskarn Broodling ×3 (Common — Ember/Tide/Verdant tints, 1-skill) · Sskarn Broodguard ×3 (Uncommon — same tints, 2-skill). Summonable via Faded Sigils, dropped by campaign, stocked in Bazaar.
+**Pool coverage checks (publish-validated):** Mistwoven (Mist-only) pool = 3 R + 2 E + 3 L ✓ · every element ≥2 Rares ✓ · every summonable rarity non-empty per element where required ✓.
 
 ## 2. Enemy roster (all use the lizard model; tint per archetype)
 
@@ -120,13 +160,12 @@ Structure per COMBAT §9 (2-of-3 trees, 2×T1 + 3×T2–T5 + 1×T6 picks). Per t
 
 ## 7. Meta content
 - **Quests:** dailies/weeklies/monthlies exactly as ECONOMY §11.
-- **Missions (80):** 10 arcs × 8 (Awakening the Gate → First Steel → The Causeway → Depths-Delver → Proving Yourself → Arena Blooded → Silver Standard → The Deep Floors → Brutal Roads → Court of the Coilmother). Each arc ends in a sigil/tome milestone; final: Radiant ×2 + Mistwoven ×2 + title "Warden of the Reclamation".
+- **Missions (80):** 10 arcs × 8 (Awakening the Gate → First Steel → The Causeway → Depths-Delver → Proving Yourself → Arena Blooded → Silver Standard → The Deep Floors → Brutal Roads → Court of the Coilmother). Each arc ends in a sigil/tome milestone; final: **Aureleth, Voice of the Vale** (exclusive Legendary, §1b) + title "Warden of the Reclamation".
 - **Events at launch:** Champion Training (5d), Depths Delve (3d), Summon Surge (2d) staggered on a 2-week admin-cloneable calendar.
 - **Login:** 30-day cycle (day 30 Epic selector), 7-day welcome track. **News:** seeded welcome post + patch-notes template.
 - **Bazaar/Crystal shop:** per ECONOMY §9–10.
-- **Tutorial (scripted, `tutorial_step_defs`):** 1 cold-open battle (all 3 starters, preset relics, scripted near-loss drama beat) → 2 the Mistgate flickers: starter choice (permanent, kit preview) → 3 clear 1-1 → 4 first summon (granted Faded Sigils ×2) → 5 equip relic → 6 upgrade relic to +1 → 7 clear 1-2 → 8 quests intro (claim first) → 9 clear 1-3 → 10 free level-ups + rank-up explainer → 11 clear 1-4 (first sigil drop) → 12 Bazaar visit → 13 clear 1-5..1-7 (boss banner moment) → 14 Depths tease (mist-shrouded) → 15 open goals: Missions arc 1. Rewards throughout ≈ 3 days of faucets ⚙.
-- **Bots (arena seed):** 60 bots at launch across bands (Bronze 24 / Silver 20 / Gold 12 / Platinum 4) ⚙, name pool ("Karrow", "Vessa Thornhand", "Old Maddoc"…), teams synthesized at band power from the 7 champions + (if approved) Broodling filler, nightly refresh ±5% power jitter, top-10 auto-yield on.
-- **Broodlings (pending USER_QUESTIONS):** Common "Sskarn Broodling" (element tints ×3, 1-skill kit) + Uncommon "Sskarn Broodguard" (×3, 2-skill kit) as summonable food; excluded from Chronicle "collection complete" math.
+- **Tutorial (scripted, `tutorial_step_defs`):** 1 cold-open battle (all 3 starters, preset relics, scripted near-loss drama beat) → 2 the Mistgate flickers: starter choice (permanent, kit preview) → 3 clear 1-1 → 4 first summon (granted Faded Sigils ×2; first pull guaranteed Rare) → 5 equip relic → 6 upgrade relic to +1 → 7 clear 1-2 → 8 quests intro (claim first) → 9 clear 1-3 → 10 free level-ups + rank-up explainer → 11 clear 1-4 (first sigil drop) → 12 Bazaar visit → 13 clear 1-5..1-7 (boss banner moment) → 14 Depths tease (mist-shrouded) → 15 open goals: Missions arc 1. Rewards throughout ≈ 3 days of faucets ⚙.
+- **Bots (arena seed):** 60 bots at launch across bands (Bronze 24 / Silver 20 / Gold 12 / Platinum 4) ⚙, natural name pool ("Karrow", "Vessa Thornhand", "Old Berrin"…, no bot marker — owner-approved), teams synthesized at band power from the full 37-champion roster (rarity mix scales with band), nightly refresh ±5% power jitter, top-10 auto-yield on.
 
 ## 8. Seed-generation notes (Phase P1/P10)
 Band tables above expand via `tools/` seed generator into full `stage_defs` rows (wave comps from per-chapter templates + level bands + drop tables). Generated seeds are committed JSON — reviewed like code, tweaked via Admin after deploy. Balance-sim CI gates (COMBAT §14) run against exactly these seeds.
