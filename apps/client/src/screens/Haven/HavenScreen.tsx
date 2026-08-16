@@ -1,6 +1,7 @@
 import { usePlayerStore } from '@/state/playerStore';
 import { Panel } from '@/ui/Panel/Panel';
 import { SCREENS, isScreenUnlocked, type ScreenId } from '@/app/screens';
+import { StarterChoice } from './StarterChoice';
 import styles from './HavenScreen.module.scss';
 
 /**
@@ -18,6 +19,8 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
 
   return (
     <div className={styles.screen}>
+      <StarterChoice />
+
       <div className={styles.welcome}>
         <h1 className={styles.heading}>The Haven</h1>
         <p className={styles.subheading}>

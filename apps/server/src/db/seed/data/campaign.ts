@@ -1,15 +1,27 @@
 import type { CampaignChapterDefInput, StageDefInput } from '@mistvale/shared';
 
 /**
- * Chapter 1 — the Veilwood Fringe.
+ * The opening chapters.
  *
- * P1 seeds the first chapter across all three difficulties so the content pipeline has
- * real stages to serve; the remaining eleven chapters are generated and tuned in P3/P6
- * against the balance simulator (docs/CONTENT_PLAN_EA01.md §3).
+ * Chapter 1 ships on all three difficulties; chapters 2 and 3 ship on Normal, which is
+ * what the campaign loop needs to feel like a journey rather than a single room. The
+ * remaining nine chapters are generated and tuned in P6 against the balance simulator
+ * (docs/CONTENT_PLAN_EA01.md §3).
  *
  * Stage shape follows the source game's conventions: stages 1–6 are three-wave fights
  * whose number decides which relic slot drops, and stage 7 is the chapter boss.
  */
+
+/** Everything that varies between chapters. Adding a chapter is one entry here. */
+interface ChapterPlan {
+  key: string;
+  number: number;
+  bossKey: string;
+  /** Enemy level band per difficulty. */
+  levels: Record<'normal' | 'hard' | 'brutal', [number, number]>;
+  /** Which difficulties this chapter ships on. */
+  difficulties: readonly ('normal' | 'hard' | 'brutal')[];
+}
 
 export const CAMPAIGN_CHAPTERS: CampaignChapterDefInput[] = [
   {
@@ -27,17 +39,64 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefInput[] = [
     ],
     sortOrder: 1,
   },
+  {
+    key: 'chapter_02',
+    number: 2,
+    name: 'The Drowned Road',
+    region: 'Sunken Marches',
+    lore: 'The causeway is under a foot of black water now, and something down there keeps pace with anyone walking it.',
+    backgroundAsset: 'bg_veilwood',
+    setKey: 'stormcoil',
+    starRewards: [
+      { stars: 7, rewards: { silver: 7_000, crystals: 10 } },
+      { stars: 14, rewards: { silver: 16_000, crystals: 25 } },
+      { stars: 21, rewards: { silver: 38_000, crystals: 50 } },
+    ],
+    sortOrder: 2,
+  },
+  {
+    key: 'chapter_03',
+    number: 3,
+    name: 'Silkmire Hollow',
+    region: 'Sunken Marches',
+    lore: 'A brood-warren dug into the hillside. The Sskarn do not guard it so much as feed it.',
+    backgroundAsset: 'bg_veilwood',
+    setKey: 'gravebind',
+    starRewards: [
+      { stars: 7, rewards: { silver: 9_000, crystals: 10 } },
+      { stars: 14, rewards: { silver: 20_000, crystals: 25 } },
+      { stars: 21, rewards: { silver: 46_000, crystals: 50 } },
+    ],
+    sortOrder: 3,
+  },
+];
+
+const CHAPTER_PLANS: ChapterPlan[] = [
+  {
+    key: 'chapter_01',
+    number: 1,
+    bossKey: 'boss_vrash_fenblade',
+    levels: { normal: [1, 6], hard: [24, 30], brutal: [42, 48] },
+    difficulties: ['normal', 'hard', 'brutal'],
+  },
+  {
+    key: 'chapter_02',
+    number: 2,
+    bossKey: 'boss_ssythra_tidecaller',
+    levels: { normal: [6, 12], hard: [30, 36], brutal: [48, 53] },
+    difficulties: ['normal'],
+  },
+  {
+    key: 'chapter_03',
+    number: 3,
+    bossKey: 'boss_gorrakh_broodtyrant',
+    levels: { normal: [12, 19], hard: [36, 42], brutal: [53, 58] },
+    difficulties: ['normal'],
+  },
 ];
 
 /** Energy cost by difficulty; the boss stage costs one more (source-faithful). */
 const ENERGY: Record<'normal' | 'hard' | 'brutal', number> = { normal: 4, hard: 6, brutal: 8 };
-
-/** Enemy level bands per difficulty for chapter 1. */
-const LEVELS: Record<'normal' | 'hard' | 'brutal', [number, number]> = {
-  normal: [1, 6],
-  hard: [24, 30],
-  brutal: [42, 48],
-};
 
 /** Reward scaling per difficulty. */
 const REWARD_SCALE: Record<'normal' | 'hard' | 'brutal', number> = {
@@ -79,8 +138,15 @@ const TRASH_COMPOSITIONS: string[][][] = [
   ],
 ];
 
-function buildStage(stageNumber: number, difficulty: 'normal' | 'hard' | 'brutal'): StageDefInput {
-  const [minLevel, maxLevel] = LEVELS[difficulty];
+function buildStage(
+  plan: ChapterPlan,
+  stageNumber: number,
+  difficulty: 'normal' | 'hard' | 'brutal',
+): StageDefInput {
+  const [minLevel, maxLevel] = plan.levels[difficulty];
+  // Later chapters pay more for the same work, which is what makes pushing forward
+  // better than farming the opening stage forever.
+  const chapterScale = 1 + (plan.number - 1) * 0.45;
   const isBoss = stageNumber === 7;
   const scale = REWARD_SCALE[difficulty];
 
@@ -105,7 +171,7 @@ function buildStage(stageNumber: number, difficulty: 'normal' | 'hard' | 'brutal
           stars: 2,
           slot,
         })),
-        [{ enemyKey: 'boss_vrash_fenblade', level: maxLevel, stars: 3, slot: 1 }],
+        [{ enemyKey: plan.bossKey, level: maxLevel, stars: 3, slot: 1 }],
       ]
     : (TRASH_COMPOSITIONS[stageNumber - 1] ?? []).map((wave, waveIndex) =>
         wave.map((enemyKey, slot) => ({
@@ -116,34 +182,59 @@ function buildStage(stageNumber: number, difficulty: 'normal' | 'hard' | 'brutal
         })),
       );
 
+  const prefix = `c${String(plan.number).padStart(2, '0')}`;
+
   return {
-    key: `c01_s${stageNumber}_${difficulty}`,
+    key: `${prefix}_s${stageNumber}_${difficulty}`,
     mode: 'campaign',
-    parentKey: 'chapter_01',
+    parentKey: plan.key,
     number: stageNumber,
     difficulty,
     energyCost: ENERGY[difficulty] + (isBoss ? 1 : 0),
     waves,
     rewards: {
-      silverMin: Math.round((320 + stageNumber * 55) * scale),
-      silverMax: Math.round((480 + stageNumber * 80) * scale),
-      playerXp: Math.round((14 + stageNumber * 3) * scale),
-      championXp: Math.round((110 + stageNumber * 26) * scale),
+      silverMin: Math.round((320 + stageNumber * 55) * scale * chapterScale),
+      silverMax: Math.round((480 + stageNumber * 80) * scale * chapterScale),
+      playerXp: Math.round((14 + stageNumber * 3) * scale * chapterScale),
+      championXp: Math.round((110 + stageNumber * 26) * scale * chapterScale),
     },
     starRules: { noDeaths: true, maxTurns: isBoss ? 16 : 12 },
     firstClearRewards: isBoss
-      ? { silver: Math.round(2_000 * scale), crystals: 15 }
-      : { silver: Math.round(400 * scale) },
-    unlock:
-      stageNumber === 1
-        ? difficulty === 'normal'
-          ? {}
-          : { previousStageKey: `c01_s7_${difficulty === 'hard' ? 'normal' : 'hard'}` }
-        : { previousStageKey: `c01_s${stageNumber - 1}_${difficulty}` },
+      ? { silver: Math.round(2_000 * scale * chapterScale), crystals: 15 }
+      : { silver: Math.round(400 * scale * chapterScale) },
+    unlock: buildUnlock(plan, stageNumber, difficulty),
     sortOrder: stageNumber,
   };
 }
 
-export const CAMPAIGN_STAGES: StageDefInput[] = (['normal', 'hard', 'brutal'] as const).flatMap(
-  (difficulty) => Array.from({ length: 7 }, (_, index) => buildStage(index + 1, difficulty)),
+/**
+ * What has to be cleared before this stage opens.
+ *
+ * Within a chapter it is simply the previous stage. The first stage of a chapter opens on
+ * the previous chapter's boss, and a harder difficulty opens on finishing the one below —
+ * so the campaign reads as one continuous line rather than three parallel ones.
+ */
+function buildUnlock(
+  plan: ChapterPlan,
+  stageNumber: number,
+  difficulty: 'normal' | 'hard' | 'brutal',
+): StageDefInput['unlock'] {
+  const prefix = `c${String(plan.number).padStart(2, '0')}`;
+  if (stageNumber > 1) return { previousStageKey: `${prefix}_s${stageNumber - 1}_${difficulty}` };
+
+  if (difficulty !== 'normal') {
+    const below = difficulty === 'hard' ? 'normal' : 'hard';
+    return { previousStageKey: `${prefix}_s7_${below}` };
+  }
+
+  const previous = CHAPTER_PLANS.find((entry) => entry.number === plan.number - 1);
+  return previous
+    ? { previousStageKey: `c${String(previous.number).padStart(2, '0')}_s7_normal` }
+    : {};
+}
+
+export const CAMPAIGN_STAGES: StageDefInput[] = CHAPTER_PLANS.flatMap((plan) =>
+  plan.difficulties.flatMap((difficulty) =>
+    Array.from({ length: 7 }, (_, index) => buildStage(plan, index + 1, difficulty)),
+  ),
 );

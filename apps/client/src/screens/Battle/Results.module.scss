@@ -1,0 +1,56 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 22rem;
+}
+
+.outcome {
+  font-size: 1.4rem;
+  color: $parchment;
+}
+
+.victory {
+  color: $mist;
+}
+
+.defeat {
+  color: $danger;
+}
+
+.stars {
+  color: $gold;
+  font-size: 1.6rem;
+  letter-spacing: 4px;
+}
+
+.rewards {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  color: $parchment;
+  font-size: 0.9rem;
+}
+
+.label {
+  color: $muted;
+}
+
+.actions {
+  display: flex;
+  gap: $space-2;
+  justify-content: flex-end;
+}
+
+.note {
+  color: $muted;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}

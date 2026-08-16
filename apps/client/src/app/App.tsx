@@ -3,12 +3,15 @@ import { PixiStage } from '@/game/PixiStage';
 import { ToastHost } from '@/ui/Toast/Toast';
 import { AuthScreen } from '@/screens/Auth/AuthScreen';
 import { HavenScreen } from '@/screens/Haven/HavenScreen';
+import { CampaignScreen } from '@/screens/Campaign/CampaignScreen';
+import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { PlaceholderScreen } from '@/screens/Placeholder/PlaceholderScreen';
 import { SettingsModal } from '@/screens/Settings/SettingsModal';
 import { useSessionStore } from '@/state/sessionStore';
 import { usePlayerStore } from '@/state/playerStore';
 import { useContentStore } from '@/state/contentStore';
 import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screens';
+import { useNavStore } from '@/state/navStore';
 import { TopBar } from './TopBar';
 import { Dock } from './Dock';
 import { BootScreen } from './BootScreen';
@@ -111,10 +114,11 @@ export function App() {
 
 /** The signed-in game shell: resource bar, current screen, navigation dock. */
 function GameShell() {
-  const [screen, setScreen] = useState<ScreenId>('haven');
+  const screen = useNavStore((state) => state.screen);
+  const setScreen = useNavStore((state) => state.setScreen);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const navigate = useCallback((id: ScreenId) => setScreen(id), []);
+  const navigate = useCallback((id: ScreenId) => setScreen(id), [setScreen]);
 
   // Number keys jump between dock slots.
   useEffect(() => {
@@ -137,7 +141,7 @@ function GameShell() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [setScreen]);
 
   const definition = SCREENS.find((entry) => entry.id === screen);
 
@@ -149,12 +153,17 @@ function GameShell() {
         <main className={styles.content}>
           {screen === 'haven' ? (
             <HavenScreen onNavigate={navigate} />
+          ) : screen === 'campaign' ? (
+            <CampaignScreen />
+          ) : screen === 'battle' ? (
+            <BattleScreen />
           ) : definition ? (
             <PlaceholderScreen screen={definition} />
           ) : null}
         </main>
 
-        <Dock current={screen} onNavigate={navigate} />
+        {/* A fight takes the whole screen: leaving it is a deliberate act, not a tab away. */}
+        {screen !== 'battle' && <Dock current={screen} onNavigate={navigate} />}
       </div>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />

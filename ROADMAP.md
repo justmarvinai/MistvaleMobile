@@ -11,7 +11,7 @@
 | **P0 ✅** | Foundation | Monorepo, CI, DB, auth, client shell, deploy scripts v1 | ▓▓ |
 | **P1 ✅** | Content backbone | Content schema + cache + publish, seeds v1, Admin core editors (A0–A1) | ▓▓▓ |
 | **P2 ✅** | Battle engine | Full engine + tests + battle API + balance-sim | ▓▓▓▓ |
-| P3 | Battle experience | Battle screen, campaign flow, results | ▓▓▓▓ |
+| **P3 ✅** | Battle experience | Battle screen, campaign flow, results | ▓▓▓▓ |
 | P4 | Champions & relics | Roster, leveling/rank/ascension, gear loop, Bazaar | ▓▓▓ |
 | P5 | Summoning | Mistgate, pools/pity, Chronicle | ▓▓ |
 | P6 | The Depths | 4 dungeons + Proving + Springs, masteries, multi-battle, Hard/Brutal | ▓▓▓ |
@@ -39,9 +39,10 @@ Full content schema (`*_defs` per DATA_MODEL.md) + Zod contracts in shared. Cont
 **Also delivered:** the player roster (`player_champions`) brought forward from P4, because the battle API needs to know what a team *is* and inventing a temporary shape would have been the exact "temporary hack" the brief rules out · the battle API — start, act, auto, retreat, resume — with the engine's whole state stored as JSONB so a fight survives a restart, one active battle per player enforced by a partial unique index, and `actionId` idempotency so a dropped response is safe to retry · `RewardService`, the single path resources move by, writing every movement to `economy_log` · 18 integration tests over the real seeded content: pick a starter, fight chapter 1-1, get paid, exactly once.
 **Deferred to A2:** the Admin battle inspector (timeline viewer + stage simulate), which belongs with the Admin phase rather than here.
 
-### P3 — Battle experience (+ campaign flow)
+### P3 — Battle experience (+ campaign flow) ✅ **complete**
 Battle screen per UI_UX §4: Pixi stage (formations, idle/procedural animations, floaters, VFX presets, shake), turn-order strip, skill bar + targeting + tooltips, buff chips, speed ×1/×2, auto toggle, retreat; event-log playback engine (the client "player piano"). Campaign map + chapter/stage screens, team select (presets, power, energy confirm), results screen (stars, loot reveal, XP bars). Wave/victory/defeat choreography. Seeds extended: chapters 1–3 Normal.
 **Exit:** tutorial-less full loop: pick team → fight 1-1…3-7 manually or auto → loot → repeat, feeling like a real game.
+**Delivered:** starter choice (pedestals from content) · campaign map with chapters, stages and difficulty tabs · team select with leader-first ordering and an energy preview · the battle screen — Pixi formations with running idle loops, drifting mist, health bars, status pips, hit shake and damage floaters, over a DOM HUD with turn order, skill bar with cooldowns, speed ×1/×2, auto, skip and retreat · the playback engine that applies the server's event log to a view model and reads every number off an event, with an ESLint rule enforcing that the client imports engine *types* only · results with stars and the granted loot · `pnpm assets` sprite pipeline, run by the client's own build, publishing `assets/` with a frame-count manifest · chapters 2–3 seeded with their own bosses, the generator now per-chapter plan driven · 18 playback tests and a browser end-to-end run of the whole loop.
 
 ### P4 — Champions & relics (+ Admin A3 start)
 Roster + champion detail screens (stats breakdown from server, skills/tomes, lore). Leveling (food consume), rank-up, ascension (essences), dupe→skill-level. Relic inventory, equip/unequip (free), upgrade forge (success ladder, animated attempts, bulk-continue), sell with guardrails, set bonuses live in stat preview. Bazaar (rotating stock + crystal tab + refresh). Locks/favorites.

@@ -1,9 +1,27 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 /**
  * The Phase P0 exit criterion, exercised for real: a visitor registers, lands in the
  * Haven, sees their resources, navigates, signs out, and signs back in.
  */
+
+/**
+ * Clears the mandatory starter choice.
+ *
+ * A brand-new account must pick a champion before the Haven is usable — that is the
+ * game's first screen, not an optional prompt. These tests are about the account
+ * lifecycle, so they get past it and move on.
+ */
+async function chooseAStarter(page: Page): Promise<void> {
+  const dialog = page.getByRole('dialog', { name: /choose your first champion/i });
+  await expect(dialog).toBeVisible({ timeout: 20_000 });
+  await dialog
+    .getByRole('button', { name: /^choose /i })
+    .first()
+    .click();
+  await dialog.getByRole('button', { name: /stand together/i }).click();
+  await expect(dialog).toBeHidden({ timeout: 15_000 });
+}
 
 function uniqueSuffix(): string {
   return Math.random().toString(36).slice(2, 10);
@@ -38,6 +56,8 @@ test.describe('account lifecycle', () => {
     await page.getByLabel('Profile name').fill(profileName);
     await page.getByLabel('Password').fill(password);
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+    await chooseAStarter(page);
 
     // We land in the Haven with the shell around us.
     await expect(page.getByRole('heading', { name: 'The Haven' })).toBeVisible();
@@ -113,6 +133,7 @@ test.describe('account lifecycle', () => {
     await page.getByLabel('Profile name').fill(profileName);
     await page.getByLabel('Password').fill('a-good-long-password');
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
+    await chooseAStarter(page);
     await expect(page.getByRole('heading', { name: 'The Haven' })).toBeVisible();
     await page.getByRole('button', { name: 'Sign out' }).click();
 

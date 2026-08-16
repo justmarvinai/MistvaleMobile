@@ -19,7 +19,8 @@ export type ScreenId =
   | 'bazaar'
   | 'quests'
   | 'events'
-  | 'settings';
+  | 'settings'
+  | 'battle';
 
 export interface ScreenDefinition {
   id: ScreenId;
@@ -80,6 +81,8 @@ export const SCREENS: readonly ScreenDefinition[] = [
     inDock: true,
   },
   { id: 'settings', label: 'Settings', glyph: '⚙', inDock: false },
+  // A full-screen takeover reached from team select, never from the dock.
+  { id: 'battle', label: 'Battle', glyph: '⚔', inDock: false },
 ];
 
 export const DOCK_SCREENS = SCREENS.filter((screen) => screen.inDock);

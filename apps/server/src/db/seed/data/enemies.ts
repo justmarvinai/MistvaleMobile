@@ -305,4 +305,44 @@ export const ENEMIES: EnemyDefInput[] = [
       },
     },
   ),
+  // Chapter 2's warden of the drowned road. Immune to turn-meter reduction, so a team
+  // cannot simply deny it every turn — the counterplay is damage, not tempo.
+  enemy(
+    'boss_ssythra_tidecaller',
+    'Ssythra the Tidecaller',
+    'tidecaller',
+    'tide',
+    'support',
+    { hp: 17_800, atk: 400, def: 380, spd: 101, critRate: 18, critDmg: 55, res: 55, acc: 40 },
+    ['sskarn_a1_venom_spit', 'sskarn_a2_mire_mend', 'boss_a3_coilmother_wrath'],
+    110,
+    {
+      isBoss: true,
+      bossMechanics: {
+        almightyImmunity: true,
+        tmReductionImmune: true,
+        enrage: { afterTurn: 22, dmgPctPerTurn: 7 },
+      },
+    },
+  ),
+
+  // Chapter 3's brood-tyrant: heavier and slower, a wall to be worn down.
+  enemy(
+    'boss_gorrakh_broodtyrant',
+    'Gorrakh the Broodtyrant',
+    'broodtyrant',
+    'ember',
+    'defense',
+    { hp: 22_400, atk: 470, def: 520, spd: 94, critRate: 15, critDmg: 55, res: 60, acc: 35 },
+    ['sskarn_a1_brute_slam', 'sskarn_a2_stunning_blow', 'boss_a3_coilmother_wrath'],
+    120,
+    {
+      isBoss: true,
+      bossMechanics: {
+        almightyImmunity: true,
+        tmReductionImmune: false,
+        enrage: { afterTurn: 24, dmgPctPerTurn: 9 },
+      },
+    },
+  ),
 ];

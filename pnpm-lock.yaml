@@ -41,6 +41,9 @@ importers:
 
   apps/client:
     dependencies:
+      '@mistvale/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
       '@mistvale/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -160,6 +163,12 @@ importers:
       zod:
         specifier: ^4.4.3
         version: 4.4.3
+
+  tools/asset-sync:
+    devDependencies:
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.12
 
   tools/balance-sim:
     dependencies:

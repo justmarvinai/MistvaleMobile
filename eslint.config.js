@@ -56,7 +56,25 @@ export default tseslint.config(
     // React rules apply to the client only; the server and engine have no components.
     files: ['apps/client/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
-    rules: reactHooks.configs.recommended.rules,
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      // The client renders the engine's event contract, so it needs the engine's
+      // *types* — but shipping its code would put game math on the client, which is a
+      // hard rule (CLAUDE.md). Type imports are erased at build; value imports are not.
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@mistvale/engine',
+              message:
+                'The client may import engine types only. Game math runs on the server; use `import type`.',
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     // Plain-JS build tooling runs in Node, outside any package's TypeScript project.

@@ -1,0 +1,15 @@
+{
+  "name": "@mistvale/asset-sync",
+  "version": "0.1.0-ea.0",
+  "private": true,
+  "type": "module",
+  "description": "Copies the owner's unit sprites out of assets/ into the client's public tree, normalising filenames and emitting a manifest.",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "sync": "tsx src/index.ts",
+    "check": "tsx src/index.ts --check"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}

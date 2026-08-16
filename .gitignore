@@ -7,9 +7,12 @@ dist/
 build/
 *.tsbuildinfo
 
-# generated client assets (produced by tools/atlas-pack + tools/icon-fetch)
+# generated client assets (produced by tools/atlas-pack + tools/icon-fetch + tools/asset-sync)
+# The sprite tree is a normalised copy of assets/; committing it would carry the
+# owner's art twice. The client's own build republishes it, so it is never missing.
 apps/client/public/atlases/
 apps/client/public/icons/
+apps/client/public/sprites/
 
 # tool caches
 .cache/

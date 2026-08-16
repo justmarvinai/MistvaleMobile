@@ -96,17 +96,25 @@ function main(): void {
     });
   }
 
-  // ── Gate 2: a par team beats the chapter boss ───────────────────────────
-  const all = campaignStages(content, 1, 'normal');
-  const boss = all[all.length - 1];
-  if (boss) {
-    const [result] = [simulateStage(content, boss.key, parTeam(content), RUNS)];
-    table('Par team — chapter 1 boss, Normal', [result!]);
+  // ── Gate 2: a par team beats every published chapter boss ───────────────
+  // Levelled to the chapter it faces, because "at par recommended power" is the whole
+  // point of the check — a level-20 team wiping on chapter 3 is expected, not a bug.
+  for (let chapter = 1; chapter <= 12; chapter += 1) {
+    const stages = campaignStages(content, chapter, 'normal');
+    const boss = stages[stages.length - 1];
+    if (!boss) continue;
+
+    const level = Math.min(60, 20 + (chapter - 1) * 10);
+    const rank = Math.min(6, 3 + Math.floor((chapter - 1) / 2));
+    const team = parTeam(content).map((member) => ({ ...member, level, rank }));
+
+    const result = simulateStage(content, boss.key, team, RUNS);
+    table(`Par team — chapter ${chapter} boss, Normal`, [result]);
     gates.push({
-      name: 'chapter-1-boss',
+      name: `chapter-${chapter}-boss`,
       detail: 'falls to a par team on auto at least 70% of the time',
-      passed: result!.winRate >= 0.7,
-      measured: `${(result!.winRate * 100).toFixed(1)}%`,
+      passed: result.winRate >= 0.7,
+      measured: `${(result.winRate * 100).toFixed(1)}%`,
     });
   }
 

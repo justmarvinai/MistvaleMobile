@@ -1,0 +1,138 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  height: 100%;
+  min-height: 0;
+}
+
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+}
+
+.wave {
+  color: $parchment;
+  font-size: 0.9rem;
+}
+
+.order {
+  display: flex;
+  gap: $space-1;
+  flex: 1;
+  justify-content: center;
+}
+
+.orderPip {
+  min-width: 2.4rem;
+  padding: 2px $space-1;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $muted;
+  font-size: 0.68rem;
+  text-align: center;
+
+  &[data-side='ally'] {
+    border-color: $mist-dim;
+    color: $mist;
+  }
+}
+
+.controls {
+  display: flex;
+  gap: $space-1;
+}
+
+.toggle {
+  padding: $space-1 $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $muted;
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: $mist;
+    color: $mist;
+  }
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid $edge;
+  background: $ground-deep;
+  overflow: hidden;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  min-height: 4.5rem;
+  padding: $space-2;
+  background: $panel;
+  border: 1px solid $edge;
+}
+
+.actor {
+  min-width: 8rem;
+  color: $parchment;
+  font-size: 0.85rem;
+}
+
+.actorMeta {
+  color: $muted;
+  font-size: 0.72rem;
+}
+
+.skills {
+  display: flex;
+  gap: $space-2;
+  flex: 1;
+}
+
+.skill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 7rem;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $parchment;
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $mist;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.skillMeta {
+  color: $muted;
+  font-size: 0.68rem;
+}
+
+.hint {
+  color: $muted;
+  font-size: 0.8rem;
+}
+
+.error {
+  color: $danger;
+  font-size: 0.8rem;
+}

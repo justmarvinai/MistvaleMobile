@@ -1,0 +1,69 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 26rem;
+}
+
+.intro {
+  color: $muted;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: $space-2;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-3 $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $parchment;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $mist;
+  }
+
+  &[aria-pressed='true'] {
+    border-color: $mist;
+    background: $panel-raised;
+  }
+}
+
+.portrait {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+.name {
+  font-size: 0.9rem;
+}
+
+.meta {
+  color: $muted;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.error {
+  color: $danger;
+  font-size: 0.85rem;
+}

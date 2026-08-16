@@ -3,15 +3,17 @@
   "version": "0.1.0-ea.0",
   "private": true,
   "type": "module",
-  "description": "Mistvale game client — React shell with a PixiJS stage.",
+  "description": "Mistvale game client \u2014 React shell with a PixiJS stage.",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "pnpm run sprites && vite",
+    "build": "pnpm run sprites && vite build",
     "preview": "vite preview",
+    "sprites": "pnpm --filter @mistvale/asset-sync sync",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@mistvale/shared": "workspace:*",
+    "@mistvale/engine": "workspace:*",
     "howler": "^2.2.4",
     "pixi.js": "^8.6.6",
     "react": "^18.3.1",
