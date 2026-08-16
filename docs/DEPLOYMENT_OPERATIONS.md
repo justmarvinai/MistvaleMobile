@@ -50,7 +50,7 @@ All scripts read one `/srv/mistvale/.env`; no secrets in git; `.env.example` doc
 
 ## 4. Operational routines
 - **Daily reset** (in-process cron, default 04:00 Europe/Berlin, configurable in `game_config`): quest/shop/arena-token-bonus rotation, event activation/expiry, bot ladder nightly refresh, battle-log pruning, economy-log pruning (90 d).
-- **Monitoring (EA-appropriate):** `STATUS.sh` on demand; optional free UptimeRobot ping to `/api/health-lite`; server emails/log-marks on crash-loop (systemd `OnFailure` → log flag surfaced on Admin dashboard).
+- **Monitoring (EA-appropriate):** `STATUS.sh` on demand (reads `/api/health-lite`, and the full `/api/health` payload when `OPS_SESSION_TOKEN` holds an admin session token); optional free UptimeRobot ping to `/api/health-lite`; systemd `OnFailure` writes a crash marker that `STATUS.sh` and the Admin dashboard surface.
 - **Content workflow reminder:** git seeds bootstrap; after that the DB is content truth. Admin "Export content" downloads JSON for git-committing back when you want content in version control (recommended after big authoring sessions — makes content reviewable + disaster-proof).
 - **Disaster recovery:** VPS dies → new VPS + `DEPLOY.sh` + `RESTORE.sh` from offsite backup ≈ 30 min. Documented drill in P10 checklist.
 - **TLS:** certbot auto-renew (systemd timer) for both subdomains.

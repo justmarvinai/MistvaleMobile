@@ -175,7 +175,14 @@ activate() {
 
 restart_and_check() { # restart_and_check [attempts]
 	local attempts="${1:-20}"
-	systemctl_do restart "${SERVICE}"
+	# The restart's own exit status must be checked explicitly: `set -e` is
+	# disabled inside a function called as an `if` condition, so a failing
+	# systemctl would otherwise fall through to a health check that the OLD
+	# process happily answers.
+	if ! systemctl_do restart "${SERVICE}"; then
+		err "systemctl restart ${SERVICE} failed"
+		return 1
+	fi
 	if health_check "${HEALTH_LITE_URL}" "${attempts}" 2 >/dev/null; then
 		return 0
 	fi
@@ -185,16 +192,18 @@ restart_and_check() { # restart_and_check [attempts]
 # rollback_to <release dir> <reason>
 rollback_to() {
 	local rel="$1" reason="$2"
-	err "ROLLBACK: ${reason}"
+	warn "ROLLBACK: ${reason}"
 	log "switching back to release $(basename -- "${rel}")"
 
 	# When the previous release was built from a different lockfile, its code
 	# needs the matching node_modules (they live in the repo checkout, shared by
 	# all releases). Restore the recorded SHAs and reinstall in that case.
+	# Both hashes must be known — an unknown one is no evidence of a difference.
 	local meta="${rel}/RELEASE" want_lock have_lock game_sha admin_sha
 	want_lock="$(meta_get "${meta}" game_lock_hash)"
 	have_lock="$(lock_hash "${REPO_DIR}")"
-	if [[ -n "${want_lock}" && "${want_lock}" != "${have_lock}" ]]; then
+	if [[ -n "${want_lock}" && "${want_lock}" != "none" &&
+		"${have_lock}" != "none" && "${want_lock}" != "${have_lock}" ]]; then
 		game_sha="$(meta_get "${meta}" game_sha)"
 		admin_sha="$(meta_get "${meta}" admin_sha)"
 		warn "the previous release used different dependencies — restoring checkouts (${game_sha}, ${admin_sha}) and reinstalling"
@@ -216,7 +225,7 @@ rollback_to() {
 		warn "the deployment did NOT complete — investigate before retrying: ${SCRIPTS_DIR}/LOGS.sh -e"
 		return 0
 	fi
-	err "rollback restarted the service but it is still unhealthy"
+	err "the rollback could not bring ${SERVICE} back to a healthy state"
 	err "manual recovery: ${SCRIPTS_DIR}/LOGS.sh -e  ·  systemctl status ${SERVICE}"
 	err "if a migration broke the schema, restore the pre-update backup: ${SCRIPTS_DIR}/RESTORE.sh"
 	return 1
@@ -282,7 +291,8 @@ fi
 # Normal deployment
 # =============================================================================
 step "Mistvale update — branch ${BRANCH}"
-PREV_RELEASE="$(previous_release 2>/dev/null || true)"
+# The release that is live right now: this is what an automatic rollback must
+# return to if the new one fails its health check.
 CUR_RELEASE="$(current_release || true)"
 OLD_GAME_SHA="$(repo_sha "${REPO_DIR}")"
 log "current release : ${CUR_RELEASE:-none}"
@@ -481,7 +491,9 @@ ok "migrations applied"
 # --- Seeds (fresh install only) ---------------------------------------------
 if ((INITIAL == 1)); then
 	step "5b/7 Seeding content (first deployment)"
-	"${SCRIPTS_DIR}/SEED.sh" || die "seeding failed"
+	# Seed with the bundle from the release being deployed, exactly like the
+	# migration above — the live symlink does not exist yet on a fresh box.
+	MISTVALE_SERVER_DIR="${NEW_RELEASE}/server" "${SCRIPTS_DIR}/SEED.sh" || die "seeding failed"
 fi
 
 # --- 6. Swap -----------------------------------------------------------------
@@ -498,8 +510,8 @@ fi
 if restart_and_check 20; then
 	ok "${SERVICE} is healthy on release ${RELEASE_TS}"
 else
-	if [[ -n "${PREV_RELEASE}" && "${PREV_RELEASE}" != "${NEW_RELEASE}" ]]; then
-		rollback_to "${PREV_RELEASE}" "the new release failed its health check (${HEALTH_LITE_URL})"
+	if [[ -n "${CUR_RELEASE}" && "${CUR_RELEASE}" != "${NEW_RELEASE}" && -d "${CUR_RELEASE}" ]]; then
+		rollback_to "${CUR_RELEASE}" "the new release failed its health check (${HEALTH_LITE_URL})"
 		exit 1
 	fi
 	err "health check failed and there is no previous release to roll back to"
@@ -513,7 +525,8 @@ mapfile -t ALL_RELEASES < <(releases_sorted)
 if ((${#ALL_RELEASES[@]} > KEEP_RELEASES)); then
 	PRUNE_COUNT=$((${#ALL_RELEASES[@]} - KEEP_RELEASES))
 	KEEP_CURRENT="$(basename -- "$(current_release)")"
-	KEEP_PREV="$(basename -- "${PREV_RELEASE:-none}")"
+	# The release we just replaced is what `--rollback` would return to.
+	KEEP_PREV="$(basename -- "${CUR_RELEASE:-none}")"
 	for r in "${ALL_RELEASES[@]:0:${PRUNE_COUNT}}"; do
 		# Never remove what is running, nor the one rollback would use.
 		[[ "${r}" == "${KEEP_CURRENT}" || "${r}" == "${KEEP_PREV}" ]] && continue
