@@ -34,13 +34,22 @@
           },
           "rank": {
             "type": "string",
-            "enum": ["player", "gamemaster", "admin"]
+            "enum": [
+              "player",
+              "gamemaster",
+              "admin"
+            ]
           },
           "forcePasswordChange": {
             "type": "boolean"
           }
         },
-        "required": ["id", "accountName", "rank", "forcePasswordChange"],
+        "required": [
+          "id",
+          "accountName",
+          "rank",
+          "forcePasswordChange"
+        ],
         "additionalProperties": false
       },
       "AdminLoginResponse": {
@@ -50,7 +59,9 @@
             "$ref": "#/components/schemas/AccountSummary"
           }
         },
-        "required": ["account"],
+        "required": [
+          "account"
+        ],
         "additionalProperties": false
       },
       "AdminLogoutResponse": {
@@ -60,7 +71,9 @@
             "type": "boolean"
           }
         },
-        "required": ["loggedOut"],
+        "required": [
+          "loggedOut"
+        ],
         "additionalProperties": false
       },
       "AdminMeResponse": {
@@ -70,7 +83,9 @@
             "$ref": "#/components/schemas/AccountSummary"
           }
         },
-        "required": ["account"],
+        "required": [
+          "account"
+        ],
         "additionalProperties": false
       },
       "AdminOverview": {
@@ -95,7 +110,11 @@
                 "maximum": 9007199254740991
               }
             },
-            "required": ["total", "bots", "activeToday"],
+            "required": [
+              "total",
+              "bots",
+              "activeToday"
+            ],
             "additionalProperties": false
           },
           "accounts": {
@@ -117,7 +136,11 @@
                 "maximum": 9007199254740991
               }
             },
-            "required": ["total", "admins", "banned"],
+            "required": [
+              "total",
+              "admins",
+              "banned"
+            ],
             "additionalProperties": false
           },
           "content": {
@@ -159,7 +182,14 @@
                 "maximum": 9007199254740991
               }
             },
-            "required": ["rev", "publishedAt", "champions", "skills", "enemies", "stages"],
+            "required": [
+              "rev",
+              "publishedAt",
+              "champions",
+              "skills",
+              "enemies",
+              "stages"
+            ],
             "additionalProperties": false
           },
           "recentAudit": {
@@ -169,7 +199,12 @@
             }
           }
         },
-        "required": ["players", "accounts", "content", "recentAudit"],
+        "required": [
+          "players",
+          "accounts",
+          "content",
+          "recentAudit"
+        ],
         "additionalProperties": false
       },
       "ApiError": {
@@ -205,7 +240,10 @@
             "type": "string"
           }
         },
-        "required": ["code", "message"],
+        "required": [
+          "code",
+          "message"
+        ],
         "additionalProperties": false
       },
       "AssetDef": {
@@ -225,12 +263,20 @@
           },
           "kind": {
             "type": "string",
-            "enum": ["unit", "vfx", "ui", "audio"]
+            "enum": [
+              "unit",
+              "vfx",
+              "ui",
+              "audio"
+            ]
           },
           "source": {
             "default": "repo",
             "type": "string",
-            "enum": ["repo", "upload"]
+            "enum": [
+              "repo",
+              "upload"
+            ]
           },
           "basePath": {
             "type": "string",
@@ -262,7 +308,11 @@
                   "type": "boolean"
                 }
               },
-              "required": ["frames", "fps", "loop"],
+              "required": [
+                "frames",
+                "fps",
+                "loop"
+              ],
               "additionalProperties": false
             }
           },
@@ -319,7 +369,13 @@
             "type": "string"
           }
         },
-        "required": ["actor", "action", "entity", "entityId", "createdAt"],
+        "required": [
+          "actor",
+          "action",
+          "entity",
+          "entityId",
+          "createdAt"
+        ],
         "additionalProperties": false
       },
       "CampaignChapterDef": {
@@ -389,7 +445,10 @@
                   }
                 }
               },
-              "required": ["stars", "rewards"],
+              "required": [
+                "stars",
+                "rewards"
+              ],
               "additionalProperties": false
             }
           }
@@ -444,15 +503,31 @@
           },
           "element": {
             "type": "string",
-            "enum": ["ember", "tide", "verdant", "mist"]
+            "enum": [
+              "ember",
+              "tide",
+              "verdant",
+              "mist"
+            ]
           },
           "rarity": {
             "type": "string",
-            "enum": ["common", "uncommon", "rare", "epic", "legendary"]
+            "enum": [
+              "common",
+              "uncommon",
+              "rare",
+              "epic",
+              "legendary"
+            ]
           },
           "role": {
             "type": "string",
-            "enum": ["attack", "defense", "hp", "support"]
+            "enum": [
+              "attack",
+              "defense",
+              "hp",
+              "support"
+            ]
           },
           "baseStats": {
             "type": "object",
@@ -502,7 +577,16 @@
                 "maximum": 300
               }
             },
-            "required": ["hp", "atk", "def", "spd", "critRate", "critDmg", "res", "acc"],
+            "required": [
+              "hp",
+              "atk",
+              "def",
+              "spd",
+              "critRate",
+              "critDmg",
+              "res",
+              "acc"
+            ],
             "additionalProperties": false
           },
           "skills": {
@@ -524,7 +608,16 @@
                 "properties": {
                   "stat": {
                     "type": "string",
-                    "enum": ["hp", "atk", "def", "spd", "critRate", "critDmg", "res", "acc"]
+                    "enum": [
+                      "hp",
+                      "atk",
+                      "def",
+                      "spd",
+                      "critRate",
+                      "critDmg",
+                      "res",
+                      "acc"
+                    ]
                   },
                   "value": {
                     "type": "number",
@@ -534,15 +627,29 @@
                   "scope": {
                     "default": "all",
                     "type": "string",
-                    "enum": ["all", "element", "faction"]
+                    "enum": [
+                      "all",
+                      "element",
+                      "faction"
+                    ]
                   },
                   "area": {
                     "default": "any",
                     "type": "string",
-                    "enum": ["any", "campaign", "arena", "depths"]
+                    "enum": [
+                      "any",
+                      "campaign",
+                      "arena",
+                      "depths"
+                    ]
                   }
                 },
-                "required": ["stat", "value", "scope", "area"],
+                "required": [
+                  "stat",
+                  "value",
+                  "scope",
+                  "area"
+                ],
                 "additionalProperties": false
               },
               {
@@ -747,7 +854,11 @@
             "$ref": "#/components/schemas/ContentTotals"
           }
         },
-        "required": ["rev", "entries", "totals"],
+        "required": [
+          "rev",
+          "entries",
+          "totals"
+        ],
         "additionalProperties": false
       },
       "ContentDiffEntry": {
@@ -761,7 +872,11 @@
           },
           "change": {
             "type": "string",
-            "enum": ["added", "modified", "removed"]
+            "enum": [
+              "added",
+              "modified",
+              "removed"
+            ]
           },
           "fields": {
             "type": "array",
@@ -774,16 +889,29 @@
                 "before": {},
                 "after": {}
               },
-              "required": ["path", "before", "after"],
+              "required": [
+                "path",
+                "before",
+                "after"
+              ],
               "additionalProperties": false
             }
           },
           "risk": {
             "type": "string",
-            "enum": ["rates", "balance", "economy"]
+            "enum": [
+              "rates",
+              "balance",
+              "economy"
+            ]
           }
         },
-        "required": ["contentType", "key", "change", "fields"],
+        "required": [
+          "contentType",
+          "key",
+          "change",
+          "fields"
+        ],
         "additionalProperties": false
       },
       "ContentEntry": {
@@ -801,7 +929,11 @@
           },
           "state": {
             "type": "string",
-            "enum": ["live", "draft", "deleting"]
+            "enum": [
+              "live",
+              "draft",
+              "deleting"
+            ]
           },
           "updatedAt": {
             "anyOf": [
@@ -824,7 +956,13 @@
             ]
           }
         },
-        "required": ["key", "data", "state", "updatedAt", "updatedBy"],
+        "required": [
+          "key",
+          "data",
+          "state",
+          "updatedAt",
+          "updatedBy"
+        ],
         "additionalProperties": false
       },
       "ContentIssue": {
@@ -832,7 +970,10 @@
         "properties": {
           "severity": {
             "type": "string",
-            "enum": ["error", "warning"]
+            "enum": [
+              "error",
+              "warning"
+            ]
           },
           "contentType": {
             "type": "string"
@@ -847,7 +988,12 @@
             "type": "string"
           }
         },
-        "required": ["severity", "contentType", "key", "message"],
+        "required": [
+          "severity",
+          "contentType",
+          "key",
+          "message"
+        ],
         "additionalProperties": false
       },
       "ContentRevisionSummary": {
@@ -871,7 +1017,13 @@
             "$ref": "#/components/schemas/ContentTotals"
           }
         },
-        "required": ["rev", "publishedAt", "publishedBy", "note", "summary"],
+        "required": [
+          "rev",
+          "publishedAt",
+          "publishedBy",
+          "note",
+          "summary"
+        ],
         "additionalProperties": false
       },
       "ContentTotals": {
@@ -893,7 +1045,11 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["added", "modified", "removed"],
+        "required": [
+          "added",
+          "modified",
+          "removed"
+        ],
         "additionalProperties": false
       },
       "ContentTypeCount": {
@@ -933,7 +1089,13 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["contentType", "label", "path", "live", "drafts"],
+        "required": [
+          "contentType",
+          "label",
+          "path",
+          "live",
+          "drafts"
+        ],
         "additionalProperties": false
       },
       "ContentValidationResult": {
@@ -960,7 +1122,12 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["ok", "errors", "warnings", "checked"],
+        "required": [
+          "ok",
+          "errors",
+          "warnings",
+          "checked"
+        ],
         "additionalProperties": false
       },
       "DeleteContentEntryResponse": {
@@ -990,7 +1157,11 @@
             "type": "boolean"
           }
         },
-        "required": ["key", "contentType", "pendingDelete"],
+        "required": [
+          "key",
+          "contentType",
+          "pendingDelete"
+        ],
         "additionalProperties": false
       },
       "DiscardAllDraftsResponse": {
@@ -1002,7 +1173,9 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["discarded"],
+        "required": [
+          "discarded"
+        ],
         "additionalProperties": false
       },
       "DiscardContentDraftResponse": {
@@ -1032,7 +1205,11 @@
             "type": "boolean"
           }
         },
-        "required": ["key", "contentType", "discarded"],
+        "required": [
+          "key",
+          "contentType",
+          "discarded"
+        ],
         "additionalProperties": false
       },
       "EnemyDef": {
@@ -1062,11 +1239,21 @@
           },
           "element": {
             "type": "string",
-            "enum": ["ember", "tide", "verdant", "mist"]
+            "enum": [
+              "ember",
+              "tide",
+              "verdant",
+              "mist"
+            ]
           },
           "role": {
             "type": "string",
-            "enum": ["attack", "defense", "hp", "support"]
+            "enum": [
+              "attack",
+              "defense",
+              "hp",
+              "support"
+            ]
           },
           "baseStats": {
             "type": "object",
@@ -1116,7 +1303,16 @@
                 "maximum": 300
               }
             },
-            "required": ["hp", "atk", "def", "spd", "critRate", "critDmg", "res", "acc"],
+            "required": [
+              "hp",
+              "atk",
+              "def",
+              "spd",
+              "critRate",
+              "critDmg",
+              "res",
+              "acc"
+            ],
             "additionalProperties": false
           },
           "growth": {
@@ -1175,7 +1371,10 @@
                     "maximum": 100
                   }
                 },
-                "required": ["hits", "punishTmPct"],
+                "required": [
+                  "hits",
+                  "punishTmPct"
+                ],
                 "additionalProperties": false
               },
               "thresholdRetaliation": {
@@ -1191,7 +1390,10 @@
                     "type": "boolean"
                   }
                 },
-                "required": ["perHpPct", "skipIfDot"],
+                "required": [
+                  "perHpPct",
+                  "skipIfDot"
+                ],
                 "additionalProperties": false
               },
               "addSummon": {
@@ -1214,7 +1416,11 @@
                     "maximum": 10
                   }
                 },
-                "required": ["unitKey", "perTurn", "cap"],
+                "required": [
+                  "unitKey",
+                  "perTurn",
+                  "cap"
+                ],
                 "additionalProperties": false
               },
               "enrage": {
@@ -1231,11 +1437,17 @@
                     "maximum": 50
                   }
                 },
-                "required": ["afterTurn", "dmgPctPerTurn"],
+                "required": [
+                  "afterTurn",
+                  "dmgPctPerTurn"
+                ],
                 "additionalProperties": false
               }
             },
-            "required": ["almightyImmunity", "tmReductionImmune"],
+            "required": [
+              "almightyImmunity",
+              "tmReductionImmune"
+            ],
             "additionalProperties": false
           }
         },
@@ -1286,7 +1498,13 @@
             "maxLength": 64
           }
         },
-        "required": ["key", "sortOrder", "name", "lore", "icon"],
+        "required": [
+          "key",
+          "sortOrder",
+          "name",
+          "lore",
+          "icon"
+        ],
         "additionalProperties": false
       },
       "GameConfigDef": {
@@ -1337,7 +1555,13 @@
             "maxLength": 400
           }
         },
-        "required": ["key", "value", "group", "label", "help"],
+        "required": [
+          "key",
+          "value",
+          "group",
+          "label",
+          "help"
+        ],
         "additionalProperties": false
       },
       "GearSetDef": {
@@ -1395,7 +1619,16 @@
             "properties": {
               "stat": {
                 "type": "string",
-                "enum": ["hp", "atk", "def", "spd", "critRate", "critDmg", "res", "acc"]
+                "enum": [
+                  "hp",
+                  "atk",
+                  "def",
+                  "spd",
+                  "critRate",
+                  "critDmg",
+                  "res",
+                  "acc"
+                ]
               },
               "pct": {
                 "type": "number",
@@ -1421,7 +1654,15 @@
             "additionalProperties": false
           }
         },
-        "required": ["key", "sortOrder", "name", "lore", "pieces", "bonusType", "bonus"],
+        "required": [
+          "key",
+          "sortOrder",
+          "name",
+          "lore",
+          "pieces",
+          "bonusType",
+          "bonus"
+        ],
         "additionalProperties": false
       },
       "GearSlotDef": {
@@ -1451,7 +1692,16 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["hp", "atk", "def", "spd", "critRate", "critDmg", "res", "acc"]
+              "enum": [
+                "hp",
+                "atk",
+                "def",
+                "spd",
+                "critRate",
+                "critDmg",
+                "res",
+                "acc"
+              ]
             }
           },
           "allowsPercentMain": {
@@ -1537,7 +1787,14 @@
             "type": "boolean"
           }
         },
-        "required": ["key", "contentType", "data", "live", "hasDraft", "pendingDelete"],
+        "required": [
+          "key",
+          "contentType",
+          "data",
+          "live",
+          "hasDraft",
+          "pendingDelete"
+        ],
         "additionalProperties": false
       },
       "ItemDef": {
@@ -1562,12 +1819,25 @@
           },
           "category": {
             "type": "string",
-            "enum": ["sigil", "essence", "tome", "emblem", "consumable", "material"]
+            "enum": [
+              "sigil",
+              "essence",
+              "tome",
+              "emblem",
+              "consumable",
+              "material"
+            ]
           },
           "rarity": {
             "default": "common",
             "type": "string",
-            "enum": ["common", "uncommon", "rare", "epic", "legendary"]
+            "enum": [
+              "common",
+              "uncommon",
+              "rare",
+              "epic",
+              "legendary"
+            ]
           },
           "description": {
             "default": "",
@@ -1627,7 +1897,10 @@
             }
           }
         },
-        "required": ["contentType", "items"],
+        "required": [
+          "contentType",
+          "items"
+        ],
         "additionalProperties": false
       },
       "ListContentRevisionsResponse": {
@@ -1645,7 +1918,10 @@
             }
           }
         },
-        "required": ["current", "revisions"],
+        "required": [
+          "current",
+          "revisions"
+        ],
         "additionalProperties": false
       },
       "ListContentTypesResponse": {
@@ -1668,7 +1944,11 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["types", "draftCount", "rev"],
+        "required": [
+          "types",
+          "draftCount",
+          "rev"
+        ],
         "additionalProperties": false
       },
       "LoginRequest": {
@@ -1686,7 +1966,10 @@
             "maxLength": 128
           }
         },
-        "required": ["accountName", "password"],
+        "required": [
+          "accountName",
+          "password"
+        ],
         "additionalProperties": false
       },
       "PublishContentRequest": {
@@ -1698,7 +1981,9 @@
             "maxLength": 400
           }
         },
-        "required": ["note"],
+        "required": [
+          "note"
+        ],
         "additionalProperties": false
       },
       "PublishResult": {
@@ -1716,7 +2001,11 @@
             "$ref": "#/components/schemas/ContentValidationResult"
           }
         },
-        "required": ["rev", "summary", "validation"],
+        "required": [
+          "rev",
+          "summary",
+          "validation"
+        ],
         "additionalProperties": false
       },
       "RevertContentRequest": {
@@ -1728,7 +2017,9 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["rev"],
+        "required": [
+          "rev"
+        ],
         "additionalProperties": false
       },
       "RevertContentResponse": {
@@ -1740,7 +2031,9 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["rev"],
+        "required": [
+          "rev"
+        ],
         "additionalProperties": false
       },
       "SaveContentEntryRequest": {
@@ -1754,7 +2047,9 @@
             "additionalProperties": {}
           }
         },
-        "required": ["data"],
+        "required": [
+          "data"
+        ],
         "additionalProperties": false
       },
       "SaveContentEntryResponse": {
@@ -1784,7 +2079,11 @@
             "type": "boolean"
           }
         },
-        "required": ["key", "contentType", "saved"],
+        "required": [
+          "key",
+          "contentType",
+          "saved"
+        ],
         "additionalProperties": false
       },
       "SkillDef": {
@@ -1814,7 +2113,13 @@
           },
           "slot": {
             "type": "string",
-            "enum": ["a1", "a2", "a3", "a4", "passive"]
+            "enum": [
+              "a1",
+              "a2",
+              "a3",
+              "a4",
+              "passive"
+            ]
           },
           "cooldown": {
             "default": 0,
@@ -1827,11 +2132,21 @@
             "properties": {
               "side": {
                 "type": "string",
-                "enum": ["enemy", "ally", "self"]
+                "enum": [
+                  "enemy",
+                  "ally",
+                  "self"
+                ]
               },
               "mode": {
                 "type": "string",
-                "enum": ["single", "all", "random", "lowestHp", "self"]
+                "enum": [
+                  "single",
+                  "all",
+                  "random",
+                  "lowestHp",
+                  "self"
+                ]
               },
               "count": {
                 "type": "integer",
@@ -1839,7 +2154,10 @@
                 "maximum": 4
               }
             },
-            "required": ["side", "mode"],
+            "required": [
+              "side",
+              "mode"
+            ],
             "additionalProperties": false
           },
           "components": {
@@ -1857,7 +2175,12 @@
                     },
                     "scale": {
                       "type": "string",
-                      "enum": ["atk", "def", "maxHp", "spd"]
+                      "enum": [
+                        "atk",
+                        "def",
+                        "maxHp",
+                        "spd"
+                      ]
                     },
                     "mult": {
                       "type": "number",
@@ -1877,7 +2200,12 @@
                     },
                     "element": {
                       "type": "string",
-                      "enum": ["ember", "tide", "verdant", "mist"]
+                      "enum": [
+                        "ember",
+                        "tide",
+                        "verdant",
+                        "mist"
+                      ]
                     },
                     "condition": {
                       "oneOf": [
@@ -1893,7 +2221,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -1908,7 +2239,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -1924,7 +2258,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -1940,7 +2277,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -1956,7 +2296,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -1967,7 +2310,12 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type", "scale", "mult", "hits"],
+                  "required": [
+                    "type",
+                    "scale",
+                    "mult",
+                    "hits"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2012,7 +2360,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2027,7 +2378,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2043,7 +2397,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2059,7 +2416,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2075,7 +2435,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -2086,7 +2449,12 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type", "status", "turns", "target"],
+                  "required": [
+                    "type",
+                    "status",
+                    "turns",
+                    "target"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2098,7 +2466,12 @@
                     },
                     "scale": {
                       "type": "string",
-                      "enum": ["atk", "def", "maxHp", "spd"]
+                      "enum": [
+                        "atk",
+                        "def",
+                        "maxHp",
+                        "spd"
+                      ]
                     },
                     "mult": {
                       "type": "number",
@@ -2131,7 +2504,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2146,7 +2522,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2162,7 +2541,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2178,7 +2560,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2194,7 +2579,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -2205,7 +2593,12 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type", "scale", "mult", "target"],
+                  "required": [
+                    "type",
+                    "scale",
+                    "mult",
+                    "target"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2217,7 +2610,12 @@
                     },
                     "scale": {
                       "type": "string",
-                      "enum": ["atk", "def", "maxHp", "spd"]
+                      "enum": [
+                        "atk",
+                        "def",
+                        "maxHp",
+                        "spd"
+                      ]
                     },
                     "mult": {
                       "type": "number",
@@ -2255,7 +2653,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2270,7 +2671,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2286,7 +2690,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2302,7 +2709,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2318,7 +2728,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -2329,7 +2742,13 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type", "scale", "mult", "turns", "target"],
+                  "required": [
+                    "type",
+                    "scale",
+                    "mult",
+                    "turns",
+                    "target"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2370,7 +2789,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2385,7 +2807,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2401,7 +2826,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2417,7 +2845,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2433,7 +2864,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -2444,7 +2878,11 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type", "deltaPct", "target"],
+                  "required": [
+                    "type",
+                    "deltaPct",
+                    "target"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2493,7 +2931,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2508,7 +2949,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2524,7 +2968,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2540,7 +2987,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2556,7 +3006,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -2567,7 +3020,11 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type", "count", "target"],
+                  "required": [
+                    "type",
+                    "count",
+                    "target"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2616,7 +3073,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2631,7 +3091,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2647,7 +3110,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2663,7 +3129,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2679,7 +3148,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -2690,7 +3162,11 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type", "count", "target"],
+                  "required": [
+                    "type",
+                    "count",
+                    "target"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2714,7 +3190,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2729,7 +3208,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2745,7 +3227,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2761,7 +3246,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2777,7 +3265,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -2788,7 +3279,9 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type"],
+                  "required": [
+                    "type"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2829,7 +3322,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2844,7 +3340,10 @@
                               "minLength": 1
                             }
                           },
-                          "required": ["type", "status"],
+                          "required": [
+                            "type",
+                            "status"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2860,7 +3359,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2876,7 +3378,10 @@
                               "maximum": 100
                             }
                           },
-                          "required": ["type", "pct"],
+                          "required": [
+                            "type",
+                            "pct"
+                          ],
                           "additionalProperties": false
                         },
                         {
@@ -2892,7 +3397,10 @@
                               "maximum": 3
                             }
                           },
-                          "required": ["type", "atLeast"],
+                          "required": [
+                            "type",
+                            "atLeast"
+                          ],
                           "additionalProperties": false
                         }
                       ]
@@ -2903,7 +3411,11 @@
                       "maximum": 1
                     }
                   },
-                  "required": ["type", "delta", "target"],
+                  "required": [
+                    "type",
+                    "delta",
+                    "target"
+                  ],
                   "additionalProperties": false
                 }
               ]
@@ -2928,7 +3440,10 @@
                       "maximum": 25
                     }
                   },
-                  "required": ["effect", "pct"],
+                  "required": [
+                    "effect",
+                    "pct"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2944,7 +3459,10 @@
                       "maximum": 25
                     }
                   },
-                  "required": ["effect", "pct"],
+                  "required": [
+                    "effect",
+                    "pct"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2959,7 +3477,10 @@
                       "const": 1
                     }
                   },
-                  "required": ["effect", "turns"],
+                  "required": [
+                    "effect",
+                    "turns"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2975,7 +3496,10 @@
                       "maximum": 25
                     }
                   },
-                  "required": ["effect", "pct"],
+                  "required": [
+                    "effect",
+                    "pct"
+                  ],
                   "additionalProperties": false
                 },
                 {
@@ -2991,7 +3515,10 @@
                       "maximum": 25
                     }
                   },
-                  "required": ["effect", "pct"],
+                  "required": [
+                    "effect",
+                    "pct"
+                  ],
                   "additionalProperties": false
                 }
               ]
@@ -3003,7 +3530,13 @@
             "properties": {
               "prefer": {
                 "type": "string",
-                "enum": ["lowestHp", "highestAtk", "highestTm", "random", "lowestHpAlly"]
+                "enum": [
+                  "lowestHp",
+                  "highestAtk",
+                  "highestTm",
+                  "random",
+                  "lowestHpAlly"
+                ]
               },
               "openWith": {
                 "type": "boolean"
@@ -3028,7 +3561,11 @@
               "track": {
                 "default": "attack",
                 "type": "string",
-                "enum": ["attack", "cast", "idle"]
+                "enum": [
+                  "attack",
+                  "cast",
+                  "idle"
+                ]
               },
               "vfx": {
                 "type": "string"
@@ -3040,7 +3577,9 @@
                 "type": "boolean"
               }
             },
-            "required": ["track"],
+            "required": [
+              "track"
+            ],
             "additionalProperties": false
           }
         },
@@ -3076,7 +3615,13 @@
           },
           "mode": {
             "type": "string",
-            "enum": ["campaign", "dungeon", "springs", "proving", "tutorial"]
+            "enum": [
+              "campaign",
+              "dungeon",
+              "springs",
+              "proving",
+              "tutorial"
+            ]
           },
           "parentKey": {
             "type": "string",
@@ -3092,7 +3637,11 @@
           "difficulty": {
             "default": "normal",
             "type": "string",
-            "enum": ["normal", "hard", "brutal"]
+            "enum": [
+              "normal",
+              "hard",
+              "brutal"
+            ]
           },
           "energyCost": {
             "type": "integer",
@@ -3133,7 +3682,12 @@
                     "maximum": 3
                   }
                 },
-                "required": ["enemyKey", "level", "stars", "slot"],
+                "required": [
+                  "enemyKey",
+                  "level",
+                  "stars",
+                  "slot"
+                ],
                 "additionalProperties": false
               }
             }
@@ -3168,7 +3722,12 @@
                 "pattern": "^[a-z][a-z0-9_]*$"
               }
             },
-            "required": ["silverMin", "silverMax", "playerXp", "championXp"],
+            "required": [
+              "silverMin",
+              "silverMax",
+              "playerXp",
+              "championXp"
+            ],
             "additionalProperties": false
           },
           "starRules": {
@@ -3185,7 +3744,10 @@
                 "maximum": 60
               }
             },
-            "required": ["noDeaths", "maxTurns"],
+            "required": [
+              "noDeaths",
+              "maxTurns"
+            ],
             "additionalProperties": false
           },
           "firstClearRewards": {
@@ -3255,7 +3817,10 @@
           },
           "kind": {
             "type": "string",
-            "enum": ["buff", "debuff"]
+            "enum": [
+              "buff",
+              "debuff"
+            ]
           },
           "engineType": {
             "type": "string",
@@ -3297,7 +3862,16 @@
             "properties": {
               "stat": {
                 "type": "string",
-                "enum": ["hp", "atk", "def", "spd", "critRate", "critDmg", "res", "acc"]
+                "enum": [
+                  "hp",
+                  "atk",
+                  "def",
+                  "spd",
+                  "critRate",
+                  "critDmg",
+                  "res",
+                  "acc"
+                ]
               },
               "pct": {
                 "type": "number",
@@ -3317,7 +3891,11 @@
               "tick": {
                 "default": "none",
                 "type": "string",
-                "enum": ["none", "ownerTurnStart", "ownerTurnEnd"]
+                "enum": [
+                  "none",
+                  "ownerTurnStart",
+                  "ownerTurnEnd"
+                ]
               },
               "maxStacks": {
                 "default": 1,
@@ -3331,7 +3909,10 @@
                 "maximum": 100
               }
             },
-            "required": ["tick", "maxStacks"],
+            "required": [
+              "tick",
+              "maxStacks"
+            ],
             "additionalProperties": false
           },
           "icon": {
@@ -3379,7 +3960,9 @@
       "get": {
         "operationId": "getContentBundle",
         "summary": "Fetch the live content bundle",
-        "tags": ["content"],
+        "tags": [
+          "content"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -3398,7 +3981,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3424,7 +4011,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3449,7 +4040,9 @@
       "post": {
         "operationId": "adminLogin",
         "summary": "Sign in to the Admin Suite",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -3468,7 +4061,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3491,7 +4088,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3514,7 +4115,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3537,7 +4142,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3561,7 +4170,9 @@
       "get": {
         "operationId": "adminMe",
         "summary": "The signed-in admin account",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -3580,7 +4191,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3603,7 +4218,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3626,7 +4245,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3649,7 +4272,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3670,7 +4297,9 @@
       "post": {
         "operationId": "adminLogout",
         "summary": "End the admin session",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -3689,7 +4318,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3712,7 +4345,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3735,7 +4372,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3758,7 +4399,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3779,7 +4424,9 @@
       "get": {
         "operationId": "adminOverview",
         "summary": "Dashboard counters and recent audit entries",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -3798,7 +4445,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3821,7 +4472,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3844,7 +4499,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3867,7 +4526,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3888,7 +4551,9 @@
       "get": {
         "operationId": "listContentTypes",
         "summary": "Live and draft counts for every content type",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -3907,7 +4572,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3930,7 +4599,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3953,7 +4626,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3976,7 +4653,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3997,7 +4678,9 @@
       "get": {
         "operationId": "listContentEntries",
         "summary": "Every entity of one content type",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -4016,7 +4699,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4039,7 +4726,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4062,7 +4753,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4085,7 +4780,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4108,7 +4807,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4154,7 +4857,9 @@
       "get": {
         "operationId": "getContentEntry",
         "summary": "One entity, with its live version alongside the draft",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -4173,7 +4878,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4196,7 +4905,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4219,7 +4932,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4242,7 +4959,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4265,7 +4986,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4318,7 +5043,9 @@
       "put": {
         "operationId": "saveContentEntry",
         "summary": "Save an entity as a draft",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -4337,7 +5064,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4360,7 +5091,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4383,7 +5118,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4406,7 +5145,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4429,7 +5172,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4452,7 +5199,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4516,7 +5267,9 @@
       "delete": {
         "operationId": "deleteContentEntry",
         "summary": "Mark an entity for deletion at the next publish",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -4535,7 +5288,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4558,7 +5315,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4581,7 +5342,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4604,7 +5369,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4627,7 +5396,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4683,7 +5456,9 @@
       "post": {
         "operationId": "discardContentDraft",
         "summary": "Drop one pending draft, restoring the live version in the editor",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -4702,7 +5477,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4725,7 +5504,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4748,7 +5531,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4771,7 +5558,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4794,7 +5585,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4849,7 +5644,9 @@
       "post": {
         "operationId": "validateContent",
         "summary": "Validate the pending drafts without changing anything",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -4868,7 +5665,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4891,7 +5692,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4914,7 +5719,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4937,7 +5746,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4958,7 +5771,9 @@
       "get": {
         "operationId": "diffContent",
         "summary": "Field-level differences between live content and the drafts",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -4977,7 +5792,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5000,7 +5819,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5023,7 +5846,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5046,7 +5873,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5067,7 +5898,9 @@
       "post": {
         "operationId": "publishContent",
         "summary": "Publish the drafts",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -5086,7 +5919,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5109,7 +5946,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5132,7 +5973,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5155,7 +6000,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5178,7 +6027,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5210,7 +6063,9 @@
       "post": {
         "operationId": "revertContent",
         "summary": "Restore a previous revision",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -5229,7 +6084,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5252,7 +6111,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5275,7 +6138,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5298,7 +6165,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5321,7 +6192,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5344,7 +6219,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5376,7 +6255,9 @@
       "get": {
         "operationId": "listContentRevisions",
         "summary": "Publish history",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -5395,7 +6276,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5418,7 +6303,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5441,7 +6330,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5464,7 +6357,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5485,7 +6382,9 @@
       "post": {
         "operationId": "discardAllDrafts",
         "summary": "Discard every pending draft",
-        "tags": ["admin"],
+        "tags": [
+          "admin"
+        ],
         "responses": {
           "200": {
             "description": "Success.",
@@ -5504,7 +6403,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "data", "rev"],
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5527,7 +6430,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5550,7 +6457,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -5573,7 +6484,11 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["ok", "error", "rev"],
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
                   "additionalProperties": false
                 }
               }
