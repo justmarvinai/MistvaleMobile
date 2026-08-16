@@ -15,6 +15,7 @@ A 2D pixel-art, turn-based **champion-collection RPG** for the browser — colle
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Tech stack, monorepo layout, client/server/engine design, budgets |
 | [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) · [`docs/API_DESIGN.md`](docs/API_DESIGN.md) | PostgreSQL schema · REST API inventory |
 | [`docs/UI_UX_DESIGN.md`](docs/UI_UX_DESIGN.md) | Design language, all 25 screens, battle-screen spec, icon map |
+| [`docs/FIRST_DEPLOY.md`](docs/FIRST_DEPLOY.md) | **Step-by-step runbook: bare VPS → running game** |
 | [`docs/DEPLOYMENT_OPERATIONS.md`](docs/DEPLOYMENT_OPERATIONS.md) | VPS topology, DEPLOY/UPDATE/BACKUP scripts, tuning |
 | [`docs/ASSET_GUIDE.md`](docs/ASSET_GUIDE.md) | Asset inventory, conventions, pipeline |
 | [`docs/research/RAID_REFERENCE.md`](docs/research/RAID_REFERENCE.md) | Verified research on how the source game works |
