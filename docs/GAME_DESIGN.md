@@ -40,7 +40,7 @@ Eight factions structure collection, lore, faction-content (post-EA), and summon
 
 | Faction | Identity | EA members (final art ⭐) |
 |---|---|---|
-| **Vale Sentinels** | Knight-remnants of the old federation; discipline, oaths, steel | ⭐Anuria + 4 |
+| **Vale Sentinels** | Knight-remnants of the old federation; discipline, oaths, steel | ⭐Anuria + 5 |
 | **Emberclan** | Mountain warhost of feuding fire-cults; fury and iron | ⭐Thordakk + 4 |
 | **The Wayfarers** | Itinerant conclave of mist-scholars, hedge-wizards, pilgrims | ⭐Maruan, ⭐Darius + 4 |
 | **Hollowborn** | The mist's dead, walking out of it with memories half-intact | ⭐Khazgor, ⭐Rattledagger + 5 |

@@ -3,6 +3,16 @@
 > Status: **Planning draft** — table-by-table blueprint for the Drizzle schema built in Phase P0/P1.
 > Conventions: `snake_case`; PKs `id bigint generated always as identity` unless noted; all timestamps `timestamptz`; every table gets `created_at`/`updated_at`; FKs `on delete restrict` unless noted; JSONB columns are always Zod-validated at the API boundary (never trusted raw).
 
+> **Implementation note (P1).** The content families below are *modelled* exactly as
+> described, but they are **stored in one table**, `content_entries`, discriminated by
+> `content_type` with the entity in a validated JSONB `data` column, plus
+> `content_revisions` for publish snapshots. A table per family would mean a migration
+> for every new content type — precisely the cost the "content is data" rule exists to
+> avoid. The schema per family is enforced in code by the Zod contracts in
+> `packages/shared/src/content/`, which the Admin API, the seed loader and publish
+> validation all share. Read the sections below as the *shape of each entity*, not as a
+> list of physical tables.
+
 Two families of tables:
 - **Content (`*_defs`)** — authored via Admin Suite, read-mostly, loaded into the server ContentCache. Rows carry `status` (`draft` | `live`) + `draft_of` self-reference for the publish workflow, and are exportable/importable as JSON (admin backup / git-versioned content).
 - **Player state** — hot tables, one source of truth for everything a player owns/did.

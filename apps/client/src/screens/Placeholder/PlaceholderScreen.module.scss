@@ -45,6 +45,36 @@
   color: $mist-dim;
 }
 
+.readiness {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-1;
+  width: 100%;
+  padding: $space-3;
+  border: 1px solid $edge;
+  border-left: 3px solid $mist;
+  border-radius: 0 2px 2px 0;
+  background: $panel-inset;
+}
+
+.readinessLabel {
+  @include label-text;
+  color: $mist;
+}
+
+.readinessText {
+  font-size: 13px;
+  line-height: 1.6;
+  color: $parchment;
+}
+
+.rev {
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $muted-deep;
+}
+
 @keyframes settle {
   from {
     opacity: 0;

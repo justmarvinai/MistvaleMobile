@@ -6,3 +6,4 @@
  */
 export * from './accounts';
 export * from './audit';
+export * from './content';

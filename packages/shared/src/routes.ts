@@ -25,6 +25,33 @@ export const ROUTES = {
     /** Full health payload (DB pool, memory, event-loop lag). Admin-gated. */
     full: '/health',
   },
+  content: {
+    /** The full content bundle for the live revision (ETag-cached). */
+    bundle: '/content',
+  },
+} as const;
+
+/** Admin API routes, consumed by the Admin Suite in the sibling repo. */
+export const ADMIN_ROUTES = {
+  auth: {
+    login: '/auth/login',
+    logout: '/auth/logout',
+    me: '/auth/me',
+  },
+  content: {
+    /** `/content/:type` — list and create; `/content/:type/:key` — read, update, delete. */
+    collection: (type: string) => `/content/${type}`,
+    item: (type: string, key: string) => `/content/${type}/${encodeURIComponent(key)}`,
+    validate: '/content/validate',
+    diff: '/content/diff',
+    publish: '/content/publish',
+    revert: '/content/revert',
+    revisions: '/content/revisions',
+    discard: '/content/discard',
+  },
+  stats: {
+    overview: '/stats/overview',
+  },
 } as const;
 
 /** Absolute player-API path for a route constant. */

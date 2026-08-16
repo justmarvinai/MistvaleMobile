@@ -1,0 +1,93 @@
+import { CONTENT_LOAD_ORDER, CONTENT_REGISTRY, type ContentType } from '@mistvale/shared';
+import { CAMPAIGN_CHAPTERS, CAMPAIGN_STAGES } from './data/campaign';
+import { GAME_CONFIG, ITEMS } from './data/config';
+import { ENEMIES, ENEMY_SKILLS } from './data/enemies';
+import { EXTENDED_CHAMPIONS, EXTENDED_SKILLS } from './data/extended-champions';
+import { SHOWCASE_CHAMPIONS, SHOWCASE_SKILLS } from './data/showcase-champions';
+import { STATUSES } from './data/statuses';
+import { ASSETS, FACTIONS, GEAR_SETS, GEAR_SLOTS } from './data/world';
+
+/**
+ * The committed content set.
+ *
+ * Seeds are code-reviewable data, not a database dump: they are the starting point a
+ * fresh install gets, and the reference the Admin Suite edits away from. Once deployed,
+ * the database is the source of truth — re-seeding never overwrites live content unless
+ * explicitly forced (docs/DATA_MODEL.md §5).
+ */
+
+export interface SeedContent {
+  contentType: ContentType;
+  entities: { key: string; data: unknown }[];
+}
+
+/** Everything P1 ships, in dependency order. */
+export function buildSeedContent(): SeedContent[] {
+  const byType: Record<ContentType, { key: string; data: unknown }[]> = {
+    faction: FACTIONS.map((data) => ({ key: data.key, data })),
+    status: STATUSES.map((data) => ({ key: data.key, data })),
+    asset: ASSETS.map((data) => ({ key: data.key, data })),
+    skill: [...SHOWCASE_SKILLS, ...EXTENDED_SKILLS, ...ENEMY_SKILLS].map((data) => ({
+      key: data.key,
+      data,
+    })),
+    // The showcase seven have final art (CONTENT_PLAN §1); the rest of the roster and
+    // the food units are art-pending and share the placeholder model (§1b).
+    champion: [...SHOWCASE_CHAMPIONS, ...EXTENDED_CHAMPIONS].map((data) => ({
+      key: data.key,
+      data,
+    })),
+    enemy: ENEMIES.map((data) => ({ key: data.key, data })),
+    gearSet: GEAR_SETS.map((data) => ({ key: data.key, data })),
+    gearSlot: GEAR_SLOTS.map((data) => ({ key: data.key, data })),
+    item: ITEMS.map((data) => ({ key: data.key, data })),
+    campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
+    stage: CAMPAIGN_STAGES.map((data) => ({ key: data.key, data })),
+    gameConfig: GAME_CONFIG.map((data) => ({ key: data.key, data })),
+  };
+
+  return CONTENT_LOAD_ORDER.map((contentType) => ({
+    contentType,
+    entities: byType[contentType],
+  }));
+}
+
+/**
+ * Parses every seed entity against its schema.
+ *
+ * Runs before anything is written, so a malformed seed fails loudly at load time rather
+ * than producing content that only breaks later at publish.
+ */
+export function parseSeedContent(seeds: SeedContent[]): {
+  ok: boolean;
+  problems: string[];
+  total: number;
+} {
+  const problems: string[] = [];
+  let total = 0;
+
+  for (const seed of seeds) {
+    const seen = new Set<string>();
+
+    for (const entity of seed.entities) {
+      total += 1;
+
+      if (seen.has(entity.key)) {
+        problems.push(`${seed.contentType}/${entity.key}: duplicate key in seed data`);
+        continue;
+      }
+      seen.add(entity.key);
+
+      const result = CONTENT_REGISTRY[seed.contentType].schema.safeParse(entity.data);
+      if (!result.success) {
+        for (const issue of result.error.issues) {
+          problems.push(
+            `${seed.contentType}/${entity.key}: ${issue.path.join('.') || '(root)'} — ${issue.message}`,
+          );
+        }
+      }
+    }
+  }
+
+  return { ok: problems.length === 0, problems, total };
+}

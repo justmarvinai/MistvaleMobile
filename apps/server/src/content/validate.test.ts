@@ -1,0 +1,407 @@
+import { describe, expect, it } from 'vitest';
+import type { ContentType } from '@mistvale/shared';
+import { validateAndNormalise, validateContentSet, type ContentSet } from './validate';
+
+/**
+ * Validator unit tests.
+ *
+ * The validator is the only thing standing between an editor's mistake and a broken live
+ * game, so each rule it enforces is pinned here independently of the database.
+ */
+
+function setOf(entries: Record<string, Record<string, unknown>>): ContentSet {
+  const content: ContentSet = new Map();
+  for (const [contentType, entities] of Object.entries(entries)) {
+    content.set(contentType as ContentType, new Map(Object.entries(entities)));
+  }
+  return content;
+}
+
+const faction = { key: 'testers', name: 'Testers', lore: '', icon: '', sortOrder: 0 };
+
+const asset = {
+  key: 'test_asset',
+  kind: 'unit',
+  source: 'repo',
+  basePath: 'test',
+  tracks: {},
+  stillPath: '',
+  avatarPath: '',
+  sortOrder: 0,
+};
+
+const skill = {
+  key: 'test_a1',
+  name: 'Strike',
+  description: '',
+  slot: 'a1',
+  cooldown: 0,
+  targeting: { side: 'enemy', mode: 'single' },
+  components: [{ type: 'damage', scale: 'atk', mult: 2, hits: 1 }],
+  upgrades: [],
+  aiHints: {},
+  animation: { track: 'attack' },
+  sortOrder: 0,
+};
+
+const champion = {
+  key: 'hero',
+  name: 'Hero',
+  title: '',
+  lore: '',
+  factionKey: 'testers',
+  element: 'ember',
+  rarity: 'rare',
+  role: 'attack',
+  baseStats: {
+    hp: 15000,
+    atk: 1000,
+    def: 900,
+    spd: 100,
+    critRate: 15,
+    critDmg: 50,
+    res: 30,
+    acc: 0,
+  },
+  skills: ['test_a1'],
+  aura: null,
+  assetKey: 'test_asset',
+  isFood: false,
+  summonable: true,
+  starter: false,
+  balanceVersion: 1,
+  sortOrder: 0,
+};
+
+const validSet = () =>
+  setOf({
+    faction: { testers: faction },
+    asset: { test_asset: asset },
+    skill: { test_a1: skill },
+    champion: { hero: champion },
+  });
+
+describe('validateContentSet', () => {
+  it('accepts a complete, consistent set', () => {
+    const result = validateContentSet(validSet());
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.checked).toBe(4);
+  });
+
+  it('accepts an empty set', () => {
+    const result = validateContentSet(new Map());
+    expect(result.ok).toBe(true);
+    expect(result.checked).toBe(0);
+  });
+
+  describe('shape', () => {
+    it('reports field-level schema failures', () => {
+      const content = setOf({
+        champion: { hero: { ...champion, baseStats: { ...champion.baseStats, spd: 9_999 } } },
+      });
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors[0]?.path).toContain('baseStats.spd');
+    });
+
+    it('catches an entity stored under a key that disagrees with its own', () => {
+      const content = setOf({ faction: { wrong_key: faction } });
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors[0]?.message).toMatch(/declares key/i);
+    });
+  });
+
+  describe('references', () => {
+    it.each([
+      ['faction', { ...champion, factionKey: 'ghosts' }],
+      ['asset', { ...champion, assetKey: 'missing_asset' }],
+      ['skill', { ...champion, skills: ['no_such_skill'] }],
+    ])('rejects a champion pointing at a missing %s', (_label, broken) => {
+      const content = validSet();
+      content.get('champion')?.set('hero', broken);
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((issue) => /does not exist/i.test(issue.message))).toBe(true);
+    });
+
+    it('rejects a skill applying a status nobody defined', () => {
+      const content = validSet();
+      content.get('skill')?.set('test_a1', {
+        ...skill,
+        components: [
+          { type: 'damage', scale: 'atk', mult: 2, hits: 1 },
+          { type: 'applyStatus', status: 'imaginary_curse', turns: 2, target: 'hitTargets' },
+        ],
+      });
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors[0]?.path).toMatch(/components\.1\.status/);
+    });
+
+    it('rejects a stage whose wave names an unknown enemy', () => {
+      const content = validSet();
+      content.set(
+        'campaignChapter',
+        new Map([
+          [
+            'ch1',
+            {
+              key: 'ch1',
+              number: 1,
+              name: 'One',
+              region: '',
+              lore: '',
+              backgroundAsset: '',
+              starRewards: [],
+              sortOrder: 0,
+            },
+          ],
+        ]),
+      );
+      content.set(
+        'stage',
+        new Map([
+          [
+            's1',
+            {
+              key: 's1',
+              mode: 'campaign',
+              parentKey: 'ch1',
+              number: 1,
+              difficulty: 'normal',
+              energyCost: 4,
+              waves: [[{ enemyKey: 'nobody', level: 3, stars: 1, slot: 0 }]],
+              rewards: { silverMin: 1, silverMax: 2, playerXp: 1, championXp: 1 },
+              starRules: { noDeaths: true, maxTurns: 12 },
+              firstClearRewards: {},
+              unlock: {},
+              sortOrder: 0,
+            },
+          ],
+        ]),
+      );
+
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((issue) => issue.contentType === 'stage')).toBe(true);
+    });
+
+    it('rejects two enemies sharing a slot in one wave', () => {
+      const content = validSet();
+      content.set(
+        'enemy',
+        new Map([
+          [
+            'grunt',
+            {
+              key: 'grunt',
+              name: 'Grunt',
+              archetype: 'grunt',
+              element: 'ember',
+              role: 'attack',
+              baseStats: {
+                hp: 1000,
+                atk: 100,
+                def: 100,
+                spd: 90,
+                critRate: 15,
+                critDmg: 50,
+                res: 20,
+                acc: 0,
+              },
+              growth: 1.045,
+              skills: ['test_a1'],
+              assetKey: 'test_asset',
+              isBoss: false,
+              bossMechanics: { almightyImmunity: false, tmReductionImmune: false },
+              sortOrder: 0,
+            },
+          ],
+        ]),
+      );
+      content.set(
+        'campaignChapter',
+        new Map([
+          [
+            'ch1',
+            {
+              key: 'ch1',
+              number: 1,
+              name: 'One',
+              region: '',
+              lore: '',
+              backgroundAsset: '',
+              starRewards: [],
+              sortOrder: 0,
+            },
+          ],
+        ]),
+      );
+      content.set(
+        'stage',
+        new Map([
+          [
+            's1',
+            {
+              key: 's1',
+              mode: 'campaign',
+              parentKey: 'ch1',
+              number: 1,
+              difficulty: 'normal',
+              energyCost: 4,
+              waves: [
+                [
+                  { enemyKey: 'grunt', level: 3, stars: 1, slot: 0 },
+                  { enemyKey: 'grunt', level: 3, stars: 1, slot: 0 },
+                ],
+              ],
+              rewards: { silverMin: 1, silverMax: 2, playerXp: 1, championXp: 1 },
+              starRules: { noDeaths: true, maxTurns: 12 },
+              firstClearRewards: {},
+              unlock: {},
+              sortOrder: 0,
+            },
+          ],
+        ]),
+      );
+
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((issue) => /occupy slot/i.test(issue.message))).toBe(true);
+    });
+  });
+
+  describe('engine registry', () => {
+    it('rejects a status mapped to a behaviour the engine lacks', () => {
+      const content = validSet();
+      content.set(
+        'status',
+        new Map([
+          [
+            'weird',
+            {
+              key: 'weird',
+              name: 'Weird',
+              kind: 'buff',
+              engineType: 'timeTravel',
+              family: 'weird',
+              potency: 1,
+              params: { tick: 'none', maxStacks: 1 },
+              icon: '',
+              description: '',
+              sortOrder: 0,
+            },
+          ],
+        ]),
+      );
+
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+    });
+  });
+
+  describe('design rules', () => {
+    it('rejects an A1 with a cooldown', () => {
+      const content = validSet();
+      content.get('skill')?.set('test_a1', { ...skill, cooldown: 3 });
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors[0]?.message).toMatch(/no cooldown/i);
+    });
+
+    it('warns, without blocking, when a Legendary kit looks thin', () => {
+      const content = validSet();
+      content.get('champion')?.set('hero', { ...champion, rarity: 'legendary' });
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(true);
+      expect(result.warnings.some((issue) => /at least 4 skills/i.test(issue.message))).toBe(true);
+    });
+
+    it('does not apply the kit-depth rule to food units', () => {
+      const content = validSet();
+      content.get('champion')?.set('hero', { ...champion, rarity: 'legendary', isFood: true });
+      const result = validateContentSet(content);
+      expect(result.warnings.some((issue) => /at least 4 skills/i.test(issue.message))).toBe(false);
+    });
+
+    it('warns when nothing is summonable', () => {
+      const content = validSet();
+      content.get('champion')?.set('hero', { ...champion, summonable: false });
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(true);
+      expect(result.warnings.some((issue) => /empty pool/i.test(issue.message))).toBe(true);
+    });
+  });
+
+  describe('normalisation', () => {
+    it('fills schema defaults so stored content never depends on how it was authored', () => {
+      const authored = {
+        key: 'test_a1',
+        name: 'Sparse',
+        slot: 'a1',
+        targeting: { side: 'enemy', mode: 'single' },
+        // No hits, no description, no cooldown, no upgrades, no aiHints, no animation.
+        components: [{ type: 'damage', scale: 'atk', mult: 2 }],
+      };
+
+      const content = validSet();
+      content.get('skill')?.set('test_a1', authored);
+      const { result, normalised } = validateAndNormalise(content);
+
+      expect(result.ok).toBe(true);
+      const stored = normalised.get('skill')?.get('test_a1') as {
+        components: { hits: number }[];
+        cooldown: number;
+        upgrades: unknown[];
+        animation: { track: string };
+      };
+      expect(stored.components[0]?.hits).toBe(1);
+      expect(stored.cooldown).toBe(0);
+      expect(stored.upgrades).toEqual([]);
+      expect(stored.animation.track).toBe('attack');
+    });
+
+    it('normalises the sparse and the explicit form to the same stored shape', () => {
+      const sparse = validSet();
+      sparse.get('skill')?.set('test_a1', {
+        key: 'test_a1',
+        name: 'Strike',
+        slot: 'a1',
+        targeting: { side: 'enemy', mode: 'single' },
+        components: [{ type: 'damage', scale: 'atk', mult: 2 }],
+      });
+
+      const explicit = validSet();
+      explicit.get('skill')?.set('test_a1', {
+        ...skill,
+        name: 'Strike',
+        components: [{ type: 'damage', scale: 'atk', mult: 2, hits: 1 }],
+      });
+
+      const fromSparse = validateAndNormalise(sparse).normalised.get('skill')?.get('test_a1');
+      const fromExplicit = validateAndNormalise(explicit).normalised.get('skill')?.get('test_a1');
+
+      expect(fromSparse).toBeDefined();
+      expect(fromSparse).toEqual(fromExplicit);
+    });
+
+    it('leaves entities that failed to parse out of the normalised set', () => {
+      const content = setOf({ faction: { testers: { ...faction, sortOrder: 'nope' } } });
+      const { result, normalised } = validateAndNormalise(content);
+      expect(result.ok).toBe(false);
+      expect(normalised.get('faction')?.has('testers')).toBe(false);
+    });
+  });
+
+  it('reports every problem at once rather than stopping at the first', () => {
+    const content = setOf({
+      champion: {
+        hero: { ...champion, factionKey: 'ghosts', assetKey: 'nope', skills: ['nope'] },
+      },
+    });
+    const result = validateContentSet(content);
+    expect(result.errors.length).toBeGreaterThanOrEqual(3);
+  });
+});

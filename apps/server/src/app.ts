@@ -1,16 +1,19 @@
 import Fastify, { LogController, type FastifyInstance, type FastifyServerOptions } from 'fastify';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
-import { API_PREFIX } from '@mistvale/shared';
+import { ADMIN_API_PREFIX, API_PREFIX } from '@mistvale/shared';
 import { loadConfig, type AppConfig } from './lib/config';
 import { createLoggerOptions } from './lib/logger';
 import { databasePlugin } from './plugins/database';
 import { authPlugin } from './plugins/auth';
+import { contentPlugin } from './plugins/content';
 import { errorHandlerPlugin } from './plugins/error-handler';
 import { generateRequestId, requestContextPlugin } from './plugins/request-context';
 import { authRoutes } from './modules/auth/routes';
 import { playerRoutes } from './modules/player/routes';
 import { healthRoutes } from './modules/health/routes';
+import { contentRoutes } from './modules/content/routes';
+import { adminApi } from './admin/index';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -71,15 +74,19 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   await app.register(databasePlugin);
   await app.register(authPlugin);
+  await app.register(contentPlugin);
 
   await app.register(
     async (api) => {
       await api.register(healthRoutes);
       await api.register(authRoutes);
       await api.register(playerRoutes);
+      await api.register(contentRoutes);
     },
     { prefix: API_PREFIX },
   );
+
+  await app.register(adminApi, { prefix: ADMIN_API_PREFIX });
 
   await app.ready();
   return app;
