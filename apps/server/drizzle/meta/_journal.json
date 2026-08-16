@@ -15,6 +15,20 @@
       "when": 1786874444164,
       "tag": "0001_slimy_vin_gonzales",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786884558298,
+      "tag": "0002_faulty_blue_shield",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786884743372,
+      "tag": "0003_sloppy_hairball",
+      "breakpoints": true
     }
   ]
 }

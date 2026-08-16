@@ -3,7 +3,7 @@
 **Mistvale** — a 2D pixel-art, turn-based champion-collection / gacha RPG in the browser, heavily inspired by Raid: Shadow Legends (structurally faithful, uniquely named, own numbers). Desktop-first, later landscape-mobile PWA. This repo: game client + authoritative server + battle engine + assets. Sibling repo `MistvaleMobile-Admin`: the operator SPA for the Admin API this server hosts.
 
 ## Project state
-**Phases P0–P1 complete → next is P2 (battle engine)** — see `ROADMAP.md`. The monorepo, CI, database, auth, client shell, deploy scripts, content pipeline (draft→validate→publish→revert), the full 37-champion + 6-food seed and the Admin Suite's core editors exist and are tested. The engine simulation and the game screens do not yet: `packages/engine` holds only the seeded RNG. When the docs and reality diverge, fix one or the other in the same PR — stale docs are a review-blocker.
+**Phases P0–P1 complete; P2's engine done → finishing P2 (battle API), then P3 (battle screen)** — see `ROADMAP.md`. The monorepo, CI, database, auth, client shell, deploy scripts, content pipeline, the full 37-champion + 6-food seed, the Admin Suite's core editors and the complete battle engine (`packages/engine`, with golden replays and the `pnpm sim` balance gates) exist and are tested. The game screens do not yet. When the docs and reality diverge, fix one or the other in the same PR — stale docs are a review-blocker.
 
 **Working on the code:** `pnpm install`, then `pnpm db:migrate` against a local PostgreSQL, `pnpm dev` to run server + client. `pnpm verify` runs the whole gate CI runs (format, lint, typecheck, test, build); `pnpm e2e` drives the browser flow. Server tests need PostgreSQL and skip themselves without it.
 
@@ -38,7 +38,7 @@ pnpm monorepo · TypeScript strict everywhere · Node 22 + Fastify 5 + Zod 4 + D
 - Client: screen folders + registry; stores per domain; no game math client-side; pixel sprites integer-scaled, DOM UI free.
 - Testing: engine = highest bar (mechanic units + golden replays + property tests); services tested against real Postgres in CI; goldens regenerate only in deliberate, reviewed commits.
 - Commits: `feat(scope): …` / `fix:` / `docs:` / `chore:` / `test:`; CHANGELOG `[Unreleased]` entry for every player- or admin-visible change.
-- Branches: never commit to `main` directly. Current work branch: `claude/mistvale-raid-planning-1k4axz`.
+- Branches: **work on `main` and push there directly** (owner's standing instruction — no feature branch). Every push must leave `pnpm verify` and `pnpm sim` green, since nothing sits in front of `main`.
 - Balance numbers: never hardcode — they live in `game_config`/content seeds (ECONOMY_BALANCE.md documents defaults).
 
 ## Workflow with the owner (Marvin)

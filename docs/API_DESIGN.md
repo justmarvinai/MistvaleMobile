@@ -17,6 +17,8 @@
 | GET `/content` | Full content bundle for current revision (ETag/If-None-Match; client caches in IndexedDB). |
 | GET `/player` | Full player snapshot: profile, resources, energy `{value,cap,nextTickAt}`, unlock flags, tutorial step, counters (quests badge, mail badge, event banners). Fetched on boot + screen re-entry, never polled. |
 | GET `/player/champions` · GET `/player/gear` · GET `/player/items` | Roster / gear inventory / stackables. Paged where sensible. |
+| GET `/player/starters` | The champions flagged `starter` in content — what a new account chooses between. |
+| POST `/player/starter` | `{championKey}` → grants the chosen starter. Idempotent: a player who already owns champions is left alone. |
 | PATCH `/player/settings` | Audio/gfx/preferences jsonb (schema-validated). |
 | GET `/profile/:profileName` | Public profile card (level, top champions, arena tier) — for arena opponent inspection. |
 
@@ -36,8 +38,7 @@
 
 ### Battles (campaign, dungeons, springs, proving, tutorial)
 | POST `/battles/start` | `{mode, stageKey, team[1-4], actionId}` → spends energy, creates session, returns `{battleId, initialState, events (to first decision), needsInput}` |
-| POST `/battles/:id/action` | `{skillId, targetSlot, actionId}` → `{events, needsInput, done?}` |
-| POST `/battles/:id/auto` | `{on: true}` → resolves to end (or until manual resumes), returns full remaining events. |
+| POST `/battles/:id/action` | `{actionId, skill?, target?, auto?}` → `{state, events, outcome, rewards}`. Omit `skill` to let the AI take the turn; set `auto` to resolve the rest of the fight in one call. Replaying an `actionId` returns the recorded state rather than taking a second turn. |
 | POST `/battles/:id/retreat` | Concede (energy stays spent). |
 | POST `/battles/multi` | `{mode, stageKey, team, runs (≤ cap), actionId}` → N seeded auto-runs server-side → summary + per-run compact results + rewards. |
 | GET `/battles/active` | Resume support after refresh/crash. |

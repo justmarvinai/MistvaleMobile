@@ -50,7 +50,12 @@ export function testConfig(): AppConfig {
 }
 
 export async function buildTestApp(): Promise<FastifyInstance> {
-  return buildApp({ config: testConfig(), logger: false });
+  // `MISTVALE_TEST_LOGS=1` surfaces server-side errors while debugging a failing test;
+  // silent by default so a normal run stays readable.
+  return buildApp({
+    config: testConfig(),
+    logger: process.env.MISTVALE_TEST_LOGS ? { level: 'error' } : false,
+  });
 }
 
 /** Removes all rows created by tests, leaving the schema intact. */

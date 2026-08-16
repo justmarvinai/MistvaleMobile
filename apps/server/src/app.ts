@@ -13,6 +13,7 @@ import { authRoutes } from './modules/auth/routes';
 import { playerRoutes } from './modules/player/routes';
 import { healthRoutes } from './modules/health/routes';
 import { contentRoutes } from './modules/content/routes';
+import { gameRoutes } from './modules/battle/routes';
 import { adminApi } from './admin/index';
 
 declare module 'fastify' {
@@ -82,6 +83,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await api.register(authRoutes);
       await api.register(playerRoutes);
       await api.register(contentRoutes);
+      await api.register(gameRoutes);
     },
     { prefix: API_PREFIX },
   );

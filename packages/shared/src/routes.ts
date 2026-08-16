@@ -29,6 +29,24 @@ export const ROUTES = {
     /** The full content bundle for the live revision (ETag-cached). */
     bundle: '/content',
   },
+  roster: {
+    /** The champions the player owns. */
+    list: '/player/champions',
+    /** The starter champions a new account may choose between. */
+    starters: '/player/starters',
+    /** One-time starter grant; idempotent once the roster is non-empty. */
+    chooseStarter: '/player/starter',
+  },
+  battle: {
+    start: '/battles/start',
+    /** The battle in progress, or null. Resume support after a refresh or crash. */
+    active: '/battles/active',
+    /** `/battles/:id` — the full session, including its event log. */
+    byId: (id: string) => `/battles/${encodeURIComponent(id)}`,
+    /** `/battles/:id/action` — take one turn, or run the rest out on auto. */
+    action: (id: string) => `/battles/${encodeURIComponent(id)}/action`,
+    retreat: (id: string) => `/battles/${encodeURIComponent(id)}/retreat`,
+  },
 } as const;
 
 /** Admin API routes, consumed by the Admin Suite in the sibling repo. */
