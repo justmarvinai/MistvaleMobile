@@ -163,9 +163,10 @@ fi
 ACTOR_HOST="$(id -un)@$(hostname -s 2>/dev/null || echo unknown)"
 
 set_rank_via_sql() {
-	local result
-	if ! result="$(
-		psql -X -tA -v ON_ERROR_STOP=1 --no-psqlrc -d "${DATABASE_URL}" \
+	local output result
+	# -q so psql's BEGIN/COMMIT status lines stay out of the parsed output.
+	if ! output="$(
+		psql -X -tAq -v ON_ERROR_STOP=1 --no-psqlrc -d "${DATABASE_URL}" \
 			-v account_name="${ACCOUNT_NAME}" \
 			-v new_rank="${NEW_RANK}" \
 			-v actor_host="${ACTOR_HOST}" <<'SQL'
@@ -203,6 +204,8 @@ SQL
 		die "rank change failed — the transaction was rolled back, '${ACCOUNT_NAME}' is still '${CURRENT_RANK}' (see the psql error above)"
 	fi
 
+	# Only the pipe-delimited result row interests us, whatever else psql printed.
+	result="$(printf '%s\n' "${output}" | grep -m1 '|' || true)"
 	[[ -n "${result}" ]] || die "rank change did not apply (no rows updated) — nothing was committed"
 
 	local r_name r_old r_new r_audit

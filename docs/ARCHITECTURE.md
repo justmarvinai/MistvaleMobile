@@ -233,8 +233,11 @@ createBattle(setup: BattleSetup, contentView: ContentView, seed: number): Battle
 
 ## 10. Observability
 
-- pino JSON logs → journald + rotated file; request logs sampled (100% errors, 10% success) to keep IO low.
-- `GET /admin/api/health`: process RSS, event-loop lag, DB pool stats, content revision, active battles, req/min, error/min — rendered on the Admin dashboard. `STATUS.sh` prints the same from the CLI.
+- pino JSON logs to stdout, captured and rotated by journald (systemd already does the rotation, retention and querying a second log file would duplicate). Request logs are sampled — 100% of errors and slow requests, 10% of successes — to keep IO low. `LOGS.sh` reads journald and formats the JSON.
+- **Health endpoints** (paths in `packages/shared` `ROUTES.health`):
+  - `GET /api/health-lite` — public, no database round-trip. The uptime-monitor and post-deploy probe; it must answer even while PostgreSQL is recovering.
+  - `GET /api/health` — **admin-rank only**: process RSS, event-loop lag, DB pool stats and latency, content revision, active battles. Rendered on the Admin dashboard; `STATUS.sh` prints the same from the CLI, authenticating with an admin session token (`OPS_SESSION_TOKEN`).
+  - These live on the player API rather than under `/admin/api` so that health remains reachable independently of the Admin SPA's routing.
 - Every unexpected error gets a `requestId` surfaced to the client toast ("Something broke — code X7F2K") for painless bug reports from friends.
 
 ## 11. Testing & CI summary

@@ -263,8 +263,8 @@ ensure_dir "${LOG_DIR}" "${APP_USER}:${APP_GROUP}" 0755
 ensure_dir "${BACKUP_DIR}" "${APP_USER}:${APP_GROUP}" 0750
 ok "directory layout ready"
 
-# Log rotation for the ops logs written by these scripts (the server rotates its
-# own pino log through pino-roll).
+# Log rotation for the ops logs these scripts write (ops-deploy.log, ops-backup.log,
+# crash.log). The server itself logs to the journal, which systemd rotates.
 cat >/etc/logrotate.d/mistvale <<EOF
 ${LOG_DIR}/*.log {
     weekly
@@ -354,7 +354,14 @@ fi
 # Load what we just wrote (or what was already there). Command-line flags win
 # over the env file, otherwise the file's DEPLOY_BRANCH is authoritative.
 load_env --required
-[[ -n "${CLI_DOMAIN}" ]] && DOMAIN="${CLI_DOMAIN}"
+ENV_DOMAIN="${DOMAIN}"
+if [[ -n "${CLI_DOMAIN}" ]]; then
+	DOMAIN="${CLI_DOMAIN}"
+	if [[ -n "${ENV_DOMAIN}" && "${ENV_DOMAIN}" != "${DOMAIN}" ]]; then
+		warn "--domain ${DOMAIN} differs from DOMAIN=${ENV_DOMAIN} in ${ENV_FILE}"
+		warn "nginx and the certificate will use ${DOMAIN}; update DOMAIN and PUBLIC_ORIGIN in ${ENV_FILE} to match, then restart ${SERVICE}"
+	fi
+fi
 if [[ -n "${CLI_BRANCH}" ]]; then
 	BRANCH="${CLI_BRANCH}"
 elif [[ -n "${DEPLOY_BRANCH:-}" ]]; then
@@ -408,25 +415,42 @@ ok "database reachable as ${DB_USER}"
 # 8. Repositories
 # =============================================================================
 step "8/16 Repositories"
-clone_or_report() { # clone_or_report <url> <dir> <label>
-	local url="$1" dir="$2" label="$3"
+clone_or_report() { # clone_or_report <url> <dir> <label> [optional]
+	local url="$1" dir="$2" label="$3" optional="${4:-required}"
 	if [[ -d "${dir}/.git" ]]; then
 		skip "${label} already cloned at ${dir}"
 		return 0
 	fi
 	log "cloning ${label} (${BRANCH}) → ${dir}"
 	# git must own the result; clone as the app user, not as root.
-	retry 5 run_as_app_user git clone --quiet --branch "${BRANCH}" "${url}" "${dir}" ||
-		die "could not clone ${label} from ${url} (branch ${BRANCH})"
-	ok "${label} cloned @ $(repo_sha "${dir}")"
+	if retry 5 run_as_app_user git clone --quiet --branch "${BRANCH}" "${url}" "${dir}"; then
+		ok "${label} cloned @ $(repo_sha "${dir}")"
+		return 0
+	fi
+
+	if [[ "${optional}" == "optional" ]]; then
+		# Expected until the Admin Suite exists (game Phase P1 / admin Phase A0): the
+		# repository may be empty or have no branch of this name yet. The game deploys
+		# fine without it — nginx answers 404 under /admin, and a later UPDATE.sh run
+		# picks the SPA up once it is there.
+		warn "${label} unavailable (branch ${BRANCH} at ${url}); continuing without it"
+		safe_rm_rf "${dir}"
+		return 0
+	fi
+
+	die "could not clone ${label} from ${url} (branch ${BRANCH})"
 }
 clone_or_report "${REPO_URL}" "${REPO_DIR}" "game repo"
-clone_or_report "${ADMIN_REPO_URL}" "${ADMIN_REPO_DIR}" "admin repo"
+clone_or_report "${ADMIN_REPO_URL}" "${ADMIN_REPO_DIR}" "admin repo" optional
 
-# From here on prefer the freshly deployed copies of the scripts, so a re-run of
-# an old DEPLOY.sh still drives the current tooling.
+# From here on prefer the freshly cloned copies of the scripts and their
+# templates, so bootstrapping from an older checkout still deploys the tooling
+# and configuration that belong to the branch being installed.
 DEPLOYED_SCRIPTS="${SCRIPTS_DIR}"
-[[ -x "${REPO_DIR}/scripts/UPDATE.sh" ]] && DEPLOYED_SCRIPTS="${REPO_DIR}/scripts"
+if [[ -x "${REPO_DIR}/scripts/UPDATE.sh" ]]; then
+	DEPLOYED_SCRIPTS="${REPO_DIR}/scripts"
+	[[ -d "${REPO_DIR}/scripts/deploy-assets" ]] && DEPLOY_ASSETS_DIR="${REPO_DIR}/scripts/deploy-assets"
+fi
 log "using ops scripts from ${DEPLOYED_SCRIPTS}"
 
 # =============================================================================
@@ -688,18 +712,19 @@ step "15/16 TLS certificate"
 # Session cookies only get the Secure flag when PUBLIC_ORIGIN is an https:// URL
 # (apps/server/src/lib/config.ts). Once TLS is live the value must follow, and
 # the server has to be restarted to pick it up.
-promote_public_origin_to_https() {
-	local current
+set_public_origin_scheme() { # set_public_origin_scheme <https|http>
+	local want="$1" current
 	current="$(sed -n 's/^PUBLIC_ORIGIN=//p' "${ENV_FILE}" | head -n1)"
-	[[ "${current}" == "http://"* ]] || return 0
-	log "TLS is live — switching PUBLIC_ORIGIN to https:// (Secure cookies)"
-	sed -i -E "s|^PUBLIC_ORIGIN=http://|PUBLIC_ORIGIN=https://|" "${ENV_FILE}"
+	[[ "${current}" == "${want}://"* ]] && return 0
+	log "setting PUBLIC_ORIGIN to ${want}:// in ${ENV_FILE}"
+	sed -i -E "s|^PUBLIC_ORIGIN=https?://|PUBLIC_ORIGIN=${want}://|" "${ENV_FILE}"
 	if svc_active "${SERVICE}"; then
 		systemctl restart "${SERVICE}"
 		health_check "${HEALTH_LITE_URL}" 15 2 >/dev/null ||
 			warn "${SERVICE} did not answer after the PUBLIC_ORIGIN change — check LOGS.sh -e"
 	fi
 }
+promote_public_origin_to_https() { set_public_origin_scheme https; }
 
 if ((SKIP_CERTBOT == 1)); then
 	skip "--skip-certbot: no certificate requested (the site is HTTP-only for now)"
@@ -726,7 +751,11 @@ else
 	else
 		warn "certbot failed — the site stays on HTTP."
 		warn "usual cause: DNS for ${DOMAIN} does not point at this box yet."
-		warn "retry later with: sudo certbot --nginx -d ${DOMAIN}"
+		# Secure cookies over plain HTTP are dropped by the browser, which would
+		# make login silently impossible; keep the origin honest until TLS works.
+		set_public_origin_scheme http
+		warn "retry later with: sudo certbot --nginx -d ${DOMAIN} && sudo ${REPO_DIR}/scripts/DEPLOY.sh"
+		warn "(the re-run flips PUBLIC_ORIGIN back to https:// and restarts the service)"
 	fi
 fi
 
