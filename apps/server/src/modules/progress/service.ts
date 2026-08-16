@@ -72,13 +72,22 @@ export interface UnlockCheck {
  * meant a fresh account could walk into a chapter-3 boss. It is checked here rather than
  * in the battle route so the campaign map can grey out the same stages the server will
  * refuse — one rule, two consumers.
+ *
+ * `parentGate` is how the Depths joins in: a dungeon can be shut for reasons a stage knows
+ * nothing about — an account level, a rotation day — and those are the Depths module's
+ * rules, not this one's. Asked first, because "closed today, opens Thursday" is more use
+ * to a player than "clear floor 3 first" when both are true.
  */
 export function checkUnlock(
   stage: StageDef,
   playerLevel: number,
   cleared: (stageKey: string) => boolean,
   stageName: (stageKey: string) => string,
+  parentGate?: (parentKey: string) => UnlockCheck | null,
 ): UnlockCheck {
+  const gate = parentGate?.(stage.parentKey);
+  if (gate && !gate.open) return gate;
+
   const required = stage.unlock.previousStageKey;
   if (required && !cleared(required)) {
     return { open: false, reason: `Clear ${stageName(required)} first.` };

@@ -26,13 +26,14 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          // Root-level tooling and test-harness files that belong to no package tsconfig.
+          // Root-level tooling that belongs to no package tsconfig. The browser specs
+          // deliberately are *not* here: they have their own `e2e/tsconfig.json`, because
+          // the inferred default project caps at eight files and every phase adds a spec.
           allowDefaultProject: [
             'eslint.config.js',
             'vitest.config.ts',
             'playwright.config.ts',
             'apps/server/build.js',
-            'e2e/*.ts',
           ],
         },
         tsconfigRootDir: import.meta.dirname,

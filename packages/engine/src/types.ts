@@ -68,13 +68,48 @@ export interface BattleUnit {
   boss: BossFlags;
   /** Consecutive hard CC landed, for the Arena anti-perma-stun rule (§7). */
   ccStreak: number;
+  /** Per-battle bookkeeping for the boss mechanics. Present only on bosses that need it. */
+  bossState?: BossRuntime;
   /** Set when the unit has already been saved from lethal damage this battle. */
   usedLastStand?: boolean;
 }
 
+/**
+ * Composable boss behaviours, copied from `enemy_defs.boss_mechanics` at setup.
+ *
+ * Every one of these is a *promise the content makes to the player*, so the engine either
+ * runs it or the content may not name it. The two immunity flags shape what can be done to
+ * a boss; the four below shape what the boss does back (docs/COMBAT_SYSTEM.md §8).
+ */
 export interface BossFlags {
+  /** Immune to Stun/Freeze/Sleep/Provoke — the baseline for every boss. */
   almightyImmunity: boolean;
   tmReductionImmune: boolean;
+  /** Hit-counter shield: break it before the boss acts, or the whole team is punished. */
+  hitShield?: { hits: number; punishTmPct: number };
+  /** Retaliates each time its HP falls through another band. */
+  thresholdRetaliation?: { perHpPct: number; skipIfDot: boolean };
+  /**
+   * Calls adds at the start of its turn.
+   *
+   * The add is carried as a fully built unit rather than a content key: the engine reads
+   * no content at runtime, so whatever a summon is, it is decided once at setup.
+   */
+  addSummon?: { perTurn: number; cap: number; template: BattleUnit };
+  /** Damage ramp after a grace period, so a fight cannot be stalled forever. */
+  enrage?: { afterTurn: number; dmgPctPerTurn: number };
+}
+
+/** What the boss mechanics remember between turns. */
+export interface BossRuntime {
+  /** Hits the shield still absorbs. Zero means it is down and the boss is hurtable. */
+  shieldHits: number;
+  /** Set on the turn the boss forfeits to a broken shield; cleared when it comes back up. */
+  shieldRecovering: boolean;
+  /** How many HP bands have already been retaliated for, counted from full. */
+  bandsPassed: number;
+  /** True once the enrage ramp has been announced, so it is announced once. */
+  enraged: boolean;
 }
 
 /** Everything the simulation needs that is not part of mutable state. */
@@ -190,6 +225,18 @@ export type BattleEvent =
   | { id: number; type: 'counterattack'; unit: UnitRef; target: UnitRef }
   | { id: number; type: 'reflected'; unit: UnitRef; target: UnitRef; amount: number }
   | { id: number; type: 'unkillable'; unit: UnitRef }
+  /** The hit-counter shield changed: `hits` left, and whether it is still standing. */
+  | { id: number; type: 'bossShield'; unit: UnitRef; hits: number; up: boolean }
+  /** The shield survived to the boss's turn, and the team pays for it. */
+  | { id: number; type: 'bossPunish'; unit: UnitRef; tmPct: number }
+  /** The shield was broken in time: the boss forfeits this turn while it recovers. */
+  | { id: number; type: 'bossExposed'; unit: UnitRef }
+  /** The boss struck back for crossing an HP band. */
+  | { id: number; type: 'bossRetaliate'; unit: UnitRef; target: UnitRef }
+  /** Adds arrived. They occupy the refs in the snapshots, replacing anything there. */
+  | { id: number; type: 'bossSummon'; unit: UnitRef; summoned: UnitSnapshot[] }
+  /** The damage ramp has started; `pct` is the bonus applied from here on. */
+  | { id: number; type: 'bossEnraged'; unit: UnitRef; pct: number }
   | { id: number; type: 'died'; unit: UnitRef }
   | { id: number; type: 'battleEnd'; outcome: BattleOutcome; turns: number };
 

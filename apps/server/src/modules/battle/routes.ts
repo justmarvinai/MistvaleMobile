@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { ROUTES, apiSuccess, routePattern } from '@mistvale/shared';
+import { BATTLE_MODES, ROUTES, apiSuccess, routePattern, type BattleMode } from '@mistvale/shared';
+import { MAX_SIDE_SLOTS } from '@mistvale/engine';
 import { AppError } from '../../lib/errors';
 import * as championView from '../roster/champions';
 import * as roster from '../roster/service';
@@ -15,11 +16,21 @@ import * as battle from './service';
 
 const unitRefSchema = z.object({
   side: z.enum(['ally', 'enemy']),
-  slot: z.number().int().min(0).max(3),
+  // A summoning boss can widen its side past the four a wave is authored with, so a
+  // manual target has as much room as the engine allows a formation.
+  slot: z.number().int().min(0).max(MAX_SIDE_SLOTS),
 });
 
+/**
+ * The modes a player may start from a map.
+ *
+ * `arena` is absent deliberately: an arena fight is entered through the Arena's own
+ * endpoint against a snapshot defence, not by naming a stage key (docs/API_DESIGN.md §1).
+ */
+const PLAYABLE_MODES = BATTLE_MODES.filter((mode) => mode !== 'arena') as [BattleMode, BattleMode];
+
 const startSchema = z.object({
-  mode: z.enum(['campaign', 'tutorial', 'practice']),
+  mode: z.enum(PLAYABLE_MODES),
   stageKey: z.string().min(2).max(64),
   /** Formation order; the first slot is the leader whose aura applies. */
   team: z.array(z.string().uuid()).min(1).max(4),

@@ -14,7 +14,7 @@
 | **P3 ✅** | Battle experience | Battle screen, campaign flow, results | ▓▓▓▓ |
 | **P4 ✅** | Champions & relics | Roster, leveling/rank/ascension, gear loop, Bazaar | ▓▓▓ |
 | **P5 ✅** | Summoning | Mistgate, pools/pity, Chronicle | ▓▓ |
-| P6 | The Depths | 4 dungeons + Proving + Springs, masteries, multi-battle, Hard/Brutal | ▓▓▓ |
+| P6 ◑ | The Depths | 4 dungeons + Proving + Springs, masteries, multi-battle, Hard/Brutal | ▓▓▓ |
 | P7 | Arena & bots | Async PvP, ratings/tiers, Hall of Valor, bot system | ▓▓▓ |
 | P8 | Meta & retention | Quests, missions, events, login, mail, news, settings | ▓▓▓ |
 | P9 | Onboarding | Scripted tutorial, feature gating, FTUE polish | ▓▓ |
@@ -57,6 +57,8 @@ Mistgate screen with portal reveal cinematics by rarity (skippable), ×1/×10, a
 ### P6 — The Depths (+ masteries, multi-battle, difficulties)
 Depths hub + 4 relic dungeons (15 floors, bosses with real mechanics per CONTENT_PLAN), Proving Grounds (Emblems), Essence Springs (day rotation + first-7-days-all-open). Masteries system + trees UI + reset. Multi-battle (server loop, daily cap, summary UI). **Practice sandbox** (zero-energy/zero-reward re-fights of cleared stages). Campaign Hard/Brutal + stars/star-chests + first-clears everywhere. Seeds: all dungeons + chapters 1–12 across difficulties (generator-assisted).
 **Exit:** the PvE endgame treadmill runs: farm springs on rotation, push floors, spec masteries, multi-battle farms.
+
+**Delivered so far:** stage progress — clears, stars kept at their best, first-clear bonuses and chapter star chests paid once, and the unlock chain that had been authored since P1 finally *enforced*, with the map greying out exactly what the server refuses · **the four unimplemented boss behaviours**, which the content schema had promised since P1 and the engine had ignored: the Ashpriest's persistent hit-counter shield (break it and it forfeits a turn; leave it and the team loses meter), the Rimebound Sentinel's per-band retaliation, the Broodmother's add-summoning, and the enrage ramp every boss now carries · a `dungeon` content type and **130 floors** across four relic keeps, the Proving Grounds and five Essence Springs, generated from ten plan entries · the springs rotation — Pure daily, each breath two days, Mist on Sunday — read against the operator's own reset hour and timezone, with every spring open during a new account's first week · drops by floor band, including the Silkmire's accessories below floor 10 · the Depths hub and floor picker · balance-sim gates per dungeon: entry, deepest, and *wall* (the deepest floor must turn back an entry-level team, or the ladder is decoration). 17 Depths cases, 14 boss-mechanic cases, and the whole suite at 528.
 
 ### P7 — Arena & bots (+ Hall of Valor)
 Arena screens (defense editor, offers + refresh, token meter, tier ladder, weekly chest, leaderboard). Rating math, weekly reset job, medal grants. Hall of Valor (element×stat tracks). Bot system: generation from content at power bands, ladder seeding (60 bots), nightly refresh, top-10 auto-yield; Admin bot manager (A5 part). Arena battles through the same engine (defense AI).

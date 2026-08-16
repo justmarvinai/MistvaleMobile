@@ -15,15 +15,22 @@ import styles from './TeamSelect.module.scss';
  * Four slots, filled by clicking a champion. Slot one is the leader, whose aura applies —
  * which is why the order is the player's to choose rather than something we sort for them
  * (docs/UI_UX_DESIGN.md §3, screen 7).
+ *
+ * Every map opens this: a campaign stage and a Depths floor are the same kind of thing, and
+ * the mode the battle starts in is read off the stage rather than passed in, so a new mode
+ * published in Admin needs no change here.
  */
 
 const MAX_SLOTS = 4;
 
 export function TeamSelect({
   stage,
+  title,
   onClose,
 }: {
   stage: StageDef;
+  /** Heading for the modal; defaults to the stage's own number. */
+  title?: string;
   onClose: () => void;
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
@@ -63,7 +70,7 @@ export function TeamSelect({
   const start = async (): Promise<void> => {
     setError(null);
     try {
-      await startBattle({ mode: 'campaign', stageKey: stage.key, team });
+      await startBattle({ mode: stage.mode, stageKey: stage.key, team });
       goTo('battle');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not start that battle.');
@@ -71,7 +78,7 @@ export function TeamSelect({
   };
 
   return (
-    <Modal open title={`Stage ${stage.number}`} onClose={onClose}>
+    <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose}>
       <div className={styles.body}>
         <p className={styles.summary}>
           {stage.waves.length} waves · {stage.energyCost} energy · {stage.rewards.silverMin}–

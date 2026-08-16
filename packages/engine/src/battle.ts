@@ -1,5 +1,18 @@
 import type { EffectComponent, SkillDef, StatusDef } from '@mistvale/shared';
 import { chooseSkill } from './ai';
+import {
+  absorbHit,
+  bandsCrossed,
+  bossRuntime,
+  enrageMultiplier,
+  freeSlots,
+  instantiateAdd,
+  resetShield,
+  shieldPhase,
+  shieldStanding,
+  shouldAnnounceEnrage,
+  summonAllowance,
+} from './boss';
 import type { CombatConfig } from './config';
 import { computeDamage, landChance, matchupOf, rollHitQuality, type Matchup } from './damage';
 import { createRng, createRngFromState, type Rng } from './rng';
@@ -87,6 +100,8 @@ interface DealtDamage {
   hpLost: number;
   /** Total before shields — what Reflect and lifesteal compute from. */
   gross: number;
+  /** DoT ticks and %-HP procs, which some on-damage rules deliberately ignore. */
+  trueDamage: boolean;
 }
 
 /**
@@ -109,7 +124,9 @@ function dealDamage(
     trueDamage?: boolean;
   },
 ): DealtDamage {
-  if (!target.alive || amount <= 0) return { hpLost: 0, gross: 0 };
+  if (!target.alive || amount <= 0) {
+    return { hpLost: 0, gross: 0, trueDamage: meta.trueDamage === true };
+  }
 
   let remaining = amount;
   let redirectedFrom: UnitRef | undefined;
@@ -133,7 +150,7 @@ function dealDamage(
 
   const gross = remaining;
   const result = applyToUnit(ctx, source, target, remaining, { ...meta, redirectedFrom });
-  return { hpLost: result, gross };
+  return { hpLost: result, gross, trueDamage: meta.trueDamage === true };
 }
 
 /** Shields, unkillable, the damage event, death — the part that actually touches HP. */
@@ -154,7 +171,29 @@ function applyToUnit(
   let remaining = amount;
   let absorbed = 0;
 
-  // 2. Shields soak before HP, and vanish when spent.
+  // 2a. A boss's hit-counter shield eats the blow whole and loses one count for it.
+  // Only real hits register: a DoT tick is not a hit, so poison chips through the shield
+  // without ever breaking it — the slow way in, next to the fast one (§8).
+  if (!meta.trueDamage && shieldStanding(target)) {
+    const left = absorbHit(target);
+    emit(ctx, {
+      type: 'damage',
+      source: source.ref,
+      target: target.ref,
+      amount: 0,
+      absorbed: remaining,
+      quality: meta.quality,
+      crit: meta.crit,
+      hitIndex: meta.hitIndex,
+      hits: meta.hits,
+      remainingHp: target.hp,
+      ...(meta.redirectedFrom ? { redirectedFrom: meta.redirectedFrom } : {}),
+    });
+    emit(ctx, { type: 'bossShield', unit: target.ref, hits: left, up: left > 0 });
+    return 0;
+  }
+
+  // 2b. Shields soak before HP, and vanish when spent.
   for (let index = target.buffs.length - 1; index >= 0 && remaining > 0; index -= 1) {
     const instance = target.buffs[index]!;
     if (ctx.rules.statuses.get(instance.key)?.engineType !== 'shield') continue;
@@ -268,14 +307,19 @@ function onDamageDealt(
     }
   }
 
-  // Counterattack: the holder swings its A1 back. Never chains — a counter cannot
-  // provoke another counter, or two counterattackers would loop forever.
-  if (!options.allowCounter || !target.alive) return;
-  const counter = findByEngineType(target, 'counterattack', ctx.rules.statuses);
-  if (!counter || !attacker.alive) return;
+  // Neither of the two swing-back rules may chain: a retaliation that provoked another
+  // retaliation would loop until the turn cap.
+  if (!options.allowCounter || !target.alive || !attacker.alive) return;
 
-  const a1Key = target.skills.find((key) => ctx.rules.skills.get(key)?.slot === 'a1');
-  const a1 = a1Key ? ctx.rules.skills.get(a1Key) : undefined;
+  // A boss punishing the band it just fell through. Checked before Counterattack because
+  // it is the boss's own mechanic rather than a status somebody put on it.
+  if (retaliateForBands(ctx, target, attacker, dealt)) return;
+
+  // Counterattack: the holder swings its A1 back.
+  const counter = findByEngineType(target, 'counterattack', ctx.rules.statuses);
+  if (!counter) return;
+
+  const a1 = firstSkillOf(ctx, target, 'a1');
   if (!a1) return;
 
   emit(ctx, { type: 'counterattack', unit: target.ref, target: attacker.ref });
@@ -283,6 +327,40 @@ function onDamageDealt(
     damageScale: (counter.def.params.ratio ?? 100) / 100,
     allowCounter: false,
   });
+}
+
+function firstSkillOf(ctx: Ctx, unit: BattleUnit, slot: string): SkillDef | undefined {
+  const key = unit.skills.find((entry) => ctx.rules.skills.get(entry)?.slot === slot);
+  return key ? ctx.rules.skills.get(key) : undefined;
+}
+
+/**
+ * The Ice-Golem answer: fall through an HP band, take one back.
+ *
+ * Returns whether it fired, so the ordinary Counterattack rule does not also run — a boss
+ * hitting back twice for the same blow would read as a bug rather than a mechanic.
+ */
+function retaliateForBands(
+  ctx: Ctx,
+  boss: BattleUnit,
+  attacker: BattleUnit,
+  dealt: DealtDamage,
+): boolean {
+  const rule = boss.isBoss ? boss.boss.thresholdRetaliation : undefined;
+  if (!rule) return false;
+  if (rule.skipIfDot && dealt.trueDamage) return false;
+
+  const owed = bandsCrossed(boss);
+  if (owed <= 0) return false;
+
+  const a1 = firstSkillOf(ctx, boss, 'a1');
+  if (!a1) return false;
+
+  for (let index = 0; index < owed && attacker.alive && boss.alive; index += 1) {
+    emit(ctx, { type: 'bossRetaliate', unit: boss.ref, target: attacker.ref });
+    executeSkill(ctx, boss, a1, [attacker], { allowCounter: false });
+  }
+  return true;
 }
 
 // ── Skill execution ─────────────────────────────────────────────────────────
@@ -371,7 +449,10 @@ function runComponent(
 
         const quality = rollHitQuality(matchup, ctx.rng, ctx.config);
         const raw =
-          scaleValue(caster, component.scale, component.mult, ctx) * (options.damageScale ?? 1);
+          scaleValue(caster, component.scale, component.mult, ctx) *
+          (options.damageScale ?? 1) *
+          // An enraged boss hits harder every turn it is left standing.
+          (caster.isBoss ? enrageMultiplier(caster, ctx.state.turn) : 1);
         const { amount, crit } = computeDamage(
           {
             attacker: caster,
@@ -686,6 +767,80 @@ function runStartOfTurnTicks(ctx: Ctx, unit: BattleUnit): void {
   }
 }
 
+/**
+ * What a boss does simply by reaching its turn.
+ *
+ * Runs before it chooses a skill, so the punish, the adds and the ramp are all things the
+ * player watches happen *to* them rather than consequences of a skill they might dodge.
+ *
+ * Returns true when the boss forfeits the turn entirely — the reward for breaking a
+ * hit-counter shield.
+ */
+function runBossTurnStart(ctx: Ctx, unit: BattleUnit): boolean {
+  if (!unit.isBoss) return false;
+  bossRuntime(unit);
+
+  // The shield cycle, and the whole of the Cinderspire's puzzle. Reach the boss's turn
+  // with it intact and the team is punished; break it first and the boss forfeits the turn
+  // and stays hurtable through it, until it recovers on the turn after.
+  const shield = unit.boss.hitShield;
+  switch (shieldPhase(unit)) {
+    case 'punish': {
+      emit(ctx, { type: 'bossPunish', unit: unit.ref, tmPct: shield?.punishTmPct ?? 0 });
+      const { foes } = sides(ctx, unit);
+      for (const foe of living(foes)) {
+        applyTurnMeter(foe, -(shield?.punishTmPct ?? 0));
+        emit(ctx, {
+          type: 'turnMeter',
+          source: unit.ref,
+          target: foe.ref,
+          deltaPct: -(shield?.punishTmPct ?? 0),
+          value: foe.tm,
+        });
+      }
+      break;
+    }
+    case 'expose': {
+      emit(ctx, { type: 'bossExposed', unit: unit.ref });
+      return true;
+    }
+    case 'restore': {
+      const restored = resetShield(unit);
+      emit(ctx, { type: 'bossShield', unit: unit.ref, hits: restored, up: restored > 0 });
+      break;
+    }
+    default:
+      break;
+  }
+
+  // Adds, up to what the cap still has room for.
+  const summon = unit.boss.addSummon;
+  if (summon) {
+    const { own } = sides(ctx, unit);
+    const slots = freeSlots(own, summonAllowance(unit, own));
+    const arrived: BattleUnit[] = [];
+    for (const slot of slots) {
+      const add = instantiateAdd(summon.template, { side: unit.ref.side, slot });
+      const existing = own.findIndex((other) => other.ref.slot === slot);
+      if (existing >= 0) own[existing] = add;
+      else own.push(add);
+      arrived.push(add);
+    }
+    if (arrived.length > 0) {
+      emit(ctx, { type: 'bossSummon', unit: unit.ref, summoned: arrived.map(snapshot) });
+    }
+  }
+
+  if (shouldAnnounceEnrage(unit, ctx.state.turn)) {
+    emit(ctx, {
+      type: 'bossEnraged',
+      unit: unit.ref,
+      pct: Math.round((enrageMultiplier(unit, ctx.state.turn) - 1) * 100),
+    });
+  }
+  return false;
+}
+
 function endTurn(ctx: Ctx, unit: BattleUnit): void {
   for (const key of tickDurations(unit)) {
     emit(ctx, { type: 'statusExpired', target: unit.ref, status: key });
@@ -717,6 +872,11 @@ function beginTurn(ctx: Ctx, unit: BattleUnit): 'dead' | 'skipped' | 'ready' {
   const skipped = skipReason(unit, ctx.rules.statuses);
   if (skipped) {
     emit(ctx, { type: 'turnSkipped', unit: unit.ref, reason: skipped });
+    endTurn(ctx, unit);
+    return 'skipped';
+  }
+
+  if (runBossTurnStart(ctx, unit)) {
     endTurn(ctx, unit);
     return 'skipped';
   }

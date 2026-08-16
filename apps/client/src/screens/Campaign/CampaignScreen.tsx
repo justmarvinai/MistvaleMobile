@@ -4,7 +4,7 @@ import { Panel } from '../../ui/Panel/Panel';
 import { useContentStore } from '../../state/contentStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { useProgressStore } from '../../state/progressStore';
-import { TeamSelect } from './TeamSelect';
+import { TeamSelect } from '../Battle/TeamSelect';
 import styles from './CampaignScreen.module.scss';
 
 /**

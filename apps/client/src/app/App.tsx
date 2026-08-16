@@ -5,6 +5,7 @@ import { AuthScreen } from '@/screens/Auth/AuthScreen';
 import { HavenScreen } from '@/screens/Haven/HavenScreen';
 import { CampaignScreen } from '@/screens/Campaign/CampaignScreen';
 import { BattleScreen } from '@/screens/Battle/BattleScreen';
+import { DepthsScreen } from '@/screens/Depths/DepthsScreen';
 import { ChampionsScreen } from '@/screens/Champions/ChampionsScreen';
 import { RelicsScreen } from '@/screens/Relics/RelicsScreen';
 import { BazaarScreen } from '@/screens/Bazaar/BazaarScreen';
@@ -160,6 +161,8 @@ function GameShell() {
             <HavenScreen onNavigate={navigate} />
           ) : screen === 'campaign' ? (
             <CampaignScreen />
+          ) : screen === 'depths' ? (
+            <DepthsScreen />
           ) : screen === 'battle' ? (
             <BattleScreen />
           ) : screen === 'champions' ? (

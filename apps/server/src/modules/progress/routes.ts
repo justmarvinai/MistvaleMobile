@@ -3,6 +3,7 @@ import { ROUTES, apiSuccess, type Progress, type StageStanding } from '@mistvale
 import { eq } from 'drizzle-orm';
 import { chapterRewards, players } from '../../db/schema/index';
 import { AppError } from '../../lib/errors';
+import * as depths from '../depths/service';
 import * as progress from './service';
 
 /**
@@ -28,7 +29,7 @@ export const progressRoutes: FastifyPluginAsync = async (app) => {
     const bundle = app.content.current().bundle;
 
     const [player] = await app.db
-      .select({ level: players.level })
+      .select({ level: players.level, createdAt: players.createdAt })
       .from(players)
       .where(eq(players.id, playerId));
     if (!player) throw AppError.notFound('No such player.');
@@ -46,9 +47,16 @@ export const progressRoutes: FastifyPluginAsync = async (app) => {
         chapterNumbers.get(stagesByKey.get(stageKey)?.parentKey ?? ''),
       );
 
+    // The Depths adds two gates a stage cannot know about — the dungeon's account level,
+    // and whether its rotation admits today. Built from the same rule the battle route
+    // enforces, so a spring greyed out on the hub is a spring the server refuses.
+    const context = depths.contextFor(player, bundle.config, new Date());
+    const gates = depths.gates(bundle.dungeons, player.level, context.rotation);
+    const parentGate = (parentKey: string) => gates.get(parentKey) ?? null;
+
     const stages: StageStanding[] = bundle.stages.map((stage) => {
       const standing = standings.get(stage.key);
-      const check = progress.checkUnlock(stage, player.level, cleared, label);
+      const check = progress.checkUnlock(stage, player.level, cleared, label, parentGate);
       return {
         stageKey: stage.key,
         stars: standing?.stars ?? 0,

@@ -109,7 +109,7 @@ Base: HP 21.5k · ATK 900 · DEF 1,100 · SPD 100 · CR 15 · CD 50 · RES 40 ·
 | **Elite** variants | any | brightened + ★ badge | +1 skill tier, +25% stat budget ⚙ |
 
 **Chapter bosses (stage x-7):** oversized (1.5× sprite scale) named warlords, one per chapter (Vrash the Fenblade, Ssker Mudjaw, Okkta Barrowqueen, Hissrad the Span-Taker, Grolk Ashscale, Vyss Galetongue, Korrash Reachburner, Mama Fenwrack, Nulla Holloweye, Tszar Coilstone, Ryssa Gatekeeper, **Ssyleth the Coilmother** ch12). Boss kits = elite kit + `almightyImmunity` + one signature (AoE nuke CD4 / enrage / add-summon for Ssyleth).
-**Depths bosses:** Broodwyrm (`tmReductionImmune`, AoE breath, Shield self-buff) · Rimebound Sentinel (`thresholdRetaliation`, self-heal, Freeze gaze) · the Ashpriest (`hitShield` 6–12 hits by floor, TM-reset punish, HP Burn) · Broodmother Ssarethi (`addSummon` 2/turn cap 6, devour-heal, Poison spit) · Pitmaster Drazhak (Proving Grounds; `enrage` +8%/turn after t12).
+**Depths bosses (shipped P6):** Broodwyrm (`tmReductionImmune`, AoE breath + SPD Down, self shield & DEF Up) · Rimebound Sentinel (`thresholdRetaliation` every 10% of its bar, self-heal + self-cleanse, Freeze gaze) · the Ashpriest (`hitShield`, **three defs** — 6 hits on floors 1–4, 9 on 5–9, 12 from 10 down — with a TM-drain punish, HP Burn, and a DEF-ignoring pyre) · Broodmother Ssarethi (`addSummon` 2/turn cap 6 of `silkmire_spawn`, devour-heal, AoE Poison spit) · Pitmaster Drazhak (Proving Grounds; `enrage` +8%/turn after t12). Every keep-boss also carries `almightyImmunity` and a late `enrage` (turn 40, +6%/turn) so no fight can be stalled to the cap. Guards are per-keep archetypes on the shared lizard model; the five Spring Wardens differ only in breath, which is the point — the springs are the straight fight.
 
 ## 3. Campaign — *The Reclamation* (12 chapters × 7 stages × 3 difficulties)
 
@@ -145,7 +145,7 @@ Base: HP 21.5k · ATK 900 · DEF 1,100 · SPD 100 · CR 15 · CD 50 · RES 40 ·
 | Proving Grounds | 10 | Emblems (Bronze F1–4 / Silver F5–7 / Gold F8–10) | Pitmaster Drazhak | 8→14 |
 | Essence Springs ×5 | 10 each | Element essences (L/G/P; Prime floors 7+); Pure Spring daily, elements 2 days/week, Mist Sun | Spring Wardens (elite guards) | 6→12 |
 
-Floors = 2 waves + boss; enemy levels scale 20→60 across floors ⚙; drop rank/rarity bands by floor tier (1–4 / 5–9 / 10–12 / 13–15 "deep").
+Floors = 2 waves + boss; enemy levels scale 20→60 across floors ⚙ (springs 18→60); drop rank/rarity bands by floor tier (1–4 / 5–9 / 10–12 / 13–15 "deep", expressed as fractions of a keep's depth so a shortened dungeon still has a deep tier). A relic keep drops a relic on **every** clear — rank 2→5 by tier, rarity shifting from mostly-common to Epic-heavy — because a wasted run would make the energy price a swindle. **130 floors shipped** (4×15 + 10 + 5×10), generated from ten plan entries.
 
 ## 5. Relic sets (16 at EA — final)
 2pc: Ironroot +15% HP · Wolfsfang +15% ATK · Stoneguard +15% DEF · Swiftwind +12% SPD · Hawkeye +12% C.RATE · Reaver +20% C.DMG · Truestrike +40 ACC · Wardweave +40 RES · Pathfinder +5% SPD +20 ACC.

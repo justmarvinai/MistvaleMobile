@@ -72,6 +72,80 @@ function makeUnit(params: {
     isBoss: params.isBoss,
     boss: params.boss,
     ccStreak: 0,
+    ...(params.isBoss
+      ? {
+          bossState: {
+            shieldHits: params.boss.hitShield?.hits ?? 0,
+            shieldRecovering: false,
+            bandsPassed: 0,
+            enraged: false,
+          },
+        }
+      : {}),
+  };
+}
+
+/** Enemy stats at a level, scaled from the archetype's authored anchor. */
+function scaleEnemyStats(def: EnemyDef, level: number): Record<Stat, number> {
+  const anchor = def.baseStats;
+  const factor = Math.pow(def.growth, level - def.anchorLevel);
+  const stats = emptyStats();
+  stats.hp = Math.max(1, Math.round(anchor.hp * factor));
+  stats.atk = Math.max(1, Math.round(anchor.atk * factor));
+  stats.def = Math.max(1, Math.round(anchor.def * factor));
+  stats.spd = anchor.spd;
+  stats.critRate = anchor.critRate ?? 15;
+  stats.critDmg = anchor.critDmg ?? 50;
+  stats.res = anchor.res ?? 30;
+  stats.acc = anchor.acc ?? 0;
+  return stats;
+}
+
+/**
+ * Turns a `boss_mechanics` row into the flags the simulation runs on.
+ *
+ * The one piece of real work is the summon: the engine reads no content mid-battle, so the
+ * add is resolved and built *here*, once, and rides inside the boss's flags. A boss whose
+ * add no longer exists simply loses the mechanic rather than crashing the fight — publish
+ * validation is what stops that reaching players.
+ */
+function bossFlagsFor(
+  def: EnemyDef,
+  level: number,
+  enemies?: ReadonlyMap<string, EnemyDef>,
+): BattleUnit['boss'] {
+  const mechanics = def.bossMechanics;
+  const summonDef = mechanics.addSummon ? enemies?.get(mechanics.addSummon.unitKey) : undefined;
+
+  return {
+    almightyImmunity: mechanics.almightyImmunity,
+    tmReductionImmune: mechanics.tmReductionImmune,
+    ...(mechanics.hitShield ? { hitShield: { ...mechanics.hitShield } } : {}),
+    ...(mechanics.thresholdRetaliation
+      ? { thresholdRetaliation: { ...mechanics.thresholdRetaliation } }
+      : {}),
+    ...(mechanics.addSummon && summonDef
+      ? {
+          addSummon: {
+            perTurn: mechanics.addSummon.perTurn,
+            cap: mechanics.addSummon.cap,
+            template: makeUnit({
+              side: 'enemy',
+              // Overwritten the moment it is summoned; a template stands nowhere.
+              slot: -1,
+              defKey: summonDef.key,
+              name: summonDef.name,
+              element: summonDef.element,
+              level,
+              stats: scaleEnemyStats(summonDef, level),
+              skills: summonDef.skills,
+              isBoss: false,
+              boss: { almightyImmunity: false, tmReductionImmune: false },
+            }),
+          },
+        }
+      : {}),
+    ...(mechanics.enrage ? { enrage: { ...mechanics.enrage } } : {}),
   };
 }
 
@@ -156,36 +230,24 @@ function applyAura(
  * Measuring from level 1 instead would make the opening stage fight the anchor at full
  * strength, which is exactly the kind of thing the balance simulator exists to catch.
  */
-export function buildWave(entries: readonly EnemyEntry[]): BattleUnit[] {
-  return entries.map((entry) => {
-    const anchor = entry.def.baseStats;
-    const factor = Math.pow(entry.def.growth, entry.level - entry.def.anchorLevel);
-    const stats = emptyStats();
-    stats.hp = Math.max(1, Math.round(anchor.hp * factor));
-    stats.atk = Math.max(1, Math.round(anchor.atk * factor));
-    stats.def = Math.max(1, Math.round(anchor.def * factor));
-    stats.spd = anchor.spd;
-    stats.critRate = anchor.critRate ?? 15;
-    stats.critDmg = anchor.critDmg ?? 50;
-    stats.res = anchor.res ?? 30;
-    stats.acc = anchor.acc ?? 0;
-
-    return makeUnit({
+export function buildWave(
+  entries: readonly EnemyEntry[],
+  enemies?: ReadonlyMap<string, EnemyDef>,
+): BattleUnit[] {
+  return entries.map((entry) =>
+    makeUnit({
       side: 'enemy',
       slot: entry.slot,
       defKey: entry.def.key,
       name: entry.def.name,
       element: entry.def.element,
       level: entry.level,
-      stats,
+      stats: scaleEnemyStats(entry.def, entry.level),
       skills: entry.def.skills,
       isBoss: entry.def.isBoss,
-      boss: {
-        almightyImmunity: entry.def.bossMechanics.almightyImmunity,
-        tmReductionImmune: entry.def.bossMechanics.tmReductionImmune,
-      },
-    });
-  });
+      boss: bossFlagsFor(entry.def, entry.level, enemies),
+    }),
+  );
 }
 
 /** Builds every wave of a stage, in order. */
@@ -202,7 +264,7 @@ export function buildStageWaves(
       if (!def) continue;
       entries.push({ def, level: unit.level, stars: unit.stars, slot: unit.slot });
     }
-    return buildWave(entries);
+    return buildWave(entries, enemies);
   });
 }
 

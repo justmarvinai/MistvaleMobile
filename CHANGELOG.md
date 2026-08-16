@@ -5,6 +5,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Phase P6: the Depths
+
+Below the vale are keeps the Sskarn moved into rather than built. Ten of them open at once: four for relics, one pit for mastery emblems, and five springs that keep their own hours.
+
+- **Four relic keeps**, fifteen floors each, and every one of them a farm for something specific — Wyrm's Hollow for speed and crit damage, the Frostgrave Vault for guard and resistance, the Cinderspire for accuracy and crit rate, the Silkmire Depths for lifesteal and regeneration, plus rings, amulets and banners below its tenth floor. A run always pays a relic; how good a relic is how deep you went.
+- **The Proving Grounds**, ten floors of bronze, silver and gold emblems, waiting for the masteries that spend them.
+- **Five Essence Springs** on a rotation that gives the week a shape: the Pure Spring every day, each breath two days, and Mist on Sunday alone. The rotation is read against the operator's own reset hour and timezone, so a run at half past three in the morning is still yesterday's spring. A new account sees **every** spring open for its first seven days, because a first week should not be spent waiting for a Tuesday.
+- **Bosses that are puzzles, not walls.** Four behaviours the content schema has promised since P1 and the engine had never run:
+  - the **Ashpriest**'s hit-counter ward, which counts blows rather than damage and keeps its count between turns. Reach its turn with the ward standing and the whole team loses turn meter; break it first and the Ashpriest forfeits a turn and stays hurtable through it. Poison chips through without ever touching the counter — the slow way in, next to the fast one.
+  - the **Rimebound Sentinel**, which answers every tenth of its health bar with a free strike at whoever took it, and owes one answer per band when a single blow crosses several.
+  - **Broodmother Ssarethi**, who calls two of the brood at the start of every turn until six of them are standing.
+  - and an **enrage** ramp on every boss in the game, chapter warlords included, so no fight can be stalled to the turn cap. Pitmaster Drazhak's starts on turn twelve.
+- **The Depths hub** groups the keeps by what they are for, marks how deep you have been in each, and says plainly when a shut spring next opens. The floor picker is the ladder, with your best floor marked on it.
+- **A dungeon is content.** Floors, energy curve, sets, rotation days and account level are all editable in Admin; adding an eleventh keep is ten fields and a publish.
+- **New balance gates**, per dungeon and enforced in CI: floor 1 falls to a team at the unlock level, the deepest floor falls to a team that has actually farmed for it — and the deepest floor turns an entry-level team back. Without that third gate a rebalance could flatten fifteen floors into one and nothing would notice.
+
+### Fixed
+- The battle route accepted only `campaign`, `tutorial` and `practice`, so no Depths mode could ever have been started through it.
+- Chapter bosses have carried an `enrage` block since P1 that the engine ignored entirely; the ramp is real now.
+- **Content published before a field existed now reads back complete.** Content is normalised when it is written, which leaves every row complete as of the schema it was written under — and short a field the moment a later release adds one. That is a real deploy, not a hypothetical: new code goes live and runs against the last published revision until somebody publishes again. The snapshot now parses each entity through its schema on the way into memory, so the promise the contracts already make — that anything read out of the bundle is a complete definition — holds by construction. A row that cannot be parsed at all is passed through rather than taking the whole snapshot down with it.
+- A manual target could only name battlefield slots 0–3, which a summoning boss can outgrow.
+
 ### Added — Phase P6: progress, unlocks and star chests
 
 The campaign becomes a journey with a shape: stages open in order, clears are remembered, and pushing forward pays.

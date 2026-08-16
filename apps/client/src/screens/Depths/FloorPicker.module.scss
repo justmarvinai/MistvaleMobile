@@ -1,0 +1,93 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 30rem;
+  max-width: 38rem;
+}
+
+.lore {
+  margin: 0;
+  color: $muted;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.sets {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.78rem;
+}
+
+.setsLabel {
+  color: $muted;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-right: $space-1;
+}
+
+.floors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: $space-1;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.floor {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $parchment;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &[data-cleared='true'] {
+    border-left: 2px solid $gold;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $mist;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.floorHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-1;
+}
+
+.floorNumber {
+  font-size: 0.82rem;
+}
+
+.floorStars {
+  color: $gold;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+}
+
+.floorMeta {
+  color: $muted;
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.empty {
+  margin: 0;
+  color: $muted;
+  font-size: 0.85rem;
+}

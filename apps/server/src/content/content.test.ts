@@ -477,4 +477,67 @@ describe.skipIf(!dbUp)('content pipeline', () => {
       expect(afterDiscard.json().data.ok).toBe(true);
     });
   });
+
+  describe('content published before a field existed', () => {
+    /**
+     * The awkward hour after a deploy.
+     *
+     * New server code goes live and runs against whatever revision was published last —
+     * which was normalised under the *old* schema and is therefore missing every field
+     * added since. The snapshot has to fill those in, or the first request that reads one
+     * takes a 500 with the operator none the wiser.
+     */
+    it('reads back complete, with every added field defaulted', async () => {
+      // A stage row exactly as an older release would have stored it: no `gearSetKeys`,
+      // no `unlock`, no `drops.items` — all fields that carry defaults today.
+      await app.db.insert(contentEntries).values({
+        contentType: 'stage',
+        key: 'legacy_stage',
+        state: 'live',
+        data: {
+          key: 'legacy_stage',
+          mode: 'campaign',
+          parentKey: 'chapter_01',
+          number: 1,
+          energyCost: 4,
+          waves: [[{ enemyKey: 'test_enemy', level: 1, slot: 0 }]],
+          rewards: {
+            silverMin: 100,
+            silverMax: 200,
+            playerXp: 10,
+            championXp: 50,
+            drops: { gearChance: 0.5, gearRankMin: 1, gearRankMax: 2 },
+          },
+          starRules: { noDeaths: true, maxTurns: 12 },
+        },
+      });
+
+      await app.content.load();
+
+      const stage = app.content
+        .current()
+        .bundle.stages.find((entry) => entry.key === 'legacy_stage');
+      expect(stage).toBeDefined();
+      expect(stage!.rewards.drops.gearSetKeys).toEqual([]);
+      expect(stage!.rewards.drops.gearSlots).toEqual([]);
+      expect(stage!.rewards.drops.items).toEqual([]);
+      expect(stage!.unlock).toEqual({});
+      expect(stage!.difficulty).toBe('normal');
+    });
+
+    it('passes an unparseable row through rather than refusing to build at all', async () => {
+      await app.db.insert(contentEntries).values({
+        contentType: 'item',
+        key: 'broken_item',
+        state: 'live',
+        data: { key: 'broken_item', category: 'not-a-category' },
+      });
+
+      // One bad row must not take the snapshot — and with it the whole game — down.
+      await expect(app.content.load()).resolves.toBeDefined();
+      expect(app.content.current().bundle.items.some((item) => item.key === 'broken_item')).toBe(
+        true,
+      );
+    });
+  });
 });

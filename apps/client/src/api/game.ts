@@ -10,6 +10,7 @@ import type {
   ShopStock,
   SkillUpgradeRequest,
   Chronicle,
+  Depths,
   Progress,
   SummonBanner,
   SummonHistoryEntry,
@@ -29,6 +30,7 @@ import { api } from './client';
 export type {
   ChampionDetail,
   Chronicle,
+  Depths,
   GearInstance,
   InventoryItem,
   RosterChampion,
@@ -197,6 +199,8 @@ export const gameApi = {
 
   progress: () =>
     api.get<{ progress: Progress }>(ROUTES.progress.stages).then((data) => data.progress),
+
+  depths: () => api.get<{ depths: Depths }>(ROUTES.depths.overview).then((data) => data.depths),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

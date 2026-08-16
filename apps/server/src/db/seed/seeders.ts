@@ -1,5 +1,7 @@
 import { CONTENT_LOAD_ORDER, CONTENT_REGISTRY, type ContentType } from '@mistvale/shared';
 import { CAMPAIGN_CHAPTERS, CAMPAIGN_STAGES } from './data/campaign';
+import { DEPTHS_STAGES, DUNGEONS } from './data/depths';
+import { DEPTHS_ENEMIES, DEPTHS_SKILLS } from './data/depths-enemies';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
 import { ENEMIES, ENEMY_SKILLS } from './data/enemies';
@@ -30,23 +32,26 @@ export function buildSeedContent(): SeedContent[] {
     faction: FACTIONS.map((data) => ({ key: data.key, data })),
     status: STATUSES.map((data) => ({ key: data.key, data })),
     asset: ASSETS.map((data) => ({ key: data.key, data })),
-    skill: [...SHOWCASE_SKILLS, ...EXTENDED_SKILLS, ...ENEMY_SKILLS].map((data) => ({
-      key: data.key,
-      data,
-    })),
+    skill: [...SHOWCASE_SKILLS, ...EXTENDED_SKILLS, ...ENEMY_SKILLS, ...DEPTHS_SKILLS].map(
+      (data) => ({
+        key: data.key,
+        data,
+      }),
+    ),
     // The showcase seven have final art (CONTENT_PLAN §1); the rest of the roster and
     // the food units are art-pending and share the placeholder model (§1b).
     champion: [...SHOWCASE_CHAMPIONS, ...EXTENDED_CHAMPIONS].map((data) => ({
       key: data.key,
       data,
     })),
-    enemy: ENEMIES.map((data) => ({ key: data.key, data })),
+    enemy: [...ENEMIES, ...DEPTHS_ENEMIES].map((data) => ({ key: data.key, data })),
     gearSet: GEAR_SETS.map((data) => ({ key: data.key, data })),
     gearSlot: GEAR_SLOTS.map((data) => ({ key: data.key, data })),
     gearStat: GEAR_STATS.map((data) => ({ key: data.key, data })),
     item: ITEMS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
-    stage: CAMPAIGN_STAGES.map((data) => ({ key: data.key, data })),
+    dungeon: DUNGEONS.map((data) => ({ key: data.key, data })),
+    stage: [...CAMPAIGN_STAGES, ...DEPTHS_STAGES].map((data) => ({ key: data.key, data })),
     summonPool: SUMMON_POOLS.map((data) => ({ key: data.key, data })),
     shop: SHOPS.map((data) => ({ key: data.key, data })),
     gameConfig: GAME_CONFIG.map((data) => ({ key: data.key, data })),

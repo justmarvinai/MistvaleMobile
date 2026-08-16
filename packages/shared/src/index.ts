@@ -7,6 +7,7 @@ export * from './gear';
 export * from './champion';
 export * from './shop';
 export * from './summon';
+export * from './depths';
 export * from './routes';
 export * from './content/index';
 export * from './openapi';

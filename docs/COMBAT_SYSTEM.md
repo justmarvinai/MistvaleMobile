@@ -72,7 +72,18 @@ final = × (1 ± 0.05 variance ⚙) × (1 + Weaken/Strengthen etc.)
 - Arena-only anti-CC rule ⚙ 〔dev〕: +25% resist chance per consecutive hard-CC (Stun/Freeze/Sleep/Provoke) landed on the same unit — perma-stun protection for a small meta.
 
 ## 8. Bosses
-Composable flags per `enemy_defs.boss_mechanics` (all engine-known): `almightyImmunity` (immune to Stun/Freeze/Sleep/Provoke — source-faithful baseline for every boss), `tmReductionImmune` (Broodwyrm), `hitShield {hits, punish}` (Cinderspire Ashpriest — Fire-Knight-style hit-counter shield), `thresholdRetaliation {perHpPct, skipIfDot}` (Frostgrave Sentinel — Ice-Golem-style), `addSummon {unitKey, perTurn, cap, devourHeal}` (Silkmire Broodmother — Spider-style), `enrage {afterTurn, dmgPerTurn}` (Proving Grounds), fixed openers. Bosses are single-unit boss waves with 3–5× stat budgets ⚙. Full per-dungeon assignments in CONTENT_PLAN_EA01.md.
+Composable flags per `enemy_defs.boss_mechanics`, all engine-known and all **implemented since P6**. Bosses are single-unit boss waves with 3–5× stat budgets ⚙; full per-dungeon assignments in CONTENT_PLAN_EA01.md.
+
+| Flag | Behaviour | Where |
+|---|---|---|
+| `almightyImmunity` | Immune to Stun/Freeze/Sleep/Provoke. Source-faithful baseline for every boss — a boss that can be switched off has no mechanic. | Every boss |
+| `tmReductionImmune` | Turn-meter depletion is refused outright (a `statusResisted … immune` event). The answer is damage, not tempo. | Broodwyrm |
+| `hitShield {hits, punishTmPct}` | A **persistent** hit counter. Every landed hit spends one count and is fully absorbed; the count carries across the boss's turns, so chipping accumulates. Reach the boss's turn with it standing and the whole opposing team loses `punishTmPct` meter. Empty it first and the boss **forfeits its next turn** and stays hurtable through it, restoring to full on the turn after. DoT ticks are true damage: they pass through the shield without touching the counter — the slow way in, next to the fast one. | Cinderspire Ashpriest (6 / 9 / 12 hits by floor band) |
+| `thresholdRetaliation {perHpPct, skipIfDot}` | Every time the boss's HP falls through another `perHpPct` band of its maximum, it answers with a free A1 at whoever struck it — once per band crossed, so a single enormous blow owes several. `skipIfDot` exempts damage-over-time. Cannot chain: a retaliation never provokes another. | Rimebound Sentinel (10%) |
+| `addSummon {unitKey, perTurn, cap}` | At the start of its turn the boss calls up to `perTurn` adds while fewer than `cap` of them are alive. Adds take the lowest free slot on their side (a slot held by a corpse may be reused; the summon event carries a full snapshot). | Broodmother Ssarethi (2/turn, cap 6) |
+| `enrage {afterTurn, dmgPctPerTurn}` | After `afterTurn` unit-turns, the boss's outgoing damage grows linearly and uncapped. Announced once, then silent. Guarantees no fight can be stalled to the 300-turn cap. | Pitmaster Drazhak (turn 12, +8%/turn); every keep-boss at turn 40; chapter bosses at 20–24 |
+
+Each of these carries a `boss*` event so the client can present it: `bossShield` (count changed), `bossPunish`, `bossExposed`, `bossRetaliate`, `bossSummon`, `bossEnraged`.
 
 ## 9. Masteries (source-faithful structure, own content)
 - Three trees — **Onslaught / Bulwark / Insight** — 6 tiers each. Per champion: **only 2 of the 3 trees may be activated**; picks capped at **15 + nothing extra**: 2× Tier-1, 3 each of Tiers 2–5, exactly **1 Tier-6 capstone** (across both active trees).
@@ -97,7 +108,7 @@ A skill = `targeting` + ordered `components[]`. The nine component types the eng
 | `extraTurn` | — |
 | `cooldown` | `delta` (−3…+3), `target` |
 
-Every component also takes an optional `chance` (0–1, rolled before the ACC/RES contest) and an optional `condition` — `targetHasStatus` · `targetMissingStatus` · `selfHpBelow` · `targetHpBelow` · `alliesDead`. Multi-hit is the `hits` field on `damage` rather than a wrapper component, and conditionals are the per-component `condition` rather than a nesting one: both keep `components[]` a flat list, which is what lets the Admin composer render one form per component and the engine switch on `type` without recursion. Boss `summon` is reserved, not yet implemented.
+Every component also takes an optional `chance` (0–1, rolled before the ACC/RES contest) and an optional `condition` — `targetHasStatus` · `targetMissingStatus` · `selfHpBelow` · `targetHpBelow` · `alliesDead`. Multi-hit is the `hits` field on `damage` rather than a wrapper component, and conditionals are the per-component `condition` rather than a nesting one: both keep `components[]` a flat list, which is what lets the Admin composer render one form per component and the engine switch on `type` without recursion. Boss add-summoning is not a component: it is a `boss_mechanics` flag (§8), because it belongs to the unit rather than to any one skill.
 
 Plus cooldowns, tome upgrade ladders (`dmg+5% | dmg+10% | chance+5..15% | cooldown−1`), AI hints, animation binding. The Admin skill composer edits exactly this shape; publish-validation checks every component against the engine registry.
 〔dev, owner-approved〕 Tomes are **player-choice** (pick which skill to book), not random.
@@ -108,9 +119,10 @@ Priority: forced openers → highest-slot skill off cooldown whose hint passes (
 ## 13. Determinism, replay, audit
 `BattleState` pure data; `advance(state, rng)` pure; xoshiro128** seeded per battle (seed persisted) ⇒ byte-identical replays. The event log (ARCHITECTURE §6.4) is the only client contract — every floater/bar/animation derives from events carrying full payloads; the client computes no game math. Golden-replay tests pin behavior; intentional changes regenerate goldens in reviewed commits.
 
-## 14. Initial tuning targets (balance-sim gates before P2 exits)
+## 14. Initial tuning targets (balance-sim gates, enforced in CI)
 - Chosen starter (lvl 1, tutorial gear) clears 1-1…1-3 Normal on auto ≥95%.
 - At par recommended power, each chapter boss falls ≥70% on auto.
+- **The Depths (P6):** every dungeon's floor 1 falls ≥70% to a team at that dungeon's unlock level; its deepest floor falls ≥50% to a fully levelled, relic-wearing team, and turns back an entry-level team ≥80% of the time. The third gate is what keeps a ladder a ladder — without it, a rebalance could flatten fifteen floors into one.
 - Brutal 12-6 farm team (6★, +12 relics) clears in ≤14 sim-turns ≥97% (the "farmer carries 3 food" loop must work).
 - Every EA champion sims within 85–115% of its role benchmark (identity via mechanics, not raw stat gaps).
 - Arena: among seeded bot teams, no single EA champion appears in >40% of winning comps at equal power (soft diversity check).

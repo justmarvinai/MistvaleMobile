@@ -231,12 +231,48 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     }
   }
 
+  for (const [key, entity] of parsed.get('dungeon') ?? []) {
+    const dungeon = entity as {
+      kind: string;
+      setKeys: string[];
+      itemKeys: string[];
+      bossEnemyKey?: string;
+      openDays: number[];
+    };
+
+    dungeon.setKeys.forEach((setKey, index) => {
+      reference({ contentType: 'dungeon', key, path: `setKeys.${index}` }, 'gearSet', setKey);
+    });
+    dungeon.itemKeys.forEach((itemKey, index) => {
+      reference({ contentType: 'dungeon', key, path: `itemKeys.${index}` }, 'item', itemKey);
+    });
+    if (dungeon.bossEnemyKey) {
+      reference(
+        { contentType: 'dungeon', key, path: 'bossEnemyKey' },
+        'enemy',
+        dungeon.bossEnemyKey,
+      );
+    }
+
+    // A rotation that names the same day twice is not wrong so much as confused, and it
+    // would make the hub's "next open" line say something silly.
+    if (new Set(dungeon.openDays).size !== dungeon.openDays.length) {
+      errors.push({
+        severity: 'error',
+        contentType: 'dungeon',
+        key,
+        path: 'openDays',
+        message: 'A rotation day is listed twice.',
+      });
+    }
+  }
+
   for (const [key, entity] of parsed.get('stage') ?? []) {
     const stage = entity as {
       mode: string;
       parentKey: string;
       waves: { enemyKey: string; slot: number }[][];
-      rewards: { drops?: { items?: { itemKey: string }[] } };
+      rewards: { drops?: { items?: { itemKey: string }[]; gearSetKeys?: string[] } };
     };
 
     if (stage.mode === 'campaign') {
@@ -246,6 +282,20 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
         stage.parentKey,
       );
     }
+
+    // Every Depths mode hangs off a dungeon, so a floor whose keep was deleted would be a
+    // stage nothing can reach — invisible on the hub, and still fightable by key.
+    if (stage.mode === 'dungeon' || stage.mode === 'springs' || stage.mode === 'proving') {
+      reference({ contentType: 'stage', key, path: 'parentKey' }, 'dungeon', stage.parentKey);
+    }
+
+    (stage.rewards.drops?.gearSetKeys ?? []).forEach((setKey, index) => {
+      reference(
+        { contentType: 'stage', key, path: `rewards.drops.gearSetKeys.${index}` },
+        'gearSet',
+        setKey,
+      );
+    });
 
     stage.waves.forEach((wave, waveIndex) => {
       const slots = new Set<number>();

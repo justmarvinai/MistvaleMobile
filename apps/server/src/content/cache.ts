@@ -50,6 +50,7 @@ const EMPTY_BUNDLE_TYPES = {
   gearStats: 'gearStat',
   items: 'item',
   campaignChapters: 'campaignChapter',
+  dungeons: 'dungeon',
   stages: 'stage',
   summonPools: 'summonPool',
   shops: 'shop',
@@ -283,7 +284,7 @@ function buildSnapshot(
 ): ContentSnapshot {
   const frozen = new Map<ContentType, ReadonlyMap<string, unknown>>();
   for (const contentType of CONTENT_TYPES) {
-    frozen.set(contentType, new Map(byType.get(contentType) ?? []));
+    frozen.set(contentType, new Map(fillDefaults(contentType, byType.get(contentType))));
   }
 
   const sorted = (contentType: ContentType): unknown[] =>
@@ -318,6 +319,34 @@ function buildSnapshot(
   const etag = `W/"content-${rev}-${createHash('sha1').update(bundleJson).digest('hex').slice(0, 16)}"`;
 
   return { rev, publishedAt, byType: frozen, bundle, bundleJson, etag };
+}
+
+/**
+ * Parses stored content through its schema on the way into the snapshot.
+ *
+ * Content is normalised when it is *written*, which makes every row complete as of the
+ * schema it was written under — and incomplete the moment a later release adds a field
+ * with a default. That gap is a real deploy, not a hypothetical: new code goes live and
+ * runs against the last published revision until an operator publishes again, and until
+ * then `drops.gearSetKeys` is simply absent.
+ *
+ * Parsing here closes it, and makes the promise the entity contracts already make — that
+ * anything read out of the bundle is a complete `…Def` — true by construction rather than
+ * by convention. An entity that cannot be parsed at all is passed through untouched: the
+ * publish validator is the gate that keeps broken content out, and a snapshot that
+ * refused to build would take the whole game down over one bad row.
+ */
+function fillDefaults(
+  contentType: ContentType,
+  entities: ReadonlyMap<string, unknown> | undefined,
+): Map<string, unknown> {
+  const schema = CONTENT_REGISTRY[contentType].schema;
+  const parsed = new Map<string, unknown>();
+  for (const [key, data] of entities ?? []) {
+    const result = schema.safeParse(data);
+    parsed.set(key, result.success ? result.data : data);
+  }
+  return parsed;
 }
 
 /** Shallow field-level diff; nested objects are compared as wholes. */

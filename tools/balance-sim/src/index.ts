@@ -1,8 +1,10 @@
 import {
   campaignStages,
+  dungeonFloors,
   loadContent,
   simulateStage,
   starterKeys,
+  withRelics,
   type LoadedContent,
   type StageResult,
   type TeamSpec,
@@ -118,7 +120,64 @@ function main(): void {
     });
   }
 
-  // ── Gate 3: the headless performance budget ─────────────────────────────
+  // ── Gate 3: the Depths open where they say they do, and end as a wall ───
+  // Two questions per keep. Floor 1 has to fall to a team that has just reached the
+  // dungeon's unlock level, or the door is a lie. The deepest floor has to fall to a
+  // fully levelled team, or the treadmill has no end — but it is allowed to be hard,
+  // which is why the bar there is lower.
+  for (const dungeon of [...content.dungeons.values()].sort((a, b) => a.sortOrder - b.sortOrder)) {
+    const floors = dungeonFloors(content, dungeon.key);
+    const first = floors[0];
+    const deepest = floors[floors.length - 1];
+    if (!first || !deepest) continue;
+
+    const entry = parTeam(content).map((member) => ({
+      ...member,
+      level: Math.min(60, dungeon.unlockLevel * 2 + 6),
+      rank: 4,
+    }));
+    // The deepest floor is measured against a team that has actually farmed for it:
+    // levelled, ranked, ascended and wearing relics. An unequipped champion is not who
+    // walks into floor 15, and gating on one would tune the Depths for nobody.
+    const maxed = withRelics(
+      content,
+      parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 4 })),
+    );
+
+    const shallow = simulateStage(content, first.key, entry, RUNS);
+    const deep = simulateStage(content, deepest.key, maxed, RUNS);
+    table(
+      `${dungeon.name} — floor ${first.number} (at unlock) and floor ${deepest.number} (maxed)`,
+      [shallow, deep],
+    );
+
+    gates.push({
+      name: `${dungeon.key}-entry`,
+      detail: 'floor 1 falls to a team at the dungeon’s unlock level at least 70% of the time',
+      passed: shallow.winRate >= 0.7,
+      measured: `${(shallow.winRate * 100).toFixed(1)}%`,
+    });
+    gates.push({
+      name: `${dungeon.key}-deepest`,
+      detail: 'the deepest floor falls to a fully levelled team at least 50% of the time',
+      passed: deep.winRate >= 0.5,
+      measured: `${(deep.winRate * 100).toFixed(1)}%`,
+    });
+
+    // The other half of a ladder: it has to be *a ladder*. If the team that just unlocked
+    // the dungeon can walk to the bottom of it, the fifteen floors between are decoration.
+    if (floors.length > 4) {
+      const overreach = simulateStage(content, deepest.key, entry, RUNS);
+      gates.push({
+        name: `${dungeon.key}-wall`,
+        detail: 'the deepest floor turns back an entry-level team at least 80% of the time',
+        passed: overreach.winRate <= 0.2,
+        measured: `${(overreach.winRate * 100).toFixed(1)}% got through`,
+      });
+    }
+  }
+
+  // ── Gate 4: the headless performance budget ─────────────────────────────
   const perf = simulateStage(content, opening[0]!.key, parTeam(content), Math.max(RUNS, 100));
   gates.push({
     name: 'performance',

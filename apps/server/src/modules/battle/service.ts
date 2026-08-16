@@ -21,6 +21,7 @@ import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
 import { computeEnergy } from '../../lib/progression';
 import type { ContentCache } from '../../content/cache';
+import * as depths from '../depths/service';
 import * as gear from '../gear/service';
 import * as progress from '../progress/service';
 import * as chronicle from '../summon/service';
@@ -157,6 +158,10 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       const chapters = new Map(
         snapshot.bundle.campaignChapters.map((entry) => [entry.key, entry.number]),
       );
+      // The Depths' own gates — account level and the rotation day — ride along here, so
+      // a spring that is shut on a Tuesday refuses the fight rather than merely hiding it.
+      const context = depths.contextFor(player, snapshot.bundle.config, new Date());
+      const gates = depths.gates(snapshot.bundle.dungeons, player.level, context.rotation);
       const check = progress.checkUnlock(
         stage,
         player.level,
@@ -166,6 +171,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
             stages.get(stageKey),
             chapters.get(stages.get(stageKey)?.parentKey ?? ''),
           ),
+        (parentKey) => gates.get(parentKey) ?? null,
       );
       if (!check.open) throw new AppError('LOCKED_CONTENT', check.reason ?? 'That stage is shut.');
     }
@@ -513,11 +519,16 @@ async function rollDrops(
 
   if (band && band.gearChance > 0 && lootRng.chance(band.gearChance)) {
     const gearContext = gear.gearContextFrom(snapshot.bundle);
+    // A stage that names its own sets wins; otherwise the chapter's single set applies.
+    // Campaign stages inherit — one chapter, one set, one farm — while a dungeon floor
+    // has no chapter and carries the four sets its keep is known for.
     const chapter = snapshot.bundle.campaignChapters.find((entry) => entry.key === stage.parentKey);
+    const setKeys =
+      band.gearSetKeys.length > 0 ? band.gearSetKeys : chapter?.setKey ? [chapter.setKey] : [];
     const request = gear.rollBand(
       lootRng,
       {
-        setKeys: chapter?.setKey ? [chapter.setKey] : [],
+        setKeys,
         slots: band.gearSlots,
         rankMin: band.gearRankMin,
         rankMax: band.gearRankMax,

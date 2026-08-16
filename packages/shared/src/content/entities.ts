@@ -163,7 +163,10 @@ export type AssetDef = z.infer<typeof assetDefSchema>;
 
 /** Base stats at ★6 / level 60 / ascension 6; lower tiers derive from these. */
 export const baseStatsSchema = z.object({
-  hp: z.number().int().min(100).max(60_000),
+  // The ceiling is a guard against a slipped zero, not a design limit: it has to clear the
+  // heaviest thing the game fights, which since the Depths is a keep-boss rather than a
+  // chapter warlord. Champions live an order of magnitude below it.
+  hp: z.number().int().min(100).max(250_000),
   atk: z.number().int().min(10).max(5_000),
   def: z.number().int().min(10).max(5_000),
   spd: z.number().int().min(50).max(200),
@@ -480,6 +483,45 @@ export const waveUnitSchema = z.object({
 
 export const STAGE_MODES = ['campaign', 'dungeon', 'springs', 'proving', 'tutorial'] as const;
 
+// ── The Depths ──────────────────────────────────────────────────────────────
+
+/**
+ * What kind of keep a dungeon is.
+ *
+ * The three kinds differ in what they pay and when they open, not in how they are fought:
+ * a floor is a stage like any other, so everything the campaign already does — unlocks,
+ * stars, clears, first-clear bonuses — applies here without a second implementation.
+ */
+export const DUNGEON_KINDS = ['relic', 'proving', 'springs'] as const;
+export type DungeonKind = (typeof DUNGEON_KINDS)[number];
+
+export const dungeonDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(64),
+  kind: z.enum(DUNGEON_KINDS),
+  lore: z.string().max(2000).default(''),
+  region: z.string().max(64).default(''),
+  backgroundAsset: z.string().max(64).default(''),
+  /** Short line under the name on the Depths hub. */
+  tagline: z.string().max(120).default(''),
+  floors: z.number().int().min(1).max(30),
+  /** Relic sets this dungeon's floors drop, for the hub's "what's down there" line. */
+  setKeys: z.array(contentKeySchema).default([]),
+  /** Items the dungeon is farmed for — essences, emblems. Display only; drops are per-floor. */
+  itemKeys: z.array(contentKeySchema).default([]),
+  /** The name at the bottom. Display only; the floor's waves decide what is fought. */
+  bossEnemyKey: contentKeySchema.optional(),
+  /**
+   * Weekdays this dungeon opens on, `0` = Sunday. Empty means every day.
+   *
+   * The rotation is what turns the Essence Springs from a queue into a week: an operator
+   * moving Mist off Sunday is an edit and a publish, never a deploy.
+   */
+  openDays: z.array(z.number().int().min(0).max(6)).max(7).default([]),
+  /** Account level the whole dungeon opens at. Floor 1 inherits it; deeper floors chain. */
+  unlockLevel: z.number().int().min(1).max(60).default(1),
+});
+export type DungeonDef = z.infer<typeof dungeonDefSchema>;
+
 export const stageDefSchema = contentMetaSchema.extend({
   mode: z.enum(STAGE_MODES),
   /** Chapter or dungeon this stage belongs to. */
@@ -511,6 +553,15 @@ export const stageDefSchema = contentMetaSchema.extend({
         gearRarityWeights: z.partialRecord(z.enum(RARITIES), z.number().min(0)).default({}),
         /** Restricts which slots can drop here. Empty means any. */
         gearSlots: z.array(z.enum(GEAR_SLOTS)).default([]),
+        /**
+         * Which sets can drop, when the stage decides for itself.
+         *
+         * A campaign stage leaves this empty and inherits its chapter's single set — the
+         * source game's arrangement, and what makes a chapter a farm for one thing. A
+         * dungeon floor has no chapter to inherit from and lists its own four, which is
+         * what makes the Depths the place you go for a *specific* set.
+         */
+        gearSetKeys: z.array(contentKeySchema).default([]),
         /** Stackable items, each rolled independently. */
         items: z
           .array(
@@ -611,6 +662,7 @@ export type GearSetDefInput = z.input<typeof gearSetDefSchema>;
 export type GearSlotDefInput = z.input<typeof gearSlotDefSchema>;
 export type GearStatDefInput = z.input<typeof gearStatDefSchema>;
 export type CampaignChapterDefInput = z.input<typeof campaignChapterDefSchema>;
+export type DungeonDefInput = z.input<typeof dungeonDefSchema>;
 export type StageDefInput = z.input<typeof stageDefSchema>;
 export type ItemDefInput = z.input<typeof itemDefSchema>;
 export type ShopDefInput = z.input<typeof shopDefSchema>;

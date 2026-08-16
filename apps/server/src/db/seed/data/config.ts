@@ -430,6 +430,13 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Local hour at which quests, shops and rotations roll over.',
   ),
   entry(
+    'depths.springsGraceDays',
+    7,
+    'ops',
+    'Springs grace period (days)',
+    'A new account sees every Essence Spring open, rotation or not, for this many days after registering — so a first week is never spent waiting for a Tuesday.',
+  ),
+  entry(
     'ops.dailyResetTimezone',
     'Europe/Berlin',
     'ops',

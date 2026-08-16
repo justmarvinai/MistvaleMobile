@@ -145,6 +145,19 @@ export function eventDuration(event: BattleEvent): number {
     case 'reflected':
     case 'unkillable':
       return 280;
+    // A boss beat is a moment, not bookkeeping: the shield falling and the adds arriving
+    // are the two things a player has to notice to understand the fight.
+    case 'bossShield':
+      return event.up ? 120 : 460;
+    case 'bossPunish':
+    case 'bossExposed':
+      return 460;
+    case 'bossRetaliate':
+      return 300;
+    case 'bossSummon':
+      return 520;
+    case 'bossEnraged':
+      return 620;
     case 'died':
       return 420;
     case 'battleEnd':
@@ -296,6 +309,49 @@ export function applyEvent(
       if (!unit) break;
       unit.buffs = unit.buffs.filter((chip) => chip.key !== event.status);
       unit.debuffs = unit.debuffs.filter((chip) => chip.key !== event.status);
+      break;
+    }
+
+    case 'bossShield': {
+      view.floaters.push({
+        id: floaterId++,
+        ref: event.unit,
+        kind: event.up ? 'shield' : 'status',
+        text: event.up ? `WARD ${event.hits}` : 'WARD BROKEN',
+      });
+      break;
+    }
+
+    case 'bossPunish': {
+      view.banner = { id: bannerId++, text: 'The ward holds', tone: 'wave' };
+      break;
+    }
+
+    case 'bossExposed': {
+      view.floaters.push({ id: floaterId++, ref: event.unit, kind: 'status', text: 'EXPOSED' });
+      break;
+    }
+
+    case 'bossRetaliate': {
+      view.floaters.push({ id: floaterId++, ref: event.unit, kind: 'status', text: 'RETALIATE' });
+      break;
+    }
+
+    case 'bossSummon': {
+      // Adds take their refs outright: an arriving unit replaces whatever stood in that
+      // slot, which is how a dead spawn's place can be filled without confusing the view.
+      for (const arrival of event.summoned) {
+        const existing = view.enemies.findIndex((unit) => sameRef(unit.ref, arrival.ref));
+        const visual = toVisual(arrival);
+        if (existing >= 0) view.enemies[existing] = visual;
+        else view.enemies.push(visual);
+      }
+      view.banner = { id: bannerId++, text: 'The brood answers', tone: 'wave' };
+      break;
+    }
+
+    case 'bossEnraged': {
+      view.banner = { id: bannerId++, text: 'Enraged', tone: 'defeat' };
       break;
     }
 

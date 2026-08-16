@@ -133,7 +133,9 @@ Per stat × rank: base value, per-upgrade-level growth (main), roll min/max (sub
 | first_clear_bonus | jsonb | one-time rewards |
 
 ### `dungeon_defs`
-`key (wyrms_hollow, frostgrave_vault, cinderspire, silkmire_depths, proving_grounds, spring_ember|tide|verdant|mist, spring_pure), name, lore, boss_enemy_key, floors int (15 at EA), open_days jsonb (springs rotation), featured_drops jsonb, background_asset`
+`key (wyrms_hollow, frostgrave_vault, cinderspire, silkmire_depths, proving_grounds, spring_ember|tide|verdant|mist, spring_pure), name, kind (relic|proving|springs), lore, region, tagline, background_asset, floors int (15 relic / 10 proving & springs at EA), set_keys jsonb, item_keys jsonb, boss_enemy_key, open_days jsonb (weekday indices, `0` = Sunday; empty = every day), unlock_level int`
+
+The rotation and the account level are the only two things a dungeon knows that a stage does not; everything else about fighting a floor is the stage's own business. `open_days` is content rather than code precisely because "Mist on Sunday only" is a balance decision, not a structural one.
 
 ### `drop_table_defs` + `drop_table_entries`
 Weighted rolls, engine-agnostic: `entries: {ref_type: gear|item|silver|champion, ref/params (set, slot?, rank, rarity_weights, level_range | item_key, qty_range), weight, rolls}`. Publish-validated (weights > 0, refs exist). Reused by stages, chests, events, login calendar, shops.
@@ -238,8 +240,8 @@ Stock is rolled per player and **stored**, not derived on read: what a player is
 ### `campaign_progress`
 `player_id, stage_key, stars (0-3), best_clear jsonb (turns, team), clears int, unique(player_id, stage_key)` + claimed star-tier flags on a per-chapter row (`chapter_star_claims`).
 
-### `dungeon_progress`
-`player_id, dungeon_key, highest_floor, clears_by_floor jsonb`
+### `dungeon_progress` — **not built; deliberately**
+A floor *is* a stage, so its clear is already a `stage_progress` row with `parent_key` set to the dungeon. "Deepest floor" is the largest floor number among those rows and "clears" is their sum, both derived on read. A second table would be the same fact written twice, and the second copy is the one that drifts.
 
 ### `player_quests` / `player_missions`
 `player_id, quest_key, period_anchor date (for daily/weekly/monthly instance), progress jsonb, completed_at, claimed_at`. Missions: `player_id, mission_key, progress, completed_at, claimed_at`. Progress events flow through one `ProgressService.track(tx, playerId, action, params)` fan-out (quests + missions + events + tutorial all subscribe — one integration point for every future goal type).

@@ -73,7 +73,7 @@
 | GET `/arena/leaderboard` | Top N + own rank neighborhood (bots included). |
 
 ### The Depths, quests, events, meta
-| GET `/depths` | Dungeon list, open springs today, own floor progress, proving grounds state. |
+| GET `/depths` | Every published dungeon with: whether it is open right now (account level *and* today's rotation), why not if not, which weekday it next opens, the deepest floor reached and total clears. Plus the server's game-day and weekday, and the new-account grace period's end. Per-floor stars and unlocks come from `/player/progress`, which returns every mode's stages. |
 | GET `/quests` | Daily/weekly/monthly with progress + daily-chest meter. POST `/quests/:key/claim`. |
 | GET `/missions` | Chain state. POST `/missions/:key/claim`. |
 | GET `/events` | Active events, points, milestones. POST `/events/:key/claim` `{milestone}`. |

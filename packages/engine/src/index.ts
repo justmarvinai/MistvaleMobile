@@ -49,6 +49,15 @@ export {
 
 export { candidatesFor, living, resolveTargets, unitAt } from './targeting';
 
+export {
+  MAX_SIDE_SLOTS,
+  bandsCrossed,
+  enrageMultiplier,
+  freeSlots,
+  shieldStanding,
+  summonAllowance,
+} from './boss';
+
 export { chooseSkill, hintsAllow, type SkillChoice } from './ai';
 
 export {
@@ -71,6 +80,7 @@ export type {
   BattleState,
   BattleUnit,
   BossFlags,
+  BossRuntime,
   HitQuality,
   Side,
   StatusInstance,

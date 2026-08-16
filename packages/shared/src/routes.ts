@@ -95,6 +95,10 @@ export const ROUTES = {
     /** Stars, clears and which stages are open — everything the maps render. */
     stages: '/player/progress',
   },
+  depths: {
+    /** The dungeon list with today's rotation and how deep the player has been. */
+    overview: '/depths',
+  },
   battle: {
     start: '/battles/start',
     /** The battle in progress, or null. Resume support after a refresh or crash. */
