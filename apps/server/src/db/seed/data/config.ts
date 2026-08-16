@@ -133,6 +133,48 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'However high resistance climbs, debuffs still land occasionally.',
   ),
   entry(
+    'combat.accuracyBonusPerPoint',
+    0.0025,
+    'combat',
+    'Land chance gained per point of accuracy above resistance',
+    'Added to the parity chance for each point of ACC over RES, up to the bonus cap.',
+  ),
+  entry(
+    'combat.accuracyMaxBonus',
+    0.07,
+    'combat',
+    'Cap on the accuracy bonus',
+    'At the default 0.0025 per point this caps out at 28 accuracy over resistance.',
+  ),
+  entry(
+    'combat.accuracyPenaltyPerPoint',
+    0.01,
+    'combat',
+    'Land chance lost per point of resistance above accuracy',
+    'Each point of RES over ACC costs roughly one percentage point of land chance.',
+  ),
+  entry(
+    'combat.poisonStackCap',
+    5,
+    'combat',
+    'Maximum poison stacks per unit',
+    'Poison is the one status that stacks. The source game allows ten; five suits a smaller roster.',
+  ),
+  entry(
+    'combat.effectBarCap',
+    10,
+    'combat',
+    'Maximum buffs or debuffs per unit',
+    'Buffs and debuffs are capped separately. A full bar rejects further effects of that kind.',
+  ),
+  entry(
+    'combat.hpBurnSplashPct',
+    3,
+    'combat',
+    'HP Burn splash to allies',
+    "Share of the burning unit's max HP dealt to each of its allies when the burn ticks.",
+  ),
+  entry(
     'combat.waveHealPct',
     10,
     'combat',
@@ -176,6 +218,39 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'progression',
     'Starting roster slots',
     'How many champions a new account can hold.',
+  ),
+
+  // ── Champion stat derivation (COMBAT_SYSTEM §1) ───────────────────────────
+  // A champion's authored base_stats are its values at ★6 / level 60 / ascension 6.
+  // Everything below that is derived by scaling down, so one authored anchor covers
+  // every tier a champion can be in.
+  entry(
+    'champion.levelCurveExponent',
+    1.35,
+    'progression',
+    'Level curve exponent',
+    "Primary stats scale as (level / 60) ^ exponent, then blend with the level-1 floor. Higher means more of a champion's power arrives late.",
+  ),
+  entry(
+    'champion.levelFloorPct',
+    18,
+    'progression',
+    'Level 1 share of final stats',
+    'What percentage of its level-60 primaries a champion has at level 1, before rank.',
+  ),
+  entry(
+    'champion.rankMultipliers',
+    [0.42, 0.55, 0.68, 0.79, 0.9, 1],
+    'progression',
+    'Star rank multipliers',
+    'One entry per star, ★1 first. Multiplies HP, ATK and DEF. ★6 must be 1.0 — it is the authored anchor.',
+  ),
+  entry(
+    'champion.ascensionBonusPct',
+    2,
+    'progression',
+    'Ascension bonus per level',
+    'Each ascension level adds this percentage to HP, ATK and DEF.',
   ),
 
   // ── Economy ───────────────────────────────────────────────────────────────

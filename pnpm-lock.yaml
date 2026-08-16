@@ -161,6 +161,22 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
 
+  tools/balance-sim:
+    dependencies:
+      '@mistvale/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
+      '@mistvale/server':
+        specifier: workspace:*
+        version: link:../../apps/server
+      '@mistvale/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.12
+
   tools/icon-fetch:
     devDependencies:
       tsx:

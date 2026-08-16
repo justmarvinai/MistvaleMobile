@@ -183,7 +183,10 @@ export const ENEMY_SKILLS: SkillDefInput[] = [
   },
 ];
 
-/** Base stats are quoted at level 20; stages scale them by level and star rank. */
+/**
+ * Base stats are quoted at level 60 — the same anchor convention champions use — and a
+ * stage scales them down to whatever level its wave asks for.
+ */
 const enemy = (
   key: string,
   name: string,

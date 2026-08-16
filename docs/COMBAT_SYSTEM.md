@@ -15,6 +15,8 @@
 
 **Stat pipeline (order is normative):** `base(level, rank, ascension)` → `+ flat gear` → `+ %-gear on base` → `+ set bonuses` → `+ Hall of Valor (element-keyed)` → `+ masteries` → `+ aura` → *battle-time* `× buffs/debuffs`. Base growth: per-champion anchors in `champion_defs.base_stats` are values at ★6/60/Asc6; level curve geometric (⚙ exponent), rank multiplier table ⚙ (★1 ≈ 0.42 … ★6 = 1.00), ascension +2% primaries per level ⚙.
 
+**Enemies** follow the same convention from the other end: `enemy_defs.base_stats` are the values at `anchor_level` (default 60), and a stage scales them by `growth ^ (level − anchor_level)`. Authoring at the tier you can picture and deriving the rest is what keeps one lizard archetype serving chapter 1 and chapter 12.
+
 **Power score** (informational only): `HP/30 + ATK×2 + DEF×2 + SPD×8 + C.RATE×6 + C.DMG×3 + RES×2 + ACC×2 + Σ gearLevel×15` ⚙.
 
 ## 2. Battle structure & waves
@@ -81,7 +83,23 @@ Composable flags per `enemy_defs.boss_mechanics` (all engine-known): `almightyIm
 One aura per champion, active only from the leader slot (slot 1), exactly one per battle: stat (HP/ATK/DEF/SPD/C.RATE/RES/ACC) + scope (all/element/faction) + area (everywhere/Campaign/Arena/Depths). Team-select shows the live effect.
 
 ## 11. Skills as data (engine contract)
-A skill = `targeting` + ordered `components[]`: `damage {scale, mult, ignoreDefPct?, bonusVsHpBelow?}` · `applyStatus {status, chance, turns, target}` · `heal {scale, mult, target}` · `shield {scale, mult, turns, target}` · `turnMeter {deltaPct, target}` · `cleanse {count|all}` · `dispel {count|all}` · `extraTurn` · `multiHit {n, components}` · `conditional {if, then}` · boss-only `summon`. Plus cooldowns, tome upgrade ladders (`dmg+5% | dmg+10% | chance+5..15% | cooldown−1`), AI hints, animation binding. The Admin skill composer edits exactly this shape; publish-validation checks every component against the engine registry.
+A skill = `targeting` + ordered `components[]`. The nine component types the engine implements:
+
+| Component | Fields |
+|---|---|
+| `damage` | `scale` (atk/def/maxHp/spd), `mult`, `hits`, `ignoreDefPct?`, `element?` |
+| `applyStatus` | `status`, `turns`, `target` |
+| `heal` | `scale`, `mult`, `target` |
+| `shield` | `scale`, `mult`, `turns`, `target` |
+| `turnMeter` | `deltaPct`, `target` |
+| `cleanse` | `count` (number or `all`), `target` |
+| `dispel` | `count` (number or `all`), `target` |
+| `extraTurn` | — |
+| `cooldown` | `delta` (−3…+3), `target` |
+
+Every component also takes an optional `chance` (0–1, rolled before the ACC/RES contest) and an optional `condition` — `targetHasStatus` · `targetMissingStatus` · `selfHpBelow` · `targetHpBelow` · `alliesDead`. Multi-hit is the `hits` field on `damage` rather than a wrapper component, and conditionals are the per-component `condition` rather than a nesting one: both keep `components[]` a flat list, which is what lets the Admin composer render one form per component and the engine switch on `type` without recursion. Boss `summon` is reserved, not yet implemented.
+
+Plus cooldowns, tome upgrade ladders (`dmg+5% | dmg+10% | chance+5..15% | cooldown−1`), AI hints, animation binding. The Admin skill composer edits exactly this shape; publish-validation checks every component against the engine registry.
 〔dev, owner-approved〕 Tomes are **player-choice** (pick which skill to book), not random.
 
 ## 12. AI (enemies & auto-battle) — deterministic, hint-driven

@@ -1,0 +1,4533 @@
+[
+  {
+    "type": "battleStart",
+    "wave": 0,
+    "allies": [
+      {
+        "ref": {
+          "side": "ally",
+          "slot": 0
+        },
+        "defKey": "ally_0",
+        "name": "ally 0",
+        "element": "ember",
+        "level": 60,
+        "maxHp": 15500,
+        "hp": 15500,
+        "stats": {
+          "hp": 15500,
+          "atk": 1300,
+          "def": 850,
+          "spd": 112,
+          "critRate": 30,
+          "critDmg": 50,
+          "res": 0,
+          "acc": 55
+        },
+        "skills": [
+          "strike",
+          "nuke"
+        ],
+        "isBoss": false
+      },
+      {
+        "ref": {
+          "side": "ally",
+          "slot": 1
+        },
+        "defKey": "ally_1",
+        "name": "ally 1",
+        "element": "tide",
+        "level": 60,
+        "maxHp": 18000,
+        "hp": 18000,
+        "stats": {
+          "hp": 18000,
+          "atk": 950,
+          "def": 1250,
+          "spd": 96,
+          "critRate": 0,
+          "critDmg": 50,
+          "res": 45,
+          "acc": 0
+        },
+        "skills": [
+          "strike",
+          "rally"
+        ],
+        "isBoss": false
+      },
+      {
+        "ref": {
+          "side": "ally",
+          "slot": 2
+        },
+        "defKey": "ally_2",
+        "name": "ally 2",
+        "element": "mist",
+        "level": 60,
+        "maxHp": 17000,
+        "hp": 17000,
+        "stats": {
+          "hp": 17000,
+          "atk": 1050,
+          "def": 1000,
+          "spd": 101,
+          "critRate": 0,
+          "critDmg": 50,
+          "res": 0,
+          "acc": 30
+        },
+        "skills": [
+          "strike",
+          "venom"
+        ],
+        "isBoss": false
+      },
+      {
+        "ref": {
+          "side": "ally",
+          "slot": 3
+        },
+        "defKey": "ally_3",
+        "name": "ally 3",
+        "element": "verdant",
+        "level": 60,
+        "maxHp": 19000,
+        "hp": 19000,
+        "stats": {
+          "hp": 19000,
+          "atk": 900,
+          "def": 1150,
+          "spd": 93,
+          "critRate": 0,
+          "critDmg": 50,
+          "res": 0,
+          "acc": 0
+        },
+        "skills": [
+          "strike"
+        ],
+        "isBoss": false
+      }
+    ],
+    "enemies": [
+      {
+        "ref": {
+          "side": "enemy",
+          "slot": 0
+        },
+        "defKey": "enemy_0",
+        "name": "enemy 0",
+        "element": "verdant",
+        "level": 60,
+        "maxHp": 12000,
+        "hp": 12000,
+        "stats": {
+          "hp": 12000,
+          "atk": 900,
+          "def": 700,
+          "spd": 99,
+          "critRate": 0,
+          "critDmg": 50,
+          "res": 0,
+          "acc": 0
+        },
+        "skills": [
+          "enemy_strike"
+        ],
+        "isBoss": false
+      },
+      {
+        "ref": {
+          "side": "enemy",
+          "slot": 1
+        },
+        "defKey": "enemy_1",
+        "name": "enemy 1",
+        "element": "ember",
+        "level": 60,
+        "maxHp": 11000,
+        "hp": 11000,
+        "stats": {
+          "hp": 11000,
+          "atk": 950,
+          "def": 650,
+          "spd": 103,
+          "critRate": 0,
+          "critDmg": 50,
+          "res": 0,
+          "acc": 0
+        },
+        "skills": [
+          "enemy_strike"
+        ],
+        "isBoss": false
+      },
+      {
+        "ref": {
+          "side": "enemy",
+          "slot": 2
+        },
+        "defKey": "enemy_2",
+        "name": "enemy 2",
+        "element": "tide",
+        "level": 60,
+        "maxHp": 13500,
+        "hp": 13500,
+        "stats": {
+          "hp": 13500,
+          "atk": 850,
+          "def": 800,
+          "spd": 95,
+          "critRate": 0,
+          "critDmg": 50,
+          "res": 0,
+          "acc": 0
+        },
+        "skills": [
+          "enemy_strike"
+        ],
+        "isBoss": false
+      }
+    ],
+    "id": 0
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 0,
+    "id": 1
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "nuke",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      },
+      {
+        "side": "enemy",
+        "slot": 1
+      },
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 2
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1380,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 10620,
+    "id": 3
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 1488,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 9512,
+    "id": 4
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1055,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 12445,
+    "id": 5
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "def_down_60",
+    "turns": 2,
+    "stacks": 1,
+    "id": 6
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "status": "def_down_60",
+    "turns": 2,
+    "stacks": 1,
+    "id": 7
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "nuke",
+    "value": 4,
+    "id": 8
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "turn": 1,
+    "id": 9
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      }
+    ],
+    "id": 10
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 766,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 14734,
+    "id": 11
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 2,
+    "id": 12
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "venom",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 1
+      }
+    ],
+    "id": 13
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 1303,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 2,
+    "remainingHp": 8209,
+    "id": 14
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 1357,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 1,
+    "hits": 2,
+    "remainingHp": 6852,
+    "id": 15
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "status": "poison_5",
+    "turns": 3,
+    "stacks": 1,
+    "id": 16
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "venom",
+    "value": 4,
+    "id": 17
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 3,
+    "id": 18
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 19
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 614,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 18386,
+    "id": 20
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 4,
+    "id": 21
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "rally",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      },
+      {
+        "side": "ally",
+        "slot": 1
+      },
+      {
+        "side": "ally",
+        "slot": 2
+      },
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 22
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 23
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 24
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 25
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 26
+  },
+  {
+    "type": "heal",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 766,
+    "remainingHp": 15500,
+    "id": 27
+  },
+  {
+    "type": "heal",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 614,
+    "remainingHp": 19000,
+    "id": 28
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "rally",
+    "value": 5,
+    "id": 29
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "turn": 5,
+    "id": 30
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 1
+      }
+    ],
+    "id": 31
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "amount": 537,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 17463,
+    "id": 32
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 6,
+    "id": 33
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 34
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1859,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 8761,
+    "id": 35
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 7,
+    "id": 36
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 1
+      }
+    ],
+    "id": 37
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 2619,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 4233,
+    "id": 38
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "turn": 8,
+    "id": 39
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 550,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 3683,
+    "trueDamage": true,
+    "id": 40
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      }
+    ],
+    "id": 41
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 782,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 14718,
+    "id": 42
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "status": "def_down_60",
+    "id": 43
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 9,
+    "id": 44
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 45
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 2071,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 6690,
+    "id": 46
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 10,
+    "id": 47
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 1
+      }
+    ],
+    "id": 48
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "amount": 741,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 16722,
+    "id": 49
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "def_down_60",
+    "id": 50
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 11,
+    "id": 51
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 52
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1223,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 11222,
+    "id": 53
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "status": "atk_up_50",
+    "id": 54
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "turn": 12,
+    "id": 55
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      }
+    ],
+    "id": 56
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 705,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 14013,
+    "id": 57
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 13,
+    "id": 58
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 59
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1544,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 9678,
+    "id": 60
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "status": "atk_up_50",
+    "id": 61
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 14,
+    "id": 62
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 1
+      }
+    ],
+    "id": 63
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 1887,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 1796,
+    "id": 64
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "status": "atk_up_50",
+    "id": 65
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "turn": 15,
+    "id": 66
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 550,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 1246,
+    "trueDamage": true,
+    "id": 67
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 68
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 885,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 18115,
+    "id": 69
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 16,
+    "id": 70
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 71
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1412,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 8266,
+    "id": 72
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "status": "atk_up_50",
+    "id": 73
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 17,
+    "id": 74
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 1
+      }
+    ],
+    "id": 75
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "amount": 775,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 15947,
+    "id": 76
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 18,
+    "id": 77
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 78
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 780,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 7486,
+    "id": 79
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "turn": 19,
+    "id": 80
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 81
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 476,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 17639,
+    "id": 82
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 20,
+    "id": 83
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 84
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 775,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 6711,
+    "id": 85
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 21,
+    "id": 86
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 87
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 2372,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": true,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 4318,
+    "id": 88
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "turn": 22,
+    "id": 89
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 550,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 696,
+    "trueDamage": true,
+    "id": 90
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      }
+    ],
+    "id": 91
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 818,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 13195,
+    "id": 92
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "status": "poison_5",
+    "id": 93
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 23,
+    "id": 94
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 95
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 980,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 3338,
+    "id": 96
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 24,
+    "id": 97
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 2
+      }
+    ],
+    "id": 98
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "amount": 664,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 16336,
+    "id": 99
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 25,
+    "id": 100
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 1
+      }
+    ],
+    "id": 101
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "amount": 1187,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 0,
+    "id": 102
+  },
+  {
+    "type": "died",
+    "unit": {
+      "side": "enemy",
+      "slot": 1
+    },
+    "id": 103
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "turn": 26,
+    "id": 104
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      }
+    ],
+    "id": 105
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 702,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 12493,
+    "id": 106
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 27,
+    "id": 107
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 108
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 735,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 5976,
+    "id": 109
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 28,
+    "id": 110
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "nuke",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      },
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 111
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 2709,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": true,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 629,
+    "id": 112
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1052,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 4924,
+    "id": 113
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "def_down_60",
+    "turns": 2,
+    "stacks": 1,
+    "id": 114
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "status": "def_down_60",
+    "turns": 2,
+    "stacks": 1,
+    "id": 115
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "nuke",
+    "value": 4,
+    "id": 116
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 29,
+    "id": 117
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "venom",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 118
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1269,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 2,
+    "remainingHp": 3655,
+    "id": 119
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1245,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 1,
+    "hits": 2,
+    "remainingHp": 2410,
+    "id": 120
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "status": "poison_5",
+    "turns": 3,
+    "stacks": 1,
+    "id": 121
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "venom",
+    "value": 4,
+    "id": 122
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 30,
+    "id": 123
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 1
+      }
+    ],
+    "id": 124
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "amount": 589,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 15358,
+    "id": 125
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 31,
+    "id": 126
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 127
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1235,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 1175,
+    "id": 128
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "turn": 32,
+    "id": 129
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 675,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 500,
+    "trueDamage": true,
+    "id": 130
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 1
+      }
+    ],
+    "id": 131
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "amount": 542,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 14816,
+    "id": 132
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 33,
+    "id": 133
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 134
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 2319,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 0,
+    "id": 135
+  },
+  {
+    "type": "died",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "id": 136
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 34,
+    "id": 137
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 2
+      }
+    ],
+    "id": 138
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "amount": 1498,
+    "absorbed": 0,
+    "quality": "strong",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 0,
+    "id": 139
+  },
+  {
+    "type": "died",
+    "unit": {
+      "side": "enemy",
+      "slot": 2
+    },
+    "id": 140
+  },
+  {
+    "type": "waveCleared",
+    "wave": 0,
+    "healed": [
+      {
+        "unit": {
+          "side": "ally",
+          "slot": 0
+        },
+        "amount": 1550
+      },
+      {
+        "unit": {
+          "side": "ally",
+          "slot": 1
+        },
+        "amount": 1800
+      },
+      {
+        "unit": {
+          "side": "ally",
+          "slot": 2
+        },
+        "amount": 664
+      },
+      {
+        "unit": {
+          "side": "ally",
+          "slot": 3
+        },
+        "amount": 1361
+      }
+    ],
+    "id": 141
+  },
+  {
+    "type": "waveStart",
+    "wave": 1,
+    "enemies": [
+      {
+        "ref": {
+          "side": "enemy",
+          "slot": 0
+        },
+        "defKey": "enemy_0",
+        "name": "enemy 0",
+        "element": "mist",
+        "level": 60,
+        "maxHp": 40000,
+        "hp": 40000,
+        "stats": {
+          "hp": 40000,
+          "atk": 1400,
+          "def": 1100,
+          "spd": 108,
+          "critRate": 0,
+          "critDmg": 50,
+          "res": 60,
+          "acc": 0
+        },
+        "skills": [
+          "enemy_strike"
+        ],
+        "isBoss": true
+      }
+    ],
+    "id": 142
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 35,
+    "id": 143
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 144
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 942,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 39058,
+    "id": 145
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 36,
+    "id": 146
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 147
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 950,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 18050,
+    "id": 148
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 37,
+    "id": 149
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 150
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 755,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 38303,
+    "id": 151
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 38,
+    "id": 152
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "rally",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      },
+      {
+        "side": "ally",
+        "slot": 1
+      },
+      {
+        "side": "ally",
+        "slot": 2
+      },
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 153
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 154
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 155
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 156
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 157
+  },
+  {
+    "type": "heal",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 1457,
+    "remainingHp": 15500,
+    "id": 158
+  },
+  {
+    "type": "heal",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "amount": 1384,
+    "remainingHp": 18000,
+    "id": 159
+  },
+  {
+    "type": "heal",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 950,
+    "remainingHp": 19000,
+    "id": 160
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "rally",
+    "value": 5,
+    "id": 161
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 39,
+    "id": 162
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 163
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 912,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 37391,
+    "id": 164
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 40,
+    "id": 165
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "nuke",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 166
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1608,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 35783,
+    "id": 167
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "def_down_60",
+    "turns": 2,
+    "stacks": 1,
+    "id": 168
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "nuke",
+    "value": 4,
+    "id": 169
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 41,
+    "id": 170
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 171
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 961,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 18039,
+    "id": 172
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 42,
+    "id": 173
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 174
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1736,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 34047,
+    "id": 175
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 43,
+    "id": 176
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 177
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1574,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 32473,
+    "id": 178
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "status": "atk_up_50",
+    "id": 179
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 44,
+    "id": 180
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 181
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1500,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 30973,
+    "id": 182
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "status": "atk_up_50",
+    "id": 183
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 45,
+    "id": 184
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 185
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 2169,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 28804,
+    "id": 186
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "status": "atk_up_50",
+    "id": 187
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 46,
+    "id": 188
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 2
+      }
+    ],
+    "id": 189
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "amount": 1054,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 15946,
+    "id": 190
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "def_down_60",
+    "id": 191
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 47,
+    "id": 192
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "venom",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 193
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1028,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 2,
+    "remainingHp": 27776,
+    "id": 194
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1033,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 1,
+    "hits": 2,
+    "remainingHp": 26743,
+    "id": 195
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "poison_5",
+    "turns": 3,
+    "stacks": 1,
+    "id": 196
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "venom",
+    "value": 4,
+    "id": 197
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "status": "atk_up_50",
+    "id": 198
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 48,
+    "id": 199
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 200
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 664,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 26079,
+    "id": 201
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 49,
+    "id": 202
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 203
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 626,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 25453,
+    "id": 204
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 50,
+    "id": 205
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 206
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 928,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 24525,
+    "id": 207
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 51,
+    "id": 208
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 2000,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 22525,
+    "trueDamage": true,
+    "id": 209
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      }
+    ],
+    "id": 210
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 1181,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 14319,
+    "id": 211
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 52,
+    "id": 212
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 213
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 775,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 21750,
+    "id": 214
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 53,
+    "id": 215
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 216
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 650,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 21100,
+    "id": 217
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 54,
+    "id": 218
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 219
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 618,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 20482,
+    "id": 220
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 55,
+    "id": 221
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 222
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 915,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 19567,
+    "id": 223
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 56,
+    "id": 224
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 2000,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 17567,
+    "trueDamage": true,
+    "id": 225
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 226
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 945,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 17094,
+    "id": 227
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 57,
+    "id": 228
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 229
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 759,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 16808,
+    "id": 230
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 58,
+    "id": 231
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 232
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 665,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 16143,
+    "id": 233
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 59,
+    "id": 234
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "nuke",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 235
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1105,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 15038,
+    "id": 236
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "def_down_60",
+    "turns": 2,
+    "stacks": 1,
+    "id": 237
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "nuke",
+    "value": 4,
+    "id": 238
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 60,
+    "id": 239
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 240
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 995,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 14043,
+    "id": 241
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 61,
+    "id": 242
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 2000,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 12043,
+    "trueDamage": true,
+    "id": 243
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 244
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 969,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 16125,
+    "id": 245
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "poison_5",
+    "id": 246
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 62,
+    "id": 247
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 248
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1203,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 10840,
+    "id": 249
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 63,
+    "id": 250
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 251
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1463,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 9377,
+    "id": 252
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 64,
+    "id": 253
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "rally",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 0
+      },
+      {
+        "side": "ally",
+        "slot": 1
+      },
+      {
+        "side": "ally",
+        "slot": 2
+      },
+      {
+        "side": "ally",
+        "slot": 3
+      }
+    ],
+    "id": 254
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 255
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 256
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 257
+  },
+  {
+    "type": "statusApplied",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "status": "atk_up_50",
+    "turns": 2,
+    "stacks": 1,
+    "id": 258
+  },
+  {
+    "type": "heal",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "amount": 1181,
+    "remainingHp": 15500,
+    "id": 259
+  },
+  {
+    "type": "heal",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "amount": 1054,
+    "remainingHp": 17000,
+    "id": 260
+  },
+  {
+    "type": "heal",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "amount": 2160,
+    "remainingHp": 18285,
+    "id": 261
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "rally",
+    "value": 5,
+    "id": 262
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 65,
+    "id": 263
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 264
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1535,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 7842,
+    "id": 265
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 66,
+    "id": 266
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 2
+      }
+    ],
+    "id": 267
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "amount": 1011,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 15989,
+    "id": 268
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "status": "def_down_60",
+    "id": 269
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 67,
+    "id": 270
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "venom",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 271
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 958,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 2,
+    "remainingHp": 6884,
+    "id": 272
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1029,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 1,
+    "hits": 2,
+    "remainingHp": 5855,
+    "id": 273
+  },
+  {
+    "type": "cooldownChanged",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "venom",
+    "value": 4,
+    "id": 274
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 68,
+    "id": 275
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 276
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1371,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 4484,
+    "id": 277
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 69,
+    "id": 278
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 279
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1003,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 3481,
+    "id": 280
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "status": "atk_up_50",
+    "id": 281
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 70,
+    "id": 282
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 1
+      }
+    ],
+    "id": 283
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "amount": 908,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 17092,
+    "id": 284
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "turn": 71,
+    "id": 285
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 3
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 286
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 3
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 972,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 2509,
+    "id": 287
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 3
+    },
+    "status": "atk_up_50",
+    "id": 288
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "turn": 72,
+    "id": 289
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 2
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 290
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 2
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1145,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 1364,
+    "id": 291
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 2
+    },
+    "status": "atk_up_50",
+    "id": 292
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "turn": 73,
+    "id": 293
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 0
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 294
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 0
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 1353,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 11,
+    "id": 295
+  },
+  {
+    "type": "statusExpired",
+    "target": {
+      "side": "ally",
+      "slot": 0
+    },
+    "status": "atk_up_50",
+    "id": 296
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "turn": 74,
+    "id": 297
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "skill": "enemy_strike",
+    "targets": [
+      {
+        "side": "ally",
+        "slot": 1
+      }
+    ],
+    "id": 298
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "target": {
+      "side": "ally",
+      "slot": 1
+    },
+    "amount": 898,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 16194,
+    "id": 299
+  },
+  {
+    "type": "turnStart",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "turn": 75,
+    "id": 300
+  },
+  {
+    "type": "skillUsed",
+    "unit": {
+      "side": "ally",
+      "slot": 1
+    },
+    "skill": "strike",
+    "targets": [
+      {
+        "side": "enemy",
+        "slot": 0
+      }
+    ],
+    "id": 301
+  },
+  {
+    "type": "damage",
+    "source": {
+      "side": "ally",
+      "slot": 1
+    },
+    "target": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "amount": 642,
+    "absorbed": 0,
+    "quality": "normal",
+    "crit": false,
+    "hitIndex": 0,
+    "hits": 1,
+    "remainingHp": 0,
+    "id": 302
+  },
+  {
+    "type": "died",
+    "unit": {
+      "side": "enemy",
+      "slot": 0
+    },
+    "id": 303
+  },
+  {
+    "type": "battleEnd",
+    "outcome": "victory",
+    "turns": 76,
+    "id": 304
+  }
+]

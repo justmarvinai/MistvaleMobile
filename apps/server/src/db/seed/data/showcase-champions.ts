@@ -20,8 +20,12 @@ export const SHOWCASE_SKILLS: SkillDefInput[] = [
     slot: 'a1',
     cooldown: 0,
     targeting: { side: 'enemy', mode: 'single' },
+    // 2 × 1.1 = ×2.2 ATK: the top of the A1 band (COMBAT_SYSTEM §6). Anuria is the
+    // squishiest of the three starters by design, and the balance simulator had her
+    // clearing chapter 1 on auto only 84% of the time against a 95% gate — the pressure
+    // her identity promises has to actually land.
     components: [
-      { type: 'damage', scale: 'atk', mult: 0.95, hits: 2 },
+      { type: 'damage', scale: 'atk', mult: 1.1, hits: 2 },
       { type: 'applyStatus', status: 'weaken_25', turns: 1, chance: 0.2, target: 'hitTargets' },
     ],
     upgrades: [

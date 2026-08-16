@@ -1315,6 +1315,12 @@
             ],
             "additionalProperties": false
           },
+          "anchorLevel": {
+            "default": 60,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          },
           "growth": {
             "default": 1.045,
             "type": "number",
@@ -1459,6 +1465,7 @@
           "element",
           "role",
           "baseStats",
+          "anchorLevel",
           "growth",
           "skills",
           "assetKey",

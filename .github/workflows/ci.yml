@@ -76,6 +76,12 @@ jobs:
       - name: Test
         run: pnpm test
 
+      # The engine's own tests use fixtures so a rebalance cannot break them; this asks
+      # the opposite question of the shipped content — is chapter 1 actually winnable by
+      # a fresh account? (COMBAT_SYSTEM §14)
+      - name: Balance gates
+        run: pnpm sim
+
       - name: Build
         run: pnpm build
 

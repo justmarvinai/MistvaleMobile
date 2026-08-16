@@ -3,7 +3,7 @@
   "version": "0.1.0-ea.0",
   "private": true,
   "type": "module",
-  "description": "Mistvale battle engine \u2014 pure, deterministic, IO-free. Phase P0 ships the seeded RNG foundation; the simulation lands in P2.",
+  "description": "Mistvale battle engine \u2014 pure, deterministic, IO-free. Turn meter, damage, statuses, waves, AI and the event log.",
   "exports": {
     ".": {
       "types": "./src/index.ts",

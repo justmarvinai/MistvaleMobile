@@ -225,8 +225,15 @@ export const enemyDefSchema = contentMetaSchema.extend({
   archetype: z.string().min(1).max(48),
   element: z.enum(ELEMENTS),
   role: z.enum(ROLES),
-  /** Stats at the reference level; stages scale them by level and star rank. */
+  /**
+   * Stats at `anchorLevel`. A stage scales them to the level its wave specifies.
+   *
+   * Same convention as champions: author the numbers at the tier you can picture, and
+   * let the curve derive every other tier from them.
+   */
   baseStats: baseStatsSchema,
+  /** The level `baseStats` describes. Stages scale by `growth ^ (level − anchorLevel)`. */
+  anchorLevel: z.number().int().min(1).max(120).default(60),
   /** Per-level multiplicative growth, e.g. 1.045. */
   growth: z.number().min(1).max(1.2).default(1.045),
   skills: z.array(contentKeySchema).min(1).max(5),

@@ -22,6 +22,7 @@
     "db:generate": "pnpm --filter @mistvale/server db:generate",
     "db:migrate": "pnpm --filter @mistvale/server db:migrate",
     "seed": "pnpm --filter @mistvale/server seed",
+    "sim": "pnpm --filter @mistvale/balance-sim sim",
     "openapi": "pnpm --filter @mistvale/server openapi",
     "openapi:check": "pnpm --filter @mistvale/server openapi:check",
     "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
