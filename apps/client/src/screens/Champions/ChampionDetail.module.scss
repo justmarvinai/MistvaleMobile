@@ -1,0 +1,236 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  width: min(46rem, 88vw);
+  max-height: 76vh;
+  overflow-y: auto;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $space-3;
+}
+
+.title {
+  color: $muted;
+  font-size: 0.85rem;
+}
+
+.tier {
+  margin-top: 2px;
+  color: $gold;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+}
+
+.power {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.powerValue {
+  color: $mist;
+  font-family: $font-mono;
+  font-size: 1.3rem;
+}
+
+.powerLabel {
+  color: $muted;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.flags {
+  display: flex;
+  gap: $space-2;
+}
+
+.flag {
+  padding: $space-1 $space-3;
+  background: $panel-inset;
+  border: 1px solid transparent;
+  color: $muted;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: $gold;
+    color: $gold;
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: $space-1;
+  border-bottom: 1px solid $edge;
+}
+
+.tab {
+  padding: $space-1 $space-3;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: $muted;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    border-bottom-color: $mist;
+    color: $parchment;
+  }
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-2;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 4.4rem;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px dashed $edge;
+  color: $muted;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &[data-filled='true'] {
+    border-style: solid;
+    border-color: $mist-dim;
+    color: $parchment;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.slotName {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.slotMain {
+  color: $parchment;
+  font-size: 0.8rem;
+}
+
+.slotLevel {
+  color: $mist;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.slotEmpty {
+  font-size: 0.75rem;
+}
+
+.setBonuses {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: $space-2;
+  background: $panel-inset;
+  list-style: none;
+  color: $muted;
+  font-size: 0.8rem;
+
+  strong {
+    color: $mist;
+    font-weight: normal;
+  }
+}
+
+.skills {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skill {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $space-3;
+  padding: $space-2;
+  background: $panel-inset;
+}
+
+.skillName {
+  display: flex;
+  align-items: baseline;
+  gap: $space-2;
+  color: $parchment;
+  font-size: 0.9rem;
+}
+
+.skillSlot {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.7rem;
+}
+
+.skillLevel {
+  color: $mist;
+  font-size: 0.75rem;
+}
+
+.skillText {
+  margin: 2px 0 0;
+  color: $muted;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.lore {
+  color: $muted;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+.ladders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  padding-top: $space-2;
+  border-top: 1px solid $edge;
+}
+
+.note,
+.notice,
+.error {
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.note {
+  color: $muted;
+}
+
+.notice {
+  color: $success;
+}
+
+.error {
+  color: $danger;
+}

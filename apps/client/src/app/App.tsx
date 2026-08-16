@@ -5,6 +5,9 @@ import { AuthScreen } from '@/screens/Auth/AuthScreen';
 import { HavenScreen } from '@/screens/Haven/HavenScreen';
 import { CampaignScreen } from '@/screens/Campaign/CampaignScreen';
 import { BattleScreen } from '@/screens/Battle/BattleScreen';
+import { ChampionsScreen } from '@/screens/Champions/ChampionsScreen';
+import { RelicsScreen } from '@/screens/Relics/RelicsScreen';
+import { BazaarScreen } from '@/screens/Bazaar/BazaarScreen';
 import { PlaceholderScreen } from '@/screens/Placeholder/PlaceholderScreen';
 import { SettingsModal } from '@/screens/Settings/SettingsModal';
 import { useSessionStore } from '@/state/sessionStore';
@@ -157,6 +160,12 @@ function GameShell() {
             <CampaignScreen />
           ) : screen === 'battle' ? (
             <BattleScreen />
+          ) : screen === 'champions' ? (
+            <ChampionsScreen />
+          ) : screen === 'relics' ? (
+            <RelicsScreen />
+          ) : screen === 'bazaar' ? (
+            <BazaarScreen />
           ) : definition ? (
             <PlaceholderScreen screen={definition} />
           ) : null}

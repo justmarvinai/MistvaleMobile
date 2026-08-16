@@ -1,0 +1,160 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: $space-4;
+  height: 100%;
+  min-height: 0;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $space-3;
+  margin-bottom: $space-3;
+}
+
+.title {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 1.15rem;
+  font-weight: normal;
+}
+
+.blurb {
+  margin: 2px 0 0;
+  max-width: 34rem;
+  color: $muted;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.timer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.timerValue {
+  color: $mist;
+  font-family: $font-mono;
+  font-size: 1.1rem;
+}
+
+.timerLabel {
+  color: $muted;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: $space-2;
+  align-content: start;
+  max-height: calc(100% - 5rem);
+  overflow-y: auto;
+  padding-right: $space-2;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-2;
+  background: $panel;
+  border: 1px solid $edge;
+
+  &[data-sold='true'] {
+    opacity: 0.45;
+  }
+}
+
+.slotHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+}
+
+.slotName {
+  color: $parchment;
+  font-size: 0.85rem;
+}
+
+.qty {
+  color: $mist;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+}
+
+.slotBody {
+  margin: 0;
+  color: $muted;
+  font-size: 0.8rem;
+}
+
+.slotFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
+  margin-top: auto;
+}
+
+.price {
+  color: $gold;
+  font-family: $font-mono;
+  font-size: 0.8rem;
+}
+
+.priceShort {
+  color: $danger;
+  font-family: $font-mono;
+  font-size: 0.8rem;
+}
+
+.reason {
+  margin: 0;
+  color: $muted-deep;
+  font-size: 0.72rem;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-height: 0;
+}
+
+.note {
+  color: $muted;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.crystalActions {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin-top: $space-3;
+}
+
+.empty {
+  color: $muted;
+  font-size: 0.85rem;
+}
+
+.notice {
+  color: $success;
+  font-size: 0.8rem;
+}
+
+.error {
+  color: $danger;
+  font-size: 0.8rem;
+}

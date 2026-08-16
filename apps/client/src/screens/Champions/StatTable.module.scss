@@ -1,0 +1,45 @@
+@use '../../styles/tokens' as *;
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 3px $space-2;
+    text-align: right;
+  }
+
+  thead th {
+    color: $muted;
+    font-size: 0.7rem;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid $edge;
+  }
+
+  tbody th {
+    color: $muted;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  td {
+    color: $parchment-dim;
+    font-family: $font-mono;
+  }
+}
+
+.bonus {
+  color: $success;
+}
+
+.zero {
+  color: $muted-deep;
+}
+
+.total {
+  color: $parchment;
+}

@@ -215,10 +215,22 @@ Single-row-per-key `key text pk, value jsonb, schema_key text`. Every balance co
 | column | notes |
 |---|---|
 | id, player_id, set_key, slot, rank (1-6), rarity, level (0-16) | |
-| main_stat jsonb `{stat, value}` | value recomputed from defs on level-up |
-| substats jsonb `[{stat, value, rolls}]` | |
+| main_stat jsonb `{stat, percent, value}` | recomputed from `gear_stat_defs` on each upgrade level |
+| substats jsonb `[{stat, percent, value, rolls}]` | rolled at drop and at +4/+8/+12/+16; **never** recomputed from the tables afterwards, so retuning them cannot restat a piece a player already owns |
 | equipped_champion_id fk nullable → player_champions (unique per slot enforced by partial unique index `(equipped_champion_id, slot)`) | |
 | source, obtained_at | |
+
+### `shop_states`
+| column | notes |
+|---|---|
+| player_id, shop_key, unique(player_id, shop_key) | |
+| restocks_at | a read past this rolls the next window |
+| unlocked_slots | crystal shelves opened permanently |
+| slots jsonb | `[{index, offerKey, gearId, price, purchased}]` — the whole window, always read and written together |
+| daily_counts jsonb, daily_counts_on | per-offer purchase counts since the last daily reset |
+| seed, content_rev | so a support query can reproduce what was offered |
+
+Stock is rolled per player and **stored**, not derived on read: what a player is looking at has to still be there when they tap it, and what they were offered has to be as auditable afterwards as a drop. A relic offer creates its `gear_instances` row up front — which is what lets the shop show real substats — and buying it simply stops the next restock from sweeping it away.
 
 ### `campaign_progress`
 `player_id, stage_key, stars (0-3), best_clear jsonb (turns, team), clears int, unique(player_id, stage_key)` + claimed star-tier flags on a per-chapter row (`chapter_star_claims`).

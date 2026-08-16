@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
 import { ROUTES, apiSuccess, routePattern } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
+import * as championView from '../roster/champions';
 import * as roster from '../roster/service';
 import * as battle from './service';
 
@@ -50,7 +51,14 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
   // ── Roster ───────────────────────────────────────────────────────────────
   app.get(ROUTES.roster.list, async (request, reply) => {
     const playerId = requirePlayer(request);
-    const champions = await roster.listRoster(app.db, playerId);
+    // The assembled shape, not the bare row: the roster grid shows power and worn relics,
+    // and having two representations of "a champion the player owns" is exactly how the
+    // two drift apart.
+    const champions = await championView.loadRoster(
+      app.db,
+      playerId,
+      championView.championContextFrom(app.content),
+    );
     return reply.send(apiSuccess({ champions }, app.content.rev));
   });
 
@@ -72,8 +80,15 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
     const playerId = requirePlayer(request);
     const { championKey } = starterSchema.parse(request.body);
 
-    const champions = await app.db.transaction((tx) =>
+    await app.db.transaction((tx) =>
       roster.grantStarterPack(tx, playerId, app.content, championKey),
+    );
+    // Answer with the same assembled shape the list endpoint returns, so the client's
+    // roster store holds one kind of champion regardless of how it arrived.
+    const champions = await championView.loadRoster(
+      app.db,
+      playerId,
+      championView.championContextFrom(app.content),
     );
     request.log.info({ playerId, championKey }, 'starter chosen');
     return reply.send(apiSuccess({ champions }, app.content.rev));

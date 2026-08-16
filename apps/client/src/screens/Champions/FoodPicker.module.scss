@@ -1,0 +1,43 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  width: min(44rem, 88vw);
+}
+
+.rule {
+  margin: 0;
+  color: $muted;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: $space-2;
+  max-height: 44vh;
+  overflow-y: auto;
+  padding-right: $space-2;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $space-2;
+}
+
+.count {
+  margin-right: auto;
+  color: $muted;
+  font-size: 0.8rem;
+}
+
+.empty {
+  color: $muted;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}

@@ -1,0 +1,122 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  width: min(28rem, 88vw);
+}
+
+.odds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+  padding: $space-2;
+  background: $panel-inset;
+  color: $muted;
+  font-size: 0.82rem;
+
+  strong {
+    color: $parchment;
+    font-family: $font-mono;
+    font-weight: normal;
+  }
+}
+
+.short strong {
+  color: $danger;
+}
+
+.maxed {
+  color: $gold;
+}
+
+.times {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+}
+
+.timesOption {
+  padding: $space-1 $space-2;
+  background: $panel-inset;
+  border: 1px solid transparent;
+  color: $muted;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: $mist;
+    color: $mist;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.hint {
+  margin-left: $space-2;
+  color: $muted-deep;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.attempts {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  max-height: 12rem;
+  overflow-y: auto;
+  list-style: none;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: $space-2;
+    padding: 2px $space-2;
+    background: $panel-inset;
+    color: $muted;
+
+    &[data-success='true'] {
+      color: $success;
+    }
+
+    &[data-success='false'] {
+      color: $danger;
+    }
+  }
+}
+
+.attemptLevel {
+  min-width: 6rem;
+}
+
+.attemptResult {
+  flex: 1;
+}
+
+.rolled {
+  color: $mist;
+}
+
+.attemptCost {
+  color: $muted-deep;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $space-2;
+}
+
+.error {
+  color: $danger;
+  font-size: 0.8rem;
+}

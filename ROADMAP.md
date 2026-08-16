@@ -12,7 +12,7 @@
 | **P1 ✅** | Content backbone | Content schema + cache + publish, seeds v1, Admin core editors (A0–A1) | ▓▓▓ |
 | **P2 ✅** | Battle engine | Full engine + tests + battle API + balance-sim | ▓▓▓▓ |
 | **P3 ✅** | Battle experience | Battle screen, campaign flow, results | ▓▓▓▓ |
-| P4 | Champions & relics | Roster, leveling/rank/ascension, gear loop, Bazaar | ▓▓▓ |
+| **P4 ✅** | Champions & relics | Roster, leveling/rank/ascension, gear loop, Bazaar | ▓▓▓ |
 | P5 | Summoning | Mistgate, pools/pity, Chronicle | ▓▓ |
 | P6 | The Depths | 4 dungeons + Proving + Springs, masteries, multi-battle, Hard/Brutal | ▓▓▓ |
 | P7 | Arena & bots | Async PvP, ratings/tiers, Hall of Valor, bot system | ▓▓▓ |
@@ -44,9 +44,10 @@ Battle screen per UI_UX §4: Pixi stage (formations, idle/procedural animations,
 **Exit:** tutorial-less full loop: pick team → fight 1-1…3-7 manually or auto → loot → repeat, feeling like a real game.
 **Delivered:** starter choice (pedestals from content) · campaign map with chapters, stages and difficulty tabs · team select with leader-first ordering and an energy preview · the battle screen — Pixi formations with running idle loops, drifting mist, health bars, status pips, hit shake and damage floaters, over a DOM HUD with turn order, skill bar with cooldowns, speed ×1/×2, auto, skip and retreat · the playback engine that applies the server's event log to a view model and reads every number off an event, with an ESLint rule enforcing that the client imports engine *types* only · results with stars and the granted loot · `pnpm assets` sprite pipeline, run by the client's own build, publishing `assets/` with a frame-count manifest · chapters 2–3 seeded with their own bosses, the generator now per-chapter plan driven · 18 playback tests and a browser end-to-end run of the whole loop.
 
-### P4 — Champions & relics (+ Admin A3 start)
+### P4 ✅ — Champions & relics (+ Admin A3 start)
 Roster + champion detail screens (stats breakdown from server, skills/tomes, lore). Leveling (food consume), rank-up, ascension (essences), dupe→skill-level. Relic inventory, equip/unequip (free), upgrade forge (success ladder, animated attempts, bulk-continue), sell with guardrails, set bonuses live in stat preview. Bazaar (rotating stock + crystal tab + refresh). Locks/favorites.
 **Exit:** the full RPG management loop closes: farm → equip → upgrade → stronger → farther.
+**Delivered:** relics as owned instances with rolled stats frozen in · the gear maths (main-stat interpolation to a published ceiling, substat rolls without replacement, set bonuses in complete copies, percentages against base) with 31 unit tests · champions fight in their relics, so the champion screen's number is the number the engine uses · campaign stages drop relics by chapter-set and stage-slot plus essences · level via food, rank-up, ascension, skill tomes and duplicates, lock/favourite, release — each refusing before it spends · the Bazaar with per-player stock, lazy restock, crystal refresh and unlockable slots · roster grid, champion detail with the stat split and nine relic slots, the relic vault with mass-sell guard rails, the forge with played-back attempts, and the Bazaar screen · two new content types (relic stats, shops) so the whole economy is Admin-editable · 32 integration cases and a browser run of the whole management loop.
 
 ### P5 — Summoning & collection
 Mistgate screen with portal reveal cinematics by rarity (skippable), ×1/×10, all four sigils, pools + weights + **mercy counters** (server) + "Odds & Mercy" transparency panel, summon history, roster capacity + expansion, Chronicle (owned/seen; food units excluded), NEW-champion flow. Pools span the full roster incl. Broodlings/Broodguards (owner-approved).

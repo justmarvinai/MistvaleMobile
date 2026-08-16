@@ -1,0 +1,116 @@
+@use '../../styles/tokens' as *;
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: $space-2;
+  background: $panel;
+  border: 1px solid $edge;
+  border-top-width: 3px;
+  color: $parchment;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $mist;
+  }
+
+  &[data-selected='true'] {
+    border-color: $mist-glow;
+    background: $panel-raised;
+  }
+
+  &[data-rarity='common'] {
+    border-top-color: $rarity-common;
+  }
+  &[data-rarity='uncommon'] {
+    border-top-color: $rarity-uncommon;
+  }
+  &[data-rarity='rare'] {
+    border-top-color: $rarity-rare;
+  }
+  &[data-rarity='epic'] {
+    border-top-color: $rarity-epic;
+  }
+  &[data-rarity='legendary'] {
+    border-top-color: $rarity-legendary;
+  }
+}
+
+.portrait {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  background: $panel-inset;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    // Pixel art must never be smoothed.
+    image-rendering: pixelated;
+  }
+}
+
+.fallback {
+  width: 60%;
+  height: 60%;
+  background: $ground;
+}
+
+.badge {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  color: $gold;
+  font-size: 0.7rem;
+}
+
+.name {
+  font-size: 0.8rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.stars {
+  color: $gold;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+}
+
+.meta {
+  color: $muted;
+  font-size: 0.7rem;
+}
+
+.asc {
+  color: $mist;
+}
+
+.power {
+  color: $mist;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.gearPips {
+  display: flex;
+  gap: 2px;
+
+  span {
+    width: 6px;
+    height: 3px;
+    background: $ground;
+
+    &[data-filled='true'] {
+      background: $mist-dim;
+    }
+  }
+}

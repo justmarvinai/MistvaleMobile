@@ -23,18 +23,28 @@
 | GET `/profile/:profileName` | Public profile card (level, top champions, arena tier) — for arena opponent inspection. |
 
 ### Champions & gear
-| POST `/champions/:id/level-food` | Consume food champions → XP (server computes, respects locks). |
-| POST `/champions/:id/rank-up` | Consume required food → +1 star. |
-| POST `/champions/:id/ascend` | Spend essences → ascension +1 (unlocks per COMBAT doc). |
-| POST `/champions/:id/skill-upgrade` | Spend tome → next upgrade on chosen skill (choice-based; see USER_QUESTIONS #tomes). |
+| GET `/player/champions/:id` | One champion: assembled stats split into base and relic contribution, worn relics, skill levels, and what each ladder's next step costs. |
+| POST `/player/champions/:id/level` | `{foodIds[], actionId}` — consume food champions for XP. Refuses anything locked, favourited, still wearing relics, or the champion itself. |
+| POST `/player/champions/:id/rank-up` | `{foodIds[], actionId}` — exactly R champions of exactly R stars plus a silver fee; resets the champion to level 1. |
+| POST `/player/champions/:id/ascend` | `{actionId}` — spends element-matched essences scaled by rarity. Capped by star rank. |
+| POST `/player/champions/:id/skill-upgrade` | `{skillKey, source, actionId}` — `source` is a tome of the champion's rarity or a duplicate of the same champion. The player picks the skill (a deliberate deviation from the source game's random books). |
 | POST `/champions/:id/masteries` | `{addNode}` spend emblems; POST `/champions/:id/masteries/reset` (crystal cost). |
-| POST `/champions/release` | `{ids[]}` release for small silver (confirm-guarded, locked champions refused). |
-| POST `/champions/:id/lock` `/favorite` | Toggles. |
-| POST `/gear/:id/equip` | `{championId}` (handles slot swap atomically). |
-| POST `/gear/:id/unequip` | Free (the source game made gear removal permanently free in 2025 — we adopt that from day one). |
-| POST `/gear/:id/upgrade` | One level attempt: spends silver, rolls success (server), returns result + new stats. `{times?: n}` bulk-continue supported. |
-| POST `/gear/sell` | `{ids[]}` → silver. |
-| GET `/champions/:id/preview-gear/:gearId` | Stat-diff preview (server-computed so client shows true numbers). |
+| POST `/player/champions/release` | `{ids[], actionId}` release for silver by rarity × rank (locked, favourited and equipped champions refused — the whole selection, not silently part of it). |
+| POST `/player/champions/:id/flags` | `{locked?, favourite?}` toggles. |
+| POST `/player/gear/:id/equip` | `{championId}` — clears the slot and fills it in one transaction; a partial unique index makes a double occupancy impossible rather than merely unlikely. Accessory slots check the champion's ascension against the slot definition. |
+| POST `/player/gear/:id/unequip` | Free (the source game made gear removal permanently free in 2025 — we adopt that from day one). |
+| POST `/player/gear/:id/lock` | `{locked}` — protects a relic from a mass sell. |
+| POST `/player/gear/:id/upgrade` | `{times, actionId}` — resolves the whole run server-side and returns every attempt in order, so the client animates them without deciding one. A run stops at the first success, at the cap, or when the silver runs out; a failure still charges. |
+| POST `/player/gear/sell` | `{ids[], actionId}` → silver. Refuses the whole selection if any of it is locked or worn, rather than quietly sparing some of it. |
+| GET `/player/gear` | Every relic the player owns, with sell value and next-upgrade cost and chance already computed. |
+| GET `/player/items` | Stackables held, by item key. |
+| GET `/player/gear/:id/preview?championId=` | Stat-diff preview, computed by assembling the champion twice — set bonuses appearing or vanishing included, which is exactly what a client-side sum would get wrong. |
+
+### Shops
+| GET `/shops/:key` | The player's current stock and its restock time. A read past the window rolls the next one in the same transaction that serves it, so the shop refreshes without a scheduler. |
+| POST `/shops/:key/buy` | `{slotIndex, actionId}` — charges, grants, and marks the slot sold. Relic offers hand over the exact piece that was shown. |
+| POST `/shops/:key/refresh` | `{actionId}` — pays crystals to roll a new window now. Relics from the discarded window stop being for sale. |
+| POST `/shops/:key/unlock-slot` | `{actionId}` — opens one more crystal shelf, permanently. It fills on the next restock. |
 
 ### Battles (campaign, dungeons, springs, proving, tutorial)
 | POST `/battles/start` | `{mode, stageKey, team[1-4], actionId}` → spends energy, creates session, returns `{battleId, initialState, events (to first decision), needsInput}` |

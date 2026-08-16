@@ -1,0 +1,148 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: $space-4;
+  height: 100%;
+  min-height: 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-1;
+  margin-bottom: $space-3;
+}
+
+.filter {
+  padding: $space-1 $space-2;
+  background: $panel-inset;
+  border: 1px solid transparent;
+  color: $muted;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: $mist;
+    color: $mist;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: $space-2;
+  align-content: start;
+  max-height: calc(100% - 3rem);
+  overflow-y: auto;
+  padding-right: $space-2;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.entryActions {
+  display: flex;
+  gap: $space-1;
+}
+
+.mini {
+  flex: 1;
+  padding: 2px $space-1;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $muted;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $mist;
+    color: $mist;
+  }
+
+  &[aria-pressed='true'] {
+    border-color: $gold;
+    color: $gold;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-height: 0;
+}
+
+.note {
+  color: $muted;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  margin: $space-3 0;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+  }
+
+  dt {
+    color: $muted;
+  }
+
+  dd {
+    margin: 0;
+    color: $parchment;
+  }
+}
+
+.sellValue {
+  margin: 0 0 $space-2;
+  color: $gold;
+  font-family: $font-mono;
+  font-size: 1.1rem;
+}
+
+.sellActions {
+  display: flex;
+  gap: $space-2;
+}
+
+.warn {
+  margin: 0 0 $space-2;
+  color: $warning;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.empty {
+  color: $muted;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.notice {
+  color: $success;
+  font-size: 0.8rem;
+}
+
+.error {
+  color: $danger;
+  font-size: 0.8rem;
+}

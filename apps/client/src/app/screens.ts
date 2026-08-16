@@ -15,6 +15,7 @@ export type ScreenId =
   | 'depths'
   | 'arena'
   | 'champions'
+  | 'relics'
   | 'mistgate'
   | 'bazaar'
   | 'quests'
@@ -55,6 +56,11 @@ export const SCREENS: readonly ScreenDefinition[] = [
     inDock: true,
   },
   { id: 'champions', label: 'Champions', glyph: '☗', inDock: true },
+  // Deliberately ungated: relics start dropping from the first campaign clear, and a
+  // player who cannot see what they just earned has no idea the system exists. The
+  // `relicUpgrading` unlock gates the *forge* inside this screen, which is what the flag
+  // actually names (docs/GAME_DESIGN.md §12).
+  { id: 'relics', label: 'Relics', glyph: '◆', inDock: true },
   { id: 'mistgate', label: 'Mistgate', glyph: '◉', inDock: true },
   {
     id: 'bazaar',

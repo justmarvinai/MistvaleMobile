@@ -1,0 +1,83 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  width: min(44rem, 88vw);
+  max-height: 76vh;
+  overflow-y: auto;
+}
+
+.heading {
+  margin: 0 0 $space-2;
+  color: $muted;
+  font-size: 0.7rem;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.current {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  align-items: flex-start;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: $space-2;
+}
+
+.preview {
+  padding: $space-2;
+  background: $panel-inset;
+}
+
+.deltas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin: 0 0 $space-2;
+  padding: 0;
+  list-style: none;
+  font-family: $font-mono;
+  font-size: 0.8rem;
+
+  li[data-sign='up'] {
+    color: $success;
+  }
+
+  li[data-sign='down'] {
+    color: $danger;
+  }
+}
+
+.power {
+  color: $muted;
+  font-size: 0.85rem;
+
+  strong {
+    color: $mist;
+    font-family: $font-mono;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $space-2;
+}
+
+.empty {
+  color: $muted;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.error {
+  color: $danger;
+  font-size: 0.8rem;
+}

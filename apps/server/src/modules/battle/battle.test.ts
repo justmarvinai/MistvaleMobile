@@ -309,12 +309,17 @@ describe.skipIf(!dbUp)('the game loop', () => {
       expect(replay.json().data.events).toHaveLength(first.json().data.events.length);
       expect(replay.json().data.outcome).toBe(first.json().data.outcome);
 
-      // And crucially, it did not pay twice.
+      // And crucially, it did not pay twice. A win writes at most one currency row and
+      // at most one drop row; a replay that settled again would double either.
       const ledger = await app.db
         .select()
         .from(economyLog)
         .where(eq(economyLog.playerId, playerId));
-      expect(ledger.length).toBeLessThanOrEqual(1);
+      const currencyRows = ledger.filter((row) =>
+        Object.hasOwn(row.deltas as Record<string, number>, 'silver'),
+      );
+      expect(currencyRows.length).toBeLessThanOrEqual(1);
+      expect(ledger.length - currencyRows.length).toBeLessThanOrEqual(1);
     });
 
     it('pauses for input in manual mode, then acts on the chosen skill', async () => {

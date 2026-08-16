@@ -1,0 +1,367 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChampionDetail, GearSlot, Stat } from '@mistvale/shared';
+import { GEAR_SLOTS } from '@mistvale/shared';
+import { Modal } from '../../ui/Modal/Modal';
+import { Button } from '../../ui/Button/Button';
+import { gameApi, newActionId } from '../../api/game';
+import { useContentStore } from '../../state/contentStore';
+import { useInventoryStore, itemCount } from '../../state/inventoryStore';
+import { usePlayerStore } from '../../state/playerStore';
+import { useRosterStore } from '../../state/rosterStore';
+import { FoodPicker } from './FoodPicker';
+import { RelicPicker } from './RelicPicker';
+import { StatTable } from './StatTable';
+import styles from './ChampionDetail.module.scss';
+
+/**
+ * One champion, everything about it.
+ *
+ * Four ladders and nine relic slots on one screen, which is a lot — so the layout puts
+ * the two things a player came for at the top (what it is worth now, what it is wearing)
+ * and the spends below. Every cost shown here came from the server with the champion;
+ * nothing on this screen is calculated locally.
+ */
+
+type Tab = 'gear' | 'skills' | 'lore';
+
+const SLOT_LABEL: Record<GearSlot, string> = {
+  weapon: 'Weapon',
+  helm: 'Helm',
+  shield: 'Shield',
+  gauntlets: 'Gauntlets',
+  cuirass: 'Cuirass',
+  boots: 'Boots',
+  ring: 'Ring',
+  amulet: 'Amulet',
+  banner: 'Banner',
+};
+
+export function ChampionDetailModal({
+  championId,
+  onClose,
+}: {
+  championId: string;
+  onClose: () => void;
+}): JSX.Element {
+  const bundle = useContentStore((state) => state.bundle);
+  const items = useInventoryStore((state) => state.items);
+  const refreshInventory = useInventoryStore((state) => state.refresh);
+  const refreshRoster = useRosterStore((state) => state.load);
+  const refreshPlayer = usePlayerStore((state) => state.refresh);
+
+  const [detail, setDetail] = useState<ChampionDetail | null>(null);
+  const [tab, setTab] = useState<Tab>('gear');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [picking, setPicking] = useState<'level' | 'rank' | null>(null);
+  const [slotPicking, setSlotPicking] = useState<GearSlot | null>(null);
+
+  // Bumped after every spend to re-read the champion. A counter rather than a callback
+  // so the fetch lives in one effect with one cancellation guard — a response that lands
+  // after the modal moved on must not overwrite what is on screen.
+  const [reloadToken, setReloadToken] = useState(0);
+  const reload = useCallback(() => setReloadToken((token) => token + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    gameApi
+      .champion(championId)
+      .then((result) => {
+        if (!cancelled) setDetail(result);
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) {
+          setError(cause instanceof Error ? cause.message : 'That champion could not be loaded.');
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [championId, reloadToken]);
+
+  const def = useMemo(
+    () => bundle?.champions.find((entry) => entry.key === detail?.champion.championKey),
+    [bundle, detail],
+  );
+
+  /** Runs a spend, then re-reads everything it could have moved. */
+  const run = async (label: string, action: () => Promise<unknown>): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await action();
+      await Promise.all([refreshInventory(), refreshRoster(), refreshPlayer()]);
+      reload();
+      setNotice(label);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'That did not work.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!detail || !def) {
+    return (
+      <Modal open title="Champion" onClose={onClose}>
+        <p className={styles.note}>{error ?? 'Reading the roll…'}</p>
+      </Modal>
+    );
+  }
+
+  const { champion, stats, costs } = detail;
+  const wornBySlot = new Map(detail.gear.map((piece) => [piece.slot, piece]));
+  const ascendCost = costs.ascend?.items ?? {};
+  const canAffordAscend =
+    costs.ascend?.allowedByRank === true &&
+    Object.entries(ascendCost).every(([key, amount]) => itemCount(items, key) >= amount);
+
+  const skills = (bundle?.skills ?? []).filter((skill) => def.skills.includes(skill.key));
+  const tomeKey =
+    def.rarity === 'legendary'
+      ? 'tome_legendary'
+      : def.rarity === 'epic'
+        ? 'tome_epic'
+        : 'tome_rare';
+
+  return (
+    <Modal open title={def.name} onClose={onClose}>
+      <div className={styles.body}>
+        <header className={styles.head}>
+          <div>
+            <div className={styles.title}>{def.title}</div>
+            <div className={styles.tier}>
+              {'★'.repeat(champion.rank)}
+              {'☆'.repeat(6 - champion.rank)} · Level {champion.level}/{champion.levelCap}
+              {champion.ascension > 0 && ` · Ascension ${champion.ascension}`}
+            </div>
+          </div>
+          <div className={styles.power}>
+            <span className={styles.powerValue}>{stats.power.toLocaleString()}</span>
+            <span className={styles.powerLabel}>Power</span>
+          </div>
+        </header>
+
+        <div className={styles.flags}>
+          <button
+            type="button"
+            className={styles.flag}
+            aria-pressed={champion.locked}
+            disabled={busy}
+            onClick={() =>
+              void run(champion.locked ? 'Unlocked.' : 'Locked.', () =>
+                gameApi.setChampionFlags(championId, { locked: !champion.locked }),
+              )
+            }
+          >
+            ⚿ {champion.locked ? 'Locked' : 'Lock'}
+          </button>
+          <button
+            type="button"
+            className={styles.flag}
+            aria-pressed={champion.favourite}
+            disabled={busy}
+            onClick={() =>
+              void run(champion.favourite ? 'Unfavourited.' : 'Favourited.', () =>
+                gameApi.setChampionFlags(championId, { favourite: !champion.favourite }),
+              )
+            }
+          >
+            ✦ {champion.favourite ? 'Favourite' : 'Mark favourite'}
+          </button>
+        </div>
+
+        <StatTable stats={stats} />
+
+        <div className={styles.tabs} role="tablist">
+          {(['gear', 'skills', 'lore'] as Tab[]).map((entry) => (
+            <button
+              key={entry}
+              type="button"
+              role="tab"
+              aria-selected={tab === entry}
+              className={styles.tab}
+              onClick={() => setTab(entry)}
+            >
+              {entry === 'gear' ? 'Relics' : entry === 'skills' ? 'Skills' : 'Lore'}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'gear' && (
+          <div className={styles.slots}>
+            {GEAR_SLOTS.map((slot) => {
+              const worn = wornBySlot.get(slot);
+              const slotDef = bundle?.gearSlots.find((entry) => entry.key === slot);
+              const locked = (slotDef?.ascensionRequired ?? 0) > champion.ascension;
+              return (
+                <button
+                  key={slot}
+                  type="button"
+                  className={styles.slot}
+                  data-filled={worn ? 'true' : undefined}
+                  disabled={locked || busy}
+                  onClick={() => setSlotPicking(slot)}
+                  title={
+                    locked
+                      ? `Needs ascension ${slotDef?.ascensionRequired}`
+                      : worn
+                        ? `${worn.setKey} · +${worn.level}`
+                        : `Empty ${SLOT_LABEL[slot]}`
+                  }
+                >
+                  <span className={styles.slotName}>{SLOT_LABEL[slot]}</span>
+                  {worn ? (
+                    <>
+                      <span className={styles.slotMain}>
+                        {worn.main.stat.toUpperCase()} +{worn.main.value}
+                        {worn.main.percent ? '%' : ''}
+                      </span>
+                      <span className={styles.slotLevel}>+{worn.level}</span>
+                    </>
+                  ) : (
+                    <span className={styles.slotEmpty}>{locked ? 'Locked' : 'Empty'}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {tab === 'gear' && stats.setBonuses.length > 0 && (
+          <ul className={styles.setBonuses}>
+            {stats.setBonuses.map((bonus) => (
+              <li key={bonus.setKey}>
+                <strong>{bonus.name}</strong> ({bonus.equipped} worn) — {bonus.description}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {tab === 'skills' && (
+          <ul className={styles.skills}>
+            {skills.map((skill) => {
+              const level = detail.skillUpgrades[skill.key] ?? 0;
+              const maxed = level >= 5;
+              const haveTome = itemCount(items, tomeKey) > 0;
+              return (
+                <li key={skill.key} className={styles.skill}>
+                  <div>
+                    <div className={styles.skillName}>
+                      {skill.name}
+                      <span className={styles.skillSlot}>{skill.slot.toUpperCase()}</span>
+                      {level > 0 && <span className={styles.skillLevel}>+{level}</span>}
+                    </div>
+                    <p className={styles.skillText}>{skill.description}</p>
+                  </div>
+                  {skill.slot !== 'passive' && (
+                    <Button
+                      variant="ghost"
+                      disabled={busy || maxed || !haveTome}
+                      onClick={() =>
+                        void run('Skill improved.', () =>
+                          gameApi.upgradeSkill(championId, {
+                            skillKey: skill.key,
+                            source: { kind: 'tome' },
+                            actionId: newActionId(),
+                          }),
+                        )
+                      }
+                    >
+                      {maxed ? 'Maxed' : haveTome ? 'Use tome' : 'No tome'}
+                    </Button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {tab === 'lore' && <p className={styles.lore}>{def.lore || 'Nothing is written down.'}</p>}
+
+        <div className={styles.ladders}>
+          <Button
+            variant="secondary"
+            disabled={busy || champion.level >= champion.levelCap}
+            onClick={() => setPicking('level')}
+          >
+            {champion.level >= champion.levelCap ? 'At level cap' : 'Feed for experience'}
+          </Button>
+
+          <Button
+            variant="secondary"
+            disabled={busy || !costs.rankUp || !costs.rankUp.atLevelCap}
+            onClick={() => setPicking('rank')}
+            title={
+              costs.rankUp
+                ? `${costs.rankUp.foodCount} × ★${costs.rankUp.foodRank} champions + ${costs.rankUp.silver.toLocaleString()} silver`
+                : 'Already ★6'
+            }
+          >
+            {costs.rankUp ? `Rank up to ★${champion.rank + 1}` : 'Fully ranked'}
+          </Button>
+
+          <Button
+            variant="secondary"
+            disabled={busy || !canAffordAscend}
+            title={
+              costs.ascend?.allowedByRank === false
+                ? 'Rank this champion up first'
+                : Object.entries(ascendCost)
+                    .map(([key, amount]) => `${amount} × ${key} (have ${itemCount(items, key)})`)
+                    .join(' · ')
+            }
+            onClick={() => void run('Ascended.', () => gameApi.ascend(championId, newActionId()))}
+          >
+            {costs.ascend ? `Ascend to ${champion.ascension + 1}` : 'Fully ascended'}
+          </Button>
+        </div>
+
+        {notice && <p className={styles.notice}>{notice}</p>}
+        {error && <p className={styles.error}>{error}</p>}
+      </div>
+
+      {picking && (
+        <FoodPicker
+          mode={picking}
+          champion={detail}
+          onClose={() => setPicking(null)}
+          onConfirm={async (ids) => {
+            setPicking(null);
+            await run(picking === 'level' ? 'Experience granted.' : 'Rank raised.', () =>
+              picking === 'level'
+                ? gameApi.levelUp(championId, ids, newActionId())
+                : gameApi.rankUp(championId, ids, newActionId()),
+            );
+          }}
+        />
+      )}
+
+      {slotPicking && (
+        <RelicPicker
+          slot={slotPicking}
+          championId={championId}
+          worn={wornBySlot.get(slotPicking) ?? null}
+          onClose={() => setSlotPicking(null)}
+          onChanged={async () => {
+            setSlotPicking(null);
+            await run('Relics changed.', async () => undefined);
+          }}
+        />
+      )}
+    </Modal>
+  );
+}
+
+/** Stat keys in the order the design doc lists them. */
+export const STAT_ORDER: readonly Stat[] = [
+  'hp',
+  'atk',
+  'def',
+  'spd',
+  'critRate',
+  'critDmg',
+  'res',
+  'acc',
+];
