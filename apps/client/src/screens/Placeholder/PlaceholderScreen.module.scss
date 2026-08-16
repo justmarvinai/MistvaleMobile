@@ -1,0 +1,53 @@
+.screen {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: $space-5;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-3;
+  max-width: 460px;
+  padding: $space-7 $space-6;
+  text-align: center;
+
+  @include motion-safe {
+    animation: settle $duration-base $ease-out;
+  }
+}
+
+.glyph {
+  font-size: 44px;
+  line-height: 1;
+  color: $mist;
+  text-shadow: 0 0 22px $mist-glow;
+}
+
+.title {
+  @include display-text(26px);
+}
+
+.blurb {
+  font-size: 13px;
+  line-height: 1.7;
+  color: $parchment-dim;
+}
+
+.phase {
+  @include label-text;
+  padding: $space-1 $space-3;
+  border: 1px solid $edge;
+  border-radius: 2px;
+  background: $panel-inset;
+  color: $mist-dim;
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}

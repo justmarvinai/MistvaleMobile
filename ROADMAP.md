@@ -8,7 +8,7 @@
 
 | Phase | Theme | Key deliverables | Relative size |
 |---|---|---|---|
-| P0 | Foundation | Monorepo, CI, DB, auth, client shell, deploy scripts v1 | ▓▓ |
+| **P0 ✅** | Foundation | Monorepo, CI, DB, auth, client shell, deploy scripts v1 | ▓▓ |
 | P1 | Content backbone | Content schema + cache + publish, seeds v1, Admin core editors (A0–A1) | ▓▓▓ |
 | P2 | Battle engine | Full engine + tests + battle API + balance-sim | ▓▓▓▓ |
 | P3 | Battle experience | Battle screen, campaign flow, results | ▓▓▓▓ |
@@ -22,9 +22,10 @@
 
 ---
 
-### P0 — Foundation
+### P0 — Foundation ✅ **complete**
 Monorepo scaffold (pnpm: `apps/client`, `apps/server`, `packages/shared`, `packages/engine`, `tools/`), TS strict + ESLint/Prettier + Vitest + CI (lint/typecheck/test/build). Drizzle + Postgres with migration/seed harness. Fastify server: config, pino, error envelope, rate limiting, request IDs. **Auth complete** (register/login/logout/sessions/change-password, argon2id, case-insensitive uniques, force-password-change path). Client shell: Vite + React + Pixi boot (one Application, scaling/letterbox, nearest-neighbor), design tokens, UI kit v1 (Panel/Button/Modal/Toast/Bar from Kenney 9-slice), screen registry + router, login/register screens, API client with envelope/error handling. `tools/atlas-pack` + `tools/icon-fetch` working (icons fetched + attributed). Scripts v1: DEPLOY/UPDATE/STATUS/BACKUP/SEED (VPS-ready even if the game is just a login screen).
 **Exit:** fresh VPS → DEPLOY.sh → register, log in, see an empty Haven at 60 fps; CI green.
+**Delivered:** pnpm workspace (client/server/shared/engine/tools) · TS strict + ESLint 9 + Prettier + Vitest + Playwright · GitHub Actions CI (format→lint→typecheck→migrate→test→build→migration-drift check, plus a browser e2e job against real PostgreSQL) · Drizzle schema for accounts/sessions/players/audit_log/economy_log with the Player/GameMaster/Admin rank model · Fastify server with config validation, pino logging, error envelope, rate limiting, request ids, rank-gated health endpoints · complete auth (argon2id, hashed session tokens, sliding expiry, case-insensitive unique names, change-password revoking all sessions) · seeded xoshiro128** RNG for the engine · React + Pixi client shell (design tokens, UI kit, screen registry, animated mist backdrop, Haven, settings, locked-feature teasers) · `tools/icon-fetch` (79 attributed game-icons) · all eight ops scripts + nginx/systemd/Postgres configs. 104 unit/integration tests and 3 end-to-end browser tests pass.
 
 ### P1 — Content backbone (+ Admin A0–A1)
 Full content schema (`*_defs` per DATA_MODEL.md) + Zod contracts in shared. ContentCache with draft→validate→publish→revert + revisions + client bundle endpoint (ETag/IndexedDB). Seed v1: the full 37-champion roster + 6 food units (7 final-art kits verbatim from CONTENT_PLAN §1; §1b kits from the skill-template library; placeholder-asset convention per ASSET_GUIDE), lizard archetypes, chapter 1 stages, sets/slots/stat tables, game_config defaults. Asset registry + admin upload → pack pipeline. Admin Suite reaches A1 (auth, shell, Game-config editor, Champion/Skills/Enemy/Gear editors, asset manager, dashboard v1).

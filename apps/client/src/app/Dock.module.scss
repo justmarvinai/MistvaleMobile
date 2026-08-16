@@ -1,0 +1,87 @@
+.dock {
+  position: relative;
+  z-index: $z-chrome;
+  display: flex;
+  align-items: stretch;
+  gap: $space-1;
+  padding: $space-2;
+  background: linear-gradient(0deg, $panel 0%, $ground 100%);
+  border-top: 1px solid $edge;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.item {
+  @include interactive;
+
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 52px;
+  padding: $space-2 $space-1;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: $muted;
+
+  &:hover:not(.locked) {
+    color: $parchment;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: $edge;
+  }
+
+  &:active:not(.locked) {
+    @include press-down;
+  }
+}
+
+.active {
+  color: $parchment;
+  background: linear-gradient(180deg, $panel-raised, $panel);
+  border-color: $mist-dim;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 12px rgba(127, 212, 193, 0.15);
+
+  // The lit underline that marks the current destination.
+  &::after {
+    content: '';
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    bottom: -1px;
+    height: 2px;
+    background: $mist;
+    box-shadow: 0 0 8px $mist-glow;
+  }
+}
+
+.locked {
+  color: $muted-deep;
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+  opacity: 0.55;
+}
+
+.glyph {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.hotkey {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-family: $font-mono;
+  font-size: 9px;
+  color: $muted-deep;
+}

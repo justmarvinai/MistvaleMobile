@@ -1,0 +1,10 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'tools/*'
+
+# Native/binary dependencies that legitimately need their install scripts:
+# argon2 compiles a native addon, esbuild fetches its platform binary.
+onlyBuiltDependencies:
+  - argon2
+  - esbuild

@@ -1,0 +1,109 @@
+# =============================================================================
+# mistvale-server.service — the Mistvale game + admin API (Fastify, Node 22)
+# =============================================================================
+# Rendered by scripts/DEPLOY.sh into /etc/systemd/system/mistvale-server.service
+# (the __TOKEN__ placeholders are substituted with the constants from
+# scripts/lib/common.sh). Production defaults:
+#
+#   __APP_USER__  = mistvale          __APP_ROOT__ = /srv/mistvale
+#   __ENV_FILE__  = /srv/mistvale/.env
+#   __LOG_DIR__   = /var/log/mistvale __UPLOADS_ROOT__ = /var/lib/mistvale
+#   __NODE_BIN__  = /usr/bin/node
+#
+# The server runs from the symlink /srv/mistvale/server → releases/<ts>/server,
+# so a release swap is "repoint symlink + systemctl restart" (≈2–5 s downtime,
+# DEPLOYMENT_OPERATIONS.md §2).
+# -----------------------------------------------------------------------------
+
+[Unit]
+Description=Mistvale game server (Fastify, player API + admin API)
+Documentation=https://github.com/justmarvinai/MistvaleMobile
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+# A truly hopeless crash loop (30 restarts inside 10 minutes) gives up so that
+# the failure is visible in STATUS.sh instead of being masked by restarts.
+# Clear with: systemctl reset-failed __SERVICE__
+StartLimitIntervalSec=600
+StartLimitBurst=30
+
+[Service]
+Type=simple
+User=__APP_USER__
+Group=__APP_GROUP__
+WorkingDirectory=__APP_ROOT__/server
+EnvironmentFile=__ENV_FILE__
+
+# --max-old-space-size=1024 keeps the heap inside the RAM budget for the
+# 1-core/4 GB box (ARCHITECTURE §9, DEPLOYMENT_OPERATIONS §3).
+ExecStart=__NODE_BIN__ --max-old-space-size=1024 dist/index.js
+
+# Graceful reload path for future use (SIGHUP is ignored today; a restart is
+# the supported way to pick up a new release).
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=always
+RestartSec=3
+TimeoutStartSec=60
+TimeoutStopSec=20
+KillSignal=SIGTERM
+KillMode=mixed
+
+# Logging: the server writes pino JSON to stdout/stderr and systemd captures it
+# into the journal (apps/server/src/lib/logger.ts, ARCHITECTURE §10). LOGS.sh
+# reads `journalctl -u __SERVICE__`, and prefers __LOG_DIR__/server.log if a file
+# sink is ever added.
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mistvale
+
+# Crash marker for the Admin dashboard / STATUS.sh: every non-clean exit appends
+# one line to ${LOG_DIR}/crash.log (DEPLOYMENT_OPERATIONS §4 "crash-loop flag").
+ExecStopPost=/bin/sh -c 'if [ "$SERVICE_RESULT" != "success" ]; then printf "%s service=__SERVICE__ result=%s exit_code=%s exit_status=%s\\n" "$(date -u +%%Y-%%m-%%dT%%H:%%M:%%SZ)" "$SERVICE_RESULT" "$EXIT_CODE" "$EXIT_STATUS" >> __LOG_DIR__/crash.log; fi'
+
+# --- Resource guards ---------------------------------------------------------
+# Hard ceiling above the 1 GB V8 heap so a leak is killed instead of swapping
+# the whole box to death (DEPLOYMENT_OPERATIONS §3).
+MemoryMax=1536M
+MemoryHigh=1280M
+TasksMax=256
+# Node is single-threaded here; leave scheduling to the kernel but stay polite
+# to nginx/Postgres on the single core.
+Nice=0
+IOSchedulingClass=best-effort
+IOSchedulingPriority=4
+
+# --- Hardening ---------------------------------------------------------------
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RestrictRealtime=true
+# AF_NETLINK is required: glibc's getaddrinfo() consults netlink for source
+# address selection, so dropping it breaks DNS/localhost resolution.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+LockPersonality=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0027
+# ProtectSystem=strict makes everything read-only except these paths:
+#   uploads (admin asset uploads + packed atlases), log dir (pino file log).
+ReadWritePaths=__UPLOADS_ROOT__ __LOG_DIR__
+# NOTE: MemoryDenyWriteExecute must stay OFF — V8's JIT needs W^X pages.
+MemoryDenyWriteExecute=false
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+{
+  "name": "@mistvale/icon-fetch",
+  "version": "0.1.0-ea.0",
+  "private": true,
+  "type": "module",
+  "description": "Fetches, normalizes and attributes the game-icons.net icons used by the Mistvale client (CC BY 3.0).",
+  "bin": {
+    "icon-fetch": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "icons": "tsx src/index.ts",
+    "fetch": "tsx src/index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}

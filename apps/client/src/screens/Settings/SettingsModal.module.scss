@@ -1,0 +1,108 @@
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-1;
+  padding: $space-1;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  border-radius: 2px;
+}
+
+.tab {
+  @include interactive;
+  padding: $space-2;
+  font-size: 12px;
+  font-weight: 600;
+  color: $muted;
+  border-radius: 2px;
+
+  &:hover {
+    color: $parchment;
+  }
+}
+
+.tabActive {
+  background: $panel-raised;
+  color: $parchment;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  margin-top: $space-3;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-2 0;
+  cursor: default;
+
+  & + & {
+    border-top: 1px solid rgba(42, 51, 69, 0.5);
+  }
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: $parchment;
+}
+
+.rowDescription {
+  font-size: 11px;
+  color: $muted-deep;
+}
+
+.sliderWrap {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  flex-shrink: 0;
+}
+
+.slider {
+  width: 140px;
+  accent-color: $mist;
+  cursor: pointer;
+}
+
+.sliderValue {
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $muted;
+  min-width: 34px;
+  text-align: right;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: $mist;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.speedGroup {
+  display: flex;
+  gap: $space-1;
+}
+
+.credits {
+  margin-top: $space-4;
+  padding-top: $space-3;
+  border-top: 1px solid $edge;
+  font-size: 11px;
+  color: $muted-deep;
+  text-align: center;
+}

@@ -1,0 +1,3 @@
+# Local sanity-build target (`--out dist-assets`). The real output goes to
+# apps/client/public/icons, which the root .gitignore already covers.
+dist-assets/

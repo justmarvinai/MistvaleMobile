@@ -3,7 +3,9 @@
 **Mistvale** — a 2D pixel-art, turn-based champion-collection / gacha RPG in the browser, heavily inspired by Raid: Shadow Legends (structurally faithful, uniquely named, own numbers). Desktop-first, later landscape-mobile PWA. This repo: game client + authoritative server + battle engine + assets. Sibling repo `MistvaleMobile-Admin`: the operator SPA for the Admin API this server hosts.
 
 ## Project state
-**Planning complete → implementation starts at Phase P0** (`ROADMAP.md`). No application code exists yet; docs are the source of truth. When the docs and reality diverge during implementation, fix one or the other in the same PR — stale docs are a review-blocker.
+**Phase P0 complete → next is P1 (content backbone)** — see `ROADMAP.md`. The monorepo, CI, database, auth, client shell and deploy scripts exist and are tested; content tables, the engine simulation, and the game screens do not yet. When the docs and reality diverge, fix one or the other in the same PR — stale docs are a review-blocker.
+
+**Working on the code:** `pnpm install`, then `pnpm db:migrate` against a local PostgreSQL, `pnpm dev` to run server + client. `pnpm verify` runs the whole gate CI runs (format, lint, typecheck, test, build); `pnpm e2e` drives the browser flow. Server tests need PostgreSQL and skip themselves without it.
 
 ## Read first (order matters)
 1. `ROADMAP.md` — where we are, what the current phase owes

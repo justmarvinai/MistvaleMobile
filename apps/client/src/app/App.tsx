@@ -1,0 +1,146 @@
+import { useCallback, useEffect, useState } from 'react';
+import { PixiStage } from '@/game/PixiStage';
+import { ToastHost } from '@/ui/Toast/Toast';
+import { AuthScreen } from '@/screens/Auth/AuthScreen';
+import { HavenScreen } from '@/screens/Haven/HavenScreen';
+import { PlaceholderScreen } from '@/screens/Placeholder/PlaceholderScreen';
+import { SettingsModal } from '@/screens/Settings/SettingsModal';
+import { useSessionStore } from '@/state/sessionStore';
+import { usePlayerStore } from '@/state/playerStore';
+import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screens';
+import { TopBar } from './TopBar';
+import { Dock } from './Dock';
+import { BootScreen } from './BootScreen';
+import styles from './App.module.scss';
+
+/**
+ * The application root.
+ *
+ * Owns session restoration and the top-level choice between the auth screen and the
+ * game shell. Navigation state lives inside `GameShell`, which is keyed by account so a
+ * new sign-in always starts fresh without any state-resetting effects.
+ */
+export function App() {
+  const status = useSessionStore((state) => state.status);
+  const account = useSessionStore((state) => state.account);
+  const restore = useSessionStore((state) => state.restore);
+  const player = usePlayerStore((state) => state.player);
+  const refreshPlayer = usePlayerStore((state) => state.refresh);
+  const resetPlayer = usePlayerStore((state) => state.reset);
+
+  const [bootError, setBootError] = useState<string>();
+
+  // Ask the server once whether the cookie we may be holding is still a live session.
+  useEffect(() => {
+    void restore().catch(() => {
+      setBootError('Could not reach the server. It may be restarting — try again shortly.');
+    });
+  }, [restore]);
+
+  // Pull the full snapshot once signed in; drop it on sign-out.
+  useEffect(() => {
+    if (status === 'authenticated') {
+      void refreshPlayer().catch(() => {
+        setBootError('Signed in, but the player snapshot could not be loaded.');
+      });
+    } else if (status === 'anonymous') {
+      resetPlayer();
+    }
+  }, [status, refreshPlayer, resetPlayer]);
+
+  if (status === 'unknown') {
+    return (
+      <>
+        <PixiStage scene="mist" />
+        <BootScreen error={bootError} onRetry={() => window.location.reload()} />
+      </>
+    );
+  }
+
+  if (status === 'anonymous') {
+    return (
+      <>
+        <PixiStage scene="mist" />
+        <AuthScreen />
+        <ToastHost />
+      </>
+    );
+  }
+
+  // Authenticated, but the first snapshot has not landed yet.
+  if (!player) {
+    return (
+      <>
+        <PixiStage scene="mist" />
+        <BootScreen
+          message="Lighting the lanterns…"
+          error={bootError}
+          onRetry={() => window.location.reload()}
+        />
+        <ToastHost />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <PixiStage scene="mist" />
+      {/* Keyed by account: signing in as someone else rebuilds the shell from scratch. */}
+      <GameShell key={account?.id ?? 'session'} />
+      <ToastHost />
+    </>
+  );
+}
+
+/** The signed-in game shell: resource bar, current screen, navigation dock. */
+function GameShell() {
+  const [screen, setScreen] = useState<ScreenId>('haven');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const navigate = useCallback((id: ScreenId) => setScreen(id), []);
+
+  // Number keys jump between dock slots.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      const typing =
+        target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA' ||
+        target?.isContentEditable === true;
+      if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const slot = Number.parseInt(event.key, 10);
+      if (!Number.isInteger(slot) || slot < 1 || slot > DOCK_SCREENS.length) return;
+
+      const destination = DOCK_SCREENS[slot - 1];
+      if (destination && isScreenUnlocked(destination, usePlayerStore.getState().unlocks)) {
+        setScreen(destination.id);
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  const definition = SCREENS.find((entry) => entry.id === screen);
+
+  return (
+    <>
+      <div className={styles.shell}>
+        <TopBar onOpenSettings={() => setSettingsOpen(true)} />
+
+        <main className={styles.content}>
+          {screen === 'haven' ? (
+            <HavenScreen onNavigate={navigate} />
+          ) : definition ? (
+            <PlaceholderScreen screen={definition} />
+          ) : null}
+        </main>
+
+        <Dock current={screen} onNavigate={navigate} />
+      </div>
+
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+    </>
+  );
+}

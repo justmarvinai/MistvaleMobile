@@ -1,0 +1,80 @@
+.host {
+  position: fixed;
+  // Clears the top bar so notifications never cover the sign-out/settings controls.
+  top: 68px;
+  right: $space-4;
+  z-index: $z-toast;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  max-width: 360px;
+  pointer-events: none;
+}
+
+.toast {
+  @include panel($panel-raised);
+
+  display: flex;
+  align-items: flex-start;
+  gap: $space-3;
+  padding: $space-3;
+  border-left-width: 3px;
+  pointer-events: auto;
+
+  @include motion-safe {
+    animation: slide-in $duration-base $ease-out;
+  }
+}
+
+.info {
+  border-left-color: $mist;
+}
+
+.success {
+  border-left-color: $success;
+}
+
+.error {
+  border-left-color: $danger;
+}
+
+.warning {
+  border-left-color: $warning;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message {
+  font-size: 13px;
+  color: $parchment;
+  overflow-wrap: anywhere;
+}
+
+.requestId {
+  margin-top: $space-1;
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $muted-deep;
+}
+
+.close {
+  @include interactive;
+  color: $muted;
+  font-size: 12px;
+  line-height: 1;
+  padding: $space-1;
+
+  &:hover {
+    color: $parchment;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}

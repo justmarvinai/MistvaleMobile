@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+
+# generated client assets (produced by tools/atlas-pack + tools/icon-fetch)
+apps/client/public/atlases/
+apps/client/public/icons/
+
+# tool caches
+.cache/
+coverage/
+.vitest/
+playwright-report/
+test-results/
+
+# environment & secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# logs
+*.log
+logs/
+
+# editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

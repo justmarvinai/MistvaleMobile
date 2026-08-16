@@ -1,0 +1,145 @@
+@use 'sass:color';
+
+.bar {
+  position: relative;
+  z-index: $z-chrome;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-2 $space-4;
+  background: linear-gradient(180deg, $panel 0%, $ground 100%);
+  border-bottom: 1px solid $edge;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  min-width: 0;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, $mist-dim, color.adjust($mist-dim, $lightness: -22%));
+  border: 1px solid $mist;
+  border-radius: 2px;
+  color: $ground-deep;
+  font-family: $font-display;
+  font-size: 18px;
+  box-shadow: 0 0 10px $mist-glow;
+}
+
+.profileText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  color: $parchment;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.level {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: 11px;
+  color: $muted;
+}
+
+.xpTrack {
+  display: block;
+  width: 72px;
+  height: 3px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.xpFill {
+  display: block;
+  height: 100%;
+  background: $mist;
+  transition: width $duration-slow $ease-out;
+}
+
+.resources {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.pill {
+  @include inset-well;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  min-height: 36px;
+}
+
+.pillGlyph {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pillBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pillValue {
+  font-family: $font-mono;
+  font-size: 13px;
+  font-weight: 600;
+  color: $parchment;
+  line-height: 1;
+}
+
+.pillCap {
+  color: $muted-deep;
+  font-size: 11px;
+}
+
+.energy .pillGlyph {
+  color: $mist;
+}
+
+.energyTrack {
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.energyFill {
+  display: block;
+  height: 100%;
+  background: $mist;
+  transition: width $duration-base $ease-out;
+}
+
+.silver .pillGlyph {
+  color: $muted;
+}
+
+.crystal .pillGlyph {
+  color: $mist-element;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+}

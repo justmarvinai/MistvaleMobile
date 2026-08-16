@@ -1,0 +1,119 @@
+// Mistvale design tokens — "Forged in mist".
+//
+// The single source of visual truth (docs/UI_UX_DESIGN.md §1.1). Values are exposed as
+// CSS custom properties so runtime themes and the Pixi layer can read them, and as Sass
+// variables for compile-time use in mixins.
+//
+// Hard rules encoded here: no serif fonts anywhere, no generic rounded "app" styling.
+
+// ── Palette ────────────────────────────────────────────────────────────────────
+$ground-deep: #0b0e14; // page background, deepest layer
+$ground: #11151d; // panels sitting on the page
+$panel: #161b26; // standard panel fill
+$panel-raised: #1e2533; // hovered/raised surfaces
+$panel-inset: #0d1119; // wells, inputs, inset areas
+$edge: #2a3345; // borders and dividers
+$edge-bright: #3a465e; // hovered borders
+
+$mist: #7fd4c1; // primary interactive accent
+$mist-dim: #4a9c8c;
+$mist-glow: rgba(127, 212, 193, 0.35);
+
+$parchment: #e8ddc4; // primary text
+$parchment-dim: #b9b096;
+$muted: #9aa3b5; // secondary text
+$muted-deep: #6b7488;
+
+$ember: #e5533d;
+$tide: #3f8fd4;
+$verdant: #57b35c;
+$mist-element: #a06bd8;
+
+$rarity-common: #9aa3b5;
+$rarity-uncommon: #57b35c;
+$rarity-rare: #3f8fd4;
+$rarity-epic: #a06bd8;
+$rarity-legendary: #e6a53c;
+
+$danger: #d4503f;
+$success: #57b35c;
+$warning: #e6a53c;
+$gold: #e6c35c;
+
+// ── Typography (no serif fonts, ever) ──────────────────────────────────────────
+$font-display: 'Pixelify Sans', 'Trebuchet MS', system-ui, sans-serif;
+$font-body:
+  'Inter',
+  system-ui,
+  -apple-system,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+
+// ── Spacing (4px base grid, matching the pixel art) ────────────────────────────
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 24px;
+$space-6: 32px;
+$space-7: 48px;
+$space-8: 64px;
+
+// ── Motion (docs/UI_UX_DESIGN.md §1.2) ─────────────────────────────────────────
+$duration-instant: 80ms;
+$duration-fast: 120ms;
+$duration-base: 180ms;
+$duration-slow: 250ms;
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+// ── Layers ─────────────────────────────────────────────────────────────────────
+$z-stage: 0;
+$z-content: 10;
+$z-chrome: 100;
+$z-modal: 1000;
+$z-toast: 2000;
+
+:root {
+  --mv-ground-deep: #{$ground-deep};
+  --mv-ground: #{$ground};
+  --mv-panel: #{$panel};
+  --mv-panel-raised: #{$panel-raised};
+  --mv-panel-inset: #{$panel-inset};
+  --mv-edge: #{$edge};
+  --mv-edge-bright: #{$edge-bright};
+
+  --mv-mist: #{$mist};
+  --mv-mist-dim: #{$mist-dim};
+  --mv-mist-glow: #{$mist-glow};
+
+  --mv-parchment: #{$parchment};
+  --mv-parchment-dim: #{$parchment-dim};
+  --mv-muted: #{$muted};
+  --mv-muted-deep: #{$muted-deep};
+
+  --mv-ember: #{$ember};
+  --mv-tide: #{$tide};
+  --mv-verdant: #{$verdant};
+  --mv-mist-element: #{$mist-element};
+
+  --mv-rarity-common: #{$rarity-common};
+  --mv-rarity-uncommon: #{$rarity-uncommon};
+  --mv-rarity-rare: #{$rarity-rare};
+  --mv-rarity-epic: #{$rarity-epic};
+  --mv-rarity-legendary: #{$rarity-legendary};
+
+  --mv-danger: #{$danger};
+  --mv-success: #{$success};
+  --mv-warning: #{$warning};
+  --mv-gold: #{$gold};
+
+  --mv-font-display: #{$font-display};
+  --mv-font-body: #{$font-body};
+  --mv-font-mono: #{$font-mono};
+
+  --mv-duration-fast: #{$duration-fast};
+  --mv-duration-base: #{$duration-base};
+}

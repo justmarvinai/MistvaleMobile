@@ -1,0 +1,130 @@
+@use 'sass:color';
+@use 'tokens' as *;
+
+// Shared style primitives for the hand-built pixel UI kit.
+//
+// These encode the look so individual components stay declarative — and so "no generic
+// rounded AI-slop UI" is enforced by construction rather than by review.
+
+/// A panel with a hard bevelled edge. Corners stay nearly square: the pixel-art frame
+/// does the decorative work, not a large border radius.
+@mixin panel($fill: $panel, $border: $edge) {
+  background: $fill;
+  border: 1px solid $border;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+/// An inset well — inputs, list backgrounds, resource readouts.
+@mixin inset-well {
+  background: $panel-inset;
+  border: 1px solid color.adjust($edge, $lightness: -6%);
+  border-radius: 2px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/// Keyboard focus ring. Always visible — accessibility is not optional.
+@mixin focus-ring($color: $mist) {
+  outline: 2px dashed $color;
+  outline-offset: 2px;
+}
+
+/// Interactive element baseline: pointer, no text selection, consistent transitions.
+@mixin interactive {
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color $duration-fast $ease-out,
+    border-color $duration-fast $ease-out,
+    box-shadow $duration-fast $ease-out,
+    transform $duration-instant $ease-out;
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    filter: saturate(0.25) brightness(0.7);
+  }
+}
+
+/// The 1px "press down" that makes pixel buttons feel physical.
+@mixin press-down {
+  transform: translateY(1px);
+}
+
+/// Display type: headings and numbers that should feel carved.
+@mixin display-text($size: 20px) {
+  font-family: $font-display;
+  font-size: $size;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: $parchment;
+}
+
+/// Small uppercase label used above fields and in stat readouts.
+@mixin label-text {
+  font-family: $font-body;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $muted;
+}
+
+/// Nearest-neighbour scaling so pixel art never blurs.
+@mixin pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/// Respects the OS "reduce motion" setting for decorative animation.
+@mixin motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    @content;
+  }
+}
+
+/// A subtle drifting mist overlay, used behind key surfaces.
+@mixin mist-veil($opacity: 0.05) {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(127, 212, 193, $opacity), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(160, 107, 216, $opacity * 0.8), transparent 60%);
+  }
+}
+
+/// Custom scrollbar matching the panel palette.
+@mixin pixel-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: $edge-bright $panel-inset;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $panel-inset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $edge-bright;
+    border: 2px solid $panel-inset;
+
+    &:hover {
+      background: $mist-dim;
+    }
+  }
+}
