@@ -5,7 +5,9 @@ import { apiErrorSchema } from './api';
 import { CONTENT_REGISTRY, CONTENT_TYPES } from './content/registry';
 import {
   contentBundleSchema,
+  contentDiffEntrySchema,
   contentDiffSchema,
+  contentIssueSchema,
   contentRevisionSummarySchema,
   contentTotalsSchema,
   contentValidationResultSchema,
@@ -29,7 +31,8 @@ import {
 /** An entity as the editor sees it: the draft if there is one, else the live row. */
 export const contentEntrySchema = z.object({
   key: z.string(),
-  data: z.unknown(),
+  /** The entity itself. Always a JSON object — every content type is one. */
+  data: z.record(z.string(), z.unknown()),
   state: z.enum(['live', 'draft', 'deleting']),
   updatedAt: z.string().nullable(),
   updatedBy: z.string().nullable(),
@@ -189,8 +192,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     response: z.object({
       key: z.string(),
       contentType: z.enum(CONTENT_TYPES),
-      data: z.unknown(),
-      live: z.unknown().nullable(),
+      data: z.record(z.string(), z.unknown()),
+      /** The published version, or null when the entity has never been published. */
+      live: z.record(z.string(), z.unknown()).nullable(),
       hasDraft: z.boolean(),
       pendingDelete: z.boolean(),
     }),
@@ -318,7 +322,9 @@ const SHARED_SCHEMAS: Record<string, z.ZodType> = {
   AccountSummary: accountSummarySchema,
   ContentBundle: contentBundleSchema,
   ContentValidationResult: contentValidationResultSchema,
+  ContentIssue: contentIssueSchema,
   ContentDiff: contentDiffSchema,
+  ContentDiffEntry: contentDiffEntrySchema,
   ContentRevisionSummary: contentRevisionSummarySchema,
   ContentTotals: contentTotalsSchema,
   ContentEntry: contentEntrySchema,
