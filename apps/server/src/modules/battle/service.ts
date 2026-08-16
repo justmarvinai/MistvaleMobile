@@ -8,18 +8,20 @@ import {
   combatConfigFrom,
   createBattle,
   createRng,
+  deriveStats,
   retreat as retreatBattle,
   type BattleAction,
   type BattleEvent,
   type BattleState,
   type ChampionEntry,
 } from '@mistvale/engine';
-import type { BattleMode, ChampionDef, EnemyDef, StageDef } from '@mistvale/shared';
+import type { BattleMode, ChampionDef, EnemyDef, GearInstance, StageDef } from '@mistvale/shared';
 import { battleSessions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
 import { computeEnergy } from '../../lib/progression';
 import type { ContentCache } from '../../content/cache';
+import * as gear from '../gear/service';
 import * as rewards from '../rewards/service';
 import * as roster from '../roster/service';
 
@@ -67,6 +69,10 @@ export interface RewardSummary {
   championXp: number;
   stars: number;
   levelsGained: number;
+  /** Relics the clear dropped, already owned by the player by the time this is read. */
+  gear: GearInstance[];
+  /** Stackables the clear dropped, by item key. */
+  items: Record<string, number>;
 }
 
 const MAX_TEAM = 4;
@@ -140,6 +146,13 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
     }
 
+    // Relics are resolved into flat stat bonuses here rather than inside the engine: the
+    // engine takes numbers, and everything about what a percentage resolves against is a
+    // server concern (docs/COMBAT_SYSTEM.md §1). This is why the number on the champion
+    // screen is the number that fights.
+    const equipped = await gear.gearByChampion(tx, options.team);
+    const gearContext = gear.gearContextFrom(snapshot.bundle);
+
     const entries: ChampionEntry[] = owned.map((member) => {
       const def = champions.get(member.championKey);
       if (!def) {
@@ -148,7 +161,15 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
           `Champion "${member.championKey}" is no longer published.`,
         );
       }
-      return { def, level: member.level, rank: member.rank, ascension: member.ascension };
+      const base = deriveStats(def.baseStats, member, scaling);
+      const assembled = gear.assembleChampion(base, equipped.get(member.id) ?? [], gearContext);
+      return {
+        def,
+        level: member.level,
+        rank: member.rank,
+        ascension: member.ascension,
+        bonuses: assembled.gear,
+      };
     });
 
     // Energy: derived from the clock, so an idle account costs nothing to keep current.
@@ -412,13 +433,76 @@ async function settle(
 
   await rewards.grantChampionXp(tx, row.teamIds, stage.rewards.championXp, roster.levelCapForRank);
 
+  const drops = await rollDrops(tx, ctx, row, stage, playerId, lootRng);
+
   return {
     silver,
     playerXp: stage.rewards.playerXp,
     championXp: stage.rewards.championXp,
     stars,
     levelsGained: granted.levelsGained,
+    gear: drops.gear,
+    items: drops.items,
   };
+}
+
+/**
+ * What the clear dropped, beyond silver and experience.
+ *
+ * The relic's set comes from the chapter and its slot from the stage number — the source
+ * game's arrangement, and the reason a chapter is a farm for something specific rather
+ * than a lottery. Rolled from the battle's own loot stream, so a replay of a fight
+ * reports the same drop it originally paid.
+ */
+async function rollDrops(
+  tx: Parameters<Parameters<Database['transaction']>[0]>[0],
+  ctx: BattleContext,
+  row: { stageKey: string },
+  stage: StageDef,
+  playerId: string,
+  lootRng: ReturnType<typeof createRng>,
+): Promise<{ gear: GearInstance[]; items: Record<string, number> }> {
+  const snapshot = ctx.content.current();
+  const band = stage.rewards.drops;
+  const dropped: GearInstance[] = [];
+  const items: Record<string, number> = {};
+
+  if (band && band.gearChance > 0 && lootRng.chance(band.gearChance)) {
+    const gearContext = gear.gearContextFrom(snapshot.bundle);
+    const chapter = snapshot.bundle.campaignChapters.find((entry) => entry.key === stage.parentKey);
+    const request = gear.rollBand(
+      lootRng,
+      {
+        setKeys: chapter?.setKey ? [chapter.setKey] : [],
+        slots: band.gearSlots,
+        rankMin: band.gearRankMin,
+        rankMax: band.gearRankMax,
+        rarityWeights: band.gearRarityWeights,
+      },
+      gearContext,
+    );
+    if (request) {
+      const created = await gear.createGear(
+        tx,
+        playerId,
+        { ...request, source: `stage:${row.stageKey}` },
+        lootRng,
+        gearContext,
+      );
+      dropped.push(gear.toDto(created, gearContext));
+    }
+  }
+
+  for (const drop of band?.items ?? []) {
+    if (!lootRng.chance(drop.chance)) continue;
+    const quantity = lootRng.int(drop.min, Math.max(drop.min, drop.max));
+    items[drop.itemKey] = (items[drop.itemKey] ?? 0) + quantity;
+  }
+  if (Object.keys(items).length > 0) {
+    await rewards.grantItems(tx, playerId, items, rewards.battleSource('drop', row.stageKey));
+  }
+
+  return { gear: dropped, items };
 }
 
 /**

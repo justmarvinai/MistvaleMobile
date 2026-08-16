@@ -47,9 +47,11 @@ const EMPTY_BUNDLE_TYPES = {
   enemies: 'enemy',
   gearSets: 'gearSet',
   gearSlots: 'gearSlot',
+  gearStats: 'gearStat',
   items: 'item',
   campaignChapters: 'campaignChapter',
   stages: 'stage',
+  shops: 'shop',
 } as const satisfies Record<string, ContentType>;
 
 export class ContentCache {

@@ -1,5 +1,14 @@
 import { z } from 'zod';
-import { DIFFICULTIES, ELEMENTS, GEAR_SLOTS, RARITIES, ROLES, STATS } from '../enums';
+import {
+  DIFFICULTIES,
+  ELEMENTS,
+  GEAR_SLOTS,
+  MAX_RANK,
+  MIN_RANK,
+  RARITIES,
+  ROLES,
+  STATS,
+} from '../enums';
 import {
   aiHintsSchema,
   auraSchema,
@@ -291,6 +300,96 @@ export const gearSlotDefSchema = z.object({
 });
 export type GearSlotDef = z.infer<typeof gearSlotDefSchema>;
 
+/**
+ * One rollable relic stat, in one form.
+ *
+ * A relic's numbers are the balance surface of the whole gear economy, so they are
+ * content rather than code: `hp_flat` and `hp_pct` are separate entries because they are
+ * separately tuned, and the key is what a `{stat, percent}` pair resolves to.
+ *
+ * Values are given at the two ends of the upgrade track — `mainBase` at +0 and `mainMax`
+ * at the maximum level — and interpolated between. Storing the endpoints rather than a
+ * per-level step is what keeps "an r6 weapon caps at 265 ATK" true by construction
+ * instead of true until rounding drifts (docs/ECONOMY_BALANCE.md §4).
+ *
+ * Every array is indexed by rank − 1, so index 5 is a ★6 relic.
+ */
+export const gearStatDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(32),
+  stat: z.enum(STATS),
+  /** A percentage of the champion's base stat, rather than a flat addition. */
+  percent: z.boolean().default(false),
+  canBeMain: z.boolean().default(true),
+  canBeSub: z.boolean().default(true),
+  mainBase: z.array(z.number().min(0)).length(MAX_RANK),
+  mainMax: z.array(z.number().min(0)).length(MAX_RANK),
+  subMin: z.array(z.number().min(0)).length(MAX_RANK),
+  subMax: z.array(z.number().min(0)).length(MAX_RANK),
+});
+export type GearStatDef = z.infer<typeof gearStatDefSchema>;
+
+// ── Shops ───────────────────────────────────────────────────────────────────
+
+/** What a shop slot hands over when bought. */
+export const SHOP_OFFER_KINDS = ['item', 'gear', 'champion', 'currency'] as const;
+export type ShopOfferKind = (typeof SHOP_OFFER_KINDS)[number];
+
+/**
+ * One thing a shop can roll into a slot.
+ *
+ * `weight` is relative within the shop, so making relics rarer is one number. A `gear`
+ * offer describes a *band* rather than a specific relic — the server rolls the actual
+ * piece when the slot is stocked, the same way a drop does.
+ */
+export const shopOfferSchema = z.object({
+  key: contentKeySchema,
+  kind: z.enum(SHOP_OFFER_KINDS),
+  name: z.string().min(1).max(48),
+  weight: z.number().min(0).max(1000).default(10),
+  currency: z.enum(['silver', 'crystals']).default('silver'),
+  price: z.number().int().min(0),
+  /** Scales the price with the rolled relic's rank, for `gear` offers. */
+  pricePerRank: z.number().int().min(0).default(0),
+  /** `item_defs` key for `item`, `champion_defs` key for `champion`. */
+  refKey: z.string().max(64).default(''),
+  quantity: z.number().int().min(1).max(999).default(1),
+  /** Relic band for `gear` offers. */
+  gear: z
+    .object({
+      rankMin: z.number().int().min(MIN_RANK).max(MAX_RANK),
+      rankMax: z.number().int().min(MIN_RANK).max(MAX_RANK),
+      rarityWeights: z.partialRecord(z.enum(RARITIES), z.number().min(0)),
+      /** Empty means every published set. */
+      setKeys: z.array(contentKeySchema).default([]),
+    })
+    .optional(),
+  /** How many of this offer may be bought per daily reset. 0 = unlimited. */
+  dailyLimit: z.number().int().min(0).max(99).default(0),
+  minAccountLevel: z.number().int().min(1).max(60).default(1),
+});
+export type ShopOffer = z.infer<typeof shopOfferSchema>;
+
+/**
+ * A shop: a set of slots that restock together on a timer.
+ *
+ * Stock is per player and rolled server-side, so a shop's contents are as unguessable as
+ * a summon and as auditable as a drop.
+ */
+export const shopDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  description: z.string().max(400).default(''),
+  restockMinutes: z.number().int().min(5).max(1440).default(60),
+  /** Slots every player has. */
+  baseSlots: z.number().int().min(1).max(12).default(4),
+  /** Extra slots a player may unlock permanently with crystals. */
+  crystalSlots: z.number().int().min(0).max(12).default(4),
+  crystalSlotCost: z.number().int().min(0).max(5000).default(150),
+  /** Crystals to re-roll the whole shop before the timer is up. */
+  refreshCost: z.number().int().min(0).max(5000).default(50),
+  offers: z.array(shopOfferSchema).min(1),
+});
+export type ShopDef = z.infer<typeof shopDefSchema>;
+
 // ── Campaign & stages ───────────────────────────────────────────────────────
 
 export const campaignChapterDefSchema = contentMetaSchema.extend({
@@ -337,6 +436,36 @@ export const stageDefSchema = contentMetaSchema.extend({
     playerXp: z.number().int().min(0).max(10_000),
     championXp: z.number().int().min(0).max(50_000),
     dropTableKey: contentKeySchema.optional(),
+    /**
+     * What a clear can drop, beyond silver and experience.
+     *
+     * Relics are described as a band rather than a list: the set comes from the chapter,
+     * the slot from the stage number, and the rank/rarity from here — the source game's
+     * arrangement, and the reason a chapter's farm is a *specific* farm. The generalised
+     * drop-table content type arrives with the Depths in P6; until then a campaign stage
+     * carries its own band, which is where an operator looks for it anyway.
+     */
+    drops: z
+      .object({
+        gearChance: z.number().min(0).max(1).default(0),
+        gearRankMin: z.number().int().min(MIN_RANK).max(MAX_RANK).default(1),
+        gearRankMax: z.number().int().min(MIN_RANK).max(MAX_RANK).default(2),
+        gearRarityWeights: z.partialRecord(z.enum(RARITIES), z.number().min(0)).default({}),
+        /** Restricts which slots can drop here. Empty means any. */
+        gearSlots: z.array(z.enum(GEAR_SLOTS)).default([]),
+        /** Stackable items, each rolled independently. */
+        items: z
+          .array(
+            z.object({
+              itemKey: contentKeySchema,
+              chance: z.number().min(0).max(1),
+              min: z.number().int().min(1).max(999).default(1),
+              max: z.number().int().min(1).max(999).default(1),
+            }),
+          )
+          .default([]),
+      })
+      .prefault({}),
   }),
   /** 3-star criteria: no deaths, and inside the turn limit. */
   starRules: z.object({
@@ -422,7 +551,9 @@ export type ChampionDefInput = z.input<typeof championDefSchema>;
 export type EnemyDefInput = z.input<typeof enemyDefSchema>;
 export type GearSetDefInput = z.input<typeof gearSetDefSchema>;
 export type GearSlotDefInput = z.input<typeof gearSlotDefSchema>;
+export type GearStatDefInput = z.input<typeof gearStatDefSchema>;
 export type CampaignChapterDefInput = z.input<typeof campaignChapterDefSchema>;
 export type StageDefInput = z.input<typeof stageDefSchema>;
 export type ItemDefInput = z.input<typeof itemDefSchema>;
+export type ShopDefInput = z.input<typeof shopDefSchema>;
 export type GameConfigEntryInput = z.input<typeof gameConfigEntrySchema>;

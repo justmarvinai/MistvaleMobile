@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { ROUTES, apiSuccess } from '@mistvale/shared';
+import { ROUTES, apiSuccess, routePattern } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
 import * as roster from '../roster/service';
 import * as battle from './service';
@@ -95,13 +95,13 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
     return reply.send(apiSuccess({ battle: view }, app.content.rev));
   });
 
-  app.get('/battles/:id', async (request, reply) => {
+  app.get(routePattern(ROUTES.battle.byId), async (request, reply) => {
     const playerId = requirePlayer(request);
     const { id } = request.params as { id: string };
     return reply.send(apiSuccess(await battle.findById(ctx(), playerId, id), app.content.rev));
   });
 
-  app.post('/battles/:id/action', async (request, reply) => {
+  app.post(routePattern(ROUTES.battle.action), async (request, reply) => {
     const playerId = requirePlayer(request);
     const { id } = request.params as { id: string };
     const input = actionSchema.parse(request.body ?? {});
@@ -118,7 +118,7 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
     return reply.send(apiSuccess(view, app.content.rev));
   });
 
-  app.post('/battles/:id/retreat', async (request, reply) => {
+  app.post(routePattern(ROUTES.battle.retreat), async (request, reply) => {
     const playerId = requirePlayer(request);
     const { id } = request.params as { id: string };
     const view = await battle.retreat(ctx(), playerId, id);

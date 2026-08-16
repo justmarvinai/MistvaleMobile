@@ -8,7 +8,9 @@ import {
   gameConfigEntrySchema,
   gearSetDefSchema,
   gearSlotDefSchema,
+  gearStatDefSchema,
   itemDefSchema,
+  shopDefSchema,
   skillDefSchema,
   stageDefSchema,
   statusDefSchema,
@@ -37,9 +39,11 @@ export const contentBundleSchema = z.object({
   enemies: z.array(enemyDefSchema),
   gearSets: z.array(gearSetDefSchema),
   gearSlots: z.array(gearSlotDefSchema),
+  gearStats: z.array(gearStatDefSchema),
   items: z.array(itemDefSchema),
   campaignChapters: z.array(campaignChapterDefSchema),
   stages: z.array(stageDefSchema),
+  shops: z.array(shopDefSchema),
   /** Flattened to a plain map — the client only ever reads values. */
   config: z.record(z.string(), gameConfigEntrySchema.shape.value),
 });

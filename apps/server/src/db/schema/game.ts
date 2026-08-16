@@ -47,6 +47,14 @@ export const playerChampions = pgTable(
     ascension: smallint('ascension').notNull().default(0),
     xp: bigint('xp', { mode: 'number' }).notNull().default(0),
 
+    /**
+     * Tome levels applied per skill key.
+     *
+     * Kept as a map rather than a column per skill because a champion's kit is content:
+     * adding a fifth skill in Admin must not need a migration.
+     */
+    skillUpgrades: jsonb('skill_upgrades').notNull().default({}).$type<Record<string, number>>(),
+
     /** Locked champions cannot be fed away or sold — the guard against a misclick. */
     locked: boolean('locked').notNull().default(false),
     favourite: boolean('favourite').notNull().default(false),

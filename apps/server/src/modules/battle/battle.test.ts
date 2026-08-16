@@ -276,12 +276,18 @@ describe.skipIf(!dbUp)('the game loop', () => {
           .where(eq(players.id, playerId));
         expect(wallet!.silver).toBe(view.rewards.silver);
 
+        // A clear writes one currency row, and one more for item drops when the stage
+        // rolled any. What must never happen is a second *currency* row: that would be a
+        // double payout, which is the thing this assertion exists to catch.
         const ledger = await app.db
           .select()
           .from(economyLog)
           .where(eq(economyLog.playerId, playerId));
-        expect(ledger).toHaveLength(1);
-        expect(ledger[0]?.source).toContain('c01_s1_normal');
+        const currencyRows = ledger.filter((row) =>
+          Object.hasOwn(row.deltas as Record<string, number>, 'silver'),
+        );
+        expect(currencyRows).toHaveLength(1);
+        for (const row of ledger) expect(row.source).toContain('c01_s1_normal');
       }
     });
 

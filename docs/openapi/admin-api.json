@@ -769,6 +769,12 @@
               "$ref": "#/components/schemas/GearSlotDef"
             }
           },
+          "gearStats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GearStatDef"
+            }
+          },
           "items": {
             "type": "array",
             "items": {
@@ -785,6 +791,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/StageDef"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShopDef"
             }
           },
           "config": {
@@ -829,9 +841,11 @@
           "enemies",
           "gearSets",
           "gearSlots",
+          "gearStats",
           "items",
           "campaignChapters",
           "stages",
+          "shops",
           "config"
         ],
         "additionalProperties": false
@@ -1066,9 +1080,11 @@
               "enemy",
               "gearSet",
               "gearSlot",
+              "gearStat",
               "item",
               "campaignChapter",
               "stage",
+              "shop",
               "gameConfig"
             ]
           },
@@ -1147,9 +1163,11 @@
               "enemy",
               "gearSet",
               "gearSlot",
+              "gearStat",
               "item",
               "campaignChapter",
               "stage",
+              "shop",
               "gameConfig"
             ]
           },
@@ -1195,9 +1213,11 @@
               "enemy",
               "gearSet",
               "gearSlot",
+              "gearStat",
               "item",
               "campaignChapter",
               "stage",
+              "shop",
               "gameConfig"
             ]
           },
@@ -1743,6 +1763,103 @@
         ],
         "additionalProperties": false
       },
+      "GearStatDef": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "stat": {
+            "type": "string",
+            "enum": [
+              "hp",
+              "atk",
+              "def",
+              "spd",
+              "critRate",
+              "critDmg",
+              "res",
+              "acc"
+            ]
+          },
+          "percent": {
+            "default": false,
+            "type": "boolean"
+          },
+          "canBeMain": {
+            "default": true,
+            "type": "boolean"
+          },
+          "canBeSub": {
+            "default": true,
+            "type": "boolean"
+          },
+          "mainBase": {
+            "minItems": 6,
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "mainMax": {
+            "minItems": 6,
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "subMin": {
+            "minItems": 6,
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "subMax": {
+            "minItems": 6,
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "required": [
+          "key",
+          "sortOrder",
+          "name",
+          "stat",
+          "percent",
+          "canBeMain",
+          "canBeSub",
+          "mainBase",
+          "mainMax",
+          "subMin",
+          "subMax"
+        ],
+        "additionalProperties": false
+      },
       "GetContentEntryResponse": {
         "type": "object",
         "properties": {
@@ -1760,9 +1877,11 @@
               "enemy",
               "gearSet",
               "gearSlot",
+              "gearStat",
               "item",
               "campaignChapter",
               "stage",
+              "shop",
               "gameConfig"
             ]
           },
@@ -1891,9 +2010,11 @@
               "enemy",
               "gearSet",
               "gearSlot",
+              "gearStat",
               "item",
               "campaignChapter",
               "stage",
+              "shop",
               "gameConfig"
             ]
           },
@@ -2076,9 +2197,11 @@
               "enemy",
               "gearSet",
               "gearSlot",
+              "gearStat",
               "item",
               "campaignChapter",
               "stage",
+              "shop",
               "gameConfig"
             ]
           },
@@ -2090,6 +2213,216 @@
           "key",
           "contentType",
           "saved"
+        ],
+        "additionalProperties": false
+      },
+      "ShopDef": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 48
+          },
+          "description": {
+            "default": "",
+            "type": "string",
+            "maxLength": 400
+          },
+          "restockMinutes": {
+            "default": 60,
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 1440
+          },
+          "baseSlots": {
+            "default": 4,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "crystalSlots": {
+            "default": 4,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 12
+          },
+          "crystalSlotCost": {
+            "default": 150,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "refreshCost": {
+            "default": 50,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "offers": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 64,
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "item",
+                    "gear",
+                    "champion",
+                    "currency"
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 48
+                },
+                "weight": {
+                  "default": 10,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "currency": {
+                  "default": "silver",
+                  "type": "string",
+                  "enum": [
+                    "silver",
+                    "crystals"
+                  ]
+                },
+                "price": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pricePerRank": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "refKey": {
+                  "default": "",
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "quantity": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "gear": {
+                  "type": "object",
+                  "properties": {
+                    "rankMin": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 6
+                    },
+                    "rankMax": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 6
+                    },
+                    "rarityWeights": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "enum": [
+                          "common",
+                          "uncommon",
+                          "rare",
+                          "epic",
+                          "legendary"
+                        ]
+                      },
+                      "additionalProperties": {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    },
+                    "setKeys": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 64,
+                        "pattern": "^[a-z][a-z0-9_]*$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "rankMin",
+                    "rankMax",
+                    "rarityWeights",
+                    "setKeys"
+                  ],
+                  "additionalProperties": false
+                },
+                "dailyLimit": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 99
+                },
+                "minAccountLevel": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                }
+              },
+              "required": [
+                "key",
+                "kind",
+                "name",
+                "weight",
+                "currency",
+                "price",
+                "pricePerRank",
+                "refKey",
+                "quantity",
+                "dailyLimit",
+                "minAccountLevel"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "key",
+          "sortOrder",
+          "name",
+          "description",
+          "restockMinutes",
+          "baseSlots",
+          "crystalSlots",
+          "crystalSlotCost",
+          "refreshCost",
+          "offers"
         ],
         "additionalProperties": false
       },
@@ -3727,13 +4060,121 @@
                 "minLength": 2,
                 "maxLength": 64,
                 "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "drops": {
+                "type": "object",
+                "properties": {
+                  "gearChance": {
+                    "default": 0,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "gearRankMin": {
+                    "default": 1,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 6
+                  },
+                  "gearRankMax": {
+                    "default": 2,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 6
+                  },
+                  "gearRarityWeights": {
+                    "default": {},
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string",
+                      "enum": [
+                        "common",
+                        "uncommon",
+                        "rare",
+                        "epic",
+                        "legendary"
+                      ]
+                    },
+                    "additionalProperties": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "gearSlots": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "weapon",
+                        "helm",
+                        "shield",
+                        "gauntlets",
+                        "cuirass",
+                        "boots",
+                        "ring",
+                        "amulet",
+                        "banner"
+                      ]
+                    }
+                  },
+                  "items": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "itemKey": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 64,
+                          "pattern": "^[a-z][a-z0-9_]*$"
+                        },
+                        "chance": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "min": {
+                          "default": 1,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 999
+                        },
+                        "max": {
+                          "default": 1,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 999
+                        }
+                      },
+                      "required": [
+                        "itemKey",
+                        "chance",
+                        "min",
+                        "max"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "gearChance",
+                  "gearRankMin",
+                  "gearRankMax",
+                  "gearRarityWeights",
+                  "gearSlots",
+                  "items"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "silverMin",
               "silverMax",
               "playerXp",
-              "championXp"
+              "championXp",
+              "drops"
             ],
             "additionalProperties": false
           },
@@ -4842,9 +5283,11 @@
                 "enemies",
                 "gear-sets",
                 "gear-slots",
+                "gear-stats",
                 "items",
                 "chapters",
                 "stages",
+                "shops",
                 "config"
               ]
             }
@@ -5021,9 +5464,11 @@
                 "enemies",
                 "gear-sets",
                 "gear-slots",
+                "gear-stats",
                 "items",
                 "chapters",
                 "stages",
+                "shops",
                 "config"
               ]
             }
@@ -5235,9 +5680,11 @@
                 "enemies",
                 "gear-sets",
                 "gear-slots",
+                "gear-stats",
                 "items",
                 "chapters",
                 "stages",
+                "shops",
                 "config"
               ]
             }
@@ -5432,9 +5879,11 @@
                 "enemies",
                 "gear-sets",
                 "gear-slots",
+                "gear-stats",
                 "items",
                 "chapters",
                 "stages",
+                "shops",
                 "config"
               ]
             }
@@ -5620,9 +6069,11 @@
                 "enemies",
                 "gear-sets",
                 "gear-slots",
+                "gear-stats",
                 "items",
                 "chapters",
                 "stages",
+                "shops",
                 "config"
               ]
             }

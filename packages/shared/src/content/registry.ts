@@ -8,7 +8,9 @@ import {
   gameConfigEntrySchema,
   gearSetDefSchema,
   gearSlotDefSchema,
+  gearStatDefSchema,
   itemDefSchema,
+  shopDefSchema,
   skillDefSchema,
   stageDefSchema,
   statusDefSchema,
@@ -31,9 +33,11 @@ export const CONTENT_TYPES = [
   'enemy',
   'gearSet',
   'gearSlot',
+  'gearStat',
   'item',
   'campaignChapter',
   'stage',
+  'shop',
   'gameConfig',
 ] as const;
 
@@ -111,6 +115,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: [],
     inBundle: true,
   },
+  gearStat: {
+    label: 'Relic stats',
+    path: 'gear-stats',
+    schema: gearStatDefSchema,
+    references: [],
+    inBundle: true,
+  },
   item: { label: 'Items', path: 'items', schema: itemDefSchema, references: [], inBundle: true },
   campaignChapter: {
     label: 'Campaign chapters',
@@ -124,6 +135,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     path: 'stages',
     schema: stageDefSchema,
     references: ['campaignChapter', 'enemy'],
+    inBundle: true,
+  },
+  shop: {
+    label: 'Shops',
+    path: 'shops',
+    schema: shopDefSchema,
+    references: ['item', 'gearSet', 'champion'],
     inBundle: true,
   },
   gameConfig: {
@@ -145,9 +163,11 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'enemy',
   'gearSet',
   'gearSlot',
+  'gearStat',
   'item',
   'campaignChapter',
   'stage',
+  'shop',
   'gameConfig',
 ];
 

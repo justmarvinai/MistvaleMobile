@@ -236,6 +236,7 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       mode: string;
       parentKey: string;
       waves: { enemyKey: string; slot: number }[][];
+      rewards: { drops?: { items?: { itemKey: string }[] } };
     };
 
     if (stage.mode === 'campaign') {
@@ -266,6 +267,110 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
         slots.add(unit.slot);
       });
     });
+
+    // A drop naming an item that no longer exists would be a silent hole in the reward
+    // table: the fight pays out and the player simply never receives the thing.
+    (stage.rewards.drops?.items ?? []).forEach((drop, index) => {
+      reference(
+        { contentType: 'stage', key, path: `rewards.drops.items.${index}.itemKey` },
+        'item',
+        drop.itemKey,
+      );
+    });
+  }
+
+  for (const [key, entity] of parsed.get('shop') ?? []) {
+    const shop = entity as {
+      baseSlots: number;
+      crystalSlots: number;
+      offers: {
+        key: string;
+        kind: string;
+        refKey: string;
+        gear?: { rankMin: number; rankMax: number; setKeys: string[] };
+      }[];
+    };
+
+    const offerKeys = new Set<string>();
+    shop.offers.forEach((offer, index) => {
+      const path = `offers.${index}`;
+      if (offerKeys.has(offer.key)) {
+        errors.push({
+          severity: 'error',
+          contentType: 'shop',
+          key,
+          path: `${path}.key`,
+          message: `Two offers share the key "${offer.key}"; purchase limits are tracked by it.`,
+        });
+      }
+      offerKeys.add(offer.key);
+
+      if (offer.kind === 'item') {
+        reference({ contentType: 'shop', key, path: `${path}.refKey` }, 'item', offer.refKey);
+      }
+      if (offer.kind === 'champion') {
+        reference({ contentType: 'shop', key, path: `${path}.refKey` }, 'champion', offer.refKey);
+      }
+      if (offer.kind === 'gear') {
+        if (!offer.gear) {
+          errors.push({
+            severity: 'error',
+            contentType: 'shop',
+            key,
+            path: `${path}.gear`,
+            message: 'A relic offer needs a rank and rarity band to roll from.',
+          });
+        } else {
+          if (offer.gear.rankMin > offer.gear.rankMax) {
+            errors.push({
+              severity: 'error',
+              contentType: 'shop',
+              key,
+              path: `${path}.gear.rankMin`,
+              message: `Minimum rank ${offer.gear.rankMin} is above the maximum ${offer.gear.rankMax}.`,
+            });
+          }
+          for (const setKey of offer.gear.setKeys) {
+            reference(
+              { contentType: 'shop', key, path: `${path}.gear.setKeys` },
+              'gearSet',
+              setKey,
+            );
+          }
+        }
+      }
+    });
+
+    // Every slot has to be fillable, or a player stares at an empty shelf.
+    if (shop.offers.length < shop.baseSlots) {
+      warnings.push({
+        severity: 'warning',
+        contentType: 'shop',
+        key,
+        path: 'offers',
+        message: `${shop.offers.length} offers cannot fill ${shop.baseSlots} slots without repeating.`,
+      });
+    }
+  }
+
+  // A relic stat nothing can roll is dead content: no slot lists it as a main and it is
+  // barred from substats, so it can never appear on a piece.
+  const mainStatsBySlot = new Set<string>();
+  for (const [, entity] of parsed.get('gearSlot') ?? []) {
+    for (const stat of (entity as { allowedMainStats: string[] }).allowedMainStats) {
+      mainStatsBySlot.add(stat);
+    }
+  }
+  for (const [key, entity] of parsed.get('gearStat') ?? []) {
+    const def = entity as { stat: string; canBeMain: boolean; canBeSub: boolean };
+    if (!def.canBeSub && !(def.canBeMain && mainStatsBySlot.has(def.stat))) {
+      warnings.push({
+        severity: 'warning',
+        contentType: 'gearStat',
+        key,
+        message: 'No slot can roll this as a main stat and it is barred from substats.',
+      });
+    }
   }
 
   // Nothing may reference a champion that is not summonable and not obtainable

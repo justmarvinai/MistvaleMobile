@@ -1,9 +1,11 @@
 import { CONTENT_LOAD_ORDER, CONTENT_REGISTRY, type ContentType } from '@mistvale/shared';
 import { CAMPAIGN_CHAPTERS, CAMPAIGN_STAGES } from './data/campaign';
 import { GAME_CONFIG, ITEMS } from './data/config';
+import { GEAR_STATS } from './data/gear-stats';
 import { ENEMIES, ENEMY_SKILLS } from './data/enemies';
 import { EXTENDED_CHAMPIONS, EXTENDED_SKILLS } from './data/extended-champions';
 import { SHOWCASE_CHAMPIONS, SHOWCASE_SKILLS } from './data/showcase-champions';
+import { SHOPS } from './data/shops';
 import { STATUSES } from './data/statuses';
 import { ASSETS, FACTIONS, GEAR_SETS, GEAR_SLOTS } from './data/world';
 
@@ -40,9 +42,11 @@ export function buildSeedContent(): SeedContent[] {
     enemy: ENEMIES.map((data) => ({ key: data.key, data })),
     gearSet: GEAR_SETS.map((data) => ({ key: data.key, data })),
     gearSlot: GEAR_SLOTS.map((data) => ({ key: data.key, data })),
+    gearStat: GEAR_STATS.map((data) => ({ key: data.key, data })),
     item: ITEMS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
     stage: CAMPAIGN_STAGES.map((data) => ({ key: data.key, data })),
+    shop: SHOPS.map((data) => ({ key: data.key, data })),
     gameConfig: GAME_CONFIG.map((data) => ({ key: data.key, data })),
   };
 

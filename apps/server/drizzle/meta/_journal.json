@@ -29,6 +29,20 @@
       "when": 1786884743372,
       "tag": "0003_sloppy_hairball",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786889367088,
+      "tag": "0004_fine_mongoose",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786890181075,
+      "tag": "0005_lazy_zarek",
+      "breakpoints": true
     }
   ]
 }

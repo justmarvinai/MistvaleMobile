@@ -292,6 +292,127 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Free relic removal',
     'The source game made removal free in 2025; Mistvale adopts that from the start.',
   ),
+  entry(
+    'economy.gearUpgradeCost',
+    [
+      3_000, 3_000, 3_000, 3_000, 6_000, 6_000, 6_000, 6_000, 12_000, 12_000, 12_000, 12_000,
+      28_000, 28_000, 28_000, 28_000,
+    ],
+    'economy',
+    'Relic upgrade cost per level (★6)',
+    'Silver per attempt at each level 1–16, for a ★6 relic. Lower ranks scale by the rank multipliers. Expected total to +16 at ★6 ≈ 1.8M.',
+  ),
+  entry(
+    'economy.gearUpgradeCostByRank',
+    [0.1, 0.18, 0.3, 0.45, 0.65, 1],
+    'economy',
+    'Relic upgrade cost by rank',
+    'Multiplier applied to the per-level cost, indexed by rank − 1.',
+  ),
+  entry(
+    'economy.gearSellBase',
+    [120, 300, 800, 1_800, 3_400, 8_000],
+    'economy',
+    'Relic sell base by rank',
+    'Before the rarity multiplier and the per-level bonus. About 95% of drops are meant to be sold — this is the silver faucet.',
+  ),
+  entry(
+    'economy.gearSellRarityMultiplier',
+    { common: 1, uncommon: 1.2, rare: 1.5, epic: 2, legendary: 2.8 },
+    'economy',
+    'Relic sell multiplier by rarity',
+    'Multiplies the rank base.',
+  ),
+  entry(
+    'economy.gearSellPerLevel',
+    0.35,
+    'economy',
+    'Relic sell bonus per upgrade level',
+    'Sell value is base × rarity × (1 + this × level), so upgrading is never wholly wasted.',
+  ),
+  entry(
+    'economy.gearSubstatsByRarity',
+    { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4 },
+    'economy',
+    'Relic starting substats by rarity',
+    'How many substats a relic drops with. It gains one at +4, +8, +12 and +16 until it holds four.',
+  ),
+  entry(
+    'economy.gearDropRarityWeights',
+    { common: 45, uncommon: 30, rare: 18, epic: 6, legendary: 1 },
+    'economy',
+    'Default relic rarity weights',
+    'Used when a stage or shop offer names no distribution of its own.',
+  ),
+  entry(
+    'economy.powerWeights',
+    { hp: 0.06, atk: 1, def: 0.9, spd: 12, critRate: 8, critDmg: 4, res: 3, acc: 3 },
+    'economy',
+    'Power score weights',
+    'Informational only — power sorts lists and bands the arena, and is never a combat input.',
+  ),
+  entry(
+    'economy.championReleaseSilver',
+    { common: 250, uncommon: 500, rare: 1_500, epic: 6_000, legendary: 25_000 },
+    'economy',
+    'Silver for releasing a champion',
+    'By the released champion’s rarity, scaled by its star rank.',
+  ),
+  entry(
+    'economy.rankUpSilver',
+    [2_000, 8_000, 30_000, 100_000, 300_000],
+    'economy',
+    'Rank-up silver fee',
+    'Indexed by the current rank − 1: 1★→2★ costs the first entry. Food champions are consumed on top.',
+  ),
+  entry(
+    'economy.ascensionCosts',
+    {
+      1: { element_lesser: 8 },
+      2: { element_lesser: 15, essence_pure: 5 },
+      3: { element_greater: 12, essence_pure: 8 },
+      4: { element_greater: 20, essence_pure: 12 },
+      5: { element_prime: 15, essence_pure: 20 },
+      6: { element_prime: 25, essence_pure: 30 },
+    },
+    'economy',
+    'Ascension cost per level',
+    'Costs for an Epic champion. `element_*` resolves to the champion’s own element. Rare champions pay the Rare multiplier, Legendary the Legendary one.',
+  ),
+  entry(
+    'economy.ascensionRarityMultiplier',
+    { common: 0.4, uncommon: 0.5, rare: 0.6, epic: 1, legendary: 1.6 },
+    'economy',
+    'Ascension cost by rarity',
+    'Multiplies every essence in the ascension table.',
+  ),
+  entry(
+    'economy.maxAscensionByRank',
+    [0, 1, 2, 3, 4, 6],
+    'economy',
+    'Ascension cap by star rank',
+    'A champion cannot ascend past this for its rank — indexed by rank − 1, so ★1 cannot ascend at all and ★6 reaches 6.',
+  ),
+  entry(
+    'economy.skillUpgradeMaxLevel',
+    5,
+    'economy',
+    'Maximum skill upgrade level',
+    'How many tome or duplicate upgrades one skill can take, on top of its published ladder.',
+  ),
+  entry(
+    'economy.tomeByRarity',
+    {
+      common: 'tome_rare',
+      uncommon: 'tome_rare',
+      rare: 'tome_rare',
+      epic: 'tome_epic',
+      legendary: 'tome_legendary',
+    },
+    'economy',
+    'Which tome a rarity needs',
+    'Tome rarity must match the champion’s (GAME_DESIGN §7).',
+  ),
 
   // ── Summoning ─────────────────────────────────────────────────────────────
   entry(
@@ -447,13 +568,34 @@ export const ITEMS: ItemDefInput[] = [
     'Fog in a stoppered jar.',
     53,
   ),
+  // Greater and Prime tiers, for ascension levels 3–6 (ECONOMY_BALANCE §6). Element
+  // essences are matched to the champion's own breath; Pure is the universal top-up.
+  ...(
+    [
+      ['ember', 'Ember', 'A coal that has not gone out in a century.'],
+      ['tide', 'Tide', 'Water under pressure, still moving.'],
+      ['verdant', 'Verdant', 'Growth that has learned to be patient.'],
+      ['mist', 'Mist', 'Fog that remembers a shape.'],
+    ] as const
+  ).flatMap(([key, label, lore], index) => [
+    item(`essence_${key}_greater`, `Greater ${label} Essence`, 'essence', 'rare', lore, 54 + index),
+    item(
+      `essence_${key}_prime`,
+      `Prime ${label} Essence`,
+      'essence',
+      'epic',
+      `${lore} Concentrated past what the springs give up willingly.`,
+      58 + index,
+    ),
+  ]),
+
   item(
     'essence_pure',
     'Pure Essence',
     'essence',
     'rare',
     'Elementally silent, and useful to everyone.',
-    60,
+    70,
   ),
 
   item('tome_rare', 'Rare Tome', 'tome', 'rare', 'Teaches a Rare champion a little more.', 70),

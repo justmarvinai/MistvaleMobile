@@ -1,0 +1,1 @@
+ALTER TABLE "player_champions" ADD COLUMN "skill_upgrades" jsonb DEFAULT '{}'::jsonb NOT NULL;

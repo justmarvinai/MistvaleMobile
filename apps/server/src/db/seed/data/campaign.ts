@@ -21,6 +21,8 @@ interface ChapterPlan {
   levels: Record<'normal' | 'hard' | 'brutal', [number, number]>;
   /** Which difficulties this chapter ships on. */
   difficulties: readonly ('normal' | 'hard' | 'brutal')[];
+  /** The breath this chapter's essence drops belong to. */
+  element: 'ember' | 'tide' | 'verdant' | 'mist';
 }
 
 export const CAMPAIGN_CHAPTERS: CampaignChapterDefInput[] = [
@@ -78,6 +80,7 @@ const CHAPTER_PLANS: ChapterPlan[] = [
     bossKey: 'boss_vrash_fenblade',
     levels: { normal: [1, 6], hard: [24, 30], brutal: [42, 48] },
     difficulties: ['normal', 'hard', 'brutal'],
+    element: 'verdant',
   },
   {
     key: 'chapter_02',
@@ -85,6 +88,7 @@ const CHAPTER_PLANS: ChapterPlan[] = [
     bossKey: 'boss_ssythra_tidecaller',
     levels: { normal: [6, 12], hard: [30, 36], brutal: [48, 53] },
     difficulties: ['normal'],
+    element: 'tide',
   },
   {
     key: 'chapter_03',
@@ -92,6 +96,7 @@ const CHAPTER_PLANS: ChapterPlan[] = [
     bossKey: 'boss_gorrakh_broodtyrant',
     levels: { normal: [12, 19], hard: [36, 42], brutal: [53, 58] },
     difficulties: ['normal'],
+    element: 'ember',
   },
 ];
 
@@ -137,6 +142,68 @@ const TRASH_COMPOSITIONS: string[][][] = [
     ['sskarn_broodguard', 'sskarn_brute', 'sskarn_skirmisher'],
   ],
 ];
+
+/**
+ * Which relic slot a campaign stage drops.
+ *
+ * Stage number decides the slot and the chapter decides the set — the source game's
+ * arrangement, and the reason a chapter is a *specific* farm rather than a lottery. The
+ * boss stage drops any slot, which is what makes it the one worth repeating.
+ */
+const SLOT_BY_STAGE: readonly StageDropSlots[] = [
+  ['weapon'],
+  ['helm'],
+  ['shield'],
+  ['gauntlets'],
+  ['cuirass'],
+  ['boots'],
+  [],
+];
+
+type StageDropSlots = NonNullable<NonNullable<StageDefInput['rewards']['drops']>['gearSlots']>;
+
+/**
+ * What a clear can drop.
+ *
+ * Relic rank climbs with the chapter and again with difficulty, so Brutal chapter 3 is
+ * the first place a ★4 piece appears. The rarity mix shifts the same way: Normal is
+ * mostly sell-fodder that funds the forge, and the good rolls live further in
+ * (docs/ECONOMY_BALANCE.md §4).
+ */
+function buildDrops(
+  plan: ChapterPlan,
+  stageNumber: number,
+  difficulty: 'normal' | 'hard' | 'brutal',
+): StageDefInput['rewards']['drops'] {
+  const difficultyStep = difficulty === 'brutal' ? 2 : difficulty === 'hard' ? 1 : 0;
+  const chapterStep = Math.floor((plan.number - 1) / 2);
+  const rankMin = Math.min(6, 1 + chapterStep + difficultyStep);
+  const rankMax = Math.min(6, rankMin + 1);
+  const isBoss = stageNumber === 7;
+
+  return {
+    // The boss drops nearly every run; trash stages are the trickle that funds selling.
+    gearChance: isBoss ? 0.85 : 0.42,
+    gearRankMin: rankMin,
+    gearRankMax: rankMax,
+    gearRarityWeights: {
+      common: difficulty === 'normal' ? 46 : 24,
+      uncommon: 32,
+      rare: difficulty === 'brutal' ? 30 : 18,
+      epic: difficulty === 'brutal' ? 12 : difficulty === 'hard' ? 6 : 3,
+      legendary: difficulty === 'brutal' ? 2 : 1,
+    },
+    gearSlots: SLOT_BY_STAGE[stageNumber - 1] ?? [],
+    // The boss is also the ascension faucet until the Springs open in P6.
+    items: isBoss
+      ? [
+          { itemKey: 'essence_pure', chance: 0.5, min: 1, max: 3 },
+          { itemKey: `essence_${plan.element}_lesser`, chance: 0.7, min: 1, max: 4 },
+          { itemKey: 'sigil_faded', chance: 0.25, min: 1, max: 1 },
+        ]
+      : [{ itemKey: `essence_${plan.element}_lesser`, chance: 0.14, min: 1, max: 2 }],
+  };
+}
 
 function buildStage(
   plan: ChapterPlan,
@@ -197,6 +264,7 @@ function buildStage(
       silverMax: Math.round((480 + stageNumber * 80) * scale * chapterScale),
       playerXp: Math.round((14 + stageNumber * 3) * scale * chapterScale),
       championXp: Math.round((110 + stageNumber * 26) * scale * chapterScale),
+      drops: buildDrops(plan, stageNumber, difficulty),
     },
     starRules: { noDeaths: true, maxTurns: isBoss ? 16 : 12 },
     firstClearRewards: isBoss

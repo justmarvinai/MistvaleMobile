@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, gte, sql } from 'drizzle-orm';
 import { CURRENCIES, type Currency } from '@mistvale/shared';
-import { economyLog, playerChampions, players } from '../../db/schema/index';
+import { economyLog, playerChampions, playerItems, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
 import { applyAccountXp } from '../../lib/progression';
@@ -189,6 +189,73 @@ export async function grantChampionXp(
  */
 export function championXpToNextLevel(level: number): number {
   return Math.round(180 * Math.pow(1.16, Math.max(0, level - 1)));
+}
+
+/**
+ * Adds to (or takes from) a player's stackable items.
+ *
+ * Same contract as `grant`: it enforces the floor, it writes to `economy_log`, and it is
+ * the only way `player_items` moves. Quantities are signed, so a tome spend and a drop
+ * grant are the same call with opposite signs and one audit row each.
+ *
+ * The upsert is `on conflict do update` against the unique `(player_id, item_key)` index
+ * rather than a read-then-write, so two concurrent grants cannot lose one another.
+ */
+export async function grantItems(
+  tx: Executor,
+  playerId: string,
+  items: Readonly<Record<string, number>>,
+  source: string,
+): Promise<Record<string, number>> {
+  const applied: Record<string, number> = {};
+  const entries = Object.entries(items).filter(([, quantity]) => quantity !== 0);
+  if (entries.length === 0) return applied;
+
+  for (const [itemKey, quantity] of entries) {
+    if (quantity > 0) {
+      await tx
+        .insert(playerItems)
+        .values({ playerId, itemKey, quantity })
+        .onConflictDoUpdate({
+          target: [playerItems.playerId, playerItems.itemKey],
+          set: { quantity: sql`${playerItems.quantity} + ${quantity}`, updatedAt: new Date() },
+        });
+      applied[itemKey] = quantity;
+      continue;
+    }
+
+    // A spend must not drive the stack negative. The `where` makes the check and the
+    // write one statement, so a double-spend races to zero rows rather than to −1.
+    const needed = Math.abs(quantity);
+    const updated = await tx
+      .update(playerItems)
+      .set({ quantity: sql`${playerItems.quantity} - ${needed}`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(playerItems.playerId, playerId),
+          eq(playerItems.itemKey, itemKey),
+          gte(playerItems.quantity, needed),
+        ),
+      )
+      .returning({ id: playerItems.id });
+
+    if (updated.length === 0) {
+      throw new AppError('INSUFFICIENT_FUNDS', `Not enough ${itemKey}.`);
+    }
+    applied[itemKey] = quantity;
+  }
+
+  await tx.insert(economyLog).values({ playerId, source, deltas: applied });
+  return applied;
+}
+
+/** How many of an item a player holds. */
+export async function itemQuantities(tx: Executor, playerId: string): Promise<Map<string, number>> {
+  const rows = await tx
+    .select({ itemKey: playerItems.itemKey, quantity: playerItems.quantity })
+    .from(playerItems)
+    .where(eq(playerItems.playerId, playerId));
+  return new Map(rows.map((row) => [row.itemKey, row.quantity]));
 }
 
 /** Rolls a stage's silver payout. Uses the caller's seeded RNG so a replay pays the same. */
