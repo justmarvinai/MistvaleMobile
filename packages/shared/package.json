@@ -1,0 +1,21 @@
+{
+  "name": "@mistvale/shared",
+  "version": "0.1.0-ea.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared contracts between the Mistvale client and server: enums, DTOs, API envelope, error codes, route constants.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  }
+}

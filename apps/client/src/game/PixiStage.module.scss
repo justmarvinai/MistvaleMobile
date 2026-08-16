@@ -1,0 +1,21 @@
+.stageWrap {
+  position: fixed;
+  inset: 0;
+  z-index: $z-stage;
+  pointer-events: none;
+  background: $ground-deep;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  @include pixelated;
+}
+
+/// Darkens the edges so UI panels read clearly over the moving backdrop.
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(4, 6, 10, 0.75) 100%);
+}

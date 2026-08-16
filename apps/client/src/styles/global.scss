@@ -1,0 +1,114 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+// Global baseline. Component styling lives in SCSS modules next to each component;
+// this file only sets the document-level foundation.
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: $ground-deep;
+  color: $parchment;
+  font-family: $font-body;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  // The game is a fixed-viewport app; the page itself never scrolls.
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: $font-display;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+p {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+a {
+  color: $mist;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+::selection {
+  background: $mist-glow;
+  color: $parchment;
+}
+
+// Any scrollable region gets the pixel scrollbar treatment.
+.mv-scroll {
+  overflow-y: auto;
+  @include pixel-scrollbar;
+}
+
+// Visually hidden but available to screen readers.
+.mv-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

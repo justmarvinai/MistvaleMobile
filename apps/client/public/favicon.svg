@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <!-- Mistvale mark: a lantern-lit gate standing in the fog. -->
+  <rect width="32" height="32" fill="#0b0e14"/>
+  <!-- drifting mist bands -->
+  <rect x="2" y="22" width="28" height="2" fill="#1e2533"/>
+  <rect x="0" y="25" width="32" height="2" fill="#161b26"/>
+  <!-- gate arch -->
+  <path d="M10 26V13a6 6 0 0 1 12 0v13h-3V13a3 3 0 0 0-6 0v13z" fill="#7fd4c1"/>
+  <!-- ghost-light in the arch -->
+  <rect x="14" y="15" width="4" height="11" fill="#4a9c8c"/>
+  <rect x="15" y="17" width="2" height="4" fill="#e8ddc4"/>
+</svg>

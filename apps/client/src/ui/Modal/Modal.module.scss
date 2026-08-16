@@ -1,0 +1,54 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-5;
+  background: rgba(4, 6, 10, 0.72);
+  backdrop-filter: blur(2px);
+
+  @include motion-safe {
+    animation: fade-in $duration-fast $ease-out;
+  }
+}
+
+.dialog {
+  width: 100%;
+  outline: none;
+
+  @include motion-safe {
+    animation: rise $duration-base $ease-out;
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  color: $parchment-dim;
+  font-size: 14px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $space-2;
+  margin-top: $space-4;
+  padding-top: $space-3;
+  border-top: 1px solid $edge;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+}

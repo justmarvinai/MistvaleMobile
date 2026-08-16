@@ -28,7 +28,7 @@ Every grant/spend flows through `RewardService` → `economy_log`, so the Admin 
 ## 3. Champion XP & rank economy
 - **Champion XP** to max per rank ⚙: ★1 6.3k · ★2 34k · ★3 116k · ★4 400k · ★5 1.55M · ★6 5.4M (geometric per-level curve, `xp(level) ≈ A × e^(0.076·level)` shape like the source; total 1→60 ≈ 7.5M).
 - Stage champ-XP scales with chapter & difficulty; **Brutal 12-3/12-6 are tuned as the intended XP farms** (≈4.3k per surviving champion per run ⚙, split across deployed team — the "farmer carries 3 food" loop is deliberately preserved).
-- **Rank-up:** at max level, consume `R` champions of exactly `R`★ + silver fee ⚙ (1→2: 1×1★ … 5→6: 5×5★; silver 2k/8k/30k/100k/300k). Pre-ranked food ("Broodlings"/chicken-analog, pending USER_QUESTIONS §Broodlings) drops from events/login at 2★–4★.
+- **Rank-up:** at max level, consume `R` champions of exactly `R`★ + silver fee ⚙ (1→2: 1×1★ … 5→6: 5×5★; silver 2k/8k/30k/100k/300k). Food chain (owner-approved): Broodlings/Broodguards from Faded Sigils + campaign drops; pre-ranked food (2★–4★ Broodguards, chicken-analog) from events/login.
 - **Duplicates:** feeding an identical champion grants +1 skill level on a chosen skill 〔dev: choice, not random〕 — the dupe economy for a 7-champion pool.
 - **Account XP:** per energy spent (≈8 XP/energy ⚙) + quest chunks (100/500/1,000). L60 cap ≈ 3–4 months of active play ⚙.
 
@@ -69,12 +69,12 @@ Full build = 100 Bronze + 600 Silver + 950 Gold Emblems (source-faithful shape; 
 Mine: 3 levels × 500 crystals, 5/10/15 per day (source-faithful ~100-day payback each — the classic first purchase).
 
 ## 10. The Bazaar (market)
-Rotating stock, restock every 60 min ⚙, 4 base slots + 4 crystal-unlockable: Faded Sigil 5k (always in pool) · relics (all EA sets, rank ≤ player-band, rarity-weighted) 8k–120k · essence bundles · Gleaming Sigil 200k (1/day) · food champions (if Broodlings approved) 6k–45k. Prices/stock weights all content-table-driven; sanity-checked against faucet targets in the Admin shop editor.
+Rotating stock, restock every 60 min ⚙, 4 base slots + 4 crystal-unlockable: Faded Sigil 5k (always in pool) · relics (all EA sets, rank ≤ player-band, rarity-weighted) 8k–120k · essence bundles · Gleaming Sigil 200k (1/day) · food champions (Broodlings 6k / Broodguards 39k). Prices/stock weights all content-table-driven; sanity-checked against faucet targets in the Admin shop editor.
 
 ## 11. Quests, missions, events, login (reward sizing)
 - **Dailies (8, source-mirrored):** 5 arena battles → energy 30 · 3 summons → silver 5k · spend 50 energy → 2 Lesser Pure Essences · 3 champion level-ups → 5k · 4 relic upgrade attempts → 5k · 1 Bazaar purchase → 5 arena tokens · rotating (3 boss kills / 7 campaign wins) → 5k · claim-all bonus → **10 Crystals + 400 account XP + daily chest** (chest = small relic/sigil roll).
 - **Weeklies (6):** incl. "claim all-dailies 5×" → **1 Gleaming Sigil** + crystals; **Monthlies (5):** → **1 Radiant Sigil + 1 Mistwoven Sigil** + Epic tome.
-- **Missions (~80 at EA):** silver/energy early → sigils/tomes/emblems mid → Radiant bundle + exclusive title final (champion reward reserved until art exists).
+- **Missions (~80 at EA):** silver/energy early → sigils/tomes/emblems mid → final: **Aureleth, Voice of the Vale** (exclusive Legendary, Arbiter-analog) + title.
 - **Events (presets):** Champion Training (points/level gained scaled by rank), Depths Delve (points/floor energy), Summon Surge (Faded 1 / Gleaming 20 / Mistwoven 120 / Radiant 500 — source-faithful weights); milestone ladders sized to ~60–70% completion for a daily-active player ⚙.
 - **Login:** 30-day cycle (sigil days 7/14/21/28; day 30 = **Epic selector** — choice of the 4 non-starters; monthly re-roll of calendar via admin); 7-day welcome track ending in Gleaming ×2 + starter relic set.
 

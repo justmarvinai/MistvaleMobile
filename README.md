@@ -8,7 +8,7 @@ A 2D pixel-art, turn-based **champion-collection RPG** for the browser — colle
 | Doc | Contents |
 |---|---|
 | [`ROADMAP.md`](ROADMAP.md) | Phase plan P0→P10 to the EA-0.1 release |
-| [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md) | The master GDD: world, factions, the 7 champions, every system |
+| [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md) | The master GDD: world, factions, the 37-champion roster, every system |
 | [`docs/COMBAT_SYSTEM.md`](docs/COMBAT_SYSTEM.md) | Turn meter, damage math, 28 status effects, masteries — the engine contract |
 | [`docs/ECONOMY_BALANCE.md`](docs/ECONOMY_BALANCE.md) | Currencies, curves, rates, pity, sinks — all admin-tunable |
 | [`docs/CONTENT_PLAN_EA01.md`](docs/CONTENT_PLAN_EA01.md) | Every champion kit, enemy, chapter, dungeon, quest shipping in EA-0.1 |

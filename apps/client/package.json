@@ -1,0 +1,29 @@
+{
+  "name": "@mistvale/client",
+  "version": "0.1.0-ea.0",
+  "private": true,
+  "type": "module",
+  "description": "Mistvale game client — React shell with a PixiJS stage.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@mistvale/shared": "workspace:*",
+    "howler": "^2.2.4",
+    "pixi.js": "^8.6.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/howler": "^2.2.12",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "sass": "^1.83.4",
+    "vite": "^6.0.7"
+  }
+}

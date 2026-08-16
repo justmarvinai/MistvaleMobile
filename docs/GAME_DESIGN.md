@@ -17,6 +17,13 @@
 4. **A living, breathing pixel world** — everything animated, everything reactive; "full game", not "UI demo".
 5. **Respect the player** — transparent odds, visible pity, no pay wall (EA has no payments at all).
 
+### 1.1 Depth budget — "deep grind, gentle onboarding" (owner directive)
+Mistvale must be **as grindy and content-rich as the source game without its ten years of accreted complexity**. The source is the structure; we ship its *core* systems complete and park its bolt-on layers. Binding rules:
+- **Grind depth is sacred.** There must always be something worth farming: gear RNG (substats/rolls/sets), 252 stars × 3 difficulties, 4 dungeon ladders + springs rotation + Proving Grounds, per-champion masteries, Hall of Valor's year-scale sink, arena weeklies, events, missions, the collection itself. "Play 5 minutes then AFK" must never be optimal — energy, tokens, rotations, and events keep sessions meaningful all day.
+- **Entry complexity is budgeted.** Deliberate simplifications vs the source (already reflected throughout these docs): 4 elements with one simple wheel · 28 status effects instead of 40+ · no awakening/blessings/glyphs/gear-ascension meta-layers at EA · one arena, one medal currency · choice-based tomes · free gear removal · 48-node masteries instead of ~72 · simplified 3-star rule · no faction-locked or tower modes at EA. Each parked layer returns post-EA only when the base game feels mastered, never before.
+- **Teach by unlocking.** Systems appear one at a time via the level-gating table (§12) with one-sentence explanations; a new player should never see more than one unfamiliar system at once.
+- When a future design choice trades depth against approachability: keep the grind, cut the rulebook.
+
 ## 2. World & narrative
 
 **The realm of Mistvale** was a federation of old kingdoms until the **Worldmist** — a sentient, hungry fog — rolled down from the peaks and swallowed the lowlands. Whole armies vanished into it. Generations later, the mist has settled into an ecology: things live in it, things come out of it… and with the **Sigils** — rune-keyed anchors forged by the lost kingdoms — heroes can be *called back out of it*.
@@ -29,18 +36,18 @@ Tone: melancholy dark fantasy with warmth — a campfire in the fog, not grimdar
 
 ## 3. Factions
 
-Eight factions structure collection, lore, future faction-content, and summon variety. **Five are active in EA-0.1** (they contain the 7 existing champions + enemies); three are announced-but-empty (visible in the Chronicle as teasers).
+Eight factions structure collection, lore, faction-content (post-EA), and summon variety. **All eight are active in EA-0.1**: the full roster (§5) spreads across them, with art-pending members using the placeholder model until their sprites arrive via the Admin Suite.
 
-| Faction | Identity | EA champions |
+| Faction | Identity | EA members (final art ⭐) |
 |---|---|---|
-| **Vale Sentinels** | Knight-remnants of the old federation; discipline, oaths, steel | Anuria |
-| **Emberclan** | Mountain warhost of feuding fire-cults; fury and iron | Thordakk |
-| **The Wayfarers** | Itinerant conclave of mist-scholars, hedge-wizards, pilgrims | Maruan, Darius |
-| **Hollowborn** | The mist's dead, walking out of it with memories half-intact | Khazgor, Rattledagger |
-| **Sskarn Broods** | Serpentfolk empire of the Sunken Marches (enemy faction — with playable exiles) | Sethlurias (exile) |
-| *Thornweald Court* | Fey of the deepwood (post-EA) | — |
-| *Runebound Halls* | Dwarven vault-holds (post-EA) | — |
-| *The Drowned Choir* | Tide-cult of the flooded coast (post-EA) | — |
+| **Vale Sentinels** | Knight-remnants of the old federation; discipline, oaths, steel | ⭐Anuria + 4 |
+| **Emberclan** | Mountain warhost of feuding fire-cults; fury and iron | ⭐Thordakk + 4 |
+| **The Wayfarers** | Itinerant conclave of mist-scholars, hedge-wizards, pilgrims | ⭐Maruan, ⭐Darius + 4 |
+| **Hollowborn** | The mist's dead, walking out of it with memories half-intact | ⭐Khazgor, ⭐Rattledagger + 5 |
+| **Sskarn Broods** | Serpentfolk empire of the Sunken Marches (enemy faction — with playable exiles & captives) | ⭐Sethlurias + 5 |
+| **Thornweald Court** | Fey of the deepwood; bargains and briars | 3 (founding members) |
+| **Runebound Halls** | Dwarven vault-holds beneath the peaks | 2 (founding members) |
+| **The Drowned Choir** | Tide-cult of the flooded coast | 2 (founding members) |
 
 ## 4. Elements ("the Four Breaths")
 
@@ -55,16 +62,17 @@ Element read at a glance: colored ring under every unit, icon chip on every card
 
 - **Rarities:** Common → Uncommon → Rare → Epic → Legendary (Mythic reserved post-EA). Rarity drives base-stat band, aura strength, skill-kit depth (Commons 2 skills … Legendaries 4), tome rarity needed, food value.
 - **Roles:** Attack / Defense / HP / Support — determines stat spread, gear affinity and AI defaults; shown as a chip everywhere.
-- EA roster reality: **7 champions exist, all Epic** (that's what the art supports). The *systems* ship complete for all rarities; duplicates are the pull economy at EA (dupes = rank-up fuel + skill levels, exactly like the source game's dupe reality) and pools weight the 4 non-starters. More champions slot in via Admin as art lands.
-- **Food economy proposal (decision pending — USER_QUESTIONS.md §Broodlings):** to make the rank-up chain work like the source game (which feeds on Commons/Uncommons), EA adds **Sskarn Broodlings** — Common/Uncommon food units using the existing lizard model with element tints, obtainable from Faded Sigils and campaign drops. Lore: captured broodlings sworn into service. Alternative (if the owner prefers strictly 7 champion models in the collection): rank-ups consume a stackable item instead. The data model supports either; Broodlings are the recommended, source-faithful default.
+- **EA roster (owner-approved): 37 champions + 6 food units.** Seven champions have final art (the §6 showcase); the other 30 use the **placeholder model** — the territorial-lizard sprite with per-champion tints — until Marvin swaps in real sprites/avatars via the Admin Suite (asset-registry swap, zero code). Breakdown: 3 Uncommon · 13 Rare · 14 Epic · 6 Legendary summonable · 1 exclusive Legendary (missions reward). Full table with kits: `CONTENT_PLAN_EA01.md §1b`.
+- **Food economy (owner-approved):** **Sskarn Broodlings** (Common ×3 element tints) and **Sskarn Broodguards** (Uncommon ×3) are food units on the lizard model — summonable from Faded Sigils, dropped by campaign — feeding the source-faithful level/rank-up chain. Lore: captured broodlings sworn into service. Food units are excluded from Chronicle collection-completeness.
+- Many more champions (and food-champion designs) are coming from the owner over time; the content pipeline treats "new champion" as pure data + art upload, so the roster grows without releases.
 
-## 6. The seven champions of EA-0.1
+## 6. The showcase seven (final-art champions)
 
-Full kit data (multipliers, chances, tome ladders) in `CONTENT_PLAN_EA01.md`; identities and design intent here. All are Epic; the three **starters** mirror the source game's starter trio: three elements, three playstyles, all campaign-viable.
+Full kit data (multipliers, chances, tome ladders) in `CONTENT_PLAN_EA01.md §1`; the other 30 roster champions are tabled in `§1b`. All seven are Epic; the three **starters** mirror the source game's starter trio: three elements, three playstyles, all campaign-viable.
 
 | | Champion | Faction · Element · Role | Design intent | Kit sketch |
 |---|---|---|---|---|
-| ⭐ | **Anuria, Blade of the Vale** | Vale Sentinels · Tide · Attack | Self-buffing duelist (Athel-pattern): consistent single-target pressure | A1 *Cleaving Arc* — 2-hit strike, small Weaken chance · A2 *Sentinel's Oath* — instant self ATK+50% & Crit+30% (2t) · A3 *Mistpiercer* — AoE slash, 75% chance Weaken (2t). Aura: team ATK+15% (Campaign) |
+| ⭐ | **Anuria, Arrow of the Vale** | Vale Sentinels · Tide · Attack | Self-buffing **sharpshooter** (Athel-pattern): consistent single-target pressure at range | A1 *Twinshot* — 2 arrows, small Weaken chance · A2 *Warden's Aim* — instant self ATK+50% & Crit+30% (2t) + turn meter · A3 *Arrowstorm* — AoE volley, 75% chance Weaken (2t). Aura: team ATK+15% (Campaign) |
 | ⭐ | **Thordakk Cindermaw** | Emberclan · Ember · Attack | AoE bruiser (Galek-pattern): wave-clear king, tanky for an attacker | A1 *Axefall* — heavy single hit · A2 *Emberwake* — AoE, 60% chance ATK-Down 30% (2t) · A3 *Ashen Roar* — AoE + self Counterattack (2t). Aura: team HP+15% (Campaign) |
 | ⭐ | **Maruan the Stillwater** | Wayfarers · Verdant · Support | Sustain + damage-over-time (Kael-inverted): the beginner-friendly safety pick | A1 *Thornlash* — hit + 40% Poison 5% · A2 *Rite of Reeds* — team heal 20% of Maruan's HP + cleanse 1 debuff · A3 *Verdant Ruin* — AoE, 75% chance 2× Poison 5% (2t). Aura: team DEF+15% (Campaign) |
 | | **Darius Veilcaller** | Wayfarers · Mist · Attack | Glass-cannon control mage; the "big pull" of early pools | A1 *Hexbolt* — hit + 30% SPD-Down 15% · A2 *Umbral Torrent* — AoE, 50% SPD-Down 30% (2t) · A3 *Rite of Ruin* — huge nuke ignoring 25% DEF. Aura: team ACC+40 (Depths) |
@@ -100,7 +108,7 @@ Six relic slots — **Weapon, Helm, Shield, Gauntlets, Cuirass, Boots** — plus
 - **Essence Springs** (ascension keeps, source-faithful rotation): **Pure Spring open every day**; Verdant Mon & Thu, Ember Tue & Fri, Tide Wed & Sat, **Mist Sun only**; all springs open daily during a new account's first 7 days. 10 floors each.
 
 ### 9.3 Arena (async PvP) + Hall of Valor
-Classic arena: 4v4 vs snapshot **defense teams**; tokens cap 10, +1/hour (source-faithful), opponent offer list with refresh; Elo-lite rating → tiers **Bronze I-III, Silver I-III, Gold I-III, Platinum**; per-win **Valor Medals** (amount scales with tier) + weekly tier chest (reset Monday). **AI bots seed every band** (never an empty ladder; natural names, admin-managed; disclosure question → USER_QUESTIONS). **Hall of Valor**: spend Valor Medals on permanent account-wide element-keyed stat bonuses (per element × stat, 10 levels — the Great Hall analog), doubling as the long-term arena sink.
+Classic arena: 4v4 vs snapshot **defense teams**; tokens cap 10, +1/hour (source-faithful), opponent offer list with refresh; Elo-lite rating → tiers **Bronze I-III, Silver I-III, Gold I-III, Platinum**; per-win **Valor Medals** (amount scales with tier) + weekly tier chest (reset Monday). **AI bots seed every band** (never an empty ladder; natural names with no bot marker — owner-approved; admin-managed). **Hall of Valor**: spend Valor Medals on permanent account-wide element-keyed stat bonuses (per element × stat, 10 levels — the Great Hall analog), doubling as the long-term arena sink.
 
 ### 9.4 Tutorial / Onboarding — *The First Calling*
 Scripted RSL-style opening: cold-open battle with all three starters pre-made (taste of power) → the Mistgate flickers, you may keep only one (**starter choice**) → guided: first summon (guaranteed Rare), equip relic, upgrade relic, clear 1-1…1-3, unlock Quests → tutorial rewards seed the first days. Steps data-driven (`tutorial_step_defs`), skippable-per-step for alts. Guide NPC: **the Wardenmaster**, a Hollowborn lantern-keeper.
@@ -109,19 +117,19 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 
 | Sigil | Analog | Pool | Base rates (initial) |
 |---|---|---|---|
-| **Faded Sigil** | Mystery | Common–Rare food & starter dupes | C 74% / U 20% / R 6% |
+| **Faded Sigil** | Mystery | Broodlings/Broodguards (food) + Rares | C 74% / U 20% / R 6% |
 | **Gleaming Sigil** | Ancient | Rare–Legendary, all elements | R 91.5% / E 8% / L 0.5% |
-| **Mistwoven Sigil** | Void | Mist-element pool | R 91.5% / E 8% / L 0.5% |
+| **Mistwoven Sigil** | Void | Mist-element champions only (R/E/L) | R 91.5% / E 8% / L 0.5% |
 | **Radiant Sigil** | Sacred | Epic+ only | E 94% / L 6% |
 
 - **Mercy/pity (visible in-game, source-faithful):** Gleaming/Mistwoven — Epic chance +2%/pull after 20 pulls without an Epic+; Legendary chance +5%/pull after 200 without a Legendary; Radiant — Legendary +2%/pull after 12. Counters are per sigil type, additive, reset on hit, and shown on the "Odds & Mercy" panel. Exact tuning in ECONOMY_BALANCE.md.
 - x1/x10 pulls, reveal cinematics by rarity (skippable), NEW badge + Chronicle registration, dupes flow to rank-up stock with a "reserved as food?" affordance (locked champions never auto-foddered).
-- EA pool honesty: Legendary hits pull a **"Mistbound Cache"** (choice chest: large tome/essence/gear bundle) until real Legendary champions exist — clearly labeled, swapped to champions the moment art arrives. (Flagged in USER_QUESTIONS.md #legendaries.)
+- All rarities pull **real champions** from the 37-champion roster (owner-approved); art-pending champions show their placeholder sprite + tinted avatar frame until real art is uploaded via Admin.
 
 ## 11. Meta & retention systems
 
 - **Quests:** Daily (7-8 tasks + completion chest), Weekly, Monthly ladders — classic gacha checklist, all admin-editable.
-- **Missions — "The Valewarden's Path":** ~80-step curated chain from tutorial to endgame (teachers disguised as goals: "3★ chapter 2", "reach Silver arena", "+12 a relic"…), big milestone rewards; final EA reward: Radiant Sigil bundle + exclusive title (champion reward reserved for when art exists).
+- **Missions — "The Valewarden's Path":** ~80-step curated chain from tutorial to endgame (teachers disguised as goals: "3★ chapter 2", "reach Silver arena", "+12 a relic"…), big milestone rewards; final EA reward: **Aureleth, Voice of the Vale** — an exclusive, unsummonable Legendary (Mist · Support; the Arbiter-analog) + title "Warden of the Reclamation".
 - **Events (timed):** point-accrual framework with milestone ladders; EA presets: **Champion Training** (XP), **Dungeon Delve** (Depths clears), **Summon Surge** (pulls). Admin composes/schedules freely; Haven banners + event screen.
 - **Login calendar:** 30-day rolling track + separate 7-day newcomer track (day 7: Gleaming Sigil ×2).
 - **Bazaar:** rotating relic/sigil/essence stock for silver (refresh timer + manual refresh), crystal tab (energy refills, silver caches, roster slots).
@@ -139,12 +147,12 @@ No payments in EA (crystals fully earnable; "premium" is a pacing currency, not 
 ## 14. Post-EA parked systems (architected-for, not built)
 **Warbands** (guilds) + **the Vale Titan** (clan-boss analog) — first post-EA priority per the brief · **The Mistspire** (Doom-Tower-style ascending tower) · **Faction Trials** (faction-locked crypt ladders) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · Battle pass ("Vale Pass") · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
 
-## 15. Claude's suggested additions (pending owner approval — see USER_QUESTIONS.md §Proposals)
-1. **Choice-based skill tomes** (vs RSL's random) — QoL deviation, already assumed above.
-2. **Multi-battle** from L6 — massive QoL, trivially safe server-side.
-3. **Battle replays & shareable battle-log links** (friends compare arena hits) — nearly free given the event-log architecture.
-4. **"Odds & Mercy" transparency panel** — trust feature, already assumed.
-5. **Team presets per mode** (campaign/dungeon/arena remember last/saved teams).
-6. **Daily first-win-of-mode bonuses** (gentle session-spreading incentive).
-7. **Practice sandbox** (fight any cleared stage at zero energy/zero reward, for testing builds) — cheap, uses the same engine; great with friends.
-8. **Colorblind-safe element glyphs** baked into all element indicators.
+## 15. Approved additions (owner-approved 2026-08-16 — all in EA-0.1 scope)
+1. **Choice-based skill tomes** (vs the source's random books) — §7.
+2. **Multi-battle** from L6, 30 runs/day cap — §9.1 / ECONOMY §2.
+3. **Battle replays & shareable battle-log links** — profile/battle-log feature, built on the event-log architecture (ROADMAP P8).
+4. **"Odds & Mercy" transparency panel** — §10.
+5. **Team presets per mode** — team-select feature (ROADMAP P3).
+6. **Daily first-win-of-mode bonuses** — quest-layer bonus (ROADMAP P8).
+7. **Practice sandbox** — re-fight any cleared stage at zero energy / zero reward (ROADMAP P6).
+8. **Colorblind-safe element glyphs** — UI_UX_DESIGN §element indicators.

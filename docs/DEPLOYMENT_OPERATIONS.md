@@ -4,27 +4,33 @@
 
 ## 1. Topology
 
+**Domain (owner-provided): `play.pathlands.cc`** — single domain, path-based routing; DNS already points at the VPS. Admin Panel lives at `play.pathlands.cc/admin`, reachable only by accounts with `admin` rank (see ARCHITECTURE §5.6).
+
 ```
                     ┌────────────────────────── VPS ──────────────────────────┐
  players ── HTTPS ──►  nginx (TLS, gzip/brotli, static, proxy)                │
- admin   ── HTTPS ──►    ├─ game.<domain>       → /srv/mistvale/client (SPA)  │
-                    │    ├─ game.<domain>/api   → 127.0.0.1:3001 (Fastify)    │
-                    │    ├─ admin.<domain>      → /srv/mistvale/admin (SPA)   │
-                    │    ├─ admin.<domain>/admin/api → 127.0.0.1:3001         │
-                    │    └─ /assets, /atlases, /uploads  (immutable caching)  │
+ admins  ── HTTPS ──►    play.pathlands.cc                                    │
+                    │    ├─ /              → /srv/mistvale/client (game SPA)  │
+                    │    ├─ /api           → 127.0.0.1:3001 (Fastify)         │
+                    │    ├─ /admin/api     → 127.0.0.1:3001 (rank-gated)      │
+                    │    ├─ /admin         → /srv/mistvale/admin (admin SPA)  │
+                    │    └─ /assets /atlases /uploads (immutable caching)     │
                     │  mistvale-server.service (Node 22, systemd)             │
                     │  postgresql@16 (localhost only)                          │
                     │  cron-in-process (server) + system cron (backups)        │
                     └──────────────────────────────────────────────────────────┘
 ```
-- Everything binds localhost except nginx 80/443. UFW: allow 22/80/443 only. fail2ban on sshd + nginx auth endpoints. Admin subdomain can additionally be IP-allowlisted in nginx (`ADMIN_ALLOWLIST` in deploy env).
+- nginx location order: `/admin/api` (proxy) before `/admin` (static, SPA fallback to `/admin/index.html`) before `/api` (proxy) before `/` (static). Admin SPA builds with Vite `base: '/admin/'`.
+- Everything binds localhost except nginx 80/443. UFW: allow 22/80/443 only. fail2ban on sshd + nginx auth endpoints. `location /admin` can additionally be IP-allowlisted (`ADMIN_ALLOWLIST` in deploy env, optional).
+- Single certbot cert for `play.pathlands.cc`.
 - Directory layout: `/srv/mistvale/{repo,admin-repo,client,admin,releases}` (builds symlink-swapped), `/var/lib/mistvale/uploads`, `/var/backups/mistvale`.
 
 ## 2. Scripts (in `scripts/`, all idempotent, `set -euo pipefail`, logged to `/var/log/mistvale/`)
 
 | Script | What it does |
 |---|---|
-| `DEPLOY.sh` | Fresh-VPS bootstrap: apt update; install nginx, PostgreSQL 16, Node 22 (NodeSource), pnpm, certbot, ufw, fail2ban; create `mistvale` system user; clone both repos; write `.env` interactively (domains, DB password, session pepper — generated); create DB + role; run migrations + `SEED.sh`; build client/admin/server; install systemd unit + nginx sites + certbot certs; enable firewall; start everything; run `STATUS.sh`. Safe to re-run (skips done steps). |
+| `DEPLOY.sh` | Fresh-VPS bootstrap: apt update; install nginx, PostgreSQL 16, Node 22 (NodeSource), pnpm, certbot, ufw, fail2ban; create `mistvale` system user; clone both repos; write `.env` interactively (`DOMAIN=play.pathlands.cc` default, DB password + session pepper generated); create DB + role; run migrations + `SEED.sh`; build client/admin/server; install systemd unit + nginx site + certbot cert; enable firewall; start everything; **bootstrap the first admin: prompts for an account name → creates it (or finds it) and sets `rank=admin` via `SET_RANK.sh`**; run `STATUS.sh`. Safe to re-run (skips done steps). |
+| `SET_RANK.sh` | `SET_RANK.sh <accountName> <player\|gamemaster\|admin>` — rank management from the CLI (audited as `admin:cli`); how the first admin account is created and the recovery path if all admins lock themselves out. |
 | `UPDATE.sh` | Zero-drama updates: `git fetch/pull` both repos (target branch configurable); `pnpm install --frozen-lockfile`; build server+client+admin into `releases/<ts>` (nice/ionice so the live server stays responsive on 1 core); **backup DB first**; run migrations; symlink-swap static dirs; `systemctl restart mistvale-server` (downtime ≈ 2–5 s; client shows reconnect toast); post-check health endpoint, auto-rollback symlinks + restore previous build if health fails. `--content-only` flag: reseed content defs without rebuild. |
 | `BACKUP.sh` | `pg_dump -Fc` + tar of `/var/lib/mistvale/uploads` → `/var/backups/mistvale/<date>/`; keep 14 daily + 8 weekly; optional `RCLONE_REMOTE` offsite push. Installed as system cron (03:30). |
 | `RESTORE.sh` | Interactive: list backups → confirm phrase → stop server → restore DB (+uploads) → start → health check. |
@@ -56,5 +62,5 @@ All scripts read one `/srv/mistvale/.env`; no secrets in git; `.env.example` doc
 4. Tag release `ea-0.1.x`; CHANGELOG entry (script reminds).
 Rollback = `UPDATE.sh --rollback` (previous release dir + DB restore only if a migration was destructive — script warns).
 
-## 6. Open items (tracked in USER_QUESTIONS.md)
-- Final domain names (+ whether admin gets IP allowlist), VPS provider/SSH details, offsite backup remote (rclone target), reset timezone confirmation.
+## 6. Resolved decisions (owner, 2026-08-16)
+- Domain: `play.pathlands.cc` (game) + `/admin` path (Admin Panel) — DNS already pointed at the VPS. Bare-metal systemd deployment (no Docker). Daily reset default Europe/Berlin. Still open operationally (non-blocking): optional IP allowlist for `/admin`, optional rclone offsite backup target.

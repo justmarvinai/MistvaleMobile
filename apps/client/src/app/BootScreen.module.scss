@@ -1,0 +1,65 @@
+.screen {
+  position: relative;
+  z-index: $z-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-4;
+  height: 100%;
+  padding: $space-5;
+}
+
+.logo {
+  @include display-text(46px);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 24px $mist-glow;
+}
+
+.track {
+  width: 220px;
+  height: 4px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  overflow: hidden;
+}
+
+.fill {
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, $mist, transparent);
+
+  @include motion-safe {
+    animation: sweep 1.2s $ease-in-out infinite;
+  }
+}
+
+.message {
+  font-size: 13px;
+  color: $muted;
+  letter-spacing: 0.04em;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-4;
+  max-width: 380px;
+  text-align: center;
+}
+
+.errorText {
+  font-size: 13px;
+  line-height: 1.6;
+  color: $parchment-dim;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(320%);
+  }
+}

@@ -23,7 +23,7 @@ Two families of tables:
 | column | type | notes |
 |---|---|---|
 | key | text unique | `anuria`, `thordakk`, … |
-| name, title, lore | text | e.g. Anuria, "Blade of the Vale" |
+| name, title, lore | text | e.g. Anuria, "Arrow of the Vale" |
 | faction_key | fk | |
 | element | enum | `ember` `tide` `verdant` `mist` |
 | rarity | enum | `common` `uncommon` `rare` `epic` `legendary` (`mythic` reserved) |
@@ -178,10 +178,11 @@ Single-row-per-key `key text pk, value jsonb, schema_key text`. Every balance co
 ## 4. Player state
 
 ### `accounts`
-`id, account_name citext unique, password_hash, force_password_change bool, status enum(active|banned), ban_reason, last_login_at, created_ip`
+`id, account_name citext unique, password_hash, rank enum(player|gamemaster|admin) default 'player', force_password_change bool, status enum(active|banned), ban_reason, last_login_at, created_ip`
+- **One account system, rank-gated (owner decision):** `player` = the game; `gamemaster` = reserved moderation rank (no Admin Panel access at EA — future in-game moderation tools); `admin` = full Admin Panel access. Only `admin` can authenticate against `/admin/api`. Rank changes: Admin Panel player-management (admin-only, audited, self-demotion blocked) or the `scripts/` CLI (`SET_RANK.sh`, used by DEPLOY.sh to bootstrap the first admin account).
 
 ### `sessions`
-`id, account_id fk cascade, token_hash bytea unique, expires_at, created_at, last_seen_at, user_agent` (player) — mirrored `admin_accounts`/`admin_sessions` with `role enum(owner|editor)`.
+`id, account_id fk cascade, token_hash bytea unique, expires_at, created_at, last_seen_at, user_agent` — one session table for all ranks; Admin API endpoints additionally require `rank = 'admin'` on every request (checked server-side, never cached client-side).
 
 ### `players` (1:1 account)
 `id, account_id unique, profile_name citext unique, level, xp, energy, energy_updated_at, silver bigint, crystals, valor_medals, roster_capacity, tutorial_step, settings jsonb, last_daily_reset_at, is_bot bool default false` — bots are players; every system (arena, leaderboards) works on them uniformly. Currencies as columns (hot, small); stackable items normalized below.
@@ -246,7 +247,7 @@ Current refreshable opponent list per player (3-5 offers, regenerated on refresh
 `id, player_id, source (battle:c01_s3|summon|quest:...|admin:<name>|mail|shop), deltas jsonb, created_at` — powers Admin player inspector + economy dashboards. Pruned to 90 days.
 
 ### `audit_log` (admin actions)
-`id, admin_id, action, entity, entity_id, before jsonb, after jsonb, created_at` — every Admin mutation, no exceptions.
+`id, account_id (rank admin at time of action), action, entity, entity_id, before jsonb, after jsonb, created_at` — every Admin mutation, no exceptions (including rank changes).
 
 ---
 

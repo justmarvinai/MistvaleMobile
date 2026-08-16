@@ -69,13 +69,13 @@
 
 ## 2. Admin API (`/admin/api`, consumed by MistvaleMobile-Admin)
 
-- **Auth:** POST `/auth/login|logout`, GET `/auth/me`; separate admin sessions; roles `owner|editor`.
+- **Auth:** POST `/auth/login|logout`, GET `/auth/me` — same `accounts` table as the game, but login succeeds **only for `rank = 'admin'`** (GameMaster/Player get a generic denial). Every `/admin/api` request re-checks rank server-side. Sessions are the standard session system.
 - **Content CRUD:** for every `*_defs` family: `GET /content/<type>` (list w/ filter), `GET/POST/PUT/DELETE /content/<type>/:key`, all writes hit **draft** state. Bulk ops where needed (drop table entries, pool entries).
 - **Publish flow:** GET `/content/diff` (draft vs live, human-readable), POST `/content/publish` (validate → snapshot → swap → bump rev), POST `/content/revert` `{rev}`, GET `/content/revisions`.
 - **Validation service:** POST `/content/validate` — full referential + engine-registry check, returns structured problem list (the editors run this continuously).
 - **Export/import:** GET `/content/export?types=…` → JSON file; POST `/content/import` (dry-run diff first).
 - **Assets:** POST `/assets/upload` (frame strips/PNGs; server packs atlas + registers), GET `/assets`, DELETE guarded. Preview URLs for editors.
-- **Players:** GET `/players?query=` (search), GET `/players/:id` (full inspect: roster, gear, resources, progress, economy_log tail, battle history), POST `/players/:id/grant` (RewardService — champions/items/currency/gear), POST `/players/:id/reset-password` (temp password + force-change), POST `/players/:id/ban|unban`, DELETE guarded double-confirm. |
+- **Players:** GET `/players?query=` (search), GET `/players/:id` (full inspect: roster, gear, resources, progress, economy_log tail, battle history), POST `/players/:id/grant` (RewardService — champions/items/currency/gear), POST `/players/:id/reset-password` (temp password + force-change), POST `/players/:id/set-rank` `{rank: player|gamemaster|admin}` (admin-only, audited, self-demotion blocked), POST `/players/:id/ban|unban`, DELETE guarded double-confirm. |
 | **Bots:** GET/POST/PUT `/bots`, POST `/bots/generate` `{count, ratingBand}`, POST `/bots/refresh-ladder`. |
 - **Mail:** POST `/mail/compose` `{target: player|all, title, body, attachments, expiresInDays}`.
 - **Ops:** GET `/health` (see ARCHITECTURE §10), GET `/stats/overview` (DAU-ish counters, economy totals, summon rarity actuals vs configured), GET `/battles/:id/log` (inspector), GET `/audit-log`, POST `/jobs/run/:name` (manually trigger daily reset etc. — guarded).

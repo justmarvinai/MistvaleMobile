@@ -1,0 +1,165 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Tests run against a real PostgreSQL: the schema, its constraints and the
+    # transaction behaviour are exactly what we want covered (docs/ARCHITECTURE.md §11).
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: mistvale
+          POSTGRES_PASSWORD: mistvale_ci
+          POSTGRES_DB: mistvale_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U mistvale"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://mistvale:mistvale_ci@127.0.0.1:5432/mistvale_test
+      DATABASE_URL_TEST: postgresql://mistvale:mistvale_ci@127.0.0.1:5432/mistvale_test
+      SESSION_PEPPER: ci-pepper-value-at-least-16-characters
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Apply migrations
+        run: pnpm db:migrate
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      # A drifted migration means the committed SQL no longer matches the schema
+      # definitions — that must fail here rather than surprise a deploy.
+      - name: Check for uncommitted migration drift
+        run: |
+          pnpm db:generate
+          if ! git diff --quiet -- apps/server/drizzle; then
+            echo "::error::Schema changes are not reflected in committed migrations."
+            git diff --stat -- apps/server/drizzle
+            exit 1
+          fi
+
+  e2e:
+    name: End-to-end smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: verify
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: mistvale
+          POSTGRES_PASSWORD: mistvale_ci
+          POSTGRES_DB: mistvale
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U mistvale"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://mistvale:mistvale_ci@127.0.0.1:5432/mistvale
+      SESSION_PEPPER: ci-pepper-value-at-least-16-characters
+      PUBLIC_ORIGIN: http://127.0.0.1:5173
+      PORT: '3001'
+      LOG_LEVEL: warn
+      # Every request originates from one address here, which would trip the
+      # per-IP registration limit. The limiter itself is covered by a unit test.
+      RATE_LIMIT_ENABLED: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
+      - run: pnpm build
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Start server
+        run: |
+          node apps/server/dist/index.js &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:3001/api/health-lite > /dev/null; then
+              echo "server up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Server did not become healthy"; exit 1
+
+      - name: Start client
+        run: |
+          pnpm --filter @mistvale/client exec vite preview --port 5173 --strictPort --host 127.0.0.1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:5173/ > /dev/null; then
+              echo "client up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Client did not start"; exit 1
+
+      - name: Run end-to-end tests
+        run: pnpm e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

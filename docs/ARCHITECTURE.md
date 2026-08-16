@@ -140,7 +140,7 @@ MistvaleMobile/
 ## 5. Server architecture
 
 ### 5.1 Process model
-- **One Node process** runs both the player API and the Admin API (separate Fastify plugin trees, separate auth, same content services — admin edits invalidate caches in-process, which is what makes "changes are live immediately" trivial).
+- **One Node process** runs both the player API and the Admin API (separate Fastify plugin trees; one account system with the Admin tree rank-gated to `admin`; same content services — admin edits invalidate caches in-process, which is what makes "changes are live immediately" trivial).
 - systemd manages the process (auto-restart, journal); nginx terminates TLS and serves all static files (client build, admin build, atlases, uploads).
 - In-process `node-cron` jobs (daily reset 04:00 Europe/Berlin, shop refresh, event activation/expiry, bot refresh, energy is computed lazily — no ticking job).
 
@@ -169,7 +169,7 @@ MistvaleMobile/
 ### 5.6 Security posture (EA)
 - Session tokens: 256-bit random, stored **hashed** (SHA-256) in `sessions`, 30-day sliding expiry, httpOnly + SameSite=Lax cookie (header fallback for PWA), logout-all support.
 - argon2id: memory 19 MiB, iterations 2, parallelism 1 (~40–60 ms on the VPS — strong enough, cheap enough).
-- Admin API: separate `admin_accounts` + sessions, stricter rate limits, optional IP allowlist (nginx), every mutation writes `audit_log` (§DATA_MODEL). Password resets for players happen here.
+- Admin API: **same account system, rank-gated** (owner decision) — `accounts.rank ∈ {player, gamemaster, admin}`; only `admin` passes the `/admin/api` auth guard (checked per request, server-side). `gamemaster` is a reserved moderation rank with no Admin Panel access at EA. Stricter rate limits on `/admin/api`, optional IP allowlist (nginx `location /admin`), every mutation writes `audit_log`. Player password resets happen here. First admin bootstrapped by DEPLOY.sh (`SET_RANK.sh`).
 - Input hygiene: Zod everywhere, Postgres parameterized via Drizzle, no raw HTML rendering of user strings (profile names rendered as text; length + charset limits `[a-zA-Z0-9_\- ]{3,16}`).
 - No secrets in the repo: `.env` on the VPS (`DATABASE_URL`, `SESSION_PEPPER`, `ADMIN_ALLOWLIST?`, `DOMAIN…`), `.env.example` in git.
 
@@ -214,7 +214,7 @@ createBattle(setup: BattleSetup, contentView: ContentView, seed: number): Battle
 
 ## 8. Admin API (consumed by MistvaleMobile-Admin)
 
-- Mounted at `/admin/api/*` in the same process (see §5.1 for why). Full CRUD for every `*_defs` table, draft/publish, asset upload + atlas pack, player management (search, inspect, grant via RewardService, password reset, ban), bot management, mail composer, battle log inspector, health/stats endpoints.
+- Mounted at `/admin/api/*` in the same process (see §5.1 for why); the Admin SPA itself is served at **`play.pathlands.cc/admin`** (path-based, single domain — owner decision). Full CRUD for every `*_defs` table, draft/publish, asset upload + atlas pack, player management (search, inspect, grant via RewardService, password reset, rank changes, ban), bot management, mail composer, battle log inspector, health/stats endpoints.
 - Fastify + Zod generate an **OpenAPI 3.1 document** at build time, committed to this repo (`docs/openapi/admin-api.json`). The admin repo type-generates its client from that file — the two repos stay in sync through one artifact.
 
 ## 9. Performance & capacity budget (1 core / 4 GB)

@@ -9,7 +9,7 @@
 
 | Key | Sprite read (visual) | Planned identity (GAME_DESIGN.md §champions) |
 |---|---|---|
-| `anuria` | White-haired woman, dark armor, greatsword on back | Starter · Vale Sentinels · Tide · Attack duelist |
+| `anuria` | White-haired woman, dark armor, bow across her back | Starter · Vale Sentinels · Tide · Attack **archer/ranger** (owner-confirmed; battles render her ranged with arrow projectiles) |
 | `thordakk` | Bulky rust-armored warrior, huge axe | Starter · Emberclan · Ember · Attack bruiser (AoE) |
 | `maruan` | Hooded wanderer, teal cloak & cape | Starter · Wayfarers · Verdant · Support (heal/DoT) |
 | `darius` | Grey wizard: pointed hat, staff, tome | Wayfarers · Mist · Attack mage (AoE debuffer) |
@@ -21,6 +21,9 @@ Avatar art pending for the 4 non-starters → UI falls back to a framed, zoomed 
 
 ### Enemies — `assets/enemies/teritorial_lizard/`
 One model (64×64 still + 9-frame idle). **All EA enemies use it**, differentiated by name/stats/skills/tint (variant tint defined per `enemy_defs` archetype: Skirmisher, Spearman, Shaman, Brute, Broodguard, Warchief, boss variants — see CONTENT_PLAN_EA01.md). Folder name keeps the original `teritorial_` spelling; the asset key normalizes to `enemy_lizard`.
+
+### Placeholder champions (owner-approved convention)
+The 30 art-pending roster champions + 6 food units (CONTENT_PLAN §1b) **also use `enemy_lizard`** with a per-champion tint and a framed, tinted still as their avatar (distinct rarity frame so cards still read correctly). When Marvin uploads a champion's real sprite/avatar through the Admin asset manager, the asset-registry reference swaps and every screen updates — no code, no redeploy. This convention applies to all future champions authored before their art exists.
 
 ### UI — `assets/ui/Kenney Fantasy UI Borders/`
 Panels/borders/dividers (Default + Double styles, 32 variants each + transparent variants, SVG source, CC0 license file included). Used as 9-slice frames per UI_UX_DESIGN.md — selectively, not for everything.

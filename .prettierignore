@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+coverage
+.cache
+assets
+apps/server/drizzle
+apps/client/public/icons
+pnpm-lock.yaml
+
+# Docs are hand-authored: Prettier reflows tables whose cells contain pipe
+# characters (JSON examples), which corrupts them.
+*.md

@@ -82,7 +82,7 @@ One aura per champion, active only from the leader slot (slot 1), exactly one pe
 
 ## 11. Skills as data (engine contract)
 A skill = `targeting` + ordered `components[]`: `damage {scale, mult, ignoreDefPct?, bonusVsHpBelow?}` · `applyStatus {status, chance, turns, target}` · `heal {scale, mult, target}` · `shield {scale, mult, turns, target}` · `turnMeter {deltaPct, target}` · `cleanse {count|all}` · `dispel {count|all}` · `extraTurn` · `multiHit {n, components}` · `conditional {if, then}` · boss-only `summon`. Plus cooldowns, tome upgrade ladders (`dmg+5% | dmg+10% | chance+5..15% | cooldown−1`), AI hints, animation binding. The Admin skill composer edits exactly this shape; publish-validation checks every component against the engine registry.
-〔dev〕 Tomes are **player-choice** (pick which skill to book), not random — QoL deviation, flagged in USER_QUESTIONS.
+〔dev, owner-approved〕 Tomes are **player-choice** (pick which skill to book), not random.
 
 ## 12. AI (enemies & auto-battle) — deterministic, hint-driven
 Priority: forced openers → highest-slot skill off cooldown whose hint passes (`dontRepeatWhileActive`, `onlyBelowHpPct`, …) → A1. Targeting per skill hint (`lowest_hp | highest_atk | highest_tm | random | self | lowest_hp_ally`), default seeded-random. Auto-battle uses the same brain for player units; per-skill player instructions (Auto settings: *don't use / opener / priority*) ship in EA 〔source parity: Skill Instructions〕. Manual play always overrides.

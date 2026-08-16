@@ -1,0 +1,21 @@
+{
+  "name": "@mistvale/engine",
+  "version": "0.1.0-ea.0",
+  "private": true,
+  "type": "module",
+  "description": "Mistvale battle engine \u2014 pure, deterministic, IO-free. Phase P0 ships the seeded RNG foundation; the simulation lands in P2.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@mistvale/shared": "workspace:*"
+  }
+}
