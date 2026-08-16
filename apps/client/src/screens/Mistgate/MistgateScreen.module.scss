@@ -1,0 +1,192 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: $space-4;
+  height: 100%;
+  min-height: 0;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-height: 0;
+}
+
+.sigils {
+  display: flex;
+  gap: $space-2;
+}
+
+.sigil {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid transparent;
+  border-bottom-width: 2px;
+  color: $muted;
+  font: inherit;
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    border-color: $mist;
+    color: $parchment;
+    background: $panel;
+  }
+
+  &[data-pool='faded'] {
+    border-bottom-color: $rarity-common;
+  }
+  &[data-pool='gleaming'] {
+    border-bottom-color: $rarity-rare;
+  }
+  &[data-pool='mistwoven'] {
+    border-bottom-color: $rarity-epic;
+  }
+  &[data-pool='radiant'] {
+    border-bottom-color: $rarity-legendary;
+  }
+}
+
+.sigilName {
+  font-size: 0.8rem;
+}
+
+.sigilCount {
+  color: $mist;
+  font-family: $font-mono;
+  font-size: 0.9rem;
+}
+
+.gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  flex: 1;
+  min-height: 0;
+  padding: $space-4;
+  background: $panel;
+  border: 1px solid $edge;
+  text-align: center;
+  overflow-y: auto;
+}
+
+.portal {
+  position: relative;
+  width: 9rem;
+  height: 9rem;
+  display: grid;
+  place-items: center;
+}
+
+.portalRing {
+  position: absolute;
+  inset: 0;
+  border: 2px solid $mist-dim;
+  border-radius: 50%;
+  animation: spin 14s linear infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 0 62%);
+}
+
+.portalCore {
+  width: 55%;
+  height: 55%;
+  border-radius: 50%;
+  background: radial-gradient(circle, $mist-glow 0%, transparent 70%);
+  animation: pulse 3.2s ease-in-out infinite;
+}
+
+[data-pool='radiant'] .portalCore {
+  background: radial-gradient(circle, $rarity-legendary 0%, transparent 70%);
+}
+
+[data-pool='mistwoven'] .portalCore {
+  background: radial-gradient(circle, $rarity-epic 0%, transparent 70%);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portalRing,
+  .portalCore {
+    animation: none;
+  }
+}
+
+.title {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 1.2rem;
+  font-weight: normal;
+}
+
+.blurb {
+  margin: 0;
+  max-width: 32rem;
+  color: $muted;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+.featured {
+  margin: 0;
+  color: $gold;
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  gap: $space-2;
+  margin-top: $space-2;
+}
+
+.held {
+  margin: 0;
+  color: $muted;
+  font-size: 0.78rem;
+}
+
+.floor {
+  color: $muted-deep;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.empty {
+  color: $muted;
+  font-size: 0.85rem;
+}
+
+.error {
+  color: $danger;
+  font-size: 0.8rem;
+}

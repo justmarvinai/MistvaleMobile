@@ -8,6 +8,8 @@ import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { ChampionsScreen } from '@/screens/Champions/ChampionsScreen';
 import { RelicsScreen } from '@/screens/Relics/RelicsScreen';
 import { BazaarScreen } from '@/screens/Bazaar/BazaarScreen';
+import { MistgateScreen } from '@/screens/Mistgate/MistgateScreen';
+import { ChronicleScreen } from '@/screens/Chronicle/ChronicleScreen';
 import { PlaceholderScreen } from '@/screens/Placeholder/PlaceholderScreen';
 import { SettingsModal } from '@/screens/Settings/SettingsModal';
 import { useSessionStore } from '@/state/sessionStore';
@@ -166,6 +168,10 @@ function GameShell() {
             <RelicsScreen />
           ) : screen === 'bazaar' ? (
             <BazaarScreen />
+          ) : screen === 'mistgate' ? (
+            <MistgateScreen />
+          ) : screen === 'chronicle' ? (
+            <ChronicleScreen />
           ) : definition ? (
             <PlaceholderScreen screen={definition} />
           ) : null}

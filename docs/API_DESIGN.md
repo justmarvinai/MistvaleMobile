@@ -46,6 +46,12 @@
 | POST `/shops/:key/refresh` | `{actionId}` — pays crystals to roll a new window now. Relics from the discarded window stop being for sale. |
 | POST `/shops/:key/unlock-slot` | `{actionId}` — opens one more crystal shelf, permanently. It fills on the next restock. |
 
+### Summoning & collection
+| GET `/summon/banners` | Every published pool with the player's sigils, the published rates, and the live mercy state — including the *effective* chance the next pull will roll against. |
+| POST `/summon/:key` | `{count, actionId}` — ×1 or ×10. Atomic under the player lock: the sigil leaves and the champion arrives together. A replayed `actionId` returns the original pull rather than spending again. |
+| GET `/summon/history` | The player's recent pulls, newest first. |
+| GET `/chronicle` | Owned and seen across the whole roster. Food units are listed but excluded from the completion count. |
+
 ### Battles (campaign, dungeons, springs, proving, tutorial)
 | POST `/battles/start` | `{mode, stageKey, team[1-4], actionId}` → spends energy, creates session, returns `{battleId, initialState, events (to first decision), needsInput}` |
 | POST `/battles/:id/action` | `{actionId, skill?, target?, auto?}` → `{state, events, outcome, rewards}`. Omit `skill` to let the AI take the turn; set `auto` to resolve the rest of the fight in one call. Replaying an `actionId` returns the recorded state rather than taking a second turn. |

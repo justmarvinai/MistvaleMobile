@@ -14,6 +14,7 @@ import {
   skillDefSchema,
   stageDefSchema,
   statusDefSchema,
+  summonPoolDefSchema,
 } from './entities';
 
 /**
@@ -43,6 +44,7 @@ export const contentBundleSchema = z.object({
   items: z.array(itemDefSchema),
   campaignChapters: z.array(campaignChapterDefSchema),
   stages: z.array(stageDefSchema),
+  summonPools: z.array(summonPoolDefSchema),
   shops: z.array(shopDefSchema),
   /** Flattened to a plain map — the client only ever reads values. */
   config: z.record(z.string(), gameConfigEntrySchema.shape.value),

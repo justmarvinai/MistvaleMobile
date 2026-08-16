@@ -71,6 +71,16 @@ export const ROUTES = {
     /** `/player/gear/:id/preview` — what equipping it would do, server-computed. */
     preview: (id: string) => `/player/gear/${encodeURIComponent(id)}/preview`,
   },
+  summon: {
+    /** Every published pool, with the player's sigils and mercy state folded in. */
+    banners: '/summon/banners',
+    /** `/summon/:key` — pull ×1 or ×10. */
+    pull: (key: string) => `/summon/${encodeURIComponent(key)}`,
+    /** The player's recent pulls. */
+    history: '/summon/history',
+    /** Owned/seen across the whole roster. */
+    chronicle: '/chronicle',
+  },
   shop: {
     /** `/shops/:key` — the player's current stock and its restock time. */
     stock: (key: string) => `/shops/${encodeURIComponent(key)}`,

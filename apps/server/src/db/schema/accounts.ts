@@ -120,6 +120,26 @@ export const players = pgTable(
 
     settings: jsonb('settings').notNull().default(DEFAULT_PLAYER_SETTINGS).$type<PlayerSettings>(),
 
+    /**
+     * Mercy counters per pool, `{poolKey: {rarity: sinceCount}}`.
+     *
+     * Derivable from `summon_history`, cached here so the Mistgate's odds panel is one
+     * row read rather than an aggregate over a table that only grows.
+     */
+    summonPity: jsonb('summon_pity')
+      .notNull()
+      .default({})
+      .$type<Record<string, Record<string, number>>>(),
+
+    /**
+     * The last summon `actionId` applied.
+     *
+     * A retried pull returns what the first one produced instead of spending again —
+     * the same idempotency guarantee a battle action has, and it matters more here,
+     * because a dropped response could otherwise cost ten sigils twice.
+     */
+    lastSummonActionId: text('last_summon_action_id'),
+
     /** Bots are players too, so arena and leaderboards need no special cases. */
     isBot: boolean('is_bot').notNull().default(false),
 

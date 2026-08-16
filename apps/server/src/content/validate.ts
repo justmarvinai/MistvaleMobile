@@ -279,6 +279,70 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     });
   }
 
+  for (const [key, entity] of parsed.get('summonPool') ?? []) {
+    const pool = entity as {
+      sigilKey: string;
+      rates: Record<string, number>;
+      entries: { championKey: string }[];
+      tenPullFloor?: string;
+    };
+
+    reference({ contentType: 'summonPool', key, path: 'sigilKey' }, 'item', pool.sigilKey);
+
+    // The advertised odds are a promise. A table that does not sum to one would make the
+    // Odds & Mercy panel a lie, so it cannot reach players at all.
+    const total = Object.values(pool.rates).reduce((sum, value) => sum + value, 0);
+    if (Math.abs(total - 1) > 1e-6) {
+      errors.push({
+        severity: 'error',
+        contentType: 'summonPool',
+        key,
+        path: 'rates',
+        message: `Rarity rates sum to ${total.toFixed(4)}; they must sum to exactly 1.`,
+      });
+    }
+
+    const championRarity = new Map<string, string>();
+    for (const [championKey, champion] of parsed.get('champion') ?? []) {
+      championRarity.set(championKey, (champion as { rarity: string }).rarity);
+    }
+
+    const covered = new Set<string>();
+    pool.entries.forEach((poolEntry, index) => {
+      reference(
+        { contentType: 'summonPool', key, path: `entries.${index}.championKey` },
+        'champion',
+        poolEntry.championKey,
+      );
+      const rarity = championRarity.get(poolEntry.championKey);
+      if (rarity) covered.add(rarity);
+    });
+
+    // A rarity the pool advertises but cannot deliver would silently fall through to a
+    // lower one — the player would see a rate they can never actually hit.
+    for (const [rarity, rate] of Object.entries(pool.rates)) {
+      if (rate > 0 && !covered.has(rarity)) {
+        errors.push({
+          severity: 'error',
+          contentType: 'summonPool',
+          key,
+          path: 'rates',
+          message: `Advertises a ${rarity} rate of ${rate} but contains no ${rarity} champion.`,
+        });
+      }
+    }
+
+    if (pool.tenPullFloor && !covered.has(pool.tenPullFloor)) {
+      errors.push({
+        severity: 'error',
+        contentType: 'summonPool',
+        key,
+        path: 'tenPullFloor',
+        message: `Guarantees a ${pool.tenPullFloor} but contains none.`,
+      });
+    }
+  }
+
   for (const [key, entity] of parsed.get('shop') ?? []) {
     const shop = entity as {
       baseSlots: number;

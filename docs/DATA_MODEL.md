@@ -142,7 +142,10 @@ Weighted rolls, engine-agnostic: `entries: {ref_type: gear|item|silver|champion,
 | column | notes |
 |---|---|
 | pool per sigil type; entries: `{champion_key, weight}` grouped by rarity with `rarity_rates jsonb` (`{rare:0.914, epic:0.08, legendary:0.006}`-style, must sum 1, publish-validated) |
-| `pity jsonb` | mercy rules per pool: `{epic:{after:20, bonusPerSummon:0.02}, legendary:{after:200, bonusPerSummon:0.005}}` |
+| `pity jsonb` | mercy rules per pool: `{epic:{after:20, step:0.02, maxBonus:1}, legendary:{after:200, step:0.05, maxBonus:1}}` |
+| `ten_pull_floor` | rarity a ×10 guarantees at least once, if any |
+
+Rates and mercy live here rather than in `game_config` because they are per-pool: Radiant's mercy is not Gleaming's, and a rate-up weekend on one banner must not touch the others. Publish validation refuses a table that does not sum to 1, or a pool advertising a rarity it holds no champion for.
 
 ### `quest_defs` (daily/weekly/monthly), `mission_defs` (one long chain)
 | column | notes |
@@ -258,6 +261,9 @@ Current refreshable opponent list per player (3-5 offers, regenerated on refresh
 
 ### `summon_history`
 `player_id, pool_key, sigil_item_key, champion_key, rarity, pity_counters_after jsonb, created_at` — the pity state IS derivable but we cache counters on `players.summon_pity jsonb` for O(1) reads.
+
+### `champion_sightings`
+`player_id, champion_key, first_seen_at, unique(player_id, champion_key)` — champions the player has *met*, recorded on a summon and when a battle starts. The Chronicle reads owned from `player_champions` and seen from here, which is what makes it a record of the world rather than a list of receipts.
 
 ### `mailbox`
 `id, player_id, title, body, attachments jsonb (rewards), sent_by (system|admin name), read_at, claimed_at, expires_at` — admin composer can target one/all players (fan-out rows at send time; player count is tiny).

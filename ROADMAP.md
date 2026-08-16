@@ -13,7 +13,7 @@
 | **P2 ✅** | Battle engine | Full engine + tests + battle API + balance-sim | ▓▓▓▓ |
 | **P3 ✅** | Battle experience | Battle screen, campaign flow, results | ▓▓▓▓ |
 | **P4 ✅** | Champions & relics | Roster, leveling/rank/ascension, gear loop, Bazaar | ▓▓▓ |
-| P5 | Summoning | Mistgate, pools/pity, Chronicle | ▓▓ |
+| **P5 ✅** | Summoning | Mistgate, pools/pity, Chronicle | ▓▓ |
 | P6 | The Depths | 4 dungeons + Proving + Springs, masteries, multi-battle, Hard/Brutal | ▓▓▓ |
 | P7 | Arena & bots | Async PvP, ratings/tiers, Hall of Valor, bot system | ▓▓▓ |
 | P8 | Meta & retention | Quests, missions, events, login, mail, news, settings | ▓▓▓ |
@@ -49,9 +49,10 @@ Roster + champion detail screens (stats breakdown from server, skills/tomes, lor
 **Exit:** the full RPG management loop closes: farm → equip → upgrade → stronger → farther.
 **Delivered:** relics as owned instances with rolled stats frozen in · the gear maths (main-stat interpolation to a published ceiling, substat rolls without replacement, set bonuses in complete copies, percentages against base) with 31 unit tests · champions fight in their relics, so the champion screen's number is the number the engine uses · campaign stages drop relics by chapter-set and stage-slot plus essences · level via food, rank-up, ascension, skill tomes and duplicates, lock/favourite, release — each refusing before it spends · the Bazaar with per-player stock, lazy restock, crystal refresh and unlockable slots · roster grid, champion detail with the stat split and nine relic slots, the relic vault with mass-sell guard rails, the forge with played-back attempts, and the Bazaar screen · two new content types (relic stats, shops) so the whole economy is Admin-editable · 32 integration cases and a browser run of the whole management loop.
 
-### P5 — Summoning & collection
+### P5 ✅ — Summoning & collection
 Mistgate screen with portal reveal cinematics by rarity (skippable), ×1/×10, all four sigils, pools + weights + **mercy counters** (server) + "Odds & Mercy" transparency panel, summon history, roster capacity + expansion, Chronicle (owned/seen; food units excluded), NEW-champion flow. Pools span the full roster incl. Broodlings/Broodguards (owner-approved).
 **Exit:** pull loop feels premium; pity provably correct (unit-tested counters); Chronicle registers everything.
+**Delivered:** the roll as a pure, injectable module — rarity from the published table plus accrued mercy, then a weighted champion *within* that band, so adding a champion dilutes its peers and never the advertised rate · mercy taken off the commonest rarity so the table always sums to one, with a Legendary satisfying the Epic counter · ×10 floors that guarantee without capping · four pools (Faded, Gleaming, Mistwoven, Radiant) generated from the roster, so a champion added in Admin joins the pools it belongs to by construction · publish validation refusing a pool whose rates do not sum to 1 or that advertises a rarity it cannot deliver · atomic pulls under the player lock with `actionId` idempotency, full `summon_history`, and cached pity counters · the Mistgate with portal, ×1/×10, a skippable rarity-paced reveal and an Odds & Mercy panel showing the *effective* chance with full pool disclosure one click away · the Chronicle, recording champions met as well as owned, food excluded from the count · a data-driven welcome grant so a new warden reaches the gate on their first evening · 27 roll tests including bulk-distribution and drought bounds, 16 integration cases, and three browser runs.
 
 ### P6 — The Depths (+ masteries, multi-battle, difficulties)
 Depths hub + 4 relic dungeons (15 floors, bosses with real mechanics per CONTENT_PLAN), Proving Grounds (Emblems), Essence Springs (day rotation + first-7-days-all-open). Masteries system + trees UI + reset. Multi-battle (server loop, daily cap, summary UI). **Practice sandbox** (zero-energy/zero-reward re-fights of cleared stages). Campaign Hard/Brutal + stars/star-chests + first-clears everywhere. Seeds: all dungeons + chapters 1–12 across difficulties (generator-assisted).

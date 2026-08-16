@@ -51,6 +51,7 @@ const EMPTY_BUNDLE_TYPES = {
   items: 'item',
   campaignChapters: 'campaignChapter',
   stages: 'stage',
+  summonPools: 'summonPool',
   shops: 'shop',
 } as const satisfies Record<string, ContentType>;
 

@@ -109,6 +109,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
   const as = (options: InjectOptions) =>
     app.inject({ ...options, cookies: { mv_session: cookie } });
 
+  /** Economy rows this battle wrote. The welcome grant and friends are not in scope. */
+  const battleLedger = async () => {
+    const rows = await app.db.select().from(economyLog).where(eq(economyLog.playerId, playerId));
+    return rows.filter((row) => row.source.startsWith('battle:'));
+  };
+
   /** Picks the first starter and returns the roster it produced. */
   async function chooseStarter(): Promise<{ id: string; championKey: string }[]> {
     const offered = await as({ method: 'GET', url: apiPath(ROUTES.roster.starters) });
@@ -278,11 +284,9 @@ describe.skipIf(!dbUp)('the game loop', () => {
 
         // A clear writes one currency row, and one more for item drops when the stage
         // rolled any. What must never happen is a second *currency* row: that would be a
-        // double payout, which is the thing this assertion exists to catch.
-        const ledger = await app.db
-          .select()
-          .from(economyLog)
-          .where(eq(economyLog.playerId, playerId));
+        // double payout, which is the thing this assertion exists to catch. Rows from
+        // other sources — the welcome grant, for one — are not this test's business.
+        const ledger = await battleLedger();
         const currencyRows = ledger.filter((row) =>
           Object.hasOwn(row.deltas as Record<string, number>, 'silver'),
         );
@@ -311,10 +315,7 @@ describe.skipIf(!dbUp)('the game loop', () => {
 
       // And crucially, it did not pay twice. A win writes at most one currency row and
       // at most one drop row; a replay that settled again would double either.
-      const ledger = await app.db
-        .select()
-        .from(economyLog)
-        .where(eq(economyLog.playerId, playerId));
+      const ledger = await battleLedger();
       const currencyRows = ledger.filter((row) =>
         Object.hasOwn(row.deltas as Record<string, number>, 'silver'),
       );

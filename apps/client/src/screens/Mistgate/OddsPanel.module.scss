@@ -1,0 +1,152 @@
+@use '../../styles/tokens' as *;
+
+.rates {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+
+  th,
+  td {
+    padding: 2px $space-1;
+    text-align: right;
+  }
+
+  thead th {
+    color: $muted;
+    font-size: 0.68rem;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid $edge;
+  }
+
+  tbody th {
+    text-align: left;
+    font-weight: normal;
+  }
+
+  td {
+    color: $parchment-dim;
+    font-family: $font-mono;
+  }
+
+  tr[data-rarity='rare'] th {
+    color: $rarity-rare;
+  }
+  tr[data-rarity='epic'] th {
+    color: $rarity-epic;
+  }
+  tr[data-rarity='legendary'] th {
+    color: $rarity-legendary;
+  }
+  tr[data-rarity='uncommon'] th {
+    color: $rarity-uncommon;
+  }
+  tr[data-rarity='common'] th {
+    color: $rarity-common;
+  }
+}
+
+.boosted {
+  color: $success;
+}
+
+.pity {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin-top: $space-3;
+}
+
+.pityRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pityHead {
+  display: flex;
+  justify-content: space-between;
+  color: $muted;
+  font-size: 0.75rem;
+}
+
+.pitySince {
+  font-family: $font-mono;
+}
+
+.pityBar {
+  height: 4px;
+  background: $ground;
+
+  span {
+    display: block;
+    height: 100%;
+    background: $mist-dim;
+    transition: width $duration-base $ease-out;
+  }
+}
+
+.pityNote {
+  margin: 0;
+  color: $muted-deep;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.toggle {
+  margin-top: $space-3;
+  padding: 0;
+  background: none;
+  border: none;
+  color: $mist;
+  font: inherit;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.contents {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin-top: $space-2;
+}
+
+.contentsHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+  margin: 0 0 2px;
+  font-size: 0.75rem;
+  font-weight: normal;
+
+  &[data-rarity='rare'] {
+    color: $rarity-rare;
+  }
+  &[data-rarity='epic'] {
+    color: $rarity-epic;
+  }
+  &[data-rarity='legendary'] {
+    color: $rarity-legendary;
+  }
+  &[data-rarity='uncommon'] {
+    color: $rarity-uncommon;
+  }
+  &[data-rarity='common'] {
+    color: $rarity-common;
+  }
+}
+
+.contentsCount {
+  color: $muted-deep;
+  font-size: 0.68rem;
+}
+
+.contentsList {
+  margin: 0;
+  color: $muted;
+  font-size: 0.72rem;
+  line-height: 1.6;
+}

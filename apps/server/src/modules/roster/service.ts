@@ -3,6 +3,7 @@ import { LEVEL_CAP_BY_RANK, type ChampionDef } from '@mistvale/shared';
 import { playerChampions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
+import { grantItems } from '../rewards/service';
 import type { ContentCache } from '../../content/cache';
 
 /**
@@ -169,5 +170,22 @@ export async function grantStarterPack(
     throw new AppError('VALIDATION', 'That is not one of the available starters.');
   }
 
-  return [await grantChampion(tx, playerId, chosen.key, { level: 1, rank: 1 })];
+  const granted = await grantChampion(tx, playerId, chosen.key, { level: 1, rank: 1 });
+
+  // The welcome grant. A new warden should be able to reach the Mistgate on their first
+  // evening rather than farming towards it — the pull is the hook, and a player who has
+  // never seen it has not really met the game. What they get is `game_config`, so the
+  // opening hour is tunable without a deploy.
+  const welcome = content.current().bundle.config['progression.starterGrant'];
+  if (welcome && typeof welcome === 'object' && !Array.isArray(welcome)) {
+    const items: Record<string, number> = {};
+    for (const [itemKey, amount] of Object.entries(welcome as Record<string, unknown>)) {
+      if (typeof amount === 'number' && amount > 0) items[itemKey] = Math.trunc(amount);
+    }
+    if (Object.keys(items).length > 0) {
+      await grantItems(tx, playerId, items, 'starter:welcome');
+    }
+  }
+
+  return [granted];
 }

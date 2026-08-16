@@ -7,6 +7,7 @@ import { EXTENDED_CHAMPIONS, EXTENDED_SKILLS } from './data/extended-champions';
 import { SHOWCASE_CHAMPIONS, SHOWCASE_SKILLS } from './data/showcase-champions';
 import { SHOPS } from './data/shops';
 import { STATUSES } from './data/statuses';
+import { SUMMON_POOLS } from './data/summon-pools';
 import { ASSETS, FACTIONS, GEAR_SETS, GEAR_SLOTS } from './data/world';
 
 /**
@@ -46,6 +47,7 @@ export function buildSeedContent(): SeedContent[] {
     item: ITEMS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
     stage: CAMPAIGN_STAGES.map((data) => ({ key: data.key, data })),
+    summonPool: SUMMON_POOLS.map((data) => ({ key: data.key, data })),
     shop: SHOPS.map((data) => ({ key: data.key, data })),
     gameConfig: GAME_CONFIG.map((data) => ({ key: data.key, data })),
   };

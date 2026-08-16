@@ -328,6 +328,64 @@ export const gearStatDefSchema = contentMetaSchema.extend({
 });
 export type GearStatDef = z.infer<typeof gearStatDefSchema>;
 
+// ── Summoning ───────────────────────────────────────────────────────────────
+
+/**
+ * Mercy for one rarity.
+ *
+ * After `after` consecutive summons without that rarity, its chance grows by `step` each
+ * pull until it lands, then the counter resets. Source-faithful, and — crucially — shown
+ * to the player: the Odds & Mercy panel renders these exact numbers, so the published
+ * value and the advertised value cannot drift apart (GAME_DESIGN §10).
+ */
+export const pityRuleSchema = z.object({
+  after: z.number().int().min(0).max(1000),
+  step: z.number().min(0).max(1),
+  /** Ceiling on the accrued bonus. 1 means it can reach certainty. */
+  maxBonus: z.number().min(0).max(1).default(1),
+});
+export type PityRule = z.infer<typeof pityRuleSchema>;
+
+/**
+ * One sigil's pool.
+ *
+ * Rates, mercy and the champion table all live here rather than in `game_config`, because
+ * they are per-pool: Radiant's mercy is not Gleaming's, and a summon event that doubles
+ * Epic weight for a weekend must not touch the other three. Publish validation checks the
+ * rates sum to 1 and that every champion named exists and is summonable.
+ */
+export const summonPoolDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  description: z.string().max(400).default(''),
+  /** The `item_defs` key spent for one pull. */
+  sigilKey: contentKeySchema,
+  /** Rarity distribution. Must sum to 1 (publish-validated). */
+  rates: z.partialRecord(z.enum(RARITIES), z.number().min(0).max(1)),
+  /** Mercy per rarity. Rarities absent here simply have none. */
+  pity: z.partialRecord(z.enum(RARITIES), pityRuleSchema).default({}),
+  /**
+   * Which champions can appear, and how likely each is *within its rarity*.
+   *
+   * Weights are relative inside a rarity band, never across bands — the band is chosen
+   * first from `rates`, then a champion from it. Keeping the two steps separate is what
+   * makes the advertised rate honest no matter how the roster grows.
+   */
+  entries: z
+    .array(
+      z.object({
+        championKey: contentKeySchema,
+        weight: z.number().min(0).max(1000).default(10),
+        /** Marks a rate-up champion for the banner's "featured" strip. */
+        featured: z.boolean().default(false),
+      }),
+    )
+    .min(1),
+  /** ×10 pulls guarantee at least this rarity once, if set. */
+  tenPullFloor: z.enum(RARITIES).optional(),
+  sortOrder: z.number().int().min(0).max(9999).default(0),
+});
+export type SummonPoolDef = z.infer<typeof summonPoolDefSchema>;
+
 // ── Shops ───────────────────────────────────────────────────────────────────
 
 /** What a shop slot hands over when bought. */
@@ -556,4 +614,5 @@ export type CampaignChapterDefInput = z.input<typeof campaignChapterDefSchema>;
 export type StageDefInput = z.input<typeof stageDefSchema>;
 export type ItemDefInput = z.input<typeof itemDefSchema>;
 export type ShopDefInput = z.input<typeof shopDefSchema>;
+export type SummonPoolDefInput = z.input<typeof summonPoolDefSchema>;
 export type GameConfigEntryInput = z.input<typeof gameConfigEntrySchema>;

@@ -12,6 +12,7 @@ import {
   itemDefSchema,
   shopDefSchema,
   skillDefSchema,
+  summonPoolDefSchema,
   stageDefSchema,
   statusDefSchema,
 } from './entities';
@@ -37,6 +38,7 @@ export const CONTENT_TYPES = [
   'item',
   'campaignChapter',
   'stage',
+  'summonPool',
   'shop',
   'gameConfig',
 ] as const;
@@ -137,6 +139,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: ['campaignChapter', 'enemy'],
     inBundle: true,
   },
+  summonPool: {
+    label: 'Summon pools',
+    path: 'summon-pools',
+    schema: summonPoolDefSchema,
+    references: ['item', 'champion'],
+    inBundle: true,
+  },
   shop: {
     label: 'Shops',
     path: 'shops',
@@ -167,6 +176,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'item',
   'campaignChapter',
   'stage',
+  'summonPool',
   'shop',
   'gameConfig',
 ];

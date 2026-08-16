@@ -17,6 +17,7 @@ export type ScreenId =
   | 'champions'
   | 'relics'
   | 'mistgate'
+  | 'chronicle'
   | 'bazaar'
   | 'quests'
   | 'events'
@@ -62,6 +63,14 @@ export const SCREENS: readonly ScreenDefinition[] = [
   // actually names (docs/GAME_DESIGN.md §12).
   { id: 'relics', label: 'Relics', glyph: '◆', inDock: true },
   { id: 'mistgate', label: 'Mistgate', glyph: '◉', inDock: true },
+  {
+    id: 'chronicle',
+    label: 'Chronicle',
+    glyph: '❋',
+    unlock: 'chronicle',
+    lockedHint: 'Opens at level 9',
+    inDock: true,
+  },
   {
     id: 'bazaar',
     label: 'Bazaar',

@@ -145,3 +145,65 @@ export const shopStates = pgTable(
 export type PlayerItemRow = typeof playerItems.$inferSelect;
 export type GearInstanceRow = typeof gearInstances.$inferSelect;
 export type ShopStateRow = typeof shopStates.$inferSelect;
+
+/**
+ * Every pull, kept.
+ *
+ * The pity state is derivable from this table, and the cached counters on
+ * `players.summon_pity` are only an optimisation — but the history is what a support
+ * question ("I pulled forty times and got nothing") is answered from, and what makes the
+ * advertised rates auditable after the fact rather than merely asserted
+ * (docs/DATA_MODEL.md §4).
+ */
+export const summonHistory = pgTable(
+  'summon_history',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+
+    /** `summon_pool_defs` key. */
+    poolKey: text('pool_key').notNull(),
+    sigilItemKey: text('sigil_item_key').notNull(),
+    championKey: text('champion_key').notNull(),
+    rarity: text('rarity').notNull(),
+
+    /** True when mercy, not the base rate, produced this rarity. */
+    fromMercy: boolean('from_mercy').notNull().default(false),
+    /** Counters as they stood immediately after this pull. */
+    pityAfter: jsonb('pity_after').notNull().default({}),
+    /** The content revision the pool was rolled against. */
+    contentRev: integer('content_rev').notNull().default(0),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('summon_history_player_idx').on(table.playerId, table.createdAt),
+    index('summon_history_champion_idx').on(table.championKey),
+  ],
+);
+
+/**
+ * Champions the player has met but may not own.
+ *
+ * The Chronicle is a record of the world, not a list of receipts, so a champion fought in
+ * the campaign or shown on a banner registers as *seen* even if it was never pulled.
+ */
+export const championSightings = pgTable(
+  'champion_sightings',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    championKey: text('champion_key').notNull(),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('champion_sightings_player_champion_key').on(table.playerId, table.championKey),
+  ],
+);
+
+export type SummonHistoryRow = typeof summonHistory.$inferSelect;
+export type ChampionSightingRow = typeof championSightings.$inferSelect;

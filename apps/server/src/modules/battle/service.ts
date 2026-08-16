@@ -22,6 +22,7 @@ import { AppError } from '../../lib/errors';
 import { computeEnergy } from '../../lib/progression';
 import type { ContentCache } from '../../content/cache';
 import * as gear from '../gear/service';
+import * as chronicle from '../summon/service';
 import * as rewards from '../rewards/service';
 import * as roster from '../roster/service';
 
@@ -211,6 +212,13 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       rules,
       config,
     );
+
+    // Everything that took the field counts as met, which is what makes the Chronicle a
+    // record of the world rather than a list of receipts (GAME_DESIGN §10).
+    await chronicle.see(tx, options.playerId, [
+      ...owned.map((member) => member.championKey),
+      ...stage.waves.flatMap((wave) => wave.map((unit) => unit.enemyKey)),
+    ]);
 
     const [row] = await tx
       .insert(battleSessions)

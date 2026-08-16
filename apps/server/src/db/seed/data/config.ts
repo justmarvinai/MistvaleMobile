@@ -213,6 +213,13 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Multiplier applied per level.',
   ),
   entry(
+    'progression.starterGrant',
+    { sigil_faded: 10, sigil_gleaming: 3 },
+    'progression',
+    'Welcome grant',
+    'Items handed over with the starter champion. A new warden should be able to reach the Mistgate on their first evening — ten Faded Sigils is a ×10 on the brood banner, which teaches the mechanic and stocks the first rank-up.',
+  ),
+  entry(
     'progression.rosterCapacityDefault',
     60,
     'progression',
@@ -412,57 +419,6 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'economy',
     'Which tome a rarity needs',
     'Tome rarity must match the champion’s (GAME_DESIGN §7).',
-  ),
-
-  // ── Summoning ─────────────────────────────────────────────────────────────
-  entry(
-    'summon.rates.gleaming',
-    { rare: 0.915, epic: 0.08, legendary: 0.005 },
-    'summon',
-    'Gleaming Sigil rates',
-    'Must sum to 1. Shown to players on the Odds & Mercy panel.',
-  ),
-  entry(
-    'summon.rates.radiant',
-    { epic: 0.94, legendary: 0.06 },
-    'summon',
-    'Radiant Sigil rates',
-    'Must sum to 1.',
-  ),
-  entry(
-    'summon.rates.faded',
-    { common: 0.74, uncommon: 0.2, rare: 0.06 },
-    'summon',
-    'Faded Sigil rates',
-    'Must sum to 1.',
-  ),
-  entry(
-    'summon.mercy.gleamingEpicAfter',
-    20,
-    'summon',
-    'Epic mercy threshold',
-    'Pulls without an Epic before the bonus starts accruing.',
-  ),
-  entry(
-    'summon.mercy.gleamingEpicStep',
-    0.02,
-    'summon',
-    'Epic mercy step',
-    'Added to the Epic chance per pull past the threshold.',
-  ),
-  entry(
-    'summon.mercy.legendaryAfter',
-    200,
-    'summon',
-    'Legendary mercy threshold',
-    'Pulls without a Legendary before the bonus starts.',
-  ),
-  entry(
-    'summon.mercy.legendaryStep',
-    0.05,
-    'summon',
-    'Legendary mercy step',
-    'Added to the Legendary chance per pull past the threshold.',
   ),
 
   // ── Live operations ───────────────────────────────────────────────────────

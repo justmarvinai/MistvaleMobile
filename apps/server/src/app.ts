@@ -16,6 +16,7 @@ import { contentRoutes } from './modules/content/routes';
 import { gameRoutes } from './modules/battle/routes';
 import { inventoryRoutes } from './modules/gear/routes';
 import { shopRoutes } from './modules/shop/routes';
+import { summonRoutes } from './modules/summon/routes';
 import { adminApi } from './admin/index';
 
 declare module 'fastify' {
@@ -88,6 +89,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await api.register(gameRoutes);
       await api.register(inventoryRoutes);
       await api.register(shopRoutes);
+      await api.register(summonRoutes);
     },
     { prefix: API_PREFIX },
   );

@@ -9,6 +9,10 @@ import type {
   ShopPurchaseResult,
   ShopStock,
   SkillUpgradeRequest,
+  Chronicle,
+  SummonBanner,
+  SummonHistoryEntry,
+  SummonResponse,
 } from '@mistvale/shared';
 import { ROUTES } from '@mistvale/shared';
 import type { BattleEvent, BattleState, UnitRef } from '@mistvale/engine';
@@ -21,7 +25,16 @@ import { api } from './client';
  * then plays back what came back (CLAUDE.md hard rules).
  */
 
-export type { ChampionDetail, GearInstance, InventoryItem, RosterChampion, ShopStock };
+export type {
+  ChampionDetail,
+  Chronicle,
+  GearInstance,
+  InventoryItem,
+  RosterChampion,
+  ShopStock,
+  SummonBanner,
+  SummonHistoryEntry,
+};
 
 export interface StarterChoice {
   key: string;
@@ -161,6 +174,19 @@ export const gameApi = {
 
   unlockShopSlot: (key: string, actionId: string) =>
     api.post<{ stock: ShopStock }>(ROUTES.shop.unlockSlot(key), { actionId }).then((d) => d.stock),
+
+  // ── The Mistgate ─────────────────────────────────────────────────────────
+  banners: () =>
+    api.get<{ banners: SummonBanner[] }>(ROUTES.summon.banners).then((data) => data.banners),
+
+  summon: (poolKey: string, count: 1 | 10, actionId: string) =>
+    api.post<SummonResponse>(ROUTES.summon.pull(poolKey), { count, actionId }),
+
+  summonHistory: () =>
+    api.get<{ entries: SummonHistoryEntry[] }>(ROUTES.summon.history).then((data) => data.entries),
+
+  chronicle: () =>
+    api.get<{ chronicle: Chronicle }>(ROUTES.summon.chronicle).then((data) => data.chronicle),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

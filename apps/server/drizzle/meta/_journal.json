@@ -43,6 +43,20 @@
       "when": 1786890181075,
       "tag": "0005_lazy_zarek",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786897557357,
+      "tag": "0006_wonderful_warlock",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786897766435,
+      "tag": "0007_cooing_raza",
+      "breakpoints": true
     }
   ]
 }

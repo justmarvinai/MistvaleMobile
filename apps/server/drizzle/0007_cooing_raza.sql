@@ -1,0 +1,1 @@
+ALTER TABLE "players" ADD COLUMN "last_summon_action_id" text;
