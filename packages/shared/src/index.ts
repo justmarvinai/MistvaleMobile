@@ -5,3 +5,4 @@ export * from './auth';
 export * from './player';
 export * from './routes';
 export * from './content/index';
+export * from './openapi';

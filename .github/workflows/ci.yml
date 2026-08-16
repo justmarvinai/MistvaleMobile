@@ -64,6 +64,12 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # The Admin Suite generates its client types from this artifact. If the server's
+      # contracts moved and the artifact did not, that repo would be built against an API
+      # this one no longer serves.
+      - name: Check the committed OpenAPI artifact is current
+        run: pnpm openapi:check
+
       - name: Apply migrations
         run: pnpm db:migrate
 

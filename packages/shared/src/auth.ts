@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ACCOUNT_RANKS, type AccountRank } from './enums';
+import { ACCOUNT_RANKS } from './enums';
 
 /**
  * Auth contracts: account name + password + profile name. No e-mail anywhere in
@@ -61,13 +61,19 @@ export const changePasswordRequestSchema = z.object({
 });
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>;
 
-/** The account half of a session — identity and permissions. */
-export interface AccountSummary {
-  id: string;
-  accountName: string;
-  rank: AccountRank;
-  forcePasswordChange: boolean;
-}
+/**
+ * The account half of a session — identity and permissions.
+ *
+ * A schema rather than an interface because the Admin API publishes it: the OpenAPI
+ * artifact the Admin Suite generates its types from is derived from this.
+ */
+export const accountSummarySchema = z.object({
+  id: z.string(),
+  accountName: z.string(),
+  rank: z.enum(ACCOUNT_RANKS),
+  forcePasswordChange: z.boolean(),
+});
+export type AccountSummary = z.infer<typeof accountSummarySchema>;
 
 /** The player half — the game profile attached to the account. */
 export interface PlayerSummary {

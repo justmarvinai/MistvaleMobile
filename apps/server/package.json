@@ -14,6 +14,8 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "seed": "tsx src/db/seed/index.ts",
+    "openapi": "tsx src/openapi-gen.ts",
+    "openapi:check": "tsx src/openapi-gen.ts --check",
     "set-rank": "tsx src/scripts/set-rank.ts"
   },
   "dependencies": {
@@ -32,7 +34,7 @@
     "node-cron": "^3.0.3",
     "pg": "^8.13.1",
     "pino": "^9.6.0",
-    "zod": "^3.24.1"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node-cron": "^3.0.11",

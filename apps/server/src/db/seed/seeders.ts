@@ -2,6 +2,7 @@ import { CONTENT_LOAD_ORDER, CONTENT_REGISTRY, type ContentType } from '@mistval
 import { CAMPAIGN_CHAPTERS, CAMPAIGN_STAGES } from './data/campaign';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { ENEMIES, ENEMY_SKILLS } from './data/enemies';
+import { EXTENDED_CHAMPIONS, EXTENDED_SKILLS } from './data/extended-champions';
 import { SHOWCASE_CHAMPIONS, SHOWCASE_SKILLS } from './data/showcase-champions';
 import { STATUSES } from './data/statuses';
 import { ASSETS, FACTIONS, GEAR_SETS, GEAR_SLOTS } from './data/world';
@@ -26,14 +27,13 @@ export function buildSeedContent(): SeedContent[] {
     faction: FACTIONS.map((data) => ({ key: data.key, data })),
     status: STATUSES.map((data) => ({ key: data.key, data })),
     asset: ASSETS.map((data) => ({ key: data.key, data })),
-    // The thirty art-pending roster champions (CONTENT_PLAN §1b) are appended here as
-    // their kits are authored; the pipeline and the showcase seven are independent of
-    // them, so the two land separately.
-    skill: [...SHOWCASE_SKILLS, ...ENEMY_SKILLS].map((data) => ({
+    skill: [...SHOWCASE_SKILLS, ...EXTENDED_SKILLS, ...ENEMY_SKILLS].map((data) => ({
       key: data.key,
       data,
     })),
-    champion: [...SHOWCASE_CHAMPIONS].map((data) => ({
+    // The showcase seven have final art (CONTENT_PLAN §1); the rest of the roster and
+    // the food units are art-pending and share the placeholder model (§1b).
+    champion: [...SHOWCASE_CHAMPIONS, ...EXTENDED_CHAMPIONS].map((data) => ({
       key: data.key,
       data,
     })),
