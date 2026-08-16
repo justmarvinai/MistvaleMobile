@@ -56,7 +56,25 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
                   <span>{rewards.levelsGained}</span>
                 </div>
               )}
+              {rewards.firstClear && (rewards.bonus.silver ?? 0) > 0 && (
+                <div className={styles.row}>
+                  <span className={styles.label}>First clear</span>
+                  <span className={styles.bonus}>+{rewards.bonus.silver}</span>
+                </div>
+              )}
+              {rewards.gear.length > 0 && (
+                <div className={styles.row}>
+                  <span className={styles.label}>Relics found</span>
+                  <span className={styles.bonus}>{rewards.gear.length}</span>
+                </div>
+              )}
             </div>
+
+            {rewards.chestTiers.length > 0 && (
+              <p className={styles.chest}>
+                Star chest claimed — {rewards.chestTiers.join(' and ')} stars in this chapter.
+              </p>
+            )}
           </>
         ) : (
           <p className={styles.note}>

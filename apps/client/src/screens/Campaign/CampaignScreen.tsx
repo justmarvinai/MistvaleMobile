@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CampaignChapterDef, Difficulty, StageDef } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
 import { useContentStore } from '../../state/contentStore';
 import { usePlayerStore } from '../../state/playerStore';
+import { useProgressStore } from '../../state/progressStore';
 import { TeamSelect } from './TeamSelect';
 import styles from './CampaignScreen.module.scss';
 
@@ -25,8 +26,16 @@ const DIFFICULTY_LABEL: Record<Difficulty, string> = {
 export function CampaignScreen(): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
   const energy = usePlayerStore((state) => state.player?.energy.value ?? 0);
+  const standings = useProgressStore((state) => state.stages);
+  const parentStars = useProgressStore((state) => state.parentStars);
+  const loadProgress = useProgressStore((state) => state.load);
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [chosen, setChosen] = useState<StageDef | null>(null);
+
+  // Re-read on mount: coming back from a fight, the map has to know what opened.
+  useEffect(() => {
+    void loadProgress();
+  }, [loadProgress]);
 
   const chapters = useMemo<CampaignChapterDef[]>(
     () => [...(bundle?.campaignChapters ?? [])].sort((a, b) => a.number - b.number),
@@ -91,7 +100,12 @@ export function CampaignScreen(): JSX.Element {
                   <span className={styles.chapterName}>
                     {chapter.number}. {chapter.name}
                   </span>
-                  <span className={styles.chapterRegion}>{chapter.region}</span>
+                  <span className={styles.chapterRegion}>
+                    {chapter.region}
+                    {(parentStars[chapter.key] ?? 0) > 0 && (
+                      <span className={styles.chapterStars}> ★ {parentStars[chapter.key]}</span>
+                    )}
+                  </span>
                 </header>
 
                 {stages.length === 0 ? (
@@ -102,27 +116,51 @@ export function CampaignScreen(): JSX.Element {
                   <div className={styles.stages}>
                     {stages.map((stage) => {
                       const affordable = energy >= stage.energyCost;
+                      const standing = standings.get(stage.key);
+                      // Default to open: on the first paint, before progress lands, a
+                      // hopeful map beats one that flickers everything shut.
+                      const open = standing?.open ?? true;
+                      const stars = standing?.stars ?? 0;
+
                       return (
                         <button
                           key={stage.key}
                           type="button"
                           className={styles.stage}
+                          disabled={!open}
+                          data-cleared={stars > 0 ? 'true' : undefined}
                           onClick={() => setChosen(stage)}
                           title={
-                            affordable
-                              ? `${stage.waves.length} waves · ${stage.energyCost} energy`
-                              : `Needs ${stage.energyCost} energy — you have ${energy}`
+                            !open
+                              ? (standing?.lockedReason ?? 'Not open yet.')
+                              : affordable
+                                ? `${stage.waves.length} waves · ${stage.energyCost} energy`
+                                : `Needs ${stage.energyCost} energy — you have ${energy}`
                           }
                         >
-                          <span className={styles.stageName}>
-                            {chapter.number}-{stage.number}
+                          <span className={styles.stageHead}>
+                            <span className={styles.stageName}>
+                              {chapter.number}-{stage.number}
+                            </span>
+                            <span className={styles.stageStars} aria-label={`${stars} of 3 stars`}>
+                              {'★'.repeat(stars)}
+                              {'☆'.repeat(3 - stars)}
+                            </span>
                           </span>
-                          <span className={styles.stageMeta}>
-                            {stage.waves.length} waves · {stage.energyCost} energy
-                          </span>
-                          <span className={styles.stageMeta}>
-                            {stage.rewards.silverMin}–{stage.rewards.silverMax} silver
-                          </span>
+                          {open ? (
+                            <>
+                              <span className={styles.stageMeta}>
+                                {stage.waves.length} waves · {stage.energyCost} energy
+                              </span>
+                              <span className={styles.stageMeta}>
+                                {stage.rewards.silverMin}–{stage.rewards.silverMax} silver
+                              </span>
+                            </>
+                          ) : (
+                            <span className={styles.stageLocked}>
+                              {standing?.lockedReason ?? 'Not open yet.'}
+                            </span>
+                          )}
                         </button>
                       );
                     })}

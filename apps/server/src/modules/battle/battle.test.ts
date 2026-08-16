@@ -276,11 +276,15 @@ describe.skipIf(!dbUp)('the game loop', () => {
         expect(view.rewards.stars).toBeGreaterThanOrEqual(1);
         expect(view.rewards.stars).toBeLessThanOrEqual(3);
 
+        // A first clear pays its bonus on top of the stage payout, so the wallet is the
+        // sum of the two — and the response says so rather than leaving the client to
+        // wonder where the extra silver came from.
+        expect(view.rewards.firstClear).toBe(true);
         const [wallet] = await app.db
           .select({ silver: players.silver, xp: players.xp, level: players.level })
           .from(players)
           .where(eq(players.id, playerId));
-        expect(wallet!.silver).toBe(view.rewards.silver);
+        expect(wallet!.silver).toBe(view.rewards.silver + (view.rewards.bonus.silver ?? 0));
 
         // A clear writes one currency row, and one more for item drops when the stage
         // rolled any. What must never happen is a second *currency* row: that would be a

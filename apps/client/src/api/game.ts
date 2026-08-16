@@ -10,6 +10,7 @@ import type {
   ShopStock,
   SkillUpgradeRequest,
   Chronicle,
+  Progress,
   SummonBanner,
   SummonHistoryEntry,
   SummonResponse,
@@ -56,6 +57,12 @@ export interface BattleRewards {
   /** Relics the clear dropped, already owned by the time the client reads this. */
   gear: GearInstance[];
   items: Record<string, number>;
+  /** True the first time this stage has ever been beaten. */
+  firstClear: boolean;
+  /** Paid on top of the stage payout: the first-clear bonus and any star chest. */
+  bonus: Record<string, number>;
+  /** Chapter star-chest tiers this clear crossed. */
+  chestTiers: number[];
 }
 
 export interface BattleView {
@@ -187,6 +194,9 @@ export const gameApi = {
 
   chronicle: () =>
     api.get<{ chronicle: Chronicle }>(ROUTES.summon.chronicle).then((data) => data.chronicle),
+
+  progress: () =>
+    api.get<{ progress: Progress }>(ROUTES.progress.stages).then((data) => data.progress),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

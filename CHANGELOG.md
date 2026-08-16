@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Phase P6: progress, unlocks and star chests
+
+The campaign becomes a journey with a shape: stages open in order, clears are remembered, and pushing forward pays.
+
+- **Stage progress** — one table across every mode, recording stars, clears and the best turn count. Stars are the *best* ever, never the latest, so a sloppy re-farm can never cost a star already earned. Dungeon floors will chain through the same rules, so the Depths needs no second implementation of any of it.
+- **Unlocks are enforced.** The chain has been authored in content since P1 but was never checked — a fresh account could walk into a chapter-3 boss. The campaign map now greys out exactly the stages the server will refuse, and says why: "Clear 1-6 first."
+- **First clears** pay their bonus once, and **chapter star chests** pay when the total crosses a tier — both recorded rather than recomputed, so re-farming a stage cannot re-earn either.
+- The campaign map shows stars per stage and per chapter, and the results screen names the first-clear bonus, the relics found and any chest claimed rather than folding them silently into the silver total.
+
 ### Added — Phase P5: Summoning & the Chronicle
 
 The Mistgate opens. Four sigils, real odds, and a mercy clock you can watch.

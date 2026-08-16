@@ -149,3 +149,68 @@ export const battleSessions = pgTable(
 
 export type PlayerChampionRow = typeof playerChampions.$inferSelect;
 export type BattleSessionRow = typeof battleSessions.$inferSelect;
+
+/**
+ * What a player has cleared, and how well.
+ *
+ * One row per stage per player, covering every mode — campaign, dungeon floor, spring,
+ * proving. Keeping them in one table rather than one per mode is what lets the unlock
+ * check, the star total and the "farm this again" affordance be written once.
+ *
+ * `stars` is the *best* result, never the latest: a three-star clear followed by a sloppy
+ * one must not take a star away, or nobody would ever re-farm a stage.
+ */
+export const stageProgress = pgTable(
+  'stage_progress',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    /** `stage_defs` key. */
+    stageKey: text('stage_key').notNull(),
+    /** Denormalised from the stage so the campaign map can total stars per chapter. */
+    parentKey: text('parent_key').notNull().default(''),
+    mode: text('mode').notNull().default('campaign'),
+
+    stars: smallint('stars').notNull().default(0),
+    clears: integer('clears').notNull().default(0),
+    /** Fewest turns any clear took — the bragging number, and a multi-battle input. */
+    bestTurns: smallint('best_turns'),
+
+    firstClearedAt: timestamp('first_cleared_at', { withTimezone: true }),
+    lastClearedAt: timestamp('last_cleared_at', { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex('stage_progress_player_stage_key').on(table.playerId, table.stageKey),
+    index('stage_progress_parent_idx').on(table.playerId, table.parentKey),
+    check('stage_progress_stars_check', sql`${table.stars} >= 0 and ${table.stars} <= 3`),
+  ],
+);
+
+/**
+ * Star-chest tiers already paid out, per chapter.
+ *
+ * Separate from `stage_progress` because a chest is claimed against a *chapter* total,
+ * and storing which tiers have been taken is what stops a player re-earning the same
+ * chest by losing and regaining a star.
+ */
+export const chapterRewards = pgTable(
+  'chapter_rewards',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    chapterKey: text('chapter_key').notNull(),
+    /** Star thresholds already granted. */
+    claimedTiers: jsonb('claimed_tiers').notNull().default([]).$type<number[]>(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('chapter_rewards_player_chapter_key').on(table.playerId, table.chapterKey),
+  ],
+);
+
+export type StageProgressRow = typeof stageProgress.$inferSelect;
+export type ChapterRewardRow = typeof chapterRewards.$inferSelect;

@@ -22,6 +22,7 @@ import { AppError } from '../../lib/errors';
 import { computeEnergy } from '../../lib/progression';
 import type { ContentCache } from '../../content/cache';
 import * as gear from '../gear/service';
+import * as progress from '../progress/service';
 import * as chronicle from '../summon/service';
 import * as rewards from '../rewards/service';
 import * as roster from '../roster/service';
@@ -74,6 +75,12 @@ export interface RewardSummary {
   gear: GearInstance[];
   /** Stackables the clear dropped, by item key. */
   items: Record<string, number>;
+  /** True the first time this stage has ever been beaten. */
+  firstClear: boolean;
+  /** Paid on top of the stage payout: the first-clear bonus and any star chest. */
+  bonus: rewards.RewardBundle;
+  /** Chapter star-chest tiers this clear crossed. */
+  chestTiers: number[];
 }
 
 const MAX_TEAM = 4;
@@ -140,6 +147,27 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     if (existing) {
       // A conflict, not a cooldown: the fix is to finish the fight, not to wait.
       throw new AppError('ALREADY_EXISTS', 'You are already in a battle. Finish or retreat first.');
+    }
+
+    // The unlock chain has been authored in content since P1; this is where it finally
+    // binds. Checked against the same rule the campaign map greys stages out with, so a
+    // player is never shown an open door the server will slam.
+    if (options.mode !== 'practice') {
+      const cleared = await progress.standings(tx, options.playerId);
+      const chapters = new Map(
+        snapshot.bundle.campaignChapters.map((entry) => [entry.key, entry.number]),
+      );
+      const check = progress.checkUnlock(
+        stage,
+        player.level,
+        (stageKey) => cleared.get(stageKey)?.cleared === true,
+        (stageKey) =>
+          progress.stageLabel(
+            stages.get(stageKey),
+            chapters.get(stages.get(stageKey)?.parentKey ?? ''),
+          ),
+      );
+      if (!check.open) throw new AppError('LOCKED_CONTENT', check.reason ?? 'That stage is shut.');
     }
 
     const owned = await roster.findOwned(tx, options.playerId, options.team);
@@ -443,6 +471,11 @@ async function settle(
 
   const drops = await rollDrops(tx, ctx, row, stage, playerId, lootRng);
 
+  // Progress is recorded after the payout because its bonuses — first clear, star chests
+  // — are earned by *progress* rather than by the fight, and must not be re-paid on a
+  // re-farm. `recordClear` owns that distinction.
+  const cleared = await progress.recordClear(tx, playerId, stage, ctx.content, state.turn, stars);
+
   return {
     silver,
     playerXp: stage.rewards.playerXp,
@@ -451,6 +484,9 @@ async function settle(
     levelsGained: granted.levelsGained,
     gear: drops.gear,
     items: drops.items,
+    firstClear: cleared.firstClear,
+    bonus: cleared.bonus,
+    chestTiers: cleared.chestTiers,
   };
 }
 

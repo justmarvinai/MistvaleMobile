@@ -86,9 +86,12 @@ test.describe('the Mistgate', () => {
     expect(await rosterSize(page)).toBe(before + 10);
     await expect(page.getByText(/0 faded sigils held/i)).toBeVisible({ timeout: 15_000 });
 
-    // And the Chronicle knows about them.
+    // And the Chronicle knows about them. `owned` counts collectable champions only, and
+    // the brood banner is mostly brood-kin — so the honest invariant is *copies*: the
+    // starter plus ten.
     const chronicle = await readChronicle(page);
-    expect(chronicle.owned).toBeGreaterThan(1);
+    const copies = chronicle.entries.reduce((sum, entry) => sum + entry.copies, 0);
+    expect(copies).toBe(11);
   });
 
   test('the Chronicle records the champions a warden has met', async ({ page }) => {
@@ -132,13 +135,23 @@ async function rosterSize(page: Page): Promise<number> {
   });
 }
 
-async function readChronicle(
-  page: Page,
-): Promise<{ owned: number; total: number; entries: unknown[] }> {
+interface ChronicleView {
+  owned: number;
+  total: number;
+  entries: { championKey: string; copies: number }[];
+}
+
+async function readChronicle(page: Page): Promise<ChronicleView> {
   return page.evaluate(async () => {
     const response = await fetch('/api/chronicle', { credentials: 'include' });
     const body = (await response.json()) as {
-      data: { chronicle: { owned: number; total: number; entries: unknown[] } };
+      data: {
+        chronicle: {
+          owned: number;
+          total: number;
+          entries: { championKey: string; copies: number }[];
+        };
+      };
     };
     return body.data.chronicle;
   });

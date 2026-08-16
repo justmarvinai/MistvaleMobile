@@ -91,6 +91,10 @@ export const ROUTES = {
     /** `/shops/:key/unlock-slot` — permanently open a crystal slot. */
     unlockSlot: (key: string) => `/shops/${encodeURIComponent(key)}/unlock-slot`,
   },
+  progress: {
+    /** Stars, clears and which stages are open — everything the maps render. */
+    stages: '/player/progress',
+  },
   battle: {
     start: '/battles/start',
     /** The battle in progress, or null. Resume support after a refresh or crash. */

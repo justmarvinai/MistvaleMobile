@@ -80,6 +80,10 @@
   padding: $space-2;
   background: $panel;
   border: 1px solid $edge;
+
+  &[data-cleared='true'] {
+    border-left: 2px solid $gold;
+  }
   color: $parchment;
   font: inherit;
   text-align: left;
@@ -95,8 +99,31 @@
   }
 }
 
+.stageHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+}
+
 .stageName {
   font-size: 0.85rem;
+}
+
+.stageStars {
+  color: $gold;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+}
+
+.stageLocked {
+  color: $muted-deep;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.chapterStars {
+  color: $gold;
 }
 
 .stageMeta {

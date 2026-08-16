@@ -123,3 +123,31 @@ export const progressionResultSchema = z.object({
   levelsGained: z.number().int().default(0),
 });
 export type ProgressionResult = z.infer<typeof progressionResultSchema>;
+
+// ── Progress ────────────────────────────────────────────────────────────────
+
+/**
+ * One stage as a map renders it.
+ *
+ * `open` and `lockedReason` come from the same rule the battle route enforces, so a
+ * player is never shown a door the server will slam — and when one is shut, they are told
+ * why rather than left guessing.
+ */
+export const stageStandingSchema = z.object({
+  stageKey: z.string(),
+  stars: z.number().int(),
+  clears: z.number().int(),
+  bestTurns: z.number().int().nullable(),
+  open: z.boolean(),
+  lockedReason: z.string().nullable(),
+});
+export type StageStanding = z.infer<typeof stageStandingSchema>;
+
+export const progressSchema = z.object({
+  stages: z.array(stageStandingSchema),
+  /** Total stars per chapter or dungeon, for the map headers. */
+  parentStars: z.record(z.string(), z.number().int()),
+  /** Star-chest tiers already claimed, per chapter. */
+  claimedChests: z.record(z.string(), z.array(z.number().int())),
+});
+export type Progress = z.infer<typeof progressSchema>;
