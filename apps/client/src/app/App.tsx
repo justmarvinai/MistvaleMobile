@@ -8,6 +8,7 @@ import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { DepthsScreen } from '@/screens/Depths/DepthsScreen';
 import { ArenaScreen } from '@/screens/Arena/ArenaScreen';
 import { QuestsScreen } from '@/screens/Quests/QuestsScreen';
+import { MissionsScreen } from '@/screens/Missions/MissionsScreen';
 import { ChampionsScreen } from '@/screens/Champions/ChampionsScreen';
 import { RelicsScreen } from '@/screens/Relics/RelicsScreen';
 import { BazaarScreen } from '@/screens/Bazaar/BazaarScreen';
@@ -181,6 +182,8 @@ function GameShell() {
             <ChronicleScreen />
           ) : screen === 'quests' ? (
             <QuestsScreen />
+          ) : screen === 'missions' ? (
+            <MissionsScreen />
           ) : definition ? (
             <PlaceholderScreen screen={definition} />
           ) : null}

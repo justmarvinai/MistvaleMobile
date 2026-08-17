@@ -2,11 +2,13 @@ import type { FastifyPluginAsync } from 'fastify';
 import {
   ROUTES,
   apiSuccess,
+  missionClaimRequestSchema,
   questChestClaimRequestSchema,
   questClaimRequestSchema,
   routePattern,
 } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
+import * as missions from './missions';
 import * as quests from './quests';
 
 /**
@@ -50,6 +52,24 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
       requirePlayer(request),
       body.period,
       body.actionId,
+    );
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  // ── The Valewarden's Path ─────────────────────────────────────────────────
+
+  app.get(ROUTES.missions.state, async (request, reply) => {
+    const view = await missions.overview(ctx(), requirePlayer(request));
+    return reply.send(apiSuccess({ missions: view }, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.missions.claim, 'key'), async (request, reply) => {
+    const { key } = request.params as { key: string };
+    const body = missionClaimRequestSchema.parse(request.body);
+    const result = await missions.claim(ctx(), requirePlayer(request), key, body.actionId);
+    request.log.info(
+      { playerId: requirePlayer(request), missionKey: key, champions: result.champions },
+      'mission claimed',
     );
     return reply.send(apiSuccess(result, app.content.rev));
   });

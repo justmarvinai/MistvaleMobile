@@ -11,6 +11,7 @@ import { players } from '../../db/schema/index';
 import { AppError } from '../../lib/errors';
 import { toPlayerSummary } from '../auth/service';
 import { multiState } from '../battle/service';
+import * as missions from '../meta/missions';
 import * as quests from '../meta/quests';
 
 /**
@@ -36,6 +37,8 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
             forcePasswordChange: account.forcePasswordChange,
           },
           player: toPlayerSummary(player, now),
+          // The honorific the Path awarded, shown beside the profile name.
+          title: player.title,
           unlocks: computeUnlocks(player.level),
           // Today's farming allowance rides on the snapshot the shell already refetches
           // after every battle, so the team-select screen never has to ask for it.
@@ -49,6 +52,10 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
               player.id,
               player,
               now,
+            ),
+            missions: await missions.claimableCount(
+              { db: app.db, content: app.content },
+              player.id,
             ),
           },
           settings: { ...DEFAULT_PLAYER_SETTINGS, ...player.settings },

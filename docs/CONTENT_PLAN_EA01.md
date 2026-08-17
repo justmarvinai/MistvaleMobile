@@ -165,7 +165,7 @@ Structure per COMBAT §9 (2-of-3 trees, 2×T1 + 3×T2–T5 + 1×T6 picks, tiers 
 
 ## 7. Meta content
 - **Quests:** dailies/weeklies/monthlies exactly as ECONOMY §11.
-- **Missions (80):** 10 arcs × 8 (Awakening the Gate → First Steel → The Causeway → Depths-Delver → Proving Yourself → Arena Blooded → Silver Standard → The Deep Floors → Brutal Roads → Court of the Coilmother). Each arc ends in a sigil/tome milestone; final: **Aureleth, Voice of the Vale** (exclusive Legendary, §1b) + title "Warden of the Reclamation".
+- **Missions (80, shipped):** 10 arcs × 8 (Awakening the Gate → First Steel → The Causeway → Depths-Delver → Proving Yourself → Arena Blooded → Silver Standard → The Deep Floors → Brutal Roads → Court of the Coilmother). Each arc's eighth step is its milestone and pays a sigil or tome; final: **Aureleth, Voice of the Vale** (exclusive Legendary, §1b) + title "Warden of the Reclamation". Arcs open in order and the eight inside one are open together; progress accrues on every arc regardless, so the ordering never costs a player something they earned.
 - **Events at launch:** Champion Training (5d), Depths Delve (3d), Summon Surge (2d) staggered on a 2-week admin-cloneable calendar.
 - **Login:** 30-day cycle (day 30 Epic selector), 7-day welcome track. **News:** seeded welcome post + patch-notes template.
 - **Bazaar/Crystal shop:** per ECONOMY §9–10.

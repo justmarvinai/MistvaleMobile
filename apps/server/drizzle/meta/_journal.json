@@ -120,6 +120,13 @@
       "when": 1786973367415,
       "tag": "0016_unknown_lockheed",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1786977449619,
+      "tag": "0017_brave_blue_blade",
+      "breakpoints": true
     }
   ]
 }

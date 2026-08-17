@@ -18,6 +18,7 @@ import { grantItems, itemQuantities } from '../rewards/service';
 import { grantChampion } from '../roster/service';
 import { championContextFrom, toRosterChampion } from '../roster/champions';
 import { gearByChampion } from '../gear/service';
+import { track } from '../meta/progress';
 import { pityStates, poolContents, rarityLookup, rollMany, type PityCounters } from './roll';
 
 /**
@@ -221,6 +222,16 @@ export async function pull(
       .update(players)
       .set({ summonPity: pity, lastSummonActionId: actionId, updatedAt: new Date() })
       .where(eq(players.id, playerId));
+
+    // A ×10 is one pull worth ten, not ten pulls: the daily asks for champions summoned,
+    // and the rarity rides along so a mission can ask for a Legendary specifically.
+    await track(tx, { content }, playerId, [
+      { type: 'summon', amount: results.length, facts: { poolKey } },
+      ...results.map((result) => ({
+        type: 'championObtained' as const,
+        facts: { rarity: result.rarity },
+      })),
+    ]);
 
     const held = await itemQuantities(tx, playerId);
     return {

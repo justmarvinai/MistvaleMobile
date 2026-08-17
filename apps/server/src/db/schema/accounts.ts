@@ -180,6 +180,16 @@ export const players = pgTable(
       .default({})
       .$type<Record<string, { anchor: string; actionId: string }>>(),
 
+    /**
+     * An honorific the account has earned and may display beside its profile name.
+     *
+     * One column rather than a table of earned titles: at EA exactly one is awarded, by
+     * the last step of the Valewarden's Path, and a table for a single row would be a
+     * table to maintain. When a second source appears it becomes a list — the column is
+     * the *displayed* title either way, which is the only thing the game reads.
+     */
+    title: text('title'),
+
     lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

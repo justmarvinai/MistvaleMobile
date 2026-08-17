@@ -15,6 +15,7 @@ import type { Database } from '../../db/client';
 import type { ContentCache } from '../../content/cache';
 import { AppError } from '../../lib/errors';
 import * as rewards from '../rewards/service';
+import { track } from '../meta/progress';
 
 /**
  * Masteries.
@@ -214,6 +215,7 @@ export async function learn(
     nodeKey: string;
     nodes: ReadonlyMap<string, MasteryDef>;
     costs: MasteryCosts;
+    content: ContentCache;
   },
 ): Promise<LearnOutcome> {
   if (options.playerLevel < options.costs.unlockLevel) {
@@ -260,6 +262,8 @@ export async function learn(
     .update(playerChampions)
     .set({ masteries: chosen, updatedAt: new Date() })
     .where(eq(playerChampions.id, options.championId));
+
+  await track(tx, { content: options.content }, options.playerId, [{ type: 'masteryLearn' }]);
 
   return { chosen, spent: cost };
 }

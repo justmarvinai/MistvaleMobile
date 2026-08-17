@@ -934,6 +934,18 @@ async function settle(
       ? []
       : [{ type: 'dungeonClear' as const, facts: { dungeonKey: stage.parentKey } }]),
     ...(stage.energyCost > 0 ? [{ type: 'useEnergy' as const, amount: stage.energyCost }] : []),
+    // Stars held in this chapter, as a threshold rather than as a gain: "3★ chapter 2" is
+    // satisfied by the total standing there now, so re-clearing a stage for a better star
+    // cannot double-count, and a mission set after the fact still completes.
+    ...(stage.mode === 'campaign'
+      ? [
+          {
+            type: 'chapterStars' as const,
+            amount: cleared.chapterStars,
+            facts: { chapterKey: stage.parentKey },
+          },
+        ]
+      : []),
   ]);
 
   // The day's first victory in this mode, paid on the spot. After the fan-out, so a win

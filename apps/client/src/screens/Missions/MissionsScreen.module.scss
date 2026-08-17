@@ -1,0 +1,263 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: $space-4;
+  height: 100%;
+  min-height: 0;
+}
+
+.rail {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: $space-2;
+}
+
+// ── The arc rail ────────────────────────────────────────────────────────────
+
+.total {
+  margin: 0 0 $space-3;
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.arcs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arcButton {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $space-2;
+  width: 100%;
+  padding: $space-2;
+  background: transparent;
+  border: 1px solid transparent;
+  color: $parchment-dim;
+  font-size: 0.8125rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color $duration-fast $ease-out,
+    border-color $duration-fast $ease-out;
+
+  &:hover {
+    color: $parchment;
+    border-color: $edge;
+  }
+}
+
+.arcCurrent {
+  background: $panel-raised;
+  border-color: $edge-bright;
+  color: $gold;
+}
+
+.arcDone {
+  color: $muted;
+}
+
+.arcShut {
+  opacity: 0.6;
+}
+
+.arcMark {
+  color: $gold;
+  font-size: 0.6875rem;
+}
+
+.arcName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arcCount {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.6875rem;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: $space-3 0 0;
+  padding: $space-2;
+  background: rgba(212, 175, 96, 0.08);
+  border: 1px solid $gold;
+  color: $gold;
+  font-family: $font-display;
+  font-size: 0.8125rem;
+}
+
+.titleLabel {
+  color: $parchment-dim;
+  font-family: $font-body;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// ── The arc itself ──────────────────────────────────────────────────────────
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-3;
+  padding-bottom: $space-2;
+  border-bottom: 1px solid $edge;
+}
+
+.headName {
+  margin: 0;
+  color: $gold;
+  font-family: $font-display;
+  font-size: 1.125rem;
+}
+
+.headNote {
+  margin: 0;
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.error {
+  margin: 0;
+  padding: $space-2 $space-3;
+  background: rgba(180, 60, 60, 0.12);
+  border: 1px solid $danger;
+  color: $parchment;
+  font-size: 0.8125rem;
+}
+
+.empty {
+  margin: $space-6 0;
+  color: $muted;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mission {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-3;
+  background: $panel;
+  border: 1px solid $edge;
+  transition: border-color $duration-fast $ease-out;
+}
+
+.missionReady {
+  border-color: $gold;
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 96, 0.18);
+}
+
+.missionDone {
+  opacity: 0.55;
+}
+
+.missionBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.missionName {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 0.9375rem;
+}
+
+.missionNote {
+  margin: 2px 0 $space-2;
+  color: $parchment-dim;
+  font-size: 0.8125rem;
+}
+
+.goal {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+
+  & + & {
+    margin-top: 4px;
+  }
+}
+
+.bar {
+  flex: 1 1 auto;
+  height: 8px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: $mist;
+  transition: width $duration-base $ease-out;
+}
+
+.count {
+  flex: 0 0 auto;
+  min-width: 5.5rem;
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.missionSide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $space-2;
+  flex: 0 0 auto;
+}
+
+/** A granted champion, called out above the currencies it sits with. */
+.grant {
+  margin: 0;
+  padding: 2px $space-2;
+  background: rgba(191, 143, 255, 0.12);
+  border: 1px solid $rarity-legendary;
+  color: $rarity-legendary;
+  font-family: $font-display;
+  font-size: 0.8125rem;
+}
+
+.grantTitle {
+  margin: 0;
+  color: $gold;
+  font-size: 0.75rem;
+}

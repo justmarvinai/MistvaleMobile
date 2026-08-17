@@ -15,6 +15,7 @@ import {
   skillDefSchema,
   stageDefSchema,
   statusDefSchema,
+  missionDefSchema,
   questDefSchema,
   summonPoolDefSchema,
 } from './entities';
@@ -52,6 +53,7 @@ export const contentBundleSchema = z.object({
   shops: z.array(shopDefSchema),
   masteries: z.array(masteryDefSchema),
   quests: z.array(questDefSchema),
+  missions: z.array(missionDefSchema),
   /** Flattened to a plain map — the client only ever reads values. */
   config: z.record(z.string(), gameConfigEntrySchema.shape.value),
 });

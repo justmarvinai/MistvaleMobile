@@ -4,6 +4,7 @@ import { DEPTHS_STAGES, DUNGEONS } from './data/depths';
 import { DEPTHS_ENEMIES, DEPTHS_SKILLS } from './data/depths-enemies';
 import { MASTERIES } from './data/masteries';
 import { QUESTS } from './data/quests';
+import { MISSIONS } from './data/missions';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
 import { ENEMIES, ENEMY_SKILLS } from './data/enemies';
@@ -58,6 +59,7 @@ export function buildSeedContent(): SeedContent[] {
     shop: SHOPS.map((data) => ({ key: data.key, data })),
     mastery: MASTERIES.map((data) => ({ key: data.key, data })),
     quest: QUESTS.map((data) => ({ key: data.key, data })),
+    mission: MISSIONS.map((data) => ({ key: data.key, data })),
     gameConfig: GAME_CONFIG.map((data) => ({ key: data.key, data })),
   };
 

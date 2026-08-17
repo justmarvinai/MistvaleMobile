@@ -387,6 +387,121 @@ describe.skipIf(!dbUp)('quests', () => {
     });
   });
 
+  describe('every daily is reachable', () => {
+    /**
+     * The test this suite was missing, and the reason it shipped broken.
+     *
+     * Everything above fabricates events and reports them straight to the fan-out, which
+     * proves the fan-out works and proves nothing at all about whether the *game* ever
+     * sends them. Four of the eight dailies asked for events no module emitted, so they
+     * could never complete — and the chest that needs all eight could never be opened.
+     *
+     * A checklist is a promise that the game will notice. This is the assertion that keeps
+     * it: every goal type the shipped quests ask for must be one some module reports.
+     */
+    it('asks only for events some module actually reports', () => {
+      // Kept by hand on purpose. Adding a goal type to a quest without wiring a `track`
+      // call should fail here loudly, rather than in a player's empty progress bar.
+      const REPORTED = new Set([
+        // battle/service.ts
+        'battleWin',
+        'stageClear',
+        'bossKill',
+        'dungeonClear',
+        'useEnergy',
+        'chapterStars',
+        // arena/ladder.ts
+        'arenaBattle',
+        'arenaWin',
+        'arenaTier',
+        // summon/service.ts
+        'summon',
+        'championObtained',
+        // roster/progression.ts
+        'championLevelUp',
+        'championRankUp',
+        'championAscend',
+        // gear/service.ts
+        'gearUpgrade',
+        'gearLevel',
+        // shop/service.ts
+        'shopPurchase',
+        // mastery/service.ts
+        'masteryLearn',
+        // meta/progress.ts appends it to every report
+        'accountLevel',
+        // meta/quests.ts, on the daily chest
+        'claimAllDailies',
+      ]);
+
+      const asked = new Set(
+        app.content.current().bundle.quests.flatMap((def) => def.goals.map((goal) => goal.type)),
+      );
+      const orphaned = [...asked].filter((type) => !REPORTED.has(type));
+      expect(orphaned, `no module reports: ${orphaned.join(', ')}`).toEqual([]);
+    });
+
+    it('completes a daily off the real summon endpoint', async () => {
+      // Not a fabricated event: an actual pull, through the actual route.
+      const def = app.content.current().bundle.quests.find((e) => e.key === 'daily_summon')!;
+      const pool = app.content.current().bundle.summonPools[0]!;
+      await app.db
+        .insert(playerItems)
+        .values({ playerId, itemKey: pool.sigilKey, quantity: 50 })
+        .onConflictDoUpdate({
+          target: [playerItems.playerId, playerItems.itemKey],
+          set: { quantity: 50 },
+        });
+
+      const target = def.goals[0]!.target;
+      for (let index = 0; index < target; index += 1) {
+        const response = await as({
+          method: 'POST',
+          url: apiPath(ROUTES.summon.pull(pool.key)),
+          payload: { count: 1, actionId: `real-pull-${index}` },
+        });
+        expect(response.statusCode, response.body).toBe(200);
+      }
+
+      expect(questIn(await read(), 'daily_summon').complete).toBe(true);
+      const claimed = await claim('daily_summon', 'real-summon-0001');
+      expect(claimed.statusCode, claimed.body).toBe(200);
+    });
+
+    it('completes a daily off the real Bazaar endpoint', async () => {
+      // Rich in both currencies before reading the stock: the Bazaar's window is rolled
+      // from a fresh seed every time, so which slots appear — and what they cost — differs
+      // per run. A test that assumed the first slot was affordable would pass most days.
+      await app.db
+        .update(players)
+        .set({ silver: 5_000_000, crystals: 100_000 })
+        .where(eq(players.id, playerId));
+
+      const stock = await as({ method: 'GET', url: apiPath(ROUTES.shop.stock('bazaar')) });
+      expect(stock.statusCode, stock.body).toBe(200);
+      const slots = stock.json().data.stock.slots as {
+        index: number;
+        purchased: boolean;
+        slotLocked: boolean;
+        unavailableReason: string | null;
+      }[];
+
+      const buyable = slots.find(
+        (slot) => !slot.purchased && !slot.slotLocked && slot.unavailableReason === null,
+      );
+      expect(buyable, 'the Bazaar offered nothing buyable').toBeDefined();
+
+      const bought = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.shop.buy('bazaar')),
+        payload: { slotIndex: buyable!.index, actionId: 'real-buy-0001' },
+      });
+      expect(bought.statusCode, bought.body).toBe(200);
+
+      expect(questIn(await read(), 'daily_bazaar').complete).toBe(true);
+    });
+  });
+
   describe('the day’s first win', () => {
     it('pays once per mode per day', async () => {
       const bonus = questConfigFrom(app.content.current().bundle.config).firstWins.campaign!;

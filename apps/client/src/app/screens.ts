@@ -20,6 +20,7 @@ export type ScreenId =
   | 'chronicle'
   | 'bazaar'
   | 'quests'
+  | 'missions'
   | 'events'
   | 'settings'
   | 'battle';
@@ -83,6 +84,14 @@ export const SCREENS: readonly ScreenDefinition[] = [
     id: 'quests',
     label: 'Quests',
     glyph: '✦',
+    unlock: 'quests',
+    lockedHint: 'Opens at level 4',
+    inDock: true,
+  },
+  {
+    id: 'missions',
+    label: 'Missions',
+    glyph: '⇗',
     unlock: 'quests',
     lockedHint: 'Opens at level 4',
     inDock: true,

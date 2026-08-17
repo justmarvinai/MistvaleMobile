@@ -21,6 +21,9 @@ import type {
   Depths,
   MultiBattleRequest,
   MultiBattleResult,
+  MissionClaimRequest,
+  MissionClaimResult,
+  MissionsView,
   Progress,
   QuestChestClaimRequest,
   QuestClaimRequest,
@@ -291,6 +294,16 @@ export const gameApi = {
       period,
       actionId,
     } satisfies QuestChestClaimRequest),
+
+  // ── The Valewarden's Path ─────────────────────────────────────────────────
+
+  missions: () =>
+    api.get<{ missions: MissionsView }>(ROUTES.missions.state).then((data) => data.missions),
+
+  claimMission: (missionKey: string, actionId: string) =>
+    api.post<MissionClaimResult>(ROUTES.missions.claim(missionKey), {
+      actionId,
+    } satisfies MissionClaimRequest),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

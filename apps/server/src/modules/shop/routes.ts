@@ -52,7 +52,7 @@ export const shopRoutes: FastifyPluginAsync = async (app) => {
     const { key } = request.params as { key: string };
     const body = buyShopSlotRequestSchema.parse(request.body);
 
-    const result = await shop.buy(app.db, playerId, body.slotIndex, context(key));
+    const result = await shop.buy(app.db, playerId, body.slotIndex, context(key), app.content);
     request.log.info({ playerId, shopKey: key, slot: body.slotIndex }, 'shop purchase');
     return reply.send(apiSuccess(result, app.content.rev));
   });

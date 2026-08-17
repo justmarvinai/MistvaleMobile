@@ -4,8 +4,10 @@ import { createRng, type Rng } from '@mistvale/engine';
 import type { ChampionDef, ShopDef, ShopOffer, ShopSlot, ShopStock } from '@mistvale/shared';
 import { gearInstances, players, shopStates } from '../../db/schema/index';
 import type { Database } from '../../db/client';
+import type { ContentCache } from '../../content/cache';
 import type { ShopStateRow } from '../../db/schema/inventory';
 import { AppError } from '../../lib/errors';
+import { track } from '../meta/progress';
 import { grant, grantItems } from '../rewards/service';
 import { createGear, rollBand, toDto, type GearContext } from '../gear/service';
 import { grantChampion } from '../roster/service';
@@ -318,6 +320,7 @@ export async function buy(
   playerId: string,
   slotIndex: number,
   context: ShopContext,
+  content: ContentCache,
   now: Date = new Date(),
 ): Promise<PurchaseOutcome> {
   const { row, granted } = await db.transaction(async (tx) => {
@@ -409,6 +412,12 @@ export async function buy(
       .where(eq(shopStates.id, state.id))
       .returning();
     if (!updated) throw new AppError('INTERNAL', 'The purchase could not be recorded.');
+
+    // Which shop rides along, so a daily can ask for the Bazaar specifically rather than
+    // being satisfied by a crystal-shop energy refill.
+    await track(tx, { content }, playerId, [
+      { type: 'shopPurchase', facts: { shopKey: context.def.key } },
+    ]);
 
     return { row: updated, granted: result };
   });

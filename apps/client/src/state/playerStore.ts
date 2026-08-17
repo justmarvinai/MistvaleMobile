@@ -22,6 +22,8 @@ interface PlayerSnapshot {
   account: AccountSummary;
   player: PlayerSummary;
   unlocks: UnlockFlags;
+  /** The honorific the Valewarden's Path awarded, if any. */
+  title: string | null;
   multiBattle: MultiBattleState;
   badges: DockBadges;
   settings: PlayerSettings;
@@ -34,9 +36,10 @@ interface PlayerSnapshot {
  */
 export interface DockBadges {
   quests: number;
+  missions: number;
 }
 
-const NO_BADGES: DockBadges = Object.freeze({ quests: 0 });
+const NO_BADGES: DockBadges = Object.freeze({ quests: 0, missions: 0 });
 
 /** Until the first snapshot lands, the farming control is drawn shut rather than guessed at. */
 const NO_MULTI_BATTLE: MultiBattleState = Object.freeze({
@@ -50,6 +53,8 @@ const NO_MULTI_BATTLE: MultiBattleState = Object.freeze({
 interface PlayerState {
   player: PlayerSummary | null;
   unlocks: UnlockFlags;
+  /** The honorific shown beside the profile name. */
+  title: string | null;
   /** Today's farming allowance, server-computed like every other gate. */
   multiBattle: MultiBattleState;
   /** What is waiting to be collected, per dock destination. */
@@ -67,6 +72,7 @@ interface PlayerState {
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   player: null,
   unlocks: computeUnlocks(1),
+  title: null,
   multiBattle: NO_MULTI_BATTLE,
   badges: NO_BADGES,
   settings: DEFAULT_PLAYER_SETTINGS,
@@ -85,6 +91,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       set({
         player: snapshot.player,
         unlocks: snapshot.unlocks,
+        title: snapshot.title ?? null,
         multiBattle: snapshot.multiBattle ?? NO_MULTI_BATTLE,
         badges: snapshot.badges ?? NO_BADGES,
         settings: { ...DEFAULT_PLAYER_SETTINGS, ...snapshot.settings },
@@ -122,6 +129,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set({
       player: null,
       unlocks: computeUnlocks(1),
+      title: null,
       multiBattle: NO_MULTI_BATTLE,
       badges: NO_BADGES,
       settings: DEFAULT_PLAYER_SETTINGS,

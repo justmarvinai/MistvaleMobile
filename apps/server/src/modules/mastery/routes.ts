@@ -50,6 +50,7 @@ export const masteryRoutes: FastifyPluginAsync = async (app) => {
         nodeKey: body.nodeKey,
         nodes: context.masteryNodes,
         costs: context.masteryCosts,
+        content: app.content,
       });
 
       return championView.loadDetail(tx, playerId, id, context);

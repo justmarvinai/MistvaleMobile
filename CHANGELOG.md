@@ -5,6 +5,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the Valewarden's Path (P8c)
+
+Eighty missions in ten arcs of eight, from the first battle in the Vale to the Coilmother's court. The chain is a *teacher*: each arc introduces one system and then asks the player to use it properly, so somebody who follows the Path never meets a wall they have no tool for.
+
+- **Arcs open in order; the eight inside one are open together.** Strictly sequential would be a wall the day somebody cannot do step 43, and an entirely open list of eighty would not be a path.
+- **Progress accrues on every arc, whatever is open.** Clearing two hundred Depths floors while arc 4 is in front of you leaves arc 8's "clear one hundred" already done — the floors happened, and a chain that pretended otherwise would punish playing well. The arc gate decides what you may *claim*, and nothing else.
+- **The end of the chain hands over Aureleth, Voice of the Vale** — an exclusive Legendary the Mistgate will never roll, so eighty steps is the only way she exists — and the title **"Warden of the Reclamation"**, shown beside the profile name. The grant happens inside the claim's transaction: a claim that paid the crystals and lost the champion would be the worst bug in the game.
+- **Publish validation covers the chain's own failure modes**: a goal filtered on a keep that was renamed, a reward naming a deleted item, a granted champion that no longer exists, two steps numbered the same, and a *gap* in the arc numbering — which would silently strand every arc past it.
+
+### Fixed — four of the eight dailies could never be completed
+
+Shipped broken in P8b, and my own tests hid it. They fabricated events and reported them straight to the goal engine, which proved the engine worked and proved nothing about whether the game ever sends anything. Four dailies — summon three champions, level a champion three times, four relic upgrade attempts, one Bazaar purchase — asked for events **no module emitted**. They could never complete, and the daily chest that needs all eight could never be opened.
+
+Every remaining reporter is now wired: the Mistgate reports pulls and the champions they produced, the roster reports levels, ranks and ascensions, the forge reports attempts and the level reached, the Bazaar reports purchases, and the mastery trees report nodes learned. Account level and chapter stars are reported as *thresholds* — a goal asking to "reach level 20" is satisfied by the standing rather than by having watched the level arrive.
+
+Two guards so it cannot happen again: a test asserting that **no shipped quest asks for an event nothing reports**, and two tests that complete a daily through the real endpoints rather than through a fabricated event.
+
+### Fixed — a flaky Bazaar test
+
+The one intermittent failure flagged during P8b, found and fixed. The Bazaar's window is rolled from a fresh seed each time, so which slots appear and what they cost differs per run; the test bought slot zero and assumed it was affordable. It now picks a slot the server says is actually buyable.
+
 ### Added — quests (P8b)
 
 The checklist is playable: eight dailies, six weeklies, five monthlies, a chest for finishing the day, and a bonus for the day's first win in each mode.

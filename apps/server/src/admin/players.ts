@@ -16,8 +16,12 @@ import {
   economyLog,
   gearInstances,
   hallOfValor,
+  loginClaims,
   playerChampions,
+  playerEvents,
   playerItems,
+  playerMissions,
+  playerQuests,
   players,
   sessions,
   shopStates,
@@ -557,6 +561,12 @@ export async function resetAccount(
       .returning({ id: summonHistory.id });
 
     await tx.delete(chapterRewards).where(eq(chapterRewards.playerId, playerId));
+    // The retention layer, all of it: a fresh start that kept yesterday's dailies and an
+    // eighty-step chain half-walked would not be a fresh start.
+    await tx.delete(playerQuests).where(eq(playerQuests.playerId, playerId));
+    await tx.delete(playerMissions).where(eq(playerMissions.playerId, playerId));
+    await tx.delete(playerEvents).where(eq(playerEvents.playerId, playerId));
+    await tx.delete(loginClaims).where(eq(loginClaims.playerId, playerId));
     await tx.delete(championSightings).where(eq(championSightings.playerId, playerId));
     await tx.delete(shopStates).where(eq(shopStates.playerId, playerId));
     await tx.delete(hallOfValor).where(eq(hallOfValor.playerId, playerId));
@@ -597,6 +607,11 @@ export async function resetAccount(
         lastMultiBattle: null,
         dailyCounters: {},
         dailyCountersDay: null,
+        chestClaims: {},
+        // The title came from the last step of the Path, and the Path has just been
+        // un-walked. Keeping it would be an honorific for something that no longer
+        // happened.
+        title: null,
         lastDailyResetAt: null,
         updatedAt: new Date(),
       })

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance, InjectOptions } from 'fastify';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import {
   ROUTES,
   apiPath,
@@ -30,6 +30,7 @@ import {
   uniqueProfileName,
 } from '../../test/harness';
 import * as battle from '../battle/service';
+import { questConfigFrom } from '../meta/quests';
 import { weekKey, weeklyReset } from './ladder';
 import { arenaConfigFrom } from './rating';
 import * as arena from './service';
@@ -310,17 +311,25 @@ describe.skipIf(!dbUp)('the Arena', () => {
         .select({ valorMedals: players.valorMedals })
         .from(players)
         .where(eq(players.id, attacker.playerId));
-      const paid = await app.db
+      const rows = await app.db
         .select({ source: economyLog.source })
         .from(economyLog)
-        .where(and(eq(economyLog.playerId, attacker.playerId), eq(economyLog.source, 'arena:win')));
+        .where(eq(economyLog.playerId, attacker.playerId));
+      const paid = rows.filter((row) => row.source === 'arena:win');
 
       if (won) {
-        expect(player!.valorMedals).toBe(before.medalsPerWin);
+        // The win's own medals, plus the day's first-win bonus for the Arena — two
+        // separate sources on purpose, since one is the ladder paying and the other is a
+        // daily reward that happened to land on this fight (`quests.firstWinBonuses` ⚙).
+        const firstWin = questConfigFrom(app.content.current().bundle.config).firstWins.arena;
+        expect(player!.valorMedals).toBe(before.medalsPerWin + (firstWin?.valorMedals ?? 0));
         expect(paid).toHaveLength(1);
+        expect(rows.filter((row) => row.source === 'quest:firstWin:arena')).toHaveLength(1);
       } else {
+        // A loss pays neither: the bonus is for *winning*, unlike the rating.
         expect(player!.valorMedals).toBe(0);
         expect(paid).toHaveLength(0);
+        expect(rows.some((row) => row.source === 'quest:firstWin:arena')).toBe(false);
       }
     });
 

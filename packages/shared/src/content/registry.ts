@@ -13,6 +13,7 @@ import {
   itemDefSchema,
   shopDefSchema,
   skillDefSchema,
+  missionDefSchema,
   questDefSchema,
   summonPoolDefSchema,
   stageDefSchema,
@@ -46,6 +47,7 @@ export const CONTENT_TYPES = [
   'shop',
   'mastery',
   'quest',
+  'mission',
   'gameConfig',
 ] as const;
 
@@ -180,6 +182,14 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: [],
     inBundle: true,
   },
+  mission: {
+    label: 'Missions',
+    path: 'missions',
+    schema: missionDefSchema,
+    // The finale hands over a champion, so a mission can point at one.
+    references: ['champion'],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -208,6 +218,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'shop',
   'mastery',
   'quest',
+  'mission',
   'gameConfig',
 ];
 

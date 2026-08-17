@@ -700,3 +700,45 @@ export const questDefSchema = contentMetaSchema.extend({
   active: z.boolean().default(true),
 });
 export type QuestDef = z.infer<typeof questDefSchema>;
+
+/**
+ * A step on the Valewarden's Path.
+ *
+ * Missions are the game teaching itself: "3★ chapter 2", "reach Silver in the Arena",
+ * "take a relic to +12" are lessons wearing the clothes of goals. They are permanent and
+ * ordered where quests are periodic and interchangeable, which is why they need their own
+ * type rather than a `period: 'once'` on a quest — a quest's whole shape is built around an
+ * instance that expires, and a mission has no instance and never expires.
+ *
+ * Grouped into **arcs of eight**. Every mission in the open arc is available at once and
+ * completable in any order, and the next arc opens when this one is finished. Strictly
+ * sequential would be a wall the day a player cannot do step 43; an entirely open list
+ * would not be a path.
+ */
+export const missionGrantSchema = z.object({
+  /**
+   * Champions handed over outright. This is how the exclusive Legendary at the end of the
+   * chain is delivered — she is unsummonable, so the Path is the only way she exists.
+   */
+  champions: z.array(z.string()).max(4).default([]),
+  /** An honorific the account may then display. Empty for all but a handful of steps. */
+  title: z.string().max(48).default(''),
+});
+export type MissionGrant = z.infer<typeof missionGrantSchema>;
+
+export const missionDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(64),
+  description: z.string().max(240).default(''),
+  /** Which arc this belongs to, 1-based. Arcs open in order. */
+  arc: z.number().int().min(1).max(50),
+  /** Where it sits inside its arc, for display order. */
+  step: z.number().int().min(1).max(50),
+  /** The arc's name, repeated on each of its missions so an arc needs no second type. */
+  arcName: z.string().min(1).max(64),
+  goals: z.array(goalSchema).min(1).max(4),
+  rewards: z.record(z.string(), z.number()).default({}),
+  grants: missionGrantSchema.default({ champions: [], title: '' }),
+  icon: z.string().max(64).default(''),
+  active: z.boolean().default(true),
+});
+export type MissionDef = z.infer<typeof missionDefSchema>;

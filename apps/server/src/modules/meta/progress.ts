@@ -4,9 +4,10 @@ import {
   goalMatches,
   type Goal,
   type GoalEvent,
+  type MissionDef,
   type QuestDef,
 } from '@mistvale/shared';
-import { playerQuests, players } from '../../db/schema/index';
+import { playerMissions, playerQuests, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import type { ContentCache } from '../../content/cache';
 import { gameDayFrom } from '../../lib/game-day';
@@ -26,9 +27,10 @@ import { gameDayFrom } from '../../lib/game-day';
  * reverse — a battle paid for without its quest credit — is the same bug wearing a
  * different hat.
  *
- * Missions and events subscribe here too, in P8c and P8d. They are deliberately absent
- * rather than stubbed: an empty subscriber that does nothing is a thing to maintain and a
- * thing to misread.
+ * Two listeners today — the periodic checklist and the Valewarden's Path — and they share
+ * everything but the table they write to. Events join in P8d as a third. The reporting
+ * modules did not change to gain the second listener, which is the property this whole
+ * design exists to buy.
  */
 
 /**
@@ -79,9 +81,19 @@ export function activeQuests(
     .map((def) => ({ def, anchor: periodAnchor(def.period, bundle.config, now) }));
 }
 
-/** Whether every goal in a definition is at or past its target. */
+/** Whether every goal in a list is at or past its target. */
+export function goalsMet(goals: readonly Goal[], progress: readonly number[]): boolean {
+  return goals.every((goal, index) => (progress[index] ?? 0) >= goal.target);
+}
+
+/** Whether a quest is finished. The same test, named for its caller. */
 export function questComplete(def: QuestDef, progress: readonly number[]): boolean {
-  return def.goals.every((goal, index) => (progress[index] ?? 0) >= goal.target);
+  return goalsMet(def.goals, progress);
+}
+
+/** Whether a mission is finished. */
+export function missionComplete(def: MissionDef, progress: readonly number[]): boolean {
+  return goalsMet(def.goals, progress);
 }
 
 /**
@@ -115,9 +127,29 @@ export async function track(
   const level = await lockAndReadLevel(tx, playerId);
   if (level === null) return;
 
+  // The account level is not an *action*, so nothing reports it — but goals ask for it
+  // ("reach level 20"), and a threshold goal is satisfied by the state rather than by the
+  // change. Appending it to every report is what makes "reach level 20" complete on the
+  // next thing the player does after levelling, rather than needing a level-up to be
+  // spotted and forwarded from the four places XP is granted.
+  const reports: GoalEvent[] = [...events, { type: 'accountLevel', amount: level }];
+
+  await advanceQuests(tx, ctx, playerId, reports, level, now);
+  await advanceMissions(tx, ctx, playerId, reports, now);
+}
+
+/** Today's quest instances, advanced. */
+async function advanceQuests(
+  tx: Executor,
+  ctx: ProgressContext,
+  playerId: string,
+  reports: readonly GoalEvent[],
+  level: number,
+  now: Date,
+): Promise<void> {
   // Which quests could possibly care. Decided in memory, before touching the database.
   const interested = activeQuests(ctx, level, now).filter(({ def }) =>
-    def.goals.some((goal) => events.some((event) => goalMatches(goal, event))),
+    def.goals.some((goal) => reports.some((event) => goalMatches(goal, event))),
   );
   if (interested.length === 0) return;
 
@@ -142,10 +174,10 @@ export async function track(
     if (existing?.claimedAt) continue;
 
     const before: number[] = def.goals.map((_, index) => existing?.progress[index] ?? 0);
-    const after = def.goals.map((goal, index) => applyEvents(goal, before[index] ?? 0, events));
+    const after = def.goals.map((goal, index) => applyEvents(goal, before[index] ?? 0, reports));
     if (after.every((value, index) => value === before[index]) && existing) continue;
 
-    const complete = questComplete(def, after);
+    const complete = goalsMet(def.goals, after);
     const completedAt = complete ? (existing?.completedAt ?? now) : null;
 
     if (existing) {
@@ -169,6 +201,78 @@ export async function track(
         })
         .onConflictDoUpdate({
           target: [playerQuests.playerId, playerQuests.questKey, playerQuests.periodAnchor],
+          set: { progress: after, completedAt, updatedAt: now },
+        });
+    }
+  }
+}
+
+/**
+ * The Valewarden's Path, advanced.
+ *
+ * **Every active mission accrues, whatever arc it is in.** The arc gate decides what a
+ * player may *claim* and what the screen shows them next; it deliberately does not decide
+ * what counts. A player who clears two hundred Depths floors while arc 4 is open should
+ * not restart arc 8's "clear one hundred" from zero — the floors happened, and a chain
+ * that pretended otherwise would be punishing the player for playing well.
+ *
+ * The cost of that is bounded by the cap: a mission at its target computes the same
+ * progress it already holds, so it writes nothing. Steady state is one write per mission
+ * genuinely in flight, not one per mission in the game.
+ */
+async function advanceMissions(
+  tx: Executor,
+  ctx: ProgressContext,
+  playerId: string,
+  reports: readonly GoalEvent[],
+  now: Date,
+): Promise<void> {
+  const interested = ctx.content
+    .current()
+    .bundle.missions.filter(
+      (def) =>
+        def.active && def.goals.some((goal) => reports.some((event) => goalMatches(goal, event))),
+    );
+  if (interested.length === 0) return;
+
+  const rows = await tx
+    .select()
+    .from(playerMissions)
+    .where(
+      and(
+        eq(playerMissions.playerId, playerId),
+        inArray(
+          playerMissions.missionKey,
+          interested.map((def) => def.key),
+        ),
+      ),
+    );
+  const held = new Map(rows.map((row) => [row.missionKey, row]));
+
+  for (const def of interested) {
+    const existing = held.get(def.key);
+    // Claimed is finished: a mission is walked once, and there is no next instance to
+    // bank progress against.
+    if (existing?.claimedAt) continue;
+
+    const before: number[] = def.goals.map((_, index) => existing?.progress[index] ?? 0);
+    const after = def.goals.map((goal, index) => applyEvents(goal, before[index] ?? 0, reports));
+    if (after.every((value, index) => value === before[index]) && existing) continue;
+
+    const complete = goalsMet(def.goals, after);
+    const completedAt = complete ? (existing?.completedAt ?? now) : null;
+
+    if (existing) {
+      await tx
+        .update(playerMissions)
+        .set({ progress: after, completedAt, updatedAt: now })
+        .where(eq(playerMissions.id, existing.id));
+    } else {
+      await tx
+        .insert(playerMissions)
+        .values({ playerId, missionKey: def.key, progress: after, completedAt })
+        .onConflictDoUpdate({
+          target: [playerMissions.playerId, playerMissions.missionKey],
           set: { progress: after, completedAt, updatedAt: now },
         });
     }

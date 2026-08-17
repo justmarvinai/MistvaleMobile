@@ -56,6 +56,7 @@ const EMPTY_BUNDLE_TYPES = {
   shops: 'shop',
   masteries: 'mastery',
   quests: 'quest',
+  missions: 'mission',
 } as const satisfies Record<string, ContentType>;
 
 export class ContentCache {

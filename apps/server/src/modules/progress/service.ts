@@ -116,6 +116,11 @@ export interface ClearOutcome {
   bonus: Record<string, number>;
   /** Star-chest tiers this clear unlocked, if any. */
   chestTiers: number[];
+  /**
+   * Stars held across the whole chapter after this clear — every difficulty totalled, the
+   * way the campaign map counts them. `0` outside the campaign.
+   */
+  chapterStars: number;
 }
 
 /**
@@ -167,13 +172,17 @@ export async function recordClear(
   const bonus: Record<string, number> = {};
   if (firstClear) mergeRewards(bonus, stage.firstClearRewards);
 
-  const chestTiers = await claimStarChests(tx, playerId, stage, content, bonus);
+  // Totalled once and used twice: the chest tiers are cut against it, and the goal engine
+  // is told the standing so a mission asking for "3★ chapter 2" is satisfied by the total
+  // rather than by having watched every star arrive.
+  const chapterTotal = await starsInChapterOf(tx, playerId, stage, content);
+  const chestTiers = await claimStarChests(tx, playerId, stage, content, bonus, chapterTotal);
 
   if (Object.keys(bonus).length > 0) {
     await payRewards(tx, playerId, bonus, `progress:${stage.key}`, knownItem(content));
   }
 
-  return { stars: row.stars, firstClear, bonus, chestTiers };
+  return { stars: row.stars, firstClear, bonus, chestTiers, chapterStars: chapterTotal };
 }
 
 /**
@@ -183,36 +192,51 @@ export async function recordClear(
  * player who three-stars a chapter, then has content re-tuned under them, must not be
  * offered the same chest again.
  */
+/**
+ * Stars held across every difficulty of a stage's chapter.
+ *
+ * Totalled the way the campaign map totals them, so a chest tier and a mission goal both
+ * mean what the map says they mean. `0` outside the campaign — the Depths has no chapters.
+ */
+async function starsInChapterOf(
+  tx: Parameters<Parameters<Database['transaction']>[0]>[0],
+  playerId: string,
+  stage: StageDef,
+  content: ContentCache,
+): Promise<number> {
+  if (stage.mode !== 'campaign') return 0;
+
+  const chapterStages = content
+    .current()
+    .bundle.stages.filter(
+      (entry) => entry.mode === 'campaign' && entry.parentKey === stage.parentKey,
+    )
+    .map((entry) => entry.key);
+  if (chapterStages.length === 0) return 0;
+
+  const [{ total } = { total: 0 }] = await tx
+    .select({ total: sql<number>`coalesce(sum(${stageProgress.stars}), 0)::int` })
+    .from(stageProgress)
+    .where(
+      and(eq(stageProgress.playerId, playerId), inArray(stageProgress.stageKey, chapterStages)),
+    );
+  return total;
+}
+
 async function claimStarChests(
   tx: Parameters<Parameters<Database['transaction']>[0]>[0],
   playerId: string,
   stage: StageDef,
   content: ContentCache,
   bonus: Record<string, number>,
+  total: number,
 ): Promise<number[]> {
   if (stage.mode !== 'campaign') return [];
 
-  const bundle = content.current().bundle;
-  const chapter: CampaignChapterDef | undefined = bundle.campaignChapters.find(
-    (entry) => entry.key === stage.parentKey,
-  );
+  const chapter: CampaignChapterDef | undefined = content
+    .current()
+    .bundle.campaignChapters.find((entry) => entry.key === stage.parentKey);
   if (!chapter || chapter.starRewards.length === 0) return [];
-
-  // Stars across every difficulty of the chapter — the campaign map totals them the
-  // same way, so a chest tier means what the map says it means.
-  const chapterStages = bundle.stages
-    .filter((entry) => entry.mode === 'campaign' && entry.parentKey === chapter.key)
-    .map((entry) => entry.key);
-
-  const [{ total } = { total: 0 }] = await tx
-    .select({ total: sql<number>`coalesce(sum(${stageProgress.stars}), 0)::int` })
-    .from(stageProgress)
-    .where(
-      and(
-        eq(stageProgress.playerId, playerId),
-        inArray(stageProgress.stageKey, chapterStages.length > 0 ? chapterStages : ['']),
-      ),
-    );
 
   const [claimRow] = await tx
     .select()

@@ -258,42 +258,94 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     });
   }
 
+  /**
+   * Goals that name content have to resolve, for the same reason rewards do.
+   *
+   * "Clear fifteen floors of Wyrm's Hollow" quietly becomes uncompletable the day the keep
+   * is renamed, and a goal nobody can finish is worse than one nobody was offered. Shared
+   * between quests and missions because they are the same DSL, and a check that covered
+   * only one of them would be a check that misses the eighty-step chain.
+   */
+  const goalReferences = (
+    contentType: ContentType,
+    key: string,
+    goals: readonly { filters: Record<string, string | number> }[],
+  ): void => {
+    const FILTER_TARGETS: Readonly<Record<string, ContentType>> = {
+      stageKey: 'stage',
+      dungeonKey: 'dungeon',
+      chapterKey: 'campaignChapter',
+    };
+    goals.forEach((goal, index) => {
+      for (const [filter, target] of Object.entries(FILTER_TARGETS)) {
+        const value = goal.filters[filter];
+        if (typeof value === 'string') {
+          reference({ contentType, key, path: `goals.${index}.filters.${filter}` }, target, value);
+        }
+      }
+    });
+  };
+
   for (const [key, entity] of parsed.get('quest') ?? []) {
     const quest = entity as {
       rewards?: Record<string, number>;
       goals: { type: string; filters: Record<string, string | number> }[];
     };
     rewardMap({ contentType: 'quest', key, path: 'rewards' }, quest.rewards);
+    goalReferences('quest', key, quest.goals);
+  }
 
-    // A goal that names content directly has to resolve, for the same reason a reward does:
-    // "clear 15 floors of Emberkeep" quietly becomes uncompletable the day Emberkeep is
-    // renamed, and a quest nobody can finish is worse than one nobody was offered.
-    quest.goals.forEach((goal, index) => {
-      const stageKey = goal.filters.stageKey;
-      if (typeof stageKey === 'string') {
-        reference(
-          { contentType: 'quest', key, path: `goals.${index}.filters.stageKey` },
-          'stage',
-          stageKey,
-        );
-      }
-      const dungeonKey = goal.filters.dungeonKey;
-      if (typeof dungeonKey === 'string') {
-        reference(
-          { contentType: 'quest', key, path: `goals.${index}.filters.dungeonKey` },
-          'dungeon',
-          dungeonKey,
-        );
-      }
-      const chapterKey = goal.filters.chapterKey;
-      if (typeof chapterKey === 'string') {
-        reference(
-          { contentType: 'quest', key, path: `goals.${index}.filters.chapterKey` },
-          'campaignChapter',
-          chapterKey,
-        );
-      }
+  const missionArcs = new Map<number, Set<number>>();
+  for (const [key, entity] of parsed.get('mission') ?? []) {
+    const mission = entity as {
+      arc: number;
+      step: number;
+      rewards?: Record<string, number>;
+      grants?: { champions?: string[] };
+      goals: { type: string; filters: Record<string, string | number> }[];
+    };
+    rewardMap({ contentType: 'mission', key, path: 'rewards' }, mission.rewards);
+    goalReferences('mission', key, mission.goals);
+
+    // The finale hands over a champion who cannot be summoned, so a dangling key here is
+    // the difference between an eighty-step chain paying its promised prize and paying
+    // nothing at all.
+    (mission.grants?.champions ?? []).forEach((championKey, index) => {
+      reference(
+        { contentType: 'mission', key, path: `grants.champions.${index}` },
+        'champion',
+        championKey,
+      );
     });
+
+    const steps = missionArcs.get(mission.arc) ?? new Set<number>();
+    if (steps.has(mission.step)) {
+      errors.push({
+        severity: 'error',
+        contentType: 'mission',
+        key,
+        path: 'step',
+        message: `Arc ${mission.arc} already has a step ${mission.step}.`,
+      });
+    }
+    steps.add(mission.step);
+    missionArcs.set(mission.arc, steps);
+  }
+
+  // An arc nobody can reach is a chain that stops. Arcs open in order, so a gap in the
+  // numbering strands every arc past it — silently, and only for players who get that far.
+  if (missionArcs.size > 0) {
+    const highest = Math.max(...missionArcs.keys());
+    for (let arc = 1; arc <= highest; arc += 1) {
+      if (missionArcs.has(arc)) continue;
+      errors.push({
+        severity: 'error',
+        contentType: 'mission',
+        key: `arc ${arc}`,
+        path: 'arc',
+        message: `No missions in arc ${arc}, so arcs ${arc + 1}–${highest} can never open.`,
+      });
+    }
   }
 
   // A tree needs enough nodes at each tier to satisfy the pick rules, or a player who

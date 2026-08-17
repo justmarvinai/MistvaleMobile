@@ -124,6 +124,12 @@ export const ROUTES = {
     /** The all-quests chest for a period, named in the body. */
     claimChest: '/quests/chest',
   },
+  missions: {
+    /** The whole Path: every arc, with the open one's steps and their progress. */
+    state: '/missions',
+    /** `/missions/:key/claim` — one finished step of the chain. */
+    claim: (key: string) => `/missions/${encodeURIComponent(key)}/claim`,
+  },
   battle: {
     start: '/battles/start',
     /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */

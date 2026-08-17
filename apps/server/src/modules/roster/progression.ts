@@ -8,10 +8,12 @@ import {
 } from '@mistvale/shared';
 import { gearInstances, playerChampions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
+import type { ContentCache } from '../../content/cache';
 import type { PlayerChampionRow } from '../../db/schema/game';
 import { AppError } from '../../lib/errors';
 import { championXpToNextLevel, grant, grantItems, itemQuantities } from '../rewards/service';
 import { levelCapForRank } from './service';
+import { track } from '../meta/progress';
 
 /**
  * The four ladders a champion climbs: level, rank, ascension and skills.
@@ -187,6 +189,7 @@ export async function levelUpWithFood(
   playerId: string,
   championId: string,
   foodIds: readonly string[],
+  content: ContentCache,
 ): Promise<LevelUpOutcome> {
   return db.transaction(async (tx) => {
     const champion = await lockChampion(tx, playerId, championId);
@@ -218,6 +221,13 @@ export async function levelUpWithFood(
     if (!updated) throw AppError.notFound('No such champion.');
 
     await consume(tx, food);
+
+    // Levels gained, not feeds performed: a daily asking for three level-ups means three
+    // levels, and one generous feed can be all three.
+    await track(tx, { content }, playerId, [
+      { type: 'championLevelUp', amount: level - champion.level },
+    ]);
+
     return {
       champion: updated,
       consumed: food.map((row) => row.id),
@@ -235,6 +245,7 @@ export async function rankUp(
   championId: string,
   foodIds: readonly string[],
   config: ProgressionConfig,
+  content: ContentCache,
 ): Promise<{ champion: PlayerChampionRow; consumed: string[] }> {
   return db.transaction(async (tx) => {
     const champion = await lockChampion(tx, playerId, championId);
@@ -272,6 +283,13 @@ export async function rankUp(
     if (!updated) throw AppError.notFound('No such champion.');
 
     await consume(tx, food);
+
+    // The rank *reached* rides along, so a mission can ask for a ★5 rather than for five
+    // rank-ups of anything.
+    await track(tx, { content }, playerId, [
+      { type: 'championRankUp', facts: { rank: updated.rank } },
+    ]);
+
     return { champion: updated, consumed: food.map((row) => row.id) };
   });
 }
@@ -284,6 +302,7 @@ export async function ascend(
   championId: string,
   def: Pick<ChampionDef, 'element' | 'rarity'>,
   config: ProgressionConfig,
+  content: ContentCache,
 ): Promise<PlayerChampionRow> {
   return db.transaction(async (tx) => {
     const champion = await lockChampion(tx, playerId, championId);
@@ -325,6 +344,8 @@ export async function ascend(
       .where(eq(playerChampions.id, championId))
       .returning();
     if (!updated) throw AppError.notFound('No such champion.');
+
+    await track(tx, { content }, playerId, [{ type: 'championAscend' }]);
     return updated;
   });
 }

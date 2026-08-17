@@ -13,9 +13,11 @@ import {
 } from '@mistvale/shared';
 import { gearInstances, playerChampions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
+import type { ContentCache } from '../../content/cache';
 import type { GearInstanceRow } from '../../db/schema/inventory';
 import { AppError } from '../../lib/errors';
 import { grant } from '../rewards/service';
+import { track } from '../meta/progress';
 import {
   applyUpgrade,
   assembleGearBonus,
@@ -423,6 +425,7 @@ export async function upgrade(
   times: number,
   context: GearContext,
   seed: number,
+  content: ContentCache,
 ): Promise<UpgradeOutcome> {
   return db.transaction(async (tx) => {
     const row = await ownedGear(tx, playerId, gearId, { lock: true });
@@ -496,6 +499,14 @@ export async function upgrade(
       .where(eq(gearInstances.id, gearId))
       .returning();
     if (!updated) throw AppError.notFound('No such relic.');
+
+    // The *attempt* is the activity, successful or not — a daily that punished bad luck
+    // would be a daily some days cannot be finished. The level reached is separate, and a
+    // high-water mark, so "+12 a relic" cannot be satisfied by twelve relics at +1.
+    await track(tx, { content }, playerId, [
+      { type: 'gearUpgrade', amount: attempts.length },
+      { type: 'gearLevel', amount: piece.level },
+    ]);
 
     return { gear: updated, attempts, silverSpent: spent, silver };
   });

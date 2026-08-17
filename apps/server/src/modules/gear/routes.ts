@@ -75,7 +75,13 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const { id } = request.params as { id: string };
     const body = levelUpRequestSchema.parse(request.body);
 
-    const result = await progression.levelUpWithFood(app.db, playerId, id, body.foodIds);
+    const result = await progression.levelUpWithFood(
+      app.db,
+      playerId,
+      id,
+      body.foodIds,
+      app.content,
+    );
     const detail = await champions.loadDetail(app.db, playerId, id, context());
     request.log.info(
       { playerId, championId: id, fed: result.consumed.length, xp: result.xpGained },
@@ -105,6 +111,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       id,
       body.foodIds,
       context().progression,
+      app.content,
     );
     const detail = await champions.loadDetail(app.db, playerId, id, context());
     request.log.info(
@@ -136,7 +143,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       .bundle.champions.find((entry) => entry.key === owned.championKey);
     if (!def) throw AppError.notFound('That champion is no longer published.');
 
-    await progression.ascend(app.db, playerId, id, def, ctx.progression);
+    await progression.ascend(app.db, playerId, id, def, ctx.progression, app.content);
     const detail = await champions.loadDetail(app.db, playerId, id, context());
     request.log.info({ playerId, championId: id }, 'champion ascended');
     return reply.send(
@@ -241,7 +248,15 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const body = upgradeGearRequestSchema.parse(request.body);
 
     const ctx = context();
-    const result = await gear.upgrade(app.db, playerId, id, body.times, ctx.gear, upgradeSeed());
+    const result = await gear.upgrade(
+      app.db,
+      playerId,
+      id,
+      body.times,
+      ctx.gear,
+      upgradeSeed(),
+      app.content,
+    );
     return reply.send(
       apiSuccess(
         {

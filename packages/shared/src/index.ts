@@ -12,6 +12,7 @@ export * from './mastery';
 export * from './battle';
 export * from './arena';
 export * from './quest';
+export * from './mission';
 export * from './admin';
 export * from './routes';
 export * from './content/index';
