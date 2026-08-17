@@ -491,6 +491,41 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Reset timezone',
     'Timezone the reset hour is interpreted in.',
   ),
+  entry(
+    'ops.retainBattleDays',
+    14,
+    'ops',
+    'Keep finished battles (days)',
+    'Resolved battles and the event logs they carry. Active battles are never pruned at any setting — somebody who left a fight open over a weekend comes back to it. Nothing a player sees depends on this: the prune is about disk.',
+  ),
+  entry(
+    'ops.retainMailDays',
+    30,
+    'ops',
+    'Keep expired mail (days)',
+    'How long an expired message stays in the database after it has already vanished from the inbox. Kept a while on purpose: “what did that compensation mail say” is asked after it is gone. Mail with no expiry is never pruned.',
+  ),
+  entry(
+    'ops.retainEconomyDays',
+    90,
+    'ops',
+    'Keep the economy log (days)',
+    'The audit trail behind the player inspector and the economy dashboards. Lower it on a box that is filling up; raise it before an investigation.',
+  ),
+  entry(
+    'ops.retainQuestDays',
+    90,
+    'ops',
+    'Keep quest instances (days)',
+    'One row per active quest per player per day, so this is the table that grows fastest. A period older than the longest quest period is dead weight — nothing reads it.',
+  ),
+  entry(
+    'ops.retainEventDays',
+    60,
+    'ops',
+    'Keep event scores (days)',
+    'A past occurrence’s points and claimed milestones. Dead once the claim grace closes; kept longer so a question about last month’s ladder can still be answered.',
+  ),
 
   // ── The Arena ─────────────────────────────────────────────────────────────
   entry(

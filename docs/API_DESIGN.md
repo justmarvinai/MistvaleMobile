@@ -20,7 +20,6 @@
 | GET `/player/starters` | The champions flagged `starter` in content — what a new account chooses between. |
 | POST `/player/starter` | `{championKey}` → grants the chosen starter. Idempotent: a player who already owns champions is left alone. |
 | PATCH `/player/settings` | Audio/gfx/preferences jsonb (schema-validated). |
-| GET `/profile/:profileName` | Public profile card (level, top champions, arena tier) — for arena opponent inspection. |
 
 ### Champions & gear
 | GET `/player/champions/:id` | One champion: assembled stats split into base and relic contribution, worn relics, skill levels, and what each ladder's next step costs. |
@@ -117,7 +116,7 @@ Keyed by **player** id, not account id — that is what `economy_log`, `stage_pr
 - **Players:** GET `/players?query=` (search), GET `/players/:id` (full inspect: roster, gear, resources, progress, economy_log tail, battle history), POST `/players/:id/grant` (RewardService — champions/items/currency/gear), POST `/players/:id/reset-password` (temp password + force-change), POST `/players/:id/set-rank` `{rank: player|gamemaster|admin}` (admin-only, audited, self-demotion blocked), POST `/players/:id/ban|unban`, DELETE guarded double-confirm. |
 | **Bots:** GET/POST/PUT `/bots`, POST `/bots/generate` `{count, ratingBand}`, POST `/bots/refresh-ladder`. |
 - **Mail:** POST `/mail/compose` `{target: player|all, title, body, attachments, expiresInDays}`.
-- **Ops:** GET `/health` (see ARCHITECTURE §10), GET `/stats/overview` (DAU-ish counters, economy totals, summon rarity actuals vs configured), GET `/battles/:id/log` (inspector), GET `/audit-log`, POST `/jobs/run/:name` (manually trigger daily reset etc. — guarded).
+- **Ops:** GET `/health` (see ARCHITECTURE §10), GET `/stats/overview` (DAU-ish counters, economy totals, summon rarity actuals vs configured), GET `/battles/:id/log` (inspector), GET `/audit-log`, GET `/jobs` + POST `/jobs/run/:name` — a **closed list of two** (`daily`, `weekly`) rather than a name that reaches anything callable, audited, for the operator who has just shortened a retention window or published content the bot ladder should pick up. Both jobs are safe to run late or twice.
 
 ## 3. Cross-cutting rules
 - **Errors:** closed enum (`AUTH_REQUIRED, FORBIDDEN, VALIDATION, NOT_FOUND, INSUFFICIENT_FUNDS, ENERGY_LOW, ROSTER_FULL, COOLDOWN, LOCKED_CONTENT, IDEMPOTENT_REPLAY, RATE_LIMITED, CONTENT_STALE, INTERNAL`). `CONTENT_STALE` tells the client to re-pull the bundle and retry once.

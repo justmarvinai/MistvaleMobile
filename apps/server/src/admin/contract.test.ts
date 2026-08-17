@@ -45,10 +45,15 @@ const dbUp = await isDatabaseAvailable();
  */
 function urlFor(endpoint: ApiEndpoint, key = 'testers'): string {
   const prefix = endpoint.surface === 'admin' ? ADMIN_API_PREFIX : API_PREFIX;
-  return `${prefix}${endpoint.path}`
-    .replace(':type', 'factions')
-    .replace(':key', key)
-    .replace(':id', targetPlayerId);
+  return (
+    `${prefix}${endpoint.path}`
+      .replace(':type', 'factions')
+      .replace(':key', key)
+      // The job runner takes a name from a closed list rather than an id; `daily` is the
+      // safe one to exercise — it prunes an empty fixture and rebuilds an empty ladder.
+      .replace(':name', 'daily')
+      .replace(':id', targetPlayerId)
+  );
 }
 
 /** The disposable account the player-management cases act on. */

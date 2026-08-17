@@ -243,6 +243,19 @@ export const ADMIN_ROUTES = {
     send: '/mail',
     log: '/mail/batches',
   },
+
+  /**
+   * Scheduled work, on demand.
+   *
+   * The jobs run themselves on a schedule; this is for the operator who has just changed a
+   * retention window, or published content the bot ladder should pick up, and does not want
+   * to wait until 04:00 to see it. Every one is written to be safe to run late or twice,
+   * which is what makes running it by hand safe at all.
+   */
+  jobs: {
+    list: '/jobs',
+    run: (name: string) => `/jobs/run/${encodeURIComponent(name)}`,
+  },
 } as const;
 
 /**

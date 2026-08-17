@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the nightly prune, and a button for it (P8i)
+
+The scheduled pass now clears what has gone stale. Worth saying plainly what it is *not*: **it resets nothing.**
+
+- **The job is about disk, never about state.** Energy, arena tokens, quest periods, event windows, mail expiry and the login calendar are all worked out against the clock when they are read, so a night the job does not run costs storage and nothing a player could notice. That is the design and not a happy accident — the moment something needs this job to have run, an hour of downtime becomes a bug report.
+- **What it clears:** finished battles with the event logs they carry, mail that expired a while ago, the economy trail past its window, and quest and event rows whose period is long gone. Quest instances are the volume — eight a day per active account, forever — so they are the reason this exists at all.
+- **What it must never clear, enforced rather than commented.** The login calendar's position *is* `count(*)` over its claim rows: a prune that swept them would walk every player backwards through the month, with no symptom that pointed at the prune. There is now a named list of protected tables and a test that runs the job at its most destructive legal setting and fails if any of them loses a row. An active battle is protected the same way — somebody who left a fight open over a weekend comes back to it.
+- **Every retention window is a config key**, so an operator on a filling box can shorten one without a deploy, and lengthen one before an investigation.
+- **An operator can run either job now** rather than waiting for 04:00 — useful right after changing a window or publishing content the bot ladder should pick up. It is a closed list of two, not a name that reaches anything callable, and every run is audited.
+
 ### Removed — battle replays and shareable battle-log links
 
 Dropped from the plan at the owner's request. It had been approved in the 2026-08-16 review as one of eight suggested additions and scheduled into P8; no part of it was built, so nothing is being taken away from anybody.

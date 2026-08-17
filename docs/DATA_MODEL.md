@@ -300,7 +300,7 @@ Points are added in SQL (`points + n`) rather than read-then-written — a score
 ### `login_claims`
 `player_id, track (calendar|welcome), day, claimed_on, claim_action_id`, unique on `(player_id, track, claimed_on)`. A row per claim rather than a counter: the calendar gives day N on the Nth *claim*, so a player who misses a day loses the day and not their place.
 
-The whole of a track's state is `count(*)` over these rows plus "was one of them today" — which cycle a player is on, which tile glows and whether it is spent all fall out of those two numbers. So there is nothing here for the daily reset to do, and no counter that can drift from the ledger that produced it. The unique index is what stops two tabs both taking day 7; `claim_action_id` is what lets a retried claim replay rather than fail.
+**`login_claims` is never pruned, at any setting**, and the nightly job has a test that fails if it ever is. The whole of a track's state is `count(*)` over these rows plus "was one of them today" — which cycle a player is on, which tile glows and whether it is spent all fall out of those two numbers. So there is nothing here for the daily reset to do, and no counter that can drift from the ledger that produced it. The unique index is what stops two tabs both taking day 7; `claim_action_id` is what lets a retried claim replay rather than fail.
 
 The `loginTrack` content type holds the days themselves — one entity per *track* (thirty tiles or seven), because a track is only ever read whole and "re-cut the calendar for August" should be one draft to review rather than thirty. A day carries a reward map, champions granted outright, champions the player picks *one* of (the day-30 selector), and relics to roll. Publish validation refuses gaps or duplicates in the day numbers, a second active track of the same kind, and any key that does not resolve.
 
@@ -321,7 +321,7 @@ There is no bot table. A bot is an ordinary `players` row with `is_bot` set, hol
 ### `battles` (active sessions + history header)
 `id uuid, player_id, mode, stage_key/arena ref, state enum(active|won|lost|retreat|expired), seed, content_rev, team jsonb, snapshot jsonb (latest engine state), action_count, energy_spent, rewards jsonb (granted on completion), action_id uuid (idempotency), created_at, resolved_at`
 ### `battle_logs`
-`battle_id fk, events jsonb (compressed event list)` — kept 14 days for players, longer for arena disputes; admin inspector reads these. Partitioned/pruned by cron.
+`battle_id fk, events jsonb (compressed event list)` — in practice the events live on the session row itself rather than in a second table, so a session and its log are pruned together. Kept `ops.retainBattleDays` (14 ⚙); an **active** session is never pruned at any setting, because a player who left a fight open over a weekend must come back to it. `arena_battles` outlives them on purpose — the ladder's history is what settles a dispute, and it is small.
 
 ### `summon_history`
 `player_id, pool_key, sigil_item_key, champion_key, rarity, pity_counters_after jsonb, created_at` — the pity state IS derivable but we cache counters on `players.summon_pity jsonb` for O(1) reads.
@@ -340,7 +340,7 @@ There is no bot table. A bot is an ordinary `players` row with `is_bot` set, hol
 `id, player_id, element, stat, level, updated_at` — unique on `(player_id, element, stat)`, level checked 0–10. A row per track rather than a jsonb map because a track is a *ledger*: it only ever goes up, one level at a time, each level bought with medals — and rows make that a constraint rather than a convention.
 
 ### `economy_log` (append-only audit of every grant/spend)
-`id, player_id, source (battle:c01_s3|summon|quest:...|admin:<name>|mail|shop), deltas jsonb, created_at` — powers Admin player inspector + economy dashboards. Pruned to 90 days.
+`id, player_id, source (battle:c01_s3|summon|quest:...|admin:<name>|mail|shop), deltas jsonb, created_at` — powers Admin player inspector + economy dashboards. Pruned to `ops.retainEconomyDays` (90 ⚙).
 
 ### `audit_log` (admin actions)
 `id, account_id (rank admin at time of action), action, entity, entity_id, before jsonb, after jsonb, created_at` — every Admin mutation, no exceptions (including rank changes).

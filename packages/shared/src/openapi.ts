@@ -506,6 +506,38 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       'game itself raised carry no batch and are not listed.',
     response: z.object({ batches: z.array(mailBatchSchema) }),
   },
+
+  // ── Admin: scheduled work, on demand ──────────────────────────────────────
+  {
+    surface: 'admin',
+    method: 'get',
+    path: ADMIN_ROUTES.jobs.list,
+    operationId: 'listJobs',
+    summary: 'The scheduled jobs an operator may run by hand',
+    description:
+      'A closed list of two. A generic "run this name" would be a remote-execution ' +
+      'surface with an admin cookie in front of it.',
+    response: z.object({
+      jobs: z.array(z.object({ name: z.string(), label: z.string(), description: z.string() })),
+    }),
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: routePattern(ADMIN_ROUTES.jobs.run, 'name'),
+    operationId: 'runJob',
+    summary: 'Run one now rather than waiting for its schedule',
+    description:
+      'For the operator who has just shortened a retention window, or published content ' +
+      'the bot ladder should pick up. Both jobs are written to be safe to run late or ' +
+      'twice, which is what makes offering a button safe. Audited.',
+    response: z.object({
+      job: z.string(),
+      durationMs: z.number().int(),
+      result: z.unknown().nullable(),
+    }),
+    errors: [404],
+  },
 ];
 
 // ── Document generation ─────────────────────────────────────────────────────

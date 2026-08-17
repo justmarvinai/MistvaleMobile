@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { deleteExpiredSessions } from '../modules/auth/repo';
 import { refreshLadder, yieldTopTen } from '../modules/arena/bots';
 import { weeklyReset } from '../modules/arena/ladder';
+import { pruneOldRows, pruneWindowsFrom, type PruneReport } from './prune';
 
 /**
  * Scheduled maintenance.
@@ -13,10 +14,15 @@ import { weeklyReset } from '../modules/arena/ladder';
  * remaining work (quests, event windows) attaches to the nightly pass in later phases.
  *
  * Almost nothing a player can see is *derived* from this job running. Energy, arena
- * tokens, the shop's window and every daily allowance are computed against the clock on
- * read, so an hour of downtime at the reset hour costs a bot refresh and nothing else.
- * The arena's weekly close is the one exception — it seals a chest and decays ratings, a
- * genuine state change — and it is written to be safe to run late or twice.
+ * tokens, quest periods, event windows, mail expiry, the login calendar and every daily
+ * allowance are computed against the clock on read, so an hour of downtime at the reset
+ * hour costs a bot refresh and some disk, and nothing else. The arena's weekly close is
+ * the one exception — it seals a chest and decays ratings, a genuine state change — and it
+ * is written to be safe to run late or twice.
+ *
+ * That property is the design, not an accident of it: "the daily reset job" resets nothing.
+ * It prunes what has gone stale and rebuilds the bot ladder. Anything that ever *needs* it
+ * to have run belongs on the read path instead.
  */
 export function startMaintenanceJobs(app: FastifyInstance): () => void {
   const { RESET_HOUR, RESET_TIMEZONE } = app.config;
@@ -47,7 +53,18 @@ export function startMaintenanceJobs(app: FastifyInstance): () => void {
   };
 }
 
-async function runDailyMaintenance(app: FastifyInstance): Promise<void> {
+/**
+ * The nightly pass.
+ *
+ * Three independent pieces, each in its own `try`: a failure in one must not cost the other
+ * two a night. Exported so the Admin API can run it on demand — an operator who has just
+ * changed a retention window should not have to wait until 04:00 to see it take effect.
+ */
+export async function runDailyMaintenance(app: FastifyInstance): Promise<{
+  removedSessions: number;
+  ladder: { created: number; refreshed: number; removed: number };
+  pruned: PruneReport | null;
+}> {
   const startedAt = Date.now();
   let removedSessions = 0;
   try {
@@ -55,6 +72,15 @@ async function runDailyMaintenance(app: FastifyInstance): Promise<void> {
   } catch (error) {
     // A failed maintenance run must never take the server down with it.
     app.log.error({ err: error }, 'session pruning failed');
+  }
+
+  let pruned: PruneReport | null = null;
+  try {
+    // Disk, never correctness — see `prune.ts`. The windows come from `game_config`, so an
+    // operator on a filling box can shorten them without a deploy.
+    pruned = await pruneOldRows(app.db, pruneWindowsFrom(app.content.current().bundle.config));
+  } catch (error) {
+    app.log.error({ err: error }, 'row pruning failed');
   }
 
   let ladder = { created: 0, refreshed: 0, removed: 0 };
@@ -70,6 +96,7 @@ async function runDailyMaintenance(app: FastifyInstance): Promise<void> {
   app.log.info(
     {
       removedSessions,
+      pruned,
       botsRefreshed: ladder.refreshed,
       botsCreated: ladder.created,
       botsRemoved: ladder.removed,
@@ -77,6 +104,8 @@ async function runDailyMaintenance(app: FastifyInstance): Promise<void> {
     },
     'daily maintenance complete',
   );
+
+  return { removedSessions, ladder, pruned };
 }
 
 /**
@@ -87,7 +116,7 @@ async function runDailyMaintenance(app: FastifyInstance): Promise<void> {
  * belongs to people (GAME_DESIGN §13), and a board that only becomes fair after the
  * rewards are worked out would satisfy the letter of it and not the point.
  */
-async function runWeeklyMaintenance(app: FastifyInstance): Promise<void> {
+export async function runWeeklyMaintenance(app: FastifyInstance): Promise<void> {
   const startedAt = Date.now();
   const ctx = { db: app.db, content: app.content };
 

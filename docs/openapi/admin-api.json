@@ -3204,6 +3204,38 @@
         ],
         "additionalProperties": false
       },
+      "ListJobsResponse": {
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "label",
+                "description"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "jobs"
+        ],
+        "additionalProperties": false
+      },
       "LoginRequest": {
         "type": "object",
         "properties": {
@@ -5172,6 +5204,33 @@
         },
         "required": [
           "revoked"
+        ],
+        "additionalProperties": false
+      },
+      "RunJobResponse": {
+        "type": "object",
+        "properties": {
+          "job": {
+            "type": "string"
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "result": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "job",
+          "durationMs",
+          "result"
         ],
         "additionalProperties": false
       },
@@ -12652,6 +12711,299 @@
           }
         },
         "description": "One row per send rather than per message: after a compensation mail the question is whether players took it, which a thousand rows cannot answer. Messages the game itself raised carry no batch and are not listed.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/jobs": {
+      "get": {
+        "operationId": "listJobs",
+        "summary": "The scheduled jobs an operator may run by hand",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ListJobsResponse"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "A closed list of two. A generic \"run this name\" would be a remote-execution surface with an admin cookie in front of it.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/jobs/run/{name}": {
+      "post": {
+        "operationId": "runJob",
+        "summary": "Run one now rather than waiting for its schedule",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RunJobResponse"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such content type, entity or revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "For the operator who has just shortened a retention window, or published content the bot ladder should pick up. Both jobs are written to be safe to run late or twice, which is what makes offering a button safe. Audited.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "security": [
           {
             "sessionCookie": []

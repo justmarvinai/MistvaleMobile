@@ -153,6 +153,7 @@ MistvaleMobile/
 - Every mutating game action is **one Postgres transaction** with `SELECT … FOR UPDATE` on the player row (serializes a single player's actions — prevents double-spend from double-click/multi-tab, costs nothing at our scale).
 - Reward grants go through a single `RewardService.grant(tx, playerId, rewards[], source)` used by *every* system (battle, quest, mail, summon, admin grant) and always writes an `economy_log` row — one audit trail, one place to extend.
 - Idempotency: battle completion, summon, and purchase endpoints take a client-generated `actionId` (UUID); replays return the stored result instead of re-granting.
+- **The nightly job resets nothing.** Energy, arena tokens, quest periods, event windows, mail expiry, the login calendar and every daily allowance are derived against the clock on read, so the scheduled pass only *prunes* rows past their retention window and rebuilds the bot ladder. A missed run costs disk, never state — and anything that would ever need it to have run belongs on the read path instead. The one genuine state change is the arena's Monday close, which names the week it seals so running it late or twice closes it once.
 
 ### 5.4 Content cache & publish flow
 - `ContentCache` loads all `*_defs` tables at boot into typed, frozen in-memory structures (validated by the same Zod schemas the Admin API writes with — bad content cannot go live).
