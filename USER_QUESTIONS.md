@@ -4,7 +4,15 @@
 
 ## Open questions
 
-*None right now.* New questions will appear here (numbered, with defaults) as implementation raises them.
+**Q1. Where should a new account enter the Arena ladder?**
+It unlocks at account level 8 and starts everybody at rating **900**, which sits in the middle of Bronze — so a warden's first five opponents are mid-Bronze bots (champions around level 19 in rank-3 relics), not the weakest ones. Whether that is a fair first evening depends on what a real level-8 roster looks like, which nobody has measured yet: my own check used an artificially levelled account holding one un-geared starter, so it proves nothing either way.
+
+Three ways to go, all one config edit and no deploy:
+- **(a) Leave it at 900 〔recommended〕.** A level-8 account has had the welcome grant, ten Faded and three Gleaming sigils, and thirty-odd clears — probably a rank-2/3 team of three or four. Mid-Bronze is then a fair fight rather than a gift, and the Bronze loss floor means a bad run cannot strand anybody. Revisit with real numbers rather than guesses.
+- **(b) Start at 400** (`arena.startingRating`), the Bronze floor, so the first opponents are the weakest on the ladder and the first week is a climb. Costs a little of the ladder's meaning: everybody starts joint-last.
+- **(c) Soften the Bronze recipe** (`arena.botBands.bronze.championLevelMin/Max`), making the whole band easier rather than moving where players enter it.
+
+Not blocking: whichever way it goes is a number in the Game config editor. What P7 fixed is the thing that *was* structural — a band's bots are now built along a ramp, so a bot's rating predicts how hard it hits and the +13/+23 the hub shows is a real guide rather than decoration. **The honest next step is a `pnpm sim` arena gate** (a modelled level-8 roster against each band's floor), which G7 already schedules.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)

@@ -25,6 +25,7 @@ At Early Access there may be four real players, and an Arena whose offer list is
 - **A bot is an ordinary player row** with a flag, not a second table: matchmaking, the leaderboard, the engine and the settle path need no special case. Its account password is CSPRNG bytes hashed and discarded, so nobody can log into one.
 - **A bot is economically inert** — no balances, nothing through `RewardService`, no row in `economy_log`. A bot in the economy reports would make every faucet and sink number a lie, so it is pinned by a test rather than left to care.
 - **A bot is synthesised, never authored.** Champions, relics, level and rating all come from live content and a per-band recipe in `game_config`, so sixty opponents cost zero rows of hand-maintained content and a balance change reaches them without a deploy. Rebuilt nightly with a ±5% rating drift, because a ladder whose teams never change is a solved puzzle by the second week.
+- **A band is a ramp, not a step.** A bot's champions and relics are built along its rating inside the band — the weakest opponent in Bronze fields level-15 champions in half-upgraded relics, the strongest level-25 in full ones. Without that every bot in a band hits equally hard, and the `+13 / +23` the hub shows would be decoration rather than a guide to which fight is easier.
 - **Bots yield the top ten** at the weekly reset. The visible top of the board belongs to people.
 
 ### Added — the Arena, in the game

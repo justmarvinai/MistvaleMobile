@@ -132,7 +132,29 @@ function fieldable(ctx: ArenaContext): ChampionDef[] {
 }
 
 /**
+ * Where a rating sits inside its band: 0 at the floor, 1 at the top.
+ *
+ * This is what makes a band a *ramp* rather than a step. Without it every bot in Bronze
+ * would be identically strong, so the +10 offer and the +21 offer would be the same fight
+ * — and the stakes the hub shows would be a lie about difficulty rather than a guide.
+ */
+function strengthOf(rating: number, band: ArenaBotBand): number {
+  const low = Math.min(band.ratingMin, band.ratingMax);
+  const high = Math.max(band.ratingMin, band.ratingMax);
+  if (high <= low) return 1;
+  return Math.min(1, Math.max(0, (rating - low) / (high - low)));
+}
+
+const lerp = (from: number, to: number, at: number): number => from + (to - from) * at;
+
+/**
  * Builds a bot's roster and stands it on the defence.
+ *
+ * `strength` is where the bot sits in its band, and it decides how far up the band's own
+ * ranges the champions and relics are built: the weakest opponent in Bronze fields
+ * level-15 champions in half-upgraded relics, the strongest fields level-25 in full ones.
+ * A player climbing a band therefore meets a rising wall rather than the same wall five
+ * times, and the rating on an offer means what it looks like it means.
  *
  * Wipes whatever was there first, because this runs nightly as well as at seeding: a
  * refresh replaces the team rather than adding to it, or a bot would accumulate a roster
@@ -143,6 +165,7 @@ async function buildRoster(
   ctx: ArenaContext,
   playerId: string,
   band: ArenaBotBand,
+  strength: number,
   rng: Rng,
 ): Promise<string[]> {
   await tx.delete(gearInstances).where(eq(gearInstances.playerId, playerId));
@@ -163,11 +186,20 @@ async function buildRoster(
     [shuffled[index], shuffled[swap]] = [shuffled[swap]!, shuffled[index]!];
   }
 
+  const low = Math.min(band.championLevelMin, band.championLevelMax);
+  const high = Math.max(band.championLevelMin, band.championLevelMax);
+  const championLevel = Math.round(lerp(low, high, strength));
+  // Relics run from half-upgraded at a band's floor to fully upgraded at its top. Halving
+  // rather than starting at zero because a bot in bare relics reads as broken, not as easy.
+  const gearLevel = Math.round(band.gearLevel * lerp(0.5, 1, strength));
+
   const team: string[] = [];
   const kit: gear.GearGrant[] = [];
   for (const champion of shuffled.slice(0, Math.min(band.teamSize, shuffled.length))) {
     const member = await roster.grantChampion(tx, playerId, champion.key, {
-      level: rng.int(band.championLevelMin, band.championLevelMax),
+      // A point either way, so a team is not four champions at an identical level — which
+      // is what a real roster looks like and what a screenshot would give away.
+      level: Math.min(high, Math.max(low, championLevel + rng.int(-1, 1))),
       rank: band.championRank,
       ascension: band.ascension,
     });
@@ -184,7 +216,7 @@ async function buildRoster(
         slot,
         rank: band.gearRank,
         rarity: band.gearRarity,
-        level: band.gearLevel,
+        level: gearLevel,
         equippedChampionId: member.id,
         source: 'arena:bot',
       });
@@ -274,7 +306,7 @@ export async function createBot(
     .returning({ id: players.id });
   if (!player) throw AppError.internal('Could not create a bot player.');
 
-  const team = await buildRoster(tx, ctx, player.id, recipe, rng);
+  const team = await buildRoster(tx, ctx, player.id, recipe, strengthOf(rating, recipe), rng);
 
   await tx.insert(arenaState).values({
     playerId: player.id,
@@ -381,7 +413,14 @@ export async function refreshLadder(ctx: ArenaContext): Promise<LadderReport> {
       const rating = Math.min(high, Math.max(low, bot.rating + drift));
 
       await ctx.db.transaction(async (tx) => {
-        const team = await buildRoster(tx, ctx, bot.playerId, recipe, rng);
+        const team = await buildRoster(
+          tx,
+          ctx,
+          bot.playerId,
+          recipe,
+          strengthOf(rating, recipe),
+          rng,
+        );
         await tx
           .update(arenaState)
           .set({

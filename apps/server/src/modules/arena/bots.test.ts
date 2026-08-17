@@ -297,8 +297,35 @@ describe.skipIf(!dbUp)('the bot ladder', () => {
         expect(relics).toHaveLength(recipe.teamSize * recipe.gearSlots);
         // Worn, not stacked in a vault — an unequipped relic contributes nothing to a fight.
         expect(relics.every((relic) => relic.equipped !== null)).toBe(true);
-        expect(relics.every((relic) => relic.level === recipe.gearLevel)).toBe(true);
+        // Half-upgraded at a band's floor, fully upgraded at its top, and never bare —
+        // a bot in unupgraded relics reads as broken rather than as easy.
+        expect(
+          relics.every(
+            (relic) =>
+              relic.level >= Math.round(recipe.gearLevel * 0.5) && relic.level <= recipe.gearLevel,
+          ),
+        ).toBe(true);
       }
+    });
+
+    it('builds a band as a ramp, so an offer’s rating predicts its difficulty', async () => {
+      // Without this the +10 offer and the +21 offer are the same fight, and the stakes
+      // the hub shows are a lie about difficulty rather than a guide.
+      await seedLadder(ctx);
+
+      const rows = await app.db
+        .select({ rating: arenaState.rating, level: playerChampions.level })
+        .from(arenaState)
+        .innerJoin(players, eq(players.id, arenaState.playerId))
+        .innerJoin(playerChampions, eq(playerChampions.playerId, arenaState.playerId))
+        .where(eq(players.isBot, true));
+
+      const bronze = rows.filter((row) => bandOf(tierForRating(row.rating)) === 'bronze');
+      expect(bronze.length).toBeGreaterThan(1);
+
+      const weakest = bronze.reduce((low, row) => (row.rating < low.rating ? row : low));
+      const strongest = bronze.reduce((high, row) => (row.rating > high.rating ? row : high));
+      expect(strongest.level).toBeGreaterThan(weakest.level);
     });
 
     it('never gives a bot the same champion twice', async () => {
