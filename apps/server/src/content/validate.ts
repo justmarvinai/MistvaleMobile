@@ -504,6 +504,39 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     }
   }
 
+  for (const [key, entity] of parsed.get('newsPost') ?? []) {
+    const post = entity as { startsAt?: string; endsAt?: string };
+    // Same trap the events have: a post whose window is nonsense simply never appears, and
+    // an operator finds out by nobody mentioning the announcement.
+    for (const [field, value] of [
+      ['startsAt', post.startsAt],
+      ['endsAt', post.endsAt],
+    ] as const) {
+      if (value && !Number.isFinite(Date.parse(value))) {
+        errors.push({
+          severity: 'error',
+          contentType: 'newsPost',
+          key,
+          path: field,
+          message: `“${value}” is not a timestamp.`,
+        });
+      }
+    }
+    if (post.startsAt && post.endsAt) {
+      const starts = Date.parse(post.startsAt);
+      const ends = Date.parse(post.endsAt);
+      if (Number.isFinite(starts) && Number.isFinite(ends) && ends <= starts) {
+        errors.push({
+          severity: 'error',
+          contentType: 'newsPost',
+          key,
+          path: 'endsAt',
+          message: 'A post cannot close before it opens.',
+        });
+      }
+    }
+  }
+
   // A tree needs enough nodes at each tier to satisfy the pick rules, or a player who
   // commits to it hits a wall the UI cannot explain.
   const masteryTierCounts = new Map<string, number>();

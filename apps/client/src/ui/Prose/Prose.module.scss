@@ -1,0 +1,27 @@
+@use '../../styles/tokens' as *;
+
+.prose {
+  color: $parchment-dim;
+  font-size: 0.875rem;
+  line-height: 1.55;
+
+  p {
+    margin: 0 0 $space-3;
+    max-width: 68ch;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  strong {
+    color: $parchment;
+    font-weight: 700;
+  }
+
+  em {
+    color: $mist;
+    font-style: normal; // No serifs, and no italics that read as one — UI_UX §1.1.
+    letter-spacing: 0.02em;
+  }
+}

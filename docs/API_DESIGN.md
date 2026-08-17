@@ -97,10 +97,11 @@ Keyed by **player** id, not account id — that is what `economy_log`, `stage_pr
 | POST `/events/:key/claim` | `{milestone, actionId}` — pays one rung of the current occurrence's ladder. Retried claims replay; second claims are refused; a rung the score has not reached is refused with the shortfall; an event past its grace says it is *over* rather than that it never existed. |
 | GET `/login-calendar` | Both tracks at once — the thirty-day cycle and, for a newcomer, the seven-day welcome strip — with the tile the next claim pays marked on each, which cycle the calendar is on, and the server's own game-day. A finished welcome track is simply absent. |
 | POST `/login-calendar/claim` | `{track, actionId, choice?}` — takes the next day of one track. The day paid is decided by how many claims came before it, under the player's row lock. One claim per track per game-day: a retried claim replays, a second is refused. `choice` is required on a day that offers a selection and refused on a day that does not. |
-| GET `/mail` · POST `/mail/:id/claim` · POST `/mail/claim-all` | Inbox. |
+| GET `/mail` | The inbox: everything not expired, newest first, with the unread and claimable counts the top bar's pip rides on. |
+| POST `/mail/:id/read` · POST `/mail/:id/claim` · POST `/mail/claim-all` · POST `/mail/:id/discard` | Open one, collect one, collect everything carrying something (one transaction, one payout, one ledger row), throw one away. A retried claim replays; a second is refused; discarding a message that still carries something is refused rather than silently dropping it. Every one answers with the whole inbox again. |
 | GET `/hall-of-valor` · POST `/hall-of-valor/upgrade` | All 24 tracks (4 elements × 6 stats) with level, next cost and what the next level gives; `{element, stat, actionId}` buys one. Gated with the Arena, because the Hall spends what the Arena pays. What it grants is account-wide and unconditional, so it is folded into a champion's stats *before* the fight, alongside relics and unconditional masteries — a player who reads their champion screen sees it. |
 | GET `/bazaar` · POST `/bazaar/buy` `{slotId, actionId}` · POST `/bazaar/refresh` | Shop. |
-| GET `/news` | Active announcements. |
+| GET `/news` | Posts whose window is open right now, pinned first then newest-first. Read straight from the content snapshot — no database read at all. A post whose timestamps are unparseable is treated as *shut*: a broadcast that shows a half-configured announcement to everybody is worse than one that shows nothing. |
 | POST `/tutorial/advance` | `{step, choice?}` — server validates scripted order; starter pick happens here. |
 
 ## 2. Admin API (`/admin/api`, consumed by MistvaleMobile-Admin)

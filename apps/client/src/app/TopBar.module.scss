@@ -143,3 +143,27 @@
   align-items: center;
   gap: $space-1;
 }
+
+.tool {
+  position: relative;
+  display: inline-flex;
+}
+
+/** The waiting-mail pip. Same shape as the dock's, so a pip means one thing everywhere. */
+.pip {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.875rem;
+  height: 0.875rem;
+  padding: 0 3px;
+  background: $danger;
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 0.5625rem;
+  line-height: 1;
+  pointer-events: none;
+}

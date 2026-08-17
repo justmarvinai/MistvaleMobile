@@ -5,6 +5,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — mail, news, and the operator's composer (P8f)
+
+The game can talk to a player directly now, and hand them something while it does.
+
+- **A mailbox.** Gifts, apologies, and the occasional word from the Vale. Attachments are the same reward map everything else pays in, so an operator can send anything the game already knows how to give — and it lands in the player's economy log like every other grant. **Collect all** is one act: one transaction, one payout, one ledger row, rather than twenty separate gifts arriving one at a time.
+- **A message cannot pay twice.** A retried claim replays what it already paid; a second one is refused; an expired message says so. This is the only surface in the game where an operator hands out currency directly, which is exactly why it is the one where "collected once" had to be structural rather than careful.
+- **Nothing expires on a schedule.** A message is gone when its moment has passed, worked out when the inbox is read — so a server that was down for a week comes back with precisely the right inbox and nothing to catch up on. Sweeping the rows afterwards is about disk space, not correctness.
+- **The composer sends to one player or to everybody**, and to everybody means *everybody at once*: the fan-out happens inside a single transaction, so a send either reaches the whole game or none of it. Bots are never recipients. Attachments are checked against the live item catalogue **before** anything is written, because unlike content there is no publish step between an operator typing a key and a thousand players opening a message that pays nothing. Every send is audited and carries the operator's own name, so a player who asks about it can be answered.
+- **The send log answers the question that actually gets asked** — not "what did row 412 do" but "did they take it": one line per send, with how many it reached, how many opened it and how many collected.
+- **News posts are content with a window.** Write Friday's patch note on Tuesday, publish once, and it appears by itself — the same trick the events use, and the reason news is not a table with a scheduler bolted to it. A seeded welcome post explains the loop to somebody who has just arrived; a patch-note template ships alongside it, deliberately switched off.
+- **A post can never inject markup into a player's browser.** Bodies are markdown-lite and are rendered as text — no HTML, no sanitiser to keep current, nothing to get wrong. "We trust our own operators" is not an argument that survives one compromised session, and a feed reaches everybody at once.
+
 ### Added — the login calendar and the welcome track (P8e)
 
 A reason to open the game that costs nothing to keep, and a first week that hands a newcomer the things the campaign is slowest to give.

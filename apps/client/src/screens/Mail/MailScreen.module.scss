@@ -1,0 +1,163 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  height: 100%;
+  min-height: 0;
+}
+
+.error {
+  margin: 0;
+  padding: $space-2 $space-3;
+  background: rgba(180, 60, 60, 0.12);
+  border: 1px solid $danger;
+  color: $parchment;
+  font-size: 0.8125rem;
+}
+
+.empty {
+  margin: $space-8 0;
+  max-width: 48ch;
+  margin-inline: auto;
+  color: $muted;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+// ── Layout ──────────────────────────────────────────────────────────────────
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  gap: $space-4;
+  min-height: 0;
+  height: 100%;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-height: 0;
+}
+
+.listHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
+  padding-bottom: $space-2;
+  border-bottom: 1px solid $edge;
+}
+
+.count {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.6875rem;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0 $space-1 0 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: $space-2;
+  background: $panel;
+  border: 1px solid $edge;
+  color: $parchment-dim;
+  font-family: $font-body;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $mist;
+  }
+}
+
+.itemActive {
+  border-color: $gold;
+  color: $parchment;
+}
+
+// An unread message carries a bar down its leading edge rather than bold text: it survives
+// being read at a glance, and it does not shift the row's metrics when it clears.
+.itemUnread {
+  box-shadow: inset 3px 0 0 0 $mist;
+}
+
+.itemTitle {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
+.itemMeta {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.625rem;
+}
+
+.gift {
+  padding: 0 4px;
+  background: rgba(212, 175, 96, 0.14);
+  border: 1px solid $gold;
+  color: $gold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+// ── The reading pane ────────────────────────────────────────────────────────
+
+.from {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.6875rem;
+}
+
+.body {
+  margin-bottom: $space-3;
+}
+
+.attachments {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  flex-wrap: wrap;
+  margin-bottom: $space-3;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.attachLabel {
+  color: $parchment-dim;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.expiry {
+  color: $warning;
+  font-family: $font-mono;
+  font-size: 0.6875rem;
+}

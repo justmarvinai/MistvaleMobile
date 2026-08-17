@@ -28,6 +28,10 @@ import type {
   LoginClaimResult,
   LoginTrackKind,
   LoginView,
+  MailClaimRequest,
+  MailClaimResult,
+  MailView,
+  NewsView,
   MissionClaimRequest,
   MissionClaimResult,
   MissionsView,
@@ -330,6 +334,22 @@ export const gameApi = {
       actionId,
       ...(choice ? { choice } : {}),
     } satisfies LoginClaimRequest),
+
+  mail: () => api.get<{ mail: MailView }>(ROUTES.mail.state).then((data) => data.mail),
+
+  readMail: (mailId: string) =>
+    api.post<{ mail: MailView }>(ROUTES.mail.read(mailId), {}).then((data) => data.mail),
+
+  claimMail: (mailId: string, actionId: string) =>
+    api.post<MailClaimResult>(ROUTES.mail.claim(mailId), { actionId } satisfies MailClaimRequest),
+
+  claimAllMail: (actionId: string) =>
+    api.post<MailClaimResult>(ROUTES.mail.claimAll, { actionId } satisfies MailClaimRequest),
+
+  discardMail: (mailId: string) =>
+    api.post<{ mail: MailView }>(ROUTES.mail.discard(mailId), {}).then((data) => data.mail),
+
+  news: () => api.get<{ news: NewsView }>(ROUTES.news.state).then((data) => data.news),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

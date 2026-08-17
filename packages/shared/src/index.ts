@@ -15,6 +15,8 @@ export * from './quest';
 export * from './mission';
 export * from './event';
 export * from './login';
+export * from './mail';
+export * from './news';
 export * from './admin';
 export * from './routes';
 export * from './content/index';

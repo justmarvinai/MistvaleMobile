@@ -17,6 +17,7 @@ import {
   adminSetRankRequestSchema,
 } from './admin';
 import { arenaBotCensusSchema, arenaLadderResultSchema } from './arena';
+import { mailBatchSchema, mailSendRequestSchema, mailSendResultSchema } from './mail';
 import { accountSummarySchema, loginRequestSchema } from './auth';
 import { apiErrorSchema } from './api';
 import { CONTENT_REGISTRY, CONTENT_TYPES } from './content/registry';
@@ -474,6 +475,36 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       'band, then tops the ladder up. For use after a balance publish, so an operator ' +
       'does not have to wait until the reset hour to see the result.',
     response: arenaLadderResultSchema,
+  },
+
+  // ── Admin: the mail composer ──────────────────────────────────────────────
+  {
+    surface: 'admin',
+    method: 'post',
+    path: ADMIN_ROUTES.mail.send,
+    operationId: 'sendMail',
+    summary: 'Compose and send a message, to one player or to everybody',
+    description:
+      'Fans out to a row per recipient inside one transaction, so a send either reaches ' +
+      'everybody or nobody. Bots are never recipients. Attachments are validated against ' +
+      'the live item catalogue first: there is no publish step between an operator ' +
+      'typing a key and a thousand players opening a message that pays nothing. Audited, ' +
+      'and stamped with the operator’s own account name so a player can ask about it.',
+    body: mailSendRequestSchema,
+    response: mailSendResultSchema,
+    errors: [400, 404],
+  },
+  {
+    surface: 'admin',
+    method: 'get',
+    path: ADMIN_ROUTES.mail.log,
+    operationId: 'getMailBatches',
+    summary: 'What each send reached, and how much of it was collected',
+    description:
+      'One row per send rather than per message: after a compensation mail the question ' +
+      'is whether players took it, which a thousand rows cannot answer. Messages the ' +
+      'game itself raised carry no batch and are not listed.',
+    response: z.object({ batches: z.array(mailBatchSchema) }),
   },
 ];
 

@@ -880,3 +880,28 @@ export const loginTrackDefSchema = contentMetaSchema.extend({
   active: z.boolean().default(true),
 });
 export type LoginTrackDef = z.infer<typeof loginTrackDefSchema>;
+
+/**
+ * A news post: what the Vale is telling everyone this week.
+ *
+ * Content rather than a table, and deliberately so. A post carries a *window* — it appears
+ * and disappears on the clock exactly the way an event does — which means an operator can
+ * write Friday's patch note on Tuesday, publish it once, and have it show up by itself. A
+ * table would have needed either a scheduler or an operator awake at the right hour.
+ *
+ * The body is markdown-lite and is rendered by the client as text, never as HTML: an
+ * operator writing a post must not be able to inject markup into every player's browser,
+ * and "we trust our own operators" is not an argument that survives a compromised session.
+ */
+export const newsPostDefSchema = contentMetaSchema.extend({
+  title: z.string().min(1).max(120),
+  /** Paragraphs separated by blank lines; `**bold**` and `*emphasis*` are honoured. */
+  body: z.string().min(1).max(4000),
+  /** ISO instants. Both optional: a post with neither is simply always up. */
+  startsAt: z.string().max(40).default(''),
+  endsAt: z.string().max(40).default(''),
+  /** Held at the top of the list, above anything newer. */
+  pinned: z.boolean().default(false),
+  active: z.boolean().default(true),
+});
+export type NewsPostDef = z.infer<typeof newsPostDefSchema>;

@@ -23,6 +23,7 @@ export type ScreenId =
   | 'missions'
   | 'events'
   | 'calendar'
+  | 'mail'
   | 'settings'
   | 'battle';
 
@@ -113,6 +114,8 @@ export const SCREENS: readonly ScreenDefinition[] = [
     lockedHint: 'Opens at level 2',
     inDock: true,
   },
+  // Reached from the top bar, like Settings — mail is an errand, not a destination.
+  { id: 'mail', label: 'Mail', glyph: '✉', inDock: false },
   { id: 'settings', label: 'Settings', glyph: '⚙', inDock: false },
   // A full-screen takeover reached from team select, never from the dock.
   { id: 'battle', label: 'Battle', glyph: '⚔', inDock: false },

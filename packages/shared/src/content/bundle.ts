@@ -12,6 +12,7 @@ import {
   gearStatDefSchema,
   itemDefSchema,
   loginTrackDefSchema,
+  newsPostDefSchema,
   shopDefSchema,
   skillDefSchema,
   stageDefSchema,
@@ -58,6 +59,7 @@ export const contentBundleSchema = z.object({
   missions: z.array(missionDefSchema),
   events: z.array(eventDefSchema),
   loginTracks: z.array(loginTrackDefSchema),
+  newsPosts: z.array(newsPostDefSchema),
   /** Flattened to a plain map — the client only ever reads values. */
   config: z.record(z.string(), gameConfigEntrySchema.shape.value),
 });

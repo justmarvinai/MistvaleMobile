@@ -17,6 +17,7 @@ import {
   gearInstances,
   hallOfValor,
   loginClaims,
+  mailbox,
   playerChampions,
   playerEvents,
   playerItems,
@@ -567,6 +568,7 @@ export async function resetAccount(
     await tx.delete(playerMissions).where(eq(playerMissions.playerId, playerId));
     await tx.delete(playerEvents).where(eq(playerEvents.playerId, playerId));
     await tx.delete(loginClaims).where(eq(loginClaims.playerId, playerId));
+    await tx.delete(mailbox).where(eq(mailbox.playerId, playerId));
     await tx.delete(championSightings).where(eq(championSightings.playerId, playerId));
     await tx.delete(shopStates).where(eq(shopStates.playerId, playerId));
     await tx.delete(hallOfValor).where(eq(hallOfValor.playerId, playerId));

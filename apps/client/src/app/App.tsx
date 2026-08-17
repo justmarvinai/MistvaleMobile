@@ -11,6 +11,8 @@ import { QuestsScreen } from '@/screens/Quests/QuestsScreen';
 import { MissionsScreen } from '@/screens/Missions/MissionsScreen';
 import { EventsScreen } from '@/screens/Events/EventsScreen';
 import { CalendarScreen } from '@/screens/Calendar/CalendarScreen';
+import { MailScreen } from '@/screens/Mail/MailScreen';
+import { NewsPanel } from '@/screens/News/NewsPanel';
 import { ChampionsScreen } from '@/screens/Champions/ChampionsScreen';
 import { RelicsScreen } from '@/screens/Relics/RelicsScreen';
 import { BazaarScreen } from '@/screens/Bazaar/BazaarScreen';
@@ -128,6 +130,7 @@ function GameShell() {
   const screen = useNavStore((state) => state.screen);
   const setScreen = useNavStore((state) => state.setScreen);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [newsOpen, setNewsOpen] = useState(false);
 
   const navigate = useCallback((id: ScreenId) => setScreen(id), [setScreen]);
 
@@ -159,7 +162,11 @@ function GameShell() {
   return (
     <>
       <div className={styles.shell}>
-        <TopBar onOpenSettings={() => setSettingsOpen(true)} />
+        <TopBar
+          onOpenSettings={() => setSettingsOpen(true)}
+          onOpenMail={() => navigate('mail')}
+          onOpenNews={() => setNewsOpen(true)}
+        />
 
         <main className={styles.content}>
           {screen === 'haven' ? (
@@ -190,6 +197,8 @@ function GameShell() {
             <EventsScreen />
           ) : screen === 'calendar' ? (
             <CalendarScreen />
+          ) : screen === 'mail' ? (
+            <MailScreen />
           ) : definition ? (
             <PlaceholderScreen screen={definition} />
           ) : null}
@@ -200,6 +209,7 @@ function GameShell() {
       </div>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <NewsPanel open={newsOpen} onClose={() => setNewsOpen(false)} />
     </>
   );
 }

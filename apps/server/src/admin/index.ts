@@ -7,6 +7,7 @@ import * as authService from '../modules/auth/service';
 import { adminContentRoutes } from './content-routes';
 import { adminPlayerRoutes } from './player-routes';
 import { adminBotRoutes } from './bot-routes';
+import { adminMailRoutes } from './mail-routes';
 
 /**
  * The Admin API.
@@ -115,5 +116,6 @@ export const adminApi: FastifyPluginAsync = async (app) => {
     await guarded.register(adminContentRoutes);
     await guarded.register(adminPlayerRoutes);
     await guarded.register(adminBotRoutes);
+    await guarded.register(adminMailRoutes);
   });
 };

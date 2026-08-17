@@ -13,6 +13,7 @@ import { toPlayerSummary } from '../auth/service';
 import { multiState } from '../battle/service';
 import * as events from '../meta/events';
 import * as login from '../meta/login';
+import * as mailService from '../mail/service';
 import * as missions from '../meta/missions';
 import * as quests from '../meta/quests';
 
@@ -69,6 +70,11 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
               { db: app.db, content: app.content },
               player.id,
               player.level,
+              now,
+            ),
+            mail: await mailService.waitingCount(
+              { db: app.db, content: app.content },
+              player.id,
               now,
             ),
           },

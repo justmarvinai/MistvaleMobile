@@ -187,6 +187,15 @@ describe.skipIf(!dbUp)('API contract', () => {
     setPlayerBanned: { banned: true, reason: 'contract test' },
     renamePlayer: { profileName: uniqueProfileName() },
     grantToPlayer: { silver: 500, note: 'contract test' },
+    // No attachments: the fixture publishes a handful of entities and no items, so a
+    // reward map would be refused by the same catalogue check that protects a real send.
+    sendMail: {
+      target: 'all',
+      title: 'Contract test',
+      body: 'Sent by the contract suite.',
+      attachments: {},
+      expiresInDays: 1,
+    },
   };
 
   /**

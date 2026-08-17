@@ -1407,6 +1407,12 @@
               "$ref": "#/components/schemas/LoginTrackDef"
             }
           },
+          "newsPosts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewsPostDef"
+            }
+          },
           "config": {
             "type": "object",
             "propertyNames": {
@@ -1461,6 +1467,7 @@
           "missions",
           "events",
           "loginTracks",
+          "newsPosts",
           "config"
         ],
         "additionalProperties": false
@@ -1707,6 +1714,7 @@
               "mission",
               "event",
               "loginTrack",
+              "newsPost",
               "gameConfig"
             ]
           },
@@ -1797,6 +1805,7 @@
               "mission",
               "event",
               "loginTrack",
+              "newsPost",
               "gameConfig"
             ]
           },
@@ -1854,6 +1863,7 @@
               "mission",
               "event",
               "loginTrack",
+              "newsPost",
               "gameConfig"
             ]
           },
@@ -2913,6 +2923,7 @@
               "mission",
               "event",
               "loginTrack",
+              "newsPost",
               "gameConfig"
             ]
           },
@@ -2951,6 +2962,81 @@
           "live",
           "hasDraft",
           "pendingDelete"
+        ],
+        "additionalProperties": false
+      },
+      "GetMailBatchesResponse": {
+        "type": "object",
+        "properties": {
+          "batches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "batchId": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "sentBy": {
+                  "type": "string"
+                },
+                "sentAt": {
+                  "type": "string"
+                },
+                "attachments": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "recipients": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "read": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "claimed": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "expiresAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "batchId",
+                "title",
+                "sentBy",
+                "sentAt",
+                "attachments",
+                "recipients",
+                "read",
+                "claimed",
+                "expiresAt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "batches"
         ],
         "additionalProperties": false
       },
@@ -3053,6 +3139,7 @@
               "mission",
               "event",
               "loginTrack",
+              "newsPost",
               "gameConfig"
             ]
           },
@@ -4753,6 +4840,62 @@
         ],
         "additionalProperties": false
       },
+      "NewsPostDef": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "startsAt": {
+            "default": "",
+            "type": "string",
+            "maxLength": 40
+          },
+          "endsAt": {
+            "default": "",
+            "type": "string",
+            "maxLength": 40
+          },
+          "pinned": {
+            "default": false,
+            "type": "boolean"
+          },
+          "active": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "sortOrder",
+          "title",
+          "body",
+          "startsAt",
+          "endsAt",
+          "pinned",
+          "active"
+        ],
+        "additionalProperties": false
+      },
       "PublishContentRequest": {
         "type": "object",
         "properties": {
@@ -5077,6 +5220,7 @@
               "mission",
               "event",
               "loginTrack",
+              "newsPost",
               "gameConfig"
             ]
           },
@@ -5151,6 +5295,75 @@
         "required": [
           "report",
           "census"
+        ],
+        "additionalProperties": false
+      },
+      "SendMailRequest": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "enum": [
+              "player",
+              "all"
+            ]
+          },
+          "playerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "attachments": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "expiresInDays": {
+            "default": 30,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 365
+          }
+        },
+        "required": [
+          "target",
+          "title",
+          "body",
+          "attachments",
+          "expiresInDays"
+        ],
+        "additionalProperties": false
+      },
+      "SendMailResponse": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string"
+          },
+          "recipients": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "batchId",
+          "recipients"
         ],
         "additionalProperties": false
       },
@@ -8388,6 +8601,7 @@
                 "missions",
                 "events",
                 "login-tracks",
+                "news",
                 "config"
               ]
             }
@@ -8576,6 +8790,7 @@
                 "missions",
                 "events",
                 "login-tracks",
+                "news",
                 "config"
               ]
             }
@@ -8799,6 +9014,7 @@
                 "missions",
                 "events",
                 "login-tracks",
+                "news",
                 "config"
               ]
             }
@@ -9005,6 +9221,7 @@
                 "missions",
                 "events",
                 "login-tracks",
+                "news",
                 "config"
               ]
             }
@@ -9202,6 +9419,7 @@
                 "missions",
                 "events",
                 "login-tracks",
+                "news",
                 "config"
               ]
             }
@@ -12114,6 +12332,326 @@
           }
         },
         "description": "Re-synthesises each roster from live content and drifts each rating inside its band, then tops the ladder up. For use after a balance publish, so an operator does not have to wait until the reset hour to see the result.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/mail": {
+      "post": {
+        "operationId": "sendMail",
+        "summary": "Compose and send a message, to one player or to everybody",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SendMailResponse"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body failed validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such content type, entity or revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "Fans out to a row per recipient inside one transaction, so a send either reaches everybody or nobody. Bots are never recipients. Attachments are validated against the live item catalogue first: there is no publish step between an operator typing a key and a thousand players opening a message that pays nothing. Audited, and stamped with the operator’s own account name so a player can ask about it.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMailRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/mail/batches": {
+      "get": {
+        "operationId": "getMailBatches",
+        "summary": "What each send reached, and how much of it was collected",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GetMailBatchesResponse"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "One row per send rather than per message: after a compensation mail the question is whether players took it, which a thousand rows cannot answer. Messages the game itself raised carry no batch and are not listed.",
         "security": [
           {
             "sessionCookie": []

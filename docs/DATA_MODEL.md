@@ -204,8 +204,8 @@ Single-row-per-key `key text pk, value jsonb, schema_key text`. Every balance co
 ### `bot_defs`
 `name, avatar_champion_key, personality jsonb (team archetype, element bias), rating_band, roster jsonb (generated champion instances w/ gear tiers), refresh_policy`. A nightly job + admin editor manage the ladder population.
 
-### `news_defs`
-`title, body_md, starts_at, ends_at, pinned` — shown on Haven sidebar + login.
+### `newsPost` (content, not a table)
+`title, body, startsAt, endsAt, pinned, active`. Content rather than its own table, and deliberately: a post carries a *window*, so it appears and disappears on the clock exactly the way an event does — an operator writes Friday's patch note on Tuesday, publishes once, and it shows up by itself. A table would have needed either a scheduler or somebody awake at the right hour. The body is markdown-lite and the client renders it as **text, never as HTML**: a post reaches every player at once, and "we trust our own operators" is not an argument that survives one compromised session.
 
 ### Content plumbing
 - `content_revisions` — `rev serial, published_at, published_by, diff_summary jsonb, snapshot ref` (last N snapshots kept for one-click revert).
@@ -327,7 +327,11 @@ There is no bot table. A bot is an ordinary `players` row with `is_bot` set, hol
 `player_id, champion_key, first_seen_at, unique(player_id, champion_key)` — champions the player has *met*, recorded on a summon and when a battle starts. The Chronicle reads owned from `player_champions` and seen from here, which is what makes it a record of the world rather than a list of receipts.
 
 ### `mailbox`
-`id, player_id, title, body, attachments jsonb (rewards), sent_by (system|admin name), read_at, claimed_at, expires_at` — admin composer can target one/all players (fan-out rows at send time; player count is tiny).
+`id, player_id, title, body, attachments jsonb (a reward map), sent_by (`system` | `admin:<account name>`), batch_id, read_at, claimed_at, claim_action_id, expires_at, created_at` — the composer targets one player or everybody, fanning out a row per recipient at send time inside one transaction, so a send either reaches everybody or nobody. Bots are never recipients: they hold no balances, and a row per bot would be sixty wrong denominators in every claim statistic.
+
+`batch_id` groups the rows one send produced, which is what turns the composer's log into "reached 43, read 38, collected 31" instead of a thousand unrelated rows. Attachments are paid through `RewardService`, so a gift lands in `economy_log` beside every other grant.
+
+**Expiry is derived, never swept**: an expired message is one whose `expires_at` has passed, which is a `where` clause rather than a job — a server down for a week comes back with exactly the right inbox. Deleting the rows afterwards is the daily prune's business and is only about disk.
 
 ### `hall_of_valor`
 `id, player_id, element, stat, level, updated_at` — unique on `(player_id, element, stat)`, level checked 0–10. A row per track rather than a jsonb map because a track is a *ledger*: it only ever goes up, one level at a time, each level bought with medals — and rows make that a constraint rather than a convention.

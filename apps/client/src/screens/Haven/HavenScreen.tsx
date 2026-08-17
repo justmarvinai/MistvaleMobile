@@ -1,6 +1,6 @@
 import { usePlayerStore } from '@/state/playerStore';
 import { Panel } from '@/ui/Panel/Panel';
-import { SCREENS, isScreenUnlocked, type ScreenId } from '@/app/screens';
+import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from '@/app/screens';
 import { StarterChoice } from './StarterChoice';
 import styles from './HavenScreen.module.scss';
 
@@ -15,7 +15,11 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
   const player = usePlayerStore((state) => state.player);
   const unlocks = usePlayerStore((state) => state.unlocks);
 
-  const stations = SCREENS.filter((screen) => screen.id !== 'haven' && screen.id !== 'settings');
+  // The camp's stations are the dock's destinations, minus the Haven itself — the same
+  // predicate rather than a second list, because a deny-list of "not haven, not settings"
+  // silently adopts every screen added later. It had already adopted `battle`, which put a
+  // tile in the camp that walked into a battle screen with no battle behind it.
+  const stations = DOCK_SCREENS.filter((screen) => screen.id !== 'haven');
 
   return (
     <div className={styles.screen}>

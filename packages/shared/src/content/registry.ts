@@ -16,6 +16,7 @@ import {
   eventDefSchema,
   missionDefSchema,
   loginTrackDefSchema,
+  newsPostDefSchema,
   questDefSchema,
   summonPoolDefSchema,
   stageDefSchema,
@@ -52,6 +53,7 @@ export const CONTENT_TYPES = [
   'mission',
   'event',
   'loginTrack',
+  'newsPost',
   'gameConfig',
 ] as const;
 
@@ -210,6 +212,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: ['champion', 'gearSet'],
     inBundle: true,
   },
+  newsPost: {
+    label: 'News',
+    path: 'news',
+    schema: newsPostDefSchema,
+    references: [],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -241,6 +250,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'mission',
   'event',
   'loginTrack',
+  'newsPost',
   'gameConfig',
 ];
 

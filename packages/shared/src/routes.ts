@@ -142,6 +142,20 @@ export const ROUTES = {
     /** Takes the next day of one track. The track is in the body, not the path. */
     claim: '/login-calendar/claim',
   },
+  mail: {
+    /** The inbox: everything not expired, newest first. */
+    state: '/mail',
+    read: (id: string) => `/mail/${encodeURIComponent(id)}/read`,
+    claim: (id: string) => `/mail/${encodeURIComponent(id)}/claim`,
+    /** Empties every message carrying something, in one transaction. */
+    claimAll: '/mail/claim-all',
+    /** Throws one away. Refused while it still carries something unclaimed. */
+    discard: (id: string) => `/mail/${encodeURIComponent(id)}/discard`,
+  },
+  news: {
+    /** Posts whose window is open right now, pinned first. */
+    state: '/news',
+  },
   battle: {
     start: '/battles/start',
     /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */
@@ -209,6 +223,19 @@ export const ADMIN_ROUTES = {
     census: '/arena/bots',
     seed: '/arena/bots/seed',
     refresh: '/arena/bots/refresh',
+  },
+
+  /**
+   * The mail composer.
+   *
+   * Sending is one call whatever the target: the fan-out to every player happens
+   * server-side, inside one transaction, so a send either reaches everybody or nobody. The
+   * log reads back by *batch* rather than by message, because what an operator wants to
+   * know after a compensation mail is "did they take it", not "what did row 412 do".
+   */
+  mail: {
+    send: '/mail',
+    log: '/mail/batches',
   },
 } as const;
 
