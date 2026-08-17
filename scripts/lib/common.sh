@@ -534,8 +534,28 @@ run_as_app_user() {
 			"COREPACK_ENABLE_DOWNLOAD_PROMPT=0" \
 			"${@}"
 	else
-		"${@}"
+		# Already the app user — `sudo -u mistvale UPDATE.sh` takes this path, so the
+		# corepack setting has to be applied here too or it only holds for `sudo`.
+		env "COREPACK_ENABLE_DOWNLOAD_PROMPT=0" "${@}"
 	fi
+}
+
+# run_in_dir <dir> <command> [args...]
+# Runs a command as the app user with <dir> as its working directory.
+#
+# This exists for pnpm. Corepack reads the `packageManager` pin from the
+# package.json it finds by walking up from the *current working directory* — the
+# `--dir` flag is pnpm's own and corepack never sees it. Invoke `pnpm --dir /srv/
+# mistvale/repo install` from a directory with no package.json above it and
+# corepack has nothing to pin to, falls back to the latest pnpm, downloads it,
+# and that pnpm then refuses to act for a project pinned to an older major.
+#
+# Being *in* the project is what makes the pin authoritative, whatever mood
+# corepack's ambient default is in.
+run_in_dir() {
+	local dir="$1"
+	shift
+	(cd "${dir}" && run_as_app_user "${@}")
 }
 
 # reexec_as_app_user "$@"
@@ -594,7 +614,7 @@ run_server_entry() {
 
 	have_cmd pnpm || die "neither a built ${entry} nor pnpm is available — build the server first (pnpm --filter ${SERVER_PKG} build)"
 	log "no built ${entry} — falling back to: pnpm --filter ${SERVER_PKG} run ${script}"
-	run_as_app_user pnpm --dir "${REPO_ROOT}" --filter "${SERVER_PKG}" run "${script}" "$@"
+	run_in_dir "${REPO_ROOT}" pnpm --filter "${SERVER_PKG}" run "${script}" "$@"
 }
 
 # -----------------------------------------------------------------------------

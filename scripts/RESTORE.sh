@@ -327,7 +327,7 @@ fi
 if ((DO_MIGRATE == 1)); then
 	step "Running migrations"
 	need_cmd pnpm
-	run_as_app_user pnpm --dir "${REPO_DIR}" --filter "${SERVER_PKG}" migrate
+	run_in_dir "${REPO_DIR}" pnpm --filter "${SERVER_PKG}" migrate
 	ok "migrations applied"
 fi
 

@@ -213,7 +213,7 @@ rollback_to() {
 		if [[ -n "${game_sha}" ]]; then
 			run_as_app_user git -C "${REPO_DIR}" checkout --quiet --detach "${game_sha}" ||
 				warn "could not check out ${game_sha} in ${REPO_DIR}"
-			run_as_app_user "${LOWPRI[@]}" pnpm --dir "${REPO_DIR}" install --frozen-lockfile --prod=false ||
+			run_in_dir "${REPO_DIR}" "${LOWPRI[@]}" pnpm install --frozen-lockfile --prod=false ||
 				warn "pnpm install for the rolled-back tree failed"
 		fi
 		if [[ -n "${admin_sha}" && -d "${ADMIN_REPO_DIR}/.git" ]]; then
@@ -356,7 +356,7 @@ step "3/7 Installing dependencies"
 # --prod=false is explicit: pnpm skips devDependencies when NODE_ENV=production,
 # and the build toolchain (esbuild, vite, tsc, drizzle-kit) lives there.
 log "game repo: pnpm install --frozen-lockfile"
-run_as_app_user "${LOWPRI[@]}" pnpm --dir "${REPO_DIR}" install --frozen-lockfile --prod=false ||
+run_in_dir "${REPO_DIR}" "${LOWPRI[@]}" pnpm install --frozen-lockfile --prod=false ||
 	die "pnpm install failed in ${REPO_DIR}"
 
 # The Admin SPA is scaffolded in Phase A0 (admin repo). Until its package.json
@@ -365,7 +365,7 @@ ADMIN_BUILDABLE=0
 if [[ -f "${ADMIN_REPO_DIR}/package.json" ]]; then
 	ADMIN_BUILDABLE=1
 	log "admin repo: pnpm install --frozen-lockfile"
-	run_as_app_user "${LOWPRI[@]}" pnpm --dir "${ADMIN_REPO_DIR}" install --frozen-lockfile --prod=false ||
+	run_in_dir "${ADMIN_REPO_DIR}" "${LOWPRI[@]}" pnpm install --frozen-lockfile --prod=false ||
 		die "pnpm install failed in ${ADMIN_REPO_DIR}"
 else
 	warn "admin repo has no package.json yet (Phase A0 not reached) — /admin will 404 until it does"
@@ -390,16 +390,16 @@ export NODE_OPTIONS="--max-old-space-size=1536"
 # The trailing "..." in the filter means "this package and its dependencies", so
 # packages/shared and packages/engine are built first, in topological order.
 log "building server (${SERVER_PKG})"
-run_as_app_user "${LOWPRI[@]}" pnpm --dir "${REPO_DIR}" --filter "${SERVER_PKG}..." build ||
+run_in_dir "${REPO_DIR}" "${LOWPRI[@]}" pnpm --filter "${SERVER_PKG}..." build ||
 	die "server build failed — nothing was swapped, the live release is untouched"
 
 log "building game client (${CLIENT_PKG})"
-run_as_app_user "${LOWPRI[@]}" pnpm --dir "${REPO_DIR}" --filter "${CLIENT_PKG}..." build ||
+run_in_dir "${REPO_DIR}" "${LOWPRI[@]}" pnpm --filter "${CLIENT_PKG}..." build ||
 	die "client build failed — nothing was swapped, the live release is untouched"
 
 if ((ADMIN_BUILDABLE == 1)); then
 	log "building admin SPA"
-	run_as_app_user "${LOWPRI[@]}" pnpm --dir "${ADMIN_REPO_DIR}" build ||
+	run_in_dir "${ADMIN_REPO_DIR}" "${LOWPRI[@]}" pnpm build ||
 		die "admin build failed — nothing was swapped, the live release is untouched"
 fi
 

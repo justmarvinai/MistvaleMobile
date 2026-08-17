@@ -36,6 +36,13 @@ At Early Access there may be four real players, and an Arena whose offer list is
 - **The results panel knows the Arena pays differently** — rating and medals, on a loss as well as a win — so it shows the swing and the promotion rather than a silver line reading zero. A retreat says plainly that walking out is a loss, not an escape.
 - **The ladder** shows the top twenty-five plus the reader's own neighbourhood, because "you are 41st" means nothing without the four people you could overtake.
 
+### Fixed — the deploy no longer depends on where it was started
+
+Two bugs of the same shape, both found on a real update rather than in tests: an ops script inherited something from the caller's shell and broke on it.
+
+- **`pnpm install` downloaded the wrong pnpm and refused to run.** Every invocation was `pnpm --dir /srv/mistvale/repo install`, but `--dir` is pnpm's own flag and corepack never sees it — corepack reads the `packageManager` pin from the package.json it finds walking up from the *current working directory*. Started from `/srv/mistvale` (or `/root`), there is no package.json above it, so corepack had nothing to pin to, fell back to the latest pnpm, downloaded it, and pnpm 11 then refused to act for a project pinned to 10.33.0. Every pnpm call now runs *in* its project, which is what makes the pin authoritative whatever corepack's ambient default happens to be.
+- **The corepack download prompt appeared during an unattended deploy**, because `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` was only set on the branch that drops from root. `sudo -u mistvale UPDATE.sh` is already the app user and took the other branch. Both branches set it now.
+
 ### Fixed — ops scripts run from anywhere
 
 `sudo -u mistvale /srv/mistvale/repo/scripts/UPDATE.sh`, typed from a root shell, failed *after* the database backup had already succeeded: the summary line counts backup days with `find`, and `find` chdirs away and then back to the directory it started in. That directory was `/root`, which the app user cannot read, so it exited 1 — and `set -e` took the whole update down over a line that only formats a message.
