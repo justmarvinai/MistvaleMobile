@@ -16,7 +16,8 @@
     "seed": "tsx src/db/seed/index.ts",
     "openapi": "tsx src/openapi-gen.ts",
     "openapi:check": "tsx src/openapi-gen.ts --check",
-    "set-rank": "tsx src/scripts/set-rank.ts"
+    "set-rank": "tsx src/scripts/set-rank.ts",
+    "seed-bots": "tsx src/scripts/seed-arena-bots.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

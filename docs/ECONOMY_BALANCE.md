@@ -81,7 +81,9 @@ Rotating stock, restock every 60 min ⚙, 4 base slots + 4 crystal-unlockable: F
 - **Login:** 30-day cycle (sigil days 7/14/21/28; day 30 = **Epic selector** — choice of the 4 non-starters; monthly re-roll of calendar via admin); 7-day welcome track ending in Gleaming ×2 + starter relic set.
 
 ## 12. Bots (economy isolation)
-Bots never earn or consume economy resources; their rosters/gear are synthesized from content defs per rating band (power bands table ⚙) and refreshed nightly. Defense-win medals against bots are real (that's the point), but bot "accounts" hold no balances, appear in no economy reports, and auto-yield top-10 weekly leaderboard slots to humans ⚙.
+Bots never earn or consume economy resources; their rosters/gear are synthesized from content defs per rating band (`arena.botBands` ⚙ — count, rating window, account level, team size, champion level/rank/ascension, and the relics' slots/rank/rarity/level, per band) and rebuilt nightly with a ±5% rating drift. Sixty at EA, weighted to the bottom where a small ladder's traffic is: **Bronze 24 · Silver 20 · Gold 12 · Platinum 4**. Names come from two multiplied pools (`arena.botGivenNames` × `arena.botEpithets` ⚙ — 40 × 24 = 960 combinations) and carry no marker, per the owner's decision.
+
+Win medals against bots are real (that's the point), but bot "accounts" hold no balances, write nothing to `economy_log`, appear in no economy report, and auto-yield top-10 leaderboard slots to humans at the weekly reset ⚙. A bot is an ordinary `players` row with `is_bot` set — matchmaking, the leaderboard and the engine need no special case — and its account password is CSPRNG bytes hashed and discarded, so nobody can log into one.
 
 ## 13. Balance workflow (how numbers stay sane)
 1. Every constant here seeds `game_config`/content tables (SEED.sh); the Admin Game-config editor is the only tuning surface post-deploy.

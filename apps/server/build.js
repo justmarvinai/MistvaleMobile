@@ -30,6 +30,7 @@ const ENTRYPOINTS = {
   'db/migrate': 'src/db/migrate.ts',
   'db/seed': 'src/db/seed/index.ts',
   'scripts/set-rank': 'src/scripts/set-rank.ts',
+  'scripts/seed-arena-bots': 'src/scripts/seed-arena-bots.ts',
 };
 
 await rm('dist', { recursive: true, force: true });

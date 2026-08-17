@@ -235,6 +235,49 @@ export async function createGear(
   return row;
 }
 
+/** A relic to roll, with the two things only a synthesised set needs to say. */
+export interface GearGrant extends GearRollRequest {
+  /** Equip it to this champion as it is created, instead of leaving it in the vault. */
+  equippedChampionId?: string | undefined;
+  /** Create it already upgraded. A drop always arrives at zero; a bot's kit does not. */
+  level?: number | undefined;
+}
+
+/**
+ * Rolls and writes several relics in one statement.
+ *
+ * The batched twin of `createGear`, for the one caller that needs a whole kit at once:
+ * synthesising a bot's nine slots piece by piece would be eighteen round trips per
+ * champion, and the arena builds sixty of them a night on a single-core box.
+ */
+export async function createGearBatch(
+  tx: Executor,
+  playerId: string,
+  requests: readonly GearGrant[],
+  rng: Rng,
+  context: GearContext,
+): Promise<GearInstanceRow[]> {
+  if (requests.length === 0) return [];
+
+  const values = requests.map((request) => {
+    const rolled = rollGear(rng, context.tables, context.economy, request);
+    return {
+      playerId,
+      setKey: request.setKey,
+      slot: request.slot,
+      rank: request.rank,
+      rarity: request.rarity,
+      level: Math.min(Math.max(request.level ?? 0, 0), GEAR_MAX_LEVEL),
+      mainStat: rolled.main,
+      substats: [...rolled.substats],
+      source: request.source,
+      equippedChampionId: request.equippedChampionId ?? null,
+    };
+  });
+
+  return tx.insert(gearInstances).values(values).returning();
+}
+
 /** The band a stage or shop offer rolls a relic from. */
 export interface GearDropBand {
   setKeys: readonly string[];

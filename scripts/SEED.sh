@@ -140,6 +140,23 @@ fi
 ok "seed command finished"
 
 # -----------------------------------------------------------------------------
+# Fill the Arena's bot ladder.
+#
+# Separate from the content seed on purpose: bots are player data, and the content
+# seeder never writes player data so that it stays safe to run against production.
+# Idempotent — it creates only the difference between what each band should hold and
+# what it does, so a ladder that is already full costs one query. A failure here is a
+# warning rather than a death: the nightly job tops the ladder up anyway, and an empty
+# Arena is not a reason to fail a deploy that has otherwise succeeded.
+# -----------------------------------------------------------------------------
+step "Filling the Arena bot ladder"
+if run_server_entry "${ENTRY_SEED_BOTS}" "${SCRIPT_SEED_BOTS}"; then
+	ok "bot ladder filled"
+else
+	warn "bot seeding failed — the nightly maintenance job will retry (scripts/SEED.sh)"
+fi
+
+# -----------------------------------------------------------------------------
 # Reload the running server so the ContentCache picks the new revision up.
 # -----------------------------------------------------------------------------
 if ((RESTART == 1)); then

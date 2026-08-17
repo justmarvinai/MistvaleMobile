@@ -1,4 +1,10 @@
-import type { GameConfigEntryInput, ItemDefInput } from '@mistvale/shared';
+import {
+  DEFAULT_BOT_BANDS,
+  DEFAULT_BOT_EPITHETS,
+  DEFAULT_BOT_GIVEN_NAMES,
+  type GameConfigEntryInput,
+  type ItemDefInput,
+} from '@mistvale/shared';
 
 /**
  * Every tunable constant.
@@ -588,11 +594,25 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Percentage of the distance from the current rating down to its tier floor, shed at the Monday reset. Keeps an abandoned account from holding a Platinum slot forever without resetting anybody to zero.',
   ),
   entry(
-    'arena.botTargetsPerBand',
-    { bronze: 24, silver: 20, gold: 12, platinum: 4 },
+    'arena.botBands',
+    DEFAULT_BOT_BANDS,
     'arena',
-    'Bot ladder seeding',
-    'How many bots each band should hold. The ladder must never be empty — a new account at Bronze I has to find somebody to fight on its first evening (CONTENT_PLAN §7).',
+    'Bot ladder recipes',
+    'How many bots each band holds and what they are built from: the rating window they spread across, the level they show, and the champions and relics their defence is synthesised at. The ladder must never be empty — a new account has to find somebody to fight on its first evening. Sixty by default, weighted to the bottom (ECONOMY_BALANCE §12).',
+  ),
+  entry(
+    'arena.botGivenNames',
+    [...DEFAULT_BOT_GIVEN_NAMES],
+    'arena',
+    'Bot names — given',
+    'The first half of a bot’s name. Multiplied by the epithet list, so adding one word here adds a name for every epithet. Natural names with no bot marker, by the owner’s decision (GAME_DESIGN §9.3) — keep them ≤7 characters so every combination fits a profile name.',
+  ),
+  entry(
+    'arena.botEpithets',
+    [...DEFAULT_BOT_EPITHETS],
+    'arena',
+    'Bot names — epithets',
+    'The second half of a bot’s name. Keep them ≤8 characters: a profile name is at most sixteen, and a name that will not fit is a bot that cannot be created.',
   ),
   entry(
     'arena.hallCosts',

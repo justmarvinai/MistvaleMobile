@@ -94,9 +94,11 @@ DRIZZLE_DIR_REL="apps/server/drizzle"
 ENTRY_MIGRATE="db/migrate.js"
 ENTRY_SEED="db/seed.js"
 ENTRY_SET_RANK="scripts/set-rank.js"
+ENTRY_SEED_BOTS="scripts/seed-arena-bots.js"
 SCRIPT_MIGRATE="db:migrate"
 SCRIPT_SEED="seed"
 SCRIPT_SET_RANK="set-rank"
+SCRIPT_SEED_BOTS="seed-bots"
 
 # Health endpoints (packages/shared ROUTES.health, ARCHITECTURE §10).
 # The full payload is admin-gated; STATUS.sh sends an admin session token when

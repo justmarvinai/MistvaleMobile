@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ELEMENTS } from './enums';
+import { ELEMENTS, RARITIES } from './enums';
 
 /**
  * The Arena, and the Hall of Valor it pays into.
@@ -279,3 +279,217 @@ export const DEFAULT_HALL_PER_LEVEL: Readonly<Record<HallStat, number>> = Object
 export const DEFAULT_HALL_COSTS: readonly number[] = Object.freeze([
   40, 60, 90, 130, 180, 240, 310, 390, 480, 580,
 ]);
+
+// ── Bots ────────────────────────────────────────────────────────────────────
+
+/**
+ * What one band's bots are built from.
+ *
+ * A band is a recipe, not a roster: the champions, relics and ratings are synthesised
+ * from live content every time the ladder is refreshed, so a bot in Gold is exactly as
+ * strong as whatever Gold currently means. Nothing about a bot is authored by hand, which
+ * is what lets sixty of them exist without sixty rows of content to maintain
+ * (ECONOMY_BALANCE §12).
+ */
+export const arenaBotBandSchema = z.object({
+  /** How many bots hold this band. */
+  count: z.number().int().min(0).max(200),
+  /** The rating window they are spread across, evenly, so no rung is empty. */
+  ratingMin: z.number().int().min(0).max(10_000),
+  ratingMax: z.number().int().min(0).max(10_000),
+  /** The account level shown on their profile — flavour, but it has to be plausible. */
+  levelMin: z.number().int().min(1).max(60),
+  levelMax: z.number().int().min(1).max(60),
+  /** The champions their defence is built at. */
+  teamSize: z.number().int().min(1).max(4),
+  championLevelMin: z.number().int().min(1).max(60),
+  championLevelMax: z.number().int().min(1).max(60),
+  championRank: z.number().int().min(1).max(6),
+  ascension: z.number().int().min(0).max(6),
+  /** The relics they wear. `gearSlots` counts from the top of `GEAR_SLOTS`. */
+  gearSlots: z.number().int().min(0).max(9),
+  gearRank: z.number().int().min(1).max(6),
+  gearRarity: z.enum(RARITIES),
+  gearLevel: z.number().int().min(0).max(16),
+});
+export type ArenaBotBand = z.infer<typeof arenaBotBandSchema>;
+
+export const arenaBotBandsSchema = z.record(z.enum(ARENA_BANDS), arenaBotBandSchema);
+
+/**
+ * Sixty bots, weighted towards the bottom. Overridden by `arena.botBands`.
+ *
+ * The shape is the point: most of a small ladder's traffic is in Bronze and Silver, so
+ * that is where the opponents are. Platinum holds four because a Platinum account should
+ * meet the same few faces and recognise them — at the top of the ladder, thin is honest.
+ *
+ * Ascension tracks the accessory gates (Ring at 2, Amulet at 4, Banner at 6), so a bot
+ * never wears a relic a player at the same ascension could not.
+ */
+export const DEFAULT_BOT_BANDS: Readonly<Record<ArenaBand, ArenaBotBand>> = Object.freeze({
+  bronze: {
+    count: 24,
+    ratingMin: 400,
+    ratingMax: 1_150,
+    levelMin: 8,
+    levelMax: 18,
+    teamSize: 3,
+    championLevelMin: 15,
+    championLevelMax: 25,
+    championRank: 3,
+    ascension: 0,
+    gearSlots: 6,
+    gearRank: 2,
+    gearRarity: 'rare',
+    gearLevel: 4,
+  },
+  silver: {
+    count: 20,
+    ratingMin: 1_200,
+    ratingMax: 1_950,
+    levelMin: 18,
+    levelMax: 30,
+    teamSize: 4,
+    championLevelMin: 25,
+    championLevelMax: 35,
+    championRank: 4,
+    ascension: 2,
+    gearSlots: 7,
+    gearRank: 3,
+    gearRarity: 'rare',
+    gearLevel: 8,
+  },
+  gold: {
+    count: 12,
+    ratingMin: 2_000,
+    ratingMax: 2_950,
+    levelMin: 30,
+    levelMax: 45,
+    teamSize: 4,
+    championLevelMin: 35,
+    championLevelMax: 50,
+    championRank: 5,
+    ascension: 4,
+    gearSlots: 8,
+    gearRank: 4,
+    gearRarity: 'epic',
+    gearLevel: 12,
+  },
+  platinum: {
+    count: 4,
+    ratingMin: 3_000,
+    ratingMax: 3_400,
+    levelMin: 45,
+    levelMax: 60,
+    teamSize: 4,
+    championLevelMin: 50,
+    championLevelMax: 60,
+    championRank: 6,
+    ascension: 6,
+    gearSlots: 9,
+    gearRank: 5,
+    gearRarity: 'epic',
+    gearLevel: 16,
+  },
+});
+
+/**
+ * The two halves a bot's name is drawn from. Overridden by `arena.botGivenNames` and
+ * `arena.botEpithets`.
+ *
+ * Names are natural and carry no marker — the owner's decision (GAME_DESIGN §9.3). Two
+ * pools rather than one list because forty given names against twenty-four epithets is
+ * nine hundred and sixty names, which is enough that a refreshed ladder never repeats
+ * itself and an operator adding one word adds forty names.
+ *
+ * Every combination fits `profileNameSchema`: the longest given name is seven characters
+ * and the longest epithet is eight, so `given + space + epithet` never exceeds sixteen.
+ */
+export const DEFAULT_BOT_GIVEN_NAMES: readonly string[] = Object.freeze([
+  'Marek',
+  'Corvin',
+  'Iseld',
+  'Bran',
+  'Rook',
+  'Talia',
+  'Edrin',
+  'Halvi',
+  'Nesta',
+  'Orrin',
+  'Perrin',
+  'Quill',
+  'Sable',
+  'Torvin',
+  'Ulric',
+  'Vesna',
+  'Wren',
+  'Yarrow',
+  'Zeva',
+  'Alder',
+  'Briar',
+  'Cael',
+  'Dagna',
+  'Ember',
+  'Fennic',
+  'Garrick',
+  'Hollis',
+  'Imre',
+  'Joran',
+  'Kestrel',
+  'Lyra',
+  'Mabon',
+  'Niamh',
+  'Osric',
+  'Pell',
+  'Riven',
+  'Soren',
+  'Thalia',
+  'Ulla',
+  'Varek',
+]);
+
+export const DEFAULT_BOT_EPITHETS: readonly string[] = Object.freeze([
+  'Vale',
+  'Ashen',
+  'Thorn',
+  'Ember',
+  'Grey',
+  'Hollow',
+  'Ironhand',
+  'Fenwick',
+  'Marrow',
+  'Quill',
+  'Reed',
+  'Stone',
+  'Vesper',
+  'Wilder',
+  'Bright',
+  'Cinder',
+  'Dusk',
+  'Frost',
+  'Gale',
+  'Harrow',
+  'Larkin',
+  'Moss',
+  'Rime',
+  'Storm',
+]);
+
+/** One band's standing on the ladder, as the Admin bot manager reports it. */
+export const arenaBotCensusEntrySchema = z.object({
+  band: z.enum(ARENA_BANDS),
+  /** How many bots the band should hold, and how many it does. */
+  wanted: z.number().int(),
+  present: z.number().int(),
+  ratingMin: z.number().int(),
+  ratingMax: z.number().int(),
+});
+export type ArenaBotCensusEntry = z.infer<typeof arenaBotCensusEntrySchema>;
+
+export const arenaBotCensusSchema = z.object({
+  bands: z.array(arenaBotCensusEntrySchema),
+  total: z.number().int(),
+  /** When the ladder was last refreshed, ISO-8601, or null if it never has been. */
+  refreshedAt: z.string().nullable(),
+});
+export type ArenaBotCensus = z.infer<typeof arenaBotCensusSchema>;
