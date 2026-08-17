@@ -14,6 +14,17 @@ Three ways to go, all one config edit and no deploy:
 
 Not blocking: whichever way it goes is a number in the Game config editor. What P7 fixed is the thing that *was* structural — a band's bots are now built along a ramp, so a bot's rating predicts how hard it hits and the +13/+23 the hub shows is a real guide rather than decoration. **The honest next step is a `pnpm sim` arena gate** (a modelled level-8 roster against each band's floor), which G7 already schedules.
 
+**Q2. Are the three event ladders sized right — especially Summon Surge?**
+Events are live and their ladders are guesses, sized against the faucet budgets written into `db/seed/data/events.ts`. Two of the three I am reasonably confident about: Champion Training and Depths Delve put a typical week or weekend at rung 4–5 of 6, which is the "top rung is a stretch, most people finish the middle" shape ECONOMY §11 asks for.
+
+**Summon Surge is the one worth a second opinion.** The source game's version assumes hundreds of pulls a weekend; Mistvale's sigil faucet is roughly 8 Faded and 2 Gleaming (ECONOMY §5) — about 50 points, 150 for somebody who hoarded for it. So the top rung is 200, sized to the sigils a player can actually spend. The consequence is that **one Radiant pull (500 points) tops the whole ladder outright**.
+
+- **(a) Leave it 〔recommended〕.** The weights are source-faithful because a Radiant pull *should* be worth more, and "the Radiant I finally pulled finished the event" is a good moment rather than a bug. Sizing the ladder to a Radiant instead makes it unreachable for everyone who never sees one — which at EA is most people.
+- **(b) Flatten the weights** (`event_summon_surge.pointRules`) to something like 1 / 8 / 30 / 100, so a Radiant is a big jump rather than the whole ladder. Costs the source-faithful feel.
+- **(c) Raise the top rung** once the real faucet is measured, if pulls turn out to be more plentiful than §5 predicts.
+
+Not blocking: every number is an Admin edit. What would settle it is a weekend of somebody actually playing it, which is why it is a question rather than a decision.
+
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
 - **O2. Offsite backup target** — BACKUP.sh keeps local dumps; give an rclone remote anytime for offsite copies. (DEPLOYMENT_OPERATIONS §2)

@@ -39,8 +39,31 @@ test.describe('the management loop', () => {
     // ── Farm until a relic drops ──────────────────────────────────────────
     // Chapter 1-1 drops a weapon 42% of the time, so a handful of runs is reliable
     // without the test having to reach past the UI to plant one.
+    //
+    // The loop is bounded by *energy*, not by a run count. A fresh account holds twenty
+    // and 1-1 costs four, and the level-ups along the way refill the bar — so how many
+    // runs are affordable is something only the server knows. Clicking blindly past that
+    // point used to park the test on a disabled "Into the mist" for the full timeout,
+    // which reads as a hang rather than as the plain fact that the warden is out of
+    // energy.
+    const energyLeft = async (): Promise<number> =>
+      page.evaluate(async () => {
+        const response = await fetch('/api/player', { credentials: 'include' });
+        const body = (await response.json()) as {
+          data?: { player?: { energy?: { value: number } } };
+        };
+        return body.data?.player?.energy?.value ?? 0;
+      });
+
     let relicsHeld = 0;
-    for (let run = 0; run < 8 && relicsHeld === 0; run += 1) {
+    let runs = 0;
+    let ranDry = false;
+    while (relicsHeld === 0 && runs < 12) {
+      if ((await energyLeft()) < 4) {
+        ranDry = true;
+        break;
+      }
+      runs += 1;
       await page
         .getByRole('button', { name: /^campaign$/i })
         .first()
@@ -70,7 +93,12 @@ test.describe('the management loop', () => {
         return body.data?.gear?.length ?? 0;
       });
     }
-    expect(relicsHeld, 'a relic should have dropped within eight runs').toBeGreaterThan(0);
+    expect(
+      relicsHeld,
+      ranDry
+        ? `out of energy after ${runs} runs with no relic — 1-1 drops one 42% of the time, so this is bad luck rather than a broken drop table`
+        : `no relic in ${runs} runs`,
+    ).toBeGreaterThan(0);
 
     // ── The vault ─────────────────────────────────────────────────────────
     await page

@@ -170,8 +170,18 @@ How a goal accumulates is a property of its *type*, not of the goal: `count` sum
 
 The daily set also feeds a completion meter → the all-dailies chest.
 
-### `event_defs` + `event_milestone_defs` (timed events framework)
-`key, name, banner_asset, starts_at, ends_at, point_rules jsonb ([{action:"champ_xp", points_per:1000}, {action:"dungeon_clear", dungeon:"any", points:10}…]), milestones: [{points, rewards}]`. Cron activates/expires; admin editor composes these freely (Champion Training / Dungeon Delve / Summon Surge are just presets).
+### `event` (timed events framework)
+One `content_entries` row, like every other content type — `event_milestone_defs` is folded in as an array rather than a second table, because a milestone has no life outside its ladder.
+
+| field | notes |
+|---|---|
+| `schedule` | `{kind:'window', startsAt, endsAt}` for a one-off, or `{kind:'weekly', startWeekday, durationDays}` for a repeating one measured in **game-days** — so it turns over at the same reset hour as the dailies and needs no timezone arithmetic of its own. |
+| `pointRules` | `[{type, filters, points, label}]` — a goal-DSL match plus a rate. Points are paid *per unit reported*, so `{type:'summon', filters:{poolKey:'radiant'}, points:500}` pays five hundred a pull. Reusing the goal DSL means an event can count anything a quest can, and a new report type serves both at once. |
+| `milestones` | `[{points, rewards}]`, ascending — publish validation enforces the order, since a ladder out of sequence would let rung 5 be claimed before rung 2. |
+
+**There is no cron.** The planning draft said one would activate and expire events; it does not, and should not. A window is derived from the clock every time it is asked for, so a server that was down all weekend comes back with exactly the right events live and nothing to catch up on — the same rule energy, arena tokens and quest periods already follow (ARCHITECTURE §5.1).
+
+Champion Training / Depths Delve / Summon Surge are three rows, not three features. All three ship **weekly and staggered** rather than on the planned two-week absolute calendar: a calendar that has to be re-cut by hand every fortnight is a calendar that stops being cut.
 
 ### `shop_defs` + `shop_slot_defs`
 Bazaar: rotating slots `{stock_ref (drop_table or item), price {currency, amount}, refresh_group}`; crystal shop: fixed offers (energy, silver packs, roster slots). Refresh timer + manual refresh cost in `game_config`.
@@ -281,7 +291,11 @@ Three tables rather than one with a discriminator, because their *lifetimes* dif
 - **It locks the player row first.** That single statement reads the level the quest list is gated on *and* serialises every report for the account, which is what makes the read-modify-write safe: without it, a battle settling while a purchase lands both read `3`, both write `4`, and one of the two things the player did never happened.
 
 ### `player_events`
-`player_id, event_key, points, claimed_milestones jsonb`, unique on `(player_id, event_key)`. Events are point ladders rather than goal lists; the claimed indices are stored so claiming is idempotent and a milestone list extended mid-event does not re-open what was already paid.
+`player_id, event_key, occurrence, points, claimed_milestones jsonb, claim_action_id`, unique on `(player_id, event_key, occurrence)`.
+
+`occurrence` is the game-day the window opened on, and it does for events exactly what `period_anchor` does for quests: a weekly event runs again next week and the ladder starts over, so last week's row simply stops matching and there is nothing to reset. A one-off carries the day it was scheduled to open, so an operator re-running the same event later gets a fresh score rather than a total somebody has been sitting on since March.
+
+Points are added in SQL (`points + n`) rather than read-then-written — a score is the one number here that is pure accumulation, and expressing it as an increment means it cannot be lost even if the fan-out's player lock ever moves. Claimed indices are stored so claiming is idempotent and a milestone list an operator extends mid-event does not re-open what was already paid.
 
 ### `login_claims`
 `player_id, track (calendar|welcome), day, claimed_on`, unique on `(player_id, track, claimed_on)`. A row per claim rather than a counter: the calendar gives day N on the Nth *claim*, so a player who misses a day loses the day and not their place.

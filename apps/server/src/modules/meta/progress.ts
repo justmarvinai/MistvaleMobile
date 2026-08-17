@@ -1,13 +1,16 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import {
   advanceGoal,
+  eventWindowAt,
   goalMatches,
   type Goal,
+  type EventDef,
+  type EventWindow,
   type GoalEvent,
   type MissionDef,
   type QuestDef,
 } from '@mistvale/shared';
-import { playerMissions, playerQuests, players } from '../../db/schema/index';
+import { playerEvents, playerMissions, playerQuests, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import type { ContentCache } from '../../content/cache';
 import { gameDayFrom } from '../../lib/game-day';
@@ -27,10 +30,10 @@ import { gameDayFrom } from '../../lib/game-day';
  * reverse — a battle paid for without its quest credit — is the same bug wearing a
  * different hat.
  *
- * Two listeners today — the periodic checklist and the Valewarden's Path — and they share
- * everything but the table they write to. Events join in P8d as a third. The reporting
- * modules did not change to gain the second listener, which is the property this whole
- * design exists to buy.
+ * Three listeners now — the periodic checklist, the Valewarden's Path, and whatever timed
+ * events happen to be running. **None of the reporting modules changed to gain any of
+ * them**, which is the property this whole design exists to buy: the battle module still
+ * only knows that a battle was won.
  */
 
 /**
@@ -136,6 +139,79 @@ export async function track(
 
   await advanceQuests(tx, ctx, playerId, reports, level, now);
   await advanceMissions(tx, ctx, playerId, reports, now);
+  await advanceEvents(tx, ctx, playerId, reports, level, now);
+}
+
+/**
+ * Timed events, scored.
+ *
+ * Unlike a quest or a mission, an event does not ask "did you do the thing" — it asks
+ * "how much", and pays points per unit. So the same report that advances a daily by one
+ * can be worth five hundred points here, and both are correct.
+ *
+ * Only *running* events score. An event whose window has shut still shows up on the screen
+ * while its claims are open, but the ladder it pays against is fixed the moment the window
+ * closes — otherwise a grace period for collecting would be a grace period for scoring.
+ */
+async function advanceEvents(
+  tx: Executor,
+  ctx: ProgressContext,
+  playerId: string,
+  reports: readonly GoalEvent[],
+  level: number,
+  now: Date,
+): Promise<void> {
+  const live = liveEvents(ctx, level, now);
+  if (live.length === 0) return;
+
+  const earned = live
+    .map(({ def, window }) => ({ def, window, points: pointsFor(def, reports) }))
+    .filter((entry) => entry.points > 0);
+  if (earned.length === 0) return;
+
+  for (const { def, window, points } of earned) {
+    // Added in SQL rather than read-then-written. The player lock above already serialises
+    // this, but a score is the one number here that is pure accumulation, and expressing
+    // that as an increment means it cannot be lost even if the lock ever moves.
+    await tx
+      .insert(playerEvents)
+      .values({ playerId, eventKey: def.key, occurrence: window.anchor, points })
+      .onConflictDoUpdate({
+        target: [playerEvents.playerId, playerEvents.eventKey, playerEvents.occurrence],
+        set: { points: sql`${playerEvents.points} + ${points}`, updatedAt: now },
+      });
+  }
+}
+
+/** Every event running right now that this account has reached. */
+export function liveEvents(
+  ctx: ProgressContext,
+  level: number,
+  now: Date,
+): { def: EventDef; window: EventWindow }[] {
+  const bundle = ctx.content.current().bundle;
+  const day = gameDayFrom(bundle.config, now);
+  return bundle.events.flatMap((def) => {
+    if (!def.active || level < def.unlockLevel) return [];
+    const window = eventWindowAt(def.schedule, day.date, day.weekday, now);
+    return window ? [{ def, window }] : [];
+  });
+}
+
+/** What one batch of reports is worth to one event. */
+export function pointsFor(def: EventDef, reports: readonly GoalEvent[]): number {
+  let total = 0;
+  for (const rule of def.pointRules) {
+    for (const report of reports) {
+      // A rule is a goal in everything but name, so it matches the same way — which is
+      // what lets an event count anything a quest can, including a report type added
+      // after the event was authored.
+      if (!goalMatches({ type: rule.type, target: 1, filters: rule.filters }, report)) continue;
+      const amount = report.amount ?? 1;
+      if (amount > 0) total += rule.points * amount;
+    }
+  }
+  return total;
 }
 
 /** Today's quest instances, advanced. */

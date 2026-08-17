@@ -122,15 +122,27 @@ export const playerEvents = pgTable(
       .references(() => players.id, { onDelete: 'cascade' }),
     /** `event_defs` key. */
     eventKey: text('event_key').notNull(),
+    /**
+     * Which *occurrence* this score belongs to — the game-day the window opened on.
+     *
+     * A weekly event runs again next week and the ladder starts over, so points need the
+     * same treatment a quest's period gets: last week's row simply stops matching, and
+     * there is nothing to reset. A one-off carries the day it was scheduled to open, so an
+     * operator who re-runs the same event later gets a fresh score rather than a total
+     * somebody has been sitting on since March.
+     */
+    occurrence: text('occurrence').notNull(),
 
     points: integer('points').notNull().default(0),
     claimedMilestones: jsonb('claimed_milestones').notNull().default([]).$type<number[]>(),
+    /** The action that took the last milestone, so a retried claim replays. */
+    claimActionId: text('claim_action_id'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
-    uniqueIndex('player_events_key').on(table.playerId, table.eventKey),
+    uniqueIndex('player_events_key').on(table.playerId, table.eventKey, table.occurrence),
     check('player_events_points_check', sql`${table.points} >= 0`),
   ],
 );

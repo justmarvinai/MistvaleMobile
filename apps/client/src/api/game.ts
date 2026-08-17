@@ -21,6 +21,9 @@ import type {
   Depths,
   MultiBattleRequest,
   MultiBattleResult,
+  EventClaimRequest,
+  EventClaimResult,
+  EventsView,
   MissionClaimRequest,
   MissionClaimResult,
   MissionsView,
@@ -304,6 +307,16 @@ export const gameApi = {
     api.post<MissionClaimResult>(ROUTES.missions.claim(missionKey), {
       actionId,
     } satisfies MissionClaimRequest),
+
+  // ── Timed events ──────────────────────────────────────────────────────────
+
+  events: () => api.get<{ events: EventsView }>(ROUTES.events.state).then((data) => data.events),
+
+  claimEventMilestone: (eventKey: string, milestone: number, actionId: string) =>
+    api.post<EventClaimResult>(ROUTES.events.claim(eventKey), {
+      milestone,
+      actionId,
+    } satisfies EventClaimRequest),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

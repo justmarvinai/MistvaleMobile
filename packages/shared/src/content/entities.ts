@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { goalSchema } from './goals';
+import { GOAL_TYPES, goalSchema } from './goals';
 import {
   DIFFICULTIES,
   ELEMENTS,
@@ -742,3 +742,82 @@ export const missionDefSchema = contentMetaSchema.extend({
   active: z.boolean().default(true),
 });
 export type MissionDef = z.infer<typeof missionDefSchema>;
+
+/**
+ * A timed event: points for playing a certain way, and a milestone ladder to spend them on.
+ *
+ * Events are the one retention system whose *content* is meant to change often, so the
+ * shape is deliberately generic — "Champion Training", "Depths Delve" and "Summon Surge"
+ * are three rows in this table, not three features. What makes them different is which
+ * reports earn points and how many.
+ *
+ * There is no cron. An event's window is derived from the clock the same way energy and
+ * arena tokens are, so nothing has to activate or expire it and nothing can fall behind
+ * (docs/ARCHITECTURE.md §5.1).
+ */
+
+/**
+ * When an event runs.
+ *
+ * `window` is a one-off between two instants — what an operator schedules for a launch
+ * weekend. `weekly` repeats forever from a weekday, measured in **game-days**, so it turns
+ * over at the same reset hour as everything else and needs no timezone arithmetic of its
+ * own. Recurring is what makes the EA calendar tend itself: with a handful of players and
+ * nobody running live-ops, an event that has to be re-scheduled by hand every fortnight is
+ * an event that stops happening.
+ */
+export const eventScheduleSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('window'),
+    /** ISO instants. The event is live between them, inclusive of the start. */
+    startsAt: z.string(),
+    endsAt: z.string(),
+  }),
+  z.object({
+    kind: z.literal('weekly'),
+    /** `0` = Sunday, matching `gameDay().weekday` and the Springs rotation. */
+    startWeekday: z.number().int().min(0).max(6),
+    /** How many game-days it runs for, starting on that weekday. */
+    durationDays: z.number().int().min(1).max(7),
+  }),
+]);
+export type EventSchedule = z.infer<typeof eventScheduleSchema>;
+
+/**
+ * One way of earning points.
+ *
+ * A rule is a goal-DSL match plus a rate: `points` are awarded per unit of what the report
+ * carries, so `{type: 'championLevelUp', points: 10}` pays ten a level and
+ * `{type: 'summon', filters: {poolKey: 'radiant'}, points: 500}` pays five hundred a pull.
+ * Reusing the goal DSL means an event can count anything a quest can, and a new report
+ * type becomes available to both at once.
+ */
+export const eventPointRuleSchema = z.object({
+  type: z.enum(GOAL_TYPES),
+  filters: z.record(z.string(), z.union([z.string(), z.number()])).default({}),
+  /** Points per unit reported. */
+  points: z.number().int().min(1).max(100_000),
+  /** Shown on the event page so a player knows what is worth doing. */
+  label: z.string().max(96).default(''),
+});
+export type EventPointRule = z.infer<typeof eventPointRuleSchema>;
+
+export const eventMilestoneSchema = z.object({
+  points: z.number().int().min(1),
+  rewards: z.record(z.string(), z.number()).default({}),
+});
+export type EventMilestone = z.infer<typeof eventMilestoneSchema>;
+
+export const eventDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(64),
+  description: z.string().max(400).default(''),
+  bannerAsset: z.string().max(64).default(''),
+  schedule: eventScheduleSchema,
+  /** At least one, or the event is a banner nobody can score on. */
+  pointRules: z.array(eventPointRuleSchema).min(1).max(12),
+  /** Ascending by points; publish validation enforces the order. */
+  milestones: z.array(eventMilestoneSchema).min(1).max(20),
+  unlockLevel: z.number().int().min(1).max(60).default(1),
+  active: z.boolean().default(true),
+});
+export type EventDef = z.infer<typeof eventDefSchema>;

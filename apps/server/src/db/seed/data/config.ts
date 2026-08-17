@@ -660,6 +660,13 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Paid automatically on the day’s first victory in each mode — no claim, because it is a reason to open the game rather than a thing to remember. A mode left out pays nothing. Practice is deliberately absent: it costs nothing and pays nothing by design.',
   ),
   entry(
+    'events.claimGraceDays',
+    3,
+    'quests',
+    'Event claim grace (days)',
+    'How long after an event shuts its milestones can still be collected. Points stop the moment the window closes — this is only about picking up what was already earned, so somebody who finished a ladder on Sunday evening still has it on Monday morning.',
+  ),
+  entry(
     'unlocks.questsLevel',
     4,
     'quests',

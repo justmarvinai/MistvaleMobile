@@ -2,12 +2,14 @@ import type { FastifyPluginAsync } from 'fastify';
 import {
   ROUTES,
   apiSuccess,
+  eventClaimRequestSchema,
   missionClaimRequestSchema,
   questChestClaimRequestSchema,
   questClaimRequestSchema,
   routePattern,
 } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
+import * as events from './events';
 import * as missions from './missions';
 import * as quests from './quests';
 
@@ -70,6 +72,26 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
     request.log.info(
       { playerId: requirePlayer(request), missionKey: key, champions: result.champions },
       'mission claimed',
+    );
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  // ── Timed events ──────────────────────────────────────────────────────────
+
+  app.get(ROUTES.events.state, async (request, reply) => {
+    const view = await events.overview(ctx(), requirePlayer(request));
+    return reply.send(apiSuccess({ events: view }, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.events.claim, 'key'), async (request, reply) => {
+    const { key } = request.params as { key: string };
+    const body = eventClaimRequestSchema.parse(request.body);
+    const result = await events.claimMilestone(
+      ctx(),
+      requirePlayer(request),
+      key,
+      body.milestone,
+      body.actionId,
     );
     return reply.send(apiSuccess(result, app.content.rev));
   });

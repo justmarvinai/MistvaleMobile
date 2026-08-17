@@ -13,6 +13,7 @@ import {
   itemDefSchema,
   shopDefSchema,
   skillDefSchema,
+  eventDefSchema,
   missionDefSchema,
   questDefSchema,
   summonPoolDefSchema,
@@ -48,6 +49,7 @@ export const CONTENT_TYPES = [
   'mastery',
   'quest',
   'mission',
+  'event',
   'gameConfig',
 ] as const;
 
@@ -190,6 +192,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: ['champion'],
     inBundle: true,
   },
+  event: {
+    label: 'Events',
+    path: 'events',
+    schema: eventDefSchema,
+    references: [],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -219,6 +228,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'mastery',
   'quest',
   'mission',
+  'event',
   'gameConfig',
 ];
 

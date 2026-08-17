@@ -5,6 +5,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — timed events (P8d)
+
+Three things are running most of the week now, and adding a fourth is a row in a table rather than a feature.
+
+- **Champion Training** (Mon–Fri) pays for levels, ranks, ascensions and mastery nodes. **Depths Delve** (Fri–Sun) pays for floors, floor bosses and energy spent below the Vale. **Summon Surge** (Sat–Sun) pays for pulls, weighted by sigil the way the source game weights them — a Radiant pull is worth five hundred Faded ones, which is roughly what it costs to get one.
+- **The ladders are sized against real faucet budgets, not vibes.** My first pass had them two to three times too expensive, and Summon Surge sixty times: the source game's version assumes hundreds of pulls a weekend, and Mistvale's sigil faucet is about ten. Each ladder now puts a typical player at rung 4–5 of 6, with the budget it was derived from written next to it so a retune has something to argue with. Summon Surge's top rung is deliberately low enough that a single Radiant pull tops it — that is worth a second opinion once somebody has played a weekend of it (USER_QUESTIONS Q2).
+- **An event's point rules are goals with a rate attached.** That is the whole framework: the same DSL a quest uses, plus "how many points per unit". So an event can count anything a quest can, a report type added later serves both at once, and Champion Training and Summon Surge are two rows rather than two features.
+- **There is no scheduler.** The planning draft had a cron activating and expiring events; it does not exist and should not. A window is derived from the clock every time it is asked for, exactly like energy and arena tokens — so a server that was down all weekend comes back with precisely the right events live and nothing to catch up on.
+- **Recurring, not a two-week calendar.** The plan was three staggered absolute windows re-cut every fortnight. At EA there is nobody running live-ops, and a calendar that has to be re-cut by hand is a calendar that stops being cut — so all three presets repeat weekly and the game always has something on. The absolute form is still there, and is what an operator schedules for a one-off.
+- **Next week's ladder starts over, with nothing to reset.** A score belongs to an *occurrence* — the day its window opened — so last week's row simply stops matching, the same trick the daily quests use.
+- **A ladder finished on Sunday evening is still collectable on Monday.** Points stop when the window shuts, but milestones already earned stay claimable for a few days after. Taking back something a player earned over a scheduling boundary is how you teach people not to bother next time.
+
+**Worth knowing when you update the server:** the additive seed from P8b delivers content an install is *missing*, and deliberately never changes content it already has. That is the right default — it is what stops a deploy overwriting your tuning — but it means the three event ladders below arrive at whatever numbers your server first seeded. If you want the retuned ones, edit them in the Admin Suite or re-seed with `--force-content` (which replaces everything, so take the backup `UPDATE.sh` already takes).
+
 ### Added — the Valewarden's Path (P8c)
 
 Eighty missions in ten arcs of eight, from the first battle in the Vale to the Coilmother's court. The chain is a *teacher*: each arc introduces one system and then asks the player to use it properly, so somebody who follows the Path never meets a wall they have no tool for.

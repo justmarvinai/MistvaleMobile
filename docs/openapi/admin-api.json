@@ -1395,6 +1395,12 @@
               "$ref": "#/components/schemas/MissionDef"
             }
           },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDef"
+            }
+          },
           "config": {
             "type": "object",
             "propertyNames": {
@@ -1447,6 +1453,7 @@
           "masteries",
           "quests",
           "missions",
+          "events",
           "config"
         ],
         "additionalProperties": false
@@ -1691,6 +1698,7 @@
               "mastery",
               "quest",
               "mission",
+              "event",
               "gameConfig"
             ]
           },
@@ -1779,6 +1787,7 @@
               "mastery",
               "quest",
               "mission",
+              "event",
               "gameConfig"
             ]
           },
@@ -1834,6 +1843,7 @@
               "mastery",
               "quest",
               "mission",
+              "event",
               "gameConfig"
             ]
           },
@@ -2220,6 +2230,210 @@
           "assetKey",
           "isBoss",
           "bossMechanics"
+        ],
+        "additionalProperties": false
+      },
+      "EventDef": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "description": {
+            "default": "",
+            "type": "string",
+            "maxLength": 400
+          },
+          "bannerAsset": {
+            "default": "",
+            "type": "string",
+            "maxLength": 64
+          },
+          "schedule": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "window"
+                  },
+                  "startsAt": {
+                    "type": "string"
+                  },
+                  "endsAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "startsAt",
+                  "endsAt"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "weekly"
+                  },
+                  "startWeekday": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 6
+                  },
+                  "durationDays": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 7
+                  }
+                },
+                "required": [
+                  "kind",
+                  "startWeekday",
+                  "durationDays"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "pointRules": {
+            "minItems": 1,
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "battleWin",
+                    "stageClear",
+                    "bossKill",
+                    "useEnergy",
+                    "summon",
+                    "gearUpgrade",
+                    "gearLevel",
+                    "championLevelUp",
+                    "championRankUp",
+                    "championAscend",
+                    "masteryLearn",
+                    "shopPurchase",
+                    "arenaBattle",
+                    "arenaWin",
+                    "arenaTier",
+                    "chapterStars",
+                    "dungeonClear",
+                    "accountLevel",
+                    "claimAllDailies",
+                    "championObtained"
+                  ]
+                },
+                "filters": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                },
+                "points": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "label": {
+                  "default": "",
+                  "type": "string",
+                  "maxLength": 96
+                }
+              },
+              "required": [
+                "type",
+                "filters",
+                "points",
+                "label"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "milestones": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "points": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "rewards": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                }
+              },
+              "required": [
+                "points",
+                "rewards"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "unlockLevel": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "active": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "sortOrder",
+          "name",
+          "description",
+          "bannerAsset",
+          "schedule",
+          "pointRules",
+          "milestones",
+          "unlockLevel",
+          "active"
         ],
         "additionalProperties": false
       },
@@ -2687,6 +2901,7 @@
               "mastery",
               "quest",
               "mission",
+              "event",
               "gameConfig"
             ]
           },
@@ -2825,6 +3040,7 @@
               "mastery",
               "quest",
               "mission",
+              "event",
               "gameConfig"
             ]
           },
@@ -4687,6 +4903,7 @@
               "mastery",
               "quest",
               "mission",
+              "event",
               "gameConfig"
             ]
           },
@@ -7996,6 +8213,7 @@
                 "masteries",
                 "quests",
                 "missions",
+                "events",
                 "config"
               ]
             }
@@ -8182,6 +8400,7 @@
                 "masteries",
                 "quests",
                 "missions",
+                "events",
                 "config"
               ]
             }
@@ -8403,6 +8622,7 @@
                 "masteries",
                 "quests",
                 "missions",
+                "events",
                 "config"
               ]
             }
@@ -8607,6 +8827,7 @@
                 "masteries",
                 "quests",
                 "missions",
+                "events",
                 "config"
               ]
             }
@@ -8802,6 +9023,7 @@
                 "masteries",
                 "quests",
                 "missions",
+                "events",
                 "config"
               ]
             }

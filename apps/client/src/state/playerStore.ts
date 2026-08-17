@@ -37,9 +37,10 @@ interface PlayerSnapshot {
 export interface DockBadges {
   quests: number;
   missions: number;
+  events: number;
 }
 
-const NO_BADGES: DockBadges = Object.freeze({ quests: 0, missions: 0 });
+const NO_BADGES: DockBadges = Object.freeze({ quests: 0, missions: 0, events: 0 });
 
 /** Until the first snapshot lands, the farming control is drawn shut rather than guessed at. */
 const NO_MULTI_BATTLE: MultiBattleState = Object.freeze({

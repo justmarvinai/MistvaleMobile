@@ -348,6 +348,59 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     }
   }
 
+  for (const [key, entity] of parsed.get('event') ?? []) {
+    const event = entity as {
+      schedule: { kind: string; startsAt?: string; endsAt?: string };
+      pointRules: { filters: Record<string, string | number> }[];
+      milestones: { points: number; rewards?: Record<string, number> }[];
+    };
+
+    // Point rules are goals in everything but name, so they resolve the same way.
+    goalReferences('event', key, event.pointRules);
+    event.milestones.forEach((rung, index) => {
+      rewardMap({ contentType: 'event', key, path: `milestones.${index}.rewards` }, rung.rewards);
+    });
+
+    // A ladder out of order would let a player claim rung 5 before rung 2, and the screen
+    // would draw a bar that goes backwards.
+    for (let index = 1; index < event.milestones.length; index += 1) {
+      if ((event.milestones[index]?.points ?? 0) > (event.milestones[index - 1]?.points ?? 0)) {
+        continue;
+      }
+      errors.push({
+        severity: 'error',
+        contentType: 'event',
+        key,
+        path: `milestones.${index}.points`,
+        message: 'Milestones must climb — each one needs more points than the one before it.',
+      });
+    }
+
+    // A one-off that ends before it starts is a scheduling typo the operator will not see
+    // until nobody can score on it, because it simply never appears.
+    if (event.schedule.kind === 'window') {
+      const startsAt = Date.parse(event.schedule.startsAt ?? '');
+      const endsAt = Date.parse(event.schedule.endsAt ?? '');
+      if (!Number.isFinite(startsAt) || !Number.isFinite(endsAt)) {
+        errors.push({
+          severity: 'error',
+          contentType: 'event',
+          key,
+          path: 'schedule',
+          message: 'Start and end must both be timestamps.',
+        });
+      } else if (endsAt <= startsAt) {
+        errors.push({
+          severity: 'error',
+          contentType: 'event',
+          key,
+          path: 'schedule.endsAt',
+          message: 'An event cannot end before it starts.',
+        });
+      }
+    }
+  }
+
   // A tree needs enough nodes at each tier to satisfy the pick rules, or a player who
   // commits to it hits a wall the UI cannot explain.
   const masteryTierCounts = new Map<string, number>();

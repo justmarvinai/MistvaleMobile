@@ -130,6 +130,12 @@ export const ROUTES = {
     /** `/missions/:key/claim` — one finished step of the chain. */
     claim: (key: string) => `/missions/${encodeURIComponent(key)}/claim`,
   },
+  events: {
+    /** Every event running now, plus any still owing an unclaimed milestone. */
+    state: '/events',
+    /** `/events/:key/claim` — one rung of one event's ladder. */
+    claim: (key: string) => `/events/${encodeURIComponent(key)}/claim`,
+  },
   battle: {
     start: '/battles/start',
     /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */
