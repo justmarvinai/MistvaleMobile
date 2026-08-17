@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { leaveTutorial } from './support';
 
 /**
  * The first hour, in a real browser.
@@ -56,8 +57,16 @@ test.describe('the tutorial', () => {
     expect(roster).toBe(0);
 
     await page.getByRole('button', { name: /^auto$/i }).click();
-    // A win, and it paid nothing — the results screen is the cue that it is over.
-    await expect(page.getByText(/victory/i).first()).toBeVisible({ timeout: 120_000 });
+    // Auto resolves it server-side and plays it back; the results modal is the cue that
+    // the playback has caught up with the outcome.
+    const results = page.getByRole('dialog', { name: 'Results' });
+    await expect(results).toBeVisible({ timeout: 120_000 });
+    await expect(results).toContainText(/victory/i);
+
+    // The results sit *over* the parchment — the overlay is deliberately below modals so
+    // the starter choice can land on top of it — so they are read and dismissed first.
+    await results.getByRole('button', { name: /^close$/i }).click();
+    await expect(results).toBeHidden({ timeout: 20_000 });
 
     // The step it was waiting on is finished, so Continue lights up.
     const advance = overlay.getByRole('button', { name: /continue/i });
@@ -67,23 +76,25 @@ test.describe('the tutorial', () => {
     await expect(overlay).toContainText('2 / 15', { timeout: 20_000 });
   });
 
-  test('points at the thing the step names', async ({ page }) => {
+  test('marks the things a step can point at', async ({ page }) => {
     test.slow();
     await arrive(page, 'e2th');
+    // Off the battle screen, which is a takeover and deliberately has no dock — the keys
+    // a later step names live on the shell the player spends the rest of the game in.
+    await leaveTutorial(page);
+    await expect(page.getByRole('dialog', { name: /choose your first champion/i })).toBeVisible({
+      timeout: 20_000,
+    });
 
-    const overlay = page.getByRole('region', { name: 'Tutorial' });
-    await expect(overlay).toBeVisible({ timeout: 20_000 });
-
-    // Step one has no highlight — it is a fight, not a signpost — so the dim covers
-    // everything and there is no ring. What matters is that the mechanism is wired: the
-    // dock's tiles carry the keys a later step points at.
     const marked = await page.evaluate(() =>
-      [...document.querySelectorAll('[data-mv-highlight]')].map((node) =>
+      Array.from(document.querySelectorAll('[data-mv-highlight]'), (node) =>
         node.getAttribute('data-mv-highlight'),
       ),
     );
+    // The dock the script sends people around, and the modal step three points at.
     expect(marked).toContain('dock:campaign');
     expect(marked).toContain('dock:depths');
+    expect(marked).toContain('modal:starter-choice');
   });
 
   test('a skip is final, and the overlay does not come back', async ({ page }) => {
@@ -93,7 +104,7 @@ test.describe('the tutorial', () => {
     const overlay = page.getByRole('region', { name: 'Tutorial' });
     await expect(overlay).toBeVisible({ timeout: 20_000 });
 
-    await overlay.getByRole('button', { name: /^skip$/i }).click();
+    await overlay.getByRole('button', { name: /skip tutorial/i }).click();
     await expect(overlay).toContainText(/final/i);
     await overlay.getByRole('button', { name: /skip anyway/i }).click();
     await expect(overlay).toBeHidden({ timeout: 20_000 });

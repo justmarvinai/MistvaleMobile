@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { leaveTutorial } from './support';
 
 /**
  * The Mistgate and the Chronicle, in a real browser.
@@ -160,27 +161,4 @@ async function readChronicle(page: Page): Promise<ChronicleView> {
     };
     return body.data.chronicle;
   });
-}
-
-/**
- * Skips the tutorial and reloads, so the account starts where these tests expect it.
- *
- * A skip is final and server-side, so the reload comes back with no overlay and no
- * scripted navigation — the Haven, an empty roster, and the starter choice waiting.
- */
-async function leaveTutorial(page: Page): Promise<void> {
-  await page.waitForFunction(
-    async () => {
-      const response = await fetch('/api/tutorial/skip', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: '{}',
-        credentials: 'include',
-      });
-      return response.ok;
-    },
-    undefined,
-    { timeout: 20_000 },
-  );
-  await page.reload();
 }

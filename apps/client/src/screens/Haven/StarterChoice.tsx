@@ -3,6 +3,7 @@ import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
+import { currentStep, useTutorialStore } from '../../state/tutorialStore';
 import { stillPath } from '../../game/sprites';
 import { highlightable } from '../../app/highlight';
 import styles from './StarterChoice.module.scss';
@@ -24,6 +25,11 @@ export function StarterChoice(): JSX.Element | null {
   const choose = useRosterStore((state) => state.chooseStarter);
   const bundle = useContentStore((state) => state.bundle);
 
+  const step = useTutorialStore(currentStep);
+  // Null until the first read comes back. Waiting for it avoids a flash of the modal on
+  // boot, before the client knows whether the script is holding it back.
+  const tutorialRead = useTutorialStore((state) => state.tutorial !== null);
+
   const [picked, setPicked] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
@@ -42,6 +48,12 @@ export function StarterChoice(): JSX.Element | null {
   }, [bundle]);
 
   if (!checked || champions.length > 0 || starters.length === 0) return null;
+  // Offered when the script says so, or — outside the script — whenever the roster is
+  // empty. During the opening steps it is empty and the choice is still two beats away,
+  // and a modal that opened then would sit on top of the Wardenmaster and block the very
+  // button that moves the player towards it.
+  if (!tutorialRead) return null;
+  if (step && step.highlight !== 'modal:starter-choice') return null;
 
   const confirm = async (): Promise<void> => {
     if (!picked) return;

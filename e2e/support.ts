@@ -1,0 +1,62 @@
+import type { Page } from '@playwright/test';
+
+/**
+ * Shared scaffolding for the browser suite.
+ *
+ * This file exists because of the tutorial. Before it, every spec's setup was three lines
+ * of form-filling and each kept its own copy; once a fresh account started landing on a
+ * scripted opening instead of on the Haven, thirteen copies all needed the same new step,
+ * which is thirteen chances to miss one.
+ */
+
+export const PASSWORD = 'a-good-long-password';
+
+/** A name nothing else in the suite will collide with, however parallel it gets. */
+export function unique(prefix: string): string {
+  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+}
+
+/**
+ * Leaves the tutorial, and reloads so the client comes back without it.
+ *
+ * **Every spec except `tutorial.spec.ts` calls this**, and deliberately: the script opens
+ * on a borrowed fight and does not reach the starter choice until its third step, which is
+ * right for a player and wrong for forty tests about quests, mail and the Arena. Making
+ * each of them walk a thirty-turn battle to reach the thing they actually test would trade
+ * the suite's runtime for coverage it already has.
+ *
+ * A skip is server-side and final, so the reload comes back with no overlay and no
+ * scripted navigation — the Haven, an empty roster, and the starter choice waiting.
+ */
+export async function leaveTutorial(page: Page): Promise<void> {
+  await page.waitForFunction(
+    async () => {
+      const response = await fetch('/api/tutorial/skip', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{}',
+        credentials: 'include',
+      });
+      return response.ok;
+    },
+    undefined,
+    { timeout: 20_000 },
+  );
+  await page.reload();
+}
+
+/**
+ * Registers a fresh warden, out of the tutorial, with the starter dialog open.
+ *
+ * Stops there rather than choosing: which champion a spec wants — or whether it wants to
+ * assert on the choice itself — is the spec's business.
+ */
+export async function registerRaw(page: Page, account: string, profile: string): Promise<void> {
+  await page.goto('/');
+  await page.getByRole('tab', { name: 'New warden' }).click();
+  await page.getByLabel('Account name').fill(unique(account));
+  await page.getByLabel('Profile name').fill(unique(profile));
+  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByRole('button', { name: 'Take up the lantern' }).click();
+  await leaveTutorial(page);
+}

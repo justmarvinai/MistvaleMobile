@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { leaveTutorial } from './support';
 
 /**
  * The checklist, in a real browser.
@@ -112,27 +113,4 @@ async function register(page: Page, account: string, profile: string): Promise<v
     .click();
   await starterDialog.getByRole('button', { name: /stand together/i }).click();
   await expect(starterDialog).toBeHidden({ timeout: 20_000 });
-}
-
-/**
- * Skips the tutorial and reloads, so the account starts where these tests expect it.
- *
- * A skip is final and server-side, so the reload comes back with no overlay and no
- * scripted navigation — the Haven, an empty roster, and the starter choice waiting.
- */
-async function leaveTutorial(page: Page): Promise<void> {
-  await page.waitForFunction(
-    async () => {
-      const response = await fetch('/api/tutorial/skip', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: '{}',
-        credentials: 'include',
-      });
-      return response.ok;
-    },
-    undefined,
-    { timeout: 20_000 },
-  );
-  await page.reload();
 }

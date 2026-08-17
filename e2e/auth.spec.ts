@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { leaveTutorial } from './support';
 
 /**
  * The Phase P0 exit criterion, exercised for real: a visitor registers, lands in the
@@ -56,6 +57,9 @@ test.describe('account lifecycle', () => {
     await page.getByLabel('Profile name').fill(profileName);
     await page.getByLabel('Password').fill(password);
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+    // Out of the tutorial: this spec is about what comes after it.
+    await leaveTutorial(page);
 
     await chooseAStarter(page);
 
@@ -115,6 +119,9 @@ test.describe('account lifecycle', () => {
     await page.getByLabel('Profile name').fill(`Keep${uniqueSuffix().slice(0, 6)}`);
     await page.getByLabel('Password').fill('a-good-long-password');
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+    // Out of the tutorial: this spec is about what comes after it.
+    await leaveTutorial(page);
     await expect(page.getByRole('heading', { name: 'The Haven' })).toBeVisible();
 
     await page.reload();
@@ -133,6 +140,9 @@ test.describe('account lifecycle', () => {
     await page.getByLabel('Profile name').fill(profileName);
     await page.getByLabel('Password').fill('a-good-long-password');
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+    // Out of the tutorial: this spec is about what comes after it.
+    await leaveTutorial(page);
     await chooseAStarter(page);
     await expect(page.getByRole('heading', { name: 'The Haven' })).toBeVisible();
     await page.getByRole('button', { name: 'Sign out' }).click();
@@ -149,6 +159,9 @@ test.describe('account lifecycle', () => {
     await page.getByLabel('Profile name').fill(`Other${uniqueSuffix().slice(0, 6)}`);
     await page.getByLabel('Password').fill('a-good-long-password');
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+    // No skip here: this registration is *meant* to fail, so there is no session to skip
+    // with — and a reload would wipe the inline error the test is looking for.
     await expect(page.getByRole('alert')).toContainText(/already taken/i);
   });
 });

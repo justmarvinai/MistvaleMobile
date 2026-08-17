@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { leaveTutorial } from './support';
 
 /**
  * The sandbox, in a real browser.
@@ -30,6 +31,9 @@ test.describe('the practice sandbox', () => {
     await page.getByLabel('Profile name').fill(unique('Warden'));
     await page.getByLabel('Password').fill(password);
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+    // Out of the tutorial: this spec is about what comes after it.
+    await leaveTutorial(page);
 
     const starterDialog = page.getByRole('dialog', { name: /choose your first champion/i });
     await expect(starterDialog).toBeVisible({ timeout: 20_000 });

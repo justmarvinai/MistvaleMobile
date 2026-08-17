@@ -37,12 +37,30 @@ export function TutorialOverlay() {
   const advance = useTutorialStore((state) => state.advance);
   const skip = useTutorialStore((state) => state.skip);
   const clearPayout = useTutorialStore((state) => state.clearPayout);
+  const refresh = useTutorialStore((state) => state.refresh);
 
   const screen = useNavStore((state) => state.screen);
   const setScreen = useNavStore((state) => state.setScreen);
 
   const [confirmingSkip, setConfirmingSkip] = useState(false);
   const rect = useHighlightRect(step?.highlight ?? '');
+
+  /**
+   * While a step is open and unfinished, ask again every few seconds.
+   *
+   * The shell re-reads on every screen change, which covers most of the script — but not
+   * the steps that are *completed where they are opened*. The cold open is exactly that:
+   * the fight starts and finishes on the battle screen, so nothing navigates, so nothing
+   * would have told the overlay the step was done, and Continue would stay dark in front
+   * of somebody who had just won. A poll bounded to "the tutorial is open and waiting" is
+   * a few requests across the first hour and none ever again.
+   */
+  const waiting = step !== null && !step.ready;
+  useEffect(() => {
+    if (!waiting) return;
+    const timer = window.setInterval(() => void refresh(), 3000);
+    return () => window.clearInterval(timer);
+  }, [waiting, refresh]);
 
   // Take the player to the step's screen the first time it opens, and only then. Keyed on
   // the step number rather than on `screen`, so wandering off does not drag them back.
@@ -159,8 +177,11 @@ export function TutorialOverlay() {
             </>
           ) : (
             <>
+              {/* "Skip tutorial", not "Skip": a battle has a Skip of its own for jumping
+                  past playback, and the two can be on screen together — during the cold
+                  open they always are. */}
               <Button variant="ghost" onClick={() => setConfirmingSkip(true)} disabled={busy}>
-                Skip
+                Skip tutorial
               </Button>
               {showingPayout ? (
                 <Button variant="primary" onClick={clearPayout} disabled={busy}>
