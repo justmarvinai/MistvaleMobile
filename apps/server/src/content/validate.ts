@@ -656,6 +656,7 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       waves: { enemyKey: string; slot: number }[][];
       rewards: { drops?: { items?: { itemKey: string }[]; gearSetKeys?: string[] } };
       firstClearRewards?: Record<string, number>;
+      presetTeam?: { championKey: string; relics?: { setKey: string }[] }[];
     };
 
     rewardMap({ contentType: 'stage', key, path: 'firstClearRewards' }, stage.firstClearRewards);
@@ -673,6 +674,46 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     if (stage.mode === 'dungeon' || stage.mode === 'springs' || stage.mode === 'proving') {
       reference({ contentType: 'stage', key, path: 'parentKey' }, 'dungeon', stage.parentKey);
     }
+
+    // A borrowed team belongs to the cold open and nowhere else. On any other stage it
+    // would be a roster the player never chose, silently replacing the one they did — so
+    // it is refused here rather than ignored at runtime, where nobody would see it.
+    const presetTeam = stage.presetTeam ?? [];
+    if (stage.mode === 'tutorial') {
+      if (presetTeam.length === 0) {
+        errors.push({
+          severity: 'error',
+          contentType: 'stage',
+          key,
+          path: 'presetTeam',
+          message:
+            'A tutorial stage is fought with the team it carries, and this one carries nobody.',
+        });
+      }
+    } else if (presetTeam.length > 0) {
+      errors.push({
+        severity: 'error',
+        contentType: 'stage',
+        key,
+        path: 'presetTeam',
+        message: `Only a tutorial stage brings its own team; this one is ${stage.mode}. The player's team is the only team here.`,
+      });
+    }
+
+    presetTeam.forEach((member, index) => {
+      reference(
+        { contentType: 'stage', key, path: `presetTeam.${index}.championKey` },
+        'champion',
+        member.championKey,
+      );
+      (member.relics ?? []).forEach((relic, relicIndex) => {
+        reference(
+          { contentType: 'stage', key, path: `presetTeam.${index}.relics.${relicIndex}.setKey` },
+          'gearSet',
+          relic.setKey,
+        );
+      });
+    });
 
     (stage.rewards.drops?.gearSetKeys ?? []).forEach((setKey, index) => {
       reference(

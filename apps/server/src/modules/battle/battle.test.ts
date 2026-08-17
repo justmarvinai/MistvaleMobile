@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance, InjectOptions } from 'fastify';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { ROUTES, apiPath } from '@mistvale/shared';
 import {
   battleSessions,
@@ -731,6 +731,139 @@ describe.skipIf(!dbUp)('the game loop', () => {
       });
       expect(response.statusCode).toBe(403);
       expect(response.json().error.code).toBe('LOCKED_CONTENT');
+    });
+  });
+
+  // ── The cold open ────────────────────────────────────────────────────────
+
+  /**
+   * The one fight nobody brings a team to.
+   *
+   * A `tutorial` stage carries its own roster, so this is the only path through `start`
+   * that never touches `player_champions` — which is exactly why it needs its own tests:
+   * every other branch would have failed loudly on an empty roster, and this one has to
+   * succeed on one.
+   */
+  describe('the cold open', () => {
+    const COLD_OPEN = 'tut_cold_open';
+
+    const openFight = () =>
+      as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: { mode: 'tutorial', stageKey: COLD_OPEN, team: [] },
+      });
+
+    it('is fought with the stage’s own team, by an account that owns nobody', async () => {
+      const response = await openFight();
+      expect(response.statusCode, response.body).toBe(200);
+
+      const stage = app.content.current().bundle.stages.find((entry) => entry.key === COLD_OPEN)!;
+      const view = response.json().data;
+      // The engine built one combatant per preset entry, and the roster is still empty.
+      expect(view.state.allies).toHaveLength(stage.presetTeam.length);
+      const roster = await as({ method: 'GET', url: apiPath(ROUTES.roster.list) });
+      expect(roster.json().data.champions).toHaveLength(0);
+    });
+
+    it('costs no energy — the account has not been shown what energy is yet', async () => {
+      const [before] = await app.db
+        .select({ energy: players.energy })
+        .from(players)
+        .where(eq(players.id, playerId));
+
+      expect((await openFight()).statusCode).toBe(200);
+
+      const [after] = await app.db
+        .select({ energy: players.energy })
+        .from(players)
+        .where(eq(players.id, playerId));
+      expect(after!.energy).toBe(before!.energy);
+    });
+
+    it('gives the borrowed team relics, so it hits like the taste of power it is', async () => {
+      const view = (await openFight()).json().data;
+      const stage = app.content.current().bundle.stages.find((entry) => entry.key === COLD_OPEN)!;
+
+      // Champions carrying three rank-3 relics each are meaningfully above their bare
+      // selves; if the preset gear were silently dropped, this is what would notice.
+      const scaled = view.state.allies.map((ally: { maxHp: number }) => ally.maxHp);
+      expect(scaled.every((hp: number) => hp > 0)).toBe(true);
+      expect(stage.presetTeam.every((member) => member.relics.length > 0)).toBe(true);
+    });
+
+    it('is the same fight for everybody', async () => {
+      const first = (await openFight()).json().data;
+      await as({ method: 'POST', url: apiPath(ROUTES.battle.retreat(first.id)) });
+
+      // A second account, from scratch: same borrowed champions at the same strength.
+      const other = await app.inject({
+        method: 'POST',
+        url: apiPath(ROUTES.auth.register),
+        payload: {
+          accountName: uniqueAccountName('second'),
+          profileName: uniqueProfileName(),
+          password: 'a-good-long-password',
+        },
+      });
+      const otherCookie = extractSessionCookie(other.headers['set-cookie']) as string;
+      const second = (
+        await app.inject({
+          method: 'POST',
+          url: apiPath(ROUTES.battle.start),
+          payload: { mode: 'tutorial', stageKey: COLD_OPEN, team: [] },
+          cookies: { mv_session: otherCookie },
+        })
+      ).json().data;
+
+      // The relics are rolled from the stage key, not the battle seed, so the numbers
+      // match even though the two fights run on different streams.
+      expect(second.state.allies.map((ally: { maxHp: number }) => ally.maxHp)).toEqual(
+        first.state.allies.map((ally: { maxHp: number }) => ally.maxHp),
+      );
+    });
+
+    it('pays nothing and records no clear, however it ends', async () => {
+      const battleId = (await openFight()).json().data.id as string;
+      const resolved = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.action(battleId)),
+        payload: { actionId: 'cold-open-0001', auto: true },
+      });
+      expect(resolved.statusCode, resolved.body).toBe(200);
+
+      const view = resolved.json().data;
+      expect(view.status).not.toBe('active');
+      expect(view.rewards?.silver ?? 0).toBe(0);
+      expect(view.rewards?.playerXp ?? 0).toBe(0);
+      expect(await battleLedger()).toHaveLength(0);
+
+      const [row] = await app.db
+        .select()
+        .from(stageProgress)
+        .where(and(eq(stageProgress.playerId, playerId), eq(stageProgress.stageKey, COLD_OPEN)));
+      expect(row).toBeUndefined();
+    });
+
+    it('is a fight the borrowed team wins', async () => {
+      // The whole point of the beat: frightening on the third wave, and then won. A cold
+      // open a new account loses is a cold open that teaches the wrong thing.
+      const battleId = (await openFight()).json().data.id as string;
+      const resolved = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.action(battleId)),
+        payload: { actionId: 'cold-open-0002', auto: true },
+      });
+      expect(resolved.json().data.outcome).toBe('victory');
+    });
+
+    it('refuses to be farmed in a batch', async () => {
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.multi),
+        payload: { mode: 'tutorial', stageKey: COLD_OPEN, team: [], runs: 5, actionId: 'batch-01' },
+      });
+      expect(response.statusCode).toBe(400);
     });
   });
 

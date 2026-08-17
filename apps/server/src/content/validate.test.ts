@@ -496,6 +496,96 @@ describe('validateContentSet', () => {
     });
   });
 
+  describe('a borrowed team', () => {
+    const coldOpen = (over: Record<string, unknown> = {}) => ({
+      key: 'tut_open',
+      sortOrder: 0,
+      mode: 'tutorial',
+      parentKey: 'chapter_01',
+      number: 1,
+      difficulty: 'normal',
+      energyCost: 0,
+      waves: [[{ enemyKey: 'test_enemy', level: 5, stars: 1, slot: 0 }]],
+      rewards: { silverMin: 0, silverMax: 0, playerXp: 0, championXp: 0 },
+      starRules: { noDeaths: false, maxTurns: 60 },
+      presetTeam: [{ championKey: 'hero', level: 10, rank: 2, ascension: 0, relics: [] }],
+      ...over,
+    });
+
+    const enemy = {
+      key: 'test_enemy',
+      name: 'Ambusher',
+      archetype: 'grunt',
+      element: 'verdant',
+      role: 'attack',
+      baseStats: {
+        hp: 9000,
+        atk: 700,
+        def: 600,
+        spd: 90,
+        critRate: 15,
+        critDmg: 50,
+        res: 30,
+        acc: 0,
+      },
+      growth: 1.045,
+      skills: ['test_a1'],
+      assetKey: 'test_asset',
+      isBoss: false,
+      bossMechanics: { almightyImmunity: false, tmReductionImmune: false },
+      sortOrder: 0,
+    };
+
+    const withStage = (stage: Record<string, unknown>) => {
+      const content = validSet();
+      content.set('enemy', new Map([['test_enemy', enemy]]));
+      content.set('stage', new Map([[String(stage.key), stage]]));
+      return content;
+    };
+
+    it('accepts a tutorial stage that brings its own team', () => {
+      const result = validateContentSet(withStage(coldOpen()));
+      expect(result.ok, JSON.stringify(result.errors)).toBe(true);
+    });
+
+    it('refuses a tutorial stage with nobody to fight with', () => {
+      const result = validateContentSet(withStage(coldOpen({ presetTeam: [] })));
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((error) => /carries nobody/.test(error.message))).toBe(true);
+    });
+
+    it('refuses a borrowed team on any other kind of stage', () => {
+      const result = validateContentSet(
+        withStage(coldOpen({ key: 'c99_s1_normal', mode: 'campaign', energyCost: 4 })),
+      );
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((error) => /Only a tutorial stage/.test(error.message))).toBe(true);
+    });
+
+    it('refuses a borrowed champion nobody published', () => {
+      const result = validateContentSet(
+        withStage(coldOpen({ presetTeam: [{ championKey: 'nobody', relics: [] }] })),
+      );
+      expect(result.ok).toBe(false);
+    });
+
+    it('refuses a borrowed relic from a set nobody published', () => {
+      const result = validateContentSet(
+        withStage(
+          coldOpen({
+            presetTeam: [
+              {
+                championKey: 'hero',
+                relics: [{ setKey: 'nothing', slot: 'weapon', rank: 2, rarity: 'rare' }],
+              },
+            ],
+          }),
+        ),
+      );
+      expect(result.ok).toBe(false);
+    });
+  });
+
   describe('the tutorial script', () => {
     const tutorialStep = (step: number, over: Record<string, unknown> = {}) => ({
       key: `tut_${step}`,

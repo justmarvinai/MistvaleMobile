@@ -8,7 +8,7 @@ import { MISSIONS } from './data/missions';
 import { EVENTS } from './data/events';
 import { LOGIN_TRACKS } from './data/login';
 import { NEWS_POSTS } from './data/news';
-import { TUTORIAL_STEPS } from './data/tutorial';
+import { TUTORIAL_STAGES, TUTORIAL_STEPS } from './data/tutorial';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
 import { ENEMIES, ENEMY_SKILLS } from './data/enemies';
@@ -58,7 +58,10 @@ export function buildSeedContent(): SeedContent[] {
     item: ITEMS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
     dungeon: DUNGEONS.map((data) => ({ key: data.key, data })),
-    stage: [...CAMPAIGN_STAGES, ...DEPTHS_STAGES].map((data) => ({ key: data.key, data })),
+    stage: [...CAMPAIGN_STAGES, ...DEPTHS_STAGES, ...TUTORIAL_STAGES].map((data) => ({
+      key: data.key,
+      data,
+    })),
     summonPool: SUMMON_POOLS.map((data) => ({ key: data.key, data })),
     shop: SHOPS.map((data) => ({ key: data.key, data })),
     mastery: MASTERIES.map((data) => ({ key: data.key, data })),

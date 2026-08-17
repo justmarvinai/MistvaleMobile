@@ -7465,6 +7465,97 @@
               }
             },
             "additionalProperties": false
+          },
+          "presetTeam": {
+            "default": [],
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "championKey": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 64,
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "level": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                },
+                "rank": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6
+                },
+                "ascension": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                },
+                "relics": {
+                  "default": [],
+                  "maxItems": 9,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "setKey": {
+                        "type": "string"
+                      },
+                      "slot": {
+                        "type": "string",
+                        "enum": [
+                          "weapon",
+                          "helm",
+                          "shield",
+                          "gauntlets",
+                          "cuirass",
+                          "boots",
+                          "ring",
+                          "amulet",
+                          "banner"
+                        ]
+                      },
+                      "rank": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 6
+                      },
+                      "rarity": {
+                        "type": "string",
+                        "enum": [
+                          "common",
+                          "uncommon",
+                          "rare",
+                          "epic",
+                          "legendary"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "setKey",
+                      "slot",
+                      "rank",
+                      "rarity"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "championKey",
+                "level",
+                "rank",
+                "ascension",
+                "relics"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [
@@ -7479,7 +7570,8 @@
           "rewards",
           "starRules",
           "firstClearRewards",
-          "unlock"
+          "unlock",
+          "presetTeam"
         ],
         "additionalProperties": false
       },

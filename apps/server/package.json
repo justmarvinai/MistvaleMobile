@@ -53,6 +53,14 @@
     "./seeds": {
       "types": "./src/db/seed/seeders.ts",
       "default": "./src/db/seed/seeders.ts"
+    },
+    "./gear-math": {
+      "types": "./src/modules/gear/stats.ts",
+      "default": "./src/modules/gear/stats.ts"
+    },
+    "./battle-preset": {
+      "types": "./src/modules/battle/preset.ts",
+      "default": "./src/modules/battle/preset.ts"
     }
   }
 }

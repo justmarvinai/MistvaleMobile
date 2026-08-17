@@ -53,6 +53,9 @@
 | GET `/chronicle` | Owned and seen across the whole roster. Food units are listed but excluded from the completion count. |
 
 ### Battles (campaign, dungeons, springs, proving, practice, tutorial)
+
+`tutorial` is the cold open and the one mode where `team` is empty: the stage carries its own roster (`presetTeam`), because the fight happens before the account owns a champion. It spends no energy, pays nothing, records no clear and is refused by `/battles/multi`.
+
 | POST `/battles/start` | `{mode, stageKey, team[1-4]}` → spends energy, creates the session, returns the opened battle. Needs no `actionId`: the one-active-battle index already makes a duplicate start a 409 rather than a second charge. |
 | POST `/battles/:id/action` | `{actionId, skill?, target?, auto?}` → `{state, events, outcome, rewards}`. Omit `skill` to let the AI take the turn; set `auto` to resolve the rest of the fight in one call. Replaying an `actionId` returns the recorded state rather than taking a second turn. |
 | POST `/battles/:id/retreat` | Concede (energy stays spent). |

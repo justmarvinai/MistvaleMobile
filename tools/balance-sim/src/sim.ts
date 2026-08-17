@@ -5,11 +5,16 @@ import {
   type DungeonDef,
   type EnemyDef,
   type GameConfigEntry,
+  type GearSetDef,
+  type GearSlotDef,
+  type GearStatDef,
   type SkillDef,
   type StageDef,
   type StatusDef,
 } from '@mistvale/shared';
 import { buildSeedContent } from '@mistvale/server/seeds';
+import { borrowedTeam } from '@mistvale/server/battle-preset';
+import { gearEconomyFrom, gearTablesFrom } from '@mistvale/server/gear-math';
 import {
   advance,
   buildRules,
@@ -43,6 +48,10 @@ export interface LoadedContent {
   stages: Map<string, StageDef>;
   chapters: Map<string, CampaignChapterDef>;
   dungeons: Map<string, DungeonDef>;
+  /** The relic tables, for the one fight whose gear comes from content rather than a roll. */
+  gearStats: GearStatDef[];
+  gearSlots: GearSlotDef[];
+  gearSets: GearSetDef[];
   config: Record<string, GameConfigEntry['value']>;
 }
 
@@ -79,6 +88,9 @@ export function loadContent(): LoadedContent {
     stages: byKey<StageDef>('stage'),
     chapters: byKey<CampaignChapterDef>('campaignChapter'),
     dungeons: byKey<DungeonDef>('dungeon'),
+    gearStats: list<GearStatDef>('gearStat'),
+    gearSlots: list<GearSlotDef>('gearSlot'),
+    gearSets: list<GearSetDef>('gearSet'),
     config,
   };
 }
@@ -215,6 +227,107 @@ export function simulateStage(
       ? winningTurns.reduce((sum, turns) => sum + turns, 0) / winningTurns.length
       : Number.NaN,
     medianTurns: sorted.length ? sorted[Math.floor(sorted.length / 2)]! : Number.NaN,
+    winsWithin: (limit) => winningTurns.filter((turns) => turns <= limit).length / runs,
+    msPerRun: elapsed / runs,
+  };
+}
+
+/** What a scripted fight looked like, beyond whether it was won. */
+export interface ColdOpenResult extends StageResult {
+  /**
+   * Across winning runs, the median of the lowest health any ally *reached*.
+   *
+   * Sampled during the fight rather than read off the final frame, and that distinction is
+   * the whole measurement: a team with a healer ends every fight topped up, so the closing
+   * state says "untouched" about a battle somebody nearly lost. The drama beat is a moment,
+   * not an ending, so the moment is what gets measured.
+   */
+  medianWorstHp: number;
+}
+
+/**
+ * Fights a `tutorial` stage with the team it carries.
+ *
+ * Uses the server's own `borrowedTeam`, not a re-implementation: a gate that protects a
+ * differently-assembled team protects a fight nobody plays. The relics come out identical
+ * because they are rolled from the stage key rather than from the run.
+ */
+export function simulateColdOpen(
+  content: LoadedContent,
+  stageKey: string,
+  runs: number,
+  seedBase = 1,
+): ColdOpenResult {
+  const stage = content.stages.get(stageKey);
+  if (!stage) throw new Error(`No stage "${stageKey}" in the seeds.`);
+  if (stage.presetTeam.length === 0) {
+    throw new Error(`Stage "${stageKey}" carries no team to fight with.`);
+  }
+
+  const combat = combatConfigFrom(content.config);
+  const scaling = championScalingFrom(content.config);
+  const rules = buildRules(stage.mode, content.skills, content.statuses);
+  const gear = {
+    tables: gearTablesFrom({
+      gearStats: content.gearStats,
+      gearSlots: content.gearSlots,
+      gearSets: content.gearSets,
+    }),
+    economy: gearEconomyFrom(content.config),
+  };
+  const entries = borrowedTeam(stage, content.champions, scaling, gear);
+
+  let wins = 0;
+  const winningTurns: number[] = [];
+  const worstHp: number[] = [];
+  const started = performance.now();
+
+  for (let run = 0; run < runs; run += 1) {
+    const allies = buildTeam(entries, scaling, stage.mode);
+    const waves = buildStageWaves(stage, content.enemies);
+    const { state } = createBattle(
+      { seed: seedBase + run, mode: stage.mode, allies, waves },
+      rules,
+      combat,
+    );
+
+    // Stepped rather than auto-resolved, so the low-water mark is observed rather than
+    // inferred. `advance` without `auto` runs until an ally is due to act and then stops;
+    // calling it again with no action lets the AI take that turn. Sampling between calls
+    // catches the turn the fight looked lost.
+    let lowest = 1;
+    const sample = () => {
+      for (const ally of state.allies) {
+        lowest = Math.min(lowest, ally.alive ? ally.hp / ally.maxHp : 0);
+      }
+    };
+    // Bounded by the engine's own turn cap plus slack: a fight that will not finish is a
+    // turn-limit loss, and the loop must not outlive it.
+    for (let step = 0; step < 2000 && !state.finished; step += 1) {
+      advance(state, rules, combat, { auto: false });
+      sample();
+    }
+
+    if (state.outcome !== 'victory') continue;
+    wins += 1;
+    winningTurns.push(state.turn);
+    worstHp.push(lowest);
+  }
+
+  const elapsed = performance.now() - started;
+  const sortedTurns = [...winningTurns].sort((a, b) => a - b);
+  const sortedHp = [...worstHp].sort((a, b) => a - b);
+
+  return {
+    stageKey,
+    runs,
+    wins,
+    winRate: wins / runs,
+    averageTurns: winningTurns.length
+      ? winningTurns.reduce((sum, turns) => sum + turns, 0) / winningTurns.length
+      : Number.NaN,
+    medianTurns: sortedTurns.length ? sortedTurns[Math.floor(sortedTurns.length / 2)]! : Number.NaN,
+    medianWorstHp: sortedHp.length ? sortedHp[Math.floor(sortedHp.length / 2)]! : Number.NaN,
     winsWithin: (limit) => winningTurns.filter((turns) => turns <= limit).length / runs,
     msPerRun: elapsed / runs,
   };

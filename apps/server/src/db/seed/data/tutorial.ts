@@ -1,4 +1,4 @@
-import type { Goal, RelicGrant, TutorialStepDef } from '@mistvale/shared';
+import type { Goal, RelicGrant, StageDefInput, TutorialStepDef } from '@mistvale/shared';
 
 /**
  * The scripted opening (CONTENT_PLAN_EA01 §7, GAME_DESIGN §5).
@@ -9,9 +9,12 @@ import type { Goal, RelicGrant, TutorialStepDef } from '@mistvale/shared';
  * a screen and a thing on it, and the goal that closes the step is the same `{type, target,
  * filters}` a daily quest uses. Nothing here is a special case in the engine.
  *
- * **The shape of the script.** Fight, then be shown what the fight gave you, then fight
- * again with it. Clear a stage → pull → equip → upgrade → clear the next one. Every system
- * is introduced immediately before it is needed and never more than one at a time.
+ * **The shape of the script.** Open on a fight nobody earned — three borrowed starters
+ * against an ambush, so the first ninety seconds answer "what is this game" — then hand
+ * over one of the three and start again from nothing. After that: fight, be shown what the
+ * fight gave you, fight again with it. Clear a stage → pull → equip → upgrade → clear the
+ * next one. Every system is introduced immediately before it is needed, never more than one
+ * at a time.
  *
  * **The levelling is deliberate, not incidental.** Features open on account level, and a
  * step that points at a locked screen is a step nobody can finish, so the XP paid here is
@@ -20,10 +23,12 @@ import type { Goal, RelicGrant, TutorialStepDef } from '@mistvale/shared';
  *
  * | after step | XP paid | needed | level | opens before          | which step needs it |
  * |------------|---------|--------|-------|-----------------------|---------------------|
- * | 2          | 120     | 120    | 2     | the login calendar    | — (a nicety)        |
- * | 4          | 290     | 257    | 3     | the forge             | 6, upgrade to +1    |
- * | 6          | 440     | 413    | 4     | quests and the Path   | 8, claim a quest    |
- * | 8          | 650     | 591    | 5     | the Bazaar            | 12, buy something   |
+ * | 3          | 120     | 120    | 2     | the login calendar    | — (a nicety)        |
+ * | 5          | 290     | 257    | 3     | the forge             | 7, upgrade to +1    |
+ * | 7          | 440     | 413    | 4     | quests and the Path   | 9, claim a quest    |
+ * | 9          | 650     | 591    | 5     | the Bazaar            | 13, buy something   |
+ *
+ * (Step 1, the cold open, pays nothing — it is borrowed, and so is everything in it.)
  *
  * Campaign clears add their own XP on top, so every margin above is a floor rather than an
  * estimate. If `xpForNextLevel` is retuned, this table is what to re-check — and it is
@@ -35,10 +40,9 @@ import type { Goal, RelicGrant, TutorialStepDef } from '@mistvale/shared';
  * "generous opening" ECONOMY §11 asks for, and it is all ordinary fields — an operator can
  * halve it in the editor without touching this file.
  *
- * The cold-open battle that GAME_DESIGN §5 opens on — all three starters, borrowed, one
- * scripted near-loss — is a battle mode rather than a script step, and lands with the rest
- * of P9. It becomes step 1 when it does; everything here shifts up by one and no player
- * state has to move, because progress is stored as a position rather than as a key.
+ * The cold open is step 1 and `TUTORIAL_STAGES` below is the fight it points at — a
+ * `tutorial`-mode stage carrying its own team, so nothing is minted into a roster that is
+ * about to keep only one of the three.
  */
 
 const step = (
@@ -78,6 +82,17 @@ const goal = (type: Goal['type'], target: number, filters: Goal['filters'] = {})
 export const TUTORIAL_STEPS: TutorialStepDef[] = [
   step(
     1,
+    'tut_cold_open',
+    'battle',
+    '',
+    'Something on the road',
+    'Wait — do not walk out there yet. There is a Sskarn ambush on the Sunken Road and it has been there a week.\n\nI can hold three of them here, borrowed, for about as long as this takes. Watch what they do: everyone acts in turn, the fast ones twice as often, and the skills that matter are the ones you have been saving.',
+    {
+      goal: goal('stageClear', 1, { mode: 'tutorial', stageKey: 'tut_cold_open' }),
+    },
+  ),
+  step(
+    2,
     'tut_welcome',
     'haven',
     '',
@@ -86,7 +101,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     { rewards: { silver: 2_000, playerXp: 60 } },
   ),
   step(
-    2,
+    3,
     'tut_starter',
     'haven',
     'modal:starter-choice',
@@ -98,7 +113,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    3,
+    4,
     'tut_first_stage',
     'campaign',
     'stage:c01_s1_normal',
@@ -110,7 +125,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    4,
+    5,
     'tut_first_summon',
     'mistgate',
     'button:summon-faded',
@@ -123,7 +138,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    5,
+    6,
     'tut_equip',
     'relics',
     'panel:relic-list',
@@ -140,7 +155,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    6,
+    7,
     'tut_upgrade',
     'relics',
     'button:relic-upgrade',
@@ -153,7 +168,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    7,
+    8,
     'tut_second_stage',
     'campaign',
     'stage:c01_s2_normal',
@@ -165,7 +180,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    8,
+    9,
     'tut_quests',
     'quests',
     'panel:quest-daily',
@@ -177,7 +192,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    9,
+    10,
     'tut_third_stage',
     'campaign',
     'stage:c01_s3_normal',
@@ -189,7 +204,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    10,
+    11,
     'tut_level_champion',
     'champions',
     'button:champion-level',
@@ -202,7 +217,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    11,
+    12,
     'tut_fourth_stage',
     'campaign',
     'stage:c01_s4_normal',
@@ -214,7 +229,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    12,
+    13,
     'tut_bazaar',
     'bazaar',
     'panel:bazaar-offers',
@@ -227,7 +242,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    13,
+    14,
     'tut_warlord',
     'campaign',
     'stage:c01_s7_normal',
@@ -239,7 +254,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     },
   ),
   step(
-    14,
+    15,
     'tut_open_road',
     'haven',
     'dock:depths',
@@ -247,4 +262,90 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'That is everything I know how to teach standing still.\n\nThere are keeps under the Vale — the **Depths** — and they are shut to you until you are ready, which the fog will tell you about before I do. Until then the **Path** is the list that matters: it runs from here to the far end of the Reclamation, and the last thing on it is not a relic.\n\nGo on. The lantern stays lit.',
     { rewards: { silver: 5_000, sigil_gleaming: 1, playerXp: 150 } },
   ),
+];
+
+// ── The cold open ───────────────────────────────────────────────────────────
+
+/**
+ * The first fight, borrowed (GAME_DESIGN §9.4).
+ *
+ * Three starters the account does not own, at a strength it will not reach for weeks,
+ * against a Sskarn ambush on the Sunken Road. It exists to answer "what is this game" in
+ * ninety seconds, and the answer is: a turn-based fight where positioning a team and
+ * spending cooldowns decides it.
+ *
+ * **Fought with the stage's own team**, not the player's — that is what `presetTeam` is
+ * for. Nothing is minted into the roster, so nothing has to be confiscated when the
+ * Mistgate flickers a minute later and only one of the three stays.
+ *
+ * **The near-loss is authored, not scripted.** No outcome is forced anywhere in the
+ * engine; the third wave is simply built to hurt — a Warcaller and a Brute five levels
+ * above the two that came before — so a team this size wins it at low health. The relics
+ * are rolled from the stage key rather than the battle seed, so the fight is the same one
+ * for everybody and a beat tuned once stays tuned.
+ *
+ * It pays nothing, costs nothing and records no clear: `settle` treats `tutorial` the way
+ * it treats `practice`, because there is nobody on the field for champion XP to land on.
+ * The reward for it is the tutorial step that owns it.
+ */
+const ambush = (enemyKey: string, level: number, stars: number, slot: number) => ({
+  enemyKey,
+  level,
+  stars,
+  slot,
+});
+
+/** A borrowed champion's kit: one weapon, one cuirass, one pair of boots. */
+const borrowedKit = (setKey: string): RelicGrant[] => [
+  { setKey, slot: 'weapon', rank: 3, rarity: 'rare' },
+  { setKey, slot: 'cuirass', rank: 3, rarity: 'rare' },
+  { setKey, slot: 'boots', rank: 3, rarity: 'rare' },
+];
+
+export const TUTORIAL_STAGES: StageDefInput[] = [
+  {
+    key: 'tut_cold_open',
+    sortOrder: 0,
+    mode: 'tutorial',
+    // Narratively and mechanically the first stretch of the Sunken Road. The campaign map
+    // filters on `mode`, so naming chapter 1 as the parent groups it without listing it.
+    parentKey: 'chapter_01',
+    number: 1,
+    difficulty: 'normal',
+    energyCost: 0,
+    waves: [
+      [ambush('sskarn_skirmisher', 12, 3, 0), ambush('sskarn_spearguard', 12, 3, 1)],
+      [
+        ambush('sskarn_venomspitter', 18, 3, 0),
+        ambush('sskarn_skirmisher', 18, 3, 1),
+        ambush('sskarn_warcaller', 18, 3, 2),
+      ],
+      // The beat. Gorrakh the Broodtyrant is a chapter-3 warlord and has no business this
+      // far west — which is the point of the scene, and the reason the road has been shut.
+      // Two spitters flank him so the damage arrives from three directions at once.
+      //
+      // These three levels are **measured, not guessed**: `pnpm sim` fights this stage with
+      // the borrowed team three thousand times and gates on both halves of the beat — that
+      // it is never lost (3000/3000 at these numbers, and 35 is the highest that holds) and
+      // that somebody is driven to about 57% health doing it. One notch harder and one
+      // account in two thousand loses the opening fight of the game, which is not a risk
+      // worth a slightly better story.
+      [
+        ambush('boss_gorrakh_broodtyrant', 35, 5, 0),
+        ambush('sskarn_venomspitter', 31, 4, 1),
+        ambush('sskarn_venomspitter', 31, 4, 2),
+      ],
+    ],
+    // Nothing is paid for it; `settle` never reaches these. Present because the schema
+    // requires a rewards block, and zeros say plainly what the mode already enforces.
+    rewards: { silverMin: 0, silverMax: 0, playerXp: 0, championXp: 0 },
+    starRules: { noDeaths: false, maxTurns: 60 },
+    firstClearRewards: {},
+    unlock: {},
+    presetTeam: [
+      { championKey: 'thordakk', level: 24, rank: 3, ascension: 1, relics: borrowedKit('reaver') },
+      { championKey: 'anuria', level: 24, rank: 3, ascension: 1, relics: borrowedKit('swiftwind') },
+      { championKey: 'maruan', level: 24, rank: 3, ascension: 1, relics: borrowedKit('ironroot') },
+    ],
+  },
 ];

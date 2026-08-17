@@ -205,6 +205,9 @@ Two decisions are load-bearing:
 
 Publish validation refuses duplicate step numbers, a gap in 1…n (the script is walked by *position*, so a gap is a step nobody reaches), a reward naming an item that does not exist, and a goal filter its type does not declare.
 
+### `stage.presetTeam` — the borrowed team
+Only a `tutorial` stage has one, and publish validation refuses it anywhere else. Each entry is `{championKey, level, rank, ascension, relics[]}` — everything the engine needs to build a combatant with no `player_champions` row behind it, which is what lets the cold open be fought before the account owns a champion at all. The relics are `relicGrant` shapes rolled from the **stage key**, so the fight is identical for every new account; the battle's own seed stays fresh. A tutorial battle spends no energy, pays nothing, records no clear and cannot be batched — `settle` treats it exactly as it treats `practice`.
+
 ### `game_config`
 Single-row-per-key `key text pk, value jsonb, schema_key text`. Every balance constant: energy regen seconds, caps by level, XP curves, gear upgrade cost/success tables, element wheel modifiers, crit caps, arena tier thresholds & weekly rewards, multi-battle cap, pity defaults, daily reset hour/timezone, rate limits… Admin edits through schema-typed forms.
 

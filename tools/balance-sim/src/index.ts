@@ -2,6 +2,7 @@ import {
   campaignStages,
   dungeonFloors,
   loadContent,
+  simulateColdOpen,
   simulateStage,
   starterKeys,
   withRelics,
@@ -325,6 +326,41 @@ function main(): void {
       detail: 'and does it well inside the turn cap — 95% of runs under 200 turns',
       passed: farm.winsWithin(200) >= 0.95,
       measured: `${(farm.winsWithin(200) * 100).toFixed(1)}% within 200 turns`,
+    });
+  }
+
+  // ── Gate 3c: the cold open is a drama beat, and drama beats can be measured ──
+  // The first ninety seconds of the game. It has to be *won* — a new account that loses
+  // the opening cinematic learns the wrong thing about it — and it has to be *close*,
+  // because a fight won at full health teaches that the game is trivial. So both halves
+  // are gated: content that makes the ambush harmless fails here, and so does content
+  // that makes it lethal.
+  const coldOpen = [...content.stages.values()].find(
+    (stage) => stage.mode === 'tutorial' && stage.presetTeam.length > 0,
+  );
+  if (coldOpen) {
+    const opening = simulateColdOpen(content, coldOpen.key, RUNS);
+    table(`The cold open — ${coldOpen.key}, borrowed team`, [opening]);
+    console.log(
+      `  lowest health any champion reached: ${(opening.medianWorstHp * 100).toFixed(0)}% (median run)`,
+    );
+    gates.push({
+      name: 'cold-open-wins',
+      detail: 'the borrowed team wins the opening fight every time',
+      passed: opening.winRate >= 1,
+      measured: `${(opening.winRate * 100).toFixed(1)}%`,
+    });
+    gates.push({
+      name: 'cold-open-hurts',
+      detail: 'and somebody is taken to under two-thirds doing it — the beat is the point',
+      passed: opening.medianWorstHp <= 0.65,
+      measured: `driven to ${(opening.medianWorstHp * 100).toFixed(0)}%`,
+    });
+    gates.push({
+      name: 'cold-open-survives',
+      detail: 'without being a coin flip — nobody is driven under a sixth',
+      passed: opening.medianWorstHp >= 0.15,
+      measured: `driven to ${(opening.medianWorstHp * 100).toFixed(0)}%`,
     });
   }
 

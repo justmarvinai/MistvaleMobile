@@ -4,36 +4,7 @@
 
 ## Open questions
 
-**Q1. Where should a new account enter the Arena ladder?**
-It unlocks at account level 8 and starts everybody at rating **900**, which sits in the middle of Bronze — so a warden's first five opponents are mid-Bronze bots (champions around level 19 in rank-3 relics), not the weakest ones. Whether that is a fair first evening depends on what a real level-8 roster looks like, which nobody has measured yet: my own check used an artificially levelled account holding one un-geared starter, so it proves nothing either way.
-
-Three ways to go, all one config edit and no deploy:
-- **(a) Leave it at 900 〔recommended〕.** A level-8 account has had the welcome grant, ten Faded and three Gleaming sigils, and thirty-odd clears — probably a rank-2/3 team of three or four. Mid-Bronze is then a fair fight rather than a gift, and the Bronze loss floor means a bad run cannot strand anybody. Revisit with real numbers rather than guesses.
-- **(b) Start at 400** (`arena.startingRating`), the Bronze floor, so the first opponents are the weakest on the ladder and the first week is a climb. Costs a little of the ladder's meaning: everybody starts joint-last.
-- **(c) Soften the Bronze recipe** (`arena.botBands.bronze.championLevelMin/Max`), making the whole band easier rather than moving where players enter it.
-
-Not blocking: whichever way it goes is a number in the Game config editor. What P7 fixed is the thing that *was* structural — a band's bots are now built along a ramp, so a bot's rating predicts how hard it hits and the +13/+23 the hub shows is a real guide rather than decoration. **The honest next step is a `pnpm sim` arena gate** (a modelled level-8 roster against each band's floor), which G7 already schedules.
-
-**Q2. Are the three event ladders sized right — especially Summon Surge?**
-Events are live and their ladders are guesses, sized against the faucet budgets written into `db/seed/data/events.ts`. Two of the three I am reasonably confident about: Champion Training and Depths Delve put a typical week or weekend at rung 4–5 of 6, which is the "top rung is a stretch, most people finish the middle" shape ECONOMY §11 asks for.
-
-**Summon Surge is the one worth a second opinion.** The source game's version assumes hundreds of pulls a weekend; Mistvale's sigil faucet is roughly 8 Faded and 2 Gleaming (ECONOMY §5) — about 50 points, 150 for somebody who hoarded for it. So the top rung is 200, sized to the sigils a player can actually spend. The consequence is that **one Radiant pull (500 points) tops the whole ladder outright**.
-
-- **(a) Leave it 〔recommended〕.** The weights are source-faithful because a Radiant pull *should* be worth more, and "the Radiant I finally pulled finished the event" is a good moment rather than a bug. Sizing the ladder to a Radiant instead makes it unreachable for everyone who never sees one — which at EA is most people.
-- **(b) Flatten the weights** (`event_summon_surge.pointRules`) to something like 1 / 8 / 30 / 100, so a Radiant is a big jump rather than the whole ladder. Costs the source-faithful feel.
-- **(c) Raise the top rung** once the real faucet is measured, if pulls turn out to be more plentiful than §5 predicts.
-
-Not blocking: every number is an Admin edit. What would settle it is a weekend of somebody actually playing it, which is why it is a question rather than a decision.
-
-**Q3. How much should the cold-open battle borrow?**
-GAME_DESIGN §5 opens the game on a fight the player has not earned: all three starters, pre-made, in preset relics, with a scripted near-loss before the Mistgate flickers and they keep only one. It is the hook, and it is the one thing in the tutorial that is not simply pointing at a screen the game already has — a battle fought with champions nobody owns needs the team to come from *content* rather than from `player_champions`.
-
-Three ways to build it, all inside P9:
-- **(a) A `tutorial`-mode stage carrying a preset team 〔recommended〕.** The battle mode already exists in the enum and nothing uses it. A stage gains an optional preset roster — champion key, level, rank, and a relic bonus block — and `start()` builds the entries from that instead of from the player's roster for that mode alone. No energy, no rewards, no stage progress written. The near-loss is authored the way every other boss beat is: wave composition and enemy levels tuned so the third wave hurts. Everything stays content, and the same machinery would serve a future story fight.
-- **(b) Grant the three starters, fight normally, take two back.** No engine work at all — but the game would be minting and deleting champions to tell a story, the roster screen would flicker three champions in and two out, and "which one do you keep" stops being a choice about a gift and becomes a choice about a confiscation.
-- **(c) Drop it.** The script reads fine starting at the Haven; the starter choice survives intact. What is lost is the taste of power the opening is *for* — a first five minutes that shows what a levelled team feels like before asking anybody to earn one.
-
-Not blocking: the script is walked by position, so the cold open becomes step 1 whenever it lands, with no player state to move and no renumbering that could strand anybody. I am building **(a)** unless you say otherwise.
+**None.** Q1–Q3 were answered on 2026-08-17 ("as you recommend" to all three) and are in the decision record below.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
@@ -73,3 +44,11 @@ Each has a phase and a default, so none of them blocks anything. Listed here so 
 | B8 | Profile names: no filter; admin rename is the fix | DATA_MODEL, ADMIN_SUITE_DESIGN |
 | C1–C8 | **All suggested additions approved**: choice tomes, multi-battle, Odds & Mercy panel, team presets, daily first-win bonuses, practice sandbox, colorblind glyphs. 〔Replays + share links were approved here and **dropped on 2026-08-17** at the owner's request — see GDD §15.〕 | GDD §15, ROADMAP P3/P6/P8 |
 | — | **Complexity stance:** keep RSL-scale content & grind, simplify entry complexity; deepen systems later | GDD §1.1 (binding design rule) |
+
+## Decision record (owner answers, 2026-08-17)
+
+| # | Question | Answer | Where it lives now |
+|---|---|---|---|
+| Q1 | Where a new account enters the Arena ladder | **Recommendation taken: leave `arena.startingRating` at 900.** A level-8 account arrives having had the welcome grant, thirteen sigils and thirty-odd clears, so mid-Bronze is a fair fight rather than a gift — and the Bronze loss floor means a bad run cannot strand anybody. It stays a Game-config edit if real accounts say otherwise, and G7's `pnpm sim` arena gate is what would settle it with numbers instead of guesses. | ECONOMY_BALANCE §12, `arena.startingRating` |
+| Q2 | Whether the Summon Surge ladder is sized right | **Recommendation taken: leave the point weights as seeded.** One Radiant pull tops the ladder outright, and that is the point — "the Radiant I finally pulled finished the event" is a good evening, and sizing the top rung to a Radiant instead would put it out of reach of everyone who never sees one, which at EA is most people. | `db/seed/data/events.ts`, ECONOMY_BALANCE §11 |
+| Q3 | How much the cold-open battle should borrow | **Recommendation taken: a `tutorial`-mode stage carrying a preset team.** The battle mode already existed in the enum and nothing used it; a stage now carries the roster it is fought with, so the opening fight is content like every other fight. No energy, no rewards, no stage progress, and nothing minted into the roster to be taken back afterwards. | GAME_DESIGN §9.4, CONTENT_PLAN §7, DATA_MODEL §stage |

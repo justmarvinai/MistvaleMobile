@@ -240,13 +240,29 @@ describe.skipIf(!dbUp)('the tutorial', () => {
     return tutorial.advance(ctx(), playerId, actionId);
   }
 
+  /**
+   * Advances until the open step is one that asks for something.
+   *
+   * By position rather than by number, so the tests below say what they mean — "a step
+   * with a goal" — and keep meaning it when the script is re-cut.
+   */
+  async function walkToGoalStep(label: string): Promise<void> {
+    for (let index = 0; index < script().length; index += 1) {
+      if ((await read()).current?.goal) return;
+      await complete(`${label}-${index}`);
+    }
+    throw new Error('the script has no goal steps');
+  }
+
   // ── Where a new account starts ────────────────────────────────────────────
 
   it('puts a fresh account on step one of the seeded script', async () => {
     const view = await read();
     expect(view.current?.step).toBe(1);
     expect(view.current?.total).toBe(script().length);
-    expect(view.current?.screen).toBe('haven');
+    // The cold open: a fight before anything else, on the battle screen.
+    expect(view.current?.screen).toBe('battle');
+    expect(view.current?.goal?.type).toBe('stageClear');
     expect(view.finished).toBe(false);
     expect(view.skipped).toBe(false);
   });
@@ -265,28 +281,30 @@ describe.skipIf(!dbUp)('the tutorial', () => {
   // ── Advancing ─────────────────────────────────────────────────────────────
 
   it('pays the step it completes and opens the next one', async () => {
-    const first = script()[0]!;
+    // Step one is the cold open and pays nothing; step two is the first that does.
+    await complete('step-one');
+    const second = script()[1]!;
     const before = await app.db
       .select({ silver: players.silver })
       .from(players)
       .where(eq(players.id, playerId));
 
-    const result = await tutorial.advance(ctx(), playerId, 'advance-one');
+    const result = await complete('advance-two');
 
-    expect(result.paid.silver).toBe(first.rewards.silver);
-    expect(result.tutorial.current?.step).toBe(2);
+    expect(result.paid.silver).toBe(second.rewards.silver);
+    expect(result.tutorial.current?.step).toBe(3);
     const after = await app.db
       .select({ silver: players.silver })
       .from(players)
       .where(eq(players.id, playerId));
-    expect(after[0]!.silver).toBe(before[0]!.silver + (first.rewards.silver ?? 0));
+    expect(after[0]!.silver).toBe(before[0]!.silver + (second.rewards.silver ?? 0));
   });
 
   it('refuses a step whose goal is not met yet', async () => {
-    await tutorial.advance(ctx(), playerId, 'beat-one');
-    // Step two asks for a champion; nothing has reported one.
+    await complete('step-one');
+    await walkToGoalStep('to-goal');
+    // The step is waiting on something nobody has reported.
     await expect(tutorial.advance(ctx(), playerId, 'too-early')).rejects.toThrow(/not finished/i);
-    expect((await read()).current?.step).toBe(2);
   });
 
   it('hands over the next step’s kit before that step asks for it', async () => {
@@ -340,13 +358,15 @@ describe.skipIf(!dbUp)('the tutorial', () => {
   });
 
   it('replays a retried advance instead of paying twice', async () => {
-    const once = await tutorial.advance(ctx(), playerId, 'same-action');
+    await complete('step-one');
+    const stepBefore = (await read()).current!.step;
+    const once = await complete('same-action');
     const again = await tutorial.advance(ctx(), playerId, 'same-action');
 
     // The replay says exactly what the first answer said — including the next step's kit,
-    // which the first advance also handed over.
+    // which the first advance also handed over — and does not move the cursor again.
     expect(again.paid).toEqual(once.paid);
-    expect(again.tutorial.current?.step).toBe(2);
+    expect(again.tutorial.current?.step).toBe(stepBefore + 1);
     const [row] = await app.db
       .select({ silver: players.silver })
       .from(players)
@@ -384,7 +404,8 @@ describe.skipIf(!dbUp)('the tutorial', () => {
   // ── The subscriber ────────────────────────────────────────────────────────
 
   it('advances the open step from the same fan-out everything else reports to', async () => {
-    await tutorial.advance(ctx(), playerId, 'beat-one');
+    await complete('step-one');
+    await walkToGoalStep('to-goal');
     const goal = (await read()).current!.goal!;
 
     await report({ type: goal.type, amount: 1, facts: goal.filters });
@@ -395,13 +416,15 @@ describe.skipIf(!dbUp)('the tutorial', () => {
   });
 
   it('ignores a report the open step is not asking for', async () => {
-    await tutorial.advance(ctx(), playerId, 'beat-one');
+    await complete('step-one');
+    await walkToGoalStep('to-goal');
     await report({ type: 'gearUpgrade', amount: 5 });
     expect((await read()).current?.progress).toBe(0);
   });
 
   it('never counts progress past the target', async () => {
-    await tutorial.advance(ctx(), playerId, 'beat-one');
+    await complete('step-one');
+    await walkToGoalStep('to-goal');
     const goal = (await read()).current!.goal!;
     await report({ type: goal.type, amount: goal.target * 10, facts: goal.filters });
     expect((await read()).current?.progress).toBe(goal.target);
@@ -414,7 +437,10 @@ describe.skipIf(!dbUp)('the tutorial', () => {
   });
 
   it('completes the starter step from the starter choice itself', async () => {
-    await tutorial.advance(ctx(), playerId, 'beat-one');
+    // Walk to the step that asks for a champion, whichever number it is.
+    for (let index = 0; script()[index]?.goal?.type !== 'championObtained'; index += 1) {
+      await complete(`to-starter-${index}`);
+    }
     const starters = await as({ method: 'GET', url: apiPath(ROUTES.roster.starters) });
     expect(starters.statusCode).toBe(200);
     const championKey = starters.json().data.starters[0].key as string;
@@ -429,8 +455,8 @@ describe.skipIf(!dbUp)('the tutorial', () => {
     // Nothing in the roster module knows the tutorial exists; it reported a champion
     // obtained, and the step that was listening moved.
     const view = await read();
-    expect(view.current?.step).toBe(2);
     expect(view.current?.ready).toBe(true);
+    expect(view.current?.goal?.type).toBe('championObtained');
   });
 
   // ── Leaving, and the end ──────────────────────────────────────────────────
@@ -477,7 +503,8 @@ describe.skipIf(!dbUp)('the tutorial', () => {
     expect(view.current?.progress).toBe(0);
     expect(view.skipped).toBe(false);
     expect(view.finished).toBe(false);
-    await expect(tutorial.advance(ctx(), playerId, 'after-reset')).resolves.toBeDefined();
+    // And it is walkable again from the top, cold open included.
+    await expect(complete('after-reset')).resolves.toBeDefined();
   });
 
   it('skips idempotently over HTTP', async () => {

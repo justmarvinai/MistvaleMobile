@@ -39,8 +39,16 @@ const PLAYABLE_MODES = BATTLE_MODES.filter((mode) => mode !== 'arena') as [Battl
 const startSchema = z.object({
   mode: z.enum(PLAYABLE_MODES),
   stageKey: z.string().min(2).max(64),
-  /** Formation order; the first slot is the leader whose aura applies. */
-  team: z.array(z.string().uuid()).min(1).max(4),
+  /**
+   * Formation order; the first slot is the leader whose aura applies.
+   *
+   * Empty is allowed at this layer, and only because of the cold open: a `tutorial` stage
+   * carries its own team, so the client has nobody to name. Every other mode is held to
+   * one-to-four by `assertTeamShape` in the service, where the mode is known — refusing an
+   * empty team here would have meant either a second endpoint or a schema that lies about
+   * which modes it serves.
+   */
+  team: z.array(z.string().uuid()).max(4).default([]),
 });
 
 const actionSchema = z.object({

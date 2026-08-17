@@ -5,6 +5,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the cold open (P9b)
+
+The game now opens on a fight nobody earned. Three starters, borrowed at a strength a new account will not reach for weeks, against a Sskarn ambush on the Sunken Road — and then the Mistgate flickers and only one of them stays.
+
+- **The stage carries the team.** `tutorial` was a battle mode that had sat unused in the enum since P0; a stage in that mode now names the champions it is fought with, how grown they are and what they are wearing. Nothing is minted into the roster, so nothing has to be confiscated a minute later when the starter choice happens — which was the alternative, and it would have made the first real decision in the game feel like a repossession.
+- **It is the same fight for everybody.** The borrowed relics are rolled from the *stage key* rather than the battle's seed, so a beat tuned once stays tuned. The battle itself still runs on a fresh seed like every other fight.
+- **The near-loss is authored, not scripted, and it is measured.** No outcome is forced anywhere in the engine — the third wave is simply built to hurt: Gorrakh the Broodtyrant, a chapter-3 warlord with no business this far west, flanked by two spitters. `pnpm sim` now fights the stage with the borrowed team and gates on *both* halves of the beat: that it is never lost, and that somebody is driven to about 57% health along the way. The first version of this fight was won at full health in eight turns, which is how the gate earned its place.
+- **The measurement had to be taken mid-fight, not at the end.** A team with a healer finishes topped up, so the closing frame said "untouched" about a battle that had been close. The gate steps the fight and records the lowest health anybody *reached*, which is what the drama beat actually is.
+- **It costs nothing and pays nothing**: no energy, no silver, no champion XP, no stage clear. It cannot be run in a batch. It does still *report the win* — the tutorial step that opened it is listening for exactly that, and a free fight once per account is not a farm.
+- Publish validation refuses a borrowed team on any stage that is not a tutorial one — it would be a roster the player never chose, silently replacing the one they did — and refuses a tutorial stage that carries nobody.
+- The script is **fifteen steps** now, with the cold open at the front. Nobody's progress moved: it is stored as a position, which is what that decision was for.
+
 ### Added — the tutorial engine, and the script it runs (P9a)
 
 The Wardenmaster now walks a new warden from the first mist to the point the Valewarden's Path takes over. Fourteen steps, all of them content.

@@ -14,6 +14,7 @@ import {
   type BattleEvent,
   type BattleState,
   type ChampionEntry,
+  type ChampionScalingConfig,
 } from '@mistvale/engine';
 import {
   UNLOCK_LEVELS,
@@ -40,6 +41,7 @@ import * as ladder from '../arena/ladder';
 import { arenaConfigFrom } from '../arena/rating';
 import * as depths from '../depths/service';
 import * as gear from '../gear/service';
+import { borrowedTeam, PresetTeamError } from './preset';
 import * as mastery from '../mastery/service';
 import * as meta from '../meta/progress';
 import * as quests from '../meta/quests';
@@ -295,7 +297,18 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
   if (options.mode !== 'practice' && stage.mode !== options.mode) {
     throw new AppError('VALIDATION', `Stage "${options.stageKey}" is not a ${options.mode} stage.`);
   }
-  assertTeamShape(options.team);
+
+  // The cold open is the one fight where the player brings nobody: the stage carries the
+  // team, because it happens before the account owns a champion at all. Anything the
+  // client sends is ignored rather than refused — there is nothing it could usefully say.
+  const borrowed = stage.mode === 'tutorial';
+  if (borrowed) {
+    if (stage.presetTeam.length === 0) {
+      throw new AppError('CONTENT_STALE', `Stage "${options.stageKey}" has nobody to fight with.`);
+    }
+  } else {
+    assertTeamShape(options.team);
+  }
 
   const snapshot = ctx.content.current();
   const config = combatConfigFrom(snapshot.bundle.config);
@@ -325,7 +338,10 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // The unlock chain has been authored in content since P1; this is where it finally
     // binds. Checked against the same rule the campaign map greys stages out with, so a
     // player is never shown an open door the server will slam.
-    if (options.mode !== 'practice') {
+    if (borrowed) {
+      // Nothing to gate: it is the first thing that happens, and the tutorial's own
+      // position is what decides whether it is offered at all.
+    } else if (options.mode !== 'practice') {
       await assertStageOpen(tx, ctx, player, stage, stages);
     } else if (!(await progress.hasCleared(tx, options.playerId, stage.key))) {
       // The sandbox is for *re*-fighting: free entry to a stage nobody has beaten would be
@@ -333,12 +349,14 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       throw new AppError('LOCKED_CONTENT', 'You can only practise a stage you have cleared.');
     }
 
-    const owned = await roster.findOwned(tx, options.playerId, options.team);
-    if (owned.length !== options.team.length) {
+    const owned = borrowed ? [] : await roster.findOwned(tx, options.playerId, options.team);
+    if (!borrowed && owned.length !== options.team.length) {
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
     }
 
-    const entries = await assembleEntries(tx, ctx, owned, champions, scaling, options.playerId);
+    const entries = borrowed
+      ? borrowedTeamFor(ctx, stage, champions, scaling)
+      : await assembleEntries(tx, ctx, owned, champions, scaling, options.playerId);
 
     // Energy: derived from the clock, so an idle account costs nothing to keep current.
     const now = new Date();
@@ -348,8 +366,10 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       level: player.level,
       now,
     });
-    // Practice re-fights are free by design (GAME_DESIGN §15 — the sandbox).
-    const cost = options.mode === 'practice' ? 0 : stage.energyCost;
+    // Practice re-fights are free by design (GAME_DESIGN §15 — the sandbox), and so is the
+    // cold open — a fight before the account has spent anything cannot cost energy it has
+    // not been shown yet.
+    const cost = options.mode === 'practice' || borrowed ? 0 : stage.energyCost;
     if (energy.value < cost) {
       throw new AppError('ENERGY_LOW', 'Not enough energy for that stage.');
     }
@@ -383,7 +403,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // Everything that took the field counts as met, which is what makes the Chronicle a
     // record of the world rather than a list of receipts (GAME_DESIGN §10).
     await chronicle.see(tx, options.playerId, [
-      ...owned.map((member) => member.championKey),
+      ...entries.map((entry) => entry.def.key),
       ...stage.waves.flatMap((wave) => wave.map((unit) => unit.enemyKey)),
     ]);
 
@@ -414,6 +434,32 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       rewards: null,
     };
   });
+}
+
+/**
+ * `borrowedTeam`, with the content cache read for it and its one failure mapped.
+ *
+ * The maths lives in `./preset` so `pnpm sim` can fight the cold open headlessly with the
+ * exact team this builds; all that belongs here is where the tables come from and what a
+ * deleted champion means to an HTTP caller.
+ */
+function borrowedTeamFor(
+  ctx: BattleContext,
+  stage: StageDef,
+  champions: ReadonlyMap<string, ChampionDef>,
+  scaling: ChampionScalingConfig,
+): ChampionEntry[] {
+  try {
+    return borrowedTeam(
+      stage,
+      champions,
+      scaling,
+      gear.gearContextFrom(ctx.content.current().bundle),
+    );
+  } catch (cause) {
+    if (cause instanceof PresetTeamError) throw new AppError('CONTENT_STALE', cause.message);
+    throw cause;
+  }
 }
 
 /** The battle a player is currently in, if any. */
@@ -664,10 +710,10 @@ export async function runMany(
 
   const stage = stages.get(options.stageKey);
   if (!stage) throw AppError.notFound(`No stage "${options.stageKey}".`);
-  if (options.mode === 'practice') {
-    // The sandbox costs nothing and pays nothing; repeating it would spend an allowance
-    // to produce an empty summary.
-    throw new AppError('VALIDATION', 'Practice fights cannot be run in a batch.');
+  if (options.mode === 'practice' || options.mode === 'tutorial') {
+    // Both cost nothing and pay nothing; repeating either would spend an allowance to
+    // produce an empty summary.
+    throw new AppError('VALIDATION', 'That kind of fight cannot be run in a batch.');
   }
   if (stage.mode !== options.mode) {
     throw new AppError('VALIDATION', `Stage "${options.stageKey}" is not a ${options.mode} stage.`);
@@ -757,7 +803,7 @@ export async function runMany(
     // Everything that takes the field counts as met, once for the batch rather than
     // once per run: the Chronicle records that they fought, not how often.
     await chronicle.see(tx, options.playerId, [
-      ...owned.map((member) => member.championKey),
+      ...entries.map((entry) => entry.def.key),
       ...stage.waves.flatMap((wave) => wave.map((unit) => unit.enemyKey)),
     ]);
 
@@ -894,6 +940,20 @@ async function settle(
   // Practice is free and pays nothing — including stars, clears and first-clear bonuses.
   // A sandbox that quietly advanced progress would be the cheapest farm in the game.
   if (row.mode === 'practice') {
+    return { ...NO_REWARDS, stars: starsFor(stage, state) };
+  }
+
+  // The cold open pays nothing either — it is fought with champions the account does not
+  // own, so there is nobody for champion XP to land on and no clear worth recording — but
+  // it *is* a battle that was won, and it has to say so. The tutorial step that opened it
+  // is waiting on exactly that report, and it is the only listener that will hear it: a
+  // free fight once per account is not a farm, and pretending it never happened would mean
+  // the script's first step could only be finished by something other than finishing it.
+  if (row.mode === 'tutorial') {
+    await meta.track(tx, ctx, playerId, [
+      { type: 'battleWin', facts: { mode: row.mode } },
+      { type: 'stageClear', facts: { mode: row.mode, stageKey: row.stageKey } },
+    ]);
     return { ...NO_REWARDS, stars: starsFor(stage, state) };
   }
 

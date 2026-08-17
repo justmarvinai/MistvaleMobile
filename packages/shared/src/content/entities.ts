@@ -523,6 +523,39 @@ export const dungeonDefSchema = contentMetaSchema.extend({
 });
 export type DungeonDef = z.infer<typeof dungeonDefSchema>;
 
+/**
+ * A relic as *content* names it: the kind of piece, not the piece.
+ *
+ * The set, slot, rank and rarity are the decision an author makes; the main stat and the
+ * substats are the game's to roll, exactly as they are for a drop. Shared by everything
+ * that hands a relic over without one having been found — the login calendar's welcome
+ * week, a tutorial step, and the borrowed team of a cold-open fight.
+ */
+export const relicGrantSchema = z.object({
+  setKey: z.string(),
+  slot: z.enum(GEAR_SLOTS),
+  rank: z.number().int().min(MIN_RANK).max(MAX_RANK),
+  rarity: z.enum(RARITIES),
+});
+export type RelicGrant = z.infer<typeof relicGrantSchema>;
+
+/**
+ * One champion of a stage's borrowed team.
+ *
+ * Everything the engine needs to build a combatant without a `player_champions` row behind
+ * it: who, how grown, and what they are wearing. The relics are rolled from the stage key
+ * rather than from the battle's seed, so the cold open is the *same* fight for everybody —
+ * a drama beat tuned once is a drama beat that lands every time.
+ */
+export const presetChampionSchema = z.object({
+  championKey: contentKeySchema,
+  level: z.number().int().min(1).max(60).default(1),
+  rank: z.number().int().min(MIN_RANK).max(MAX_RANK).default(1),
+  ascension: z.number().int().min(0).max(6).default(0),
+  relics: z.array(relicGrantSchema).max(9).default([]),
+});
+export type PresetChampion = z.infer<typeof presetChampionSchema>;
+
 export const stageDefSchema = contentMetaSchema.extend({
   mode: z.enum(STAGE_MODES),
   /** Chapter or dungeon this stage belongs to. */
@@ -589,6 +622,18 @@ export const stageDefSchema = contentMetaSchema.extend({
       playerLevel: z.number().int().min(1).max(60).optional(),
     })
     .default({}),
+  /**
+   * The team this stage is fought with, when the player does not bring one.
+   *
+   * Only `tutorial` stages use it, and publish validation refuses it anywhere else. The
+   * cold open is a fight with three champions nobody owns yet — that is the whole point of
+   * it, and the alternative was minting a roster to confiscate two-thirds of ten minutes
+   * later. Borrowing the team from content instead means nothing is created, nothing is
+   * taken back, and the opening fight is authored the way every other fight is.
+   *
+   * Empty on every other stage, where the player's own team is the only team.
+   */
+  presetTeam: z.array(presetChampionSchema).max(4).default([]),
 });
 export type StageDef = z.infer<typeof stageDefSchema>;
 
@@ -835,14 +880,6 @@ export type EventDef = z.infer<typeof eventDefSchema>;
  * length is simply `days.length`: a shorter calendar is a shorter cycle, with nothing to
  * configure.
  */
-export const relicGrantSchema = z.object({
-  setKey: z.string(),
-  slot: z.enum(GEAR_SLOTS),
-  rank: z.number().int().min(MIN_RANK).max(MAX_RANK),
-  rarity: z.enum(RARITIES),
-});
-export type RelicGrant = z.infer<typeof relicGrantSchema>;
-
 export const loginGrantSchema = z.object({
   /** Champions handed over outright. */
   champions: z.array(z.string()).max(4).default([]),

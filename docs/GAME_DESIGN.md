@@ -117,10 +117,11 @@ Classic arena: 4v4 vs snapshot **defense teams**; tokens cap 10, +1/hour (source
 ### 9.4 Tutorial / Onboarding — *The First Calling*
 Scripted RSL-style opening: cold-open battle with all three starters pre-made (taste of power) → the Mistgate flickers, you may keep only one (**starter choice**) → guided: first summon, equip relic, upgrade relic, clear 1-1…1-7, unlock Quests → tutorial rewards seed the first days. Guide NPC: **the Wardenmaster**, a Hollowborn lantern-keeper.
 
-**Shipped P9a**, as the `tutorialStep` content type — fourteen steps, everything after the cold open, which is a battle mode rather than a script step and lands separately (see USER_QUESTIONS Q3). Two things about how it is built are worth carrying forward:
+**Shipped P9a–P9b**, as the `tutorialStep` content type — fifteen steps, cold open included. Three things about how it is built are worth carrying forward:
 
 - **A step's completion condition is an ordinary goal**, so the tutorial is a subscriber to the fan-out quests and missions already use rather than a mechanism of its own. Nothing that reports activity knows it exists, and a new step is authored exactly like a new daily.
 - **Skippable as a whole, not per step.** The design said "skippable-per-step for alts"; the build makes skipping one decision that ends the script for good. Per-step skipping would have meant deciding what to do about a step's rewards and the kit the next step depends on — and an alt who wants out wants out of all of it, not of step 7.
+- **The cold open borrows rather than grants.** A `tutorial`-mode stage carries the team it is fought with, so the three starters are never minted into a roster the Mistgate is about to reduce to one. The near-loss is authored — the third wave is built to hurt — rather than forced by the engine, and the borrowed relics roll from the stage key so every new warden fights the same fight.
 
 ## 10. Summoning — the Mistgate
 
