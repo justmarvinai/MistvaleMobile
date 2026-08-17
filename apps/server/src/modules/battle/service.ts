@@ -18,6 +18,7 @@ import {
 import {
   UNLOCK_LEVELS,
   multiBattleResultSchema,
+  type ArenaResult,
   type BattleMode,
   type ChampionDef,
   type EnemyDef,
@@ -34,6 +35,9 @@ import { countersFor, record, remaining } from '../../lib/daily-counters';
 import { AppError } from '../../lib/errors';
 import { computeEnergy } from '../../lib/progression';
 import type { ContentCache } from '../../content/cache';
+import * as hall from '../arena/hall';
+import * as ladder from '../arena/ladder';
+import { arenaConfigFrom } from '../arena/rating';
 import * as depths from '../depths/service';
 import * as gear from '../gear/service';
 import * as mastery from '../mastery/service';
@@ -96,7 +100,28 @@ export interface RewardSummary {
   bonus: rewards.RewardBundle;
   /** Chapter star-chest tiers this clear crossed. */
   chestTiers: number[];
+  /**
+   * What an Arena fight moved, on both ratings. Null for every other mode — and present
+   * on an arena *loss* too, because losing is a result the ladder records rather than the
+   * absence of one.
+   */
+  arena: ArenaResult | null;
 }
+
+/** The payout of a fight that pays nothing but is still a result. */
+const NO_REWARDS: RewardSummary = {
+  silver: 0,
+  playerXp: 0,
+  championXp: 0,
+  stars: 0,
+  levelsGained: 0,
+  gear: [],
+  items: {},
+  firstClear: false,
+  bonus: {},
+  chestTiers: [],
+  arena: null,
+};
 
 const MAX_TEAM = 4;
 
@@ -177,12 +202,20 @@ async function assertStageOpen(
  * against is a server concern (docs/COMBAT_SYSTEM.md §1). This is why the number on the
  * champion screen is the number that fights.
  */
-async function assembleEntries(
+export async function assembleEntries(
   tx: Tx,
   ctx: BattleContext,
   owned: readonly roster.RosterEntry[],
   champions: ReadonlyMap<string, ChampionDef>,
   scaling: ReturnType<typeof championScalingFrom>,
+  /**
+   * Whose Hall of Valor applies.
+   *
+   * Required rather than inferred: in the Arena both sides are assembled in the same
+   * call, and each carries its own Hall. Guessing from the champions would give the
+   * attacker's bonuses to the defender's team.
+   */
+  hallOwnerId: string,
 ): Promise<ChampionEntry[]> {
   const snapshot = ctx.content.current();
   const equipped = await gear.gearByChampion(
@@ -191,6 +224,11 @@ async function assembleEntries(
   );
   const gearContext = gear.gearContextFrom(snapshot.bundle);
   const masteryNodes = mastery.nodesFrom(ctx.content);
+
+  // The Hall is account-wide and unconditional, so it lands on the stats side of the
+  // split with relics rather than riding into the engine as an effect.
+  const arenaConfig = arenaConfigFrom(snapshot.bundle.config);
+  const hallLevels = await hall.levelsFor(tx, hallOwnerId);
 
   return owned.map((member) => {
     const def = champions.get(member.championKey);
@@ -213,6 +251,11 @@ async function assembleEntries(
 
     const bonuses = { ...assembled.gear };
     for (const [stat, value] of Object.entries(masteryStats) as [keyof typeof bonuses, number][]) {
+      bonuses[stat] = (bonuses[stat] ?? 0) + value;
+    }
+    for (const [stat, value] of Object.entries(
+      hall.bonusFor(hallLevels, def.element, base, arenaConfig),
+    ) as [keyof typeof bonuses, number][]) {
       bonuses[stat] = (bonuses[stat] ?? 0) + value;
     }
 
@@ -287,7 +330,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
     }
 
-    const entries = await assembleEntries(tx, ctx, owned, champions, scaling);
+    const entries = await assembleEntries(tx, ctx, owned, champions, scaling, options.playerId);
 
     // Energy: derived from the clock, so an idle account costs nothing to keep current.
     const now = new Date();
@@ -438,13 +481,16 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
 
     let summary: RewardSummary | null = (row.rewards as RewardSummary | null) ?? null;
     if (finished) {
-      summary = await settle(
-        tx,
-        ctx,
-        { ...row, teamIds: (row.teamIds as string[]) ?? [] },
-        result.state,
-        options.playerId,
-      );
+      summary =
+        row.mode === 'arena'
+          ? await settleArena(tx, ctx, row, result.state.outcome, options.playerId)
+          : await settle(
+              tx,
+              ctx,
+              { ...row, teamIds: (row.teamIds as string[]) ?? [] },
+              result.state,
+              options.playerId,
+            );
     }
 
     await tx
@@ -496,6 +542,12 @@ export async function retreat(
     const result = retreatBattle(row.state as BattleState, rules, config);
     const events = [...(row.events as BattleEvent[]), ...result.events];
 
+    // Walking out of an arena fight is a loss, not an escape from one. The token is gone
+    // either way, so a costless retreat would only mean a player could abandon every fight
+    // that started badly — which would make losing rating opt-in and the ladder a fiction.
+    const summary =
+      row.mode === 'arena' ? await settleArena(tx, ctx, row, 'retreat', playerId) : null;
+
     await tx
       .update(battleSessions)
       .set({
@@ -503,6 +555,7 @@ export async function retreat(
         events,
         status: 'finished',
         outcome: 'retreat',
+        rewards: summary,
         finishedAt: new Date(),
         updatedAt: new Date(),
       })
@@ -516,7 +569,7 @@ export async function retreat(
       outcome: 'retreat',
       state: result.state,
       events,
-      rewards: null,
+      rewards: summary,
     };
   });
 }
@@ -656,7 +709,7 @@ export async function runMany(
     if (owned.length !== options.team.length) {
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
     }
-    const entries = await assembleEntries(tx, ctx, owned, champions, scaling);
+    const entries = await assembleEntries(tx, ctx, owned, champions, scaling, options.playerId);
 
     const now = new Date();
     const energy = computeEnergy({
@@ -833,18 +886,7 @@ async function settle(
   // Practice is free and pays nothing — including stars, clears and first-clear bonuses.
   // A sandbox that quietly advanced progress would be the cheapest farm in the game.
   if (row.mode === 'practice') {
-    return {
-      silver: 0,
-      playerXp: 0,
-      championXp: 0,
-      stars: starsFor(stage, state),
-      levelsGained: 0,
-      gear: [],
-      items: {},
-      firstClear: false,
-      bonus: {},
-      chestTiers: [],
-    };
+    return { ...NO_REWARDS, stars: starsFor(stage, state) };
   }
 
   // A separate stream from the battle's: consuming loot rolls must not shift combat.
@@ -882,7 +924,33 @@ async function settle(
     firstClear: cleared.firstClear,
     bonus: cleared.bonus,
     chestTiers: cleared.chestTiers,
+    arena: null,
   };
+}
+
+/**
+ * Settles an Arena fight: moves both ratings, pays the medals.
+ *
+ * Unlike every other mode this runs on a *loss* as well as a win, because a loss is a
+ * result the ladder records rather than the absence of one — the defender gains what the
+ * attacker gives up. Anything short of victory is a loss for the attacker, including the
+ * turn limit: an attack that could not finish inside the clock did not take the fight.
+ */
+async function settleArena(
+  tx: Tx,
+  ctx: BattleContext,
+  // In Arena the stage key *is* the opponent: there is no stage, only somebody's defence.
+  row: { id: string; stageKey: string },
+  outcome: BattleState['outcome'],
+  playerId: string,
+): Promise<RewardSummary> {
+  const arena = await ladder.settleBattle(tx, ctx, {
+    attackerId: playerId,
+    defenderId: row.stageKey,
+    battleId: row.id,
+    won: outcome === 'victory',
+  });
+  return { ...NO_REWARDS, arena };
 }
 
 /**
