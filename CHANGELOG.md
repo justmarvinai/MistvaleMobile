@@ -5,6 +5,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the goal engine (P8a)
+
+The foundation the whole retention layer sits on. Nothing player-visible yet — quests get their screen and their claim button in P8b — but the machinery underneath is finished rather than sketched.
+
+- **One fan-out, and nothing knows what a quest is.** `ProgressService.track` is the single place the game reports what a player did: the battle module says a battle was won, the Arena says an attack was fought, and whatever is listening advances. The alternative — every module importing the quest service, then the mission service, then the event service — is how a codebase stops being able to add a fourth thing. Missions, events and the tutorial subscribe here in the phases after this one, and they are deliberately absent rather than stubbed.
+- **A goal is data**: `{type, target, filters}` over a registry of twenty report types. A new daily is an edit in the Admin Suite, not a deploy — which is the hard rule this exists to serve. **Quests are now the eighteenth content type**, so they arrive with the draft → validate → diff → publish flow already around them.
+- **The two classic quest bugs are ruled out once rather than per-goal.** How a goal accumulates is a property of its type — `count` sums reports, `highest` keeps a high-water mark — so "reach +12 on a relic" can never be satisfied by upgrading twelve relics to +1. And publish validation refuses a filter the goal's type does not declare, which stops `{type:'summon', mode:'campaign'}`: a goal that looks perfectly reasonable in the editor and silently never completes.
+- **No reset job.** A quest instance is stamped with the period it belongs to — the game-day for a daily, the Monday for a weekly, the first for a monthly — so yesterday's row simply stops matching and nothing goes round at 04:00 deleting things. A player who finishes their dailies at 03:50 still has last night's row to claim at 04:10, which a job would have thrown away.
+- **Reports cannot be lost, in either direction.** `track` is typed to accept a transaction rather than a database, so "inside the transaction that did the thing" is a rule the compiler keeps: a rolled-back fight leaves no quest credit, and a paid fight always leaves its credit. It also locks the player row before reading progress — without that, a battle settling at the same instant as a purchase would have both read `3`, both write `4`, and one of the two things the player did would simply not have happened. Eight concurrent reports of three energy record 24; before the lock they recorded 6.
+- **The 19 quests of ECONOMY §11** are seeded: eight dailies across eight *different* systems, so the checklist reads as "play the game today" rather than "grind one thing", six weeklies, five monthlies — and the completion chest worth more than any single line, which is what makes the eighth quest worth doing when the first seven have already paid.
+
 ### Added — the Arena (P7, server side)
 
 Asynchronous 4v4 against a snapshot of somebody else's defence team. The defender is never online, never consulted, and never has to be — which is the only way a ladder works when there may be four people playing.

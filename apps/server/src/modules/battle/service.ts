@@ -41,6 +41,7 @@ import { arenaConfigFrom } from '../arena/rating';
 import * as depths from '../depths/service';
 import * as gear from '../gear/service';
 import * as mastery from '../mastery/service';
+import * as meta from '../meta/progress';
 import * as progress from '../progress/service';
 import * as chronicle from '../summon/service';
 import * as rewards from '../rewards/service';
@@ -913,6 +914,21 @@ async function settle(
   // re-farm. `recordClear` owns that distinction.
   const cleared = await progress.recordClear(tx, playerId, stage, ctx.content, state.turn, stars);
 
+  // One win is several reports: it is a battle, a stage clear, possibly a boss kill and a
+  // dungeon floor, and it spent energy. Sent from here rather than from four call sites so
+  // there is one place to be wrong, and inside this transaction so a rolled-back fight
+  // cannot leave quest credit behind. After the payout, too, so a win that levels the
+  // account opens the quests that level unlocks — with this battle already counted.
+  await meta.track(tx, ctx, playerId, [
+    { type: 'battleWin', facts: { mode: row.mode } },
+    { type: 'stageClear', facts: { mode: row.mode, stageKey: row.stageKey } },
+    ...(isBossStage(ctx, stage) ? [{ type: 'bossKill' as const, facts: { mode: row.mode } }] : []),
+    ...(stage.mode === 'campaign'
+      ? []
+      : [{ type: 'dungeonClear' as const, facts: { dungeonKey: stage.parentKey } }]),
+    ...(stage.energyCost > 0 ? [{ type: 'useEnergy' as const, amount: stage.energyCost }] : []),
+  ]);
+
   return {
     silver,
     playerXp: stage.rewards.playerXp,
@@ -951,6 +967,12 @@ async function settleArena(
     won: outcome === 'victory',
   });
   return { ...NO_REWARDS, arena };
+}
+
+/** Whether a stage's waves hold anything content has flagged as a boss. */
+function isBossStage(ctx: BattleContext, stage: StageDef): boolean {
+  const { enemies } = contentMaps(ctx.content);
+  return stage.waves.some((wave) => wave.some((unit) => enemies.get(unit.enemyKey)?.isBoss));
 }
 
 /**

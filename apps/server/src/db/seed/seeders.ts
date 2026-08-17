@@ -3,6 +3,7 @@ import { CAMPAIGN_CHAPTERS, CAMPAIGN_STAGES } from './data/campaign';
 import { DEPTHS_STAGES, DUNGEONS } from './data/depths';
 import { DEPTHS_ENEMIES, DEPTHS_SKILLS } from './data/depths-enemies';
 import { MASTERIES } from './data/masteries';
+import { QUESTS } from './data/quests';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
 import { ENEMIES, ENEMY_SKILLS } from './data/enemies';
@@ -56,6 +57,7 @@ export function buildSeedContent(): SeedContent[] {
     summonPool: SUMMON_POOLS.map((data) => ({ key: data.key, data })),
     shop: SHOPS.map((data) => ({ key: data.key, data })),
     mastery: MASTERIES.map((data) => ({ key: data.key, data })),
+    quest: QUESTS.map((data) => ({ key: data.key, data })),
     gameConfig: GAME_CONFIG.map((data) => ({ key: data.key, data })),
   };
 

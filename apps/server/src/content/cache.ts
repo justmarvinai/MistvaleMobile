@@ -55,6 +55,7 @@ const EMPTY_BUNDLE_TYPES = {
   summonPools: 'summonPool',
   shops: 'shop',
   masteries: 'mastery',
+  quests: 'quest',
 } as const satisfies Record<string, ContentType>;
 
 export class ContentCache {

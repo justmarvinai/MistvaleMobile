@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { tierForRating, type ArenaResult } from '@mistvale/shared';
+import { ARENA_TIERS, tierForRating, type ArenaResult } from '@mistvale/shared';
 import { arenaBattles, arenaState, players } from '../../db/schema/index';
 import type { ArenaStateRow } from '../../db/schema/arena';
 import type { Database } from '../../db/client';
@@ -7,6 +7,7 @@ import { AppError } from '../../lib/errors';
 import { gameDayFrom } from '../../lib/game-day';
 import type { ContentCache } from '../../content/cache';
 import * as rewards from '../rewards/service';
+import { track } from '../meta/progress';
 import { applyRating, arenaConfigFrom, medalsForWin, ratingChange, weeklyDecay } from './rating';
 
 /**
@@ -150,6 +151,15 @@ export async function settleBattle(
     defenderRatingDelta: defenderAfter - defender.rating,
     medals,
   });
+
+  // Fought and won are separate reports: a daily should ask you to turn up, and only the
+  // ladder decides whether you win. The tier rides along as a threshold, so a mission that
+  // asks for Silver is satisfied by reaching it rather than by fighting there.
+  await track(tx, { content: ctx.content }, input.attackerId, [
+    { type: 'arenaBattle' },
+    ...(input.won ? [{ type: 'arenaWin' as const }] : []),
+    { type: 'arenaTier', amount: ARENA_TIERS.indexOf(tierAfter) + 1 },
+  ]);
 
   const [opponent] = await tx
     .select({ profileName: players.profileName })

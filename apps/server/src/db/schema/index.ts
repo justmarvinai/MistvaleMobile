@@ -11,3 +11,4 @@ export * from './audit';
 export * from './content';
 export * from './game';
 export * from './inventory';
+export * from './meta';

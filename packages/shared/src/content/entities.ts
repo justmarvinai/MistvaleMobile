@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { goalSchema } from './goals';
 import {
   DIFFICULTIES,
   ELEMENTS,
@@ -668,3 +669,34 @@ export type ItemDefInput = z.input<typeof itemDefSchema>;
 export type ShopDefInput = z.input<typeof shopDefSchema>;
 export type SummonPoolDefInput = z.input<typeof summonPoolDefSchema>;
 export type GameConfigEntryInput = z.input<typeof gameConfigEntrySchema>;
+
+// ── Quests ──────────────────────────────────────────────────────────────────
+
+/**
+ * How often a quest resets.
+ *
+ * The period is what makes a quest *an instance* rather than a permanent goal: today's
+ * dailies are keyed by today's game-day, and yesterday's row simply stops matching. That
+ * is why no job has to go round at 04:00 deleting things (docs/ARCHITECTURE.md §5.1).
+ */
+export const QUEST_PERIODS = ['daily', 'weekly', 'monthly'] as const;
+export type QuestPeriod = (typeof QUEST_PERIODS)[number];
+
+export const questDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(64),
+  description: z.string().max(240).default(''),
+  period: z.enum(QUEST_PERIODS),
+  /**
+   * What has to happen. More than one goal means all of them — an "and", never an "or",
+   * because an "or" quest is one a player cannot plan around.
+   */
+  goals: z.array(goalSchema).min(1).max(4),
+  rewards: z.record(z.string(), z.number()).default({}),
+  /** Counts towards the period's completion meter and its chest. */
+  countsTowardChest: z.boolean().default(true),
+  /** Hidden until the account reaches this level, so the list stays honest. */
+  unlockLevel: z.number().int().min(1).max(60).default(1),
+  icon: z.string().max(64).default(''),
+  active: z.boolean().default(true),
+});
+export type QuestDef = z.infer<typeof questDefSchema>;

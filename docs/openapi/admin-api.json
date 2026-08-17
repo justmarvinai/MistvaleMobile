@@ -1383,6 +1383,12 @@
               "$ref": "#/components/schemas/MasteryDef"
             }
           },
+          "quests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestDef"
+            }
+          },
           "config": {
             "type": "object",
             "propertyNames": {
@@ -1433,6 +1439,7 @@
           "summonPools",
           "shops",
           "masteries",
+          "quests",
           "config"
         ],
         "additionalProperties": false
@@ -1675,6 +1682,7 @@
               "summonPool",
               "shop",
               "mastery",
+              "quest",
               "gameConfig"
             ]
           },
@@ -1761,6 +1769,7 @@
               "summonPool",
               "shop",
               "mastery",
+              "quest",
               "gameConfig"
             ]
           },
@@ -1814,6 +1823,7 @@
               "summonPool",
               "shop",
               "mastery",
+              "quest",
               "gameConfig"
             ]
           },
@@ -2665,6 +2675,7 @@
               "summonPool",
               "shop",
               "mastery",
+              "quest",
               "gameConfig"
             ]
           },
@@ -2801,6 +2812,7 @@
               "summonPool",
               "shop",
               "mastery",
+              "quest",
               "gameConfig"
             ]
           },
@@ -4211,6 +4223,147 @@
         ],
         "additionalProperties": false
       },
+      "QuestDef": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "description": {
+            "default": "",
+            "type": "string",
+            "maxLength": 240
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ]
+          },
+          "goals": {
+            "minItems": 1,
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "battleWin",
+                    "stageClear",
+                    "bossKill",
+                    "useEnergy",
+                    "summon",
+                    "gearUpgrade",
+                    "gearLevel",
+                    "championLevelUp",
+                    "championRankUp",
+                    "championAscend",
+                    "masteryLearn",
+                    "shopPurchase",
+                    "arenaBattle",
+                    "arenaWin",
+                    "arenaTier",
+                    "chapterStars",
+                    "dungeonClear",
+                    "accountLevel",
+                    "claimAllDailies",
+                    "championObtained"
+                  ]
+                },
+                "target": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "filters": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "target",
+                "filters"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rewards": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "countsTowardChest": {
+            "default": true,
+            "type": "boolean"
+          },
+          "unlockLevel": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "icon": {
+            "default": "",
+            "type": "string",
+            "maxLength": 64
+          },
+          "active": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "sortOrder",
+          "name",
+          "description",
+          "period",
+          "goals",
+          "rewards",
+          "countsTowardChest",
+          "unlockLevel",
+          "icon",
+          "active"
+        ],
+        "additionalProperties": false
+      },
       "ResetPlayerAccountResponse": {
         "type": "object",
         "properties": {
@@ -4354,6 +4507,7 @@
               "summonPool",
               "shop",
               "mastery",
+              "quest",
               "gameConfig"
             ]
           },
@@ -7661,6 +7815,7 @@
                 "summon-pools",
                 "shops",
                 "masteries",
+                "quests",
                 "config"
               ]
             }
@@ -7845,6 +8000,7 @@
                 "summon-pools",
                 "shops",
                 "masteries",
+                "quests",
                 "config"
               ]
             }
@@ -8064,6 +8220,7 @@
                 "summon-pools",
                 "shops",
                 "masteries",
+                "quests",
                 "config"
               ]
             }
@@ -8266,6 +8423,7 @@
                 "summon-pools",
                 "shops",
                 "masteries",
+                "quests",
                 "config"
               ]
             }
@@ -8459,6 +8617,7 @@
                 "summon-pools",
                 "shops",
                 "masteries",
+                "quests",
                 "config"
               ]
             }

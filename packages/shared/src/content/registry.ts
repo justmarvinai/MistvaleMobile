@@ -13,6 +13,7 @@ import {
   itemDefSchema,
   shopDefSchema,
   skillDefSchema,
+  questDefSchema,
   summonPoolDefSchema,
   stageDefSchema,
   statusDefSchema,
@@ -44,6 +45,7 @@ export const CONTENT_TYPES = [
   'summonPool',
   'shop',
   'mastery',
+  'quest',
   'gameConfig',
 ] as const;
 
@@ -171,6 +173,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: [],
     inBundle: true,
   },
+  quest: {
+    label: 'Quests',
+    path: 'quests',
+    schema: questDefSchema,
+    references: [],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -198,6 +207,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'summonPool',
   'shop',
   'mastery',
+  'quest',
   'gameConfig',
 ];
 

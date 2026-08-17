@@ -149,13 +149,26 @@ Weighted rolls, engine-agnostic: `entries: {ref_type: gear|item|silver|champion,
 
 Rates and mercy live here rather than in `game_config` because they are per-pool: Radiant's mercy is not Gleaming's, and a rate-up weekend on one banner must not touch the others. Publish validation refuses a table that does not sum to 1, or a pool advertising a rarity it holds no champion for.
 
-### `quest_defs` (daily/weekly/monthly), `mission_defs` (one long chain)
-| column | notes |
+### `quest` (daily/weekly/monthly), `mission_defs` (one long chain)
+A `content_entries` row like every other content type, not a table of its own.
+
+| field | notes |
 |---|---|
-| period enum (`daily`/`weekly`/`monthly`) or chain position int |
-| goal jsonb — typed goal DSL: `{type:"battle_wins", mode:"campaign", count:3}`, `{type:"upgrade_gear", toLevel:4}`, `{type:"summon", count:1}`, `{type:"use_energy", count:60}` … (goal types are an engine-side registry, publish-validated) |
-| rewards jsonb, sort, active bool |
-| daily set also feeds a completion meter → `daily_chest_defs` (all-dailies bonus) |
+| `period` | `daily` / `weekly` / `monthly`. Missions carry a chain position instead. |
+| `goals` | 1–4 goals from the DSL below. A quest is done when **every** one is met. |
+| `rewards` | the usual `{currency-or-item-key: amount}` map, paid through `RewardService`. |
+| `countsTowardChest` | whether it fills the all-dailies completion meter. |
+| `unlockLevel`, `active`, `sortOrder`, `icon` | when it appears, whether it appears, and where. |
+
+**The goal DSL** (`packages/shared/src/content/goals.ts`) is `{type, target, filters}` and nothing else:
+
+- **`type`** is one of a registry of twenty — `battleWin`, `stageClear`, `bossKill`, `useEnergy`, `summon`, `gearUpgrade`, `gearLevel`, `championLevelUp`, `championRankUp`, `championAscend`, `masteryLearn`, `shopPurchase`, `arenaBattle`, `arenaWin`, `arenaTier`, `chapterStars`, `dungeonClear`, `accountLevel`, `claimAllDailies`, `championObtained`. Adding one is a line in the registry plus a `track` call where it happens; every quest, mission and event milestone can use it immediately.
+- **`target`** is how many, or how high. Progress is capped at it, so a goal never reads 340/3.
+- **`filters`** narrows what counts — `{mode: 'campaign'}`, `{dungeonKey: 'keep_ember'}`. **Publish validation refuses a filter the type does not declare**, which is what stops `{type:'summon', mode:'campaign'}`: a goal that looks reasonable in the editor and silently never completes.
+
+How a goal accumulates is a property of its *type*, not of the goal: `count` sums reports, `highest` keeps a high-water mark. That is what makes "reach +12 on a relic" un-satisfiable by upgrading twelve relics to +1 — the classic quest bug, ruled out once rather than per-goal.
+
+The daily set also feeds a completion meter → the all-dailies chest.
 
 ### `event_defs` + `event_milestone_defs` (timed events framework)
 `key, name, banner_asset, starts_at, ends_at, point_rules jsonb ([{action:"champ_xp", points_per:1000}, {action:"dungeon_clear", dungeon:"any", points:10}…]), milestones: [{points, rewards}]`. Cron activates/expires; admin editor composes these freely (Champion Training / Dungeon Delve / Summon Surge are just presets).
@@ -250,10 +263,24 @@ Stock is rolled per player and **stored**, not derived on read: what a player is
 A floor *is* a stage, so its clear is already a `stage_progress` row with `parent_key` set to the dungeon. "Deepest floor" is the largest floor number among those rows and "clears" is their sum, both derived on read. A second table would be the same fact written twice, and the second copy is the one that drifts.
 
 ### `player_quests` / `player_missions`
-`player_id, quest_key, period_anchor date (for daily/weekly/monthly instance), progress jsonb, completed_at, claimed_at`. Missions: `player_id, mission_key, progress, completed_at, claimed_at`. Progress events flow through one `ProgressService.track(tx, playerId, action, params)` fan-out (quests + missions + events + tutorial all subscribe — one integration point for every future goal type).
+`player_id, quest_key, period_anchor, progress jsonb, completed_at, claimed_at`, unique on `(player_id, quest_key, period_anchor)`. Missions: the same without the anchor, unique on `(player_id, mission_key)`.
+
+**`period_anchor` is what makes "today's dailies" a lookup rather than a job**: it is the game-day a daily instance belongs to, the week's Monday for a weekly, the month's first for a monthly. Yesterday's row simply stops matching, so nothing goes round at 04:00 deleting things — and a player who finished their dailies at 03:50 still has last night's row to claim at 04:10. All three periods derive from the same `lib/game-day` the rest of the game resets on, so a player's day ends once rather than three times.
+
+`progress` is an array **parallel to the definition's goals**, so a two-goal quest stores `[2, 0]`. Positional rather than keyed, because goals have no identity of their own and an operator reordering them in the editor must not silently rebind a player's progress to a different goal.
+
+Three tables rather than one with a discriminator, because their *lifetimes* differ — a quest instance belongs to a period and is replaced, a mission is permanent and ordered, an event window opens and shuts. One table would need a partial index per lifetime anyway, and every query would carry a `where kind = …` the planner has to be told about.
+
+**Everything advances through one fan-out**: `ProgressService.track(tx, ctx, playerId, events)`. Modules report what happened — `battleWin`, `summon`, `gearUpgrade` — and whatever is listening advances; nothing in Mistvale knows what a quest is. Adding the tutorial, a battle pass or a guild later is a subscriber, not a change to any module that reports. Two properties hold it together:
+
+- **Called inside the transaction that did the thing**, always — typed to accept a transaction and not a `Database`, so it is a rule the compiler keeps. A quest that advanced for a battle that then rolled back is a quest the player did not earn; a battle paid for without its quest credit is the same bug wearing a different hat.
+- **It locks the player row first.** That single statement reads the level the quest list is gated on *and* serialises every report for the account, which is what makes the read-modify-write safe: without it, a battle settling while a purchase lands both read `3`, both write `4`, and one of the two things the player did never happened.
 
 ### `player_events`
-`player_id, event_key, points, claimed_milestones int[]`
+`player_id, event_key, points, claimed_milestones jsonb`, unique on `(player_id, event_key)`. Events are point ladders rather than goal lists; the claimed indices are stored so claiming is idempotent and a milestone list extended mid-event does not re-open what was already paid.
+
+### `login_claims`
+`player_id, track (calendar|welcome), day, claimed_on`, unique on `(player_id, track, claimed_on)`. A row per claim rather than a counter: the calendar gives day N on the Nth *claim*, so a player who misses a day loses the day and not their place.
 
 ### `arena_state`
 `player_id pk, rating, tier, weekly_high, tokens, tokens_updated_at, defence_team jsonb (player_champion ids in formation order), offers jsonb, offers_refreshed_at, refreshes_used, refresh_day, last_weekly_claim, pending_chest_week, pending_chest_high`.
