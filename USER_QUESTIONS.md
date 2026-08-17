@@ -61,5 +61,5 @@ Each has a phase and a default, so none of them blocks anything. Listed here so 
 | B6 | Skill tomes: player-choice | COMBAT §11 |
 | B7 | 3-star rule: win / no deaths / ≤12 turns | CONTENT_PLAN §3 |
 | B8 | Profile names: no filter; admin rename is the fix | DATA_MODEL, ADMIN_SUITE_DESIGN |
-| C1–C8 | **All suggested additions approved**: choice tomes, multi-battle, replays + share links, Odds & Mercy panel, team presets, daily first-win bonuses, practice sandbox, colorblind glyphs | GDD §15, ROADMAP P3/P6/P8 |
+| C1–C8 | **All suggested additions approved**: choice tomes, multi-battle, Odds & Mercy panel, team presets, daily first-win bonuses, practice sandbox, colorblind glyphs. 〔Replays + share links were approved here and **dropped on 2026-08-17** at the owner's request — see GDD §15.〕 | GDD §15, ROADMAP P3/P6/P8 |
 | — | **Complexity stance:** keep RSL-scale content & grind, simplify entry complexity; deepen systems later | GDD §1.1 (binding design rule) |

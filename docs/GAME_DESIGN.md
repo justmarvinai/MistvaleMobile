@@ -154,9 +154,10 @@ No payments in EA (crystals fully earnable; "premium" is a pacing currency, not 
 ## 15. Approved additions (owner-approved 2026-08-16 — all in EA-0.1 scope)
 1. **Choice-based skill tomes** (vs the source's random books) — §7.
 2. **Multi-battle** from L6, 30 runs/day cap — §9.1 / ECONOMY §2.
-3. **Battle replays & shareable battle-log links** — profile/battle-log feature, built on the event-log architecture (ROADMAP P8).
-4. **"Odds & Mercy" transparency panel** — §10.
-5. **Team presets per mode** — team-select feature (ROADMAP P3).
-6. **Daily first-win-of-mode bonuses** — quest-layer bonus (ROADMAP P8).
-7. **Practice sandbox** — re-fight any cleared stage at zero energy / zero reward (ROADMAP P6).
-8. **Colorblind-safe element glyphs** — UI_UX_DESIGN §element indicators.
+3. **"Odds & Mercy" transparency panel** — §10.
+4. **Team presets per mode** — team-select feature (ROADMAP P3).
+5. **Daily first-win-of-mode bonuses** — quest-layer bonus (ROADMAP P8).
+6. **Practice sandbox** — re-fight any cleared stage at zero energy / zero reward (ROADMAP P6).
+7. **Colorblind-safe element glyphs** — UI_UX_DESIGN §element indicators.
+
+**Dropped 2026-08-17 (owner):** battle replays and shareable battle-log links. The engine is deterministic and the event log is persisted, so the capability is still *there* — a replay is a seed and a log — but nothing is built on it and nothing is planned to be. The share-link half was the expensive part: a public, unauthenticated surface with its own privacy questions, for a game whose only audience is signed in.

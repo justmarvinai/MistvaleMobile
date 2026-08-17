@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Removed — battle replays and shareable battle-log links
+
+Dropped from the plan at the owner's request. It had been approved in the 2026-08-16 review as one of eight suggested additions and scheduled into P8; no part of it was built, so nothing is being taken away from anybody.
+
+Worth recording what remains, because it is not nothing: the engine is deterministic and seeded, the seed is stored per battle, and the event log is persisted. A replay was always going to be *a seed and a log* rather than new machinery, and both are still there — serving the client's own battle rendering and the Admin inspector. What is gone is the plan to build a viewer on them and, more to the point, the share link: a public unauthenticated surface, with its own privacy questions and its own abuse surface, for a game whose entire audience is signed in.
+
 ### Added — the public profile card (P8g)
 
 Every warden now has a card, and every name in the game leads to one.
