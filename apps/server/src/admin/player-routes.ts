@@ -85,6 +85,38 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
     return reply.send(apiSuccess({ temporaryPassword, sessionsRevoked }, app.content.rev));
   });
 
+  app.post(routePattern(ADMIN_ROUTES.players.reset), async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const actor = operator(request);
+
+    // The "before" is read first and recorded whole. This is the one action with nothing
+    // to compare against afterwards — everything it destroys is gone — so the audit entry
+    // is the only remaining answer to "what did that account have?".
+    const before = await playerAdmin.detail(ctx(), id);
+    const { subject, summary } = await playerAdmin.resetAccount(app.db, id);
+
+    await recordAudit(app.db, request, {
+      action: 'player.reset',
+      entity: 'player',
+      entityId: subject.playerId,
+      before: {
+        level: before.player.level,
+        silver: before.player.silver,
+        crystals: before.player.crystals,
+        valorMedals: before.player.valorMedals,
+        holdings: before.holdings,
+        progress: before.progress,
+      },
+      after: { accountName: subject.accountName, ...summary },
+    });
+    request.log.warn(
+      { actor: actor.accountName, accountName: subject.accountName, ...summary },
+      'admin reset an account to a fresh start',
+    );
+
+    return reply.send(apiSuccess(summary, app.content.rev));
+  });
+
   app.post(routePattern(ADMIN_ROUTES.players.rank), async (request, reply) => {
     const { id } = request.params as { id: string };
     const actor = operator(request);

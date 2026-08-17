@@ -165,6 +165,26 @@ export const adminGrantRequestSchema = z
   );
 export type AdminGrantRequest = z.infer<typeof adminGrantRequestSchema>;
 
+/**
+ * What a full account reset destroyed.
+ *
+ * Reported back so the operator sees the size of what they just did — "reset" and
+ * "reset, and that was 143 relics" are different sentences, and only one of them
+ * tells somebody they had the wrong account open.
+ */
+export const adminResetAccountResultSchema = z.object({
+  champions: z.number().int(),
+  gear: z.number().int(),
+  itemStacks: z.number().int(),
+  stagesCleared: z.number().int(),
+  battles: z.number().int(),
+  summons: z.number().int(),
+  /** Currencies taken back, exactly as the ledger line records them. */
+  refunded: z.record(z.string(), z.number()),
+  sessionsRevoked: z.number().int(),
+});
+export type AdminResetAccountResult = z.infer<typeof adminResetAccountResultSchema>;
+
 export const adminGrantResultSchema = z.object({
   applied: z.record(z.string(), z.number()),
   levelsGained: z.number().int(),

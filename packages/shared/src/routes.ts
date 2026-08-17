@@ -167,6 +167,8 @@ export const ADMIN_ROUTES = {
     profileName: (id: string) => `/players/${encodeURIComponent(id)}/profile-name`,
     grant: (id: string) => `/players/${encodeURIComponent(id)}/grant`,
     sessions: (id: string) => `/players/${encodeURIComponent(id)}/sessions`,
+    /** Back to the state registration leaves an account in. Irreversible. */
+    reset: (id: string) => `/players/${encodeURIComponent(id)}/reset`,
   },
 
   /**

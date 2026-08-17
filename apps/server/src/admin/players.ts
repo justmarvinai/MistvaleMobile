@@ -8,13 +8,21 @@ import {
 } from '@mistvale/shared';
 import {
   accounts,
+  arenaBattles,
+  arenaState,
+  battleSessions,
+  championSightings,
+  chapterRewards,
   economyLog,
   gearInstances,
+  hallOfValor,
   playerChampions,
   playerItems,
   players,
   sessions,
+  shopStates,
   stageProgress,
+  summonHistory,
 } from '../db/schema/index';
 import type { Database } from '../db/client';
 import { AppError } from '../lib/errors';
@@ -55,6 +63,7 @@ interface Subject {
   status: (typeof accounts.$inferSelect)['status'];
   banReason: string | null;
   level: number;
+  isBot: boolean;
 }
 
 async function requireSubject(db: Executor, playerId: string): Promise<Subject> {
@@ -68,6 +77,7 @@ async function requireSubject(db: Executor, playerId: string): Promise<Subject> 
       status: accounts.status,
       banReason: accounts.banReason,
       level: players.level,
+      isBot: players.isBot,
     })
     .from(players)
     .innerJoin(accounts, eq(accounts.id, players.accountId))
@@ -453,4 +463,163 @@ export async function revokeSessions(
     .where(eq(sessions.accountId, subject.accountId))
     .returning({ id: sessions.id });
   return { subject, revoked: removed.length };
+}
+
+/**
+ * Returns an account to the state registration leaves it in.
+ *
+ * The support answer to "I want to start over", and the one an operator reaches for most
+ * while testing. Everything the account has *played* is destroyed: champions, relics,
+ * items, campaign and Depths progress, the Chronicle, shop stock, summon history, battles,
+ * its arena standing and its Hall of Valor. The account itself survives — same name, same
+ * password, same rank — because this is a reset, not a deletion.
+ *
+ * Three deliberate exceptions to "everything":
+ *
+ *  - **Settings stay.** Audio, battle speed, reduced motion and colourblind glyphs are
+ *    accessibility choices, not progress. Resetting somebody's motion sensitivity because
+ *    they asked for a fresh roster would be actively unkind.
+ *  - **`economy_log` stays**, and the wallet is emptied *through* `RewardService` rather
+ *    than by writing zeros. That keeps the ledger's central property true — the sum of a
+ *    player's deltas is their balance — so the reset appears as a line rather than as a
+ *    discontinuity nobody can explain later. The faucet and sink history was real; it
+ *    happened, and rewriting it would corrupt the economy dashboards it feeds.
+ *  - **The audit trail stays**, obviously, and gains an entry for this.
+ *
+ * No champion is granted back. A fresh account has none and is shown the starter chooser,
+ * so that is what "fresh" has to mean here — and the welcome grant arrives with the
+ * starter, exactly as it does for a new warden.
+ */
+export interface ResetSummary {
+  champions: number;
+  gear: number;
+  itemStacks: number;
+  stagesCleared: number;
+  battles: number;
+  summons: number;
+  /** Currencies taken back, as a ledger line records them. */
+  refunded: Record<string, number>;
+  sessionsRevoked: number;
+}
+
+export async function resetAccount(
+  db: Database,
+  playerId: string,
+): Promise<{ subject: Subject; summary: ResetSummary }> {
+  const subject = await requireSubject(db, playerId);
+  if (subject.isBot) {
+    throw new AppError(
+      'VALIDATION',
+      'That is an arena bot. Rebuild the ladder from the bot manager instead.',
+    );
+  }
+
+  const summary = await db.transaction(async (tx) => {
+    // Locked for the same reason every other mutation locks it: a battle resolving
+    // mid-reset would pay into a wallet this is in the middle of emptying.
+    const [wallet] = await tx
+      .select({
+        silver: players.silver,
+        crystals: players.crystals,
+        valorMedals: players.valorMedals,
+      })
+      .from(players)
+      .where(eq(players.id, playerId))
+      .for('update');
+    if (!wallet) throw AppError.notFound('No such player.');
+
+    // Counted where the number is worth reporting back, deleted plainly where it is not.
+    // Written out rather than looped: these tables do not share a primary key, and a loop
+    // clever enough to paper over that is a loop nobody can check.
+    const champions = await tx
+      .delete(playerChampions)
+      .where(eq(playerChampions.playerId, playerId))
+      .returning({ id: playerChampions.id });
+    const gear = await tx
+      .delete(gearInstances)
+      .where(eq(gearInstances.playerId, playerId))
+      .returning({ id: gearInstances.id });
+    const items = await tx
+      .delete(playerItems)
+      .where(eq(playerItems.playerId, playerId))
+      .returning({ id: playerItems.id });
+    const cleared = await tx
+      .delete(stageProgress)
+      .where(eq(stageProgress.playerId, playerId))
+      .returning({ id: stageProgress.id });
+    const battles = await tx
+      .delete(battleSessions)
+      .where(eq(battleSessions.playerId, playerId))
+      .returning({ id: battleSessions.id });
+    const summons = await tx
+      .delete(summonHistory)
+      .where(eq(summonHistory.playerId, playerId))
+      .returning({ id: summonHistory.id });
+
+    await tx.delete(chapterRewards).where(eq(chapterRewards.playerId, playerId));
+    await tx.delete(championSightings).where(eq(championSightings.playerId, playerId));
+    await tx.delete(shopStates).where(eq(shopStates.playerId, playerId));
+    await tx.delete(hallOfValor).where(eq(hallOfValor.playerId, playerId));
+    await tx.delete(arenaState).where(eq(arenaState.playerId, playerId));
+
+    // Arena history names two players. Both sides go: a fight whose attacker no longer
+    // has a rating is a row that can only mislead whoever reads it next.
+    await tx
+      .delete(arenaBattles)
+      .where(or(eq(arenaBattles.attackerId, playerId), eq(arenaBattles.defenderId, playerId)));
+
+    // The wallet goes back through RewardService so the ledger still balances.
+    const refunded: Record<string, number> = {};
+    const cost = {
+      ...(wallet.silver > 0 ? { silver: wallet.silver } : {}),
+      ...(wallet.crystals > 0 ? { crystals: wallet.crystals } : {}),
+      ...(wallet.valorMedals > 0 ? { valorMedals: wallet.valorMedals } : {}),
+    };
+    if (Object.keys(cost).length > 0) {
+      const spent = await rewards.spend(tx, playerId, cost, 'admin:reset');
+      Object.assign(refunded, spent.applied);
+    }
+
+    // Level and XP cannot go through the ledger — it moves currencies, and account level
+    // is derived from XP rather than held as a balance. Set directly, to exactly what
+    // `auth/service.ts` gives a new registration.
+    await tx
+      .update(players)
+      .set({
+        level: 1,
+        xp: 0,
+        energy: energyCapForLevel(1),
+        energyUpdatedAt: new Date(),
+        rosterCapacity: 60,
+        tutorialStep: 0,
+        summonPity: {},
+        lastSummonActionId: null,
+        lastMultiBattle: null,
+        dailyCounters: {},
+        dailyCountersDay: null,
+        lastDailyResetAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(players.id, playerId));
+
+    // Signed out everywhere: a tab still holding the old roster would spend the next
+    // minute 404-ing against champions that no longer exist.
+    const revoked = await tx
+      .delete(sessions)
+      .where(eq(sessions.accountId, subject.accountId))
+      .returning({ id: sessions.id });
+
+    return {
+      champions: champions.length,
+      gear: gear.length,
+      itemStacks: items.length,
+      stagesCleared: cleared.length,
+      battles: battles.length,
+      summons: summons.length,
+      refunded,
+      sessionsRevoked: revoked.length,
+    };
+  });
+
+  return { subject, summary };
 }

@@ -10,6 +10,7 @@ import {
   adminPlayerSearchSchema,
   adminPlayerSummarySchema,
   adminRenameRequestSchema,
+  adminResetAccountResultSchema,
   adminResetPasswordResultSchema,
   adminSessionSchema,
   adminSessionsRevokedSchema,
@@ -418,6 +419,24 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Sign an account out everywhere',
     response: adminSessionsRevokedSchema,
     errors: [404],
+  },
+
+  {
+    surface: 'admin',
+    method: 'post',
+    path: routePattern(ADMIN_ROUTES.players.reset),
+    operationId: 'resetPlayerAccount',
+    summary: 'Return an account to a fresh start',
+    description:
+      'Destroys everything the account has played — champions, relics, items, campaign ' +
+      'and Depths progress, the Chronicle, shop stock, summon history, battles, its arena ' +
+      'standing and its Hall of Valor — and puts it back at level 1 with the starter ' +
+      'chooser waiting. The account keeps its name, password and rank: this is a reset, ' +
+      'not a deletion. Settings survive (accessibility choices are not progress), and the ' +
+      'wallet is emptied through RewardService so `economy_log` still balances. ' +
+      'Irreversible, and every session is signed out.',
+    response: adminResetAccountResultSchema,
+    errors: [400, 404],
   },
 
   // ── Admin: the Arena's bot ladder ─────────────────────────────────────────

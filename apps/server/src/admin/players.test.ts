@@ -2,7 +2,20 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance, InjectOptions } from 'fastify';
 import { eq } from 'drizzle-orm';
 import { ADMIN_API_PREFIX, ADMIN_ROUTES, ROUTES, apiPath } from '@mistvale/shared';
-import { accounts, economyLog, players, sessions } from '../db/schema/index';
+import { DEFAULT_PLAYER_SETTINGS } from '@mistvale/shared';
+import {
+  accounts,
+  arenaState,
+  auditLog,
+  economyLog,
+  gearInstances,
+  hallOfValor,
+  playerChampions,
+  playerItems,
+  players,
+  sessions,
+  stageProgress,
+} from '../db/schema/index';
 import {
   buildTestApp,
   extractSessionCookie,
@@ -431,6 +444,242 @@ describe.skipIf(!dbUp)('player management', () => {
         payload: { note: 'an empty gesture' },
       });
       expect(response.statusCode).toBe(400);
+    });
+  });
+
+  describe('resetting an account to a fresh start', () => {
+    /**
+     * Registers an account and gives it something to lose in every table the reset
+     * touches.
+     *
+     * Rows are written directly rather than played for: this suite publishes no content,
+     * and what is under test is that the reset empties these tables — not how they came
+     * to be full. Nothing here is a foreign key into content, so plain keys are honest.
+     */
+    async function playedAccount() {
+      const target = await register('spent');
+      const playerId = target.playerId;
+
+      const [champion] = await app.db
+        .insert(playerChampions)
+        .values({ playerId, championKey: 'anuria', level: 30, rank: 4 })
+        .returning({ id: playerChampions.id });
+
+      await app.db.insert(gearInstances).values({
+        playerId,
+        equippedChampionId: champion!.id,
+        setKey: 'vanguard',
+        slot: 'weapon',
+        rank: 5,
+        rarity: 'epic',
+        mainStat: { stat: 'atk', percent: false, value: 200 },
+      });
+      await app.db.insert(playerItems).values({ playerId, itemKey: 'sigil_faded', quantity: 7 });
+      await app.db
+        .insert(stageProgress)
+        .values({ playerId, stageKey: 'c01_s1_normal', stars: 3, clears: 12 });
+      await app.db.insert(arenaState).values({ playerId, rating: 1_400 });
+      await app.db
+        .insert(hallOfValor)
+        .values({ playerId, element: 'ember', stat: 'atk', level: 3 });
+
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.grant(playerId)),
+        payload: { silver: 50_000, crystals: 400, valorMedals: 90, note: 'test fixture' },
+      });
+
+      return target;
+    }
+
+    it('destroys what was played and reports how much', async () => {
+      const target = await playedAccount();
+
+      const response = await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(target.playerId)),
+      });
+      expect(response.statusCode, response.body).toBe(200);
+      const summary = response.json().data;
+      expect(summary.champions).toBe(1);
+      expect(summary.gear).toBe(1);
+      expect(summary.itemStacks).toBe(1);
+      expect(summary.stagesCleared).toBe(1);
+      expect(summary.refunded.silver).toBe(-50_000);
+
+      const roster = await app.db
+        .select({ id: playerChampions.id })
+        .from(playerChampions)
+        .where(eq(playerChampions.playerId, target.playerId));
+      expect(roster).toHaveLength(0);
+    });
+
+    it('puts the account back exactly where registration leaves it', async () => {
+      const target = await playedAccount();
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(target.playerId)),
+      });
+
+      const [fresh] = await app.db.select().from(players).where(eq(players.id, target.playerId));
+      expect(fresh!.level).toBe(1);
+      expect(fresh!.xp).toBe(0);
+      expect(fresh!.silver).toBe(0);
+      expect(fresh!.crystals).toBe(0);
+      expect(fresh!.valorMedals).toBe(0);
+      expect(fresh!.tutorialStep).toBe(0);
+      expect(fresh!.summonPity).toEqual({});
+      expect(
+        await app.db
+          .select({ id: playerChampions.id })
+          .from(playerChampions)
+          .where(eq(playerChampions.playerId, target.playerId)),
+      ).toHaveLength(0);
+    });
+
+    it('takes the arena standing and the Hall with it', async () => {
+      await app.db.insert(arenaState).values({ playerId: targetPlayerId, rating: 1_400 });
+      await app.db
+        .insert(hallOfValor)
+        .values({ playerId: targetPlayerId, element: 'ember', stat: 'atk', level: 3 });
+
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(targetPlayerId)),
+      });
+
+      expect(
+        await app.db.select().from(arenaState).where(eq(arenaState.playerId, targetPlayerId)),
+      ).toHaveLength(0);
+      expect(
+        await app.db.select().from(hallOfValor).where(eq(hallOfValor.playerId, targetPlayerId)),
+      ).toHaveLength(0);
+    });
+
+    it('leaves the ledger balancing rather than rewriting it', async () => {
+      // The whole point of emptying the wallet through RewardService: the sum of a
+      // player's deltas stays equal to their balance, so a reset reads as a line rather
+      // than as a discontinuity nobody can explain a year later.
+      //
+      // Granted through the API rather than by SQL, because the invariant is only
+      // meaningful if the money arrived the way money actually arrives.
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.grant(targetPlayerId)),
+        payload: { silver: 50_000, crystals: 400, note: 'test fixture' },
+      });
+
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(targetPlayerId)),
+      });
+
+      const ledger = await app.db
+        .select({ source: economyLog.source, deltas: economyLog.deltas })
+        .from(economyLog)
+        .where(eq(economyLog.playerId, targetPlayerId));
+      const reset = ledger.filter((line) => line.source === 'admin:reset');
+      expect(reset).toHaveLength(1);
+      expect((reset[0]!.deltas as Record<string, number>).silver).toBe(-50_000);
+
+      // Every silver line ever written for this account, summed, equals what it holds.
+      const total = ledger.reduce(
+        (sum, line) => sum + ((line.deltas as Record<string, number>).silver ?? 0),
+        0,
+      );
+      const [row] = await app.db
+        .select({ silver: players.silver })
+        .from(players)
+        .where(eq(players.id, targetPlayerId));
+      expect(row!.silver).toBe(0);
+      expect(total).toBe(row!.silver);
+    });
+
+    it('keeps the account, its password and its rank', async () => {
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(targetPlayerId)),
+      });
+
+      // A reset is not a deletion: the same credentials still work afterwards.
+      const login = await app.inject({
+        method: 'POST',
+        url: apiPath(ROUTES.auth.login),
+        payload: { accountName: targetName, password },
+      });
+      expect(login.statusCode, login.body).toBe(200);
+    });
+
+    it('signs every session out', async () => {
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(targetPlayerId)),
+      });
+      const live = await app.db
+        .select({ id: sessions.id })
+        .from(sessions)
+        .where(eq(sessions.accountId, targetAccountId));
+      expect(live).toHaveLength(0);
+    });
+
+    it('keeps accessibility settings, which are not progress', async () => {
+      await app.db
+        .update(players)
+        .set({ settings: { ...DEFAULT_PLAYER_SETTINGS, reducedMotion: true } })
+        .where(eq(players.id, targetPlayerId));
+
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(targetPlayerId)),
+      });
+
+      const [row] = await app.db
+        .select({ settings: players.settings })
+        .from(players)
+        .where(eq(players.id, targetPlayerId));
+      expect(row!.settings.reducedMotion).toBe(true);
+    });
+
+    it('refuses an arena bot, and says where to go instead', async () => {
+      await app.db.update(players).set({ isBot: true }).where(eq(players.id, targetPlayerId));
+      const response = await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(targetPlayerId)),
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.message).toMatch(/bot manager/i);
+    });
+
+    it('records what was destroyed in the audit trail', async () => {
+      // Nothing survives to compare against afterwards, so the audit entry is the only
+      // remaining answer to "what did that account have?".
+      await app.db
+        .update(players)
+        .set({ silver: 50_000, level: 20 })
+        .where(eq(players.id, targetPlayerId));
+
+      await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(targetPlayerId)),
+      });
+
+      const [entry] = await app.db
+        .select({ before: auditLog.before, after: auditLog.after })
+        .from(auditLog)
+        .where(eq(auditLog.action, 'player.reset'));
+      expect(entry).toBeDefined();
+      expect((entry!.before as { silver: number }).silver).toBe(50_000);
+      expect((entry!.before as { level: number }).level).toBe(20);
+    });
+
+    it('lets an operator reset their own account', async () => {
+      // Unlike rank and ban, this locks nobody out: the account keeps its rank and its
+      // password, so an admin testing the game on their own account may use it.
+      const response = await asAdmin({
+        method: 'POST',
+        url: adminUrl(ADMIN_ROUTES.players.reset(adminPlayerId)),
+      });
+      expect(response.statusCode, response.body).toBe(200);
     });
   });
 
