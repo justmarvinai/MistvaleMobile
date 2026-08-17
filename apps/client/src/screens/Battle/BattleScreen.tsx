@@ -9,6 +9,7 @@ import { useBattleStore } from '../../state/battleStore';
 import { useContentStore } from '../../state/contentStore';
 import { useNavStore } from '../../state/navStore';
 import { usePlayerStore } from '../../state/playerStore';
+import { currentStep, useTutorialStore } from '../../state/tutorialStore';
 import { Results } from './Results';
 import styles from './BattleScreen.module.scss';
 
@@ -121,6 +122,7 @@ export function BattleScreen(): JSX.Element {
   if (!battle) {
     return (
       <div className={styles.screen}>
+        <ColdOpen />
         <p className={styles.hint}>No battle in progress.</p>
         <Button onClick={leave}>Back</Button>
       </div>
@@ -233,6 +235,43 @@ export function BattleScreen(): JSX.Element {
       </div>
 
       {finished && <Results onLeave={leave} />}
+    </div>
+  );
+}
+
+/**
+ * The way into the cold open.
+ *
+ * The opening fight is the only battle in the game that is not started from a map — there
+ * is no map yet, and no team to bring. So the empty battle screen offers it, but *only*
+ * while the tutorial is actually waiting on it: the check is the step's own goal naming a
+ * `tutorial` stage, which means an operator who re-cuts the script moves this button with
+ * it, and a player past that step never sees it again.
+ */
+function ColdOpen(): JSX.Element | null {
+  const step = useTutorialStore(currentStep);
+  const startBattle = useBattleStore((state) => state.startBattle);
+  const busy = useBattleStore((state) => state.busy);
+  const bundle = useContentStore((state) => state.bundle);
+
+  const goal = step?.goal;
+  const stageKey = goal?.type === 'stageClear' ? String(goal.filters.stageKey ?? '') : '';
+  const stage = bundle?.stages.find((entry) => entry.key === stageKey);
+  if (!stage || stage.mode !== 'tutorial') return null;
+
+  return (
+    <div className={styles.coldOpen}>
+      <h2 className={styles.coldOpenTitle}>{step?.title}</h2>
+      <p className={styles.coldOpenNote}>
+        Three of them, lent to you for as long as this takes. They are not yours yet.
+      </p>
+      <Button
+        variant="primary"
+        disabled={busy}
+        onClick={() => void startBattle({ mode: 'tutorial', stageKey: stage.key, team: [] })}
+      >
+        Meet them on the road
+      </Button>
     </div>
   );
 }

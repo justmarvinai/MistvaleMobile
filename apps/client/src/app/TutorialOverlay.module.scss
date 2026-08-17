@@ -1,0 +1,210 @@
+/**
+ * The tutorial overlay.
+ *
+ * `pointer-events: none` on the root and back on only the card is the whole trick: the
+ * scrim dims without swallowing clicks, so the thing being pointed at is still the thing
+ * the player presses. Nothing here is a modal.
+ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal - 1; // under real modals: the starter choice must sit on top of this
+  pointer-events: none;
+}
+
+.scrim {
+  position: fixed;
+  background: rgba(4, 6, 10, 0.72);
+  transition: opacity $duration-base $ease-out;
+}
+
+/* The lantern-light edge around whatever is being pointed at. */
+.ring {
+  position: fixed;
+  border: 2px solid $mist;
+  box-shadow:
+    0 0 0 1px rgba(4, 6, 10, 0.9),
+    0 0 18px 2px $mist-glow;
+  animation: breathe 2.4s $ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(4, 6, 10, 0.9),
+      0 0 12px 1px $mist-glow;
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(4, 6, 10, 0.9),
+      0 0 26px 4px $mist-glow;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring {
+    animation: none;
+  }
+}
+
+/* The parchment. Sits low by default and moves up when the target is in the bottom half. */
+.card {
+  position: fixed;
+  bottom: $space-6;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - #{$space-5 * 2}));
+  pointer-events: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-4 $space-5 $space-4;
+
+  background: linear-gradient(180deg, $panel-raised 0%, $panel 100%);
+  border: 2px solid $edge-bright;
+  box-shadow:
+    0 0 0 2px $ground-deep,
+    0 12px 40px rgba(0, 0, 0, 0.65);
+  animation: rise $duration-slow $ease-out;
+}
+
+.card.high {
+  bottom: auto;
+  top: $space-6;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+}
+
+.speaker {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-family: $font-display;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $mist-dim;
+}
+
+.lantern {
+  color: $gold;
+  font-size: 15px;
+}
+
+.who {
+  flex: 1;
+}
+
+.count {
+  font-family: $font-mono;
+  font-size: 12px;
+  color: $muted-deep;
+  letter-spacing: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 22px;
+  line-height: 1.15;
+  color: $parchment;
+}
+
+.body {
+  color: $parchment-dim;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* The reminder line: what the step is waiting for, and how far along it is. */
+.goal {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  margin: 0;
+  padding: $space-2 $space-3;
+  background: $panel-inset;
+  border-left: 3px solid $mist-dim;
+  font-size: 13px;
+  color: $muted;
+}
+
+.goalLabel {
+  flex: 1;
+  font-family: $font-display;
+  letter-spacing: 0.03em;
+}
+
+.goalCount {
+  font-family: $font-mono;
+  color: $parchment-dim;
+}
+
+.goalDone {
+  font-family: $font-display;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $success;
+}
+
+.payout {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $space-2 $space-3;
+  padding: $space-3;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.payoutLabel {
+  width: 100%;
+  font-family: $font-display;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $gold;
+}
+
+.payoutRelics {
+  font-size: 13px;
+  color: $parchment-dim;
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: $danger;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $space-2;
+}
+
+.confirm {
+  flex: 1;
+  font-size: 13px;
+  color: $warning;
+}

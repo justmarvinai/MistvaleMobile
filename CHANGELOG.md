@@ -5,6 +5,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the Wardenmaster, on screen (P9c)
+
+The fifteen steps existed and were invisible. Now there is an overlay for them.
+
+- **A dim with a hole cut in it.** The thing a step points at keeps its own colours and stays clickable; everything around it is scrimmed. Four panes rather than a giant box-shadow, so the target really is untouched rather than tinted.
+- **The overlay is a signpost, not a fence.** It never blocks input, and it never traps anybody in a modal until they press the right button. It can afford that because the *server* is what enforces order — a step closes when its goal is met and not before.
+- **It takes you there once.** A step names a screen; if the player is elsewhere, the overlay navigates — once, when the step opens. A player who then wanders off is exploring, which is the thing the tutorial is trying to teach, so it does not drag them back.
+- **The cold open finally has a door.** It is the only battle in the game not started from a map, because there is no map yet and no team to bring, so the empty battle screen offers it — and only while the tutorial is actually waiting on it. The check is the step's own goal naming a `tutorial` stage, so re-cutting the script moves the button with it.
+- **Continue is dark until the server says otherwise**, and says which of the two reasons it is dark: "Not yet" when the player is in the right place with the thing undone, "Go and do it" when they have wandered.
+- **Skipping asks once and means it.** The confirmation says it is final, because it is.
+- **Pointing is an attribute, not a wiring diagram.** An element carries `data-mv-highlight="dock:campaign"` and the overlay finds it. The Dock does not import the tutorial and the tutorial does not know what a Dock is — and half the things worth pointing at live inside a `map`, where a ref-and-hook registry would have needed a component extracted per call site. Eleven targets are marked: every dock tile, each campaign stage by key, the Mistgate's pull, the relic vault, the forge, the day's quest list, feeding a champion, the Bazaar's stock and the starter choice.
+- Content deliberately is **not** validated against that list. Client and content deploy separately, so a step pointing at something this build does not have degrades to a centred dialogue rather than failing to publish.
+
+### Fixed
+
+- **A Depths test counted the cold open as a dungeon floor.** It filtered stages by "not campaign", which was true of every Depths floor until a `tutorial` stage existed. It now names the three modes that *are* the Depths.
+
 ### Added — the cold open (P9b)
 
 The game now opens on a fight nobody earned. Three starters, borrowed at a strength a new account will not reach for weeks, against a Sskarn ambush on the Sunken Road — and then the Mistgate flickers and only one of them stays.

@@ -117,6 +117,11 @@ async function register(page: Page, account: string, profile: string): Promise<v
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Take up the lantern' }).click();
 
+  // Out of the tutorial, and deliberately: the script opens on a borrowed fight and only
+  // reaches the starter choice three steps later, which is right for a player and wrong
+  // for a suite about something else. `tutorial.spec.ts` is where the script is walked.
+  await leaveTutorial(page);
+
   const starterDialog = page.getByRole('dialog', { name: /choose your first champion/i });
   await expect(starterDialog).toBeVisible({ timeout: 20_000 });
   await starterDialog
@@ -155,4 +160,27 @@ async function readChronicle(page: Page): Promise<ChronicleView> {
     };
     return body.data.chronicle;
   });
+}
+
+/**
+ * Skips the tutorial and reloads, so the account starts where these tests expect it.
+ *
+ * A skip is final and server-side, so the reload comes back with no overlay and no
+ * scripted navigation — the Haven, an empty roster, and the starter choice waiting.
+ */
+async function leaveTutorial(page: Page): Promise<void> {
+  await page.waitForFunction(
+    async () => {
+      const response = await fetch('/api/tutorial/skip', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{}',
+        credentials: 'include',
+      });
+      return response.ok;
+    },
+    undefined,
+    { timeout: 20_000 },
+  );
+  await page.reload();
 }

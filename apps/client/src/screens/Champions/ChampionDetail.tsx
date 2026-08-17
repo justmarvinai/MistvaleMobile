@@ -13,6 +13,7 @@ import { MasteryTrees } from './MasteryTrees';
 import { RelicPicker } from './RelicPicker';
 import { StatTable } from './StatTable';
 import styles from './ChampionDetail.module.scss';
+import { highlightable } from '../../app/highlight';
 
 /**
  * One champion, everything about it.
@@ -306,6 +307,7 @@ export function ChampionDetailModal({
 
         <div className={styles.ladders}>
           <Button
+            {...highlightable('button:champion-level')}
             variant="secondary"
             disabled={busy || champion.level >= champion.levelCap}
             onClick={() => setPicking('level')}

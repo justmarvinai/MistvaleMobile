@@ -1,5 +1,6 @@
 import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from './screens';
 import { usePlayerStore, type DockBadges } from '@/state/playerStore';
+import { highlightable } from './highlight';
 import styles from './Dock.module.scss';
 
 /**
@@ -33,6 +34,7 @@ export function Dock({
           <button
             key={screen.id}
             type="button"
+            {...highlightable(`dock:${screen.id}`)}
             className={[styles.item, active ? styles.active : '', unlocked ? '' : styles.locked]
               .filter(Boolean)
               .join(' ')}

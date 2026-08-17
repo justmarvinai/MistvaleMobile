@@ -34,6 +34,9 @@ import type {
   NewsView,
   PublicProfile,
   SetShowcaseRequest,
+  TutorialAdvanceRequest,
+  TutorialAdvanceResult,
+  TutorialView,
   MissionClaimRequest,
   MissionClaimResult,
   MissionsView,
@@ -362,6 +365,19 @@ export const gameApi = {
         championIds,
       } satisfies SetShowcaseRequest)
       .then((data) => data.profile),
+
+  // ── The tutorial ──────────────────────────────────────────────────────────
+
+  tutorial: () =>
+    api.get<{ tutorial: TutorialView }>(ROUTES.tutorial.state).then((data) => data.tutorial),
+
+  advanceTutorial: (actionId: string) =>
+    api.post<TutorialAdvanceResult>(ROUTES.tutorial.advance, {
+      actionId,
+    } satisfies TutorialAdvanceRequest),
+
+  skipTutorial: () =>
+    api.post<{ tutorial: TutorialView }>(ROUTES.tutorial.skip, {}).then((data) => data.tutorial),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

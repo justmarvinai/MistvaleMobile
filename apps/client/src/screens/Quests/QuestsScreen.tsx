@@ -9,6 +9,7 @@ import { toast } from '../../state/uiStore';
 import { QuestRow } from './QuestRow';
 import { FirstWins } from './FirstWins';
 import styles from './QuestsScreen.module.scss';
+import { highlightable } from '../../app/highlight';
 
 /**
  * The checklist.
@@ -156,7 +157,7 @@ export function QuestsScreen(): JSX.Element {
             Nothing here yet — {PERIOD_LABELS[tab].toLowerCase()} quests open as your account grows.
           </p>
         ) : (
-          <ul className={styles.list}>
+          <ul className={styles.list} {...highlightable(`panel:quest-${tab}`)}>
             {visible.map((standing) => (
               <QuestRow
                 key={standing.questKey}

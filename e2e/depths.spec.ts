@@ -106,7 +106,11 @@ test.describe('the Depths', () => {
 
     expect(bundle.dungeons).toHaveLength(10);
 
-    const floors = bundle.stages.filter((stage) => stage.mode !== 'campaign');
+    // Named by the modes that *are* the Depths rather than by "not campaign": the cold
+    // open is a `tutorial` stage, and a filter phrased as an exclusion quietly counted it.
+    const floors = bundle.stages.filter((stage) =>
+      ['dungeon', 'springs', 'proving'].includes(stage.mode),
+    );
     expect(floors).toHaveLength(120);
 
     // Every keep's floor count matches what it advertises on the hub.
@@ -131,6 +135,11 @@ async function register(page: Page, account: string, profile: string): Promise<v
   await page.getByLabel('Profile name').fill(unique(profile));
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+  // Out of the tutorial, and deliberately: the script opens on a borrowed fight and only
+  // reaches the starter choice three steps later, which is right for a player and wrong
+  // for a suite about something else. `tutorial.spec.ts` is where the script is walked.
+  await leaveTutorial(page);
 
   const starterDialog = page.getByRole('dialog', { name: /choose your first champion/i });
   await expect(starterDialog).toBeVisible({ timeout: 20_000 });
@@ -161,4 +170,27 @@ async function readDepths(page: Page): Promise<DepthsView> {
     const body = (await response.json()) as { data: { depths: unknown } };
     return body.data.depths as DepthsView;
   });
+}
+
+/**
+ * Skips the tutorial and reloads, so the account starts where these tests expect it.
+ *
+ * A skip is final and server-side, so the reload comes back with no overlay and no
+ * scripted navigation — the Haven, an empty roster, and the starter choice waiting.
+ */
+async function leaveTutorial(page: Page): Promise<void> {
+  await page.waitForFunction(
+    async () => {
+      const response = await fetch('/api/tutorial/skip', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{}',
+        credentials: 'include',
+      });
+      return response.ok;
+    },
+    undefined,
+    { timeout: 20_000 },
+  );
+  await page.reload();
 }

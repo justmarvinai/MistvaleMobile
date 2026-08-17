@@ -26,7 +26,9 @@ import { usePlayerStore } from '@/state/playerStore';
 import { useContentStore } from '@/state/contentStore';
 import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screens';
 import { useNavStore } from '@/state/navStore';
+import { useTutorialStore } from '@/state/tutorialStore';
 import { TopBar } from './TopBar';
+import { TutorialOverlay } from './TutorialOverlay';
 import { Dock } from './Dock';
 import { BootScreen } from './BootScreen';
 import styles from './App.module.scss';
@@ -79,6 +81,8 @@ export function App() {
         });
     } else if (status === 'anonymous') {
       resetPlayer();
+      // The next account gets its own script, not this one's step 7.
+      useTutorialStore.getState().reset();
     }
   }, [status, refreshPlayer, resetPlayer]);
 
@@ -130,10 +134,24 @@ export function App() {
 function GameShell() {
   const screen = useNavStore((state) => state.screen);
   const setScreen = useNavStore((state) => state.setScreen);
+  const loadTutorial = useTutorialStore((state) => state.load);
+  const refreshTutorial = useTutorialStore((state) => state.refresh);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newsOpen, setNewsOpen] = useState(false);
 
   const navigate = useCallback((id: ScreenId) => setScreen(id), [setScreen]);
+
+  useEffect(() => {
+    void loadTutorial();
+  }, [loadTutorial]);
+
+  // A step's goal is completed by *doing the thing*, and the module that did it reports to
+  // the server rather than to the overlay. Re-reading on every screen change is what turns
+  // "you cleared the stage" into a Continue button lighting up, and it is cheap: one small
+  // GET at the moment the player has just finished doing something.
+  useEffect(() => {
+    void refreshTutorial();
+  }, [screen, refreshTutorial]);
 
   // Number keys jump between dock slots.
   useEffect(() => {
@@ -212,6 +230,7 @@ function GameShell() {
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <NewsPanel open={newsOpen} onClose={() => setNewsOpen(false)} />
       <ProfilePanel />
+      <TutorialOverlay />
     </>
   );
 }

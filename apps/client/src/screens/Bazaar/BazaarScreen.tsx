@@ -8,6 +8,7 @@ import { useRosterStore } from '../../state/rosterStore';
 import { useShopStore } from '../../state/shopStore';
 import { RelicCard } from '../Relics/RelicCard';
 import styles from './BazaarScreen.module.scss';
+import { highlightable } from '../../app/highlight';
 
 /**
  * The Bazaar.
@@ -104,7 +105,7 @@ export function BazaarScreen(): JSX.Element {
           </div>
         </header>
 
-        <div className={styles.slots}>
+        <div className={styles.slots} {...highlightable('panel:bazaar-offers')}>
           {stock.slots.map((slot) => {
             const wallet = slot.currency === 'silver' ? silver : crystals;
             const affordable = wallet >= slot.price;

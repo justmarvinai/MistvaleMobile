@@ -10,6 +10,7 @@ import { usePlayerStore } from '../../state/playerStore';
 import { RelicCard } from './RelicCard';
 import { Forge } from './Forge';
 import styles from './RelicsScreen.module.scss';
+import { highlightable } from '../../app/highlight';
 
 /**
  * The relic vault.
@@ -135,7 +136,7 @@ export function RelicsScreen(): JSX.Element {
               : 'Nothing in that slot.'}
           </p>
         ) : (
-          <div className={styles.grid}>
+          <div className={styles.grid} {...highlightable('panel:relic-list')}>
             {visible.map((piece) => (
               <div key={piece.id} className={styles.entry}>
                 <RelicCard

@@ -4,6 +4,7 @@ import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { stillPath } from '../../game/sprites';
+import { highlightable } from '../../app/highlight';
 import styles from './StarterChoice.module.scss';
 
 /**
@@ -54,7 +55,7 @@ export function StarterChoice(): JSX.Element | null {
 
   return (
     <Modal open title="Choose your first champion" onClose={() => undefined}>
-      <div className={styles.body}>
+      <div className={styles.body} {...highlightable('modal:starter-choice')}>
         <p className={styles.intro}>
           One of them steps out of the mist to stand with you. This choice is permanent — the other
           two can still be found later, through the Mistgate.

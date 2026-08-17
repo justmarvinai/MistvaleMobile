@@ -9,6 +9,7 @@ import { useSummonStore } from '../../state/summonStore';
 import { OddsPanel } from './OddsPanel';
 import { RevealOverlay } from './RevealOverlay';
 import styles from './MistgateScreen.module.scss';
+import { highlightable } from '../../app/highlight';
 
 /**
  * The Mistgate.
@@ -115,7 +116,11 @@ export function MistgateScreen(): JSX.Element {
           )}
 
           <div className={styles.actions}>
-            <Button disabled={!canPullOne || pulling} onClick={() => void summon(1)}>
+            <Button
+              {...highlightable(`button:summon-${banner.key}`)}
+              disabled={!canPullOne || pulling}
+              onClick={() => void summon(1)}
+            >
               Summon ×1
             </Button>
             <Button disabled={!canPullTen || pulling} onClick={() => void summon(10)}>

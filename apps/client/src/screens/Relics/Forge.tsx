@@ -6,6 +6,7 @@ import { gameApi, newActionId } from '../../api/game';
 import { usePlayerStore } from '../../state/playerStore';
 import { RelicCard } from './RelicCard';
 import styles from './Forge.module.scss';
+import { highlightable } from '../../app/highlight';
 
 /**
  * The upgrade forge.
@@ -144,7 +145,11 @@ export function Forge({
           <Button variant="ghost" disabled={playing} onClick={onClose}>
             Done
           </Button>
-          <Button disabled={atMax || busy || playing || !affordable} onClick={() => void run()}>
+          <Button
+            {...highlightable('button:relic-upgrade')}
+            disabled={atMax || busy || playing || !affordable}
+            onClick={() => void run()}
+          >
             {playing ? 'Working…' : atMax ? 'Maxed' : `Attempt ×${times}`}
           </Button>
         </div>

@@ -6,6 +6,7 @@ import { usePlayerStore } from '../../state/playerStore';
 import { useProgressStore } from '../../state/progressStore';
 import { TeamSelect } from '../Battle/TeamSelect';
 import styles from './CampaignScreen.module.scss';
+import { highlightable } from '../../app/highlight';
 
 /**
  * The campaign map.
@@ -195,6 +196,7 @@ export function CampaignScreen(): JSX.Element {
                             <button
                               key={stage.key}
                               type="button"
+                              {...highlightable(`stage:${stage.key}`)}
                               className={styles.stage}
                               disabled={!unlocked}
                               data-cleared={stars > 0 ? 'true' : undefined}
