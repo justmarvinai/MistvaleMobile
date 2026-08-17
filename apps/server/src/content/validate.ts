@@ -401,6 +401,109 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     }
   }
 
+  // A track's *live* one is whichever of its kind is active, so two active calendars is a
+  // coin toss over which one a player walks. Counted before the per-track pass so the
+  // message can name the other one.
+  const activeTracks = new Map<string, string[]>();
+  for (const [key, entity] of parsed.get('loginTrack') ?? []) {
+    const track = entity as { track: string; active: boolean };
+    if (!track.active) continue;
+    activeTracks.set(track.track, [...(activeTracks.get(track.track) ?? []), key]);
+  }
+
+  for (const [key, entity] of parsed.get('loginTrack') ?? []) {
+    const track = entity as {
+      track: string;
+      active: boolean;
+      days: {
+        day: number;
+        rewards?: Record<string, number>;
+        grants: {
+          champions: string[];
+          choices: string[];
+          relics: { setKey: string; slot: string; rank: number; rarity: string }[];
+        };
+      }[];
+    };
+
+    const siblings = (activeTracks.get(track.track) ?? []).filter((other) => other !== key);
+    if (track.active && siblings.length > 0) {
+      errors.push({
+        severity: 'error',
+        contentType: 'loginTrack',
+        key,
+        path: 'active',
+        message: `Two ${track.track} tracks are active at once (also ${siblings.join(', ')}). Deactivate one — a player can only walk a single track of each kind.`,
+      });
+    }
+
+    // Days are positional: the Nth claim pays the day numbered N. A gap or a duplicate
+    // means some claim pays nothing at all, which is invisible until it happens.
+    const seen = new Set<number>();
+    track.days.forEach((entry, index) => {
+      if (seen.has(entry.day)) {
+        errors.push({
+          severity: 'error',
+          contentType: 'loginTrack',
+          key,
+          path: `days.${index}.day`,
+          message: `Day ${entry.day} appears twice.`,
+        });
+      }
+      seen.add(entry.day);
+
+      rewardMap({ contentType: 'loginTrack', key, path: `days.${index}.rewards` }, entry.rewards);
+
+      for (const championKey of entry.grants.champions) {
+        reference(
+          { contentType: 'loginTrack', key, path: `days.${index}.grants.champions` },
+          'champion',
+          championKey,
+        );
+      }
+      for (const championKey of entry.grants.choices) {
+        reference(
+          { contentType: 'loginTrack', key, path: `days.${index}.grants.choices` },
+          'champion',
+          championKey,
+        );
+      }
+      // A single choice is not a choice, and the claim would refuse anything else anyway.
+      if (entry.grants.choices.length === 1) {
+        errors.push({
+          severity: 'warning',
+          contentType: 'loginTrack',
+          key,
+          path: `days.${index}.grants.choices`,
+          message:
+            'A selector with one option is a grant wearing a dialog. Add options, or move it to `champions`.',
+        });
+      }
+      entry.grants.relics.forEach((relic, relicIndex) => {
+        reference(
+          {
+            contentType: 'loginTrack',
+            key,
+            path: `days.${index}.grants.relics.${relicIndex}.setKey`,
+          },
+          'gearSet',
+          relic.setKey,
+        );
+      });
+    });
+
+    for (let expected = 1; expected <= track.days.length; expected += 1) {
+      if (seen.has(expected)) continue;
+      errors.push({
+        severity: 'error',
+        contentType: 'loginTrack',
+        key,
+        path: 'days',
+        message: `Day ${expected} is missing — days must run 1–${track.days.length} with no gaps, because the Nth claim pays the day numbered N.`,
+      });
+    }
+  }
+
   // A tree needs enough nodes at each tier to satisfy the pick rules, or a player who
   // commits to it hits a wall the UI cannot explain.
   const masteryTierCounts = new Map<string, number>();

@@ -15,6 +15,7 @@ import {
   skillDefSchema,
   eventDefSchema,
   missionDefSchema,
+  loginTrackDefSchema,
   questDefSchema,
   summonPoolDefSchema,
   stageDefSchema,
@@ -50,6 +51,7 @@ export const CONTENT_TYPES = [
   'quest',
   'mission',
   'event',
+  'loginTrack',
   'gameConfig',
 ] as const;
 
@@ -199,6 +201,15 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: [],
     inBundle: true,
   },
+  loginTrack: {
+    label: 'Login tracks',
+    path: 'login-tracks',
+    schema: loginTrackDefSchema,
+    // Day 30 hands over a champion the player picks, and the welcome track's last day
+    // hands over a relic set.
+    references: ['champion', 'gearSet'],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -229,6 +240,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'quest',
   'mission',
   'event',
+  'loginTrack',
   'gameConfig',
 ];
 

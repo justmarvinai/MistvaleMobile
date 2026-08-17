@@ -3,6 +3,7 @@ import {
   ROUTES,
   apiSuccess,
   eventClaimRequestSchema,
+  loginClaimRequestSchema,
   missionClaimRequestSchema,
   questChestClaimRequestSchema,
   questClaimRequestSchema,
@@ -10,6 +11,7 @@ import {
 } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
 import * as events from './events';
+import * as login from './login';
 import * as missions from './missions';
 import * as quests from './quests';
 
@@ -93,6 +95,26 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
       body.milestone,
       body.actionId,
     );
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  // ── The login calendar ────────────────────────────────────────────────────
+
+  app.get(ROUTES.login.state, async (request, reply) => {
+    const view = await login.overview(ctx(), requirePlayer(request));
+    return reply.send(apiSuccess({ login: view }, app.content.rev));
+  });
+
+  app.post(ROUTES.login.claim, async (request, reply) => {
+    const body = loginClaimRequestSchema.parse(request.body);
+    const playerId = requirePlayer(request);
+    const result = await login.claim(ctx(), playerId, body.track, body.actionId, body.choice);
+    if (result.champions.length > 0) {
+      request.log.info(
+        { playerId, track: body.track, day: result.day, champions: result.champions },
+        'login champion granted',
+      );
+    }
     return reply.send(apiSuccess(result, app.content.rev));
   });
 };

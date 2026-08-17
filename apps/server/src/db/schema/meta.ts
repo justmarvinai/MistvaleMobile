@@ -167,6 +167,8 @@ export const loginClaims = pgTable(
     day: smallint('day').notNull(),
     /** The game-day it was claimed on — one claim per track per day. */
     claimedOn: text('claimed_on').notNull(),
+    /** The action that took it, so a retried claim replays instead of failing. */
+    claimActionId: text('claim_action_id'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

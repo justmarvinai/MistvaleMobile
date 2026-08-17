@@ -136,6 +136,12 @@ export const ROUTES = {
     /** `/events/:key/claim` — one rung of one event's ladder. */
     claim: (key: string) => `/events/${encodeURIComponent(key)}/claim`,
   },
+  login: {
+    /** Both tracks, with today's tile marked on each. */
+    state: '/login-calendar',
+    /** Takes the next day of one track. The track is in the body, not the path. */
+    claim: '/login-calendar/claim',
+  },
   battle: {
     start: '/battles/start',
     /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */

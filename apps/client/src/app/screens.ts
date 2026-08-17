@@ -22,6 +22,7 @@ export type ScreenId =
   | 'quests'
   | 'missions'
   | 'events'
+  | 'calendar'
   | 'settings'
   | 'battle';
 
@@ -102,6 +103,14 @@ export const SCREENS: readonly ScreenDefinition[] = [
     glyph: '✧',
     unlock: 'events',
     lockedHint: 'Opens at level 7',
+    inDock: true,
+  },
+  {
+    id: 'calendar',
+    label: 'Calendar',
+    glyph: '☾',
+    unlock: 'loginCalendar',
+    lockedHint: 'Opens at level 2',
     inDock: true,
   },
   { id: 'settings', label: 'Settings', glyph: '⚙', inDock: false },

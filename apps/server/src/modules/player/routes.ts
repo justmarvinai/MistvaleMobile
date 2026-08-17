@@ -12,6 +12,7 @@ import { AppError } from '../../lib/errors';
 import { toPlayerSummary } from '../auth/service';
 import { multiState } from '../battle/service';
 import * as events from '../meta/events';
+import * as login from '../meta/login';
 import * as missions from '../meta/missions';
 import * as quests from '../meta/quests';
 
@@ -59,6 +60,12 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
               player.id,
             ),
             events: await events.claimableCount(
+              { db: app.db, content: app.content },
+              player.id,
+              player.level,
+              now,
+            ),
+            calendar: await login.claimableCount(
               { db: app.db, content: app.content },
               player.id,
               player.level,

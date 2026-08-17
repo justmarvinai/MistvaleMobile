@@ -6,6 +6,7 @@ import { MASTERIES } from './data/masteries';
 import { QUESTS } from './data/quests';
 import { MISSIONS } from './data/missions';
 import { EVENTS } from './data/events';
+import { LOGIN_TRACKS } from './data/login';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
 import { ENEMIES, ENEMY_SKILLS } from './data/enemies';
@@ -62,6 +63,7 @@ export function buildSeedContent(): SeedContent[] {
     quest: QUESTS.map((data) => ({ key: data.key, data })),
     mission: MISSIONS.map((data) => ({ key: data.key, data })),
     event: EVENTS.map((data) => ({ key: data.key, data })),
+    loginTrack: LOGIN_TRACKS.map((data) => ({ key: data.key, data })),
     gameConfig: GAME_CONFIG.map((data) => ({ key: data.key, data })),
   };
 

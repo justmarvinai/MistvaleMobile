@@ -298,7 +298,11 @@ Three tables rather than one with a discriminator, because their *lifetimes* dif
 Points are added in SQL (`points + n`) rather than read-then-written — a score is the one number here that is pure accumulation, and expressing it as an increment means it cannot be lost even if the fan-out's player lock ever moves. Claimed indices are stored so claiming is idempotent and a milestone list an operator extends mid-event does not re-open what was already paid.
 
 ### `login_claims`
-`player_id, track (calendar|welcome), day, claimed_on`, unique on `(player_id, track, claimed_on)`. A row per claim rather than a counter: the calendar gives day N on the Nth *claim*, so a player who misses a day loses the day and not their place.
+`player_id, track (calendar|welcome), day, claimed_on, claim_action_id`, unique on `(player_id, track, claimed_on)`. A row per claim rather than a counter: the calendar gives day N on the Nth *claim*, so a player who misses a day loses the day and not their place.
+
+The whole of a track's state is `count(*)` over these rows plus "was one of them today" — which cycle a player is on, which tile glows and whether it is spent all fall out of those two numbers. So there is nothing here for the daily reset to do, and no counter that can drift from the ledger that produced it. The unique index is what stops two tabs both taking day 7; `claim_action_id` is what lets a retried claim replay rather than fail.
+
+The `loginTrack` content type holds the days themselves — one entity per *track* (thirty tiles or seven), because a track is only ever read whole and "re-cut the calendar for August" should be one draft to review rather than thirty. A day carries a reward map, champions granted outright, champions the player picks *one* of (the day-30 selector), and relics to roll. Publish validation refuses gaps or duplicates in the day numbers, a second active track of the same kind, and any key that does not resolve.
 
 ### `arena_state`
 `player_id pk, rating, tier, weekly_high, tokens, tokens_updated_at, defence_team jsonb (player_champion ids in formation order), offers jsonb, offers_refreshed_at, refreshes_used, refresh_day, last_weekly_claim, pending_chest_week, pending_chest_high`.

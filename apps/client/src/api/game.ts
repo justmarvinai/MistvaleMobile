@@ -24,6 +24,10 @@ import type {
   EventClaimRequest,
   EventClaimResult,
   EventsView,
+  LoginClaimRequest,
+  LoginClaimResult,
+  LoginTrackKind,
+  LoginView,
   MissionClaimRequest,
   MissionClaimResult,
   MissionsView,
@@ -317,6 +321,15 @@ export const gameApi = {
       milestone,
       actionId,
     } satisfies EventClaimRequest),
+
+  login: () => api.get<{ login: LoginView }>(ROUTES.login.state).then((data) => data.login),
+
+  claimLoginDay: (track: LoginTrackKind, actionId: string, choice?: string) =>
+    api.post<LoginClaimResult>(ROUTES.login.claim, {
+      track,
+      actionId,
+      ...(choice ? { choice } : {}),
+    } satisfies LoginClaimRequest),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

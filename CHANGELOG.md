@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the login calendar and the welcome track (P8e)
+
+A reason to open the game that costs nothing to keep, and a first week that hands a newcomer the things the campaign is slowest to give.
+
+- **Two tracks.** The **calendar** is thirty days and comes round forever: sigils on 7 / 14 / 21 / 28, crystals on the fives, and day 30 an **Epic selector** — a choice of four, one per role, not a roll. Thirty days of turning up should end in the champion you wanted rather than the one the game picked for you. The **welcome track** is seven days walked once, ending in two Gleaming Sigils and a relic set: four Ironroot and two Swiftwind, which is two copies of the health bonus and one of the speed bonus, so it teaches that sets stack and that two can be worn at once — and leaves the three accessory slots to earn.
+- **A day is given on the Nth claim, not the Nth of the month.** Miss a Tuesday and you lose that Tuesday, not your place in the track. This is the whole design: a calendar that rewards showing up rather than punishing a holiday. It also means a track's entire state is "how many claims, and was one of them today" — so there is nothing here for the daily reset to do, and no counter that can drift away from the ledger that produced it.
+- **No Radiant Sigil on the calendar.** The monthly quest set already pays one, and a second guaranteed Radiant every thirty days would turn the rarest pull in the game into a subscription. The track climbs to Mistwoven ×2 and stops.
+- **The calendar is content, not code.** `loginTrack` is the twenty-first content type, and one entity holds a whole track rather than one holding a day — because a track is only ever read whole, and "re-cut the calendar for August" should be a single draft to review and publish rather than thirty. Publish validation refuses a gap or a duplicate in the day numbers, a second active track of the same kind, and any champion, item or relic set that does not resolve.
+- **Arriving late costs nothing.** The screen opens at account level 2, and a player who gets there on their third evening still starts at day one — which falls out of the claim-counted rule rather than needing a rule of its own.
+
 ### Added — timed events (P8d)
 
 Three things are running most of the week now, and adding a fourth is a row in a table rather than a feature.

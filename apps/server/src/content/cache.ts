@@ -58,6 +58,7 @@ const EMPTY_BUNDLE_TYPES = {
   quests: 'quest',
   missions: 'mission',
   events: 'event',
+  loginTracks: 'loginTrack',
 } as const satisfies Record<string, ContentType>;
 
 export class ContentCache {

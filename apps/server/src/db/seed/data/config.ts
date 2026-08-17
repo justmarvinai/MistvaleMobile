@@ -667,6 +667,13 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'How long after an event shuts its milestones can still be collected. Points stop the moment the window closes — this is only about picking up what was already earned, so somebody who finished a ladder on Sunday evening still has it on Monday morning.',
   ),
   entry(
+    'unlocks.loginCalendarLevel',
+    2,
+    'quests',
+    'Login calendar unlock level',
+    'Account level at which the calendar opens. Nothing is lost by arriving late: a track pays its Nth day on the Nth claim, so somebody who unlocks it on their third evening still starts at day one.',
+  ),
+  entry(
     'unlocks.questsLevel',
     4,
     'quests',

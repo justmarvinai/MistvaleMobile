@@ -821,3 +821,62 @@ export const eventDefSchema = contentMetaSchema.extend({
   active: z.boolean().default(true),
 });
 export type EventDef = z.infer<typeof eventDefSchema>;
+
+/**
+ * A login track: the 30-day calendar, or the 7-day welcome strip beside it.
+ *
+ * One entity per *track*, not per day, because a track is only ever read whole — the
+ * screen draws all thirty tiles at once — and because "re-roll the calendar for August" is
+ * then one draft to review and publish rather than thirty.
+ *
+ * **A day is given on the Nth claim, not on the Nth of the month.** Somebody who misses a
+ * Tuesday loses that Tuesday and not their place in the track, which is the difference
+ * between a calendar that rewards showing up and one that punishes a holiday. The cycle
+ * length is simply `days.length`: a shorter calendar is a shorter cycle, with nothing to
+ * configure.
+ */
+export const loginRelicGrantSchema = z.object({
+  setKey: z.string(),
+  slot: z.enum(GEAR_SLOTS),
+  rank: z.number().int().min(MIN_RANK).max(MAX_RANK),
+  rarity: z.enum(RARITIES),
+});
+export type LoginRelicGrant = z.infer<typeof loginRelicGrantSchema>;
+
+export const loginGrantSchema = z.object({
+  /** Champions handed over outright. */
+  champions: z.array(z.string()).max(4).default([]),
+  /**
+   * Champions the player picks *one* of — the calendar's day-30 selector. A choice rather
+   * than a roll because thirty days of showing up should end in something the player
+   * wanted, not something the game decided they got.
+   */
+  choices: z.array(z.string()).max(8).default([]),
+  /** Relics rolled and handed over. Nine is every slot, which is the sensible ceiling. */
+  relics: z.array(loginRelicGrantSchema).max(9).default([]),
+});
+export type LoginGrant = z.infer<typeof loginGrantSchema>;
+
+export const loginTrackDaySchema = z.object({
+  /** 1-based. Publish validation enforces that days run 1…n with no gaps. */
+  day: z.number().int().min(1).max(60),
+  rewards: z.record(z.string(), z.number()).default({}),
+  grants: loginGrantSchema.default({ champions: [], choices: [], relics: [] }),
+});
+export type LoginTrackDay = z.infer<typeof loginTrackDaySchema>;
+
+export const LOGIN_TRACKS = ['calendar', 'welcome'] as const;
+export type LoginTrackKind = (typeof LOGIN_TRACKS)[number];
+
+export const loginTrackDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(64),
+  description: z.string().max(400).default(''),
+  /**
+   * `calendar` cycles forever; `welcome` runs once and is then finished. The distinction is
+   * the track's whole behaviour, so it is a field rather than a convention about the key.
+   */
+  track: z.enum(LOGIN_TRACKS),
+  days: z.array(loginTrackDaySchema).min(1).max(60),
+  active: z.boolean().default(true),
+});
+export type LoginTrackDef = z.infer<typeof loginTrackDefSchema>;
