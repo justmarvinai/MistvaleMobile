@@ -5,6 +5,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Phase P6: the whole campaign
+
+Nine more chapters, two more difficulties, and twelve warlords who each fight differently.
+
+- **252 stages.** Twelve chapters of seven, on Normal, Hard and Brutal, generated from twelve plan entries — so a thirteenth chapter is one entry and a publish rather than an afternoon.
+- **Twelve warlords, twelve fights.** Every chapter boss now has a signature of its own instead of borrowing the Coilmother's: Hessk drags a team to a halt in the marsh, Vyss strips what you put up and scatters the line, Korrash burns through healing, Tszar's quake scales off its own health so stacking defence stops helping. Four of them carry a Depths mechanic in a gentler form — Hissrad a six-hit ward where the Ashpriest asks twelve, Mama Fenwrack a retaliation every eighth of her bar where the Sentinel answers every tenth, Ryssa a twelve-hit ward behind a Reflect, and the Coilmother her own brood — so nothing in the Depths is learned for the first time at full price.
+- **The chapters are different places.** Each has a theme archetype that shows up in most of its waves, and waves widen as the campaign goes on — two abreast in the Veilwood, four by the Coilstone Terraces. That, rather than a bigger number, is why a late stage is harder than an early one at the same level.
+- **Hard and Brutal are second and third passes.** A difficulty opens on clearing 12-7 of the one below, source-faithful, so Hard is the whole vale again rather than an alternative to the chapter you are on — and the level bands can assume a levelled account instead of hedging.
+- **Star chests count everything.** 7 / 21 / 42 / 63 stars per chapter across all three difficulties: 21 is Normal cleared cleanly, 42 adds Hard, 63 is everything. Chapter 12's last chest pays Valor Medals on top.
+- **The campaign map folds.** Twelve chapters laid flat is 84 buttons and no orientation, so chapters collapse and the one you are actually in opens on arrival — with its star count, its region, and the next chest it owes.
+- **Four new balance gates**, two of them walls: 12-7 Normal has to turn back a chapter-1 team, and Brutal 12-7 a team fresh off Normal. A ladder nobody can fall off is a ramp, and without those two a rebalance could flatten twelve chapters into one with every other gate still green.
+
+### Changed
+- The third star's turn limit now grows with the chapter — 16 → 44 on a warlord, 12 → 20 elsewhere. A chapter-12 warlord has four times chapter 1's health and takes about four times as long to fell; against a fixed limit the third star quietly stopped existing, which also put the 63-star chest out of reach of exactly the players who had earned it.
+- Chapters 2 and 3 now farm Wolfsfang and Stoneguard rather than Stormcoil and Gravebind, and their level bands drop to the planned ramp. The two 4-piece sets move to chapters 10 and 11 where they belong — a Provoke-on-hit set was never an early-chapter farm, and the twelve-chapter set ladder now runs basic-stat sets first and the exotic ones last.
+- Warlord health tops out below the shallowest keep-boss. The campaign is the on-ramp to the Depths; a chapter-12 boss with more health than the Broodwyrm had the two the wrong way round, and made a late campaign clear a twenty-minute slog on a stage meant to be farmed.
+
 ### Added — Phase P6: multi-battle and the practice sandbox
 
 Two ways to fight a stage you were not going to watch anyway: ten times at once, or once for free.

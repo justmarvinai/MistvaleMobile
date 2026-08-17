@@ -181,6 +181,202 @@ export const ENEMY_SKILLS: SkillDefInput[] = [
     animation: { track: 'attack', vfx: 'wrath', shake: true },
     sortOrder: 3,
   },
+
+  // ── Warlord signatures ────────────────────────────────────────────────────
+  // One per chapter boss, which is what makes twelve fights against the same lizard model
+  // twelve different fights. Each is an `a3` on a four-turn cooldown — long enough that
+  // surviving it is a plan rather than a coin flip (docs/CONTENT_PLAN_EA01.md §2).
+  {
+    key: 'boss_a3_fenblade_sweep',
+    name: 'Fenblade Sweep',
+    description: 'Two long cuts across the line, delivered before anyone has drawn.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'all' },
+    components: [
+      { type: 'damage', scale: 'atk', mult: 1.5, hits: 2 },
+      { type: 'applyStatus', status: 'atk_down_25', turns: 2, chance: 0.55, target: 'hitTargets' },
+    ],
+    upgrades: [],
+    aiHints: {},
+    animation: { track: 'attack', vfx: 'sweep', shake: true },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_tidecall',
+    name: 'Tidecall',
+    description: 'The water answers, and drags at everything standing in it.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'all' },
+    components: [
+      { type: 'damage', scale: 'atk', mult: 2.1 },
+      { type: 'turnMeter', deltaPct: -20, target: 'hitTargets' },
+      { type: 'applyStatus', status: 'spd_down_30', turns: 2, chance: 0.6, target: 'hitTargets' },
+    ],
+    upgrades: [],
+    aiHints: {},
+    animation: { track: 'cast', vfx: 'tide', shake: true },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_brood_bulwark',
+    name: 'Brood Bulwark',
+    description: 'The tyrant hunkers behind its own bulk and comes back harder.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'ally', mode: 'self' },
+    components: [
+      { type: 'shield', scale: 'maxHp', mult: 0.18, turns: 3, target: 'self' },
+      { type: 'applyStatus', status: 'def_up_60', turns: 2, target: 'self' },
+      { type: 'heal', scale: 'maxHp', mult: 0.12, target: 'self' },
+    ],
+    upgrades: [],
+    aiHints: { onlyBelowHpPct: 70 },
+    animation: { track: 'cast', vfx: 'bulwark' },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_marshbind',
+    name: 'Marshbind',
+    description: 'Roots come up through the water and take hold of ankles.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'all' },
+    components: [
+      { type: 'damage', scale: 'atk', mult: 1.9 },
+      { type: 'applyStatus', status: 'spd_down_30', turns: 3, chance: 0.75, target: 'hitTargets' },
+      { type: 'applyStatus', status: 'poison_5', turns: 2, chance: 0.5, target: 'hitTargets' },
+    ],
+    upgrades: [],
+    aiHints: { openWith: true },
+    animation: { track: 'cast', vfx: 'bind', shake: true },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_span_break',
+    name: 'Span-Break',
+    description: 'One blow meant for a bridge, spent on a person instead.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'single' },
+    components: [
+      { type: 'damage', scale: 'atk', mult: 4.4, ignoreDefPct: 0.3 },
+      { type: 'applyStatus', status: 'stun', turns: 1, chance: 0.5, target: 'hitTargets' },
+    ],
+    upgrades: [],
+    aiHints: {},
+    animation: { track: 'attack', vfx: 'break', shake: true },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_galescream',
+    name: 'Galescream',
+    description: 'A shriek off the cliff face that scatters a formation.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'all' },
+    components: [
+      { type: 'damage', scale: 'atk', mult: 2.0 },
+      { type: 'dispel', count: 2, target: 'hitTargets' },
+      { type: 'turnMeter', deltaPct: -25, target: 'hitTargets' },
+    ],
+    upgrades: [],
+    aiHints: {},
+    animation: { track: 'cast', vfx: 'gale', shake: true },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_reachburn',
+    name: 'Reachburn',
+    description: 'The ash catches, and keeps catching.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'all' },
+    components: [
+      { type: 'damage', scale: 'atk', mult: 2.2 },
+      { type: 'applyStatus', status: 'hp_burn', turns: 3, chance: 0.7, target: 'hitTargets' },
+      {
+        type: 'applyStatus',
+        status: 'heal_reduction_50',
+        turns: 2,
+        chance: 0.5,
+        target: 'hitTargets',
+      },
+    ],
+    upgrades: [],
+    aiHints: {},
+    animation: { track: 'cast', vfx: 'pyre', shake: true },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_fenwrack_feast',
+    name: 'Feast',
+    description: 'She takes what she needs out of whoever is closest.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'all' },
+    components: [
+      { type: 'damage', scale: 'atk', mult: 2.3 },
+      { type: 'applyStatus', status: 'vampiric_25', turns: 3, target: 'self' },
+      { type: 'heal', scale: 'maxHp', mult: 0.1, target: 'self' },
+    ],
+    upgrades: [],
+    aiHints: { onlyBelowHpPct: 80 },
+    animation: { track: 'attack', vfx: 'feast', shake: true },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_hollow_gaze',
+    name: 'Hollow Gaze',
+    description: 'Whatever protection you brought, she looks at it until it is not there.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'all' },
+    components: [
+      { type: 'dispel', count: 'all', target: 'allEnemies' },
+      { type: 'applyStatus', status: 'block_buffs', turns: 2, chance: 0.6, target: 'hitTargets' },
+      { type: 'damage', scale: 'atk', mult: 1.8 },
+    ],
+    upgrades: [],
+    aiHints: { openWith: true },
+    animation: { track: 'cast', vfx: 'gaze' },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_coilstone_quake',
+    name: 'Coilstone Quake',
+    description: 'The terrace shifts underfoot, and the line comes apart with it.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'enemy', mode: 'all' },
+    components: [
+      { type: 'damage', scale: 'maxHp', mult: 0.14 },
+      { type: 'applyStatus', status: 'def_down_60', turns: 3, chance: 0.75, target: 'hitTargets' },
+      { type: 'applyStatus', status: 'stun', turns: 1, chance: 0.3, target: 'hitTargets' },
+    ],
+    upgrades: [],
+    aiHints: {},
+    animation: { track: 'attack', vfx: 'quake', shake: true },
+    sortOrder: 3,
+  },
+  {
+    key: 'boss_a3_gate_ward',
+    name: 'Gate-Ward',
+    description: 'She was set here to hold a door, and she has not stopped.',
+    slot: 'a3',
+    cooldown: 4,
+    targeting: { side: 'ally', mode: 'self' },
+    components: [
+      { type: 'shield', scale: 'maxHp', mult: 0.22, turns: 3, target: 'self' },
+      { type: 'cleanse', count: 'all', target: 'self' },
+      { type: 'applyStatus', status: 'reflect_30', turns: 3, target: 'self' },
+    ],
+    upgrades: [],
+    aiHints: { openWith: true, dontRepeatWhileActive: 'reflect_30' },
+    animation: { track: 'cast', vfx: 'ward' },
+    sortOrder: 3,
+  },
 ];
 
 /**
@@ -211,6 +407,29 @@ const enemy = (
   bossMechanics: { almightyImmunity: false, tmReductionImmune: false },
   sortOrder,
   ...extra,
+});
+
+/**
+ * A chapter warlord.
+ *
+ * Every one of them is oversized, Almighty-immune and carries an enrage ramp; the third
+ * flag and the signature skill are what make the twelfth fight different from the first.
+ * Written as one helper rather than twelve literals so that "every boss is immune to hard
+ * CC" stays true by construction instead of by twelve people remembering.
+ */
+const warlord = (
+  key: string,
+  name: string,
+  element: EnemyDefInput['element'],
+  role: EnemyDefInput['role'],
+  stats: EnemyDefInput['baseStats'],
+  skills: string[],
+  sortOrder: number,
+  mechanics: Partial<NonNullable<EnemyDefInput['bossMechanics']>> = {},
+): EnemyDefInput => ({
+  ...enemy(key, name, 'warlord', element, role, stats, skills, sortOrder),
+  isBoss: true,
+  bossMechanics: { almightyImmunity: true, tmReductionImmune: false, ...mechanics },
 });
 
 export const ENEMIES: EnemyDefInput[] = [
@@ -285,64 +504,155 @@ export const ENEMIES: EnemyDefInput[] = [
     70,
   ),
 
-  // Chapter 1's warlord. Almighty immunity is the baseline for every boss so that hard
-  // crowd control cannot simply switch a boss fight off (docs/COMBAT_SYSTEM.md §8).
-  enemy(
+  // ── The twelve warlords ───────────────────────────────────────────────────
+  // One per chapter, and each one is *why* that chapter is remembered. Almighty immunity
+  // is the baseline for every boss so that hard crowd control cannot simply switch a boss
+  // fight off (docs/COMBAT_SYSTEM.md §8), and every one carries an enrage ramp so no
+  // fight can be stalled to the turn cap. What differs is the third flag and the
+  // signature — the same arrangement the keep-bosses use, so a chapter finale is a puzzle
+  // rather than a bigger health bar.
+
+  warlord(
     'boss_vrash_fenblade',
     'Vrash the Fenblade',
-    'warlord',
     'verdant',
     'attack',
     { hp: 14_500, atk: 430, def: 300, spd: 97, critRate: 20, critDmg: 60, res: 45, acc: 30 },
-    ['sskarn_a1_claw', 'sskarn_a2_lunge', 'boss_a3_coilmother_wrath'],
+    ['sskarn_a1_claw', 'sskarn_a2_lunge', 'boss_a3_fenblade_sweep'],
     100,
-    {
-      isBoss: true,
-      bossMechanics: {
-        almightyImmunity: true,
-        tmReductionImmune: false,
-        enrage: { afterTurn: 20, dmgPctPerTurn: 8 },
-      },
-    },
+    { enrage: { afterTurn: 20, dmgPctPerTurn: 8 } },
   ),
-  // Chapter 2's warden of the drowned road. Immune to turn-meter reduction, so a team
-  // cannot simply deny it every turn — the counterplay is damage, not tempo.
-  enemy(
+  // The warden of the drowned road. Immune to turn-meter reduction, so a team cannot
+  // simply deny it every turn — the counterplay is damage, not tempo.
+  warlord(
     'boss_ssythra_tidecaller',
     'Ssythra the Tidecaller',
-    'tidecaller',
     'tide',
     'support',
     { hp: 17_800, atk: 400, def: 380, spd: 101, critRate: 18, critDmg: 55, res: 55, acc: 40 },
-    ['sskarn_a1_venom_spit', 'sskarn_a2_mire_mend', 'boss_a3_coilmother_wrath'],
+    ['sskarn_a1_venom_spit', 'sskarn_a2_mire_mend', 'boss_a3_tidecall'],
     110,
-    {
-      isBoss: true,
-      bossMechanics: {
-        almightyImmunity: true,
-        tmReductionImmune: true,
-        enrage: { afterTurn: 22, dmgPctPerTurn: 7 },
-      },
-    },
+    { tmReductionImmune: true, enrage: { afterTurn: 22, dmgPctPerTurn: 7 } },
   ),
-
-  // Chapter 3's brood-tyrant: heavier and slower, a wall to be worn down.
-  enemy(
+  // Heavier and slower, a wall to be worn down — and one that mends itself if you stop.
+  warlord(
     'boss_gorrakh_broodtyrant',
     'Gorrakh the Broodtyrant',
-    'broodtyrant',
     'ember',
     'defense',
     { hp: 22_400, atk: 470, def: 520, spd: 94, critRate: 15, critDmg: 55, res: 60, acc: 35 },
-    ['sskarn_a1_brute_slam', 'sskarn_a2_stunning_blow', 'boss_a3_coilmother_wrath'],
+    ['sskarn_a1_brute_slam', 'sskarn_a2_stunning_blow', 'boss_a3_brood_bulwark'],
     120,
+    { enrage: { afterTurn: 24, dmgPctPerTurn: 9 } },
+  ),
+  // The first boss that punishes a slow team rather than a weak one.
+  warlord(
+    'boss_hessk_marshbinder',
+    'Hessk the Marshbinder',
+    'verdant',
+    'support',
+    { hp: 25_000, atk: 510, def: 420, spd: 104, critRate: 18, critDmg: 55, res: 55, acc: 45 },
+    ['sskarn_a1_venom_spit', 'sskarn_a2_venom_cloud', 'boss_a3_marshbind'],
+    130,
+    { enrage: { afterTurn: 24, dmgPctPerTurn: 8 } },
+  ),
+  // The first hit-counter ward in the campaign: break it before its turn or lose the line's
+  // tempo. Six hits — half what the Ashpriest asks for, because this is where you learn it.
+  warlord(
+    'boss_hissrad_spantaker',
+    'Hissrad the Span-Taker',
+    'tide',
+    'attack',
+    { hp: 28_000, atk: 550, def: 450, spd: 99, critRate: 22, critDmg: 65, res: 55, acc: 45 },
+    ['sskarn_a1_brute_slam', 'sskarn_a2_stunning_blow', 'boss_a3_span_break'],
+    140,
+    { hitShield: { hits: 6, punishTmPct: 25 }, enrage: { afterTurn: 26, dmgPctPerTurn: 8 } },
+  ),
+  // Fast, and it strips what you put up. Bring the buffs back or bring fewer.
+  warlord(
+    'boss_vyss_galetongue',
+    'Vyss Galetongue',
+    'mist',
+    'attack',
+    { hp: 31_000, atk: 590, def: 470, spd: 112, critRate: 25, critDmg: 70, res: 60, acc: 50 },
+    ['sskarn_a1_claw', 'sskarn_a2_lunge', 'boss_a3_galescream'],
+    150,
+    { tmReductionImmune: true, enrage: { afterTurn: 26, dmgPctPerTurn: 9 } },
+  ),
+  // Burns through healing — the chapter that teaches a team it cannot simply out-heal a
+  // fight, which is the lesson the Cinderspire will charge for later.
+  warlord(
+    'boss_korrash_reachburner',
+    'Korrash Reachburner',
+    'ember',
+    'attack',
+    { hp: 34_000, atk: 630, def: 500, spd: 101, critRate: 22, critDmg: 65, res: 60, acc: 50 },
+    ['sskarn_a1_claw', 'sskarn_a2_venom_cloud', 'boss_a3_reachburn'],
+    160,
+    { enrage: { afterTurn: 28, dmgPctPerTurn: 9 } },
+  ),
+  // Answers every eighth of her bar with a free strike at whoever took it: burst her down
+  // in clean chunks or spread the damage, but do not do both badly.
+  warlord(
+    'boss_mama_fenwrack',
+    'Mama Fenwrack',
+    'verdant',
+    'hp',
+    { hp: 37_000, atk: 660, def: 540, spd: 96, critRate: 20, critDmg: 60, res: 65, acc: 50 },
+    ['sskarn_a1_brute_slam', 'sskarn_a2_mire_mend', 'boss_a3_fenwrack_feast'],
+    170,
     {
-      isBoss: true,
-      bossMechanics: {
-        almightyImmunity: true,
-        tmReductionImmune: false,
-        enrage: { afterTurn: 24, dmgPctPerTurn: 9 },
-      },
+      thresholdRetaliation: { perHpPct: 12.5, skipIfDot: true },
+      enrage: { afterTurn: 28, dmgPctPerTurn: 10 },
+    },
+  ),
+  // Everything you brought, taken off you at the start. A fight for a team that works
+  // without its buffs.
+  warlord(
+    'boss_nulla_holloweye',
+    'Nulla Holloweye',
+    'mist',
+    'support',
+    { hp: 40_000, atk: 690, def: 580, spd: 106, critRate: 20, critDmg: 60, res: 70, acc: 60 },
+    ['sskarn_a1_venom_spit', 'sskarn_a3_warcall', 'boss_a3_hollow_gaze'],
+    180,
+    { tmReductionImmune: true, enrage: { afterTurn: 30, dmgPctPerTurn: 9 } },
+  ),
+  // A maxHP-scaled quake: stacking defence stops helping, and the answer is to end it.
+  warlord(
+    'boss_tszar_coilstone',
+    'Tszar Coilstone',
+    'ember',
+    'defense',
+    { hp: 44_000, atk: 720, def: 660, spd: 93, critRate: 18, critDmg: 60, res: 70, acc: 55 },
+    ['sskarn_a1_spearguard', 'sskarn_a2_shieldwall', 'boss_a3_coilstone_quake'],
+    190,
+    { enrage: { afterTurn: 30, dmgPctPerTurn: 10 } },
+  ),
+  // Twelve hits to break her ward, and she reflects while it stands.
+  warlord(
+    'boss_ryssa_gatekeeper',
+    'Ryssa Gatekeeper',
+    'tide',
+    'defense',
+    { hp: 48_000, atk: 750, def: 700, spd: 98, critRate: 18, critDmg: 60, res: 75, acc: 55 },
+    ['sskarn_a1_spearguard', 'sskarn_a2_broodguard_taunt', 'boss_a3_gate_ward'],
+    200,
+    { hitShield: { hits: 12, punishTmPct: 35 }, enrage: { afterTurn: 32, dmgPctPerTurn: 10 } },
+  ),
+  // The Coilmother herself: her own wrath, her own brood, and no way to stall her out.
+  warlord(
+    'boss_ssyleth_coilmother',
+    'Ssyleth the Coilmother',
+    'mist',
+    'attack',
+    { hp: 55_000, atk: 800, def: 720, spd: 108, critRate: 25, critDmg: 70, res: 80, acc: 65 },
+    ['sskarn_a1_claw', 'sskarn_a2_stunning_blow', 'boss_a3_coilmother_wrath'],
+    210,
+    {
+      tmReductionImmune: true,
+      addSummon: { unitKey: 'sskarn_broodguard', perTurn: 1, cap: 4 },
+      enrage: { afterTurn: 30, dmgPctPerTurn: 12 },
     },
   ),
 ];

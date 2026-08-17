@@ -172,10 +172,16 @@ describe.skipIf(!dbUp)('progress', () => {
     });
 
     it('keeps a harder difficulty shut until the one below is finished', async () => {
+      // The *whole* one below: Hard 1-1 wants 12-7 Normal, which is what makes Hard a
+      // second pass over the vale rather than an alternative to the chapter you are on.
       const stages = await readProgress();
       const hard = standingFor(stages, 'c01_s1_hard');
       expect(hard.open).toBe(false);
-      expect(hard.lockedReason).toMatch(/clear 1-7/i);
+      expect(hard.lockedReason).toMatch(/clear 12-7/i);
+
+      const brutal = standingFor(stages, 'c01_s1_brutal');
+      expect(brutal.open).toBe(false);
+      expect(brutal.lockedReason).toMatch(/clear 12-7/i);
     });
 
     it('opens chapter 2 only after chapter 1 is beaten', async () => {

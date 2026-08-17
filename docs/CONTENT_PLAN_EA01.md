@@ -108,31 +108,36 @@ Base: HP 21.5k · ATK 900 · DEF 1,100 · SPD 100 · CR 15 · CD 50 · RES 40 ·
 | Sskarn Brute | HP | mud | A1 ×0.2 MaxHP; A2 CD4 single stun 35% |
 | **Elite** variants | any | brightened + ★ badge | +1 skill tier, +25% stat budget ⚙ |
 
-**Chapter bosses (stage x-7):** oversized (1.5× sprite scale) named warlords, one per chapter (Vrash the Fenblade, Ssker Mudjaw, Okkta Barrowqueen, Hissrad the Span-Taker, Grolk Ashscale, Vyss Galetongue, Korrash Reachburner, Mama Fenwrack, Nulla Holloweye, Tszar Coilstone, Ryssa Gatekeeper, **Ssyleth the Coilmother** ch12). Boss kits = elite kit + `almightyImmunity` + one signature (AoE nuke CD4 / enrage / add-summon for Ssyleth).
+**Chapter bosses (stage x-7) — shipped P6:** oversized (1.5× sprite scale) named warlords, one per chapter; the roster is the table in §3. Boss kits = elite kit + `almightyImmunity` + an enrage ramp + one signature `a3` on a four-turn cooldown, and four of the twelve additionally carry a keep-boss mechanic in a gentler form (§3).
 **Depths bosses (shipped P6):** Broodwyrm (`tmReductionImmune`, AoE breath + SPD Down, self shield & DEF Up) · Rimebound Sentinel (`thresholdRetaliation` every 10% of its bar, self-heal + self-cleanse, Freeze gaze) · the Ashpriest (`hitShield`, **three defs** — 6 hits on floors 1–4, 9 on 5–9, 12 from 10 down — with a TM-drain punish, HP Burn, and a DEF-ignoring pyre) · Broodmother Ssarethi (`addSummon` 2/turn cap 6 of `silkmire_spawn`, devour-heal, AoE Poison spit) · Pitmaster Drazhak (Proving Grounds; `enrage` +8%/turn after t12). Every keep-boss also carries `almightyImmunity` and a late `enrage` (turn 40, +6%/turn) so no fight can be stalled to the cap. Guards are per-keep archetypes on the shared lizard model; the five Spring Wardens differ only in breath, which is the point — the springs are the straight fight.
 
-## 3. Campaign — *The Reclamation* (12 chapters × 7 stages × 3 difficulties)
+## 3. Campaign — *The Reclamation* (12 chapters × 7 stages × 3 difficulties) — **shipped P6**
 
-| Ch | Region | Set dropped | Enemy levels N/H/B (band ⚙) |
-|---|---|---|---|
-| 1 | Veilwood Fringe | Ironroot (HP) | 1–6 / 24–30 / 42–48 |
-| 2 | The Sunken Causeway | Wolfsfang (ATK) | 4–9 / 26–32 / 44–50 |
-| 3 | Barrowfields | Stoneguard (DEF) | 7–12 / 28–34 / 46–51 |
-| 4 | Thornmere Marsh | Hawkeye (C.RATE) | 10–15 / 30–36 / 47–52 |
-| 5 | The Shattered Span | Truestrike (ACC) | 13–18 / 32–38 / 49–53 |
-| 6 | Galehollow Cliffs | Swiftwind (SPD) | 16–21 / 34–40 / 50–54 |
-| 7 | The Ashen Reach | Wardweave (RES) | 19–24 / 36–42 / 51–55 |
-| 8 | Fenwrack Deeps | Bloodthorn (Lifesteal) | 22–27 / 38–44 / 52–56 |
-| 9 | The Hollow Vale | Reaver (C.DMG) | 25–30 / 40–46 / 53–57 |
-| 10 | Coilstone Terraces | Gravebind (Provoke) | 28–33 / 42–48 / 54–58 |
-| 11 | The Fallen Gates | Stormcoil (TM-on-hit) | 31–36 / 44–50 / 55–59 |
-| 12 | The Coilmother's Court | Mendersong (Regen) | 34–40 / 46–52 / 56–60 |
+**252 stages live**, generated from twelve plan entries in `apps/server/src/db/seed/data/campaign.ts`.
 
-- Slot-by-stage drops (source-faithful): s1 Weapon · s2 Helm · s3 Shield · s4 Gauntlets · s5 Cuirass · s6 Boots · s7 any. Drop rank bands ⚙: N ★1–3 / H ★3–5 / B ★4–6; rarity weights shift by difficulty (B ch12: up to Epic).
-- Waves: s1–6 = 3 waves × 2–4 enemies (composition templates per chapter theme, expanded by the seed generator); s7 = 2 waves + boss.
-- Energy: N 4 (boss 5) / H 6 (7) / B 8 (9). Difficulty unlock: clear 12-7 of the previous difficulty. Brutal 12-3/12-6 tuned as XP/silver farms (ECONOMY §3).
-- **Stars:** 1★ win · 2★ no deaths · 3★ no deaths + ≤12 turns ⚙ 〔dev vs source's "≤2 champions" rule — friendlier for a 7-champion roster〕. Star chests per difficulty at 60/126/189/252★; 252★ chest: **Radiant Sigil** (+ crystals, tome).
-- First-clear bonuses every stage (silver/essences/crystals drip; sigils on x-4 and x-7).
+| Ch | Chapter | Region | Set dropped | Warlord (x-7) | Enemy levels N/H/B ⚙ |
+|---|---|---|---|---|---|
+| 1 | Veilwood Fringe | The Fringe | Ironroot (HP) | Vrash the Fenblade | 1–6 / 24–30 / 42–48 |
+| 2 | The Drowned Road | Sunken Marches | Wolfsfang (ATK) | Ssythra the Tidecaller | 4–9 / 26–32 / 44–50 |
+| 3 | Silkmire Hollow | Sunken Marches | Stoneguard (DEF) | Gorrakh the Broodtyrant | 7–12 / 28–34 / 46–51 |
+| 4 | Thornmere Marsh | The Thornmere | Hawkeye (C.RATE) | Hessk the Marshbinder | 10–15 / 30–36 / 47–52 |
+| 5 | The Shattered Span | The Thornmere | Truestrike (ACC) | Hissrad the Span-Taker | 13–18 / 32–38 / 49–53 |
+| 6 | Galehollow Cliffs | The Windward Rise | Swiftwind (SPD) | Vyss Galetongue | 16–21 / 34–40 / 50–54 |
+| 7 | The Ashen Reach | The Windward Rise | Wardweave (RES) | Korrash Reachburner | 19–24 / 36–42 / 51–55 |
+| 8 | Fenwrack Deeps | The Sunless Fen | Bloodthorn (Lifesteal) | Mama Fenwrack | 22–27 / 38–44 / 52–56 |
+| 9 | The Hollow Vale | The Sunless Fen | Reaver (C.DMG) | Nulla Holloweye | 25–30 / 40–46 / 53–57 |
+| 10 | Coilstone Terraces | The Coilstone | Gravebind (Provoke) | Tszar Coilstone | 28–33 / 42–48 / 54–58 |
+| 11 | The Fallen Gates | The Coilstone | Stormcoil (TM-on-hit) | Ryssa Gatekeeper | 31–36 / 44–50 / 55–59 |
+| 12 | The Coilmother's Court | The Coilstone | Mendersong (Regen) | **Ssyleth the Coilmother** | 34–40 / 46–52 / 56–60 |
+
+- **Warlord signatures.** Every chapter boss carries `almightyImmunity`, an enrage ramp, and one signature `a3` of its own — so twelve fights against one lizard model are twelve fights. Four of them carry a keep-boss mechanic as a *teaching* version of what the Depths will charge for: Hissrad a six-hit `hitShield` (the Ashpriest asks 6/9/12), Mama Fenwrack `thresholdRetaliation` every 12.5% (the Sentinel every 10%), Ryssa a twelve-hit ward behind a Reflect, and Ssyleth `addSummon` 1/turn to a cap of 4 (the Broodmother 2/turn to 6). Warlord health tops out below the shallowest keep-boss on purpose — the campaign is the on-ramp.
+- Slot-by-stage drops (source-faithful): s1 Weapon · s2 Helm · s3 Shield · s4 Gauntlets · s5 Cuirass · s6 Boots · s7 any. Drop rank bands ⚙ climb one per three chapters and one per difficulty (N ch1 ★1–2 → B ch12 ★6); rarity weights shift by difficulty and again from chapter 9 on.
+- Waves: s1–6 = 3 waves; s7 = 2 waves + warlord. Wave width grows with the chapter (2 abreast in ch1–3, 4 by ch10), and each chapter has a **theme archetype** that appears in most of its waves — which is most of why a late stage is harder than an early one at the same level. Compositions are cursor-derived, not random: a published stage is the same stage tomorrow.
+- Energy: N 4 (boss 5) / H 6 (7) / B 8 (9). **Difficulty unlock: clear 12-7 of the difficulty below** — Hard is a second pass over the whole vale, not an alternative to the chapter you are on.
+- **Stars:** 1★ win · 2★ no deaths · 3★ no deaths + inside the turn limit ⚙ 〔dev vs source's "≤2 champions" rule — friendlier for a 7-champion roster〕. The limit **grows with the chapter** (boss 16 → 44, trash 12 → 20): a warlord with four times chapter 1's health takes four times as long to fell, and a fixed limit would put the third star out of reach for exactly the players who earned it.
+- **Star chests** at 7 / 21 / 42 / 63★ per chapter, counting all three difficulties together (7 stages × 3 stars × 3 difficulties = 63). 21 is Normal cleared cleanly, 42 adds Hard, 63 is everything; chapter 12's last chest pays Valor Medals on top.
+- First-clear bonuses on every stage — silver everywhere, crystals on the warlord.
+- **Balance gates** (`pnpm sim`, enforced in CI): each chapter's Normal boss falls to a par team ≥70%; Hard and Brutal chapter 1 fall to the team that just unlocked them ≥70%; their chapter 12 falls to a maxed team ≥50%; and two *walls* — 12-7 Normal turns back a chapter-1 team, and Brutal 12-7 turns back a team fresh off Normal, both ≥90%. Without the walls a rebalance could flatten twelve chapters into one and nothing would notice.
 
 ## 4. The Depths
 

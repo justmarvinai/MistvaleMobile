@@ -59,6 +59,19 @@ function parTeam(content: LoadedContent): TeamSpec[] {
   }));
 }
 
+/**
+ * The power an account is expected to have arrived at a Normal chapter with.
+ *
+ * One definition, used by the per-chapter gate and by the Brutal wall check, so "fresh off
+ * Normal" means the same thing in both places.
+ */
+function normalPar(chapter: number): { level: number; rank: number } {
+  return {
+    level: Math.min(60, 20 + (chapter - 1) * 10),
+    rank: Math.min(6, 3 + Math.floor((chapter - 1) / 2)),
+  };
+}
+
 function table(title: string, rows: StageResult[]): void {
   console.log(`\n${title}`);
   console.log('  stage            runs   win%   avg turns   ms/run');
@@ -106,9 +119,7 @@ function main(): void {
     const boss = stages[stages.length - 1];
     if (!boss) continue;
 
-    const level = Math.min(60, 20 + (chapter - 1) * 10);
-    const rank = Math.min(6, 3 + Math.floor((chapter - 1) / 2));
-    const team = parTeam(content).map((member) => ({ ...member, level, rank }));
+    const team = parTeam(content).map((member) => ({ ...member, ...normalPar(chapter) }));
 
     const result = simulateStage(content, boss.key, team, RUNS);
     table(`Par team — chapter ${chapter} boss, Normal`, [result]);
@@ -117,6 +128,84 @@ function main(): void {
       detail: 'falls to a par team on auto at least 70% of the time',
       passed: result.winRate >= 0.7,
       measured: `${(result.winRate * 100).toFixed(1)}%`,
+    });
+  }
+
+  // ── Gate 2b: Hard and Brutal are a second and third pass, not a wall ────
+  // A difficulty opens on finishing the whole one below it, so the team walking into
+  // Hard 1-1 is the team that just cleared 12-7 Normal — levelled, ranked and wearing
+  // what twelve chapters dropped. Both endpoints are checked: the *first* chapter of a
+  // difficulty has to fall to the team that just unlocked it, and the *last* has to fall
+  // to a team that has farmed the difficulty itself.
+  for (const difficulty of ['hard', 'brutal'] as const) {
+    const opening = campaignStages(content, 1, difficulty).at(-1);
+    const finale = campaignStages(content, 12, difficulty).at(-1);
+    if (!opening || !finale) continue;
+
+    // Who arrives: whoever just finished the difficulty below. Brutal inherits a team that
+    // has been through Hard, which is why it can afford to start above where Hard ended.
+    const arriving = withRelics(
+      content,
+      parTeam(content).map((member) => ({
+        ...member,
+        ...(difficulty === 'hard' ? { level: 50, rank: 5, ascension: 2 } : {}),
+        ...(difficulty === 'brutal' ? { level: 60, rank: 6, ascension: 4 } : {}),
+      })),
+    );
+    const maxed = withRelics(
+      content,
+      parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 6 })),
+    );
+
+    const entry = simulateStage(content, opening.key, arriving, RUNS);
+    const deep = simulateStage(content, finale.key, maxed, RUNS);
+    table(`${difficulty} — chapter 1 boss (on arrival) and chapter 12 boss (maxed)`, [entry, deep]);
+
+    gates.push({
+      name: `${difficulty}-entry`,
+      detail: 'chapter 1 falls to the team that just unlocked this difficulty, 70% of the time',
+      passed: entry.winRate >= 0.7,
+      measured: `${(entry.winRate * 100).toFixed(1)}%`,
+    });
+    gates.push({
+      name: `${difficulty}-finale`,
+      detail: 'chapter 12 falls to a fully levelled team at least 50% of the time',
+      passed: deep.winRate >= 0.5,
+      measured: `${(deep.winRate * 100).toFixed(1)}%`,
+    });
+  }
+
+  // The other half of a ladder: it has to be *a ladder*. Two walls, one per axis. If a
+  // chapter-1 team can walk to 12-7 Normal, the eleven chapters between are decoration;
+  // if the team that just finished Normal can walk into Brutal 12-7, so are the two
+  // difficulties. The same check the Depths keeps get, asked of the campaign.
+  const walls: [string, string, ReturnType<typeof parTeam>][] = [];
+  const normalFinale = campaignStages(content, 12, 'normal').at(-1);
+  const brutalFinale = campaignStages(content, 12, 'brutal').at(-1);
+  if (normalFinale) {
+    walls.push([
+      'normal-wall',
+      normalFinale.key,
+      parTeam(content).map((member) => ({ ...member, ...normalPar(1) })),
+    ]);
+  }
+  if (brutalFinale) {
+    walls.push([
+      'brutal-wall',
+      brutalFinale.key,
+      parTeam(content).map((member) => ({ ...member, ...normalPar(12) })),
+    ]);
+  }
+  for (const [name, stageKey, team] of walls) {
+    const overreach = simulateStage(content, stageKey, team, RUNS);
+    gates.push({
+      name,
+      detail:
+        name === 'normal-wall'
+          ? '12-7 Normal turns back a chapter-1 team at least 90% of the time'
+          : 'Brutal 12-7 turns back a team fresh off Normal at least 90% of the time',
+      passed: overreach.winRate <= 0.1,
+      measured: `${(overreach.winRate * 100).toFixed(1)}% got through`,
     });
   }
 

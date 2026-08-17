@@ -18,10 +18,22 @@
   padding-right: $space-2;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .chapter {
   display: flex;
   flex-direction: column;
   gap: $space-1;
+  padding-bottom: $space-2;
+  border-bottom: 1px solid $edge;
+
+  &[data-open='true'] {
+    padding-bottom: $space-3;
+  }
 }
 
 .chapterHead {
@@ -29,6 +41,24 @@
   align-items: baseline;
   justify-content: space-between;
   gap: $space-2;
+  width: 100%;
+  padding: $space-1 0;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover .chapterName {
+    color: $mist;
+  }
+}
+
+.caret {
+  display: inline-block;
+  width: 1rem;
+  color: $muted;
 }
 
 .chapterName {
@@ -36,9 +66,33 @@
   color: $parchment;
 }
 
+.chapterMeta {
+  display: flex;
+  align-items: baseline;
+  gap: $space-2;
+}
+
 .chapterRegion {
   font-size: 0.85rem;
   color: $muted;
+}
+
+.chapterLocked {
+  color: $muted-deep;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.chapterLore {
+  margin: 0 0 $space-1 1rem;
+  color: $parchment-dim;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.chest {
+  color: $gold;
 }
 
 .difficulties {
@@ -71,6 +125,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
   gap: $space-2;
+  margin-left: 1rem;
 }
 
 .stage {

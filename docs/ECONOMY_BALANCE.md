@@ -29,7 +29,7 @@ Every grant/spend flows through `RewardService` → `economy_log`, so the Admin 
 
 ## 3. Champion XP & rank economy
 - **Champion XP** to max per rank ⚙: ★1 6.3k · ★2 34k · ★3 116k · ★4 400k · ★5 1.55M · ★6 5.4M (geometric per-level curve, `xp(level) ≈ A × e^(0.076·level)` shape like the source; total 1→60 ≈ 7.5M).
-- Stage champ-XP scales with chapter & difficulty; **Brutal 12-3/12-6 are tuned as the intended XP farms** (≈4.3k per surviving champion per run ⚙, split across deployed team — the "farmer carries 3 food" loop is deliberately preserved).
+- Stage champ-XP scales with chapter & difficulty, and with the chapter **faster than silver does** (`chapterScale^1.6` against `chapterScale`) — which is what makes deep Brutal the intended *levelling* farm rather than merely the richest stage. **Brutal 12-3 ≈4.4k and 12-6 ≈6.2k per champion per run** ⚙ (a stage's champion XP is a total, split across the deployed team, so the "farmer carries 3 food" loop is deliberately preserved). 12-6 pays half again as much for the same energy because it is a harder fight further in — the reason to push past 12-3 rather than settle there.
 - **Rank-up:** at max level, consume `R` champions of exactly `R`★ + silver fee ⚙ (1→2: 1×1★ … 5→6: 5×5★; silver 2k/8k/30k/100k/300k). Food chain (owner-approved): Broodlings/Broodguards from Faded Sigils + campaign drops; pre-ranked food (2★–4★ Broodguards, chicken-analog) from events/login.
 - **Duplicates:** feeding an identical champion grants +1 skill level on a chosen skill 〔dev: choice, not random〕 — the dupe economy for a 7-champion pool.
 - **Account XP:** per energy spent (≈8 XP/energy ⚙) + quest chunks (100/500/1,000). L60 cap ≈ 3–4 months of active play ⚙.

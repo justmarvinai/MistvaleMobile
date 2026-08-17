@@ -73,4 +73,50 @@ test.describe('the campaign loop', () => {
     await expect(results).toBeHidden();
     await expect(page.getByText(/veilwood fringe/i)).toBeVisible();
   });
+
+  test('shows twelve chapters and three difficulties, with the road ahead shut', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    await page.getByRole('tab', { name: 'New warden' }).click();
+    await page.getByLabel('Account name').fill(unique('e2e'));
+    await page.getByLabel('Profile name').fill(unique('Warden'));
+    await page.getByLabel('Password').fill(password);
+    await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+    const starterDialog = page.getByRole('dialog', { name: /choose your first champion/i });
+    await expect(starterDialog).toBeVisible({ timeout: 20_000 });
+    await starterDialog
+      .getByRole('button', { name: /^choose /i })
+      .first()
+      .click();
+    await starterDialog.getByRole('button', { name: /stand together/i }).click();
+    await expect(starterDialog).toBeHidden({ timeout: 15_000 });
+
+    await page
+      .getByRole('button', { name: /^campaign$/i })
+      .first()
+      .click();
+    await expect(page.getByText(/veilwood fringe/i)).toBeVisible({ timeout: 15_000 });
+
+    // Twelve chapters, and only the one the warden is in is unfolded — 252 stages laid
+    // flat would be a wall rather than a map.
+    const headers = page.locator('button[aria-expanded]');
+    await expect(headers).toHaveCount(12);
+    await expect(page.locator('button[aria-expanded="true"]')).toHaveCount(1);
+    await expect(page.getByText(/12\. The Coilmother’s Court/)).toBeVisible();
+
+    // Chapter 2 is there, shut, and says why once it is unfolded.
+    await page.getByRole('button', { name: /2\. The Drowned Road/ }).click();
+    const chapterTwoOpener = page.getByRole('button', { name: '2-1', exact: false }).first();
+    await expect(chapterTwoOpener).toBeDisabled();
+    await expect(page.getByText(/clear 1-7 first/i).first()).toBeVisible();
+
+    // Hard exists as a tab from the start — visible, not hidden — and 1-1 on it wants the
+    // whole vale cleared on Normal first.
+    await page.getByRole('button', { name: 'Hard', exact: true }).click();
+    await expect(page.getByRole('button', { expanded: true })).toHaveCount(1);
+    await expect(page.getByText(/clear 12-7 first/i).first()).toBeVisible();
+  });
 });
