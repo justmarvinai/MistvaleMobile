@@ -54,6 +54,7 @@ const EMPTY_BUNDLE_TYPES = {
   stages: 'stage',
   summonPools: 'summonPool',
   shops: 'shop',
+  masteries: 'mastery',
 } as const satisfies Record<string, ContentType>;
 
 export class ContentCache {

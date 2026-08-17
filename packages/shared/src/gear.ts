@@ -132,6 +132,8 @@ export type ActiveSetBonus = z.infer<typeof activeSetBonusSchema>;
 export const championStatsSchema = z.object({
   base: statBlockSchema,
   gear: statBlockSchema,
+  /** What learned masteries add. Separate from relics so the screen can show both. */
+  mastery: statBlockSchema,
   total: statBlockSchema,
   setBonuses: z.array(activeSetBonusSchema),
   power: z.number().int(),

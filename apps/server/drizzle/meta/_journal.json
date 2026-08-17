@@ -71,6 +71,13 @@
       "when": 1786906934818,
       "tag": "0009_sparkling_timeslip",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786925950316,
+      "tag": "0010_dear_scourge",
+      "breakpoints": true
     }
   ]
 }

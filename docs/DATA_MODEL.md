@@ -170,7 +170,7 @@ Bazaar: rotating slots `{stock_ref (drop_table or item), price {currency, amount
 Per element × stat: 10 levels, `{bonus_value, medal_cost}` per level.
 
 ### `mastery_defs`
-Three trees (`onslaught` / `bulwark` / `insight`), 6 tiers, each node: `key, tree, tier, effect jsonb (engine-known), emblem_cost jsonb`.
+Three trees (`onslaught` / `bulwark` / `insight`), 6 tiers, each node: `key, name, description, tree, tier, icon, effects jsonb (a list of engine-known effects), sort_order`. Costs are *not* per node — they are per tier, in the `economy.masteryCosts` config row, because a tier is the unit an operator actually reprices.
 
 ### `tutorial_step_defs`
 Ordered scripted steps: `{trigger, screen, highlight, text, forced_action?, rewards?}` — makes onboarding tweakable without code.

@@ -1,0 +1,152 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.trees {
+  display: flex;
+  gap: $space-1;
+}
+
+.tree {
+  padding: $space-1 $space-3;
+  background: $panel-inset;
+  border: 1px solid transparent;
+  color: $muted;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+
+  &[data-open='true'] {
+    color: $parchment;
+  }
+
+  &[aria-selected='true'] {
+    border-color: $mist;
+    color: $mist;
+  }
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.spent {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.blurb {
+  margin: 0;
+  color: $muted;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.ladder {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.tier {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.tierHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+  border-bottom: 1px solid $edge;
+  padding-bottom: 2px;
+}
+
+.tierName {
+  color: $parchment-dim;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tierPicks {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.68rem;
+}
+
+.nodes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: $space-1;
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $parchment;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &[data-learned='true'] {
+    border-left: 2px solid $gold;
+    background: $panel-raised;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $mist;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:disabled:not([data-learned='true']) {
+    opacity: 0.42;
+  }
+}
+
+.nodeName {
+  font-size: 0.82rem;
+}
+
+.nodeText {
+  color: $muted;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.nodeCost {
+  margin-top: 2px;
+  color: $muted-deep;
+  font-family: $font-mono;
+  font-size: 0.66rem;
+}
+
+.locked {
+  margin: 0;
+  color: $muted;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}

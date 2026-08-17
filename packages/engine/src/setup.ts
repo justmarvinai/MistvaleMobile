@@ -2,6 +2,7 @@ import type {
   Aura,
   ChampionDef,
   EnemyDef,
+  MasteryEffect,
   SkillDef,
   Stat,
   StageDef,
@@ -26,8 +27,15 @@ export interface ChampionEntry {
   level: number;
   rank: number;
   ascension: number;
-  /** Flat stat additions from gear, sets, Hall of Valor and masteries. */
+  /** Flat stat additions from gear, sets, Hall of Valor and unconditional masteries. */
   bonuses?: Partial<Record<Stat, number>>;
+  /**
+   * Mastery effects the engine has to evaluate during the fight.
+   *
+   * Only the conditional ones and the procs: anything settled in advance is already in
+   * `bonuses`, which is what keeps the champion screen's numbers and the engine's the same.
+   */
+  masteries?: readonly MasteryEffect[];
 }
 
 /** One enemy as a stage's wave describes it. */
@@ -166,7 +174,7 @@ export function buildTeam(
     for (const [stat, bonus] of Object.entries(entry.bonuses ?? {}) as [Stat, number][]) {
       stats[stat] = Math.max(0, stats[stat] + bonus);
     }
-    return makeUnit({
+    const unit = makeUnit({
       side: 'ally',
       slot,
       defKey: entry.def.key,
@@ -178,6 +186,17 @@ export function buildTeam(
       isBoss: false,
       boss: { almightyImmunity: false, tmReductionImmune: false },
     });
+    if (entry.masteries && entry.masteries.length > 0) {
+      unit.masteries = entry.masteries;
+      unit.masteryState = {
+        killStacks: 0,
+        a1Uses: 0,
+        struckFirst: [],
+        debuffsThisTurn: 0,
+        livingFoes: 0,
+      };
+    }
+    return unit;
   });
 
   const leader = entries[0];

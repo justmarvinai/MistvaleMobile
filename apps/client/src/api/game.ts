@@ -125,6 +125,16 @@ export const gameApi = {
   upgradeSkill: (id: string, input: SkillUpgradeRequest) =>
     api.post<ProgressionResponse>(ROUTES.roster.skillUpgrade(id), input),
 
+  learnMastery: (id: string, nodeKey: string, actionId: string) =>
+    api
+      .post<{ champion: ChampionDetail }>(ROUTES.roster.masteries(id), { nodeKey, actionId })
+      .then((data) => data.champion),
+
+  resetMasteries: (id: string, actionId: string) =>
+    api.post<{ champion: ChampionDetail; crystalsSpent: number }>(ROUTES.roster.masteryReset(id), {
+      actionId,
+    }),
+
   setChampionFlags: (id: string, flags: ChampionFlagsRequest) =>
     api
       .post<{ champion: ChampionDetail }>(ROUTES.roster.flags(id), flags)

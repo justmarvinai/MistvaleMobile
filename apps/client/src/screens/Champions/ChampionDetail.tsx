@@ -9,6 +9,7 @@ import { useInventoryStore, itemCount } from '../../state/inventoryStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { FoodPicker } from './FoodPicker';
+import { MasteryTrees } from './MasteryTrees';
 import { RelicPicker } from './RelicPicker';
 import { StatTable } from './StatTable';
 import styles from './ChampionDetail.module.scss';
@@ -22,7 +23,7 @@ import styles from './ChampionDetail.module.scss';
  * nothing on this screen is calculated locally.
  */
 
-type Tab = 'gear' | 'skills' | 'lore';
+type Tab = 'gear' | 'skills' | 'masteries' | 'lore';
 
 const SLOT_LABEL: Record<GearSlot, string> = {
   weapon: 'Weapon',
@@ -175,7 +176,7 @@ export function ChampionDetailModal({
         <StatTable stats={stats} />
 
         <div className={styles.tabs} role="tablist">
-          {(['gear', 'skills', 'lore'] as Tab[]).map((entry) => (
+          {(['gear', 'skills', 'masteries', 'lore'] as Tab[]).map((entry) => (
             <button
               key={entry}
               type="button"
@@ -184,10 +185,33 @@ export function ChampionDetailModal({
               className={styles.tab}
               onClick={() => setTab(entry)}
             >
-              {entry === 'gear' ? 'Relics' : entry === 'skills' ? 'Skills' : 'Lore'}
+              {entry === 'gear'
+                ? 'Relics'
+                : entry === 'skills'
+                  ? 'Skills'
+                  : entry === 'masteries'
+                    ? 'Masteries'
+                    : 'Lore'}
             </button>
           ))}
         </div>
+
+        {tab === 'masteries' && (
+          <MasteryTrees
+            detail={detail}
+            busy={busy}
+            onLearn={(nodeKey) =>
+              void run('Mastery learned.', () =>
+                gameApi.learnMastery(championId, nodeKey, newActionId()),
+              )
+            }
+            onReset={() =>
+              void run('Masteries forgotten.', () =>
+                gameApi.resetMasteries(championId, newActionId()),
+              )
+            }
+          />
+        )}
 
         {tab === 'gear' && (
           <div className={styles.slots}>

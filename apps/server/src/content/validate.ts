@@ -231,6 +231,29 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     }
   }
 
+  // A tree needs enough nodes at each tier to satisfy the pick rules, or a player who
+  // commits to it hits a wall the UI cannot explain.
+  const masteryTierCounts = new Map<string, number>();
+  for (const [, entity] of parsed.get('mastery') ?? []) {
+    const node = entity as { tree: string; tier: number };
+    const slot = `${node.tree}:${node.tier}`;
+    masteryTierCounts.set(slot, (masteryTierCounts.get(slot) ?? 0) + 1);
+  }
+  if (masteryTierCounts.size > 0) {
+    for (const tree of ['onslaught', 'bulwark', 'insight']) {
+      for (let tier = 1; tier <= 6; tier += 1) {
+        const held = masteryTierCounts.get(`${tree}:${tier}`) ?? 0;
+        if (held > 0) continue;
+        errors.push({
+          severity: 'error',
+          contentType: 'mastery',
+          key: `${tree}_t${tier}`,
+          message: `The ${tree} tree has no tier ${tier} mastery; a champion training it would hit a dead end.`,
+        });
+      }
+    }
+  }
+
   for (const [key, entity] of parsed.get('dungeon') ?? []) {
     const dungeon = entity as {
       kind: string;

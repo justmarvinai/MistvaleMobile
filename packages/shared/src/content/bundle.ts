@@ -17,6 +17,7 @@ import {
   statusDefSchema,
   summonPoolDefSchema,
 } from './entities';
+import { masteryDefSchema } from './masteries';
 
 /**
  * The content bundle the client renders from.
@@ -48,6 +49,7 @@ export const contentBundleSchema = z.object({
   stages: z.array(stageDefSchema),
   summonPools: z.array(summonPoolDefSchema),
   shops: z.array(shopDefSchema),
+  masteries: z.array(masteryDefSchema),
   /** Flattened to a plain map — the client only ever reads values. */
   config: z.record(z.string(), gameConfigEntrySchema.shape.value),
 });

@@ -290,7 +290,14 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
     const owned = await champions.loadOwned(app.db, playerId, championId);
     const base = champions.baseStatsFor(owned, ctx);
-    const assembled = gear.assembleChampion(base, [...worn, candidate].map(toRow), ctx.gear);
+    // The same mastery contribution the champion screen uses, or the preview would
+    // promise a stat line the detail view then contradicts.
+    const assembled = gear.assembleChampion(
+      base,
+      [...worn, candidate].map(toRow),
+      ctx.gear,
+      champions.masteryContribution(owned, base, ctx),
+    );
 
     return reply.send(
       apiSuccess(
@@ -301,6 +308,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
             after: {
               base,
               gear: assembled.gear,
+              mastery: assembled.mastery,
               total: assembled.total,
               setBonuses: assembled.setBonuses,
               power: assembled.power,

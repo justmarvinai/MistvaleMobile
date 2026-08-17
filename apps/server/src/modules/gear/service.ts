@@ -147,18 +147,50 @@ export function assembleChampion(
   base: StatBlock,
   rows: readonly GearInstanceRow[],
   context: GearContext,
+  /**
+   * What masteries add, already resolved.
+   *
+   * Reported separately from relics in the returned block so the champion screen can show
+   * three columns — what the champion is, what it is wearing, and what it has learned —
+   * rather than one number a player has to take on trust.
+   */
+  masteries: MasteryContribution = EMPTY_MASTERIES,
 ): {
   gear: StatBlock;
+  mastery: StatBlock;
   total: StatBlock;
   setBonuses: ReturnType<typeof assembleGearBonus>['setBonuses'];
   power: number;
 } {
-  const { bonus, setBonuses } = assembleGearBonus(base, rows.map(pieceOf), context.tables);
+  const { bonus, setBonuses } = assembleGearBonus(
+    base,
+    rows.map(pieceOf),
+    context.tables,
+    masteries.setBonusAmplifyPct,
+  );
+
+  const mastery = emptyBlock();
+  for (const [stat, value] of Object.entries(masteries.flat) as [keyof StatBlock, number][]) {
+    mastery[stat] += value;
+  }
+
   const total = { ...base };
   for (const stat of Object.keys(total) as (keyof StatBlock)[]) {
-    total[stat] = Math.max(0, Math.round(base[stat] + bonus[stat]));
+    total[stat] = Math.max(0, Math.round(base[stat] + bonus[stat] + mastery[stat]));
   }
-  return { gear: bonus, total, setBonuses, power: powerScore(total, context.economy) };
+  return { gear: bonus, mastery, total, setBonuses, power: powerScore(total, context.economy) };
+}
+
+/** What a champion's learned masteries are worth, before the fight starts. */
+export interface MasteryContribution {
+  flat: Partial<Record<keyof StatBlock, number>>;
+  setBonusAmplifyPct: number;
+}
+
+const EMPTY_MASTERIES: MasteryContribution = Object.freeze({ flat: {}, setBonusAmplifyPct: 0 });
+
+function emptyBlock(): StatBlock {
+  return { hp: 0, atk: 0, def: 0, spd: 0, critRate: 0, critDmg: 0, res: 0, acc: 0 };
 }
 
 // ── Acquiring ───────────────────────────────────────────────────────────────

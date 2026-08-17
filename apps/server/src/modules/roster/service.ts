@@ -25,6 +25,8 @@ export interface RosterEntry {
   xp: number;
   locked: boolean;
   favourite: boolean;
+  /** `mastery_defs` keys this champion has learned. */
+  masteries: string[];
 }
 
 /** The highest level a champion of this rank may reach. */
@@ -43,6 +45,7 @@ export async function listRoster(db: Executor, playerId: string): Promise<Roster
       xp: playerChampions.xp,
       locked: playerChampions.locked,
       favourite: playerChampions.favourite,
+      masteries: playerChampions.masteries,
     })
     .from(playerChampions)
     .where(eq(playerChampions.playerId, playerId));
@@ -65,6 +68,7 @@ export async function findOwned(
       xp: playerChampions.xp,
       locked: playerChampions.locked,
       favourite: playerChampions.favourite,
+      masteries: playerChampions.masteries,
     })
     .from(playerChampions)
     .where(and(eq(playerChampions.playerId, playerId), inArray(playerChampions.id, [...ids])));
@@ -127,6 +131,7 @@ export async function grantChampion(
       xp: playerChampions.xp,
       locked: playerChampions.locked,
       favourite: playerChampions.favourite,
+      masteries: playerChampions.masteries,
     });
 
   if (!row) throw new AppError('INTERNAL', 'Could not add that champion.');

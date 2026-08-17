@@ -23,6 +23,7 @@ import { computeEnergy } from '../../lib/progression';
 import type { ContentCache } from '../../content/cache';
 import * as depths from '../depths/service';
 import * as gear from '../gear/service';
+import * as mastery from '../mastery/service';
 import * as progress from '../progress/service';
 import * as chronicle from '../summon/service';
 import * as rewards from '../rewards/service';
@@ -187,6 +188,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // screen is the number that fights.
     const equipped = await gear.gearByChampion(tx, options.team);
     const gearContext = gear.gearContextFrom(snapshot.bundle);
+    const masteryNodes = mastery.nodesFrom(ctx.content);
 
     const entries: ChampionEntry[] = owned.map((member) => {
       const def = champions.get(member.championKey);
@@ -197,13 +199,31 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         );
       }
       const base = deriveStats(def.baseStats, member, scaling);
-      const assembled = gear.assembleChampion(base, equipped.get(member.id) ?? [], gearContext);
+
+      // Masteries split the same way relics do not: what is unconditional becomes stats
+      // here, and what needs a fight to decide rides in as effects the engine evaluates.
+      const learned = mastery.resolveMasteries(member.masteries ?? [], masteryNodes);
+      const masteryStats = mastery.applyMasteryStats(base, learned);
+      const assembled = gear.assembleChampion(base, equipped.get(member.id) ?? [], gearContext, {
+        flat: masteryStats,
+        setBonusAmplifyPct: learned.setBonusAmplifyPct,
+      });
+
+      const bonuses = { ...assembled.gear };
+      for (const [stat, value] of Object.entries(masteryStats) as [
+        keyof typeof bonuses,
+        number,
+      ][]) {
+        bonuses[stat] = (bonuses[stat] ?? 0) + value;
+      }
+
       return {
         def,
         level: member.level,
         rank: member.rank,
         ascension: member.ascension,
-        bonuses: assembled.gear,
+        bonuses,
+        masteries: learned.battleEffects,
       };
     });
 

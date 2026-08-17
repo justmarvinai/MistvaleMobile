@@ -1,0 +1,4 @@
+ALTER TABLE "content_entries" DROP CONSTRAINT "content_entries_type_check";--> statement-breakpoint
+ALTER TABLE "player_champions" ADD COLUMN "masteries" jsonb DEFAULT '[]'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "player_champions" ADD COLUMN "mastery_resets" smallint DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE "content_entries" ADD CONSTRAINT "content_entries_type_check" CHECK ("content_entries"."content_type" in ('faction', 'status', 'skill', 'asset', 'champion', 'enemy', 'gearSet', 'gearSlot', 'gearStat', 'item', 'campaignChapter', 'dungeon', 'stage', 'summonPool', 'shop', 'mastery', 'gameConfig'));

@@ -14,6 +14,30 @@ import {
   summonAllowance,
 } from './boss';
 import type { CombatConfig } from './config';
+import {
+  a1RampMultiplier,
+  battleStartShield,
+  bonusDamageRule,
+  cleanseProc,
+  cooldownProcs,
+  counterDamageMultiplier,
+  counterProcs,
+  damageDealtMultiplier,
+  damageTakenMultiplier as masteryDamageTaken,
+  debuffChanceBonus,
+  durationExtension,
+  firstStrikeAgainst,
+  hasLastStand,
+  healingMultiplier,
+  killRewards,
+  lifestealFrom,
+  noteDebuffLanded,
+  noteSkillUse,
+  protectionBonus,
+  redirectShare,
+  resetTurnCounters,
+  turnMeterProcs,
+} from './mastery';
 import { computeDamage, landChance, matchupOf, rollHitQuality, type Matchup } from './damage';
 import { createRng, createRngFromState, type Rng } from './rng';
 import { clamp, effectiveStat, findByEngineType, healReceivedMultiplier } from './stats';
@@ -131,7 +155,8 @@ function dealDamage(
   let remaining = amount;
   let redirectedFrom: UnitRef | undefined;
 
-  // 1. Ally Protection: a share of the blow moves to the protector.
+  // 1. Ally Protection: a share of the blow moves to the protector. Bloodguard makes the
+  // protector's share larger, which is the whole of that mastery.
   const protection = findByEngineType(target, 'allyProtection', ctx.rules.statuses);
   if (protection && !meta.trueDamage) {
     const protectorRef = protection.instance.source;
@@ -139,12 +164,29 @@ function dealDamage(
       ? unitAt(ctx.state.allies, ctx.state.enemies, protectorRef)
       : undefined;
     if (protector && protector.alive && protector !== target) {
-      const share = clamp((protection.def.params.ratio ?? 0) / 100, 0, 1);
+      const ratio = (protection.def.params.ratio ?? 0) * (1 + protectionBonus(protector) / 100);
+      const share = clamp(ratio / 100, 0, 1);
       const moved = Math.round(remaining * share);
       if (moved > 0) {
         remaining -= moved;
         applyToUnit(ctx, source, protector, moved, { ...meta, redirectedFrom: target.ref });
       }
+    }
+  }
+
+  // 1b. Shieldwall: an ally standing nearby takes a share of every blow aimed at this one.
+  // Kept separate from Ally Protection because it is not a status — nobody cast it, and it
+  // cannot be dispelled off.
+  if (!meta.trueDamage) {
+    const { own } = sides(ctx, target);
+    for (const ally of living(own)) {
+      if (ally === target) continue;
+      const share = redirectShare(ally);
+      if (share <= 0) continue;
+      const moved = Math.round(remaining * (share / 100));
+      if (moved <= 0) continue;
+      remaining -= moved;
+      applyToUnit(ctx, source, ally, moved, { ...meta, redirectedFrom: target.ref });
     }
   }
 
@@ -208,11 +250,17 @@ function applyToUnit(
     }
   }
 
-  // 3. Unkillable floors HP at 1 rather than preventing the hit.
+  // 3. Unkillable floors HP at 1 rather than preventing the hit. Last Bastion does the
+  // same thing once per battle, off a mastery instead of a buff — which is why it cannot
+  // be dispelled, and why it is a capstone.
   const unkillable = findByEngineType(target, 'unkillable', ctx.rules.statuses);
   if (unkillable && remaining >= target.hp) {
     remaining = Math.max(0, target.hp - 1);
     emit(ctx, { type: 'unkillable', unit: target.ref });
+  } else if (remaining >= target.hp && hasLastStand(target)) {
+    remaining = Math.max(0, target.hp - 1);
+    target.usedLastStand = true;
+    emit(ctx, { type: 'masteryProc', unit: target.ref, mastery: 'lastStand' });
   }
 
   target.hp = Math.max(0, target.hp - remaining);
@@ -241,13 +289,22 @@ function applyToUnit(
   if (target.hp <= 0 && target.alive) {
     target.alive = false;
     emit(ctx, { type: 'died', unit: target.ref });
+    if (source !== target) runKillRewards(ctx, source);
+    runAllyDeathProcs(ctx, target);
   }
   return remaining;
 }
 
 function heal(ctx: Ctx, source: BattleUnit | null, target: BattleUnit, amount: number): number {
   if (!target.alive || amount <= 0) return 0;
-  const scaled = Math.round(amount * healReceivedMultiplier(target, ctx.rules.statuses));
+  // Three multipliers, and the order does not matter because none of them compound: Heal
+  // Reduction from statuses, then how much the healer gives and how much the target takes.
+  const scaled = Math.round(
+    amount *
+      healReceivedMultiplier(target, ctx.rules.statuses) *
+      (source ? healingMultiplier(source, 'dealt') : 1) *
+      healingMultiplier(target, 'received'),
+  );
   const healed = Math.min(scaled, target.maxHp - target.hp);
   if (healed <= 0) return 0;
   target.hp += healed;
@@ -275,6 +332,11 @@ function onDamageDealt(
   options: { allowCounter: boolean },
 ): void {
   if (dealt.gross <= 0) return;
+
+  // Masteries that read a landed blow: Bloodrush's conditional lifesteal, and Grim
+  // Cycle's chance to knock a turn off a cooldown when the hit was heavy enough.
+  heal(ctx, attacker, attacker, lifestealFrom(attacker, target, dealt.hpLost));
+  runCooldownProcs(ctx, attacker, target, dealt.hpLost);
 
   // Vampiric heals the attacker; Leech heals whoever is attacking its holder.
   const vampiric = findByEngineType(attacker, 'lifesteal', ctx.rules.statuses);
@@ -315,18 +377,61 @@ function onDamageDealt(
   // it is the boss's own mechanic rather than a status somebody put on it.
   if (retaliateForBands(ctx, target, attacker, dealt)) return;
 
-  // Counterattack: the holder swings its A1 back.
+  // Counterattack, from either source: the Counterattack buff, or Grit answering a blow
+  // that took a quarter of the holder's health. Vengeful sharpens whichever fired.
   const counter = findByEngineType(target, 'counterattack', ctx.rules.statuses);
-  if (!counter) return;
+  const grit = counterProcs(target, 'heavyHit').find(
+    (rule) =>
+      target.maxHp > 0 &&
+      (dealt.hpLost / target.maxHp) * 100 >= rule.hpLostPct &&
+      ctx.rng.chance(rule.chance),
+  );
+  if (!counter && !grit) return;
 
   const a1 = firstSkillOf(ctx, target, 'a1');
   if (!a1) return;
 
+  const ratio = counter ? (counter.def.params.ratio ?? 100) / 100 : 1;
+  if (grit) emit(ctx, { type: 'masteryProc', unit: target.ref, mastery: 'counterProc' });
   emit(ctx, { type: 'counterattack', unit: target.ref, target: attacker.ref });
   executeSkill(ctx, target, a1, [attacker], {
-    damageScale: (counter.def.params.ratio ?? 100) / 100,
+    damageScale: ratio * counterDamageMultiplier(target),
     allowCounter: false,
   });
+}
+
+/** Grim Cycle: a hit heavy enough to matter can shave a turn off a random cooldown. */
+function runCooldownProcs(
+  ctx: Ctx,
+  attacker: BattleUnit,
+  target: BattleUnit,
+  hpLost: number,
+): void {
+  const rules = cooldownProcs(attacker);
+  if (rules.length === 0 || target.maxHp <= 0) return;
+
+  const share = (hpLost / target.maxHp) * 100;
+  for (const rule of rules) {
+    if (share < rule.minDamagePctMaxHp) continue;
+    if (!ctx.rng.chance(rule.chance)) continue;
+
+    const ready = attacker.skills.filter((key) => {
+      const skill = ctx.rules.skills.get(key);
+      return (
+        skill &&
+        skill.slot !== 'a1' &&
+        skill.slot !== 'passive' &&
+        (attacker.cooldowns[key] ?? 0) > 0
+      );
+    });
+    if (ready.length === 0) continue;
+
+    const key = ctx.rng.pick(ready);
+    const next = Math.max(0, (attacker.cooldowns[key] ?? 0) - 1);
+    attacker.cooldowns[key] = next;
+    emit(ctx, { type: 'masteryProc', unit: attacker.ref, mastery: 'cooldownProc' });
+    emit(ctx, { type: 'cooldownChanged', unit: attacker.ref, skill: key, value: next });
+  }
 }
 
 function firstSkillOf(ctx: Ctx, unit: BattleUnit, slot: string): SkillDef | undefined {
@@ -369,6 +474,8 @@ interface ExecuteOptions {
   /** Counterattacks land at a fraction of normal damage. */
   damageScale?: number;
   allowCounter?: boolean;
+  /** Which slot the skill in flight came from — the A1 ramp and First Strike read it. */
+  skillSlot?: SkillDef['slot'];
 }
 
 function conditionHolds(
@@ -413,7 +520,10 @@ function scaleValue(unit: BattleUnit, scale: string, mult: number, ctx: Ctx): nu
 function debuffLands(ctx: Ctx, caster: BattleUnit, target: BattleUnit, def: StatusDef): boolean {
   const accuracy = effectiveStat(caster, 'acc', ctx.rules.statuses);
   const resistance = effectiveStat(target, 'res', ctx.rules.statuses);
-  let chance = landChance(accuracy, resistance, ctx.config);
+  // Hexweaver and Immovable widen the window before the contest is rolled, which is what
+  // makes them worth taking on a champion that is already accurate.
+  let chance =
+    landChance(accuracy, resistance, ctx.config) + debuffChanceBonus(caster, isHardCc(def));
 
   // Arena only: stacking hard CC on one unit gets progressively harder (§7).
   if (ctx.state.mode === 'arena' && isHardCc(def)) {
@@ -438,9 +548,25 @@ function runComponent(
 
   if (component.type === 'damage') {
     const hits = component.hits;
+    const aoe = hitTargets.length > 1;
     for (const target of hitTargets) {
       if (!target.alive) continue;
       const matchup: Matchup = matchupOf(caster.element, target.element);
+
+      // First Strike opens on a target once per battle, before any of the blows land.
+      const opener = options.skillSlot === 'a1' ? firstStrikeAgainst(caster, target) : 0;
+      if (opener > 0 && !target.isBoss) {
+        applyTurnMeter(target, -opener);
+        emit(ctx, { type: 'masteryProc', unit: caster.ref, mastery: 'firstStrike' });
+        emit(ctx, {
+          type: 'turnMeter',
+          source: caster.ref,
+          target: target.ref,
+          deltaPct: -opener,
+          value: target.tm,
+        });
+      }
+
       for (let hitIndex = 0; hitIndex < hits; hitIndex += 1) {
         if (!target.alive) break;
         if (component.condition && !conditionHolds(component.condition, caster, target, ctx))
@@ -448,11 +574,25 @@ function runComponent(
         if (component.chance !== undefined && !ctx.rng.chance(component.chance)) continue;
 
         const quality = rollHitQuality(matchup, ctx.rng, ctx.config);
+        const masteryContext = {
+          aoe,
+          mode: ctx.state.mode,
+          targetShielded: Boolean(findByEngineType(target, 'shield', ctx.rules.statuses)),
+          targetCrowdControlled: [...target.debuffs].some((instance) => {
+            const def = ctx.rules.statuses.get(instance.key);
+            return def ? isHardCc(def) : false;
+          }),
+        };
         const raw =
           scaleValue(caster, component.scale, component.mult, ctx) *
           (options.damageScale ?? 1) *
           // An enraged boss hits harder every turn it is left standing.
-          (caster.isBoss ? enrageMultiplier(caster, ctx.state.turn) : 1);
+          (caster.isBoss ? enrageMultiplier(caster, ctx.state.turn) : 1) *
+          // Masteries on both sides of the blow: the attacker's conditional bonuses and
+          // its A1 ramp, against whatever the defender has taken to blunt them.
+          damageDealtMultiplier(caster, target, masteryContext) *
+          (options.skillSlot === 'a1' ? a1RampMultiplier(caster) : 1) *
+          masteryDamageTaken(target, caster, masteryContext);
         const { amount, crit } = computeDamage(
           {
             attacker: caster,
@@ -470,6 +610,9 @@ function runComponent(
         onDamageDealt(ctx, caster, target, dealt, {
           allowCounter: options.allowCounter !== false,
         });
+        // Deathmark rides on top of a hit that already landed, once per skill rather than
+        // once per hit — otherwise a five-hit A1 would carry it five times over.
+        if (hitIndex === 0 && dealt.hpLost > 0) runBonusDamage(ctx, caster, target);
       }
     }
     return;
@@ -507,10 +650,23 @@ function runComponent(
         continue;
       }
 
+      // Veilbinder stretches the caster's own debuffs; Longbrew stretches buffs it puts
+      // on allies. Both roll before the status is applied, so the extra turn is part of
+      // the duration rather than a second edit to it.
+      const stretch = durationExtension(
+        caster,
+        hostile ? 'ownDebuffs' : 'allyBuffs',
+        isHardCc(def),
+      );
+      const extra = stretch && ctx.rng.chance(stretch.chance) ? stretch.turns : 0;
+      if (extra > 0) {
+        emit(ctx, { type: 'masteryProc', unit: caster.ref, mastery: 'statusDuration' });
+      }
+
       const outcome = applyStatus(
         target,
         def,
-        component.turns,
+        component.turns + extra,
         caster.ref,
         ctx.rules.statuses,
         ctx.config,
@@ -526,6 +682,8 @@ function runComponent(
         continue;
       }
       if (hostile && isHardCc(def)) target.ccStreak += 1;
+      if (hostile) runDebuffLandedProcs(ctx, caster);
+      if (hostile && isHardCc(def)) runAllyCcCounters(ctx, target, caster);
       emit(ctx, {
         type: 'statusApplied',
         source: caster.ref,
@@ -582,9 +740,15 @@ function runComponent(
         ctx.config,
       );
       if (!outcome.applied) continue;
+      const scaled = Math.round(amount * healingMultiplier(target, 'shieldReceived'));
       // A refreshed shield takes the larger pool rather than adding to it.
-      outcome.instance.shield = Math.max(outcome.instance.shield ?? 0, amount);
-      emit(ctx, { type: 'shieldGained', target: target.ref, amount, turns: component.turns });
+      outcome.instance.shield = Math.max(outcome.instance.shield ?? 0, scaled);
+      emit(ctx, {
+        type: 'shieldGained',
+        target: target.ref,
+        amount: scaled,
+        turns: component.turns,
+      });
     }
     return;
   }
@@ -720,11 +884,140 @@ function executeSkill(
     targets: targets.map((unit) => unit.ref),
   });
   for (const component of skill.components) {
-    runComponent(ctx, caster, component, targets, options);
+    runComponent(ctx, caster, component, targets, { ...options, skillSlot: skill.slot });
+  }
+}
+
+/**
+ * The Warmaster-analog: a chance at damage measured off the target's own health bar.
+ *
+ * Deliberately far weaker against a boss — a percentage of a keep-boss's maximum HP would
+ * otherwise dwarf everything else a champion does, which is the mistake the source game
+ * spent years correcting.
+ */
+function runBonusDamage(ctx: Ctx, attacker: BattleUnit, target: BattleUnit): void {
+  const rule = bonusDamageRule(attacker);
+  if (!rule || !target.alive) return;
+  if (!ctx.rng.chance(rule.chance)) return;
+
+  const pct = target.isBoss ? rule.bossPct : rule.pct;
+  const amount = Math.round((target.maxHp * pct) / 100);
+  if (amount <= 0) return;
+
+  emit(ctx, { type: 'masteryProc', unit: attacker.ref, mastery: 'bonusDamageMaxHp' });
+  applyToUnit(ctx, attacker, target, amount, {
+    quality: 'normal',
+    crit: false,
+    hitIndex: 0,
+    hits: 1,
+    trueDamage: true,
+  });
+}
+
+/** Wellspring: landing enough debuffs in one turn hands the whole team meter. */
+function runDebuffLandedProcs(ctx: Ctx, caster: BattleUnit): void {
+  for (const rule of turnMeterProcs(caster, 'debuffsLandedInTurn')) {
+    if (!noteDebuffLanded(caster, rule.threshold)) continue;
+    if (!ctx.rng.chance(rule.chance)) continue;
+    grantTurnMeter(ctx, caster, rule.pct, rule.target);
+    emit(ctx, { type: 'masteryProc', unit: caster.ref, mastery: 'turnMeterProc' });
+  }
+}
+
+/** Warden's Eye: a hard CC landing on an ally can pull a counterattack out of its guard. */
+function runAllyCcCounters(ctx: Ctx, victim: BattleUnit, attacker: BattleUnit): void {
+  const { own } = sides(ctx, victim);
+  for (const ally of living(own)) {
+    if (ally === victim) continue;
+    const rule = counterProcs(ally, 'allyCrowdControlled').find((entry) =>
+      ctx.rng.chance(entry.chance),
+    );
+    if (!rule || !attacker.alive) continue;
+
+    const a1 = firstSkillOf(ctx, ally, 'a1');
+    if (!a1) continue;
+    emit(ctx, { type: 'masteryProc', unit: ally.ref, mastery: 'counterProc' });
+    emit(ctx, { type: 'counterattack', unit: ally.ref, target: attacker.ref });
+    executeSkill(ctx, ally, a1, [attacker], {
+      damageScale: counterDamageMultiplier(ally),
+      allowCounter: false,
+      skillSlot: a1.slot,
+    });
+  }
+}
+
+/** Moves turn meter for a mastery proc, to the holder or to its whole side. */
+function grantTurnMeter(ctx: Ctx, unit: BattleUnit, pct: number, target: 'self' | 'team'): void {
+  const { own } = sides(ctx, unit);
+  const recipients = target === 'team' ? living(own) : [unit];
+  for (const recipient of recipients) {
+    applyTurnMeter(recipient, pct);
+    emit(ctx, {
+      type: 'turnMeter',
+      source: unit.ref,
+      target: recipient.ref,
+      deltaPct: pct,
+      value: recipient.tm,
+    });
+  }
+}
+
+/**
+ * What a kill is worth to the killer: Momentum's speed, Bounty Shield's absorb.
+ *
+ * Read after the death rather than before it, so a unit that dies to its own Reflect does
+ * not pay its killer twice.
+ */
+function runKillRewards(ctx: Ctx, killer: BattleUnit): void {
+  const reward = killRewards(killer);
+  if (!reward || !killer.alive) return;
+
+  if (reward.stat && reward.amount > 0) {
+    const stats = { ...killer.stats };
+    stats[reward.stat] = Math.max(0, stats[reward.stat] + reward.amount);
+    killer.stats = Object.freeze(stats);
+    emit(ctx, { type: 'masteryProc', unit: killer.ref, mastery: 'onKill' });
+  }
+
+  if (reward.shieldPctMaxHp > 0) {
+    const def = ctx.rules.statuses.get('shield');
+    if (!def) return;
+    const outcome = applyStatus(killer, def, 2, killer.ref, ctx.rules.statuses, ctx.config);
+    if (!outcome.applied) return;
+    const amount = Math.round((killer.maxHp * reward.shieldPctMaxHp) / 100);
+    outcome.instance.shield = Math.max(outcome.instance.shield ?? 0, amount);
+    emit(ctx, { type: 'shieldGained', target: killer.ref, amount, turns: 2 });
+  }
+}
+
+/** Springstep: an ally falling hands the survivors a little tempo. */
+function runAllyDeathProcs(ctx: Ctx, fallen: BattleUnit): void {
+  const { own } = sides(ctx, fallen);
+  for (const ally of living(own)) {
+    for (const rule of turnMeterProcs(ally, 'allyDied')) {
+      if (!ctx.rng.chance(rule.chance)) continue;
+      grantTurnMeter(ctx, ally, rule.pct, rule.target);
+      emit(ctx, { type: 'masteryProc', unit: ally.ref, mastery: 'turnMeterProc' });
+    }
   }
 }
 
 // ── Turn flow ───────────────────────────────────────────────────────────────
+
+/** Cleansing Surge: a chance to shrug one debuff off at the start of the holder's turn. */
+function runCleanseProc(ctx: Ctx, unit: BattleUnit): void {
+  const rule = cleanseProc(unit);
+  if (!rule || unit.debuffs.length === 0) return;
+  if (!ctx.rng.chance(rule.chance)) return;
+
+  emit(ctx, { type: 'masteryProc', unit: unit.ref, mastery: 'cleanseProc' });
+  for (let index = 0; index < rule.count; index += 1) {
+    const instance = unit.debuffs[0];
+    if (!instance) break;
+    removeStatus(unit, instance.key);
+    emit(ctx, { type: 'statusRemoved', target: unit.ref, status: instance.key, by: 'cleanse' });
+  }
+}
 
 /** Poison, HP Burn and Continuous Heal all resolve here, at the holder's turn start. */
 function runStartOfTurnTicks(ctx: Ctx, unit: BattleUnit): void {
@@ -844,6 +1137,15 @@ function runBossTurnStart(ctx: Ctx, unit: BattleUnit): boolean {
 function endTurn(ctx: Ctx, unit: BattleUnit): void {
   for (const key of tickDurations(unit)) {
     emit(ctx, { type: 'statusExpired', target: unit.ref, status: key });
+    // Bated Breath and Cold Read read the moment something falls off, which is why they
+    // fire here rather than anywhere the status was applied.
+    const kind = ctx.rules.statuses.get(key)?.kind;
+    const trigger = kind === 'buff' ? 'ownBuffExpired' : 'ownDebuffExpired';
+    for (const rule of turnMeterProcs(unit, trigger)) {
+      if (!ctx.rng.chance(rule.chance)) continue;
+      grantTurnMeter(ctx, unit, rule.pct, rule.target);
+      emit(ctx, { type: 'masteryProc', unit: unit.ref, mastery: 'turnMeterProc' });
+    }
   }
   for (const key of Object.keys(unit.cooldowns)) {
     if (unit.cooldowns[key]! > 0) unit.cooldowns[key]! -= 1;
@@ -862,6 +1164,12 @@ function endTurn(ctx: Ctx, unit: BattleUnit): void {
 function beginTurn(ctx: Ctx, unit: BattleUnit): 'dead' | 'skipped' | 'ready' {
   emit(ctx, { type: 'turnStart', unit: unit.ref, turn: ctx.state.turn });
   consumeTurn(unit);
+
+  // Per-turn mastery bookkeeping, before anything can change the board: how many foes are
+  // standing (Swarmreader reads it) and a fresh debuff count for the threshold procs.
+  const { foes } = sides(ctx, unit);
+  resetTurnCounters(unit, living(foes).length);
+  runCleanseProc(ctx, unit);
 
   runStartOfTurnTicks(ctx, unit);
   if (!unit.alive) {
@@ -929,6 +1237,10 @@ function actAndEndTurn(ctx: Ctx, unit: BattleUnit, action?: BattleAction): void 
     explicit,
   );
   executeSkill(ctx, unit, skill, targets);
+  // Methodical rewards repetition, so the ramp has to know what was cast — including that
+  // something *other* than the A1 was, which resets it. Counted *after* the skill lands,
+  // because "each consecutive attack hits harder" means the second one does, not the first.
+  noteSkillUse(unit, skill.slot === 'a1');
 
   if (skill.cooldown > 0) {
     unit.cooldowns[skill.key] = skill.cooldown + 1; // +1 because endTurn ticks it immediately.
@@ -1065,6 +1377,19 @@ export function createBattle(
     allies: state.allies.map(snapshot),
     enemies: state.enemies.map(snapshot),
   });
+
+  // First Stand goes up before anyone has moved — that is what makes it a *first* stand
+  // rather than an ordinary shield somebody has to spend a turn casting.
+  for (const unit of [...state.allies, ...state.enemies]) {
+    const rule = battleStartShield(unit);
+    const def = rule ? rules.statuses.get('shield') : undefined;
+    if (!rule || !def) continue;
+    const outcome = applyStatus(unit, def, rule.turns, unit.ref, rules.statuses, config);
+    if (!outcome.applied) continue;
+    const amount = Math.round((unit.maxHp * rule.pctMaxHp) / 100);
+    outcome.instance.shield = amount;
+    emit(ctx, { type: 'shieldGained', target: unit.ref, amount, turns: rule.turns });
+  }
 
   state.rngState = rng.getState();
   return { state, events: ctx.events };

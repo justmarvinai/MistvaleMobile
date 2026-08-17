@@ -5,6 +5,11 @@ import { defineConfig, devices } from '@playwright/test';
  *
  * These drive the real client against the real server and database — the same path a
  * player takes. Run with `pnpm e2e` (requires PostgreSQL and a built or dev client).
+ *
+ * **Start the server with `RATE_LIMIT_ENABLED=false`.** Registration is capped at five per
+ * hour per IP, and every browser test comes from 127.0.0.1 — so past the fifth account the
+ * suite fails on a 429 that looks exactly like a broken sign-up. CI sets it in the e2e job;
+ * a local run has to set it too.
  */
 export default defineConfig({
   testDir: './e2e',

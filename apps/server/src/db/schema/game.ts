@@ -55,6 +55,19 @@ export const playerChampions = pgTable(
      */
     skillUpgrades: jsonb('skill_upgrades').notNull().default({}).$type<Record<string, number>>(),
 
+    /**
+     * Mastery nodes learned, as `mastery_defs` keys.
+     *
+     * A list rather than a table for the same reason skill upgrades are a map: the shape
+     * of a tree is content, and rebalancing one into seventeen nodes must not be a
+     * migration. The build rules are re-checked on every spend, so a list that content
+     * has moved on from simply stops being extendable rather than becoming invalid.
+     */
+    masteries: jsonb('masteries').notNull().default([]).$type<string[]>(),
+
+    /** Resets already paid for. The first is free; the rest cost crystals. */
+    masteryResets: smallint('mastery_resets').notNull().default(0),
+
     /** Locked champions cannot be fed away or sold — the guard against a misclick. */
     locked: boolean('locked').notNull().default(false),
     favourite: boolean('favourite').notNull().default(false),

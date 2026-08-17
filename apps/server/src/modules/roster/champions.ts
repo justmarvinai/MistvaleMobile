@@ -3,12 +3,14 @@ import { championScalingFrom, deriveStats } from '@mistvale/engine';
 import {
   type ChampionDetail,
   type ChampionStats,
+  type MasteryDef,
   type RosterChampion,
   type StatBlock,
 } from '@mistvale/shared';
 import type { Database } from '../../db/client';
 import type { ContentCache } from '../../content/cache';
 import {
+  players,
   playerChampions,
   type GearInstanceRow,
   type PlayerChampionRow,
@@ -30,6 +32,7 @@ import {
   type ProgressionConfig,
 } from './progression';
 import { levelCapForRank } from './service';
+import * as mastery from '../mastery/service';
 
 /**
  * Assembling a champion for the client.
@@ -46,6 +49,9 @@ export interface ChampionContext {
   gear: GearContext;
   progression: ProgressionConfig;
   content: ContentCache;
+  /** Published mastery nodes and what they cost, indexed once per request. */
+  masteryNodes: ReadonlyMap<string, MasteryDef>;
+  masteryCosts: mastery.MasteryCosts;
 }
 
 export function championContextFrom(content: ContentCache): ChampionContext {
@@ -54,6 +60,21 @@ export function championContextFrom(content: ContentCache): ChampionContext {
     gear: gearContextFrom(bundle),
     progression: progressionConfigFrom(bundle.config),
     content,
+    masteryNodes: mastery.nodesFrom(content),
+    masteryCosts: mastery.costsFrom(bundle.config),
+  };
+}
+
+/** What a champion's learned masteries add to its stats, ready for `assembleChampion`. */
+export function masteryContribution(
+  row: Pick<PlayerChampionRow, 'masteries'>,
+  base: StatBlock,
+  context: ChampionContext,
+): { flat: Partial<StatBlock>; setBonusAmplifyPct: number } {
+  const resolved = mastery.resolveMasteries(row.masteries ?? [], context.masteryNodes);
+  return {
+    flat: mastery.applyMasteryStats(base, resolved),
+    setBonusAmplifyPct: resolved.setBonusAmplifyPct,
   };
 }
 
@@ -76,7 +97,12 @@ export function toRosterChampion(
   context: ChampionContext,
 ): RosterChampion {
   const base = baseStatsFor(row, context);
-  const assembled = assembleChampion(base, gear, context.gear);
+  const assembled = assembleChampion(
+    base,
+    gear,
+    context.gear,
+    masteryContribution(row, base, context),
+  );
   const cap = levelCapForRank(row.rank);
 
   return {
@@ -100,9 +126,16 @@ export function toChampionDetail(
   row: PlayerChampionRow,
   gear: readonly GearInstanceRow[],
   context: ChampionContext,
+  /** The account's level, which decides whether the mastery trainer is open at all. */
+  playerLevel = 0,
 ): ChampionDetail {
   const base = baseStatsFor(row, context);
-  const assembled = assembleChampion(base, gear, context.gear);
+  const assembled = assembleChampion(
+    base,
+    gear,
+    context.gear,
+    masteryContribution(row, base, context),
+  );
   const def = context.content
     .current()
     .bundle.champions.find((champion) => champion.key === row.championKey);
@@ -111,6 +144,7 @@ export function toChampionDetail(
   const stats: ChampionStats = {
     base,
     gear: assembled.gear,
+    mastery: assembled.mastery,
     total: assembled.total,
     setBonuses: assembled.setBonuses,
     power: assembled.power,
@@ -125,6 +159,7 @@ export function toChampionDetail(
     stats,
     gear: gear.map((piece) => toDto(piece, context.gear)),
     skillUpgrades: row.skillUpgrades ?? {},
+    masteries: mastery.stateFor(row, context.masteryNodes, context.masteryCosts, playerLevel),
     costs: {
       rankUp: rankCost ? { ...rankCost, atLevelCap: row.level >= levelCapForRank(row.rank) } : null,
       ascend:
@@ -147,7 +182,14 @@ export async function loadDetail(
 ): Promise<ChampionDetail> {
   const row = await loadOwned(db, playerId, championId);
   const gear = (await gearByChampion(db, [championId])).get(championId) ?? [];
-  return toChampionDetail(row, gear, context);
+  // The account's level is read here rather than threaded through a dozen call sites: it
+  // decides only whether the mastery trainer is open, and every caller would have to
+  // remember to pass it correctly otherwise.
+  const [player] = await db
+    .select({ level: players.level })
+    .from(players)
+    .where(eq(players.id, playerId));
+  return toChampionDetail(row, gear, context, player?.level ?? 0);
 }
 
 export async function loadOwned(

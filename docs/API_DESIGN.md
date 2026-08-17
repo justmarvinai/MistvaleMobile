@@ -28,7 +28,8 @@
 | POST `/player/champions/:id/rank-up` | `{foodIds[], actionId}` — exactly R champions of exactly R stars plus a silver fee; resets the champion to level 1. |
 | POST `/player/champions/:id/ascend` | `{actionId}` — spends element-matched essences scaled by rarity. Capped by star rank. |
 | POST `/player/champions/:id/skill-upgrade` | `{skillKey, source, actionId}` — `source` is a tome of the champion's rarity or a duplicate of the same champion. The player picks the skill (a deliberate deviation from the source game's random books). |
-| POST `/champions/:id/masteries` | `{addNode}` spend emblems; POST `/champions/:id/masteries/reset` (crystal cost). |
+| POST `/player/champions/:id/masteries` | `{nodeKey, actionId}` — learns one node, spending the tier's emblems. Refuses in order: trainer level, node exists, build rules, then affordability, so nothing is charged for a refusal. Returns the whole champion. |
+| POST `/player/champions/:id/masteries/reset` | `{actionId}` — forgets every node. The first reset per champion is free; later ones cost crystals. Returns the champion and what it cost. |
 | POST `/player/champions/release` | `{ids[], actionId}` release for silver by rarity × rank (locked, favourited and equipped champions refused — the whole selection, not silently part of it). |
 | POST `/player/champions/:id/flags` | `{locked?, favourite?}` toggles. |
 | POST `/player/gear/:id/equip` | `{championId}` — clears the slot and fills it in one transaction; a partial unique index makes a double occupancy impossible rather than merely unlikely. Accessory slots check the champion's ascension against the slot definition. |

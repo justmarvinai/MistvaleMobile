@@ -5,6 +5,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Phase P6: masteries
+
+Forty-eight of them, three trees, and the emblems the Proving Grounds has been paying out with nothing to spend them on.
+
+- **Three trees, fifteen picks, two of the three.** Onslaught is what a champion does to the enemy, Bulwark is what it survives, Insight is what it knows. A champion may open two of them; a tier opens once enough has been learned below it, and exactly one capstone is ever taken. The rules live in `packages/shared` and are evaluated by both sides, so a node the tree screen greys out is a node the server refuses, with the same sentence.
+- **Every node is engine-backed.** Nodes compose from a vocabulary of twenty-one typed effects — the same contract skills use — so adding a mastery is an Admin edit and only a genuinely new *kind* of effect is a deploy. Publish validation refuses a node that promises anything else, and refuses a tree with a hole in its ladder.
+- **What can be settled early, is.** An unconditional `+75 ATK` becomes part of the champion's stats before the fight, exactly as a relic does, and shows in its own column on the champion screen next to Relics. Only the conditional effects and the procs ride into the battle — which is what keeps the number a player reads and the number the engine fights with the same number.
+- **The capstones do what they say.** Deathmark adds a share of the target's own health bar and far less of it against a boss; Last Bastion survives one lethal blow a battle and cannot be dispelled off, because nobody cast it; Veilbinder stretches a champion's own debuffs but never a stun.
+- **Emblems and crystals.** Tier prices are `game_config`, so the tree screen shows the price the server charges rather than a second copy of it. A node refuses in order — trainer level, node exists, build rules, then affordability — so nothing is ever charged for a refusal. The first reset on each champion is free; later ones cost crystals.
+- **Tests** — 15 engine cases over the conditions and procs (including a determinism replay of a mastery-heavy fight), 17 server cases over the rules, the resolution split and the spending.
+
+### Changed
+- The mastery tier gate counts picks across the **whole build** rather than per tree. Per-tree counting reads as more source-faithful and is unshippable at fifteen picks: split your two Tier-1 picks between two trees and neither would ever reach Tier 2, stranding the champion at 2/15 permanently. `COMBAT_SYSTEM §9` now says so, and a test pins the case.
+- `COMBAT_SYSTEM §9` said 45 nodes across 15-node trees; the content plan has said 48 across 16 for some time. The content is 48.
+
 ### Added — Phase P6: the Depths
 
 Below the vale are keeps the Sskarn moved into rather than built. Ten of them open at once: four for relics, one pit for mastery emblems, and five springs that keep their own hours.

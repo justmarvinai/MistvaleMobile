@@ -46,6 +46,10 @@ export const ROUTES = {
     ascend: (id: string) => `/player/champions/${encodeURIComponent(id)}/ascend`,
     /** `/player/champions/:id/skill-upgrade` — spend a tome on a chosen skill. */
     skillUpgrade: (id: string) => `/player/champions/${encodeURIComponent(id)}/skill-upgrade`,
+    /** `/player/champions/:id/masteries` — learn one node, paying its emblems. */
+    masteries: (id: string) => `/player/champions/${encodeURIComponent(id)}/masteries`,
+    /** `/player/champions/:id/masteries/reset` — forget them all; the first is free. */
+    masteryReset: (id: string) => `/player/champions/${encodeURIComponent(id)}/masteries/reset`,
     /** `/player/champions/:id/flags` — lock and favourite toggles. */
     flags: (id: string) => `/player/champions/${encodeURIComponent(id)}/flags`,
     /** Release champions for silver. Locked ones are refused. */

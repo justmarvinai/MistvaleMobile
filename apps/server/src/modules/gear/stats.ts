@@ -416,6 +416,14 @@ export function assembleGearBonus(
   base: StatBlock,
   pieces: readonly GearPiece[],
   tables: GearTables,
+  /**
+   * How much stronger the *set* bonuses are, as a percentage.
+   *
+   * Sustained Ward, and nothing else at EA. It amplifies only the set half of a relic's
+   * contribution — never the main stat or the substats — which is what makes it a reward
+   * for wearing complete sets rather than a flat damage node in disguise.
+   */
+  setBonusAmplifyPct = 0,
 ): { bonus: StatBlock; setBonuses: ActiveSetBonus[] } {
   const bonus = emptyStatBlock();
 
@@ -442,9 +450,10 @@ export function assembleGearBonus(
     // reads off the same list, and are reported here so the UI can show them.
     if (def.bonusType === 'stat' && def.bonus.stat) {
       const stat = def.bonus.stat;
+      const amplify = 1 + setBonusAmplifyPct / 100;
       if (typeof def.bonus.pct === 'number')
-        bonus[stat] += (base[stat] * def.bonus.pct * copies) / 100;
-      if (typeof def.bonus.flat === 'number') bonus[stat] += def.bonus.flat * copies;
+        bonus[stat] += (base[stat] * def.bonus.pct * copies * amplify) / 100;
+      if (typeof def.bonus.flat === 'number') bonus[stat] += def.bonus.flat * copies * amplify;
     }
 
     setBonuses.push({

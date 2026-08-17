@@ -17,6 +17,7 @@ import {
   stageDefSchema,
   statusDefSchema,
 } from './entities';
+import { masteryDefSchema } from './masteries';
 
 /**
  * The content type registry.
@@ -42,6 +43,7 @@ export const CONTENT_TYPES = [
   'stage',
   'summonPool',
   'shop',
+  'mastery',
   'gameConfig',
 ] as const;
 
@@ -162,6 +164,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: ['item', 'gearSet', 'champion'],
     inBundle: true,
   },
+  mastery: {
+    label: 'Masteries',
+    path: 'masteries',
+    schema: masteryDefSchema,
+    references: [],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -188,6 +197,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'stage',
   'summonPool',
   'shop',
+  'mastery',
   'gameConfig',
 ];
 

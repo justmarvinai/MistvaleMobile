@@ -16,6 +16,7 @@ import { contentRoutes } from './modules/content/routes';
 import { gameRoutes } from './modules/battle/routes';
 import { inventoryRoutes } from './modules/gear/routes';
 import { depthsRoutes } from './modules/depths/routes';
+import { masteryRoutes } from './modules/mastery/routes';
 import { progressRoutes } from './modules/progress/routes';
 import { shopRoutes } from './modules/shop/routes';
 import { summonRoutes } from './modules/summon/routes';
@@ -92,6 +93,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await api.register(inventoryRoutes);
       await api.register(progressRoutes);
       await api.register(depthsRoutes);
+      await api.register(masteryRoutes);
       await api.register(shopRoutes);
       await api.register(summonRoutes);
     },

@@ -2,6 +2,7 @@ import type {
   BattleMode,
   Element,
   EffectComponent,
+  MasteryEffect,
   SkillDef,
   StatusDef,
   Stat,
@@ -70,8 +71,32 @@ export interface BattleUnit {
   ccStreak: number;
   /** Per-battle bookkeeping for the boss mechanics. Present only on bosses that need it. */
   bossState?: BossRuntime;
+  /**
+   * Mastery effects, already resolved from the champion's chosen nodes.
+   *
+   * The server does the resolving, so the engine never reads content mid-battle — and
+   * anything unconditional was folded into `stats` before the fight even started, the same
+   * road relics take. What is left here needed a fight to decide.
+   */
+  masteries?: readonly MasteryEffect[];
+  /** Per-battle bookkeeping for the mastery procs that remember anything. */
+  masteryState?: MasteryRuntime;
   /** Set when the unit has already been saved from lethal damage this battle. */
   usedLastStand?: boolean;
+}
+
+/** What the mastery procs remember across a battle. */
+export interface MasteryRuntime {
+  /** Kills counted toward a stacking on-kill bonus. */
+  killStacks: number;
+  /** Consecutive A1 uses, for the ramp. Any other skill resets it. */
+  a1Uses: number;
+  /** Targets already opened on, as `side:slot`, so First Strike fires once each. */
+  struckFirst: string[];
+  /** Debuffs landed during the current turn, for the threshold procs. */
+  debuffsThisTurn: number;
+  /** Living enemies as of this unit's turn start, for the per-enemy conditions. */
+  livingFoes: number;
 }
 
 /**
@@ -237,6 +262,8 @@ export type BattleEvent =
   | { id: number; type: 'bossSummon'; unit: UnitRef; summoned: UnitSnapshot[] }
   /** The damage ramp has started; `pct` is the bonus applied from here on. */
   | { id: number; type: 'bossEnraged'; unit: UnitRef; pct: number }
+  /** A mastery fired where nothing else in the log would have shown it. */
+  | { id: number; type: 'masteryProc'; unit: UnitRef; mastery: MasteryEffect['type'] }
   | { id: number; type: 'died'; unit: UnitRef }
   | { id: number; type: 'battleEnd'; outcome: BattleOutcome; turns: number };
 

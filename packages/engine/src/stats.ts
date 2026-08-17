@@ -1,5 +1,6 @@
 import type { BaseStats, Stat, StatusDef } from '@mistvale/shared';
 import type { ChampionScalingConfig } from './config';
+import { conditionalStatBonus } from './mastery';
 import type { BattleUnit, StatusInstance } from './types';
 
 /**
@@ -96,7 +97,10 @@ export function effectiveStat(
 ): number {
   const base = unit.stats[stat];
   const { pct, flat } = statusModifiers(unit, stat, statuses);
-  const value = base * (1 + pct / 100) + flat;
+  // Conditional masteries sit alongside statuses rather than inside `stats`, because
+  // whether they apply is a question about the fight — "while unbuffed", "per living
+  // enemy" — that could not be answered when the champion was assembled.
+  const value = base * (1 + pct / 100) + flat + conditionalStatBonus(unit, stat, base);
 
   // Crit rate is a probability; the rest are magnitudes that simply cannot go negative.
   if (stat === 'critRate') return clamp(value, 0, 100);

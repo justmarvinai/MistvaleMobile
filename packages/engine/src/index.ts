@@ -58,6 +58,15 @@ export {
   summonAllowance,
 } from './boss';
 
+export {
+  a1RampMultiplier,
+  conditionalStatBonus,
+  damageDealtMultiplier,
+  hasMastery,
+  healingMultiplier,
+  masteryRuntime,
+} from './mastery';
+
 export { chooseSkill, hintsAllow, type SkillChoice } from './ai';
 
 export {
@@ -82,6 +91,7 @@ export type {
   BossFlags,
   BossRuntime,
   HitQuality,
+  MasteryRuntime,
   Side,
   StatusInstance,
   StepResult,

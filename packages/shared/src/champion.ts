@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { championStatsSchema, gearInstanceSchema } from './gear';
+import { masteryStateSchema } from './mastery';
 
 /**
  * Owned champions, and the four ladders they climb.
@@ -35,6 +36,8 @@ export const championDetailSchema = z.object({
   gear: z.array(gearInstanceSchema),
   /** Tome levels applied per skill key. */
   skillUpgrades: z.record(z.string(), z.number().int()),
+  /** Learned masteries, the picks still available, and what a reset would cost. */
+  masteries: masteryStateSchema,
   /** What the next step on each ladder needs, so the client never guesses a cost. */
   costs: z.object({
     rankUp: z
