@@ -5,6 +5,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the Arena (P7, server side)
+
+Asynchronous 4v4 against a snapshot of somebody else's defence team. The defender is never online, never consulted, and never has to be — which is the only way a ladder works when there may be four people playing.
+
+- **The ladder.** Elo-lite: the swing is `K × (actual − expected)` off the rating gap, so beating somebody far above you is worth most of K and beating somebody far below is worth almost nothing. That is the whole thing stopping a Platinum account farming Bronze for medals all week. Both sides move from one fight — a defence team that loses while its owner sleeps has still lost — so a rating means the same at the top of the board as at the bottom. Bronze has a loss floor: a new account on a losing streak would otherwise slide to zero and meet nobody it could beat.
+- **Ten rungs, Bronze I to Platinum**, paying 1–4 Valor Medals a win by band, at the tier the win *landed* in.
+- **Ten attack tokens, one an hour**, derived from the clock the way energy is — an account that has been away for a month is current the instant it comes back, and there is no job that can fall behind.
+- **An offer list** drawn from a widening rating band, shuffled rather than sorted (a list that always leads with the weakest opponent turns the choice into a formality), each entry showing the team, its power and what the fight is worth either way. Five free refreshes a day, then crystals.
+- **An attack** spends a token and opens an ordinary battle, played through the same endpoint as everything else — the Arena adds a cost and a payout, not a second way to fight. It settles inside the same transaction as its result, so a fight can never be recorded without its rating change. Unlike every other mode it settles on a **loss** too, and a retreat counts as a loss rather than an escape: otherwise losing rating would be opt-in.
+- **The weekly chest** is sealed at the Monday reset against the *best* rating held that week — falling out of Gold on Sunday evening must not cost a week of Gold, or the last day of every week becomes a day nobody dares to play. An unclaimed chest is not thrown away: the better of it and the new one survives, so three weeks away costs the collection but never the best week in it. Ratings decay towards their tier floor at the same moment, enough that an abandoned Platinum account drifts out of the way and never enough to demote anybody.
+- **The Hall of Valor** — 24 tracks (4 elements × 6 stats), ten levels each, bought with medals. 2,500 medals finishes one track and 60,000 finishes the Hall: a year-scale sink by design, and the ladder's only one. What it grants is account-wide and unconditional, so it is folded into a champion's numbers *before* the fight, alongside relics and unconditional masteries — a player who reads their champion screen sees it, rather than discovering it in a battle log.
+
+### Added — the bot ladder
+
+At Early Access there may be four real players, and an Arena whose offer list is empty is not a feature that needs more players — it is a feature nobody comes back to. So the ladder is seeded with sixty opponents, weighted to the bottom where a small ladder's traffic actually is: Bronze 24 · Silver 20 · Gold 12 · Platinum 4.
+
+- They hold real champions in real relics and defend with teams the engine fights exactly as it fights a person's. Names are natural and carry no marker, drawn from two multiplied pools (960 combinations) — a ladder that labels half its rungs "not a real person" is a ladder nobody climbs.
+- **A bot is an ordinary player row** with a flag, not a second table: matchmaking, the leaderboard, the engine and the settle path need no special case. Its account password is CSPRNG bytes hashed and discarded, so nobody can log into one.
+- **A bot is economically inert** — no balances, nothing through `RewardService`, no row in `economy_log`. A bot in the economy reports would make every faucet and sink number a lie, so it is pinned by a test rather than left to care.
+- **A bot is synthesised, never authored.** Champions, relics, level and rating all come from live content and a per-band recipe in `game_config`, so sixty opponents cost zero rows of hand-maintained content and a balance change reaches them without a deploy. Rebuilt nightly with a ±5% rating drift, because a ladder whose teams never change is a solved puzzle by the second week.
+- **Bots yield the top ten** at the weekly reset. The visible top of the board belongs to people.
+
 ### Added — the support desk (Admin A5, pulled forward)
 
 Mistvale has no e-mail addresses. That was always a deliberate simplification, and it has one binding consequence that had gone unbuilt: **an operator is the only password reset there is** — and there was no operator endpoint. A warden who forgot their password could not be helped except by hand-writing an argon2id hash into the database, which breaks the no-direct-DB rule the whole Admin Suite exists to uphold. Pulled forward out of A5 because it is a hard-rule violation rather than a missing convenience.

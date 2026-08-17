@@ -15,6 +15,7 @@ import { healthRoutes } from './modules/health/routes';
 import { contentRoutes } from './modules/content/routes';
 import { gameRoutes } from './modules/battle/routes';
 import { inventoryRoutes } from './modules/gear/routes';
+import { arenaRoutes } from './modules/arena/routes';
 import { depthsRoutes } from './modules/depths/routes';
 import { masteryRoutes } from './modules/mastery/routes';
 import { progressRoutes } from './modules/progress/routes';
@@ -93,6 +94,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await api.register(inventoryRoutes);
       await api.register(progressRoutes);
       await api.register(depthsRoutes);
+      await api.register(arenaRoutes);
       await api.register(masteryRoutes);
       await api.register(shopRoutes);
       await api.register(summonRoutes);

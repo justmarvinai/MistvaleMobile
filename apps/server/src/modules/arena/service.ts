@@ -33,7 +33,6 @@ import {
   config,
   ensureState,
   nextMonday,
-  weekKey,
   type ArenaContext,
   type Executor as Tx,
 } from './ladder';
@@ -54,6 +53,7 @@ import { arenaConfigFrom, computeTokens, medalsForWin, ratingChange } from './ra
  */
 
 export type { ArenaContext };
+export { assertUnlocked };
 
 /** A champion as the arena shows it — enough to size up an opponent at a glance. */
 async function teamMembers(
@@ -254,15 +254,32 @@ export async function overview(ctx: ArenaContext, playerId: string): Promise<Are
       defence: row.defenceTeam,
       defenceTeam: await teamMembers(tx, ctx, row.defenceTeam, playerId),
       offers: await describeOffers(tx, ctx, row.offers, row.rating),
-      weeklyChest: {
-        tier: tierForRating(row.weeklyHigh, settings.thresholds),
-        claimable: row.lastWeeklyClaim !== weekKey(ctx, now),
-        resetsAt: nextMonday(ctx, now).toISOString(),
-      },
+      // A pending chest shows what is waiting; otherwise, what this week is currently
+      // worth — so the panel reads "your Gold chest is ready" or "you are on course for
+      // Gold", never a number that turns out to mean something else on Monday.
+      weeklyChest: chestView(row, ctx, now),
       medalsPerWin: medalsForWin(tier, settings),
       refreshCost: freeRefreshesLeft(row, ctx, now) > 0 ? 0 : settings.refreshCrystals,
     };
   });
+}
+
+/**
+ * The weekly chest panel.
+ *
+ * `claimable` is whether a sealed chest is actually waiting — the Monday reset puts one
+ * there — rather than whether the calendar has turned over. A player who has not fought
+ * since the reset has nothing to collect, and a button that says otherwise is a lie the
+ * server would have to refuse a moment later.
+ */
+function chestView(row: ArenaStateRow, ctx: ArenaContext, now: Date): ArenaState['weeklyChest'] {
+  const settings = config(ctx);
+  const pending = row.pendingChestWeek !== null && row.lastWeeklyClaim !== row.pendingChestWeek;
+  return {
+    tier: tierForRating(pending ? row.pendingChestHigh : row.weeklyHigh, settings.thresholds),
+    claimable: pending,
+    resetsAt: nextMonday(ctx, now).toISOString(),
+  };
 }
 
 /** Free refreshes still available today. Rolls over with every other daily allowance. */
@@ -554,11 +571,14 @@ export async function leaderboard(
 // ── The weekly chest ────────────────────────────────────────────────────────
 
 /**
- * Pays the weekly chest, once per week.
+ * Pays the chest the Monday reset sealed.
  *
- * Against `weekly_high` rather than the current rating: falling out of Gold on Sunday
- * evening must not cost a week of Gold, or the last day of every week becomes a day
- * nobody dares to play.
+ * Against the *best* rating held during that week rather than the rating now: falling out
+ * of Gold on Sunday evening must not cost a week of Gold, or the last day of every week
+ * becomes a day nobody dares to play.
+ *
+ * The claim is recorded against the sealed week's own key, not against today's, so the
+ * chest can be collected at any point before the next reset and never twice.
  */
 export async function claimWeekly(
   ctx: ArenaContext,
@@ -566,16 +586,19 @@ export async function claimWeekly(
 ): Promise<{ tier: ArenaTier; rewards: Record<string, number> }> {
   const settings = config(ctx);
   const now = new Date();
-  const week = weekKey(ctx, now);
   const chests = ctx.content.current().bundle.config['arena.weeklyChest'];
 
   return ctx.db.transaction(async (tx) => {
     const row = await ensureState(tx, playerId, ctx);
+    const week = row.pendingChestWeek;
+    if (!week) {
+      throw new AppError('VALIDATION', 'No chest is waiting. The next one seals on Monday.');
+    }
     if (row.lastWeeklyClaim === week) {
-      throw new AppError('ALREADY_EXISTS', 'This week’s chest has already been claimed.');
+      throw new AppError('ALREADY_EXISTS', 'That chest has already been claimed.');
     }
 
-    const tier = tierForRating(row.weeklyHigh, settings.thresholds);
+    const tier = tierForRating(row.pendingChestHigh, settings.thresholds);
     const table = (chests ?? {}) as Record<string, Record<string, number>>;
     const bundle = table[bandOf(tier)] ?? {};
 

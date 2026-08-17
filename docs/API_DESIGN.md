@@ -64,11 +64,14 @@
 **`practice` is a lens, not a stage kind.** It re-fights a stage the player has already cleared — any mode's — for zero energy and zero reward: no silver, no XP, no drops, no clear recorded, no first-clear bonus. Stars are still reported, because finding out how a team does is the entire point. A stage nobody has beaten cannot be practised, or the sandbox would be free reconnaissance on every boss in the game.
 
 ### Arena
-| GET `/arena` | State: rating, tier, tokens `{value,cap,nextTickAt}`, defense team, current opponent offers, weekly progress. |
-| POST `/arena/refresh-opponents` | Free per cooldown, else crystal cost. |
-| POST `/arena/defense` | Set defense team. |
-| POST `/arena/attack` | `{offerId, team, actionId}` → battle session vs snapshot defense (manual or auto), resolution updates ratings both sides. |
-| GET `/arena/leaderboard` | Top N + own rank neighborhood (bots included). |
+| GET `/arena` | The whole hub in one read: rating, tier, weekly high, tokens `{value,cap,regenSeconds,nextTickAt,fullAt}`, the defense team (ids + rendered members), the opponent offers with each one's stakes, the weekly chest, medals per win and the current refresh cost. One request has to be enough to draw the screen, or two of its panels eventually disagree about the same number. |
+| POST `/arena/offers/refresh` | Rolls a new opponent list. Free until the daily allowance runs out, then crystals. Returns the whole state. |
+| POST `/arena/defence` | `{team}` — set the defense team. Ownership-checked; may overlap with an attack team, because a player has one roster. Returns the whole state. |
+| POST `/arena/attack` | `{offerId, team}` → **201** with an ordinary battle view. Spends a token, assembles the defense *now* from the defender's current champions and relics, and stores the opponent as the session's `stageKey`. The fight is then played through `/battles/:id/action` like any other — the Arena adds a cost and a payout, not a second way to fight. |
+| GET `/arena/leaderboard` | Top 25 + own rank neighborhood (bots included; they auto-yield the top ten at the weekly reset). |
+| POST `/arena/weekly-chest` | Claims the chest the Monday reset sealed, paid against the **best** rating held that week. Returns `{chest, arena}`. |
+
+**Settlement.** An arena battle settles inside the same transaction as its result, through the ordinary battle settle path: both ratings move (the ladder is zero-sum), medals are granted at the tier the win landed in, the offer is spent, and a row goes into `arena_battles`. Unlike every other mode it settles on a **loss** too — the defender gains what the attacker gives up — and a retreat is a loss rather than an escape. The result rides back on the battle view as `rewards.arena`.
 
 ### Admin: player management (`/admin/api`, Admin rank only)
 Keyed by **player** id, not account id — that is what `economy_log`, `stage_progress` and a support request all reference; the account behind it is resolved server-side. Every mutation is audited with before/after.
@@ -89,7 +92,7 @@ Keyed by **player** id, not account id — that is what `economy_log`, `stage_pr
 | GET `/events` | Active events, points, milestones. POST `/events/:key/claim` `{milestone}`. |
 | GET `/login-calendar` | Month grid + today claim state. POST `/login-calendar/claim`. |
 | GET `/mail` · POST `/mail/:id/claim` · POST `/mail/claim-all` | Inbox. |
-| GET `/hall-of-valor` · POST `/hall-of-valor/upgrade` | `{element, stat}` medal spend. |
+| GET `/hall-of-valor` · POST `/hall-of-valor/upgrade` | All 24 tracks (4 elements × 6 stats) with level, next cost and what the next level gives; `{element, stat, actionId}` buys one. Gated with the Arena, because the Hall spends what the Arena pays. What it grants is account-wide and unconditional, so it is folded into a champion's stats *before* the fight, alongside relics and unconditional masteries — a player who reads their champion screen sees it. |
 | GET `/bazaar` · POST `/bazaar/buy` `{slotId, actionId}` · POST `/bazaar/refresh` | Shop. |
 | GET `/news` | Active announcements. |
 | POST `/tutorial/advance` | `{step, choice?}` — server validates scripted order; starter pick happens here. |

@@ -1,7 +1,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance, InjectOptions } from 'fastify';
 import { and, eq } from 'drizzle-orm';
-import { ROUTES, apiPath, tierForRating } from '@mistvale/shared';
+import {
+  ROUTES,
+  apiPath,
+  tierForRating,
+  type ArenaLeaderboard,
+  type ArenaState,
+  type HallOfValor,
+} from '@mistvale/shared';
 import {
   arenaBattles,
   arenaState,
@@ -23,7 +30,7 @@ import {
   uniqueProfileName,
 } from '../../test/harness';
 import * as battle from '../battle/service';
-import { weekKey } from './ladder';
+import { weekKey, weeklyReset } from './ladder';
 import { arenaConfigFrom } from './rating';
 import * as arena from './service';
 import * as hall from './hall';
@@ -415,24 +422,128 @@ describe.skipIf(!dbUp)('the Arena', () => {
     });
   });
 
-  describe('the weekly chest', () => {
-    it('pays against the best rating held, not the current one', async () => {
-      const fighter = await makeFighter('Faller');
-      await arena.overview(ctx, fighter.playerId);
-      // Held Gold I this week, then slid back to Bronze before Monday.
+  describe('closing the week', () => {
+    /** Puts an account at a rating and a week's high, then runs Monday's reset. */
+    async function closeWeek(playerId: string, rating: number, weeklyHigh: number) {
+      await arena.overview(ctx, playerId);
       await app.db
         .update(arenaState)
-        .set({ rating: 900, weeklyHigh: 2_100 })
-        .where(eq(arenaState.playerId, fighter.playerId));
+        .set({ rating, weeklyHigh })
+        .where(eq(arenaState.playerId, playerId));
+      return weeklyReset(ctx, new Date());
+    }
+
+    it('seals a chest against the best rating held, not the rating now', async () => {
+      const fighter = await makeFighter('Faller');
+      // Held Gold I this week, then slid back to Bronze before Monday.
+      await closeWeek(fighter.playerId, 900, 2_100);
 
       const claimed = await arena.claimWeekly(ctx, fighter.playerId);
       expect(claimed.tier).toBe('gold_1');
       expect(Object.keys(claimed.rewards).length).toBeGreaterThan(0);
     });
 
-    it('cannot be claimed twice in one week', async () => {
+    it('decays the rating towards its tier floor without demoting anybody', async () => {
+      const fighter = await makeFighter('Idler');
+      await closeWeek(fighter.playerId, 2_500, 2_500);
+
+      const row = await stateRow(fighter.playerId);
+      // Gold II's floor is 2,300; ten per cent of the 200 above it is 20.
+      expect(row.rating).toBe(2_480);
+      expect(row.tier).toBe('gold_2');
+      // And the new week starts from where the old one left off.
+      expect(row.weeklyHigh).toBe(2_480);
+    });
+
+    it('is safe to run twice — a restart must not decay a second time', async () => {
+      const fighter = await makeFighter('Restart');
+      await closeWeek(fighter.playerId, 2_500, 2_500);
+      const second = await weeklyReset(ctx, new Date());
+
+      expect(second.sealed).toBe(0);
+      expect((await stateRow(fighter.playerId)).rating).toBe(2_480);
+    });
+
+    it('leaves the bots to the nightly refresh', async () => {
+      // Decaying a bot every Monday would drag the whole ladder to its band floors.
+      const fighter = await makeFighter('Company');
+      await arena.overview(ctx, fighter.playerId);
+      await app.db.update(players).set({ isBot: true }).where(eq(players.id, fighter.playerId));
+      await app.db
+        .update(arenaState)
+        .set({ rating: 2_500, weeklyHigh: 2_500 })
+        .where(eq(arenaState.playerId, fighter.playerId));
+
+      expect((await weeklyReset(ctx, new Date())).sealed).toBe(0);
+      expect((await stateRow(fighter.playerId)).rating).toBe(2_500);
+    });
+
+    it('keeps the better of an unclaimed chest and a new one', async () => {
+      // Three weeks away costs the collection, never the best week in it.
+      const fighter = await makeFighter('Absent');
+      await closeWeek(fighter.playerId, 2_100, 2_100);
+      const sealed = await stateRow(fighter.playerId);
+      expect(sealed.pendingChestHigh).toBe(2_100);
+
+      // A second, worse week — pretend the first close was last Monday.
+      await app.db
+        .update(arenaState)
+        .set({ pendingChestWeek: '2000-01-03', rating: 800, weeklyHigh: 800 })
+        .where(eq(arenaState.playerId, fighter.playerId));
+      await weeklyReset(ctx, new Date());
+
+      expect((await stateRow(fighter.playerId)).pendingChestHigh).toBe(2_100);
+      expect((await arena.claimWeekly(ctx, fighter.playerId)).tier).toBe('gold_1');
+    });
+
+    it('clears the daily refresh allowance', async () => {
+      const fighter = await makeFighter('Roller');
+      await arena.overview(ctx, fighter.playerId);
+      await arena.refreshOffers(ctx, fighter.playerId);
+      expect((await stateRow(fighter.playerId)).refreshesUsed).toBe(1);
+
+      await weeklyReset(ctx, new Date());
+      expect((await stateRow(fighter.playerId)).refreshesUsed).toBe(0);
+    });
+  });
+
+  describe('the weekly chest', () => {
+    it('refuses a claim when no chest has been sealed', async () => {
+      const fighter = await makeFighter('Eager');
+      await arena.overview(ctx, fighter.playerId);
+      await expect(arena.claimWeekly(ctx, fighter.playerId)).rejects.toThrow(
+        /No chest is waiting/i,
+      );
+    });
+
+    it('reports what is waiting, then what the current week is worth', async () => {
+      const fighter = await makeFighter('Watcher');
+      await arena.overview(ctx, fighter.playerId);
+      await app.db
+        .update(arenaState)
+        .set({ rating: 2_100, weeklyHigh: 2_100 })
+        .where(eq(arenaState.playerId, fighter.playerId));
+
+      const before = await arena.overview(ctx, fighter.playerId);
+      expect(before.weeklyChest.claimable).toBe(false);
+      expect(before.weeklyChest.tier).toBe('gold_1');
+
+      await weeklyReset(ctx, new Date());
+      const sealed = await arena.overview(ctx, fighter.playerId);
+      expect(sealed.weeklyChest.claimable).toBe(true);
+      expect(sealed.weeklyChest.tier).toBe('gold_1');
+
+      await arena.claimWeekly(ctx, fighter.playerId);
+      const spent = await arena.overview(ctx, fighter.playerId);
+      expect(spent.weeklyChest.claimable).toBe(false);
+      // Back to reporting the week in progress, which the decay has just started.
+      expect(spent.weeklyChest.tier).toBe('gold_1');
+    });
+
+    it('cannot be claimed twice', async () => {
       const fighter = await makeFighter('Grabber');
       await arena.overview(ctx, fighter.playerId);
+      await weeklyReset(ctx, new Date());
       await arena.claimWeekly(ctx, fighter.playerId);
       await expect(arena.claimWeekly(ctx, fighter.playerId)).rejects.toThrow(
         /already been claimed/i,
@@ -442,16 +553,19 @@ describe.skipIf(!dbUp)('the Arena', () => {
     it('comes back the following week', async () => {
       const fighter = await makeFighter('Patient');
       await arena.overview(ctx, fighter.playerId);
+      await weeklyReset(ctx, new Date());
       await arena.claimWeekly(ctx, fighter.playerId);
 
-      const lastWeek = weekKey(ctx, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+      // Seven days on, a fresh close seals a new chest against the new week.
       await app.db
         .update(arenaState)
-        .set({ lastWeeklyClaim: lastWeek })
+        .set({ weeklyHigh: 1_250 })
         .where(eq(arenaState.playerId, fighter.playerId));
+      const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      expect((await weeklyReset(ctx, nextWeek)).sealed).toBe(1);
 
       const again = await arena.claimWeekly(ctx, fighter.playerId);
-      expect(again.tier).toBeTruthy();
+      expect(again.tier).toBe('silver_1');
     });
 
     it('names a week by its Monday', () => {
@@ -585,6 +699,149 @@ describe.skipIf(!dbUp)('the Arena', () => {
       });
       const boostedAtk = boosted.state.allies[0]!.stats.atk;
       expect(boostedAtk).toBeGreaterThan(plainAtk);
+    });
+  });
+
+  describe('the API', () => {
+    it('turns every endpoint away without a session', async () => {
+      for (const [method, url] of [
+        ['GET', ROUTES.arena.state],
+        ['POST', ROUTES.arena.refreshOffers],
+        ['POST', ROUTES.arena.defence],
+        ['POST', ROUTES.arena.attack],
+        ['GET', ROUTES.arena.leaderboard],
+        ['POST', ROUTES.arena.claimWeekly],
+        ['GET', ROUTES.hallOfValor.state],
+        ['POST', ROUTES.hallOfValor.upgrade],
+      ] as const) {
+        const response = await app.inject({ method, url: apiPath(url), payload: {} });
+        expect(response.statusCode, `${method} ${url}`).toBe(401);
+      }
+    });
+
+    it('serves the whole hub in one read', async () => {
+      const { attacker } = await pair();
+      const response = await as(attacker.cookie, {
+        method: 'GET',
+        url: apiPath(ROUTES.arena.state),
+      });
+      expect(response.statusCode, response.body).toBe(200);
+
+      const state = response.json().data.arena as ArenaState;
+      // One request has to be enough to draw the screen, or two of its panels will
+      // eventually disagree about the same number.
+      expect(state.rating).toBe(settings().startingRating);
+      expect(state.tokens.cap).toBe(settings().tokenCap);
+      expect(state.offers.length).toBeGreaterThan(0);
+      expect(state.weeklyChest.resetsAt).toBeTruthy();
+      expect(state.medalsPerWin).toBeGreaterThan(0);
+    });
+
+    it('closes the whole Arena below the unlock level', async () => {
+      const rookie = await makeFighter('Rookie', 1);
+      for (const url of [ROUTES.arena.state, ROUTES.hallOfValor.state]) {
+        const response = await as(rookie.cookie, { method: 'GET', url: apiPath(url) });
+        expect(response.statusCode, url).toBe(403);
+        expect(response.json().error.code).toBe('LOCKED_CONTENT');
+      }
+    });
+
+    it('sets a defence and reads it back', async () => {
+      const fighter = await makeFighter('Warden');
+      const response = await as(fighter.cookie, {
+        method: 'POST',
+        url: apiPath(ROUTES.arena.defence),
+        payload: { team: fighter.team },
+      });
+      expect(response.statusCode, response.body).toBe(200);
+      expect((response.json().data.arena as ArenaState).defence).toEqual(fighter.team);
+    });
+
+    it('refuses a malformed defence rather than storing it', async () => {
+      const fighter = await makeFighter('Warden');
+      const response = await as(fighter.cookie, {
+        method: 'POST',
+        url: apiPath(ROUTES.arena.defence),
+        payload: { team: ['not-a-uuid'] },
+      });
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('opens a battle from an offer', async () => {
+      const { attacker } = await pair();
+      const state = await arena.overview(ctx, attacker.playerId);
+
+      const response = await as(attacker.cookie, {
+        method: 'POST',
+        url: apiPath(ROUTES.arena.attack),
+        payload: { offerId: state.offers[0]!.offerId, team: attacker.team },
+      });
+      expect(response.statusCode, response.body).toBe(201);
+      const battleView = response.json().data.battle as { mode: string; status: string };
+      expect(battleView.mode).toBe('arena');
+      expect(battleView.status).toBe('active');
+    });
+
+    it('serves the ladder', async () => {
+      const { attacker } = await pair();
+      await arena.overview(ctx, attacker.playerId);
+      const response = await as(attacker.cookie, {
+        method: 'GET',
+        url: apiPath(ROUTES.arena.leaderboard),
+      });
+      expect(response.statusCode, response.body).toBe(200);
+      expect((response.json().data.leaderboard as ArenaLeaderboard).ownPosition).not.toBeNull();
+    });
+
+    it('pays the chest and hands back the new state with it', async () => {
+      const fighter = await makeFighter('Patron');
+      await arena.overview(ctx, fighter.playerId);
+      await weeklyReset(ctx, new Date());
+
+      const response = await as(fighter.cookie, {
+        method: 'POST',
+        url: apiPath(ROUTES.arena.claimWeekly),
+      });
+      expect(response.statusCode, response.body).toBe(200);
+      expect(response.json().data.chest.tier).toBeTruthy();
+      // The state comes back with it, so the chest panel and the wallet in the header
+      // cannot disagree about what just happened.
+      expect((response.json().data.arena as ArenaState).weeklyChest.claimable).toBe(false);
+    });
+
+    it('serves the Hall and buys a level through it', async () => {
+      const fighter = await makeFighter('Patron');
+      await app.db
+        .update(players)
+        .set({ valorMedals: 500 })
+        .where(eq(players.id, fighter.playerId));
+
+      const listed = await as(fighter.cookie, {
+        method: 'GET',
+        url: apiPath(ROUTES.hallOfValor.state),
+      });
+      expect(listed.statusCode, listed.body).toBe(200);
+      expect((listed.json().data.hall as HallOfValor).tracks).toHaveLength(24);
+      expect((listed.json().data.hall as HallOfValor).medals).toBe(500);
+
+      const bought = await as(fighter.cookie, {
+        method: 'POST',
+        url: apiPath(ROUTES.hallOfValor.upgrade),
+        payload: { element: 'ember', stat: 'atk', actionId: 'hall-upgrade-1' },
+      });
+      expect(bought.statusCode, bought.body).toBe(200);
+      expect(bought.json().data.track.level).toBe(1);
+      expect(bought.json().data.medalsLeft).toBe(500 - settings().hallCosts[0]!);
+    });
+
+    it('refuses a Hall track that is not a real element or stat', async () => {
+      const fighter = await makeFighter('Patron');
+      const response = await as(fighter.cookie, {
+        method: 'POST',
+        url: apiPath(ROUTES.hallOfValor.upgrade),
+        payload: { element: 'plaid', stat: 'spd', actionId: 'hall-upgrade-1' },
+      });
+      expect(response.statusCode).toBe(400);
     });
   });
 });

@@ -166,8 +166,8 @@ Bazaar: rotating slots `{stock_ref (drop_table or item), price {currency, amount
 ### `login_calendar_defs`
 `day int (1-30 cycle), rewards jsonb` + separate `welcome_days` 7-day new-player track.
 
-### `hall_of_valor_defs`
-Per element × stat: 10 levels, `{bonus_value, medal_cost}` per level.
+### Hall of Valor (config, not a content type)
+The Hall's shape is fixed — 4 elements × 6 stats × 10 levels — so it needs no `_defs` table. What is tunable lives in `game_config`: `arena.hallCosts` (medals per level, 1 → 10) and `arena.hallPerLevel` (what one level of each stat gives).
 
 ### `mastery_defs`
 Three trees (`onslaught` / `bulwark` / `insight`), 6 tiers, each node: `key, name, description, tree, tier, icon, effects jsonb (a list of engine-known effects), sort_order`. Costs are *not* per node — they are per tier, in the `economy.masteryCosts` config row, because a tier is the unit an operator actually reprices.
@@ -256,11 +256,15 @@ A floor *is* a stage, so its clear is already a `stage_progress` row with `paren
 `player_id, event_key, points, claimed_milestones int[]`
 
 ### `arena_state`
-`player_id, rating, tier, tokens, tokens_updated_at, defense_team jsonb ([{player_champion_id, slot}]), weekly_high, last_weekly_claim`
+`player_id pk, rating, tier, weekly_high, tokens, tokens_updated_at, defence_team jsonb (player_champion ids in formation order), offers jsonb, offers_refreshed_at, refreshes_used, refresh_day, last_weekly_claim, pending_chest_week, pending_chest_high`.
+Tokens follow energy's pattern — a value plus the moment it was written, everything else derived against the clock — so an idle account costs nothing to keep current and there is no job that can fall behind.
+The **offer list is a column, not a table**: it is small, entirely replaced on every refresh, and meaningless to anyone but its owner. Three properties that make a column the right shape.
+The two `pending_chest_*` columns hold the chest the Monday reset sealed. They exist because that reset clears `weekly_high`: a chest is earned in the week that just ended and claimed in the one that follows, so the rating it pays against has to survive the boundary.
 ### `arena_battles`
-`id, attacker_id, defender_id, attacker_rating_delta, defender_rating_delta, result, battle_log_id, created_at` (defender may be bot — same table).
-### `arena_opponent_offers`
-Current refreshable opponent list per player (3-5 offers, regenerated on refresh/token use).
+`id, attacker_id, defender_id, battle_id, won, attacker_rating_delta, defender_rating_delta, medals, created_at` (defender may be a bot — same table, no special case). Rows outlive the battle session they came from: a session is pruned with its event log, while "who attacked whom, and what it moved" is the ladder's own history and the only thing that can answer a dispute.
+
+### Bots
+There is no bot table. A bot is an ordinary `players` row with `is_bot` set, holding ordinary `player_champions` and `gear_instances` and an ordinary `arena_state` — so matchmaking, the leaderboard, the engine and the settle path need no special case. Its account carries a CSPRNG password hashed and discarded, so nobody can log into one. Champions, relics, level and rating are all synthesised from live content per the `arena.botBands` recipe and rebuilt nightly; nothing a bot does writes to `economy_log` (ECONOMY_BALANCE §12).
 
 ### `battles` (active sessions + history header)
 `id uuid, player_id, mode, stage_key/arena ref, state enum(active|won|lost|retreat|expired), seed, content_rev, team jsonb, snapshot jsonb (latest engine state), action_count, energy_spent, rewards jsonb (granted on completion), action_id uuid (idempotency), created_at, resolved_at`
@@ -276,8 +280,8 @@ Current refreshable opponent list per player (3-5 offers, regenerated on refresh
 ### `mailbox`
 `id, player_id, title, body, attachments jsonb (rewards), sent_by (system|admin name), read_at, claimed_at, expires_at` — admin composer can target one/all players (fan-out rows at send time; player count is tiny).
 
-### `hall_of_valor_progress`
-`player_id, element, stat, level` (unique triple).
+### `hall_of_valor`
+`id, player_id, element, stat, level, updated_at` — unique on `(player_id, element, stat)`, level checked 0–10. A row per track rather than a jsonb map because a track is a *ledger*: it only ever goes up, one level at a time, each level bought with medals — and rows make that a constraint rather than a convention.
 
 ### `economy_log` (append-only audit of every grant/spend)
 `id, player_id, source (battle:c01_s3|summon|quest:...|admin:<name>|mail|shop), deltas jsonb, created_at` — powers Admin player inspector + economy dashboards. Pruned to 90 days.

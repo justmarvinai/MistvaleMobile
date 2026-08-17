@@ -7,7 +7,7 @@ import { AppError } from '../../lib/errors';
 import { gameDayFrom } from '../../lib/game-day';
 import type { ContentCache } from '../../content/cache';
 import * as rewards from '../rewards/service';
-import { applyRating, arenaConfigFrom, medalsForWin, ratingChange } from './rating';
+import { applyRating, arenaConfigFrom, medalsForWin, ratingChange, weeklyDecay } from './rating';
 
 /**
  * The ladder's stateful core: opening a record, moving two ratings, naming a week.
@@ -190,4 +190,82 @@ export function nextMonday(ctx: ArenaContext, now: Date): Date {
   const monday = new Date(`${weekKey(ctx, now)}T00:00:00Z`);
   monday.setUTCDate(monday.getUTCDate() + 7);
   return monday;
+}
+
+export interface WeeklyResetReport {
+  /** Accounts whose chest was sealed for collection. */
+  sealed: number;
+  /** Accounts whose rating decayed towards its tier floor. */
+  decayed: number;
+  week: string;
+}
+
+/**
+ * Closes the arena week.
+ *
+ * Three things happen, in this order and for a reason:
+ *
+ *  1. **The chest is sealed.** The week's best rating is copied into the pending-chest
+ *     columns, because step 3 is about to clear `weekly_high` and a chest earned in the
+ *     week that just ended has to survive the boundary to be claimed in the next one.
+ *  2. **Ratings decay** by a share of the distance down to their tier floor — enough that
+ *     an abandoned Platinum account drifts out of the way, never enough to demote anybody
+ *     on its own (ECONOMY_BALANCE §8).
+ *  3. **The week restarts**: `weekly_high` becomes the post-decay rating and the daily
+ *     refresh allowance is cleared.
+ *
+ * Only real accounts are touched. A bot's rating is the nightly refresh's business, and
+ * decaying it every Monday would drag the whole ladder to its band floors over a season.
+ *
+ * Safe to run twice: the week it is sealing is named, and a second run inside the same
+ * week is a no-op rather than a second decay.
+ */
+export async function weeklyReset(ctx: ArenaContext, now: Date): Promise<WeeklyResetReport> {
+  const settings = config(ctx);
+  // The week that just *ended* — this runs at the boundary, so `now` is already inside
+  // the new one.
+  const closing = weekKey(ctx, new Date(now.getTime() - 24 * 60 * 60 * 1000));
+
+  const rows = await ctx.db
+    .select({
+      playerId: arenaState.playerId,
+      rating: arenaState.rating,
+      weeklyHigh: arenaState.weeklyHigh,
+      pendingChestWeek: arenaState.pendingChestWeek,
+      pendingChestHigh: arenaState.pendingChestHigh,
+    })
+    .from(arenaState)
+    .innerJoin(players, eq(players.id, arenaState.playerId))
+    .where(eq(players.isBot, false));
+
+  const report: WeeklyResetReport = { sealed: 0, decayed: 0, week: closing };
+
+  for (const row of rows) {
+    // Already closed this week; a restart or a manual re-run must not decay twice.
+    if (row.pendingChestWeek === closing) continue;
+
+    // An unclaimed chest is not thrown away — the better of the two is kept, so three
+    // weeks away costs the collection but never the best week in it.
+    const high = Math.max(row.weeklyHigh, row.pendingChestHigh);
+    const decayed = weeklyDecay(row.rating, settings);
+
+    await ctx.db
+      .update(arenaState)
+      .set({
+        rating: decayed,
+        tier: tierForRating(decayed, settings.thresholds),
+        weeklyHigh: decayed,
+        pendingChestWeek: closing,
+        pendingChestHigh: high,
+        refreshesUsed: 0,
+        refreshDay: null,
+        updatedAt: now,
+      })
+      .where(eq(arenaState.playerId, row.playerId));
+
+    report.sealed += 1;
+    if (decayed !== row.rating) report.decayed += 1;
+  }
+
+  return report;
 }

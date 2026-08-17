@@ -64,6 +64,18 @@ export const arenaState = pgTable(
 
     /** ISO week the last chest was claimed for, so a claim cannot repeat inside one. */
     lastWeeklyClaim: text('last_weekly_claim'),
+
+    /**
+     * The chest waiting to be collected, sealed at the Monday reset.
+     *
+     * Two columns rather than paying against `weekly_high` directly, because the reset
+     * has to clear that: a chest is earned in the week that just ended and claimed in the
+     * one that follows, so the rating it pays against must survive the boundary. Null
+     * means nothing is waiting.
+     */
+    pendingChestWeek: text('pending_chest_week'),
+    pendingChestHigh: integer('pending_chest_high').notNull().default(0),
+
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
