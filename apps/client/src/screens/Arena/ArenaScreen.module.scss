@@ -1,0 +1,252 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: $space-4;
+  height: 100%;
+  min-height: 0;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: $space-2;
+}
+
+// ── Standing ────────────────────────────────────────────────────────────────
+
+.standing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: $space-4;
+  align-items: center;
+  padding: $space-3;
+  background: $panel;
+  border: 1px solid $edge;
+}
+
+.rank {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rankTier {
+  color: $gold;
+  font-family: $font-display;
+  font-size: 1.25rem;
+}
+
+.rankRating {
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.rankNote {
+  color: $muted;
+  font-size: 0.75rem;
+}
+
+.tokens {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.tokensLabel {
+  color: $muted;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pips {
+  display: flex;
+  gap: 3px;
+}
+
+.pip {
+  flex: 1;
+  height: 8px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+
+  &[data-on='true'] {
+    background: $mist-dim;
+    border-color: $mist;
+  }
+}
+
+.tokensNote {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.72rem;
+}
+
+// ── Offers ──────────────────────────────────────────────────────────────────
+
+.offersHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  border-bottom: 1px solid $edge;
+  padding-bottom: $space-1;
+}
+
+.heading {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 1.05rem;
+  font-weight: normal;
+}
+
+.offers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: $space-2;
+}
+
+.offer {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-2;
+  background: $panel;
+  border: 1px solid $edge;
+
+  &:hover {
+    border-color: $edge-bright;
+  }
+}
+
+.offerHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+}
+
+.offerName {
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.offerTier {
+  color: $gold;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.offerMeta {
+  margin: 0;
+  color: $muted;
+  font-size: 0.74rem;
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.member {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+  padding: 2px $space-1;
+  background: $panel-inset;
+  font-size: 0.76rem;
+}
+
+.memberName {
+  color: $parchment-dim;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberMeta {
+  color: $muted-deep;
+  font-family: $font-mono;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.offerFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
+  border-top: 1px solid $edge;
+  padding-top: $space-2;
+}
+
+.stakes {
+  color: $muted-deep;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+}
+
+.gain {
+  color: $success;
+}
+
+.loss {
+  color: $danger;
+}
+
+// ── Sidebar ─────────────────────────────────────────────────────────────────
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.defence {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 $space-2;
+  padding: 0;
+  list-style: none;
+}
+
+.sideNote {
+  margin: 0 0 $space-2;
+  color: $muted;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.empty {
+  margin: 0;
+  padding: $space-4 0;
+  color: $muted;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.8rem;
+}

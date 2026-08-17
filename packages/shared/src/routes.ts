@@ -168,6 +168,20 @@ export const ADMIN_ROUTES = {
     grant: (id: string) => `/players/${encodeURIComponent(id)}/grant`,
     sessions: (id: string) => `/players/${encodeURIComponent(id)}/sessions`,
   },
+
+  /**
+   * The Arena's bot ladder.
+   *
+   * Its own group rather than a corner of player management, because the operations are
+   * about the *ladder* rather than about any one account: how full each band is, and the
+   * two buttons that fill or rebuild it. Individual bots are ordinary players and are
+   * managed through `players` like anybody else.
+   */
+  bots: {
+    census: '/arena/bots',
+    seed: '/arena/bots/seed',
+    refresh: '/arena/bots/refresh',
+  },
 } as const;
 
 /**

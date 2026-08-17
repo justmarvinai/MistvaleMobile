@@ -40,6 +40,14 @@ interface BattleStoreState {
 
   startBattle: (input: { mode: string; stageKey: string; team: string[] }) => Promise<void>;
   /**
+   * Opens an Arena fight against one of the offered opponents.
+   *
+   * A separate entry point only because the *request* is different — an offer id rather
+   * than a stage key, a token rather than energy. What comes back is an ordinary battle
+   * view, played through exactly the same machinery as everything else.
+   */
+  startArena: (input: { offerId: string; team: string[] }) => Promise<void>;
+  /**
    * Farms a stage without watching. Returns the summary rather than storing it: there is
    * no playback to own, and the screen that asked is the screen that shows the result.
    */
@@ -133,6 +141,19 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
       set({ busy: true, error: null, view: emptyView(), pending: [], battle: null });
       try {
         const battle = await gameApi.startBattle(input);
+        set({ busy: false });
+        adopt(battle, 0);
+      } catch (cause) {
+        set({ busy: false, error: messageOf(cause) });
+        throw cause;
+      }
+    },
+
+    async startArena(input) {
+      stopTimer();
+      set({ busy: true, error: null, view: emptyView(), pending: [], battle: null });
+      try {
+        const battle = await gameApi.attack(input);
         set({ busy: false });
         adopt(battle, 0);
       } catch (cause) {

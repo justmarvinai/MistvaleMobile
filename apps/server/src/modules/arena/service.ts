@@ -160,7 +160,15 @@ export async function rollOffers(
   }));
 }
 
-/** Turns stored offers into what the hub shows, with each one's stakes worked out. */
+/**
+ * Turns stored offers into what the hub shows, with each one's stakes worked out.
+ *
+ * A query per offer, and deliberately so: the loop is bounded by `arena.offerCount` — five
+ * by default — rather than by how much data exists, so it cannot degrade as the ladder
+ * grows. Five indexed reads sit far inside the 100 ms p95 the box is budgeted for
+ * (ARCHITECTURE §9). If an operator ever raises the offer count into double figures, this
+ * is the first thing to batch.
+ */
 async function describeOffers(
   tx: Tx,
   ctx: ArenaContext,

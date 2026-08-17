@@ -27,6 +27,14 @@ At Early Access there may be four real players, and an Arena whose offer list is
 - **A bot is synthesised, never authored.** Champions, relics, level and rating all come from live content and a per-band recipe in `game_config`, so sixty opponents cost zero rows of hand-maintained content and a balance change reaches them without a deploy. Rebuilt nightly with a ±5% rating drift, because a ladder whose teams never change is a solved puzzle by the second week.
 - **Bots yield the top ten** at the weekly reset. The visible top of the board belongs to people.
 
+### Added — the Arena, in the game
+
+- **The hub** draws from one read, because every panel on it is a view of the same standing and two requests would eventually disagree. Left: five opponents, each with the team it fields and what beating it is worth either way — the choice a player actually makes. Right: the defence that earns while they are away, the chest, and the Hall the medals go into.
+- **The defence editor and the attack picker are one component**, because they are the same act with different stakes, and two pickers would drift apart the first time one gained a feature. Slot one is the leader, whose aura applies — which is why the order is the player's to choose.
+- **The Hall of Valor** is laid out as elements against stats rather than a list of twenty-four rows, because that is the shape of the decision: a player picks the element their best champions share and pushes one column.
+- **The results panel knows the Arena pays differently** — rating and medals, on a loss as well as a win — so it shows the swing and the promotion rather than a silver line reading zero. A retreat says plainly that walking out is a loss, not an escape.
+- **The ladder** shows the top twenty-five plus the reader's own neighbourhood, because "you are 41st" means nothing without the four people you could overtake.
+
 ### Added — the support desk (Admin A5, pulled forward)
 
 Mistvale has no e-mail addresses. That was always a deliberate simplification, and it has one binding consequence that had gone unbuilt: **an operator is the only password reset there is** — and there was no operator endpoint. A warden who forgot their password could not be helped except by hand-writing an argon2id hash into the database, which breaks the no-direct-DB rule the whole Admin Suite exists to uphold. Pulled forward out of A5 because it is a hard-rule violation rather than a missing convenience.

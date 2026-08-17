@@ -1,0 +1,127 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 30rem;
+}
+
+.blurb {
+  margin: 0;
+  color: $muted;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-2;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 5rem;
+  justify-content: center;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px dashed $edge;
+  color: $muted;
+  font: inherit;
+  cursor: pointer;
+
+  &[data-filled='true'] {
+    border-style: solid;
+    border-color: $mist-dim;
+    color: $parchment;
+  }
+}
+
+.slotLabel {
+  color: $muted-deep;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.slotName {
+  font-family: $font-display;
+  font-size: 0.9rem;
+}
+
+.roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: $space-2;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $space-2;
+  background: $panel;
+  border: 1px solid $edge;
+  color: $parchment;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $mist;
+  }
+
+  &[aria-pressed='true'] {
+    border-color: $mist;
+    background: $panel-raised;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.cardName {
+  font-family: $font-display;
+}
+
+.cardMeta {
+  color: $muted;
+  font-size: 0.72rem;
+}
+
+.empty {
+  margin: 0;
+  padding: $space-4 0;
+  color: $muted;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $space-3;
+  border-top: 1px solid $edge;
+  padding-top: $space-3;
+}
+
+.count {
+  color: $muted;
+  font-size: 0.8rem;
+}

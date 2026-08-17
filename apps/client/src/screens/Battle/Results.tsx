@@ -1,3 +1,4 @@
+import { ARENA_TIERS, ARENA_TIER_LABELS, type ArenaTier } from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useBattleStore } from '../../state/battleStore';
@@ -25,6 +26,56 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
   // A sandbox fight pays nothing on purpose, so a reward table of zeroes would read as a
   // bug rather than as the deal the player took.
   const practice = battle?.mode === 'practice';
+  const arena = rewards?.arena ?? null;
+
+  // The Arena pays in rating and medals and nothing else, and it pays on a loss too — so
+  // it gets its own panel rather than a silver line reading zero.
+  if (arena) {
+    return (
+      <Modal open title="The Arena" onClose={onLeave}>
+        <div className={styles.body}>
+          <p className={`${styles.outcome} ${arena.won ? styles.victory : styles.defeat}`}>
+            {arena.won ? `You beat ${arena.opponent}` : `${arena.opponent} held`}
+          </p>
+
+          <div className={styles.rewards}>
+            <div className={styles.row}>
+              <span className={styles.label}>Rating</span>
+              <span className={arena.ratingDelta >= 0 ? styles.bonus : undefined}>
+                {arena.ratingBefore} → {arena.ratingAfter}
+                {'  '}({arena.ratingDelta >= 0 ? '+' : ''}
+                {arena.ratingDelta})
+              </span>
+            </div>
+            {arena.medals > 0 && (
+              <div className={styles.row}>
+                <span className={styles.label}>Valor Medals</span>
+                <span className={styles.bonus}>+{arena.medals}</span>
+              </div>
+            )}
+          </div>
+
+          {arena.tierAfter !== arena.tierBefore && (
+            <p className={styles.chest}>
+              {isPromotion(arena.tierBefore, arena.tierAfter)
+                ? `Promoted to ${ARENA_TIER_LABELS[arena.tierAfter]}.`
+                : `Slipped back to ${ARENA_TIER_LABELS[arena.tierAfter]}.`}
+            </p>
+          )}
+
+          {!arena.won && outcome === 'retreat' && (
+            <p className={styles.note}>
+              Walking out is a loss, not an escape — the token was already spent.
+            </p>
+          )}
+
+          <div className={styles.actions}>
+            <Button onClick={onLeave}>Back to the Arena</Button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal open title={practice ? 'Practice' : 'Results'} onClose={onLeave}>
@@ -106,4 +157,9 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
       </div>
     </Modal>
   );
+}
+
+/** Whether a tier change went up the ladder. Read off the canonical order, not the name. */
+function isPromotion(before: ArenaTier, after: ArenaTier): boolean {
+  return ARENA_TIERS.indexOf(after) > ARENA_TIERS.indexOf(before);
 }

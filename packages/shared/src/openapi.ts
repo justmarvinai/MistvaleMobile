@@ -15,6 +15,7 @@ import {
   adminSessionsRevokedSchema,
   adminSetRankRequestSchema,
 } from './admin';
+import { arenaBotCensusSchema, arenaLadderResultSchema } from './arena';
 import { accountSummarySchema, loginRequestSchema } from './auth';
 import { apiErrorSchema } from './api';
 import { CONTENT_REGISTRY, CONTENT_TYPES } from './content/registry';
@@ -417,6 +418,43 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Sign an account out everywhere',
     response: adminSessionsRevokedSchema,
     errors: [404],
+  },
+
+  // ── Admin: the Arena's bot ladder ─────────────────────────────────────────
+  {
+    surface: 'admin',
+    method: 'get',
+    path: ADMIN_ROUTES.bots.census,
+    operationId: 'getArenaBotCensus',
+    summary: 'What each band of the bot ladder should hold, and what it does',
+    description:
+      'Counted by where each bot actually stands rather than by the window it was made ' +
+      'in, so the numbers read as they look on the leaderboard.',
+    response: arenaBotCensusSchema,
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: ADMIN_ROUTES.bots.seed,
+    operationId: 'seedArenaBots',
+    summary: 'Bring the bot ladder up to strength',
+    description:
+      'Idempotent: creates only the difference between what each band should hold and ' +
+      'what it does, and sheds from the top of an over-full band so the entry-level ' +
+      'opponents survive. What a band *is* comes from `arena.botBands` in the game config.',
+    response: arenaLadderResultSchema,
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: ADMIN_ROUTES.bots.refresh,
+    operationId: 'refreshArenaBots',
+    summary: 'Rebuild every bot now, as the nightly job would',
+    description:
+      'Re-synthesises each roster from live content and drifts each rating inside its ' +
+      'band, then tops the ladder up. For use after a balance publish, so an operator ' +
+      'does not have to wait until the reset hour to see the result.',
+    response: arenaLadderResultSchema,
   },
 ];
 

@@ -1,9 +1,17 @@
 import type {
+  ArenaAttackRequest,
+  ArenaDefenceRequest,
+  ArenaLeaderboard,
+  ArenaResult,
+  ArenaState,
+  ArenaTier,
   ChampionDetail,
   ChampionFlagsRequest,
   GearInstance,
   GearPreview,
   GearUpgradeResult,
+  HallOfValor,
+  HallUpgradeResult,
   InventoryItem,
   RosterChampion,
   ShopPurchaseResult,
@@ -30,10 +38,14 @@ import { api } from './client';
  */
 
 export type {
+  ArenaLeaderboard,
+  ArenaResult,
+  ArenaState,
   ChampionDetail,
   Chronicle,
   Depths,
   GearInstance,
+  HallOfValor,
   InventoryItem,
   MultiBattleResult,
   RosterChampion,
@@ -68,6 +80,8 @@ export interface BattleRewards {
   bonus: Record<string, number>;
   /** Chapter star-chest tiers this clear crossed. */
   chestTiers: number[];
+  /** What an Arena fight moved, on both ratings. Null for every other mode. */
+  arena: ArenaResult | null;
 }
 
 export interface BattleView {
@@ -223,6 +237,38 @@ export const gameApi = {
     api.get<{ progress: Progress }>(ROUTES.progress.stages).then((data) => data.progress),
 
   depths: () => api.get<{ depths: Depths }>(ROUTES.depths.overview).then((data) => data.depths),
+
+  // ── The Arena ─────────────────────────────────────────────────────────────
+
+  arena: () => api.get<{ arena: ArenaState }>(ROUTES.arena.state).then((data) => data.arena),
+
+  refreshOffers: () =>
+    api.post<{ arena: ArenaState }>(ROUTES.arena.refreshOffers, {}).then((data) => data.arena),
+
+  setDefence: (team: string[]) =>
+    api
+      .post<{ arena: ArenaState }>(ROUTES.arena.defence, { team } satisfies ArenaDefenceRequest)
+      .then((data) => data.arena),
+
+  attack: (request: ArenaAttackRequest) =>
+    api.post<{ battle: BattleView }>(ROUTES.arena.attack, request).then((data) => data.battle),
+
+  leaderboard: () =>
+    api
+      .get<{ leaderboard: ArenaLeaderboard }>(ROUTES.arena.leaderboard)
+      .then((data) => data.leaderboard),
+
+  claimWeeklyChest: () =>
+    api.post<{ chest: { tier: ArenaTier; rewards: Record<string, number> }; arena: ArenaState }>(
+      ROUTES.arena.claimWeekly,
+      {},
+    ),
+
+  hallOfValor: () =>
+    api.get<{ hall: HallOfValor }>(ROUTES.hallOfValor.state).then((data) => data.hall),
+
+  upgradeHall: (request: { element: string; stat: string; actionId: string }) =>
+    api.post<HallUpgradeResult>(ROUTES.hallOfValor.upgrade, request),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

@@ -493,3 +493,19 @@ export const arenaBotCensusSchema = z.object({
   refreshedAt: z.string().nullable(),
 });
 export type ArenaBotCensus = z.infer<typeof arenaBotCensusSchema>;
+
+/** What a seeding or refresh run did. */
+export const arenaLadderReportSchema = z.object({
+  created: z.number().int(),
+  refreshed: z.number().int(),
+  removed: z.number().int(),
+  byBand: z.record(z.enum(ARENA_BANDS), z.number().int()),
+});
+export type ArenaLadderReport = z.infer<typeof arenaLadderReportSchema>;
+
+/** Both halves of what an operator wants back: what happened, and what the ladder is now. */
+export const arenaLadderResultSchema = z.object({
+  report: arenaLadderReportSchema,
+  census: arenaBotCensusSchema,
+});
+export type ArenaLadderResult = z.infer<typeof arenaLadderResultSchema>;

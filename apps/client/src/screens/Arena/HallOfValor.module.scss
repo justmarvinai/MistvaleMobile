@@ -1,0 +1,160 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 30rem;
+}
+
+.blurb {
+  margin: 0;
+  color: $muted;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.medals {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.medalsLabel {
+  color: $muted;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.medalsValue {
+  color: $gold;
+  font-family: $font-display;
+  font-size: 1.2rem;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-1;
+}
+
+.tab {
+  padding: $space-2 $space-1;
+  background: $panel;
+  border: 1px solid $edge;
+  color: $muted;
+  font: inherit;
+  font-family: $font-display;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $edge-bright;
+    color: $parchment;
+  }
+
+  &[aria-selected='true'] {
+    background: $panel-raised;
+    color: $parchment;
+  }
+
+  // The element wheel is colour-coded everywhere else in the game; the selected tab
+  // borrows the same colour so the two never have to be learned separately.
+  &[data-element='ember'][aria-selected='true'] {
+    border-color: $ember;
+  }
+  &[data-element='tide'][aria-selected='true'] {
+    border-color: $tide;
+  }
+  &[data-element='verdant'][aria-selected='true'] {
+    border-color: $verdant;
+  }
+  &[data-element='mist'][aria-selected='true'] {
+    border-color: $mist-element;
+  }
+}
+
+.tracks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: $space-2;
+}
+
+.track {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  padding: $space-2;
+  background: $panel;
+  border: 1px solid $edge;
+}
+
+.trackHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.trackName {
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 0.9rem;
+}
+
+.trackLevel {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.72rem;
+}
+
+.pips {
+  display: flex;
+  gap: 2px;
+}
+
+.pip {
+  flex: 1;
+  height: 4px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+
+  &[data-on='true'] {
+    background: $mist-dim;
+    border-color: $mist;
+  }
+}
+
+.trackFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
+}
+
+.trackValue {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.76rem;
+}
+
+.trackNext {
+  color: $mist;
+}
+
+.empty {
+  margin: 0;
+  padding: $space-4 0;
+  color: $muted;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.8rem;
+}

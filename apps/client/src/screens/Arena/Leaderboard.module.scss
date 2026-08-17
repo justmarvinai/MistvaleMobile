@@ -1,0 +1,77 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-width: 26rem;
+  max-height: 28rem;
+  overflow-y: auto;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) 5.5rem 4rem;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-1 $space-2;
+  background: $panel;
+  border: 1px solid transparent;
+  font-size: 0.82rem;
+
+  &[data-self] {
+    border-color: $mist-dim;
+    background: $panel-raised;
+  }
+}
+
+.position {
+  color: $muted-deep;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.name {
+  color: $parchment;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tier {
+  color: $muted;
+  font-size: 0.75rem;
+}
+
+.rating {
+  color: $gold;
+  font-family: $font-mono;
+  text-align: right;
+}
+
+.divider {
+  margin: $space-2 0 0;
+  color: $muted-deep;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.empty,
+.note {
+  margin: 0;
+  padding: $space-3 0;
+  color: $muted;
+  font-size: 0.85rem;
+  text-align: center;
+}

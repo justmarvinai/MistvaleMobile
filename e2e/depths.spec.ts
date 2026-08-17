@@ -91,7 +91,7 @@ test.describe('the Depths', () => {
     test.slow();
     await page.goto('/');
 
-    // 130 floors across ten keeps, every one of them an ordinary stage — which is what
+    // 120 floors across ten keeps, every one of them an ordinary stage — which is what
     // lets the Depths reuse the campaign's unlocks, stars and results screen wholesale.
     const bundle = await page.evaluate(async () => {
       const response = await fetch('/api/content');
