@@ -105,6 +105,8 @@ export const ROUTES = {
   },
   battle: {
     start: '/battles/start',
+    /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */
+    multi: '/battles/multi',
     /** The battle in progress, or null. Resume support after a refresh or crash. */
     active: '/battles/active',
     /** `/battles/:id` — the full session, including its event log. */

@@ -22,15 +22,31 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
   const outcome = battle?.outcome ?? 'defeat';
   const rewards = battle?.rewards ?? null;
   const won = outcome === 'victory';
+  // A sandbox fight pays nothing on purpose, so a reward table of zeroes would read as a
+  // bug rather than as the deal the player took.
+  const practice = battle?.mode === 'practice';
 
   return (
-    <Modal open title="Results" onClose={onLeave}>
+    <Modal open title={practice ? 'Practice' : 'Results'} onClose={onLeave}>
       <div className={styles.body}>
         <p className={`${styles.outcome} ${won ? styles.victory : styles.defeat}`}>
           {OUTCOME_TEXT[outcome] ?? 'The fight ended'}
         </p>
 
-        {won && rewards ? (
+        {practice ? (
+          <>
+            {won && rewards && (
+              <p className={styles.stars} aria-label={`${rewards.stars} of 3 stars`}>
+                {'★'.repeat(rewards.stars)}
+                {'☆'.repeat(Math.max(0, 3 - rewards.stars))}
+              </p>
+            )}
+            <p className={styles.note}>
+              A practice run: no energy spent, nothing earned, nothing recorded. The stars show how
+              the team would have done.
+            </p>
+          </>
+        ) : won && rewards ? (
           <>
             <p className={styles.stars} aria-label={`${rewards.stars} of 3 stars`}>
               {'★'.repeat(rewards.stars)}

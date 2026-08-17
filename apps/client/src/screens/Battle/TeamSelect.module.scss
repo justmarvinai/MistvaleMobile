@@ -87,6 +87,57 @@
   font-size: 0.85rem;
 }
 
+.farm,
+.practice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
+  padding-top: $space-2;
+  border-top: 1px solid $edge;
+}
+
+.farmLabel,
+.practiceLabel {
+  color: $muted;
+  font-size: 0.8rem;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  margin-left: auto;
+}
+
+.step {
+  width: 1.6rem;
+  height: 1.6rem;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $parchment;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $mist;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.stepValue {
+  min-width: 2.5rem;
+  color: $parchment;
+  font-family: $font-display;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
 .error {
   color: $danger;
   font-size: 0.85rem;

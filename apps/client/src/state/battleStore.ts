@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { BattleEvent, UnitRef } from '@mistvale/engine';
+import type { MultiBattleRequest, MultiBattleResult } from '@mistvale/shared';
 import { gameApi, newActionId, type BattleView } from '../api/game';
 import {
   applyAll,
@@ -38,6 +39,11 @@ interface BattleStoreState {
   awaitingInput: boolean;
 
   startBattle: (input: { mode: string; stageKey: string; team: string[] }) => Promise<void>;
+  /**
+   * Farms a stage without watching. Returns the summary rather than storing it: there is
+   * no playback to own, and the screen that asked is the screen that shows the result.
+   */
+  runMulti: (input: Omit<MultiBattleRequest, 'actionId'>) => Promise<MultiBattleResult>;
   resume: () => Promise<void>;
   act: (input: { skill?: string; target?: UnitRef }) => Promise<void>;
   runAuto: () => Promise<void>;
@@ -129,6 +135,18 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
         const battle = await gameApi.startBattle(input);
         set({ busy: false });
         adopt(battle, 0);
+      } catch (cause) {
+        set({ busy: false, error: messageOf(cause) });
+        throw cause;
+      }
+    },
+
+    async runMulti(input) {
+      set({ busy: true, error: null });
+      try {
+        const result = await gameApi.multiBattle({ ...input, actionId: newActionId() });
+        set({ busy: false });
+        return result;
       } catch (cause) {
         set({ busy: false, error: messageOf(cause) });
         throw cause;

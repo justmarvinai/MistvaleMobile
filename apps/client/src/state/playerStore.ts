@@ -4,6 +4,7 @@ import {
   ROUTES,
   computeUnlocks,
   type AccountSummary,
+  type MultiBattleState,
   type PlayerSettings,
   type PlayerSummary,
   type UnlockFlags,
@@ -21,13 +22,25 @@ interface PlayerSnapshot {
   account: AccountSummary;
   player: PlayerSummary;
   unlocks: UnlockFlags;
+  multiBattle: MultiBattleState;
   settings: PlayerSettings;
   serverTime: string;
 }
 
+/** Until the first snapshot lands, the farming control is drawn shut rather than guessed at. */
+const NO_MULTI_BATTLE: MultiBattleState = Object.freeze({
+  unlocked: false,
+  lockedReason: null,
+  runsLeftToday: 0,
+  dailyCap: 0,
+  maxPerCall: 0,
+});
+
 interface PlayerState {
   player: PlayerSummary | null;
   unlocks: UnlockFlags;
+  /** Today's farming allowance, server-computed like every other gate. */
+  multiBattle: MultiBattleState;
   settings: PlayerSettings;
   loading: boolean;
   /** Difference between server and client clocks, so countdowns stay honest. */
@@ -41,6 +54,7 @@ interface PlayerState {
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   player: null,
   unlocks: computeUnlocks(1),
+  multiBattle: NO_MULTI_BATTLE,
   settings: DEFAULT_PLAYER_SETTINGS,
   loading: false,
   clockSkewMs: 0,
@@ -57,6 +71,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       set({
         player: snapshot.player,
         unlocks: snapshot.unlocks,
+        multiBattle: snapshot.multiBattle ?? NO_MULTI_BATTLE,
         settings: { ...DEFAULT_PLAYER_SETTINGS, ...snapshot.settings },
         clockSkewMs: serverTime + latencyAllowance - Date.now(),
         loading: false,
@@ -92,6 +107,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set({
       player: null,
       unlocks: computeUnlocks(1),
+      multiBattle: NO_MULTI_BATTLE,
       settings: DEFAULT_PLAYER_SETTINGS,
       loading: false,
       clockSkewMs: 0,

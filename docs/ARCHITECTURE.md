@@ -142,7 +142,7 @@ MistvaleMobile/
 ### 5.1 Process model
 - **One Node process** runs both the player API and the Admin API (separate Fastify plugin trees; one account system with the Admin tree rank-gated to `admin`; same content services — admin edits invalidate caches in-process, which is what makes "changes are live immediately" trivial).
 - systemd manages the process (auto-restart, journal); nginx terminates TLS and serves all static files (client build, admin build, atlases, uploads).
-- In-process `node-cron` jobs (daily reset 04:00 Europe/Berlin, shop refresh, event activation/expiry, bot refresh, energy is computed lazily — no ticking job).
+- In-process `node-cron` jobs (event activation/expiry, bot refresh, backups). **Anything derivable from a timestamp is derived instead of ticked**, which is the pattern to reach for first: energy from `energy_updated_at`; a shop window rolled by the read that outlives it; a daily allowance stamped with its game-day, so a stale stamp reads as zero and needs no reset job at all (`lib/game-day`, `lib/daily-counters`). What "today" is comes from `ops.dailyResetHour` / `ops.dailyResetTimezone`, so a game-day runs from the reset hour rather than from midnight, and one answer serves the springs rotation and every allowance.
 
 ### 5.2 Request pipeline
 `nginx → fastify: requestId → rate-limit → session auth → zod-validate → handler(service) → typed reply | AppError`
@@ -162,7 +162,8 @@ MistvaleMobile/
 ### 5.5 Battle session management
 - Battles live in an in-memory `Map<battleId, BattleSession>` + a `battles` DB snapshot updated after each action (crash recovery = load snapshot; a restart mid-battle costs nobody anything).
 - Manual play: client sends `{ actionId, skillId, targetSlot }` → server advances the engine until the next player decision point (enemy/auto turns resolve inline) → returns the ordered `BattleEvent[]` slice.
-- Auto/multi-battle: the whole battle (or N repeats) resolves in one call; the event log(s) stream back for playback at client-chosen speed. Multi-battle summaries skip playback entirely.
+- Auto: the whole battle resolves in one call and the event log streams back for playback at client-chosen speed.
+- Multi-battle: N repeats resolve in one call under one player lock, and **write no session rows at all** — thirty states and thirty event logs is megabytes per farm, and a batch has nothing to resume. The summary is the record; it lives on the player row (`last_multi_battle`) so a retried request replays it rather than farming twice.
 - Sessions expire after 30 min idle (counts as retreat: energy spent, no reward — same as RSL).
 - Engine CPU budget: a full 3-wave stage resolves in **< 20 ms**; even aggressive multi-battle x10 stays trivially within the 1-core budget.
 

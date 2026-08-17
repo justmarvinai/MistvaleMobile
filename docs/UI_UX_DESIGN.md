@@ -63,7 +63,7 @@
 | 4 | Starter choice | The RSL moment: 3 pedestals (Anuria/Thordakk/Maruan), idle anims, kit preview cards, confirm-with-warning |
 | 5 | Haven | Animated camp, stations, news sidebar, event banners |
 | 6 | Campaign map | 12-chapter journey map (vertical scroll parchment map), chapter → stage list w/ stars, difficulty tabs (Normal/Hard/Brutal), first-clear + star-chest UI, stage tooltip: enemies, drops, energy |
-| 7 | Team select (pre-battle) | 4 slots, roster picker w/ filters/sort, saved presets per mode, power sum, drag or click-assign, multi-battle & auto toggles, energy cost confirm |
+| 7 | Team select (pre-battle) | 4 slots, roster picker w/ filters/sort, saved presets per mode, power sum, drag or click-assign, energy cost line, and the three ways to fight it: **into the mist** (watch it), **farm ×N** (a stepper bounded by energy/allowance/per-press cap, then a run-by-run summary instead of playback) and **practise** (only on a stage already cleared). The last two only render when they apply — the server's answer, read off `/player` and `/player/progress`, never re-derived here |
 | 8 | **Battle** | See §4 |
 | 9 | Battle results | Victory/defeat art, star rating, loot reveal (staggered), champ XP bars filling, buttons: replay/next/multi-continue |
 | 10 | Champions (roster) | Grid of animated cards; filter element/faction/rarity/role; sort level/power/recent; food-select mode; capacity meter |

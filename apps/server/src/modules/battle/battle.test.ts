@@ -9,6 +9,7 @@ import {
   economyLog,
   playerChampions,
   players,
+  stageProgress,
 } from '../../db/schema/index';
 import { buildSeedContent } from '../../db/seed/seeders';
 import * as contentRepo from '../../content/repo';
@@ -452,6 +453,273 @@ describe.skipIf(!dbUp)('the game loop', () => {
         cookies: { mv_session: otherCookie },
       });
       expect(response.statusCode).toBe(404);
+    });
+  });
+
+  /**
+   * Farming without watching, and fighting without stakes.
+   *
+   * The two halves of P6d share a shape — both are ordinary battles the player does not
+   * pay full attention to — but they are opposite in what they cost: a batch spends
+   * everything at once, and practice spends nothing at all. Both are checked here against
+   * the wallet and the progress table, because "pays nothing" and "pays ten times" are
+   * only claims until the ledger agrees.
+   */
+  describe('multi-battle', () => {
+    /** A team, a level that clears the unlock, and enough energy for a full batch. */
+    async function readyToFarm(energy = 200, level = 10): Promise<string> {
+      const champions = await chooseStarter();
+      await app.db.update(players).set({ level, energy }).where(eq(players.id, playerId));
+      return champions[0]!.id;
+    }
+
+    /** What one run of 1-1 costs, read from content rather than assumed. */
+    const stageCost = (): number =>
+      app.content.current().bundle.stages.find((stage) => stage.key === 'c01_s1_normal')!
+        .energyCost;
+
+    const farm = (team: string[], runs: number, actionId: string) =>
+      as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.multi),
+        payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team, runs, actionId },
+      });
+
+    it('fights the stage the requested number of times and pays for each', async () => {
+      const championId = await readyToFarm();
+      const response = await farm([championId], 5, 'batch-00000001');
+      expect(response.statusCode, response.body).toBe(200);
+
+      const result = response.json().data;
+      expect(result.runs).toHaveLength(5);
+      expect(result.stoppedReason).toBeNull();
+      expect(result.wins).toBe(5);
+      expect(result.energySpent).toBe(5 * stageCost());
+      expect(result.silver).toBe(
+        result.runs.reduce((total: number, run: { silver: number }) => total + run.silver, 0),
+      );
+
+      // The clears are real clears: the same table a manual fight writes, so a batch
+      // advances the map rather than quietly farming a stage that stays unbeaten.
+      const [standing] = await app.db
+        .select()
+        .from(stageProgress)
+        .where(eq(stageProgress.playerId, playerId));
+      expect(standing?.clears).toBe(5);
+      expect(standing?.stars).toBeGreaterThanOrEqual(1);
+    });
+
+    it('writes no session rows — the summary is the record', async () => {
+      const championId = await readyToFarm();
+      await farm([championId], 3, 'batch-00000002');
+
+      const sessions = await app.db
+        .select({ id: battleSessions.id })
+        .from(battleSessions)
+        .where(eq(battleSessions.playerId, playerId));
+      expect(sessions).toHaveLength(0);
+    });
+
+    it('replays a retried batch instead of farming it twice', async () => {
+      const championId = await readyToFarm();
+      const first = await farm([championId], 4, 'batch-00000003');
+      const [afterFirst] = await app.db
+        .select({ silver: players.silver, energy: players.energy })
+        .from(players)
+        .where(eq(players.id, playerId));
+
+      const retried = await farm([championId], 4, 'batch-00000003');
+      expect(retried.statusCode, retried.body).toBe(200);
+      expect(retried.json().data).toEqual(first.json().data);
+
+      const [afterRetry] = await app.db
+        .select({ silver: players.silver, energy: players.energy })
+        .from(players)
+        .where(eq(players.id, playerId));
+      expect(afterRetry).toEqual(afterFirst);
+    });
+
+    it('trims the batch to what energy covers and says so', async () => {
+      const champions = await chooseStarter();
+      // Exactly three runs' worth, asked for five.
+      await app.db
+        .update(players)
+        .set({ level: 10, energy: stageCost() * 3 })
+        .where(eq(players.id, playerId));
+
+      const response = await farm([champions[0]!.id], 5, 'batch-00000004');
+      expect(response.statusCode, response.body).toBe(200);
+
+      const result = response.json().data;
+      expect(result.runs).toHaveLength(3);
+      expect(result.stoppedReason).toBe('outOfEnergy');
+      expect(result.energyLeft).toBe(0);
+    });
+
+    it('trims the batch to what one press may ask for', async () => {
+      const championId = await readyToFarm();
+      const cap = app.content.current().bundle.config['economy.multiBattleMaxPerCall'] as number;
+
+      const response = await farm([championId], cap + 5, 'batch-00000005');
+      const result = response.json().data;
+      expect(result.runs).toHaveLength(cap);
+      expect(result.stoppedReason).toBe('perCallLimit');
+    });
+
+    it('spends a daily allowance that refuses once it is gone', async () => {
+      const championId = await readyToFarm(600);
+      const cap = app.content.current().bundle.config['economy.multiBattleDailyCap'] as number;
+      const perCall = app.content.current().bundle.config[
+        'economy.multiBattleMaxPerCall'
+      ] as number;
+
+      let spent = 0;
+      for (let batch = 0; spent < cap; batch += 1) {
+        const response = await farm([championId], perCall, `batch-cap-${batch}`);
+        expect(response.statusCode, response.body).toBe(200);
+        spent += response.json().data.runs.length;
+      }
+      expect(spent).toBe(cap);
+
+      const exhausted = await farm([championId], 1, 'batch-cap-last');
+      expect(exhausted.statusCode).toBe(429);
+      expect(exhausted.json().error.code).toBe('COOLDOWN');
+    });
+
+    it('reports the allowance on the player snapshot', async () => {
+      const championId = await readyToFarm();
+      await farm([championId], 3, 'batch-00000006');
+
+      const snapshot = await as({ method: 'GET', url: apiPath(ROUTES.player.self) });
+      const multi = snapshot.json().data.multiBattle;
+      expect(multi.unlocked).toBe(true);
+      expect(multi.runsLeftToday).toBe(multi.dailyCap - 3);
+    });
+
+    it('is shut until the account level opens it', async () => {
+      const champions = await chooseStarter();
+      await app.db.update(players).set({ level: 1, energy: 200 }).where(eq(players.id, playerId));
+
+      const response = await farm([champions[0]!.id], 2, 'batch-00000007');
+      expect(response.statusCode).toBe(403);
+      expect(response.json().error.code).toBe('LOCKED_CONTENT');
+
+      const snapshot = await as({ method: 'GET', url: apiPath(ROUTES.player.self) });
+      expect(snapshot.json().data.multiBattle.unlocked).toBe(false);
+      expect(snapshot.json().data.multiBattle.lockedReason).toContain('level');
+    });
+
+    it('refuses to batch a fight the player is already in', async () => {
+      const championId = await readyToFarm();
+      await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [championId] },
+      });
+
+      const response = await farm([championId], 2, 'batch-00000008');
+      expect(response.statusCode).toBe(409);
+      expect(response.json().error.code).toBe('ALREADY_EXISTS');
+    });
+
+    it('refuses to batch a practice run', async () => {
+      const championId = await readyToFarm();
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.multi),
+        payload: {
+          mode: 'practice',
+          stageKey: 'c01_s1_normal',
+          team: [championId],
+          runs: 2,
+          actionId: 'batch-00000009',
+        },
+      });
+      expect(response.statusCode).toBe(400);
+    });
+  });
+
+  describe('the practice sandbox', () => {
+    /** Clears 1-1 the ordinary way, which is what makes it practisable. */
+    async function clearFirstStage(): Promise<string> {
+      const champions = await chooseStarter();
+      const championId = champions[0]!.id;
+      await app.db.update(players).set({ energy: 200 }).where(eq(players.id, playerId));
+
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const started = await as({
+          method: 'POST',
+          url: apiPath(ROUTES.battle.start),
+          payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [championId] },
+        });
+        const battleId = started.json().data.id as string;
+        const finished = await as({
+          method: 'POST',
+          url: apiPath(ROUTES.battle.action(battleId)),
+          payload: { actionId: `clear-attempt-${attempt}`, auto: true },
+        });
+        if (finished.json().data.outcome === 'victory') return championId;
+      }
+      throw new Error('the starter could not clear 1-1 in five attempts');
+    }
+
+    it('costs nothing and pays nothing', async () => {
+      const championId = await clearFirstStage();
+      const [before] = await app.db
+        .select({ silver: players.silver, energy: players.energy, xp: players.xp })
+        .from(players)
+        .where(eq(players.id, playerId));
+      const [clearsBefore] = await app.db
+        .select({ clears: stageProgress.clears })
+        .from(stageProgress)
+        .where(eq(stageProgress.playerId, playerId));
+
+      const started = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: { mode: 'practice', stageKey: 'c01_s1_normal', team: [championId] },
+      });
+      expect(started.statusCode, started.body).toBe(200);
+      const battleId = started.json().data.id as string;
+
+      const finished = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.action(battleId)),
+        payload: { actionId: 'practice-0001', auto: true },
+      });
+      expect(finished.statusCode, finished.body).toBe(200);
+      const view = finished.json().data;
+      expect(view.status).toBe('finished');
+
+      const [after] = await app.db
+        .select({ silver: players.silver, energy: players.energy, xp: players.xp })
+        .from(players)
+        .where(eq(players.id, playerId));
+      expect(after).toEqual(before);
+
+      // Stars are still reported — the point of a sandbox is to find out how a team does
+      // — but nothing is recorded, so the clear count does not move.
+      if (view.outcome === 'victory') {
+        expect(view.rewards.stars).toBeGreaterThanOrEqual(1);
+        expect(view.rewards.silver).toBe(0);
+        expect(view.rewards.firstClear).toBe(false);
+      }
+      const [clearsAfter] = await app.db
+        .select({ clears: stageProgress.clears })
+        .from(stageProgress)
+        .where(eq(stageProgress.playerId, playerId));
+      expect(clearsAfter?.clears).toBe(clearsBefore?.clears);
+    });
+
+    it('refuses a stage the player has never cleared', async () => {
+      const champions = await chooseStarter();
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: { mode: 'practice', stageKey: 'c01_s1_normal', team: [champions[0]!.id] },
+      });
+      expect(response.statusCode).toBe(403);
+      expect(response.json().error.code).toBe('LOCKED_CONTENT');
     });
   });
 

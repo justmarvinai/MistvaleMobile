@@ -14,7 +14,8 @@ import {
   uniqueAccountName,
   uniqueProfileName,
 } from '../../test/harness';
-import { gameDay, gateFor, nextOpenDay, openToday, rotationLabel } from './service';
+import { gameDay } from '../../lib/game-day';
+import { gateFor, nextOpenDay, openToday, rotationLabel } from './service';
 
 /**
  * The Depths.

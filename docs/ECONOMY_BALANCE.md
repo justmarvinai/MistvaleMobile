@@ -24,6 +24,8 @@ Every grant/spend flows through `RewardService` → `economy_log`, so the Admin 
 - **Refill:** 40 Crystals for a full bar ⚙, flat, repeatable (source-faithful); +30/+60 energy consumable items from events/login.
 - Costs recap (details in CONTENT_PLAN): campaign N 4 / H 6 / B 8 (boss stage +1); Depths floors 6→16 by floor band; springs 6–12; Proving Grounds 8–14.
 - Sizing target ⚙: a fully-active free day ≈ 2 caps' worth of energy (regen 480 + quests/events ~100–150) ≈ 70–90 campaign runs equivalent. Multi-battle cap 30 runs/day ⚙ (source-faithful) keeps sessions humane without inflating totals.
+- **Multi-battle** (`economy.multiBattleDailyCap` 30 ⚙, `economy.multiBattleMaxPerCall` 10 ⚙, `unlocks.multiBattleLevel` 6 ⚙): the cap is a *time* limit, not an economy one — a batch pays exactly what the same runs would have paid by hand, energy included, so it changes how long farming takes rather than how much it yields. The per-press cap is smaller than the daily one on purpose: a batch should be a decision a player makes several times a day. The allowance resets at the daily reset hour (`ops.dailyResetHour` 4 ⚙, `ops.dailyResetTimezone` UTC ⚙), which is the same game-day the Essence Springs rotation runs on.
+- **Practice** costs nothing and pays nothing — no energy, no silver, no XP, no drops, no clear. It is a *time* faucet only: it lets a player find out whether a team clears a floor without spending the energy to find out the expensive way.
 
 ## 3. Champion XP & rank economy
 - **Champion XP** to max per rank ⚙: ★1 6.3k · ★2 34k · ★3 116k · ★4 400k · ★5 1.55M · ★6 5.4M (geometric per-level curve, `xp(level) ≈ A × e^(0.076·level)` shape like the source; total 1→60 ≈ 7.5M).

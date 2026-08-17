@@ -140,8 +140,30 @@ export const players = pgTable(
      */
     lastSummonActionId: text('last_summon_action_id'),
 
+    /**
+     * The last multi-battle, kept whole: `{actionId, result}`.
+     *
+     * A batch of runs writes no `battle_sessions` rows — thirty states and thirty event
+     * logs would be megabytes per farm, and there is nothing to resume — so the summary
+     * has nowhere else to live, and a retried request has nothing else to replay. Stored
+     * on the player row rather than in a table because exactly one is ever kept: the
+     * moment the next batch runs, the previous one stops being replayable.
+     */
+    lastMultiBattle: jsonb('last_multi_battle').$type<{ actionId: string; result: unknown }>(),
+
     /** Bots are players too, so arena and leaderboards need no special cases. */
     isBot: boolean('is_bot').notNull().default(false),
+
+    /**
+     * Per-day allowances used, by counter name — multi-battle runs today, and every
+     * quest counter a later phase adds.
+     *
+     * One map rather than a column per allowance: adding a counter must not be a
+     * migration. Stamped with the game-day it belongs to, so a stale day reads as zero
+     * and needs no reset job to clear it.
+     */
+    dailyCounters: jsonb('daily_counters').notNull().default({}).$type<Record<string, number>>(),
+    dailyCountersDay: text('daily_counters_day'),
 
     lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

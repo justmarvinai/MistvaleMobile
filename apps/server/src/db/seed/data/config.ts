@@ -290,7 +290,21 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     30,
     'economy',
     'Multi-battle runs per day',
-    'How many automated repeats a player gets each day.',
+    'How many automated repeats a player gets each day. Resets at the daily reset hour, not at midnight.',
+  ),
+  entry(
+    'economy.multiBattleMaxPerCall',
+    10,
+    'economy',
+    'Multi-battle runs per press',
+    'The largest batch one press may ask for. Smaller than the daily cap on purpose: a batch is a decision the player makes several times a day, not once.',
+  ),
+  entry(
+    'unlocks.multiBattleLevel',
+    6,
+    'economy',
+    'Multi-battle unlock level',
+    'Account level at which farming without watching becomes available — late enough that a new player has fought a stage by hand first.',
   ),
   entry(
     'economy.gearRemovalFree',

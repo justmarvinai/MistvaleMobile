@@ -1,6 +1,13 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { BATTLE_MODES, ROUTES, apiSuccess, routePattern, type BattleMode } from '@mistvale/shared';
+import {
+  BATTLE_MODES,
+  ROUTES,
+  apiSuccess,
+  multiBattleRequestSchema,
+  routePattern,
+  type BattleMode,
+} from '@mistvale/shared';
 import { MAX_SIDE_SLOTS } from '@mistvale/engine';
 import { AppError } from '../../lib/errors';
 import * as championView from '../roster/champions';
@@ -113,6 +120,18 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
     const view = await battle.start(ctx(), { playerId, ...input });
     request.log.info({ playerId, stageKey: input.stageKey, battleId: view.id }, 'battle started');
     return reply.send(apiSuccess(view, app.content.rev));
+  });
+
+  app.post(ROUTES.battle.multi, async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const input = multiBattleRequestSchema.parse(request.body);
+
+    const result = await battle.runMany(ctx(), { playerId, ...input });
+    request.log.info(
+      { playerId, stageKey: input.stageKey, runs: result.runs.length, wins: result.wins },
+      'multi-battle',
+    );
+    return reply.send(apiSuccess(result, app.content.rev));
   });
 
   app.get(ROUTES.battle.active, async (request, reply) => {

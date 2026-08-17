@@ -1,0 +1,119 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 26rem;
+}
+
+.tally {
+  font-family: $font-display;
+  font-size: 1.3rem;
+}
+
+.wins {
+  color: $success;
+}
+
+.losses {
+  color: $danger;
+}
+
+.stopped {
+  padding: $space-2;
+  background: $panel-inset;
+  border-left: 2px solid $warning;
+  color: $parchment-dim;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.runs {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 12rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.run {
+  display: grid;
+  grid-template-columns: 2rem 1.5rem 1fr auto 4rem;
+  align-items: center;
+  gap: $space-2;
+  padding: 2px $space-2;
+  background: $panel-inset;
+  font-size: 0.8rem;
+
+  &[data-outcome='victory'] .runMark {
+    color: $success;
+  }
+
+  &[data-outcome='defeat'] .runMark,
+  &[data-outcome='turnLimit'] .runMark {
+    color: $danger;
+  }
+}
+
+.runIndex {
+  color: $muted-deep;
+  font-variant-numeric: tabular-nums;
+}
+
+.runMark {
+  text-align: center;
+}
+
+.runStars {
+  color: $gold;
+  letter-spacing: 1px;
+}
+
+.runTurns {
+  color: $muted;
+  font-variant-numeric: tabular-nums;
+}
+
+.runSilver {
+  color: $parchment;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.totals {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: $space-3;
+  font-size: 0.9rem;
+}
+
+.label {
+  color: $muted;
+}
+
+.bonus {
+  color: $mist;
+}
+
+.remaining {
+  color: $muted;
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}

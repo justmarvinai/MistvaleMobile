@@ -200,7 +200,13 @@ Single-row-per-key `key text pk, value jsonb, schema_key text`. Every balance co
 `id, account_id fk cascade, token_hash bytea unique, expires_at, created_at, last_seen_at, user_agent` — one session table for all ranks; Admin API endpoints additionally require `rank = 'admin'` on every request (checked server-side, never cached client-side).
 
 ### `players` (1:1 account)
-`id, account_id unique, profile_name citext unique, level, xp, energy, energy_updated_at, silver bigint, crystals, valor_medals, roster_capacity, tutorial_step, settings jsonb, last_daily_reset_at, is_bot bool default false` — bots are players; every system (arena, leaderboards) works on them uniformly. Currencies as columns (hot, small); stackable items normalized below.
+`id, account_id unique, profile_name citext unique, level, xp, energy, energy_updated_at, silver bigint, crystals, valor_medals, roster_capacity, tutorial_step, settings jsonb, summon_pity jsonb, last_summon_action_id, daily_counters jsonb, daily_counters_day, last_multi_battle jsonb, last_daily_reset_at, is_bot bool default false` — bots are players; every system (arena, leaderboards) works on them uniformly. Currencies as columns (hot, small); stackable items normalized below.
+
+Three of those are worth their own sentence:
+
+- **`daily_counters` + `daily_counters_day`** — every per-day allowance in one map keyed by counter name (`multiBattle` today; eight quest counters in P8), stamped with the game-day it belongs to. One map rather than a column each, because adding an allowance must not be a migration. There is deliberately **no reset job**: a counter whose stamp is not today reads as zero and is overwritten on the next write, so an account away for a month is current the moment it comes back. What "today" means is `lib/game-day` — the reset hour and timezone are `game_config` rows, so a game-day runs from the reset hour rather than from midnight.
+- **`last_multi_battle`** — `{actionId, result}` for the most recent batch. A multi-battle writes **no `battle_sessions` rows** (thirty states and thirty logs is megabytes per farm, and a batch has nothing to resume), so the summary has nowhere else to live and a retried request has nothing else to replay. Exactly one is kept: the next batch overwrites it.
+- **`summon_pity` + `last_summon_action_id`** — mercy counters per pool, and the same replay guarantee for pulls.
 
 ### `player_items`
 `player_id, item_key, quantity bigint, unique(player_id, item_key)` — sigils, essences, tomes, emblems, consumables.

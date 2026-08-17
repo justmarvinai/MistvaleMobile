@@ -11,6 +11,8 @@ import type {
   SkillUpgradeRequest,
   Chronicle,
   Depths,
+  MultiBattleRequest,
+  MultiBattleResult,
   Progress,
   SummonBanner,
   SummonHistoryEntry,
@@ -33,6 +35,7 @@ export type {
   Depths,
   GearInstance,
   InventoryItem,
+  MultiBattleResult,
   RosterChampion,
   ShopStock,
   SummonBanner,
@@ -95,6 +98,15 @@ export const gameApi = {
 
   activeBattle: () =>
     api.get<{ battle: BattleView | null }>(ROUTES.battle.active).then((data) => data.battle),
+
+  /**
+   * Fights a stage N times without watching.
+   *
+   * Comes back as a summary rather than N logs — there is nothing to play back, which is
+   * the entire point of the button.
+   */
+  multiBattle: (input: MultiBattleRequest) =>
+    api.post<MultiBattleResult>(ROUTES.battle.multi, input),
 
   /**
    * Takes a turn.

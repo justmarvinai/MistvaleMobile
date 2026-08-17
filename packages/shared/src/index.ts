@@ -9,6 +9,7 @@ export * from './shop';
 export * from './summon';
 export * from './depths';
 export * from './mastery';
+export * from './battle';
 export * from './routes';
 export * from './content/index';
 export * from './openapi';

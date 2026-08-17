@@ -10,6 +10,7 @@ import {
 import { players } from '../../db/schema/index';
 import { AppError } from '../../lib/errors';
 import { toPlayerSummary } from '../auth/service';
+import { multiState } from '../battle/service';
 
 /**
  * Player snapshot and settings.
@@ -35,6 +36,9 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
           },
           player: toPlayerSummary(player, now),
           unlocks: computeUnlocks(player.level),
+          // Today's farming allowance rides on the snapshot the shell already refetches
+          // after every battle, so the team-select screen never has to ask for it.
+          multiBattle: multiState(app.content, player, now),
           settings: { ...DEFAULT_PLAYER_SETTINGS, ...player.settings },
           serverTime: now.toISOString(),
         },

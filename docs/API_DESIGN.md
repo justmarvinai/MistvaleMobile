@@ -15,7 +15,7 @@
 
 ### Content & player snapshot
 | GET `/content` | Full content bundle for current revision (ETag/If-None-Match; client caches in IndexedDB). |
-| GET `/player` | Full player snapshot: profile, resources, energy `{value,cap,nextTickAt}`, unlock flags, tutorial step, counters (quests badge, mail badge, event banners). Fetched on boot + screen re-entry, never polled. |
+| GET `/player` | Full player snapshot: profile, resources, energy `{value,cap,nextTickAt}`, unlock flags, today's multi-battle allowance `{unlocked, lockedReason, runsLeftToday, dailyCap, maxPerCall}`, tutorial step, counters (quests badge, mail badge, event banners). Fetched on boot + screen re-entry, never polled. |
 | GET `/player/champions` · GET `/player/gear` · GET `/player/items` | Roster / gear inventory / stackables. Paged where sensible. |
 | GET `/player/starters` | The champions flagged `starter` in content — what a new account chooses between. |
 | POST `/player/starter` | `{championKey}` → grants the chosen starter. Idempotent: a player who already owns champions is left alone. |
@@ -53,18 +53,15 @@
 | GET `/summon/history` | The player's recent pulls, newest first. |
 | GET `/chronicle` | Owned and seen across the whole roster. Food units are listed but excluded from the completion count. |
 
-### Battles (campaign, dungeons, springs, proving, tutorial)
-| POST `/battles/start` | `{mode, stageKey, team[1-4], actionId}` → spends energy, creates session, returns `{battleId, initialState, events (to first decision), needsInput}` |
+### Battles (campaign, dungeons, springs, proving, practice, tutorial)
+| POST `/battles/start` | `{mode, stageKey, team[1-4]}` → spends energy, creates the session, returns the opened battle. Needs no `actionId`: the one-active-battle index already makes a duplicate start a 409 rather than a second charge. |
 | POST `/battles/:id/action` | `{actionId, skill?, target?, auto?}` → `{state, events, outcome, rewards}`. Omit `skill` to let the AI take the turn; set `auto` to resolve the rest of the fight in one call. Replaying an `actionId` returns the recorded state rather than taking a second turn. |
 | POST `/battles/:id/retreat` | Concede (energy stays spent). |
-| POST `/battles/multi` | `{mode, stageKey, team, runs (≤ cap), actionId}` → N seeded auto-runs server-side → summary + per-run compact results + rewards. |
+| POST `/battles/multi` | `{mode, stageKey, team, runs, actionId}` → N seeded auto-runs server-side, and a summary rather than N logs. The count is **trimmed by the server** to the smallest of what was asked, the per-press cap, the daily allowance and what energy covers, and `stoppedReason` says which bit; a lost run ends the batch and keeps the rest. Writes no session rows — a batch has nothing to resume, and thirty states and logs per farm is megabytes. Replaying an `actionId` returns the recorded summary rather than farming again. |
 | GET `/battles/active` | Resume support after refresh/crash. |
 | GET `/battles/:id/log` | Replay events (own battles + arena battles involving you). |
 
-### Summoning & collection
-| POST `/summon` | `{sigilItemKey, count: 1|10, actionId}` → results `[{championKey, rarity, isNew, dupeReserved?}]` + updated pity counters. |
-| GET `/summon/pools` | Live rates + own pity counters (transparency screen). |
-| GET `/chronicle` | Collection index: all champions + owned/seen flags. |
+**`practice` is a lens, not a stage kind.** It re-fights a stage the player has already cleared — any mode's — for zero energy and zero reward: no silver, no XP, no drops, no clear recorded, no first-clear bonus. Stars are still reported, because finding out how a team does is the entire point. A stage nobody has beaten cannot be practised, or the sandbox would be free reconnaissance on every boss in the game.
 
 ### Arena
 | GET `/arena` | State: rating, tier, tokens `{value,cap,nextTickAt}`, defense team, current opponent offers, weekly progress. |

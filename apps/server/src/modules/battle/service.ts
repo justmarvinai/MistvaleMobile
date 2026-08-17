@@ -15,9 +15,22 @@ import {
   type BattleState,
   type ChampionEntry,
 } from '@mistvale/engine';
-import type { BattleMode, ChampionDef, EnemyDef, GearInstance, StageDef } from '@mistvale/shared';
+import {
+  UNLOCK_LEVELS,
+  multiBattleResultSchema,
+  type BattleMode,
+  type ChampionDef,
+  type EnemyDef,
+  type GearInstance,
+  type MultiBattleResult,
+  type MultiBattleRun,
+  type MultiBattleState,
+  type MultiBattleStopReason,
+  type StageDef,
+} from '@mistvale/shared';
 import { battleSessions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
+import { countersFor, record, remaining } from '../../lib/daily-counters';
 import { AppError } from '../../lib/errors';
 import { computeEnergy } from '../../lib/progression';
 import type { ContentCache } from '../../content/cache';
@@ -105,6 +118,115 @@ function engineRules(content: ContentCache, mode: BattleMode) {
   return buildRules(mode, bundle.skills, bundle.statuses);
 }
 
+type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
+
+function assertTeamShape(team: readonly string[]): void {
+  if (team.length === 0 || team.length > MAX_TEAM) {
+    throw new AppError('VALIDATION', `A team is one to ${MAX_TEAM} champions.`);
+  }
+  if (new Set(team).size !== team.length) {
+    throw new AppError('VALIDATION', 'A champion cannot take two slots.');
+  }
+}
+
+/**
+ * Refuses a stage the player has not earned.
+ *
+ * Two gates, asked in the order a player would want them answered: the Depths' own — an
+ * account level, a rotation day — and then the stage's unlock chain. The campaign map and
+ * the Depths hub grey stages out with the same rules, so this never contradicts what the
+ * player was looking at when they pressed the button.
+ */
+async function assertStageOpen(
+  tx: Tx,
+  ctx: BattleContext,
+  player: { id: string; createdAt: Date; level: number },
+  stage: StageDef,
+  stages: ReadonlyMap<string, StageDef>,
+): Promise<void> {
+  const snapshot = ctx.content.current();
+  const cleared = await progress.standings(tx, player.id);
+  const chapters = new Map(
+    snapshot.bundle.campaignChapters.map((entry) => [entry.key, entry.number]),
+  );
+
+  // The Depths' own gates ride along here, so a spring that is shut on a Tuesday refuses
+  // the fight rather than merely hiding it.
+  const context = depths.contextFor(player, snapshot.bundle.config, new Date());
+  const gates = depths.gates(snapshot.bundle.dungeons, player.level, context.rotation);
+
+  const check = progress.checkUnlock(
+    stage,
+    player.level,
+    (stageKey) => cleared.get(stageKey)?.cleared === true,
+    (stageKey) =>
+      progress.stageLabel(
+        stages.get(stageKey),
+        chapters.get(stages.get(stageKey)?.parentKey ?? ''),
+      ),
+    (parentKey) => gates.get(parentKey) ?? null,
+  );
+  if (!check.open) throw new AppError('LOCKED_CONTENT', check.reason ?? 'That stage is shut.');
+}
+
+/**
+ * Turns owned champions into the entries the engine fights with.
+ *
+ * Relics and masteries are resolved into flat stat bonuses here rather than inside the
+ * engine: the engine takes numbers, and everything about what a percentage resolves
+ * against is a server concern (docs/COMBAT_SYSTEM.md §1). This is why the number on the
+ * champion screen is the number that fights.
+ */
+async function assembleEntries(
+  tx: Tx,
+  ctx: BattleContext,
+  owned: readonly roster.RosterEntry[],
+  champions: ReadonlyMap<string, ChampionDef>,
+  scaling: ReturnType<typeof championScalingFrom>,
+): Promise<ChampionEntry[]> {
+  const snapshot = ctx.content.current();
+  const equipped = await gear.gearByChampion(
+    tx,
+    owned.map((member) => member.id),
+  );
+  const gearContext = gear.gearContextFrom(snapshot.bundle);
+  const masteryNodes = mastery.nodesFrom(ctx.content);
+
+  return owned.map((member) => {
+    const def = champions.get(member.championKey);
+    if (!def) {
+      throw new AppError(
+        'CONTENT_STALE',
+        `Champion "${member.championKey}" is no longer published.`,
+      );
+    }
+    const base = deriveStats(def.baseStats, member, scaling);
+
+    // Masteries split the same way relics do not: what is unconditional becomes stats
+    // here, and what needs a fight to decide rides in as effects the engine evaluates.
+    const learned = mastery.resolveMasteries(member.masteries ?? [], masteryNodes);
+    const masteryStats = mastery.applyMasteryStats(base, learned);
+    const assembled = gear.assembleChampion(base, equipped.get(member.id) ?? [], gearContext, {
+      flat: masteryStats,
+      setBonusAmplifyPct: learned.setBonusAmplifyPct,
+    });
+
+    const bonuses = { ...assembled.gear };
+    for (const [stat, value] of Object.entries(masteryStats) as [keyof typeof bonuses, number][]) {
+      bonuses[stat] = (bonuses[stat] ?? 0) + value;
+    }
+
+    return {
+      def,
+      level: member.level,
+      rank: member.rank,
+      ascension: member.ascension,
+      bonuses,
+      masteries: learned.battleEffects,
+    };
+  });
+}
+
 /**
  * Starts a battle.
  *
@@ -116,15 +238,13 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
 
   const stage = stages.get(options.stageKey);
   if (!stage) throw AppError.notFound(`No stage "${options.stageKey}".`);
-  if (stage.mode !== options.mode) {
+  // Practice is a *lens* on a stage rather than a kind of stage: it re-fights a campaign
+  // stage or a dungeon floor at no cost for no reward, so it is the one mode that does not
+  // have to match the stage's own. Every other mode must.
+  if (options.mode !== 'practice' && stage.mode !== options.mode) {
     throw new AppError('VALIDATION', `Stage "${options.stageKey}" is not a ${options.mode} stage.`);
   }
-  if (options.team.length === 0 || options.team.length > MAX_TEAM) {
-    throw new AppError('VALIDATION', `A team is one to ${MAX_TEAM} champions.`);
-  }
-  if (new Set(options.team).size !== options.team.length) {
-    throw new AppError('VALIDATION', 'A champion cannot take two slots.');
-  }
+  assertTeamShape(options.team);
 
   const snapshot = ctx.content.current();
   const config = combatConfigFrom(snapshot.bundle.config);
@@ -155,26 +275,11 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // binds. Checked against the same rule the campaign map greys stages out with, so a
     // player is never shown an open door the server will slam.
     if (options.mode !== 'practice') {
-      const cleared = await progress.standings(tx, options.playerId);
-      const chapters = new Map(
-        snapshot.bundle.campaignChapters.map((entry) => [entry.key, entry.number]),
-      );
-      // The Depths' own gates — account level and the rotation day — ride along here, so
-      // a spring that is shut on a Tuesday refuses the fight rather than merely hiding it.
-      const context = depths.contextFor(player, snapshot.bundle.config, new Date());
-      const gates = depths.gates(snapshot.bundle.dungeons, player.level, context.rotation);
-      const check = progress.checkUnlock(
-        stage,
-        player.level,
-        (stageKey) => cleared.get(stageKey)?.cleared === true,
-        (stageKey) =>
-          progress.stageLabel(
-            stages.get(stageKey),
-            chapters.get(stages.get(stageKey)?.parentKey ?? ''),
-          ),
-        (parentKey) => gates.get(parentKey) ?? null,
-      );
-      if (!check.open) throw new AppError('LOCKED_CONTENT', check.reason ?? 'That stage is shut.');
+      await assertStageOpen(tx, ctx, player, stage, stages);
+    } else if (!(await progress.hasCleared(tx, options.playerId, stage.key))) {
+      // The sandbox is for *re*-fighting: free entry to a stage nobody has beaten would be
+      // a way to scout every boss in the game at no cost (GAME_DESIGN §15.7).
+      throw new AppError('LOCKED_CONTENT', 'You can only practise a stage you have cleared.');
     }
 
     const owned = await roster.findOwned(tx, options.playerId, options.team);
@@ -182,50 +287,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
     }
 
-    // Relics are resolved into flat stat bonuses here rather than inside the engine: the
-    // engine takes numbers, and everything about what a percentage resolves against is a
-    // server concern (docs/COMBAT_SYSTEM.md §1). This is why the number on the champion
-    // screen is the number that fights.
-    const equipped = await gear.gearByChampion(tx, options.team);
-    const gearContext = gear.gearContextFrom(snapshot.bundle);
-    const masteryNodes = mastery.nodesFrom(ctx.content);
-
-    const entries: ChampionEntry[] = owned.map((member) => {
-      const def = champions.get(member.championKey);
-      if (!def) {
-        throw new AppError(
-          'CONTENT_STALE',
-          `Champion "${member.championKey}" is no longer published.`,
-        );
-      }
-      const base = deriveStats(def.baseStats, member, scaling);
-
-      // Masteries split the same way relics do not: what is unconditional becomes stats
-      // here, and what needs a fight to decide rides in as effects the engine evaluates.
-      const learned = mastery.resolveMasteries(member.masteries ?? [], masteryNodes);
-      const masteryStats = mastery.applyMasteryStats(base, learned);
-      const assembled = gear.assembleChampion(base, equipped.get(member.id) ?? [], gearContext, {
-        flat: masteryStats,
-        setBonusAmplifyPct: learned.setBonusAmplifyPct,
-      });
-
-      const bonuses = { ...assembled.gear };
-      for (const [stat, value] of Object.entries(masteryStats) as [
-        keyof typeof bonuses,
-        number,
-      ][]) {
-        bonuses[stat] = (bonuses[stat] ?? 0) + value;
-      }
-
-      return {
-        def,
-        level: member.level,
-        rank: member.rank,
-        ascension: member.ascension,
-        bonuses,
-        masteries: learned.battleEffects,
-      };
-    });
+    const entries = await assembleEntries(tx, ctx, owned, champions, scaling);
 
     // Energy: derived from the clock, so an idle account costs nothing to keep current.
     const now = new Date();
@@ -459,6 +521,296 @@ export async function retreat(
   });
 }
 
+// ── Multi-battle ────────────────────────────────────────────────────────────
+
+/** The counter name a batch spends from. Shares `players.daily_counters` with the rest. */
+const MULTI_COUNTER = 'multiBattle';
+
+export interface MultiOptions {
+  playerId: string;
+  mode: BattleMode;
+  stageKey: string;
+  team: string[];
+  /** How many times to fight it. Trimmed by the allowance, by energy, and by the per-call cap. */
+  runs: number;
+  actionId: string;
+}
+
+export interface MultiLimits {
+  unlockLevel: number;
+  dailyCap: number;
+  maxPerCall: number;
+}
+
+/** The three numbers that bound a batch, all operator-editable (`game_config`). */
+export function multiLimitsFrom(config: Readonly<Record<string, unknown>>): MultiLimits {
+  return {
+    unlockLevel: intConfig(config, 'unlocks.multiBattleLevel', UNLOCK_LEVELS.multiBattle),
+    dailyCap: intConfig(config, 'economy.multiBattleDailyCap', 30),
+    maxPerCall: intConfig(config, 'economy.multiBattleMaxPerCall', 10),
+  };
+}
+
+/**
+ * What the team-select screen needs to draw the multi-battle control.
+ *
+ * Computed server-side like every other gate, so the button the client shows and the
+ * batch the server will accept are the same rule read twice rather than two rules.
+ */
+export function multiState(
+  content: ContentCache,
+  player: {
+    level: number;
+    dailyCounters: Record<string, number>;
+    dailyCountersDay: string | null;
+  },
+  now: Date,
+): MultiBattleState {
+  const config = content.current().bundle.config;
+  const limits = multiLimitsFrom(config);
+  const counters = countersFor(player, config, now);
+  return {
+    unlocked: player.level >= limits.unlockLevel,
+    lockedReason:
+      player.level >= limits.unlockLevel ? null : `Opens at account level ${limits.unlockLevel}.`,
+    runsLeftToday: remaining(counters, MULTI_COUNTER, limits.dailyCap),
+    dailyCap: limits.dailyCap,
+    maxPerCall: limits.maxPerCall,
+  };
+}
+
+/**
+ * Fights the same stage N times and returns a summary.
+ *
+ * The farming backbone (GAME_DESIGN §9.1). Each run is an ordinary battle — same engine,
+ * same fresh seed, same payout path — so nothing here is a shortcut except that nobody
+ * watches. Three things make it a different shape from `start` rather than a loop over it:
+ *
+ *  - **No sessions are written.** Thirty states and thirty event logs is megabytes per
+ *    farm, and a batch has nothing to resume. The summary is the record, and it lives on
+ *    the player row so a retry has something to replay (docs/DATA_MODEL.md §4).
+ *  - **How many is the server's answer, not the client's.** The requested count is trimmed
+ *    by the daily allowance, by energy, and by the per-call cap, and the player is told
+ *    which one bit.
+ *  - **A defeat ends the batch.** Throwing a losing team at a stage nine more times burns
+ *    energy for nothing, so the first loss stops it and keeps the rest.
+ */
+export async function runMany(
+  ctx: BattleContext,
+  options: MultiOptions,
+): Promise<MultiBattleResult> {
+  const { champions, enemies, stages } = contentMaps(ctx.content);
+
+  const stage = stages.get(options.stageKey);
+  if (!stage) throw AppError.notFound(`No stage "${options.stageKey}".`);
+  if (options.mode === 'practice') {
+    // The sandbox costs nothing and pays nothing; repeating it would spend an allowance
+    // to produce an empty summary.
+    throw new AppError('VALIDATION', 'Practice fights cannot be run in a batch.');
+  }
+  if (stage.mode !== options.mode) {
+    throw new AppError('VALIDATION', `Stage "${options.stageKey}" is not a ${options.mode} stage.`);
+  }
+  assertTeamShape(options.team);
+
+  const snapshot = ctx.content.current();
+  const config = combatConfigFrom(snapshot.bundle.config);
+  const scaling = championScalingFrom(snapshot.bundle.config);
+  const limits = multiLimitsFrom(snapshot.bundle.config);
+
+  return ctx.db.transaction(async (tx) => {
+    const [player] = await tx
+      .select()
+      .from(players)
+      .where(eq(players.id, options.playerId))
+      .for('update');
+    if (!player) throw AppError.notFound('No such player.');
+
+    // A retried request is not a second batch. The whole summary was kept for exactly
+    // this: a dropped response on a phone must not farm the stage twice.
+    const last = player.lastMultiBattle;
+    if (last && last.actionId === options.actionId) {
+      return multiBattleResultSchema.parse(last.result);
+    }
+
+    if (player.level < limits.unlockLevel) {
+      throw new AppError(
+        'LOCKED_CONTENT',
+        `Multi-battle opens at account level ${limits.unlockLevel}.`,
+      );
+    }
+
+    const [existing] = await tx
+      .select({ id: battleSessions.id })
+      .from(battleSessions)
+      .where(
+        and(eq(battleSessions.playerId, options.playerId), eq(battleSessions.status, 'active')),
+      );
+    if (existing) {
+      throw new AppError('ALREADY_EXISTS', 'You are already in a battle. Finish or retreat first.');
+    }
+
+    await assertStageOpen(tx, ctx, player, stage, stages);
+
+    const owned = await roster.findOwned(tx, options.playerId, options.team);
+    if (owned.length !== options.team.length) {
+      throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
+    }
+    const entries = await assembleEntries(tx, ctx, owned, champions, scaling);
+
+    const now = new Date();
+    const energy = computeEnergy({
+      storedValue: player.energy,
+      updatedAt: player.energyUpdatedAt,
+      level: player.level,
+      now,
+    });
+    const counters = countersFor(player, snapshot.bundle.config, now);
+    const allowance = remaining(counters, MULTI_COUNTER, limits.dailyCap);
+
+    const cost = stage.energyCost;
+    const affordable = cost > 0 ? Math.floor(energy.value / cost) : options.runs;
+    if (allowance <= 0) {
+      throw new AppError(
+        'COOLDOWN',
+        `You have used all ${limits.dailyCap} of today's multi-battle runs.`,
+      );
+    }
+    if (affordable <= 0) {
+      throw new AppError('ENERGY_LOW', 'Not enough energy for that stage.');
+    }
+
+    // Which limit bit, in the order a player would want to hear it: the one they cannot
+    // do anything about today, then the one that refills, then the one that is just how
+    // big a press is.
+    const planned = Math.min(options.runs, limits.maxPerCall, affordable, allowance);
+    let stoppedReason: MultiBattleStopReason | null =
+      planned === options.runs
+        ? null
+        : allowance === planned
+          ? 'dailyCap'
+          : affordable === planned
+            ? 'outOfEnergy'
+            : 'perCallLimit';
+
+    // Everything that takes the field counts as met, once for the batch rather than
+    // once per run: the Chronicle records that they fought, not how often.
+    await chronicle.see(tx, options.playerId, [
+      ...owned.map((member) => member.championKey),
+      ...stage.waves.flatMap((wave) => wave.map((unit) => unit.enemyKey)),
+    ]);
+
+    const rules = engineRules(ctx.content, options.mode);
+    const runs: MultiBattleRun[] = [];
+    const droppedGear: GearInstance[] = [];
+    const items: Record<string, number> = {};
+    let wins = 0;
+    let silver = 0;
+    let playerXp = 0;
+    let championXp = 0;
+    let levelsGained = 0;
+    let energySpent = 0;
+
+    for (let index = 0; index < planned; index += 1) {
+      // A fresh seed per run, from the process CSPRNG: ten runs of the same fight must be
+      // ten different fights, or a batch would be one result multiplied.
+      const seed = randomSeed();
+      const opened = createBattle(
+        {
+          seed,
+          mode: options.mode,
+          allies: buildTeam(entries, scaling, options.mode),
+          waves: buildStageWaves(stage, enemies),
+        },
+        rules,
+        config,
+      );
+      const finished = advance(opened.state, rules, config, { auto: true });
+      energySpent += cost;
+
+      const summary = await settle(
+        tx,
+        ctx,
+        { seed, mode: options.mode, stageKey: options.stageKey, teamIds: options.team },
+        finished.state,
+        options.playerId,
+      );
+
+      runs.push({
+        outcome: runOutcome(finished.state.outcome),
+        turns: finished.state.turn,
+        stars: summary?.stars ?? 0,
+        // Bonuses included, so the column the player reads adds up to the total under it.
+        // A first clear inside a batch is still a first clear, and hiding its four hundred
+        // silver in the footer would look like an arithmetic bug.
+        silver: summary ? summary.silver + (summary.bonus.silver ?? 0) : 0,
+      });
+
+      if (summary) {
+        wins += 1;
+        silver += summary.silver + (summary.bonus.silver ?? 0);
+        playerXp += summary.playerXp + (summary.bonus.playerXp ?? 0);
+        championXp += summary.championXp;
+        levelsGained += summary.levelsGained;
+        droppedGear.push(...summary.gear);
+        for (const [key, quantity] of Object.entries(summary.items)) {
+          items[key] = (items[key] ?? 0) + quantity;
+        }
+      } else {
+        // The energy for the losing run stays spent — the same rule a retreat follows.
+        stoppedReason = 'defeated';
+        break;
+      }
+    }
+
+    await tx
+      .update(players)
+      .set({
+        energy: energy.value - energySpent,
+        energyUpdatedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(players.id, options.playerId));
+    await record(tx, options.playerId, counters, MULTI_COUNTER, runs.length);
+
+    const result: MultiBattleResult = {
+      runs,
+      stoppedReason,
+      wins,
+      silver,
+      playerXp,
+      championXp,
+      levelsGained,
+      gear: droppedGear,
+      items,
+      energySpent,
+      energyLeft: energy.value - energySpent,
+      runsLeftToday: allowance - runs.length,
+    };
+
+    await tx
+      .update(players)
+      .set({ lastMultiBattle: { actionId: options.actionId, result }, updatedAt: now })
+      .where(eq(players.id, options.playerId));
+
+    return result;
+  });
+}
+
+/** A batch never retreats, so the engine's fourth outcome cannot reach a summary line. */
+function runOutcome(outcome: BattleState['outcome']): MultiBattleRun['outcome'] {
+  return outcome === 'victory' || outcome === 'turnLimit' ? outcome : 'defeat';
+}
+
+function intConfig(
+  config: Readonly<Record<string, unknown>>,
+  key: string,
+  fallback: number,
+): number {
+  const value = config[key];
+  return typeof value === 'number' && Number.isFinite(value) ? Math.floor(value) : fallback;
+}
+
 /**
  * Pays out a finished battle.
  *
@@ -466,9 +818,9 @@ export async function retreat(
  * same fight reports the same loot and the numbers in a share link are checkable.
  */
 async function settle(
-  tx: Parameters<Parameters<Database['transaction']>[0]>[0],
+  tx: Tx,
   ctx: BattleContext,
-  row: { id: string; seed: number; mode: string; stageKey: string; teamIds: string[] },
+  row: { seed: number; mode: string; stageKey: string; teamIds: string[] },
   state: BattleState,
   playerId: string,
 ): Promise<RewardSummary | null> {
@@ -477,6 +829,23 @@ async function settle(
   const { stages } = contentMaps(ctx.content);
   const stage = stages.get(row.stageKey);
   if (!stage) return null;
+
+  // Practice is free and pays nothing — including stars, clears and first-clear bonuses.
+  // A sandbox that quietly advanced progress would be the cheapest farm in the game.
+  if (row.mode === 'practice') {
+    return {
+      silver: 0,
+      playerXp: 0,
+      championXp: 0,
+      stars: starsFor(stage, state),
+      levelsGained: 0,
+      gear: [],
+      items: {},
+      firstClear: false,
+      bonus: {},
+      chestTiers: [],
+    };
+  }
 
   // A separate stream from the battle's: consuming loot rolls must not shift combat.
   const lootRng = createRng(row.seed ^ 0x5f37_59df);
@@ -525,7 +894,7 @@ async function settle(
  * reports the same drop it originally paid.
  */
 async function rollDrops(
-  tx: Parameters<Parameters<Database['transaction']>[0]>[0],
+  tx: Tx,
   ctx: BattleContext,
   row: { stageKey: string },
   stage: StageDef,

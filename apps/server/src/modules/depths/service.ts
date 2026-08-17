@@ -3,6 +3,7 @@ import type { DungeonDef } from '@mistvale/shared';
 import { WEEKDAY_NAMES } from '@mistvale/shared';
 import { stageProgress } from '../../db/schema/index';
 import type { Database } from '../../db/client';
+import { gameDay, type GameDay } from '../../lib/game-day';
 
 /**
  * The Depths.
@@ -13,6 +14,7 @@ import type { Database } from '../../db/client';
  *
  *  - **Is this keep open today?** The Essence Springs rotate by weekday, which makes the
  *    week itself a resource: Sunday is Mist or it is nothing (docs/GAME_DESIGN.md §9.2).
+ *    What "today" means is `lib/game-day` — shared with every other daily rule.
  *  - **Has this player earned the door?** Each dungeon has an account level, and a new
  *    account gets a grace period during which every spring stands open, so a first week
  *    is never spent waiting for a Tuesday.
@@ -23,84 +25,6 @@ import type { Database } from '../../db/client';
  */
 
 type Executor = Database | Parameters<Parameters<Database['transaction']>[0]>[0];
-
-export interface GameDay {
-  /** ISO date of the game-day currently in progress, in the reset timezone. */
-  date: string;
-  /** Weekday of that game-day, `0` = Sunday — the index `openDays` is written in. */
-  weekday: number;
-}
-
-/**
- * Which game-day it is.
- *
- * A game-day runs from the daily reset hour to the next one, not from midnight, so a
- * player farming Tide at half past three in the morning is still on Wednesday's rotation.
- * Both the hour and the timezone are `game_config` rows, because "when does the day turn
- * over" is an operations decision rather than a code one.
- */
-export function gameDay(now: Date, timezone: string, resetHour: number): GameDay {
-  const parts = localParts(now, timezone);
-  let { year, month, day } = parts;
-
-  if (parts.hour < resetHour) {
-    const stepped = new Date(Date.UTC(year, month - 1, day));
-    stepped.setUTCDate(stepped.getUTCDate() - 1);
-    year = stepped.getUTCFullYear();
-    month = stepped.getUTCMonth() + 1;
-    day = stepped.getUTCDate();
-  }
-
-  const anchored = new Date(Date.UTC(year, month - 1, day));
-  return {
-    date: `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
-    weekday: anchored.getUTCDay(),
-  };
-}
-
-/** Wall-clock fields of an instant in a named timezone. */
-function localParts(
-  now: Date,
-  timezone: string,
-): {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-} {
-  const formatter = safeFormatter(timezone);
-  const fields = new Map(
-    formatter.formatToParts(now).map((part) => [part.type, Number.parseInt(part.value, 10)]),
-  );
-  return {
-    year: fields.get('year') ?? now.getUTCFullYear(),
-    month: fields.get('month') ?? now.getUTCMonth() + 1,
-    day: fields.get('day') ?? now.getUTCDate(),
-    hour: fields.get('hour') ?? now.getUTCHours(),
-  };
-}
-
-/**
- * A formatter for the configured timezone, or UTC if the configuration is nonsense.
- *
- * The timezone is operator-editable, and a typo in it must cost a rotation rather than the
- * server: falling back is the difference between "the springs are on UTC today" and a 500
- * on every request that touches the Depths.
- */
-function safeFormatter(timezone: string): Intl.DateTimeFormat {
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    hourCycle: 'h23',
-  };
-  try {
-    return new Intl.DateTimeFormat('en-CA', { ...options, timeZone: timezone });
-  } catch {
-    return new Intl.DateTimeFormat('en-CA', { ...options, timeZone: 'UTC' });
-  }
-}
 
 // ── Rotation ────────────────────────────────────────────────────────────────
 

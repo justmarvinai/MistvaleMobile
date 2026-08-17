@@ -5,6 +5,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Phase P6: multi-battle and the practice sandbox
+
+Two ways to fight a stage you were not going to watch anyway: ten times at once, or once for free.
+
+- **Multi-battle**, from account level 6. Pick a team, pick a number, and the whole batch resolves server-side. Each run is an ordinary battle — same engine, its own fresh seed, the same energy and the same payout as fighting it by hand — so nothing about it is a shortcut except that nobody watched. What comes back is a run-by-run summary instead of ten event logs, which is the point: at thirty runs the logs would be megabytes.
+- **The server decides how many.** The number you ask for is trimmed to the smallest of the per-press cap, today's allowance and what your energy actually covers, and the summary names which one bit — "that was all the energy would cover" rather than a silently shorter list. **A lost run ends the batch** and keeps everything the earlier runs earned; throwing a losing team at a stage nine more times is a way to spend energy on nothing.
+- **Thirty runs a day**, resetting at the operator's daily reset hour rather than at midnight — the same game-day the Essence Springs rotation keeps. All three numbers are `game_config`, so the cap, the press size and the unlock level are Admin decisions.
+- **The practice sandbox.** Re-fight any stage you have already cleared for no energy and no reward at all — no silver, no experience, no drops, and no clear recorded. The stars still show, because "would this team have held?" is the only question a sandbox exists to answer. A stage nobody has beaten cannot be practised: free reconnaissance on every boss in the game is not a sandbox.
+- **Team select now holds all three ways in.** Into the mist, farm ×N with a stepper that will not offer a number the server would refuse, and practise — the last two appearing only when they apply, on the server's answer rather than a guess.
+- **Tests** — 12 server cases over the batch, the trims, the allowance, the retry and the sandbox's two promises (costs nothing, pays nothing, recorded nowhere), 10 over the game-day and daily-counter rules, and a browser run of clearing a stage and then practising it.
+
+### Changed
+- `players` gained `daily_counters` + `daily_counters_day` — every per-day allowance in one map stamped with the game-day it belongs to, rather than a column per allowance. There is deliberately **no reset job**: a stale stamp reads as zero, so an account away for a month is current the moment it comes back, and the eight quest counters P8 needs are a key each rather than a migration each.
+- `players` gained `last_multi_battle`, holding the last batch whole. A multi-battle writes no `battle_sessions` rows — thirty states and thirty logs per farm is megabytes, and a batch has nothing to resume — so the summary is the record, and a retried request replays it instead of farming the stage twice.
+- `lib/game-day` moved out of the Depths module: the springs rotation and the multi-battle allowance now read one answer to "when is today" rather than two that could drift.
+
 ### Added — Phase P6: masteries
 
 Forty-eight of them, three trees, and the emblems the Proving Grounds has been paying out with nothing to spend them on.
