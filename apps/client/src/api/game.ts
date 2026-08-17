@@ -32,6 +32,8 @@ import type {
   MailClaimResult,
   MailView,
   NewsView,
+  PublicProfile,
+  SetShowcaseRequest,
   MissionClaimRequest,
   MissionClaimResult,
   MissionsView,
@@ -350,6 +352,16 @@ export const gameApi = {
     api.post<{ mail: MailView }>(ROUTES.mail.discard(mailId), {}).then((data) => data.mail),
 
   news: () => api.get<{ news: NewsView }>(ROUTES.news.state).then((data) => data.news),
+
+  profileCard: (playerId: string) =>
+    api.get<{ profile: PublicProfile }>(ROUTES.profile.card(playerId)).then((data) => data.profile),
+
+  setShowcase: (championIds: string[]) =>
+    api
+      .put<{ profile: PublicProfile }>(ROUTES.profile.showcase, {
+        championIds,
+      } satisfies SetShowcaseRequest)
+      .then((data) => data.profile),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

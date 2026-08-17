@@ -190,6 +190,16 @@ export const players = pgTable(
      */
     title: text('title'),
 
+    /**
+     * The champions this account wants to be known by, in display order.
+     *
+     * `player_champions` ids rather than champion keys: the card shows *this* Aureleth at
+     * her level and rank, not the definition. Empty means the player has never chosen, and
+     * the card falls back to their strongest — so a card is never blank, and the picker is
+     * something to reach for rather than something to get past.
+     */
+    showcase: jsonb('showcase').notNull().default([]).$type<string[]>(),
+
     lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

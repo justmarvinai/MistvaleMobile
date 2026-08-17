@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import type { EnergyState } from '@mistvale/shared';
 import { usePlayerStore } from '@/state/playerStore';
+import { useProfileStore } from '@/state/profileStore';
 import { useSessionStore } from '@/state/sessionStore';
 import { Button } from '@/ui/Button/Button';
 import styles from './TopBar.module.scss';
@@ -25,6 +26,7 @@ export function TopBar({
   const clockSkewMs = usePlayerStore((state) => state.clockSkewMs);
   const waitingMail = usePlayerStore((state) => state.badges.mail);
   const logout = useSessionStore((state) => state.logout);
+  const showProfile = useProfileStore((state) => state.show);
 
   const energy = useLiveEnergy(player?.energy ?? null, clockSkewMs);
 
@@ -37,7 +39,14 @@ export function TopBar({
 
   return (
     <header className={styles.bar}>
-      <div className={styles.profile}>
+      {/* The chip is the way into your own card — the same one the ladder shows other
+          people, which is what makes "choose your four" a decision rather than a form. */}
+      <button
+        type="button"
+        className={styles.profile}
+        aria-label="Your profile card"
+        onClick={() => void showProfile(player.id)}
+      >
         <div className={styles.avatar} aria-hidden="true">
           {player.profileName.charAt(0).toUpperCase()}
         </div>
@@ -50,7 +59,7 @@ export function TopBar({
             </span>
           </span>
         </div>
-      </div>
+      </button>
 
       <div className={styles.resources}>
         <EnergyPill energy={energy} />

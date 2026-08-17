@@ -13,6 +13,7 @@ import { EventsScreen } from '@/screens/Events/EventsScreen';
 import { CalendarScreen } from '@/screens/Calendar/CalendarScreen';
 import { MailScreen } from '@/screens/Mail/MailScreen';
 import { NewsPanel } from '@/screens/News/NewsPanel';
+import { ProfilePanel } from '@/screens/Profile/ProfilePanel';
 import { ChampionsScreen } from '@/screens/Champions/ChampionsScreen';
 import { RelicsScreen } from '@/screens/Relics/RelicsScreen';
 import { BazaarScreen } from '@/screens/Bazaar/BazaarScreen';
@@ -210,6 +211,7 @@ function GameShell() {
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <NewsPanel open={newsOpen} onClose={() => setNewsOpen(false)} />
+      <ProfilePanel />
     </>
   );
 }

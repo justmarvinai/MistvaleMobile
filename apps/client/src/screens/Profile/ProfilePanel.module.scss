@@ -1,0 +1,237 @@
+@use '../../styles/tokens' as *;
+
+.error {
+  margin: 0 0 $space-3;
+  padding: $space-2 $space-3;
+  background: rgba(180, 60, 60, 0.12);
+  border: 1px solid $danger;
+  color: $parchment;
+  font-size: 0.8125rem;
+}
+
+.empty {
+  margin: $space-4 0;
+  color: $muted;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+// ── Who they are ────────────────────────────────────────────────────────────
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: $panel-inset;
+  border: 1px solid $gold;
+  color: $gold;
+  font-family: $font-display;
+  font-size: 1.5rem;
+}
+
+.identityText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.name {
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 1.125rem;
+}
+
+.title {
+  color: $gold;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.joined {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.625rem;
+}
+
+// ── What they have done ─────────────────────────────────────────────────────
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: $space-2;
+  margin: 0;
+}
+
+.fact {
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.factLabel {
+  margin: 0 0 2px;
+  color: $parchment-dim;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.factValue {
+  display: flex;
+  align-items: baseline;
+  gap: $space-2;
+  margin: 0;
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 0.875rem;
+}
+
+.factNote {
+  margin-left: auto;
+  color: $gold;
+  font-size: 0.6875rem;
+}
+
+// ── The four ────────────────────────────────────────────────────────────────
+
+.showcaseHeading {
+  margin: 0;
+  color: $parchment-dim;
+  font-family: $font-body;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.showcase,
+.pickerList {
+  display: grid;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.showcase {
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+}
+
+.tile,
+.pickerItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: $space-2;
+  background: $panel;
+  border: 1px solid $edge;
+  text-align: left;
+}
+
+// The rarity band down the leading edge is the one place colour carries meaning here, so
+// it is a border rather than a fill — legible against the panel at any size.
+.common {
+  box-shadow: inset 3px 0 0 0 $rarity-common;
+}
+.uncommon {
+  box-shadow: inset 3px 0 0 0 $rarity-uncommon;
+}
+.rare {
+  box-shadow: inset 3px 0 0 0 $rarity-rare;
+}
+.epic {
+  box-shadow: inset 3px 0 0 0 $rarity-epic;
+}
+.legendary {
+  box-shadow: inset 3px 0 0 0 $rarity-legendary;
+}
+
+.tileName {
+  color: $parchment;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+}
+
+.tileMeta {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.625rem;
+}
+
+.tilePower {
+  color: $gold;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+// ── Choosing them ───────────────────────────────────────────────────────────
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.pickerHint {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.8125rem;
+}
+
+.pickerList {
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  max-height: 22rem;
+  overflow-y: auto;
+  padding-right: $space-1;
+}
+
+.pickerItem {
+  position: relative;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $mist;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.pickerPicked {
+  border-color: $gold;
+}
+
+.pickerFull {
+  opacity: 0.4;
+}
+
+.pickerOrder {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  background: $gold;
+  color: $ground-deep;
+  font-family: $font-mono;
+  font-size: 0.5625rem;
+}

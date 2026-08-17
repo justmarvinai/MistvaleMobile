@@ -42,6 +42,17 @@
 }
 
 .name {
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    color: $gold;
+  }
+
   color: $parchment;
   overflow: hidden;
   text-overflow: ellipsis;

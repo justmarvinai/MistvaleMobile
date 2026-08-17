@@ -102,6 +102,8 @@ Keyed by **player** id, not account id — that is what `economy_log`, `stage_pr
 | GET `/hall-of-valor` · POST `/hall-of-valor/upgrade` | All 24 tracks (4 elements × 6 stats) with level, next cost and what the next level gives; `{element, stat, actionId}` buys one. Gated with the Arena, because the Hall spends what the Arena pays. What it grants is account-wide and unconditional, so it is folded into a champion's stats *before* the fight, alongside relics and unconditional masteries — a player who reads their champion screen sees it. |
 | GET `/bazaar` · POST `/bazaar/buy` `{slotId, actionId}` · POST `/bazaar/refresh` | Shop. |
 | GET `/news` | Posts whose window is open right now, pinned first then newest-first. Read straight from the content snapshot — no database read at all. A post whose timestamps are unparseable is treated as *shut*: a broadcast that shows a half-configured announcement to everybody is worse than one that shows nothing. |
+| GET `/profiles/:id` | A warden's public card: name, title, level, arena standing and ladder position, champions owned against the collectable roster, furthest campaign stage and total stars, and the four champions they chose to be known by. Requires a session but not a particular one — public *to players*, which is what makes it reachable from the ladder. Carries no wallet, no account name, and nothing that would mark an account as a bot. |
+| PUT `/player/showcase` | `{championIds}` — up to four, in display order, each checked for ownership. An empty list hands the choice back to the game, which shows the strongest instead. |
 | POST `/tutorial/advance` | `{step, choice?}` — server validates scripted order; starter pick happens here. |
 
 ## 2. Admin API (`/admin/api`, consumed by MistvaleMobile-Admin)

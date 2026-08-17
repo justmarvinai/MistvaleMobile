@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { ARENA_TIER_LABELS, type ArenaLeaderboardEntry } from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { useArenaStore } from '../../state/arenaStore';
+import { useProfileStore } from '../../state/profileStore';
 import styles from './Leaderboard.module.scss';
 
 /**
@@ -60,10 +61,19 @@ export function Leaderboard({ onClose }: { onClose: () => void }): JSX.Element {
 }
 
 function Row({ entry }: { entry: ArenaLeaderboardEntry }): JSX.Element {
+  const showProfile = useProfileStore((state) => state.show);
+
   return (
     <li className={styles.row} data-self={entry.isSelf || undefined}>
       <span className={styles.position}>{entry.position}</span>
-      <span className={styles.name}>{entry.profileName}</span>
+      {/* A name on the ladder is a person: pressing it opens what they chose to show. */}
+      <button
+        type="button"
+        className={styles.name}
+        onClick={() => void showProfile(entry.playerId)}
+      >
+        {entry.profileName}
+      </button>
       <span className={styles.tier}>{ARENA_TIER_LABELS[entry.tier]}</span>
       <span className={styles.rating}>{entry.rating}</span>
     </li>

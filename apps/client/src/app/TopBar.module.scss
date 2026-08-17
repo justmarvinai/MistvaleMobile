@@ -18,6 +18,18 @@
   align-items: center;
   gap: $space-3;
   min-width: 0;
+  // A button that has to look like the chip it replaced: no chrome of its own, just the
+  // hover that says it can be pressed.
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover .name {
+    color: $gold;
+  }
 }
 
 .avatar {

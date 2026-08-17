@@ -200,6 +200,7 @@ async function describeOffers(
 
     offers.push({
       offerId: row.offerId,
+      playerId: row.defenderId,
       profileName: String(defender.profileName),
       level: defender.level,
       rating: defender.rating,
@@ -556,6 +557,7 @@ export async function leaderboard(
 
   const ranked = rows.map((row, index) => ({
     position: index + 1,
+    playerId: row.playerId,
     profileName: String(row.profileName),
     rating: row.rating,
     tier: tierForRating(row.rating, settings.thresholds),

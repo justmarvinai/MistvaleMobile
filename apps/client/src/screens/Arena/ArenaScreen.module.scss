@@ -135,6 +135,17 @@
 }
 
 .offerName {
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    color: $gold;
+  }
+
   color: $parchment;
   font-family: $font-display;
   font-size: 0.95rem;

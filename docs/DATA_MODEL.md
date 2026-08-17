@@ -304,6 +304,9 @@ The whole of a track's state is `count(*)` over these rows plus "was one of them
 
 The `loginTrack` content type holds the days themselves — one entity per *track* (thirty tiles or seven), because a track is only ever read whole and "re-cut the calendar for August" should be one draft to review rather than thirty. A day carries a reward map, champions granted outright, champions the player picks *one* of (the day-30 selector), and relics to roll. Publish validation refuses gaps or duplicates in the day numbers, a second active track of the same kind, and any key that does not resolve.
 
+### `players.showcase`
+`jsonb` array of `player_champions` ids, in display order. Instance ids rather than champion keys: the public card shows *this* Aureleth at her level and rank, not the definition. Empty means the player has never chosen, and the card falls back to their strongest — so a card is never blank, and the picker is something to reach for rather than something to get past. A chosen champion that is later released simply drops out of the card rather than leaving a hole.
+
 ### `arena_state`
 `player_id pk, rating, tier, weekly_high, tokens, tokens_updated_at, defence_team jsonb (player_champion ids in formation order), offers jsonb, offers_refreshed_at, refreshes_used, refresh_day, last_weekly_claim, pending_chest_week, pending_chest_high`.
 Tokens follow energy's pattern — a value plus the moment it was written, everything else derived against the clock — so an idle account costs nothing to keep current and there is no job that can fall behind.

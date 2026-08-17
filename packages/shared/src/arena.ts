@@ -131,6 +131,8 @@ export type ArenaTeamMember = z.infer<typeof arenaTeamMemberSchema>;
  */
 export const arenaOfferSchema = z.object({
   offerId: z.string(),
+  /** Who is being offered, so their public card is one click from the offer. */
+  playerId: z.string(),
   profileName: z.string(),
   level: z.number().int(),
   rating: z.number().int(),
@@ -172,6 +174,8 @@ export type ArenaState = z.infer<typeof arenaStateSchema>;
 
 export const arenaLeaderboardEntrySchema = z.object({
   position: z.number().int(),
+  /** Whose row it is, so a name on the ladder opens the card behind it. */
+  playerId: z.string(),
   profileName: z.string(),
   rating: z.number().int(),
   tier: z.enum(ARENA_TIERS),

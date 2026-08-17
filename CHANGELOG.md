@@ -5,6 +5,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the public profile card (P8g)
+
+Every warden now has a card, and every name in the game leads to one.
+
+- **What the card shows is what the account did**: level, arena tier and where that sits on the ladder, how much of the roster it has met, how far into the campaign it has been — "7-4 Hard", with a harder stage counting as further than a deeper one, because the difficulty is the wall that gates everything after it.
+- **What it leaves out is the point of it.** No silver, no crystals, no account name, and nothing that would say whether a card belongs to a bot. A card that led with a wallet would make the game about the wrong number, and a card that leaked one would be a privacy bug rather than a design choice — so a test fails if any of them ever appears on it.
+- **Four champions, chosen or not.** A player picks up to four to be known by, in the order they pick them. Anybody who has never chosen gets their strongest instead, so a card is never blank and the picker is something to reach for rather than something to get past. A champion released after being chosen simply drops off the card.
+- **Names lead somewhere.** The chip in the top bar opens your own card — the same one everybody else sees, which is what makes choosing your four a decision rather than a form — and the Arena's ladder rows and opponent offers open theirs.
+
+### Fixed
+
+- **The Haven camp had a "Battle" tile.** It built its station list from "every screen except the Haven and Settings", so it had quietly adopted every screen added since — including the battle screen, which a player could walk into with no battle behind it. It now uses the same predicate the dock does.
+- **The energy counter could spin the interface.** It handed `Date.now` to React as its snapshot of the clock — a value that is different every time it is read, so there was no fixed point to settle on. It had been latent since the first build and only surfaced when the top bar gained a second thing to watch. The instant is now cached per tick, which also means one shared timer rather than one per component, and two things animating against the same moment rather than two slightly different ones.
+
 ### Added — mail, news, and the operator's composer (P8f)
 
 The game can talk to a player directly now, and hand them something while it does.

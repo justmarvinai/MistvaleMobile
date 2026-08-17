@@ -3,6 +3,7 @@ import { ARENA_TIER_LABELS, type ArenaOffer, type ArenaTeamMember } from '@mistv
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { useArenaStore } from '../../state/arenaStore';
+import { useProfileStore } from '../../state/profileStore';
 import { useContentStore } from '../../state/contentStore';
 import { useNavStore } from '../../state/navStore';
 import { useBattleStore } from '../../state/battleStore';
@@ -29,6 +30,7 @@ export function ArenaScreen(): JSX.Element {
   const busy = useArenaStore((state) => state.busy);
   const error = useArenaStore((state) => state.error);
   const load = useArenaStore((state) => state.load);
+  const showProfile = useProfileStore((state) => state.show);
   const refreshOffers = useArenaStore((state) => state.refreshOffers);
   const setDefence = useArenaStore((state) => state.setDefence);
   const claimChest = useArenaStore((state) => state.claimChest);
@@ -139,7 +141,13 @@ export function ArenaScreen(): JSX.Element {
             {arena.offers.map((offer) => (
               <article key={offer.offerId} className={styles.offer}>
                 <header className={styles.offerHead}>
-                  <span className={styles.offerName}>{offer.profileName}</span>
+                  <button
+                    type="button"
+                    className={styles.offerName}
+                    onClick={() => void showProfile(offer.playerId)}
+                  >
+                    {offer.profileName}
+                  </button>
                   <span className={styles.offerTier}>{ARENA_TIER_LABELS[offer.tier]}</span>
                 </header>
 

@@ -156,6 +156,12 @@ export const ROUTES = {
     /** Posts whose window is open right now, pinned first. */
     state: '/news',
   },
+  profile: {
+    /** `/profiles/:id` — the public card, as anybody may see it. */
+    card: (id: string) => `/profiles/${encodeURIComponent(id)}`,
+    /** The four champions the owner wants to be known by. */
+    showcase: '/player/showcase',
+  },
   battle: {
     start: '/battles/start',
     /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */

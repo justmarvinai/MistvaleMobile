@@ -57,7 +57,7 @@ export function getContentRevision(): number {
 }
 
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   signal?: AbortSignal;
 };
@@ -125,6 +125,8 @@ export const api = {
     request<T>(path, { method: 'POST', body, signal }),
   patch: <T>(path: string, body?: unknown, signal?: AbortSignal) =>
     request<T>(path, { method: 'PATCH', body, signal }),
+  put: <T>(path: string, body?: unknown, signal?: AbortSignal) =>
+    request<T>(path, { method: 'PUT', body, signal }),
 };
 
 /** Health probe used by the boot screen; bypasses the envelope. */

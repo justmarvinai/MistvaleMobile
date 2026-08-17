@@ -148,6 +148,13 @@
       "when": 1786989847802,
       "tag": "0020_mailbox",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1786994830193,
+      "tag": "0021_showcase",
+      "breakpoints": true
     }
   ]
 }
