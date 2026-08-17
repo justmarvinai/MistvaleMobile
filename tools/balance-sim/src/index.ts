@@ -60,6 +60,41 @@ function parTeam(content: LoadedContent): TeamSpec[] {
 }
 
 /**
+ * The composition the XP farm is *for*: one maxed carry and three food units along for
+ * the ride (ECONOMY_BALANCE §3).
+ *
+ * Deliberately not four good champions. A stage's champion XP is a total split across the
+ * team, so the loop only pays if the three passengers can be worthless — which means the
+ * carry has to clear the stage almost alone. Simulating four maxed champions would measure
+ * a team nobody fields to farm and would pass a gate the real loop fails.
+ */
+function farmTeam(content: LoadedContent): TeamSpec[] {
+  const carry = [...content.champions.values()]
+    .filter((champion) => !champion.isFood && champion.summonable)
+    .sort((a, b) => a.key.localeCompare(b.key))
+    .sort((a, b) => rarityRank(b.rarity) - rarityRank(a.rarity))[0];
+  const food = [...content.champions.values()]
+    .filter((champion) => champion.isFood)
+    .sort((a, b) => a.key.localeCompare(b.key))
+    .slice(0, 3);
+  if (!carry || food.length < 3) throw new Error('No carry-plus-food team in the seeds.');
+
+  return [
+    ...withRelics(content, [{ championKey: carry.key, level: 60, rank: 6, ascension: 6 }]),
+    ...food.map((champion) => ({
+      championKey: champion.key,
+      level: 1,
+      rank: 1,
+      ascension: 0,
+    })),
+  ];
+}
+
+function rarityRank(rarity: string): number {
+  return ['common', 'uncommon', 'rare', 'epic', 'legendary'].indexOf(rarity);
+}
+
+/**
  * The power an account is expected to have arrived at a Normal chapter with.
  *
  * One definition, used by the per-chapter gate and by the Brutal wall check, so "fresh off
@@ -264,6 +299,33 @@ function main(): void {
         measured: `${(overreach.winRate * 100).toFixed(1)}% got through`,
       });
     }
+  }
+
+  // ── Gate 3b: the intended XP farm has to be farmable ────────────────────
+  // Brutal 12-6 is where ECONOMY §3 sends a levelling team, and multi-battle is how they
+  // get there ten runs at a time. Winning is not enough: a farm that occasionally grinds
+  // to forty turns is a farm nobody presses twice, so this gates the *distribution*
+  // rather than the average (COMBAT_SYSTEM §14).
+  const farmStage = campaignStages(content, 12, 'brutal').at(-2);
+  if (farmStage) {
+    const farm = simulateStage(content, farmStage.key, farmTeam(content), RUNS);
+    table('Farmer + three food — Brutal 12-6', [farm]);
+    gates.push({
+      name: 'xp-farm-wins',
+      detail: 'Brutal 12-6 falls to one carry and three food units at least 97% of the time',
+      passed: farm.winRate >= 0.97,
+      measured: `${(farm.winRate * 100).toFixed(1)}%`,
+    });
+    // Not a speed target — a *safety margin*. One champion grinding through four waves of
+    // elites takes a while by construction, and nobody watches it (that is what
+    // multi-battle is for). What must never happen is the fight creeping toward the
+    // 300-turn cap, where a farm stops being a farm and starts being a coin flip.
+    gates.push({
+      name: 'xp-farm-speed',
+      detail: 'and does it well inside the turn cap — 95% of runs under 200 turns',
+      passed: farm.winsWithin(200) >= 0.95,
+      measured: `${(farm.winsWithin(200) * 100).toFixed(1)}% within 200 turns`,
+    });
   }
 
   // ── Gate 4: the headless performance budget ─────────────────────────────

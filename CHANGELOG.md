@@ -5,6 +5,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — Phase P6 close-out
+
+The sweep at the end of a phase, where every document is checked against what actually shipped.
+
+- **Two new balance gates for the XP farm**, and they are the composition-honest kind: Brutal 12-6 has to fall to *one* maxed carry and three level-1 food units — not to four good champions, which is a team nobody fields to farm. It does, every time. `pnpm sim` also gained a distribution measure (`winsWithin`), because "usually fast" is no comfort if one run in twenty grinds toward the turn cap.
+- The documented "≤14 sim-turns" farm target was written against an unstated four-strong team. A four-strong maxed team does clear 12-6 in ~16 turns; a solo carry through four waves of elites takes ~120 by construction, and nobody watches it — that is what multi-battle is for. The gate now bounds distance from the 300-turn cap instead of speed, and COMBAT_SYSTEM §14 says why.
+- **Three §14 gates that read as enforced were not.** The per-champion role benchmark and the Arena diversity check are now marked *not yet enforced*, with the phase each belongs to (P10 and P7). A gate document that overstates itself is worse than one that admits a gap.
+- Corrected the Depths floor count in two docs: **120**, not 130 (4×15 + 10 + 5×10).
+- `AGENTS.md` said "planning docs only — implementation begins with P0" and told agents never to push to `main`. Both were wrong: P0–P6 are complete, and pushing to `main` is the owner's standing instruction. A contradiction between the two agent-facing files is the one kind of stale doc that actively causes damage.
+- The known-gaps table in `USER_QUESTIONS.md` had phase labels three phases out of date (a shallow publish diff and the missing balance-sim endpoint were both still marked P2). Re-dated against reality, with two gaps added: the Depths and Masteries still have no purpose-built Admin editors (A4, and the generic browser covers every field meanwhile), and the two unenforced gates above.
+
 ### Added — Phase P6: the whole campaign
 
 Nine more chapters, two more difficulties, and twelve warlords who each fight differently.

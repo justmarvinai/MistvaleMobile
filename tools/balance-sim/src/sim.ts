@@ -144,6 +144,14 @@ export interface StageResult {
   /** Mean turns across winning runs; losses would skew it to the cap. */
   averageTurns: number;
   medianTurns: number;
+  /**
+   * Share of *all* runs that were won inside `limit` turns.
+   *
+   * A farm gate cares about the whole distribution rather than the average: "usually
+   * fourteen turns" is no comfort if one run in twenty grinds to forty. Losses count
+   * against it, because a run that did not finish did not finish quickly either.
+   */
+  winsWithin: (limit: number) => number;
   /** Wall-clock milliseconds per simulated stage. */
   msPerRun: number;
 }
@@ -207,6 +215,7 @@ export function simulateStage(
       ? winningTurns.reduce((sum, turns) => sum + turns, 0) / winningTurns.length
       : Number.NaN,
     medianTurns: sorted.length ? sorted[Math.floor(sorted.length / 2)]! : Number.NaN,
+    winsWithin: (limit) => winningTurns.filter((turns) => turns <= limit).length / runs,
     msPerRun: elapsed / runs,
   };
 }

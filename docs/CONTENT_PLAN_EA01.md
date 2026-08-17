@@ -150,7 +150,7 @@ Base: HP 21.5k · ATK 900 · DEF 1,100 · SPD 100 · CR 15 · CD 50 · RES 40 ·
 | Proving Grounds | 10 | Emblems (Bronze F1–4 / Silver F5–7 / Gold F8–10) | Pitmaster Drazhak | 8→14 |
 | Essence Springs ×5 | 10 each | Element essences (L/G/P; Prime floors 7+); Pure Spring daily, elements 2 days/week, Mist Sun | Spring Wardens (elite guards) | 6→12 |
 
-Floors = 2 waves + boss; enemy levels scale 20→60 across floors ⚙ (springs 18→60); drop rank/rarity bands by floor tier (1–4 / 5–9 / 10–12 / 13–15 "deep", expressed as fractions of a keep's depth so a shortened dungeon still has a deep tier). A relic keep drops a relic on **every** clear — rank 2→5 by tier, rarity shifting from mostly-common to Epic-heavy — because a wasted run would make the energy price a swindle. **130 floors shipped** (4×15 + 10 + 5×10), generated from ten plan entries.
+Floors = 2 waves + boss; enemy levels scale 20→60 across floors ⚙ (springs 18→60); drop rank/rarity bands by floor tier (1–4 / 5–9 / 10–12 / 13–15 "deep", expressed as fractions of a keep's depth so a shortened dungeon still has a deep tier). A relic keep drops a relic on **every** clear — rank 2→5 by tier, rarity shifting from mostly-common to Epic-heavy — because a wasted run would make the energy price a swindle. **120 floors shipped** (4×15 + 10 + 5×10), generated from ten plan entries.
 
 ## 5. Relic sets (16 at EA — final)
 2pc: Ironroot +15% HP · Wolfsfang +15% ATK · Stoneguard +15% DEF · Swiftwind +12% SPD · Hawkeye +12% C.RATE · Reaver +20% C.DMG · Truestrike +40 ACC · Wardweave +40 RES · Pathfinder +5% SPD +20 ACC.
