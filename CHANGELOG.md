@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the support desk (Admin A5, pulled forward)
+
+Mistvale has no e-mail addresses. That was always a deliberate simplification, and it has one binding consequence that had gone unbuilt: **an operator is the only password reset there is** — and there was no operator endpoint. A warden who forgot their password could not be helped except by hand-writing an argon2id hash into the database, which breaks the no-direct-DB rule the whole Admin Suite exists to uphold. Pulled forward out of A5 because it is a hard-rule violation rather than a missing convenience.
+
+- **Reset a password.** Generated, not chosen: the operator reads a temporary password out once — the server keeps only its hash — every session is signed out, and the account must replace it before doing anything else. Choosing the password would make "the operator knows your password" a lasting state instead of a thirty-second one.
+- **`force_password_change` is now enforced**, not merely recorded. It has been stored and surfaced since P0 while nothing checked it, so a reset was a suggestion. Until the flag clears, the account can change its password, read who it is, or sign out — and nothing else, the Admin API included, so an admin who has been reset cannot administer their way around it.
+- **Find an account** by either name. A support request says "I'm Rattledagger" or "my login is rattle_d" and almost never says which, so both are searched. Bots are hidden by default and one switch away.
+- **See an account**: wallet, live energy, holdings as counts, progress and deepest floors, every live session, and the tail of the economy ledger — enough to answer "did my relic vanish" without reading 143 relics.
+- **Rank, ban, rename, grant, sign-out-everywhere.** A ban needs a reason and signs the account out immediately; a grant goes through `RewardService`, so an operator hand-out lands in `economy_log` beside the battle payouts rather than being invisible in exactly the audit it most needs to appear in. Every action is audited with before/after — and never with the password in it.
+- **Two guards refuse the caller's own account**: an admin cannot change their own rank or ban themselves. The first is how a suite locks itself out of its last admin; the second is how it locks everyone out. Recovery from either is a shell on the VPS — the situation the suite exists to avoid.
+- The two irreversible actions confirm by **typing the account name**, which is the one thing an operator with the wrong account open would get wrong.
+- **Tests** — 16 server cases against a real database (the whole reset round trip, both self-guards, ban-with-reason, rename collisions, grants landing in the ledger, rank-gating) and 8 in the suite over the screen's refusal to act.
+
 ### Changed — Phase P6 close-out
 
 The sweep at the end of a phase, where every document is checked against what actually shipped.

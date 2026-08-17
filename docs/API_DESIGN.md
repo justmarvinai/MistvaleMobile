@@ -70,6 +70,18 @@
 | POST `/arena/attack` | `{offerId, team, actionId}` → battle session vs snapshot defense (manual or auto), resolution updates ratings both sides. |
 | GET `/arena/leaderboard` | Top N + own rank neighborhood (bots included). |
 
+### Admin: player management (`/admin/api`, Admin rank only)
+Keyed by **player** id, not account id — that is what `economy_log`, `stage_progress` and a support request all reference; the account behind it is resolved server-side. Every mutation is audited with before/after.
+
+| GET `/players` | `?q=&limit=&offset=&bots=` — searches account *and* profile name, because a support request rarely says which it is quoting. Bots excluded unless asked for. |
+| GET `/players/:id` | Profile, wallet, live energy, holdings as counts, progress, live sessions, and the tail of the economy ledger. |
+| POST `/players/:id/reset-password` | **The only password reset that exists** — there is no e-mail anywhere in Mistvale. The password is *generated*, not chosen: the operator reads it out once (the server keeps only its hash), every session is signed out, and `force_password_change` is set. That flag is enforced in `requireAuth` — until it clears, the account can change its password, read `/auth/me`, or sign out, and nothing else. |
+| POST `/players/:id/rank` | `{rank}` — Player / GameMaster / Admin. **Refuses the caller's own account**: an admin who can demote themselves can lock the suite out of its last admin. |
+| POST `/players/:id/ban` | `{banned, reason?}` — a ban needs a reason (the account is shown it) and signs every session out, so it starts now rather than when a token expires. Also refuses the caller's own account. |
+| POST `/players/:id/profile-name` | `{profileName}` — the support path for a name that has to go. Uniqueness is the database's, case-insensitive. |
+| POST `/players/:id/grant` | `{silver?, crystals?, valorMedals?, playerXp?, items?, note}` — through `RewardService`, so it lands in `economy_log` beside the battle payouts. Negative takes away. The note goes in the audit entry. |
+| DELETE `/players/:id/sessions` | Signs out everywhere without touching the password — for a session in the wrong hands rather than a credential. |
+
 ### The Depths, quests, events, meta
 | GET `/depths` | Every published dungeon with: whether it is open right now (account level *and* today's rotation), why not if not, which weekday it next opens, the deepest floor reached and total clears. Plus the server's game-day and weekday, and the new-account grace period's end. Per-floor stars and unlocks come from `/player/progress`, which returns every mode's stages. |
 | GET `/quests` | Daily/weekly/monthly with progress + daily-chest meter. POST `/quests/:key/claim`. |

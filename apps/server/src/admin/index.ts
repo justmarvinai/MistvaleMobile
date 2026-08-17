@@ -5,6 +5,7 @@ import { accounts, auditLog, players } from '../db/schema/index';
 import { AppError } from '../lib/errors';
 import * as authService from '../modules/auth/service';
 import { adminContentRoutes } from './content-routes';
+import { adminPlayerRoutes } from './player-routes';
 
 /**
  * The Admin API.
@@ -111,5 +112,6 @@ export const adminApi: FastifyPluginAsync = async (app) => {
     });
 
     await guarded.register(adminContentRoutes);
+    await guarded.register(adminPlayerRoutes);
   });
 };

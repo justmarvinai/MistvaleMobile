@@ -1,6 +1,13 @@
 import fp from 'fastify-plugin';
 import cookie from '@fastify/cookie';
-import { SESSION_COOKIE, type AccountRank } from '@mistvale/shared';
+import {
+  ADMIN_API_PREFIX,
+  ADMIN_ROUTES,
+  API_PREFIX,
+  ROUTES,
+  SESSION_COOKIE,
+  type AccountRank,
+} from '@mistvale/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AccountRow, PlayerRow } from '../db/schema/index';
 import { AppError } from '../lib/errors';
@@ -29,6 +36,22 @@ declare module 'fastify' {
 
 /** Ranks in ascending order of privilege. */
 const RANK_ORDER: Record<AccountRank, number> = { player: 0, gamemaster: 1, admin: 2 };
+
+/**
+ * The only routes an account with a forced password change may still reach.
+ *
+ * Changing the password (the way out), reading who you are (so the client can render the
+ * prompt), and signing out (the way back). Anything else waits — including the Admin API,
+ * so an admin who has been reset cannot administer their way around it.
+ */
+const PASSWORD_CHANGE_EXEMPT = new Set([
+  `${API_PREFIX}${ROUTES.auth.changePassword}`,
+  `${API_PREFIX}${ROUTES.auth.me}`,
+  `${API_PREFIX}${ROUTES.auth.logout}`,
+  `${API_PREFIX}${ROUTES.auth.logoutAll}`,
+  `${ADMIN_API_PREFIX}${ADMIN_ROUTES.auth.me}`,
+  `${ADMIN_API_PREFIX}${ADMIN_ROUTES.auth.logout}`,
+]);
 
 /**
  * Session authentication.
@@ -75,6 +98,17 @@ export const authPlugin = fp(
 
       if (resolved.account.status === 'banned') {
         throw new AppError('ACCOUNT_BANNED', resolved.account.banReason ?? undefined);
+      }
+
+      // An admin password reset hands out a temporary password, and this is what makes it
+      // temporary: until it has been replaced the account can do exactly two things —
+      // change the password, or sign out. Without this the flag would be a suggestion, and
+      // an operator would keep knowing a working password indefinitely.
+      if (
+        resolved.account.forcePasswordChange &&
+        !PASSWORD_CHANGE_EXEMPT.has(request.routeOptions.url ?? '')
+      ) {
+        throw new AppError('PASSWORD_CHANGE_REQUIRED', 'Choose a new password before carrying on.');
       }
 
       request.account = resolved.account;

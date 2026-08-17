@@ -138,6 +138,23 @@ export const ADMIN_ROUTES = {
   stats: {
     overview: '/stats/overview',
   },
+  /**
+   * Player management, keyed by **player** id rather than account id.
+   *
+   * The player is what an operator has in front of them — it is what `economy_log`,
+   * `stage_progress` and every other per-account table reference, and what a support
+   * request quotes. The account behind it is resolved server-side.
+   */
+  players: {
+    search: '/players',
+    detail: (id: string) => `/players/${encodeURIComponent(id)}`,
+    resetPassword: (id: string) => `/players/${encodeURIComponent(id)}/reset-password`,
+    rank: (id: string) => `/players/${encodeURIComponent(id)}/rank`,
+    ban: (id: string) => `/players/${encodeURIComponent(id)}/ban`,
+    profileName: (id: string) => `/players/${encodeURIComponent(id)}/profile-name`,
+    grant: (id: string) => `/players/${encodeURIComponent(id)}/grant`,
+    sessions: (id: string) => `/players/${encodeURIComponent(id)}/sessions`,
+  },
 } as const;
 
 /**

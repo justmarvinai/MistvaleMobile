@@ -35,11 +35,24 @@ import {
 
 const dbUp = await isDatabaseAvailable();
 
-/** Fills path parameters with values that exist in the fixture. */
+/**
+ * Fills path parameters with values that exist in the fixture.
+ *
+ * `:id` is a *second* account created for the purpose. The player-management endpoints
+ * refuse to act on the caller's own account and one of them signs every session out, so
+ * pointing them at the admin running the suite would either fail the guard or end the
+ * session every later case depends on.
+ */
 function urlFor(endpoint: ApiEndpoint, key = 'testers'): string {
   const prefix = endpoint.surface === 'admin' ? ADMIN_API_PREFIX : API_PREFIX;
-  return `${prefix}${endpoint.path}`.replace(':type', 'factions').replace(':key', key);
+  return `${prefix}${endpoint.path}`
+    .replace(':type', 'factions')
+    .replace(':key', key)
+    .replace(':id', targetPlayerId);
 }
+
+/** The disposable account the player-management cases act on. */
+let targetPlayerId = '';
 
 const FIXTURE = [
   {
@@ -145,6 +158,19 @@ describe.skipIf(!dbUp)('API contract', () => {
       url: `${ADMIN_API_PREFIX}/content/factions/testers`,
       payload: { data: { ...FIXTURE[0]!.data, name: 'Testers Renamed' } },
     });
+
+    // The account the player-management cases act on. Never the admin's own.
+    const target = await app.inject({
+      method: 'POST',
+      url: apiPath(ROUTES.auth.register),
+      payload: {
+        accountName: uniqueAccountName('subject'),
+        profileName: uniqueProfileName(),
+        password: 'a-good-long-password',
+      },
+    });
+    expect(target.statusCode, 'registering the contract subject').toBe(201);
+    targetPlayerId = target.json().data.player.id as string;
   });
 
   afterAll(async () => {
@@ -157,6 +183,10 @@ describe.skipIf(!dbUp)('API contract', () => {
     saveContentEntry: { data: FIXTURE[0]!.data },
     publishContent: { note: 'contract test' },
     revertContent: { rev: 1 },
+    setPlayerRank: { rank: 'gamemaster' },
+    setPlayerBanned: { banned: true, reason: 'contract test' },
+    renamePlayer: { profileName: uniqueProfileName() },
+    grantToPlayer: { silver: 500, note: 'contract test' },
   };
 
   /**

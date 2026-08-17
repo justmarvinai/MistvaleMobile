@@ -1,5 +1,20 @@
 import { z } from 'zod';
-import { ADMIN_API_PREFIX, ADMIN_ROUTES, API_PREFIX, ROUTES } from './routes';
+import { ADMIN_API_PREFIX, ADMIN_ROUTES, API_PREFIX, ROUTES, routePattern } from './routes';
+import {
+  adminAccountStateSchema,
+  adminBanRequestSchema,
+  adminEconomyEntrySchema,
+  adminGrantRequestSchema,
+  adminGrantResultSchema,
+  adminPlayerDetailSchema,
+  adminPlayerSearchSchema,
+  adminPlayerSummarySchema,
+  adminRenameRequestSchema,
+  adminResetPasswordResultSchema,
+  adminSessionSchema,
+  adminSessionsRevokedSchema,
+  adminSetRankRequestSchema,
+} from './admin';
 import { accountSummarySchema, loginRequestSchema } from './auth';
 import { apiErrorSchema } from './api';
 import { CONTENT_REGISTRY, CONTENT_TYPES } from './content/registry';
@@ -307,6 +322,102 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Discard every pending draft',
     response: z.object({ discarded: z.number().int() }),
   },
+
+  // ── Admin: player management ─────────────────────────────────────────────
+  {
+    surface: 'admin',
+    method: 'get',
+    path: ADMIN_ROUTES.players.search,
+    operationId: 'searchPlayers',
+    summary: 'Find accounts by account or profile name',
+    description:
+      'Both names are searched, because a support request rarely says which one it is ' +
+      'quoting. Bots are excluded unless `bots=true`. Query: `q`, `limit`, `offset`, `bots`.',
+    response: adminPlayerSearchSchema,
+  },
+  {
+    surface: 'admin',
+    method: 'get',
+    path: routePattern(ADMIN_ROUTES.players.detail),
+    operationId: 'getPlayer',
+    summary: 'Everything about one account',
+    description:
+      'Profile, wallet, live energy, holdings as counts, progress, live sessions and the ' +
+      'tail of the economy ledger.',
+    response: adminPlayerDetailSchema,
+    errors: [404],
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: routePattern(ADMIN_ROUTES.players.resetPassword),
+    operationId: 'resetPlayerPassword',
+    summary: 'Issue a temporary password',
+    description:
+      'There is no e-mail anywhere in Mistvale, so this is the only password-reset path ' +
+      'that exists. The password is generated rather than chosen — the operator reads it ' +
+      'out once, every session is signed out, and the account cannot do anything else ' +
+      'until it has been replaced.',
+    response: adminResetPasswordResultSchema,
+    errors: [404],
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: routePattern(ADMIN_ROUTES.players.rank),
+    operationId: 'setPlayerRank',
+    summary: 'Change an account rank',
+    description: 'Refuses the caller’s own account — that is how a suite locks itself out.',
+    body: adminSetRankRequestSchema,
+    response: adminAccountStateSchema,
+    errors: [400, 404],
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: routePattern(ADMIN_ROUTES.players.ban),
+    operationId: 'setPlayerBanned',
+    summary: 'Ban or unban an account',
+    description:
+      'A ban needs a reason — the account is shown it at its next sign-in attempt — and ' +
+      'signs every session out, so it takes effect now rather than when a token expires.',
+    body: adminBanRequestSchema,
+    response: adminAccountStateSchema,
+    errors: [400, 404],
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: routePattern(ADMIN_ROUTES.players.profileName),
+    operationId: 'renamePlayer',
+    summary: 'Rename a profile',
+    description: 'The support path for a name that has to go. Uniqueness is case-insensitive.',
+    body: adminRenameRequestSchema,
+    response: adminAccountStateSchema,
+    errors: [404, 409],
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: routePattern(ADMIN_ROUTES.players.grant),
+    operationId: 'grantToPlayer',
+    summary: 'Grant or remove currencies, experience and items',
+    description:
+      'Routed through RewardService, so it lands in `economy_log` beside the battle ' +
+      'payouts. Negative amounts take things away. The note is recorded in the audit entry.',
+    body: adminGrantRequestSchema,
+    response: adminGrantResultSchema,
+    errors: [400, 404, 409],
+  },
+  {
+    surface: 'admin',
+    method: 'delete',
+    path: routePattern(ADMIN_ROUTES.players.sessions),
+    operationId: 'revokePlayerSessions',
+    summary: 'Sign an account out everywhere',
+    response: adminSessionsRevokedSchema,
+    errors: [404],
+  },
 ];
 
 // ── Document generation ─────────────────────────────────────────────────────
@@ -333,6 +444,18 @@ const SHARED_SCHEMAS: Record<string, z.ZodType> = {
   AdminOverview: adminOverviewSchema,
   PublishResult: publishResultSchema,
   LoginRequest: loginRequestSchema,
+  AdminPlayerSummary: adminPlayerSummarySchema,
+  AdminPlayerSearch: adminPlayerSearchSchema,
+  AdminPlayerDetail: adminPlayerDetailSchema,
+  AdminSession: adminSessionSchema,
+  AdminEconomyEntry: adminEconomyEntrySchema,
+  AdminAccountState: adminAccountStateSchema,
+  AdminResetPasswordResult: adminResetPasswordResultSchema,
+  AdminGrantResult: adminGrantResultSchema,
+  AdminSetRankRequest: adminSetRankRequestSchema,
+  AdminBanRequest: adminBanRequestSchema,
+  AdminRenameRequest: adminRenameRequestSchema,
+  AdminGrantRequest: adminGrantRequestSchema,
   ...Object.fromEntries(
     CONTENT_TYPES.map((type) => [`${pascal(type)}Def`, CONTENT_REGISTRY[type].schema]),
   ),
