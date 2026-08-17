@@ -10,6 +10,7 @@ export * from './summon';
 export * from './depths';
 export * from './mastery';
 export * from './battle';
+export * from './arena';
 export * from './admin';
 export * from './routes';
 export * from './content/index';

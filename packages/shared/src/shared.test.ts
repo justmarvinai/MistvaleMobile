@@ -4,6 +4,18 @@ import { computeUnlocks, UNLOCK_LEVELS } from './player';
 import { ELEMENT_BEATS, ELEMENTS, LEVEL_CAP_BY_RANK, MAX_RANK } from './enums';
 import { apiFailure, apiSuccess, isApiSuccess } from './api';
 import { ERROR_CODES, ERROR_HTTP_STATUS, ERROR_MESSAGES } from './errors';
+import {
+  ARENA_BANDS,
+  ARENA_TIERS,
+  ARENA_TIER_LABELS,
+  DEFAULT_HALL_COSTS,
+  DEFAULT_HALL_PER_LEVEL,
+  DEFAULT_TIER_THRESHOLDS,
+  HALL_MAX_LEVEL,
+  HALL_STATS,
+  bandOf,
+  tierForRating,
+} from './arena';
 
 describe('account and profile names', () => {
   it.each(['warden', 'Marvin_01', 'a-b-c'])('accepts %s as an account name', (name) => {
@@ -122,6 +134,61 @@ describe('error code tables', () => {
     for (const code of ERROR_CODES) {
       expect(ERROR_HTTP_STATUS[code]).toBeGreaterThanOrEqual(200);
       expect(ERROR_MESSAGES[code].length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('the arena ladder', () => {
+  it('puts a rating in the highest tier it clears', () => {
+    expect(tierForRating(0)).toBe('bronze_1');
+    expect(tierForRating(799)).toBe('bronze_1');
+    expect(tierForRating(800)).toBe('bronze_2');
+    expect(tierForRating(2_599)).toBe('gold_2');
+    expect(tierForRating(3_000)).toBe('platinum');
+    expect(tierForRating(99_999)).toBe('platinum');
+  });
+
+  it('never falls out of the bottom, whatever the rating', () => {
+    // Ratings are non-negative by constraint, but the floor has to hold regardless:
+    // a tier lookup that can return undefined would break matchmaking, not just display.
+    expect(tierForRating(-500)).toBe('bronze_1');
+  });
+
+  it('honours operator-retuned thresholds', () => {
+    const compressed = { ...DEFAULT_TIER_THRESHOLDS, platinum: 1_500 };
+    expect(tierForRating(1_500, compressed)).toBe('platinum');
+    expect(tierForRating(1_500)).toBe('silver_2');
+  });
+
+  it('maps every tier to exactly one band', () => {
+    for (const tier of ARENA_TIERS) {
+      expect(ARENA_BANDS).toContain(bandOf(tier));
+    }
+    expect(bandOf('bronze_3')).toBe('bronze');
+    expect(bandOf('gold_1')).toBe('gold');
+    expect(bandOf('platinum')).toBe('platinum');
+  });
+
+  it('orders the thresholds so the ladder only ever goes up', () => {
+    let previous = -1;
+    for (const tier of ARENA_TIERS) {
+      expect(DEFAULT_TIER_THRESHOLDS[tier], tier).toBeGreaterThan(previous);
+      previous = DEFAULT_TIER_THRESHOLDS[tier];
+    }
+  });
+
+  it('labels every tier', () => {
+    for (const tier of ARENA_TIERS) {
+      expect(ARENA_TIER_LABELS[tier].length).toBeGreaterThan(0);
+    }
+  });
+
+  it('prices every Hall track to the same total', () => {
+    // Twenty-four tracks × ten levels is the whole sink; a stat that cost half as much as
+    // its neighbours would quietly become the only one anybody buys.
+    expect(DEFAULT_HALL_COSTS).toHaveLength(HALL_MAX_LEVEL);
+    for (const stat of HALL_STATS) {
+      expect(DEFAULT_HALL_PER_LEVEL[stat]).toBeGreaterThan(0);
     }
   });
 });

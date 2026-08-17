@@ -6,6 +6,7 @@
  * (docs/DATA_MODEL.md).
  */
 export * from './accounts';
+export * from './arena';
 export * from './audit';
 export * from './content';
 export * from './game';

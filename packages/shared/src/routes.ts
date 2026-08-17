@@ -103,6 +103,19 @@ export const ROUTES = {
     /** The dungeon list with today's rotation and how deep the player has been. */
     overview: '/depths',
   },
+  arena: {
+    /** State, offers and the token meter in one read — what the hub renders from. */
+    state: '/arena',
+    refreshOffers: '/arena/offers/refresh',
+    defence: '/arena/defence',
+    attack: '/arena/attack',
+    leaderboard: '/arena/leaderboard',
+    claimWeekly: '/arena/weekly-chest',
+  },
+  hallOfValor: {
+    state: '/hall-of-valor',
+    upgrade: '/hall-of-valor/upgrade',
+  },
   battle: {
     start: '/battles/start',
     /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */
