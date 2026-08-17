@@ -1,5 +1,6 @@
 export * from './effects';
 export * from './goals';
+export * from './rewards';
 export * from './masteries';
 export * from './entities';
 export * from './registry';

@@ -188,6 +188,107 @@ describe('validateContentSet', () => {
       expect(result.errors.some((issue) => issue.contentType === 'stage')).toBe(true);
     });
 
+    /**
+     * Reward maps are flat `{silver: 5000, sigil_gleaming: 1}`, which is what makes them
+     * pleasant to author and what makes a typo invisible: the payout would hand over
+     * nothing and nobody would find out from an error.
+     */
+    describe('reward maps', () => {
+      const questWith = (rewards: Record<string, number>): ContentSet => {
+        const content = validSet();
+        content.set(
+          'quest',
+          new Map([
+            [
+              'q1',
+              {
+                key: 'q1',
+                name: 'A quest',
+                description: '',
+                period: 'daily',
+                goals: [{ type: 'battleWin', target: 3, filters: {} }],
+                rewards,
+                countsTowardChest: true,
+                unlockLevel: 1,
+                icon: '',
+                active: true,
+                sortOrder: 0,
+              },
+            ],
+          ]),
+        );
+        return content;
+      };
+
+      it('accepts currencies and account XP without an item anywhere in sight', () => {
+        const result = validateContentSet(questWith({ silver: 5_000, playerXp: 100 }));
+        expect(result.ok, JSON.stringify(result.errors)).toBe(true);
+      });
+
+      it('rejects a reward naming an item that does not exist', () => {
+        const result = validateContentSet(questWith({ sigil_gleeming: 1 }));
+        expect(result.ok).toBe(false);
+        expect(result.errors[0]?.path).toBe('rewards.sigil_gleeming');
+      });
+
+      it('rejects a first-clear reward naming a missing item', () => {
+        const content = validSet();
+        content.set(
+          'campaignChapter',
+          new Map([
+            [
+              'ch1',
+              {
+                key: 'ch1',
+                number: 1,
+                name: 'One',
+                region: '',
+                lore: '',
+                backgroundAsset: '',
+                starRewards: [{ stars: 9, rewards: { tome_imaginary: 1 } }],
+                sortOrder: 0,
+              },
+            ],
+          ]),
+        );
+        const result = validateContentSet(content);
+        expect(result.ok).toBe(false);
+        expect(result.errors[0]?.path).toBe('starRewards.0.rewards.tome_imaginary');
+      });
+
+      it('rejects a goal filtered on a dungeon nobody defined', () => {
+        // A quest that asks for fifteen floors of a keep that was renamed is a quest
+        // nobody can finish, which is worse than one nobody was offered.
+        const content = validSet();
+        content.set(
+          'quest',
+          new Map([
+            [
+              'q1',
+              {
+                key: 'q1',
+                name: 'A quest',
+                description: '',
+                period: 'weekly',
+                goals: [
+                  { type: 'dungeonClear', target: 3, filters: { dungeonKey: 'keep_of_nowhere' } },
+                ],
+                rewards: {},
+                countsTowardChest: true,
+                unlockLevel: 1,
+                icon: '',
+                active: true,
+                sortOrder: 0,
+              },
+            ],
+          ]),
+        );
+        const result = validateContentSet(content);
+        expect(result.ok).toBe(false);
+        expect(result.errors[0]?.path).toBe('goals.0.filters.dungeonKey');
+      });
+    });
+
     it('rejects two enemies sharing a slot in one wave', () => {
       const content = validSet();
       content.set(

@@ -22,6 +22,11 @@ import type {
   MultiBattleRequest,
   MultiBattleResult,
   Progress,
+  QuestChestClaimRequest,
+  QuestClaimRequest,
+  QuestClaimResult,
+  QuestPeriod,
+  QuestsView,
   SummonBanner,
   SummonHistoryEntry,
   SummonResponse,
@@ -80,6 +85,8 @@ export interface BattleRewards {
   bonus: Record<string, number>;
   /** Chapter star-chest tiers this clear crossed. */
   chestTiers: number[];
+  /** The day's first victory in this mode, paid automatically. Empty once taken. */
+  firstWin: Record<string, number>;
   /** What an Arena fight moved, on both ratings. Null for every other mode. */
   arena: ArenaResult | null;
 }
@@ -269,6 +276,21 @@ export const gameApi = {
 
   upgradeHall: (request: { element: string; stat: string; actionId: string }) =>
     api.post<HallUpgradeResult>(ROUTES.hallOfValor.upgrade, request),
+
+  // ── Quests ────────────────────────────────────────────────────────────────
+
+  quests: () => api.get<{ quests: QuestsView }>(ROUTES.quests.state).then((data) => data.quests),
+
+  claimQuest: (questKey: string, actionId: string) =>
+    api.post<QuestClaimResult>(ROUTES.quests.claim(questKey), {
+      actionId,
+    } satisfies QuestClaimRequest),
+
+  claimQuestChest: (period: QuestPeriod, actionId: string) =>
+    api.post<QuestClaimResult>(ROUTES.quests.claimChest, {
+      period,
+      actionId,
+    } satisfies QuestChestClaimRequest),
 };
 
 /** Every progression call answers the same way: the champion, and what it cost. */

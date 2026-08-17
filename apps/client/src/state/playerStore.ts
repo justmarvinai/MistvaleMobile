@@ -23,9 +23,20 @@ interface PlayerSnapshot {
   player: PlayerSummary;
   unlocks: UnlockFlags;
   multiBattle: MultiBattleState;
+  badges: DockBadges;
   settings: PlayerSettings;
   serverTime: string;
 }
+
+/**
+ * Dock pips, computed by the server on the snapshot the shell already re-fetches after
+ * every action — never polled (UI_UX §1.3).
+ */
+export interface DockBadges {
+  quests: number;
+}
+
+const NO_BADGES: DockBadges = Object.freeze({ quests: 0 });
 
 /** Until the first snapshot lands, the farming control is drawn shut rather than guessed at. */
 const NO_MULTI_BATTLE: MultiBattleState = Object.freeze({
@@ -41,6 +52,8 @@ interface PlayerState {
   unlocks: UnlockFlags;
   /** Today's farming allowance, server-computed like every other gate. */
   multiBattle: MultiBattleState;
+  /** What is waiting to be collected, per dock destination. */
+  badges: DockBadges;
   settings: PlayerSettings;
   loading: boolean;
   /** Difference between server and client clocks, so countdowns stay honest. */
@@ -55,6 +68,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   player: null,
   unlocks: computeUnlocks(1),
   multiBattle: NO_MULTI_BATTLE,
+  badges: NO_BADGES,
   settings: DEFAULT_PLAYER_SETTINGS,
   loading: false,
   clockSkewMs: 0,
@@ -72,6 +86,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         player: snapshot.player,
         unlocks: snapshot.unlocks,
         multiBattle: snapshot.multiBattle ?? NO_MULTI_BATTLE,
+        badges: snapshot.badges ?? NO_BADGES,
         settings: { ...DEFAULT_PLAYER_SETTINGS, ...snapshot.settings },
         clockSkewMs: serverTime + latencyAllowance - Date.now(),
         loading: false,
@@ -108,6 +123,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       player: null,
       unlocks: computeUnlocks(1),
       multiBattle: NO_MULTI_BATTLE,
+      badges: NO_BADGES,
       settings: DEFAULT_PLAYER_SETTINGS,
       loading: false,
       clockSkewMs: 0,

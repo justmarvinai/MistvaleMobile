@@ -7,6 +7,7 @@ import { CampaignScreen } from '@/screens/Campaign/CampaignScreen';
 import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { DepthsScreen } from '@/screens/Depths/DepthsScreen';
 import { ArenaScreen } from '@/screens/Arena/ArenaScreen';
+import { QuestsScreen } from '@/screens/Quests/QuestsScreen';
 import { ChampionsScreen } from '@/screens/Champions/ChampionsScreen';
 import { RelicsScreen } from '@/screens/Relics/RelicsScreen';
 import { BazaarScreen } from '@/screens/Bazaar/BazaarScreen';
@@ -178,6 +179,8 @@ function GameShell() {
             <MistgateScreen />
           ) : screen === 'chronicle' ? (
             <ChronicleScreen />
+          ) : screen === 'quests' ? (
+            <QuestsScreen />
           ) : definition ? (
             <PlaceholderScreen screen={definition} />
           ) : null}

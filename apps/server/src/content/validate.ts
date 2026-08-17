@@ -3,6 +3,7 @@ import {
   CONTENT_REGISTRY,
   EFFECT_COMPONENT_TYPES,
   STATUS_ENGINE_TYPES,
+  rewardItemKeys,
   type ContentIssue,
   type ContentType,
   type ContentValidationResult,
@@ -104,6 +105,23 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       path: from.path,
       message: `References ${CONTENT_REGISTRY[target].label.toLowerCase()} "${targetKey}", which does not exist.`,
     });
+  };
+
+  /**
+   * Every non-currency key in a reward map has to be an item that exists.
+   *
+   * A reward map is a flat `{silver: 5000, sigil_gleaming: 1}`, which is exactly what makes
+   * it pleasant to author and exactly what makes a typo invisible: `sigil_gleeming` is a
+   * perfectly good key, and the payout would hand over nothing. Checking it here turns a
+   * silent hole in a player's reward into a red line in the publish diff.
+   */
+  const rewardMap = (
+    from: { contentType: ContentType; key: string; path: string },
+    rewards: Readonly<Record<string, number>> | undefined,
+  ): void => {
+    for (const itemKey of rewardItemKeys(rewards ?? {})) {
+      reference({ ...from, path: `${from.path}.${itemKey}` }, 'item', itemKey);
+    }
   };
 
   // ── 2 & 3. References and engine registry ─────────────────────────────────
@@ -225,10 +243,57 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
   }
 
   for (const [key, entity] of parsed.get('campaignChapter') ?? []) {
-    const chapter = entity as { setKey?: string };
+    const chapter = entity as {
+      setKey?: string;
+      starRewards?: { stars: number; rewards: Record<string, number> }[];
+    };
     if (chapter.setKey) {
       reference({ contentType: 'campaignChapter', key, path: 'setKey' }, 'gearSet', chapter.setKey);
     }
+    (chapter.starRewards ?? []).forEach((tier, index) => {
+      rewardMap(
+        { contentType: 'campaignChapter', key, path: `starRewards.${index}.rewards` },
+        tier.rewards,
+      );
+    });
+  }
+
+  for (const [key, entity] of parsed.get('quest') ?? []) {
+    const quest = entity as {
+      rewards?: Record<string, number>;
+      goals: { type: string; filters: Record<string, string | number> }[];
+    };
+    rewardMap({ contentType: 'quest', key, path: 'rewards' }, quest.rewards);
+
+    // A goal that names content directly has to resolve, for the same reason a reward does:
+    // "clear 15 floors of Emberkeep" quietly becomes uncompletable the day Emberkeep is
+    // renamed, and a quest nobody can finish is worse than one nobody was offered.
+    quest.goals.forEach((goal, index) => {
+      const stageKey = goal.filters.stageKey;
+      if (typeof stageKey === 'string') {
+        reference(
+          { contentType: 'quest', key, path: `goals.${index}.filters.stageKey` },
+          'stage',
+          stageKey,
+        );
+      }
+      const dungeonKey = goal.filters.dungeonKey;
+      if (typeof dungeonKey === 'string') {
+        reference(
+          { contentType: 'quest', key, path: `goals.${index}.filters.dungeonKey` },
+          'dungeon',
+          dungeonKey,
+        );
+      }
+      const chapterKey = goal.filters.chapterKey;
+      if (typeof chapterKey === 'string') {
+        reference(
+          { contentType: 'quest', key, path: `goals.${index}.filters.chapterKey` },
+          'campaignChapter',
+          chapterKey,
+        );
+      }
+    });
   }
 
   // A tree needs enough nodes at each tier to satisfy the pick rules, or a player who
@@ -296,7 +361,10 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       parentKey: string;
       waves: { enemyKey: string; slot: number }[][];
       rewards: { drops?: { items?: { itemKey: string }[]; gearSetKeys?: string[] } };
+      firstClearRewards?: Record<string, number>;
     };
+
+    rewardMap({ contentType: 'stage', key, path: 'firstClearRewards' }, stage.firstClearRewards);
 
     if (stage.mode === 'campaign') {
       reference(

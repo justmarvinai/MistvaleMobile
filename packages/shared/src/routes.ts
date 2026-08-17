@@ -116,6 +116,14 @@ export const ROUTES = {
     state: '/hall-of-valor',
     upgrade: '/hall-of-valor/upgrade',
   },
+  quests: {
+    /** Every period, its chest and the first-win bonuses in one read. */
+    state: '/quests',
+    /** `/quests/:key/claim` — one finished quest. */
+    claim: (key: string) => `/quests/${encodeURIComponent(key)}/claim`,
+    /** The all-quests chest for a period, named in the body. */
+    claimChest: '/quests/chest',
+  },
   battle: {
     start: '/battles/start',
     /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */

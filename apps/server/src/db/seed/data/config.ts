@@ -635,6 +635,37 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Arena unlock level',
     'Account level at which the Arena and the Hall of Valor open.',
   ),
+
+  // ── Quests ────────────────────────────────────────────────────────────────
+  entry(
+    'quests.periodChests',
+    {
+      daily: { crystals: 10, playerXp: 400, sigil_faded: 1 },
+    },
+    'quests',
+    'Completion chests',
+    'Paid for claiming every chest-counting quest of a period. A period left out of this map simply has no chest — which is how the weekly and monthly currently stand, their pull being the quests themselves. Worth more than any single line, so the last quest of a day is still worth doing.',
+  ),
+  entry(
+    'quests.firstWinBonuses',
+    {
+      campaign: { silver: 3_000, playerXp: 120 },
+      dungeon: { silver: 5_000, emblem_bronze: 5 },
+      springs: { silver: 4_000, essence_pure: 1 },
+      proving: { silver: 4_000, emblem_bronze: 8 },
+      arena: { valorMedals: 3 },
+    },
+    'quests',
+    'First win of the day, per mode',
+    'Paid automatically on the day’s first victory in each mode — no claim, because it is a reason to open the game rather than a thing to remember. A mode left out pays nothing. Practice is deliberately absent: it costs nothing and pays nothing by design.',
+  ),
+  entry(
+    'unlocks.questsLevel',
+    4,
+    'quests',
+    'Quests unlock level',
+    'Account level at which the checklist appears. Below it, quests still track — so the first day’s progress is not lost — but nothing is claimable.',
+  ),
 ];
 
 /** Stackable items. P1 seeds the currencies and consumables the later phases grant. */

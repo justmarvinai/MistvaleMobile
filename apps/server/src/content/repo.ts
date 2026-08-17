@@ -127,6 +127,36 @@ export async function replaceLiveContent(
   }
 }
 
+/**
+ * Adds live entries without touching what is already there.
+ *
+ * The additive counterpart to `replaceLiveContent`, used when a release brings a content
+ * type an install has never had. `onConflictDoNothing` rather than an upsert on purpose:
+ * this must never be able to overwrite an operator's edit, so a key that somehow already
+ * exists is left exactly as it is.
+ */
+export async function addLiveContent(
+  db: Database,
+  entries: { contentType: ContentType; key: string; data: unknown }[],
+): Promise<void> {
+  if (entries.length === 0) return;
+
+  const CHUNK = 200;
+  for (let i = 0; i < entries.length; i += CHUNK) {
+    await db
+      .insert(contentEntries)
+      .values(
+        entries.slice(i, i + CHUNK).map((entry) => ({
+          contentType: entry.contentType,
+          key: entry.key,
+          state: 'live' as const,
+          data: entry.data,
+        })),
+      )
+      .onConflictDoNothing();
+  }
+}
+
 export async function latestRevision(db: Database): Promise<number> {
   const rows = await db
     .select({ rev: sql<number>`coalesce(max(${contentRevisions.rev}), 0)::int` })

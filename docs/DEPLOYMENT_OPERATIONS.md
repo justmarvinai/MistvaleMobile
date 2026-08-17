@@ -36,7 +36,7 @@
 | `RESTORE.sh` | Interactive: list backups → confirm phrase → stop server → restore DB (+uploads) → start → health check. |
 | `STATUS.sh` | One screen: systemd states, health endpoint JSON (RSS, event-loop lag, DB pool, active battles, content rev), disk/RAM, cert expiry, last backup age, error count last hour. |
 | `LOGS.sh` | Tail/filter server logs (`-e` errors only, `-p <playerName>` by player, `-r <requestId>`). |
-| `SEED.sh` | Load content seeds into empty content tables; `--force-content` = full content refresh (player data untouched, auto-backup first). Then fills the Arena's bot ladder — a separate step because bots are *player* data and the content seeder never writes any; idempotent, and a failure is a warning rather than a failed deploy since the nightly job retries. |
+| `SEED.sh` | Load content seeds. On an empty install that is everything; on an install that already has content it **adds what is missing and changes nothing that is present** — the new content types and `game_config` keys a release brought, recorded as their own revision and printed line by line. That is what makes a release's tunables actually reach a live server instead of the feature silently running on code fallbacks. `--force-content` = full content refresh, replacing operator edits (player data untouched, auto-backup first). Content an operator *deleted* returns on the next seed; retiring content is what the `active` flag is for. Then fills the Arena's bot ladder — a separate step because bots are *player* data and the content seeder never writes any; idempotent, and a failure is a warning rather than a failed deploy since the nightly job retries. |
 
 All scripts read one `/srv/mistvale/.env`; no secrets in git; `.env.example` documents every variable.
 

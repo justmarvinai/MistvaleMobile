@@ -42,6 +42,7 @@ import * as depths from '../depths/service';
 import * as gear from '../gear/service';
 import * as mastery from '../mastery/service';
 import * as meta from '../meta/progress';
+import * as quests from '../meta/quests';
 import * as progress from '../progress/service';
 import * as chronicle from '../summon/service';
 import * as rewards from '../rewards/service';
@@ -98,9 +99,14 @@ export interface RewardSummary {
   /** True the first time this stage has ever been beaten. */
   firstClear: boolean;
   /** Paid on top of the stage payout: the first-clear bonus and any star chest. */
-  bonus: rewards.RewardBundle;
+  bonus: Record<string, number>;
   /** Chapter star-chest tiers this clear crossed. */
   chestTiers: number[];
+  /**
+   * The day's first victory in this mode, paid automatically. Empty once it has been
+   * earned today, or in a mode the config pays nothing for.
+   */
+  firstWin: Record<string, number>;
   /**
    * What an Arena fight moved, on both ratings. Null for every other mode — and present
    * on an arena *loss* too, because losing is a result the ladder records rather than the
@@ -121,6 +127,7 @@ const NO_REWARDS: RewardSummary = {
   firstClear: false,
   bonus: {},
   chestTiers: [],
+  firstWin: {},
   arena: null,
 };
 
@@ -929,6 +936,10 @@ async function settle(
     ...(stage.energyCost > 0 ? [{ type: 'useEnergy' as const, amount: stage.energyCost }] : []),
   ]);
 
+  // The day's first victory in this mode, paid on the spot. After the fan-out, so a win
+  // that levels the account has already opened whatever that level opens.
+  const firstWin = await quests.awardFirstWin(tx, ctx, playerId, row.mode);
+
   return {
     silver,
     playerXp: stage.rewards.playerXp,
@@ -940,6 +951,7 @@ async function settle(
     firstClear: cleared.firstClear,
     bonus: cleared.bonus,
     chestTiers: cleared.chestTiers,
+    firstWin,
     arena: null,
   };
 }
@@ -966,7 +978,12 @@ async function settleArena(
     battleId: row.id,
     won: outcome === 'victory',
   });
-  return { ...NO_REWARDS, arena };
+
+  // The first-win bonus is for *winning*, so unlike the rating it only lands on a victory.
+  const firstWin =
+    outcome === 'victory' ? await quests.awardFirstWin(tx, ctx, playerId, 'arena') : {};
+
+  return { ...NO_REWARDS, firstWin, arena };
 }
 
 /** Whether a stage's waves hold anything content has flagged as a boss. */

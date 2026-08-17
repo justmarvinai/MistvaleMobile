@@ -85,3 +85,21 @@
   font-size: 9px;
   color: $muted-deep;
 }
+
+/** The claimable-count pip. Top-left so it never sits under the hotkey number. */
+.pip {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 3px;
+  background: $danger;
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 0.5625rem;
+  line-height: 1;
+}

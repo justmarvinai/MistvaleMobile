@@ -1,0 +1,80 @@
+import { useMemo } from 'react';
+import { useContentStore } from '../../state/contentStore';
+import styles from './Rewards.module.scss';
+
+/**
+ * A reward map, rendered.
+ *
+ * Content pays in a flat `{silver: 5000, sigil_gleaming: 1}`, so every screen that shows
+ * what something is worth needs the same two things: the player-facing name of a key, and
+ * a consistent way to lay the pairs out. Doing that per screen is how a quest ends up
+ * saying "sigil_gleaming" while the Bazaar next door says "Gleaming Sigil".
+ *
+ * Item names come from the content bundle the client already holds, so an item renamed in
+ * Admin is renamed here on the next publish with no client change.
+ */
+
+/** Wallet keys, which are not items and so are not in the bundle's item list. */
+const SCALAR_LABELS: Readonly<Record<string, string>> = Object.freeze({
+  silver: 'Silver',
+  crystals: 'Crystals',
+  valorMedals: 'Valor Medals',
+  playerXp: 'Experience',
+  championXp: 'Champion XP',
+});
+
+/**
+ * The player-facing name of a reward key.
+ *
+ * Exported because a toast has to say the same words the chips do — two lookup tables
+ * would drift the first time an item is renamed in Admin.
+ */
+export function useRewardName(): (key: string) => string {
+  const bundle = useContentStore((state) => state.bundle);
+  return useMemo(() => {
+    const items = new Map((bundle?.items ?? []).map((item) => [item.key, item.name]));
+    // An unknown key falls back to itself rather than being hidden: a reward the player is
+    // actually receiving must never render as nothing.
+    return (key: string): string => SCALAR_LABELS[key] ?? items.get(key) ?? key;
+  }, [bundle]);
+}
+
+/** `{silver: 5000, sigil_faded: 1}` → "5,000 Silver and 1 Faded Sigil". */
+export function describeRewards(
+  rewards: Readonly<Record<string, number>>,
+  nameOf: (key: string) => string,
+): string {
+  const parts = Object.entries(rewards)
+    .filter(([, amount]) => amount > 0)
+    .map(([key, amount]) => `${amount.toLocaleString()} ${nameOf(key)}`);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0]!;
+  return `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
+}
+
+export interface RewardsProps {
+  rewards: Readonly<Record<string, number>>;
+  /** `+` in front of each amount, for a payout rather than a price. */
+  signed?: boolean;
+  className?: string;
+}
+
+export function Rewards({ rewards, signed = false, className }: RewardsProps): JSX.Element | null {
+  const nameOf = useRewardName();
+  const entries = Object.entries(rewards).filter(([, amount]) => amount > 0);
+  if (entries.length === 0) return null;
+
+  return (
+    <ul className={[styles.rewards, className ?? ''].filter(Boolean).join(' ')}>
+      {entries.map(([key, amount]) => (
+        <li key={key} className={styles.reward}>
+          <span className={styles.amount}>
+            {signed ? '+' : ''}
+            {amount.toLocaleString()}
+          </span>
+          <span className={styles.name}>{nameOf(key)}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}

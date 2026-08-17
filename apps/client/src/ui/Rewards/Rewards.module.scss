@@ -1,0 +1,31 @@
+@use '../../styles/tokens' as *;
+
+.rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-1 $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reward {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.amount {
+  color: $gold;
+  font-family: $font-mono;
+  font-weight: 700;
+}
+
+.name {
+  color: $parchment-dim;
+}

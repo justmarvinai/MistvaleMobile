@@ -1,6 +1,7 @@
 import { ARENA_TIERS, ARENA_TIER_LABELS, type ArenaTier } from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
+import { Rewards } from '../../ui/Rewards/Rewards';
 import { useBattleStore } from '../../state/battleStore';
 import styles from './Results.module.scss';
 
@@ -136,6 +137,15 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
                 </div>
               )}
             </div>
+
+            {Object.keys(rewards.firstWin).length > 0 && (
+              <div className={styles.firstWin}>
+                {/* Named rather than folded into the silver line: a player who does not
+                    know this exists will not come back tomorrow for it. */}
+                <span className={styles.label}>First win of the day</span>
+                <Rewards rewards={rewards.firstWin} signed />
+              </div>
+            )}
 
             {rewards.chestTiers.length > 0 && (
               <p className={styles.chest}>

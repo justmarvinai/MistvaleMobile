@@ -5,6 +5,7 @@ import * as contentRepo from '../../content/repo';
 import { loadConfig } from '../../lib/config';
 import * as schema from '../schema/index';
 import { buildSeedContent, parseSeedContent } from './seeders';
+import { applyFill, planFill } from './fill';
 import type { ContentSet } from '../../content/validate';
 import type { ContentType } from '@mistvale/shared';
 
@@ -17,6 +18,20 @@ import type { ContentType } from '@mistvale/shared';
  * By default it refuses to overwrite content that already exists, because after the
  * first deploy the database (edited through the Admin Suite) is the source of truth.
  * `--force-content` replaces it deliberately, and `UPDATE.sh` takes a backup first.
+ *
+ * It does, however, **fill in whatever the install is missing**. A release that adds a
+ * content family (quests in P8) or — far more often — a handful of `game_config` keys for
+ * a new feature would otherwise be invisible on every existing server: the guard sees
+ * content, skips everything, and the feature runs on fallbacks nobody chose. The only way
+ * out was `--force-content`, which discards an operator's tuning to deliver rows they
+ * never had.
+ *
+ * The rule is simple and worth keeping simple: **a plain seed adds what is absent and
+ * changes nothing that is present.** Insertion is `on conflict do nothing`, so an
+ * operator's edit can never be overwritten, and every addition is printed and recorded as
+ * its own revision. The cost is that content deliberately *deleted* comes back on the next
+ * seed — retiring content is what the `active` flag is for, and a flag survives this where
+ * a deletion does not.
  */
 
 interface SeedOptions {
@@ -90,9 +105,22 @@ async function main(): Promise<void> {
       console.log(
         `Content already present (${existing.length} live entities at revision ${await contentRepo.latestRevision(db)}).`,
       );
+
+      const fill = planFill(seeds, existing, normalised);
+
+      if (fill.added.length === 0) {
+        console.log(
+          'Nothing missing. Use --force-content to replace what is there (player data is never touched).',
+        );
+        return;
+      }
+
+      const rev = await applyFill(db, fill);
+      for (const [contentType, count] of fill.perType) console.log(`  + ${contentType}: ${count}`);
       console.log(
-        'Nothing seeded. Use --force-content to replace it (player data is never touched).',
+        `Filled in ${fill.added.length} missing entities at revision ${rev}. Nothing existing was changed.`,
       );
+      console.log('Restart the server (or publish from Admin) to load it into the cache.');
       return;
     }
 

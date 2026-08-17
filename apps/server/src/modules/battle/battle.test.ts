@@ -277,26 +277,37 @@ describe.skipIf(!dbUp)('the game loop', () => {
         expect(view.rewards.stars).toBeGreaterThanOrEqual(1);
         expect(view.rewards.stars).toBeLessThanOrEqual(3);
 
-        // A first clear pays its bonus on top of the stage payout, so the wallet is the
-        // sum of the two — and the response says so rather than leaving the client to
-        // wonder where the extra silver came from.
+        // A first clear pays its bonus on top of the stage payout, and the day's first
+        // campaign victory pays a third time. All three are reported separately rather
+        // than summed into one number, so a player can see where the silver came from.
         expect(view.rewards.firstClear).toBe(true);
+        expect(view.rewards.firstWin.silver).toBeGreaterThan(0);
         const [wallet] = await app.db
           .select({ silver: players.silver, xp: players.xp, level: players.level })
           .from(players)
           .where(eq(players.id, playerId));
-        expect(wallet!.silver).toBe(view.rewards.silver + (view.rewards.bonus.silver ?? 0));
+        expect(wallet!.silver).toBe(
+          view.rewards.silver +
+            (view.rewards.bonus.silver ?? 0) +
+            (view.rewards.firstWin.silver ?? 0),
+        );
 
         // A clear writes one currency row, and one more for item drops when the stage
-        // rolled any. What must never happen is a second *currency* row: that would be a
-        // double payout, which is the thing this assertion exists to catch. Rows from
-        // other sources — the welcome grant, for one — are not this test's business.
+        // rolled any. What must never happen is a *second* row from the fight itself:
+        // that would be a double payout, which is the thing this assertion exists to
+        // catch. The first-win bonus is a separate source on purpose — it is a daily
+        // reward that happens to land on a battle, not part of the battle's payout.
         const ledger = await battleLedger();
         const currencyRows = ledger.filter((row) =>
           Object.hasOwn(row.deltas as Record<string, number>, 'silver'),
         );
         expect(currencyRows).toHaveLength(1);
         for (const row of ledger) expect(row.source).toContain('c01_s1_normal');
+
+        const firstWinRows = (
+          await app.db.select().from(economyLog).where(eq(economyLog.playerId, playerId))
+        ).filter((row) => row.source === 'quest:firstWin:campaign');
+        expect(firstWinRows).toHaveLength(1);
       }
     });
 

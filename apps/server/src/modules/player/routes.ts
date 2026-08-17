@@ -11,6 +11,7 @@ import { players } from '../../db/schema/index';
 import { AppError } from '../../lib/errors';
 import { toPlayerSummary } from '../auth/service';
 import { multiState } from '../battle/service';
+import * as quests from '../meta/quests';
 
 /**
  * Player snapshot and settings.
@@ -39,6 +40,17 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
           // Today's farming allowance rides on the snapshot the shell already refetches
           // after every battle, so the team-select screen never has to ask for it.
           multiBattle: multiState(app.content, player, now),
+          // Dock pips, computed rather than polled (UI_UX §1.3). One query, on a request
+          // the shell already makes after every fight — which is exactly when a quest
+          // becomes claimable.
+          badges: {
+            quests: await quests.claimableCount(
+              { db: app.db, content: app.content },
+              player.id,
+              player,
+              now,
+            ),
+          },
           settings: { ...DEFAULT_PLAYER_SETTINGS, ...player.settings },
           serverTime: now.toISOString(),
         },

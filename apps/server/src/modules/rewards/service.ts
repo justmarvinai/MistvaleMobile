@@ -1,5 +1,5 @@
 import { and, eq, gte, sql } from 'drizzle-orm';
-import { CURRENCIES, type Currency } from '@mistvale/shared';
+import { CURRENCIES, splitRewards, type Currency } from '@mistvale/shared';
 import { economyLog, playerChampions, playerItems, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
@@ -256,6 +256,55 @@ export async function itemQuantities(tx: Executor, playerId: string): Promise<Ma
     .from(playerItems)
     .where(eq(playerItems.playerId, playerId));
   return new Map(rows.map((row) => [row.itemKey, row.quantity]));
+}
+
+export interface PaidRewards {
+  /** Everything applied, currencies and items together — what a screen shows. */
+  applied: Record<string, number>;
+  levelsGained: number;
+  newLevel: number;
+}
+
+/**
+ * Pays a content reward map — `{silver: 5000, sigil_gleaming: 1}` — in full.
+ *
+ * The one entry point for anything content authored as a flat map: quest and mission
+ * rewards, stage first-clear bonuses, chapter star chests, the daily chest. It exists
+ * because a map mixes two things that are stored in two different places, and every
+ * caller that split them by hand got it subtly wrong in the same direction — folding the
+ * map into a currency bundle and *silently discarding* every key it did not recognise. A
+ * sigil written into a first-clear reward would validate, publish and pay nothing.
+ *
+ * Unknown keys are not tolerated here either, but they fail loudly: publish validation
+ * resolves every non-currency key against the item catalogue, so the only way to reach
+ * this with a bad key is an item deleted between publish and payout, and that is worth an
+ * error rather than a shrug.
+ */
+export async function payRewards(
+  tx: Executor,
+  playerId: string,
+  rewards: Readonly<Record<string, number>>,
+  source: string,
+  knownItem?: (itemKey: string) => boolean,
+): Promise<PaidRewards> {
+  const { scalars, items } = splitRewards(rewards);
+
+  if (knownItem) {
+    for (const itemKey of Object.keys(items)) {
+      if (!knownItem(itemKey)) {
+        throw AppError.internal(`Reward names an item that no longer exists: ${itemKey}.`);
+      }
+    }
+  }
+
+  const granted = await grant(tx, playerId, scalars, source);
+  const grantedItems = await grantItems(tx, playerId, items, source);
+
+  return {
+    applied: { ...granted.applied, ...grantedItems },
+    levelsGained: granted.levelsGained,
+    newLevel: granted.newLevel,
+  };
 }
 
 /** Rolls a stage's silver payout. Uses the caller's seeded RNG so a replay pays the same. */

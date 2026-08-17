@@ -54,6 +54,8 @@ export const playerQuests = pgTable(
     progress: jsonb('progress').notNull().default([]).$type<number[]>(),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     claimedAt: timestamp('claimed_at', { withTimezone: true }),
+    /** The action that claimed it, so a retried claim replays instead of failing. */
+    claimActionId: text('claim_action_id'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

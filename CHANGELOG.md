@@ -5,6 +5,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — quests (P8b)
+
+The checklist is playable: eight dailies, six weeklies, five monthlies, a chest for finishing the day, and a bonus for the day's first win in each mode.
+
+- **One read draws the screen.** Every period, every meter and every boundary the screen counts down to arrive together, because they all hang off the same daily reset and three requests would be three chances to straddle it. Both claims answer with the whole screen again rather than only what they paid — a claim moves the chest meter, the dock pip and sometimes the account level, so a follow-up read would render a screen one claim out of date.
+- **Claiming is idempotent in the way that matters.** A retried claim — the dropped response on a phone — replays what it paid and pays nothing again. A genuine second click is refused. The two are told apart by the action id the client generates, not guessed at from timing.
+- **The chest counts quests *claimed*, not finished.** The chest is the reward for finishing the list, and a list you have not collected is a list you have not finished. It re-opens at the reset with nothing to reset it: the row records which period instance it was taken for, so a new day is a different instance rather than a flag somebody has to clear. Only the daily has a chest — a period the config leaves out has none at all, rather than an empty meter nobody can fill.
+- **The day's first win in each mode pays automatically.** No claim, no button: it lands with the victory, because it is a reason to open the game rather than one more thing to remember to collect. Campaign, the relic keeps, the springs, the Proving Grounds and the Arena each pay their own; practice is deliberately left out, since a bonus on a free sandbox would make it the cheapest silver in the game.
+- **Progress is tracked from level 1, claimable from level 4.** The screen opens with the rest of the meta layer, but a player's first day is not thrown away by a gate they could not see — the day they arrive, the quests they already finished are waiting.
+
+### Fixed — a reward that named an item paid nothing
+
+Content pays in a flat map — `{silver: 5000, sigil_gleaming: 1}` — and the payout folded that map into a currency bundle, **silently discarding every key it did not recognise**. A stage first-clear reward or a star chest that promised a sigil would validate, publish, and hand over air. Nothing shipped had hit it, because nothing had yet paid an item that way; the quests in this release pay eight of them.
+
+Both ends are closed now. There is one payout path for reward maps, which splits currencies from items and pays both, and publish validation resolves every non-currency key against the item catalogue — so `sigil_gleeming` is a red line in the publish diff instead of a hole in somebody's reward. The same check now covers goals that name content: a weekly asking for fifteen floors of a keep that was renamed is a quest nobody can finish, which is worse than one nobody was offered.
+
+### Fixed — a release's content and config never reached a live server
+
+Found by the browser suite rather than by a test, which is the only reason it was found at all. `SEED.sh` on an install that already had content did *nothing*, on the sound principle that after the first deploy the database is the source of truth. The unsound consequence: a release that added content could never deliver it. Quests would have arrived as an empty screen on a live server, and — far more often — the handful of `game_config` keys every new feature brings never landed, so the feature ran on whatever the code falls back to. The only escape was `--force-content`, which throws away an operator's tuning to deliver rows they never had.
+
+A plain seed now **adds what is absent and changes nothing that is present**. The insert is `on conflict do nothing`, so "cannot overwrite an edit" is a property of the statement rather than of the logic around it, and every addition is printed and recorded as its own revision. The development database turned out to be **21 config rows behind** — including the Arena's, which had been quietly running on code defaults since P7.
+
 ### Added — the goal engine (P8a)
 
 The foundation the whole retention layer sits on. Nothing player-visible yet — quests get their screen and their claim button in P8b — but the machinery underneath is finished rather than sketched.

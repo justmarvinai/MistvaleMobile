@@ -88,7 +88,9 @@ Keyed by **player** id, not account id — that is what `economy_log`, `stage_pr
 
 ### The Depths, quests, events, meta
 | GET `/depths` | Every published dungeon with: whether it is open right now (account level *and* today's rotation), why not if not, which weekday it next opens, the deepest floor reached and total clears. Plus the server's game-day and weekday, and the new-account grace period's end. Per-floor stars and unlocks come from `/player/progress`, which returns every mode's stages. |
-| GET `/quests` | Daily/weekly/monthly with progress + daily-chest meter. POST `/quests/:key/claim`. |
+| GET `/quests` | The whole screen in one read: every period's quests with per-goal progress, each period's completion chest and its meter, the day's first-win bonuses, and the boundaries the screen counts down to (today, the next reset instant, the week's Monday, the month's first). One request because all of it hangs off the same daily boundary, and three would be three chances to straddle it. |
+| POST `/quests/:key/claim` | Pays one finished quest. `{actionId}` — a retried claim replays what it paid rather than failing, a second claim is refused. Answers with the whole screen again, since a claim moves the chest meter, the badge and sometimes the account level. |
+| POST `/quests/chest` | `{period, actionId}` — the completion chest, once every counting quest of that period has been **claimed** (not merely finished). Reports `claimAllDailies` to the goal engine, which is what the "claim a full day five times" weekly counts. |
 | GET `/missions` | Chain state. POST `/missions/:key/claim`. |
 | GET `/events` | Active events, points, milestones. POST `/events/:key/claim` `{milestone}`. |
 | GET `/login-calendar` | Month grid + today claim state. POST `/login-calendar/claim`. |

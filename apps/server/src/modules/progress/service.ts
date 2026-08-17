@@ -1,11 +1,11 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
-import type { CampaignChapterDef, StageDef } from '@mistvale/shared';
+import { mergeRewards, type CampaignChapterDef, type StageDef } from '@mistvale/shared';
 import { chapterRewards, stageProgress } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import type { StageProgressRow } from '../../db/schema/game';
 import type { ContentCache } from '../../content/cache';
 import { AppError } from '../../lib/errors';
-import { grant, type RewardBundle } from '../rewards/service';
+import { payRewards } from '../rewards/service';
 
 /**
  * What a player has cleared.
@@ -112,8 +112,8 @@ export interface ClearOutcome {
   stars: number;
   /** True the first time this stage has ever been beaten. */
   firstClear: boolean;
-  /** Rewards paid on top of the stage's normal payout. */
-  bonus: RewardBundle;
+  /** Rewards paid on top of the stage's normal payout — currencies and items alike. */
+  bonus: Record<string, number>;
   /** Star-chest tiers this clear unlocked, if any. */
   chestTiers: number[];
 }
@@ -164,13 +164,13 @@ export async function recordClear(
   if (!row) throw new AppError('INTERNAL', 'The clear could not be recorded.');
   const firstClear = row.clears === 1;
 
-  const bonus: RewardBundle = {};
-  if (firstClear) mergeBundle(bonus, stage.firstClearRewards);
+  const bonus: Record<string, number> = {};
+  if (firstClear) mergeRewards(bonus, stage.firstClearRewards);
 
   const chestTiers = await claimStarChests(tx, playerId, stage, content, bonus);
 
   if (Object.keys(bonus).length > 0) {
-    await grant(tx, playerId, bonus, `progress:${stage.key}`);
+    await payRewards(tx, playerId, bonus, `progress:${stage.key}`, knownItem(content));
   }
 
   return { stars: row.stars, firstClear, bonus, chestTiers };
@@ -188,7 +188,7 @@ async function claimStarChests(
   playerId: string,
   stage: StageDef,
   content: ContentCache,
-  bonus: RewardBundle,
+  bonus: Record<string, number>,
 ): Promise<number[]> {
   if (stage.mode !== 'campaign') return [];
 
@@ -227,7 +227,7 @@ async function claimStarChests(
   if (earned.length === 0) return [];
 
   for (const tier of earned) {
-    mergeBundle(bonus, tier.rewards);
+    mergeRewards(bonus, tier.rewards);
     claimed.add(tier.stars);
   }
 
@@ -243,14 +243,10 @@ async function claimStarChests(
   return earned.map((tier) => tier.stars);
 }
 
-/** Folds a `{silver: 500, crystals: 10}` reward record into a bundle. */
-function mergeBundle(bundle: RewardBundle, rewards: Readonly<Record<string, number>>): void {
-  for (const [key, amount] of Object.entries(rewards)) {
-    if (typeof amount !== 'number' || amount === 0) continue;
-    if (key === 'silver' || key === 'crystals' || key === 'valorMedals' || key === 'playerXp') {
-      bundle[key] = (bundle[key] ?? 0) + amount;
-    }
-  }
+/** Whether a reward's item key is still in the published catalogue. */
+function knownItem(content: ContentCache): (itemKey: string) => boolean {
+  const items = new Set(content.current().bundle.items.map((item) => item.key));
+  return (itemKey) => items.has(itemKey);
 }
 
 /** Stars per chapter, for the campaign map's header. */

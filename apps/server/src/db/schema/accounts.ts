@@ -165,6 +165,21 @@ export const players = pgTable(
     dailyCounters: jsonb('daily_counters').notNull().default({}).$type<Record<string, number>>(),
     dailyCountersDay: text('daily_counters_day'),
 
+    /**
+     * The last completion chest taken for each quest period: which period *instance* it
+     * was, and the action that took it.
+     *
+     * A map rather than three columns, and an anchor rather than a boolean, for the same
+     * reason `player_quests` carries one: a chest is claimable again when the anchor
+     * stored here is no longer the current period's, so the daily chest re-opens at the
+     * reset with nothing to reset it. The action id makes a retried claim replay rather
+     * than fail — a dropped response on a phone must not cost the chest.
+     */
+    chestClaims: jsonb('chest_claims')
+      .notNull()
+      .default({})
+      .$type<Record<string, { anchor: string; actionId: string }>>(),
+
     lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

@@ -65,3 +65,15 @@
   font-size: 0.82rem;
   text-align: center;
 }
+
+/** The day's first win, set apart from the fight's own payout — it is a daily reward that
+    happened to land on this battle, not part of what the battle paid. */
+.firstWin {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  margin-top: $space-3;
+  padding: $space-2 $space-3;
+  background: rgba(212, 175, 96, 0.08);
+  border: 1px solid $gold;
+}

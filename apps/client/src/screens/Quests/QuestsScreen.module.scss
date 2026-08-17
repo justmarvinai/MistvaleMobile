@@ -1,0 +1,299 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: $space-4;
+  height: 100%;
+  min-height: 0;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: $space-2;
+}
+
+.side {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+// ── Tabs ────────────────────────────────────────────────────────────────────
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $space-3;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  gap: $space-1;
+}
+
+.tab {
+  position: relative;
+  padding: $space-2 $space-4;
+  background: $panel;
+  border: 1px solid $edge;
+  border-bottom-color: transparent;
+  color: $parchment-dim;
+  font-family: $font-display;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color $duration-fast $ease-out;
+
+  &:hover {
+    color: $parchment;
+  }
+}
+
+.tabActive {
+  background: $panel-raised;
+  border-color: $edge-bright;
+  color: $gold;
+}
+
+/** The unclaimed count, mirroring the dock's pip so the two agree at a glance. */
+.pip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  margin-left: $space-2;
+  padding: 0 3px;
+  background: $danger;
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
+.resets {
+  margin: 0;
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.error {
+  margin: 0;
+  padding: $space-2 $space-3;
+  background: rgba(180, 60, 60, 0.12);
+  border: 1px solid $danger;
+  color: $parchment;
+  font-size: 0.8125rem;
+}
+
+.empty {
+  margin: $space-6 0;
+  color: $muted;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+// ── The chest ───────────────────────────────────────────────────────────────
+
+.chest {
+  flex: 0 0 auto;
+}
+
+.chestBody {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  flex-wrap: wrap;
+}
+
+.chestTitle {
+  margin: 0 0 2px;
+  color: $gold;
+  font-family: $font-display;
+  font-size: 1rem;
+}
+
+.chestNote {
+  margin: 0 0 $space-2;
+  color: $parchment-dim;
+  font-size: 0.8125rem;
+}
+
+.chestAction {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $space-2;
+}
+
+.meter {
+  display: flex;
+  gap: 3px;
+}
+
+.notch {
+  width: 10px;
+  height: 14px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.notchFull {
+  background: $gold;
+  border-color: $gold;
+}
+
+// ── Quest rows ──────────────────────────────────────────────────────────────
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quest {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-3;
+  background: $panel;
+  border: 1px solid $edge;
+  transition: border-color $duration-fast $ease-out;
+}
+
+.questReady {
+  border-color: $gold;
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 96, 0.18);
+}
+
+.questDone {
+  opacity: 0.55;
+}
+
+.questBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.questName {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 0.9375rem;
+}
+
+.questNote {
+  margin: 2px 0 $space-2;
+  color: $parchment-dim;
+  font-size: 0.8125rem;
+}
+
+.goal {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+
+  & + & {
+    margin-top: 4px;
+  }
+}
+
+.bar {
+  flex: 1 1 auto;
+  height: 8px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: $mist;
+  transition: width $duration-base $ease-out;
+}
+
+.count {
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.questSide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $space-2;
+  flex: 0 0 auto;
+}
+
+// ── First wins ──────────────────────────────────────────────────────────────
+
+.sideNote {
+  margin: 0 0 $space-3;
+  color: $muted;
+  font-size: 0.75rem;
+}
+
+.wins {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.win {
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.winDone {
+  opacity: 0.5;
+}
+
+.winLocked {
+  opacity: 0.7;
+}
+
+.winHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
+  margin-bottom: 4px;
+}
+
+.winName {
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 0.8125rem;
+}
+
+.winMark {
+  color: $gold;
+  font-size: 0.75rem;
+}
+
+.winNote {
+  margin: 0;
+  color: $muted;
+  font-size: 0.75rem;
+}
