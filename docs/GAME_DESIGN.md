@@ -115,7 +115,12 @@ Six relic slots — **Weapon, Helm, Shield, Gauntlets, Cuirass, Boots** — plus
 Classic arena: 4v4 vs snapshot **defense teams**; tokens cap 10, +1/hour (source-faithful), opponent offer list with refresh; Elo-lite rating → tiers **Bronze I-III, Silver I-III, Gold I-III, Platinum**; per-win **Valor Medals** (amount scales with tier) + weekly tier chest (reset Monday). **AI bots seed every band** (never an empty ladder; natural names with no bot marker — owner-approved; admin-managed). **Hall of Valor**: spend Valor Medals on permanent account-wide element-keyed stat bonuses (per element × stat, 10 levels — the Great Hall analog), doubling as the long-term arena sink.
 
 ### 9.4 Tutorial / Onboarding — *The First Calling*
-Scripted RSL-style opening: cold-open battle with all three starters pre-made (taste of power) → the Mistgate flickers, you may keep only one (**starter choice**) → guided: first summon (guaranteed Rare), equip relic, upgrade relic, clear 1-1…1-3, unlock Quests → tutorial rewards seed the first days. Steps data-driven (`tutorial_step_defs`), skippable-per-step for alts. Guide NPC: **the Wardenmaster**, a Hollowborn lantern-keeper.
+Scripted RSL-style opening: cold-open battle with all three starters pre-made (taste of power) → the Mistgate flickers, you may keep only one (**starter choice**) → guided: first summon, equip relic, upgrade relic, clear 1-1…1-7, unlock Quests → tutorial rewards seed the first days. Guide NPC: **the Wardenmaster**, a Hollowborn lantern-keeper.
+
+**Shipped P9a**, as the `tutorialStep` content type — fourteen steps, everything after the cold open, which is a battle mode rather than a script step and lands separately (see USER_QUESTIONS Q3). Two things about how it is built are worth carrying forward:
+
+- **A step's completion condition is an ordinary goal**, so the tutorial is a subscriber to the fan-out quests and missions already use rather than a mechanism of its own. Nothing that reports activity knows it exists, and a new step is authored exactly like a new daily.
+- **Skippable as a whole, not per step.** The design said "skippable-per-step for alts"; the build makes skipping one decision that ends the script for good. Per-step skipping would have meant deciding what to do about a step's rewards and the kit the next step depends on — and an alt who wants out wants out of all of it, not of step 7.
 
 ## 10. Summoning — the Mistgate
 

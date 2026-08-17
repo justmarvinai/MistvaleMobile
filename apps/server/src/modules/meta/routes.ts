@@ -4,6 +4,7 @@ import {
   apiSuccess,
   eventClaimRequestSchema,
   loginClaimRequestSchema,
+  tutorialAdvanceRequestSchema,
   missionClaimRequestSchema,
   questChestClaimRequestSchema,
   questClaimRequestSchema,
@@ -13,6 +14,7 @@ import { AppError } from '../../lib/errors';
 import * as events from './events';
 import * as login from './login';
 import * as missions from './missions';
+import * as tutorial from './tutorial';
 import * as quests from './quests';
 
 /**
@@ -116,5 +118,25 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
       );
     }
     return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  // ── The tutorial ──────────────────────────────────────────────────────────
+
+  app.get(ROUTES.tutorial.state, async (request, reply) => {
+    const view = await tutorial.overview(ctx(), requirePlayer(request));
+    return reply.send(apiSuccess({ tutorial: view }, app.content.rev));
+  });
+
+  app.post(ROUTES.tutorial.advance, async (request, reply) => {
+    const body = tutorialAdvanceRequestSchema.parse(request.body);
+    const result = await tutorial.advance(ctx(), requirePlayer(request), body.actionId);
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  app.post(ROUTES.tutorial.skip, async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const view = await tutorial.skip(ctx(), playerId);
+    request.log.info({ playerId }, 'tutorial skipped');
+    return reply.send(apiSuccess({ tutorial: view }, app.content.rev));
   });
 };

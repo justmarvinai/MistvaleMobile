@@ -835,13 +835,13 @@ export type EventDef = z.infer<typeof eventDefSchema>;
  * length is simply `days.length`: a shorter calendar is a shorter cycle, with nothing to
  * configure.
  */
-export const loginRelicGrantSchema = z.object({
+export const relicGrantSchema = z.object({
   setKey: z.string(),
   slot: z.enum(GEAR_SLOTS),
   rank: z.number().int().min(MIN_RANK).max(MAX_RANK),
   rarity: z.enum(RARITIES),
 });
-export type LoginRelicGrant = z.infer<typeof loginRelicGrantSchema>;
+export type RelicGrant = z.infer<typeof relicGrantSchema>;
 
 export const loginGrantSchema = z.object({
   /** Champions handed over outright. */
@@ -853,7 +853,7 @@ export const loginGrantSchema = z.object({
    */
   choices: z.array(z.string()).max(8).default([]),
   /** Relics rolled and handed over. Nine is every slot, which is the sensible ceiling. */
-  relics: z.array(loginRelicGrantSchema).max(9).default([]),
+  relics: z.array(relicGrantSchema).max(9).default([]),
 });
 export type LoginGrant = z.infer<typeof loginGrantSchema>;
 
@@ -905,3 +905,59 @@ export const newsPostDefSchema = contentMetaSchema.extend({
   active: z.boolean().default(true),
 });
 export type NewsPostDef = z.infer<typeof newsPostDefSchema>;
+
+/**
+ * One scripted step of the tutorial (CONTENT_PLAN §7).
+ *
+ * The interesting decision here is that a step's completion condition is **a goal** — the
+ * same `{type, target, filters}` a quest, a mission and an event milestone use. So the
+ * tutorial is a fourth subscriber to the one fan-out rather than a parallel mechanism that
+ * has to be told about battles and summons separately, and "the step where you equip a
+ * relic" is authored exactly like "the daily where you equip a relic".
+ *
+ * A step with no goal is a *beat*: the Wardenmaster says something and the player presses
+ * on. That is most of the script — the tutorial's job is mostly to point at things.
+ */
+export const tutorialStepDefSchema = contentMetaSchema.extend({
+  /** 1-based position. Publish validation enforces that steps run 1…n with no gaps. */
+  step: z.number().int().min(1).max(60),
+  /** Which screen the overlay expects to be on. The client navigates there if it is not. */
+  screen: z.string().min(1).max(32),
+  /**
+   * What to point at, from the client's element registry — `dock:campaign`,
+   * `button:summon-ten`. Empty means the dialogue stands alone, centred, with nothing
+   * highlighted, which is right for the opening and closing beats.
+   */
+  highlight: z.string().max(64).default(''),
+  title: z.string().min(1).max(64),
+  /** The Wardenmaster's line. Markdown-lite, rendered as text like every other prose. */
+  body: z.string().min(1).max(600),
+  /**
+   * What the player must actually do. Omitted for a beat the player simply acknowledges.
+   *
+   * Progress is counted from the moment the step **opens**, not from what the account has
+   * already done: a step asking for a stage clear wants one now. The exception falls out of
+   * the fan-out rather than being special-cased here — `accountLevel` is appended to every
+   * report, and it is a threshold goal, so "reach level 5" is satisfied by the next thing
+   * the player does rather than by levelling again.
+   *
+   * Author steps that ask for something cheap and repeatable for that reason. "Upgrade a
+   * relic to +1" is safe even for somebody who already has one at +6; "clear 1-1" costs a
+   * re-run of a stage they can re-run.
+   */
+  goal: goalSchema.optional(),
+  rewards: z.record(z.string(), z.number()).default({}),
+  /** Items handed over *before* the step, so a step can ask for what it just gave. */
+  grantsBefore: z.record(z.string(), z.number()).default({}),
+  /**
+   * Relics handed over the same way, rolled on arrival.
+   *
+   * The step that says "put a piece on somebody" cannot depend on a drop: chapter 1's
+   * trash stages drop a relic about two runs in five, so four new wardens in ten would
+   * reach that step with an empty bag and an overlay pointing at nothing. What the
+   * Wardenmaster gives, he gives.
+   */
+  grantsRelics: z.array(relicGrantSchema).max(9).default([]),
+  active: z.boolean().default(true),
+});
+export type TutorialStepDef = z.infer<typeof tutorialStepDefSchema>;

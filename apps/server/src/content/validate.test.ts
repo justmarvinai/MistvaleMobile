@@ -496,6 +496,65 @@ describe('validateContentSet', () => {
     });
   });
 
+  describe('the tutorial script', () => {
+    const tutorialStep = (step: number, over: Record<string, unknown> = {}) => ({
+      key: `tut_${step}`,
+      sortOrder: step,
+      step,
+      screen: 'haven',
+      highlight: '',
+      title: `Step ${step}`,
+      body: 'Words.',
+      rewards: {},
+      grantsBefore: {},
+      active: true,
+      ...over,
+    });
+
+    it('accepts a script numbered 1…n', () => {
+      const content = setOf({
+        tutorialStep: { tut_1: tutorialStep(1), tut_2: tutorialStep(2), tut_3: tutorialStep(3) },
+      });
+      expect(validateContentSet(content).ok).toBe(true);
+    });
+
+    it('refuses a gap, because the script is walked by position', () => {
+      const content = setOf({
+        tutorialStep: { tut_1: tutorialStep(1), tut_3: tutorialStep(3) },
+      });
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((error) => /Step 2 is missing/.test(error.message))).toBe(true);
+    });
+
+    it('refuses two steps claiming the same number', () => {
+      const content = setOf({
+        tutorialStep: { tut_1: tutorialStep(1), tut_1b: tutorialStep(1, { key: 'tut_1b' }) },
+      });
+      const result = validateContentSet(content);
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((error) => /appears twice/.test(error.message))).toBe(true);
+    });
+
+    it('refuses a step paying an item that does not exist', () => {
+      const content = setOf({
+        tutorialStep: { tut_1: tutorialStep(1, { rewards: { sigil_imaginary: 1 } }) },
+      });
+      expect(validateContentSet(content).ok).toBe(false);
+    });
+
+    it('refuses a goal filter the goal type does not understand', () => {
+      const content = setOf({
+        tutorialStep: {
+          tut_1: tutorialStep(1, {
+            goal: { type: 'summon', target: 1, filters: { mode: 'campaign' } },
+          }),
+        },
+      });
+      expect(validateContentSet(content).ok).toBe(false);
+    });
+  });
+
   it('reports every problem at once rather than stopping at the first', () => {
     const content = setOf({
       champion: {

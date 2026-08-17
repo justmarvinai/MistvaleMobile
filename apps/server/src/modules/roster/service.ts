@@ -4,6 +4,7 @@ import { playerChampions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
 import { grantItems } from '../rewards/service';
+import { track } from '../meta/progress';
 import type { ContentCache } from '../../content/cache';
 
 /**
@@ -14,7 +15,8 @@ import type { ContentCache } from '../../content/cache';
  * publish reaches every copy at once and nothing here needs migrating.
  */
 
-type Executor = Database | Parameters<Parameters<Database['transaction']>[0]>[0];
+type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
+type Executor = Database | Transaction;
 
 export interface RosterEntry {
   id: string;
@@ -158,7 +160,7 @@ export function starterChoices(content: ContentCache): ChampionDef[] {
  * retried tutorial step cannot mint a second roster.
  */
 export async function grantStarterPack(
-  tx: Executor,
+  tx: Transaction,
   playerId: string,
   content: ContentCache,
   starterKey: string,
@@ -191,6 +193,13 @@ export async function grantStarterPack(
       await grantItems(tx, playerId, items, 'starter:welcome');
     }
   }
+
+  // A starter is a champion obtained — the goal type says "however it arrived", and the
+  // tutorial's first real step is exactly this one. Reported here rather than from the
+  // route so the food units that come with a later starter grant would count too.
+  await track(tx, { content }, playerId, [
+    { type: 'championObtained', facts: { rarity: chosen.rarity } },
+  ]);
 
   return [granted];
 }

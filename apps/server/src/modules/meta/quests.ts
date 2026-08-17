@@ -321,6 +321,14 @@ export async function claim(
       knownItem(ctx),
     );
 
+    // Reported after the row is marked, so a listener that reads quests back sees this one
+    // claimed. Nothing in the quest set counts it — a quest that advanced on quest claims
+    // could advance itself — but the tutorial's "claim your first one" step does, and so
+    // could a future event.
+    await track(tx, { content: ctx.content }, playerId, [
+      { type: 'questClaim', facts: { period: def.period } },
+    ]);
+
     return finish(ctx, tx, playerId, paid.applied, paid.levelsGained, now);
   });
 }

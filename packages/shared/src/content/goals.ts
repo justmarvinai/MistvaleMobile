@@ -40,6 +40,8 @@ export const GOAL_TYPES = [
   'summon',
   /** One relic upgrade attempt, successful or not — the attempt is the activity. */
   'gearUpgrade',
+  /** A relic put on a champion. Filter: `slot`. Re-equipping the same piece counts again. */
+  'gearEquip',
   /** The highest relic level reached. A *threshold* goal: progress is a high-water mark. */
   'gearLevel',
   /** A champion levelled by feeding food. Advances by levels gained. */
@@ -64,6 +66,8 @@ export const GOAL_TYPES = [
   'dungeonClear',
   /** Account level reached. Threshold. */
   'accountLevel',
+  /** One quest claimed. Filter: `period`. */
+  'questClaim',
   /** The player claimed a full day of dailies — what the weeklies are built on. */
   'claimAllDailies',
   /** A champion added to the roster, however it arrived. */
@@ -86,6 +90,7 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   useEnergy: 'count',
   summon: 'count',
   gearUpgrade: 'count',
+  gearEquip: 'count',
   gearLevel: 'highest',
   championLevelUp: 'count',
   championRankUp: 'count',
@@ -98,6 +103,7 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   chapterStars: 'highest',
   dungeonClear: 'count',
   accountLevel: 'highest',
+  questClaim: 'count',
   claimAllDailies: 'count',
   championObtained: 'count',
 });
@@ -116,6 +122,7 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   useEnergy: [],
   summon: ['poolKey'],
   gearUpgrade: [],
+  gearEquip: ['slot'],
   gearLevel: [],
   championLevelUp: [],
   championRankUp: ['rank'],
@@ -128,6 +135,7 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   chapterStars: ['chapterKey'],
   dungeonClear: ['dungeonKey'],
   accountLevel: [],
+  questClaim: ['period'],
   claimAllDailies: [],
   championObtained: ['rarity'],
 });

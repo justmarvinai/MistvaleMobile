@@ -14,6 +14,7 @@ import { playerEvents, playerMissions, playerQuests, players } from '../../db/sc
 import type { Database } from '../../db/client';
 import type { ContentCache } from '../../content/cache';
 import { gameDayFrom } from '../../lib/game-day';
+import { advanceTutorial } from './tutorial';
 
 /**
  * `ProgressService` — the one place the game reports what a player did.
@@ -30,10 +31,11 @@ import { gameDayFrom } from '../../lib/game-day';
  * reverse — a battle paid for without its quest credit — is the same bug wearing a
  * different hat.
  *
- * Three listeners now — the periodic checklist, the Valewarden's Path, and whatever timed
- * events happen to be running. **None of the reporting modules changed to gain any of
- * them**, which is the property this whole design exists to buy: the battle module still
- * only knows that a battle was won.
+ * Four listeners now — the periodic checklist, the Valewarden's Path, whatever timed
+ * events happen to be running, and the tutorial. **None of the reporting modules changed
+ * to gain any of them**, which is the property this whole design exists to buy: the battle
+ * module still only knows that a battle was won. The fourth arrived a phase after the
+ * design predicted it by name, and cost one line here and nothing anywhere else.
  */
 
 /**
@@ -140,6 +142,7 @@ export async function track(
   await advanceQuests(tx, ctx, playerId, reports, level, now);
   await advanceMissions(tx, ctx, playerId, reports, now);
   await advanceEvents(tx, ctx, playerId, reports, level, now);
+  await advanceTutorial(tx, ctx, playerId, reports, now);
 }
 
 /**

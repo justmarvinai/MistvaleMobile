@@ -603,7 +603,12 @@ export async function resetAccount(
         energy: energyCapForLevel(1),
         energyUpdatedAt: new Date(),
         rosterCapacity: 60,
+        // The whole tutorial, not just the cursor: a reset account that came back with
+        // `skipped` still set would be a fresh player the script refuses to greet.
         tutorialStep: 0,
+        tutorialProgress: 0,
+        tutorialActionId: null,
+        tutorialSkipped: false,
         summonPity: {},
         lastSummonActionId: null,
         lastMultiBattle: null,

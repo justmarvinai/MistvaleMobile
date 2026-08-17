@@ -537,6 +537,59 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     }
   }
 
+  {
+    const steps = [...(parsed.get('tutorialStep') ?? [])].map(
+      ([key, entity]) =>
+        [
+          key,
+          entity as {
+            step: number;
+            rewards?: Record<string, number>;
+            grantsBefore?: Record<string, number>;
+            grantsRelics?: { setKey: string }[];
+            goal?: { type: string; filters: Record<string, string | number> };
+          },
+        ] as const,
+    );
+
+    const seen = new Set<number>();
+    for (const [key, step] of steps) {
+      if (seen.has(step.step)) {
+        errors.push({
+          severity: 'error',
+          contentType: 'tutorialStep',
+          key,
+          path: 'step',
+          message: `Step ${step.step} appears twice.`,
+        });
+      }
+      seen.add(step.step);
+
+      rewardMap({ contentType: 'tutorialStep', key, path: 'rewards' }, step.rewards);
+      rewardMap({ contentType: 'tutorialStep', key, path: 'grantsBefore' }, step.grantsBefore);
+      (step.grantsRelics ?? []).forEach((relic, index) => {
+        reference(
+          { contentType: 'tutorialStep', key, path: `grantsRelics.${index}.setKey` },
+          'gearSet',
+          relic.setKey,
+        );
+      });
+      if (step.goal) goalReferences('tutorialStep', key, [step.goal]);
+    }
+
+    // The script is walked positionally, so a gap is a step nobody can ever reach.
+    for (let expected = 1; expected <= steps.length; expected += 1) {
+      if (seen.has(expected)) continue;
+      errors.push({
+        severity: 'error',
+        contentType: 'tutorialStep',
+        key: 'tutorial',
+        path: 'step',
+        message: `Step ${expected} is missing — the script must run 1–${steps.length} with no gaps.`,
+      });
+    }
+  }
+
   // A tree needs enough nodes at each tier to satisfy the pick rules, or a player who
   // commits to it hits a wall the UI cannot explain.
   const masteryTierCounts = new Map<string, number>();

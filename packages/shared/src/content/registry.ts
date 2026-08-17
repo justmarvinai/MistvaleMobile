@@ -20,6 +20,7 @@ import {
   questDefSchema,
   summonPoolDefSchema,
   stageDefSchema,
+  tutorialStepDefSchema,
   statusDefSchema,
 } from './entities';
 import { masteryDefSchema } from './masteries';
@@ -54,6 +55,7 @@ export const CONTENT_TYPES = [
   'event',
   'loginTrack',
   'newsPost',
+  'tutorialStep',
   'gameConfig',
 ] as const;
 
@@ -219,6 +221,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: [],
     inBundle: true,
   },
+  tutorialStep: {
+    label: 'Tutorial',
+    path: 'tutorial',
+    schema: tutorialStepDefSchema,
+    references: [],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -251,6 +260,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'event',
   'loginTrack',
   'newsPost',
+  'tutorialStep',
   'gameConfig',
 ];
 

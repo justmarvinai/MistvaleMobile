@@ -117,6 +117,18 @@ export const players = pgTable(
     rosterCapacity: smallint('roster_capacity').notNull().default(60),
     /** 0 = not started; the tutorial script advances this (docs/CONTENT_PLAN_EA01.md §7). */
     tutorialStep: smallint('tutorial_step').notNull().default(0),
+    /**
+     * Progress towards the current step's goal.
+     *
+     * One counter rather than a row per step, because the tutorial is strictly sequential
+     * and exactly one step is ever open — a table would be a join to answer a question the
+     * player row already holds. Reset to zero as each step opens.
+     */
+    tutorialProgress: smallint('tutorial_progress').notNull().default(0),
+    /** The action that completed the last step, so a retried advance replays. */
+    tutorialActionId: text('tutorial_action_id'),
+    /** Left the script deliberately. The overlay never comes back. */
+    tutorialSkipped: boolean('tutorial_skipped').notNull().default(false),
 
     settings: jsonb('settings').notNull().default(DEFAULT_PLAYER_SETTINGS).$type<PlayerSettings>(),
 

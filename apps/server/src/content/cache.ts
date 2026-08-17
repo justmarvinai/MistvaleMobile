@@ -60,6 +60,7 @@ const EMPTY_BUNDLE_TYPES = {
   events: 'event',
   loginTracks: 'loginTrack',
   newsPosts: 'newsPost',
+  tutorialSteps: 'tutorialStep',
 } as const satisfies Record<string, ContentType>;
 
 export class ContentCache {

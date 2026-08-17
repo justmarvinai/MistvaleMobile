@@ -220,7 +220,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const body = equipGearRequestSchema.parse(request.body);
 
     const ctx = context();
-    await gear.equip(app.db, playerId, id, body.championId, ctx.gear);
+    await gear.equip(app.db, playerId, id, body.championId, ctx.gear, app.content);
     const detail = await champions.loadDetail(app.db, playerId, body.championId, context());
     return reply.send(apiSuccess({ champion: detail }, app.content.rev));
   });

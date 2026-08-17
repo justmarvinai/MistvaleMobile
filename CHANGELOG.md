@@ -5,6 +5,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the tutorial engine, and the script it runs (P9a)
+
+The Wardenmaster now walks a new warden from the first mist to the point the Valewarden's Path takes over. Fourteen steps, all of them content.
+
+- **A step's completion condition is an ordinary goal** — the same `{type, target, filters}` a daily quest uses. So the tutorial is a *subscriber* to the one fan-out everything already reports to, and no module changed to gain it: the battle module still only knows that a battle was won. It is the fourth listener, and the goal DSL named it by name a phase before it existed.
+- **A step with no goal is a beat** — the Wardenmaster says something and the player presses on. Most of the script is pointing at things.
+- **`grantsBefore` pays for the step it belongs to, as that step opens**, so "here are two sigils, now go and pull" is one step rather than two, and the ledger still says which step handed the sigils over. A step can hand over a **relic** the same way, rolled on arrival — the step that says "put a piece on somebody" cannot depend on a drop, and chapter 1's trash stages part with one about two runs in five.
+- **The XP along the way is sized against the level curve**, on purpose: features open on account level, and a step pointing at a screen the player cannot reach is a step nobody finishes. The script clears each gate before the step that needs it — the calendar by step 2, the forge by 4, quests by 6, the Bazaar by 8.
+- **Progress is a position, not a step key.** An operator who renumbers the script does not strand everybody halfway through it on a number that no longer exists — which is also what lets the cold-open battle become step 1 later without moving any player state.
+- **Skipping means it.** Nothing already earned is taken back and nothing further is paid; a tutorial that could be re-entered would have to decide what to do about the steps it already paid for, and the honest answer is that nobody wants it back.
+- **Two new things the game reports**, because two steps needed them and neither existed: a relic being equipped, and a single quest being claimed. Both are ordinary goal types now, so a daily or an event can ask for either without a deploy.
+- **Choosing a starter reports a champion obtained.** It always should have — the goal type says "however it arrived" — and the tutorial's second step is the one that noticed.
+- **`tutorialStep` is the twenty-third content type**, editable in the Admin Suite like everything else. Publish validation refuses duplicate numbers, a gap in 1…n, a reward naming an item that does not exist, and a goal filter its type does not declare.
+- An account reset now clears the whole tutorial rather than just the cursor — a fresh account that came back still marked "skipped" would be one the script refuses to greet.
+
 ### Added — the nightly prune, and a button for it (P8i)
 
 The scheduled pass now clears what has gone stale. Worth saying plainly what it is *not*: **it resets nothing.**

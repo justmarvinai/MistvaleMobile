@@ -326,6 +326,7 @@ export async function equip(
   gearId: string,
   championId: string,
   context: GearContext,
+  content: ContentCache,
 ): Promise<{ equipped: GearInstanceRow; displaced: GearInstanceRow | null }> {
   return db.transaction(async (tx) => {
     const row = await ownedGear(tx, playerId, gearId);
@@ -362,6 +363,10 @@ export async function equip(
       .where(eq(gearInstances.id, gearId))
       .returning();
     if (!equipped) throw AppError.notFound('No such relic.');
+
+    // The slot travels with the report so "put boots on somebody" is authorable; nothing
+    // asks for it yet beyond the tutorial, which asks for any slot at all.
+    await track(tx, { content }, playerId, [{ type: 'gearEquip', facts: { slot: equipped.slot } }]);
 
     return { equipped, displaced: displaced ?? null };
   });

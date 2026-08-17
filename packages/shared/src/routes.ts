@@ -162,6 +162,14 @@ export const ROUTES = {
     /** The four champions the owner wants to be known by. */
     showcase: '/player/showcase',
   },
+  tutorial: {
+    /** The step in front of the player, or nothing once it is done. */
+    state: '/tutorial',
+    /** Completes the current step, pays it, and opens the next. */
+    advance: '/tutorial/advance',
+    /** Leaves the script for good. Nothing already earned is taken back. */
+    skip: '/tutorial/skip',
+  },
   battle: {
     start: '/battles/start',
     /** N seeded auto-runs of one stage, resolved server-side. Returns a summary. */

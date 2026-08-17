@@ -25,6 +25,16 @@ Events are live and their ladders are guesses, sized against the faucet budgets 
 
 Not blocking: every number is an Admin edit. What would settle it is a weekend of somebody actually playing it, which is why it is a question rather than a decision.
 
+**Q3. How much should the cold-open battle borrow?**
+GAME_DESIGN §5 opens the game on a fight the player has not earned: all three starters, pre-made, in preset relics, with a scripted near-loss before the Mistgate flickers and they keep only one. It is the hook, and it is the one thing in the tutorial that is not simply pointing at a screen the game already has — a battle fought with champions nobody owns needs the team to come from *content* rather than from `player_champions`.
+
+Three ways to build it, all inside P9:
+- **(a) A `tutorial`-mode stage carrying a preset team 〔recommended〕.** The battle mode already exists in the enum and nothing uses it. A stage gains an optional preset roster — champion key, level, rank, and a relic bonus block — and `start()` builds the entries from that instead of from the player's roster for that mode alone. No energy, no rewards, no stage progress written. The near-loss is authored the way every other boss beat is: wave composition and enemy levels tuned so the third wave hurts. Everything stays content, and the same machinery would serve a future story fight.
+- **(b) Grant the three starters, fight normally, take two back.** No engine work at all — but the game would be minting and deleting champions to tell a story, the roster screen would flicker three champions in and two out, and "which one do you keep" stops being a choice about a gift and becomes a choice about a confiscation.
+- **(c) Drop it.** The script reads fine starting at the Haven; the starter choice survives intact. What is lost is the taste of power the opening is *for* — a first five minutes that shows what a levelled team feels like before asking anybody to earn one.
+
+Not blocking: the script is walked by position, so the cold open becomes step 1 whenever it lands, with no player state to move and no renumbering that could strand anybody. I am building **(a)** unless you say otherwise.
+
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
 - **O2. Offsite backup target** — BACKUP.sh keeps local dumps; give an rclone remote anytime for offsite copies. (DEPLOYMENT_OPERATIONS §2)

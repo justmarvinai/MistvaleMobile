@@ -18,6 +18,7 @@ export * from './login';
 export * from './mail';
 export * from './news';
 export * from './profile';
+export * from './tutorial';
 export * from './admin';
 export * from './routes';
 export * from './content/index';

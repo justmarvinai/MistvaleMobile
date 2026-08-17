@@ -1413,6 +1413,12 @@
               "$ref": "#/components/schemas/NewsPostDef"
             }
           },
+          "tutorialSteps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TutorialStepDef"
+            }
+          },
           "config": {
             "type": "object",
             "propertyNames": {
@@ -1468,6 +1474,7 @@
           "events",
           "loginTracks",
           "newsPosts",
+          "tutorialSteps",
           "config"
         ],
         "additionalProperties": false
@@ -1715,6 +1722,7 @@
               "event",
               "loginTrack",
               "newsPost",
+              "tutorialStep",
               "gameConfig"
             ]
           },
@@ -1806,6 +1814,7 @@
               "event",
               "loginTrack",
               "newsPost",
+              "tutorialStep",
               "gameConfig"
             ]
           },
@@ -1864,6 +1873,7 @@
               "event",
               "loginTrack",
               "newsPost",
+              "tutorialStep",
               "gameConfig"
             ]
           },
@@ -2349,6 +2359,7 @@
                     "useEnergy",
                     "summon",
                     "gearUpgrade",
+                    "gearEquip",
                     "gearLevel",
                     "championLevelUp",
                     "championRankUp",
@@ -2361,6 +2372,7 @@
                     "chapterStars",
                     "dungeonClear",
                     "accountLevel",
+                    "questClaim",
                     "claimAllDailies",
                     "championObtained"
                   ]
@@ -2924,6 +2936,7 @@
               "event",
               "loginTrack",
               "newsPost",
+              "tutorialStep",
               "gameConfig"
             ]
           },
@@ -3140,6 +3153,7 @@
               "event",
               "loginTrack",
               "newsPost",
+              "tutorialStep",
               "gameConfig"
             ]
           },
@@ -4762,6 +4776,7 @@
                     "useEnergy",
                     "summon",
                     "gearUpgrade",
+                    "gearEquip",
                     "gearLevel",
                     "championLevelUp",
                     "championRankUp",
@@ -4774,6 +4789,7 @@
                     "chapterStars",
                     "dungeonClear",
                     "accountLevel",
+                    "questClaim",
                     "claimAllDailies",
                     "championObtained"
                   ]
@@ -5013,6 +5029,7 @@
                     "useEnergy",
                     "summon",
                     "gearUpgrade",
+                    "gearEquip",
                     "gearLevel",
                     "championLevelUp",
                     "championRankUp",
@@ -5025,6 +5042,7 @@
                     "chapterStars",
                     "dungeonClear",
                     "accountLevel",
+                    "questClaim",
                     "claimAllDailies",
                     "championObtained"
                   ]
@@ -5280,6 +5298,7 @@
               "event",
               "loginTrack",
               "newsPost",
+              "tutorialStep",
               "gameConfig"
             ]
           },
@@ -7752,6 +7771,195 @@
           "entries"
         ],
         "additionalProperties": false
+      },
+      "TutorialStepDef": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999
+          },
+          "step": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "screen": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "highlight": {
+            "default": "",
+            "type": "string",
+            "maxLength": 64
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "goal": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "battleWin",
+                  "stageClear",
+                  "bossKill",
+                  "useEnergy",
+                  "summon",
+                  "gearUpgrade",
+                  "gearEquip",
+                  "gearLevel",
+                  "championLevelUp",
+                  "championRankUp",
+                  "championAscend",
+                  "masteryLearn",
+                  "shopPurchase",
+                  "arenaBattle",
+                  "arenaWin",
+                  "arenaTier",
+                  "chapterStars",
+                  "dungeonClear",
+                  "accountLevel",
+                  "questClaim",
+                  "claimAllDailies",
+                  "championObtained"
+                ]
+              },
+              "target": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "filters": {
+                "default": {},
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type",
+              "target",
+              "filters"
+            ],
+            "additionalProperties": false
+          },
+          "rewards": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "grantsBefore": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "grantsRelics": {
+            "default": [],
+            "maxItems": 9,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "setKey": {
+                  "type": "string"
+                },
+                "slot": {
+                  "type": "string",
+                  "enum": [
+                    "weapon",
+                    "helm",
+                    "shield",
+                    "gauntlets",
+                    "cuirass",
+                    "boots",
+                    "ring",
+                    "amulet",
+                    "banner"
+                  ]
+                },
+                "rank": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6
+                },
+                "rarity": {
+                  "type": "string",
+                  "enum": [
+                    "common",
+                    "uncommon",
+                    "rare",
+                    "epic",
+                    "legendary"
+                  ]
+                }
+              },
+              "required": [
+                "setKey",
+                "slot",
+                "rank",
+                "rarity"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "active": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "sortOrder",
+          "step",
+          "screen",
+          "highlight",
+          "title",
+          "body",
+          "rewards",
+          "grantsBefore",
+          "grantsRelics",
+          "active"
+        ],
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -8661,6 +8869,7 @@
                 "events",
                 "login-tracks",
                 "news",
+                "tutorial",
                 "config"
               ]
             }
@@ -8850,6 +9059,7 @@
                 "events",
                 "login-tracks",
                 "news",
+                "tutorial",
                 "config"
               ]
             }
@@ -9074,6 +9284,7 @@
                 "events",
                 "login-tracks",
                 "news",
+                "tutorial",
                 "config"
               ]
             }
@@ -9281,6 +9492,7 @@
                 "events",
                 "login-tracks",
                 "news",
+                "tutorial",
                 "config"
               ]
             }
@@ -9479,6 +9691,7 @@
                 "events",
                 "login-tracks",
                 "news",
+                "tutorial",
                 "config"
               ]
             }

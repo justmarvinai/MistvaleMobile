@@ -155,6 +155,13 @@
       "when": 1786994830193,
       "tag": "0021_showcase",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1786999280193,
+      "tag": "0022_tutorial",
+      "breakpoints": true
     }
   ]
 }
