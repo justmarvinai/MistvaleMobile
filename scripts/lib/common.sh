@@ -702,3 +702,24 @@ repo_branch() {
 	[[ "${b}" == "HEAD" ]] && b="detached"
 	printf '%s' "${b}"
 }
+
+# ensure_readable_cwd
+# A working directory the app user cannot read breaks any child process that
+# chdirs away and back: GNU find calls that fatal ("Failed to restore initial
+# working directory") and exits 1, which under `set -e` takes the whole script
+# down — after the real work has already succeeded.
+#
+# The ordinary way to hit it is `sudo -u mistvale /srv/mistvale/repo/scripts/…`
+# typed from /root, which is exactly what a root shell does. That is not an
+# operator mistake, and `reexec_as_app_user` cannot cover it either: with
+# `sudo -u` the script is *already* the app user, so the re-exec never runs.
+# So every script moves somewhere readable instead, at source time.
+#
+# Only when the cwd is genuinely unreadable: a normal invocation is left alone,
+# and nothing here depends on the caller's directory (every path is absolute).
+ensure_readable_cwd() {
+	[[ -r . && -x . ]] && return 0
+	cd "${APP_ROOT}" 2>/dev/null || cd / 2>/dev/null || return 0
+}
+
+ensure_readable_cwd

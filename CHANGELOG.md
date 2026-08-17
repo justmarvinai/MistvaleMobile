@@ -36,6 +36,12 @@ At Early Access there may be four real players, and an Arena whose offer list is
 - **The results panel knows the Arena pays differently** — rating and medals, on a loss as well as a win — so it shows the swing and the promotion rather than a silver line reading zero. A retreat says plainly that walking out is a loss, not an escape.
 - **The ladder** shows the top twenty-five plus the reader's own neighbourhood, because "you are 41st" means nothing without the four people you could overtake.
 
+### Fixed — ops scripts run from anywhere
+
+`sudo -u mistvale /srv/mistvale/repo/scripts/UPDATE.sh`, typed from a root shell, failed *after* the database backup had already succeeded: the summary line counts backup days with `find`, and `find` chdirs away and then back to the directory it started in. That directory was `/root`, which the app user cannot read, so it exited 1 — and `set -e` took the whole update down over a line that only formats a message.
+
+Every ops script now moves to a readable directory when the one it inherited is not, at source time. `reexec_as_app_user` could not have covered this: with `sudo -u` the script is *already* the app user, so the re-exec never runs. A normal invocation is untouched — every path in these scripts is absolute, and the guard only fires when the working directory is genuinely unusable.
+
 ### Added — the support desk (Admin A5, pulled forward)
 
 Mistvale has no e-mail addresses. That was always a deliberate simplification, and it has one binding consequence that had gone unbuilt: **an operator is the only password reset there is** — and there was no operator endpoint. A warden who forgot their password could not be helped except by hand-writing an argon2id hash into the database, which breaks the no-direct-DB rule the whole Admin Suite exists to uphold. Pulled forward out of A5 because it is a hard-rule violation rather than a missing convenience.
