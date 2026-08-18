@@ -136,7 +136,10 @@ test.describe('the management loop', () => {
     await expect(page.getByRole('button', { name: /^forge$/i }).first()).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByText(/^held$/i)).toBeVisible();
+    // Scoped to the sidebar: "In the vault" is also the name of the list's default filter,
+    // and the panel is where the count and the way to buy more of it live.
+    await expect(page.locator('aside').getByText(/in the vault/i)).toBeVisible();
+    await expect(page.locator('aside').getByText(/^\d+ \/ \d+$/)).toBeVisible();
 
     // ── Equip it from the champion screen ─────────────────────────────────
     await page
