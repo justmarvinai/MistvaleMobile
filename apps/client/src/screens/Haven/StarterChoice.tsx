@@ -33,6 +33,13 @@ export function StarterChoice(): JSX.Element | null {
   const [picked, setPicked] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
+  // Art that will not load is hidden rather than left as the browser's torn page. The
+  // three starters all have a still today and the fallback is the lizard, which has one
+  // too — but an asset entry an operator points at a folder with no `still.png` is the
+  // same class of thing that left 34 champions faceless on the roster, and this is the
+  // one image in the game that does not go through `Portrait`. The button reads fine
+  // without it: name, element, role and title are all text.
+  const [brokenArt, setBrokenArt] = useState<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
     void load().then(() => setChecked(true));
@@ -83,12 +90,15 @@ export function StarterChoice(): JSX.Element | null {
               aria-label={`Choose ${starter.name}`}
               onClick={() => setPicked(starter.key)}
             >
-              <img
-                className={styles.portrait}
-                src={stillPath(artFor(starter.assetKey))}
-                alt=""
-                aria-hidden="true"
-              />
+              {!brokenArt.has(starter.assetKey) && (
+                <img
+                  className={styles.portrait}
+                  src={stillPath(artFor(starter.assetKey))}
+                  alt=""
+                  aria-hidden="true"
+                  onError={() => setBrokenArt((known) => new Set(known).add(starter.assetKey))}
+                />
+              )}
               <span className={styles.name}>{starter.name}</span>
               <span className={styles.meta}>
                 {starter.element} · {starter.role}

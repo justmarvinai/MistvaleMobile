@@ -76,6 +76,10 @@ test.describe('the Depths', () => {
           mode: 'dungeon',
           stageKey: 'wyrms_hollow_f01',
           team: [champions[0]!.id],
+          // A valid request in every other respect, so what comes back is the *lock*
+          // rather than a schema complaint — input is parsed before anything is
+          // authorised, which is the right order and the reason this has to be here.
+          actionId: 'knocking-on-a-locked-door',
         }),
       });
       const body = (await response.json()) as { error?: { code: string; message: string } };
