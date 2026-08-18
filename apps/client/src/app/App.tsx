@@ -32,6 +32,7 @@ import { useTutorialStore } from '@/state/tutorialStore';
 import { useUnlockStore } from '@/state/unlockStore';
 import { TopBar } from './TopBar';
 import { TutorialOverlay } from './TutorialOverlay';
+import { ErrorBoundary } from './ErrorBoundary';
 import { ScreenWipe } from './ScreenWipe';
 import { UnlockCelebration } from './UnlockCelebration';
 import { Dock } from './Dock';
@@ -217,39 +218,44 @@ function GameShell() {
         />
 
         <main className={styles.content}>
-          {screen === 'haven' ? (
-            <HavenScreen onNavigate={navigate} />
-          ) : screen === 'campaign' ? (
-            <CampaignScreen />
-          ) : screen === 'depths' ? (
-            <DepthsScreen />
-          ) : screen === 'arena' ? (
-            <ArenaScreen />
-          ) : screen === 'battle' ? (
-            <BattleScreen />
-          ) : screen === 'champions' ? (
-            <ChampionsScreen />
-          ) : screen === 'relics' ? (
-            <RelicsScreen />
-          ) : screen === 'bazaar' ? (
-            <BazaarScreen />
-          ) : screen === 'mistgate' ? (
-            <MistgateScreen />
-          ) : screen === 'chronicle' ? (
-            <ChronicleScreen />
-          ) : screen === 'quests' ? (
-            <QuestsScreen />
-          ) : screen === 'missions' ? (
-            <MissionsScreen />
-          ) : screen === 'events' ? (
-            <EventsScreen />
-          ) : screen === 'calendar' ? (
-            <CalendarScreen />
-          ) : screen === 'mail' ? (
-            <MailScreen />
-          ) : definition ? (
-            <PlaceholderScreen screen={definition} />
-          ) : null}
+          {/* Keyed by screen so walking to another room clears a failure rather than
+              carrying it. A screen that throws leaves the dock and the top bar alive,
+              which is the difference between "this room is broken" and "the game is". */}
+          <ErrorBoundary key={screen} area={definition?.label ?? screen}>
+            {screen === 'haven' ? (
+              <HavenScreen onNavigate={navigate} />
+            ) : screen === 'campaign' ? (
+              <CampaignScreen />
+            ) : screen === 'depths' ? (
+              <DepthsScreen />
+            ) : screen === 'arena' ? (
+              <ArenaScreen />
+            ) : screen === 'battle' ? (
+              <BattleScreen />
+            ) : screen === 'champions' ? (
+              <ChampionsScreen />
+            ) : screen === 'relics' ? (
+              <RelicsScreen />
+            ) : screen === 'bazaar' ? (
+              <BazaarScreen />
+            ) : screen === 'mistgate' ? (
+              <MistgateScreen />
+            ) : screen === 'chronicle' ? (
+              <ChronicleScreen />
+            ) : screen === 'quests' ? (
+              <QuestsScreen />
+            ) : screen === 'missions' ? (
+              <MissionsScreen />
+            ) : screen === 'events' ? (
+              <EventsScreen />
+            ) : screen === 'calendar' ? (
+              <CalendarScreen />
+            ) : screen === 'mail' ? (
+              <MailScreen />
+            ) : definition ? (
+              <PlaceholderScreen screen={definition} />
+            ) : null}
+          </ErrorBoundary>
         </main>
 
         {/* A fight takes the whole screen: leaving it is a deliberate act, not a tab away. */}

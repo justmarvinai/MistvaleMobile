@@ -115,3 +115,36 @@ export async function resolveBattle(page: Page): Promise<void> {
     .click({ timeout: 20_000 })
     .catch(() => undefined);
 }
+
+/**
+ * Asserts an element is not merely *in the layout* but actually on top at its own centre.
+ *
+ * Playwright's `toBeVisible` answers a CSS question — is it displayed, does it have a
+ * box — and says nothing about what is painted over it. That gap is how the battle screen
+ * shipped completely covered by an opaque overlay with all fifty-five browser cases green:
+ * every control was there, every assertion passed, and a player saw an empty page.
+ *
+ * `elementFromPoint` asks the browser the question a player asks. Returning an ancestor
+ * counts — a label inside the button that was clicked is the button as far as anyone is
+ * concerned.
+ */
+export async function expectOnTop(page: Page, selector: string, label = selector): Promise<void> {
+  const result = await page.evaluate((sel) => {
+    const element = document.querySelector(sel);
+    if (!element) return { ok: false, why: 'not in the DOM' };
+    const box = element.getBoundingClientRect();
+    if (box.width === 0 || box.height === 0) return { ok: false, why: 'zero-sized' };
+
+    const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+    if (!hit) return { ok: false, why: 'nothing at its centre' };
+    if (element.contains(hit) || hit.contains(element)) return { ok: true, why: '' };
+
+    const covering = hit as HTMLElement;
+    return {
+      ok: false,
+      why: `covered by <${covering.tagName.toLowerCase()} class="${covering.className}">`,
+    };
+  }, selector);
+
+  if (!result.ok) throw new Error(`${label} is not visible to a player: ${result.why}`);
+}

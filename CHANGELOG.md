@@ -5,6 +5,49 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the QA pass: the battle screen was invisible, and nobody could have known
+
+A full read of the game against a running box, ranked, and then fixed. The three findings
+below share one cause, and it is the interesting part: **nothing in this repository could
+see what the game looked like.** Forty browser tests drive it through roles and text — the
+right way to test behaviour, and completely blind to paint. The battle screen shipped with
+an opaque full-viewport overlay across it: every control present, every assertion green,
+and nothing on screen but the top bar.
+
+- **The battle screen rendered nothing.** `BattleScreen` mounted a second `<PixiStage>` on
+  top of the one the shell already keeps for the session. That wrapper is `position: fixed;
+  inset: 0` with an opaque background, and being later in the DOM at the same layer it
+  painted over the HUD, the turn order, ×1/Skip/Auto/Retreat and the whole skill bar. Now:
+  one stage, mounted once outside every auth branch; the shell's default scene never
+  replaces one a screen has already attached; and the battle's `.stage` is a transparent
+  window onto the shared canvas rather than a second one. `BattleScene` also had no
+  `resize` — `Scene.resize` is optional and nobody had noticed, because this screen was
+  never visible — so the fight drew at its 960×540 design size in a corner of the window.
+- **34 of 37 champions had no face.** Only three of the eight sprite units ship an
+  `avatar.png`; the art-pending champions share a placeholder asset that has none, and
+  `ChampionCard` rendered a bare `<img>` with no `onError`. The roster, the Chronicle and
+  the card a Mistgate pull turns over were full of the browser's torn-page glyph. A
+  portrait is now either a loaded image or a hooded silhouette from game-icons.net, and
+  never a broken one. The dock's seventeen hand-typed emoji glyphs went the same way — the
+  brief has said icons come from game-icons.net since P0, and the navigation was the one
+  place still drawing its own.
+- **One bad render blanked the whole game.** There was no error boundary anywhere, over
+  sixteen screens whose content comes from a database an operator edits live — a malformed
+  entity reaching a render path is the failure this design makes *most* likely, and React's
+  answer to an uncaught one is to unmount everything: a white page, no dock, and no way
+  back but a manual reload. Two boundaries now, at two depths. Around a screen, so the dock
+  and the top bar survive and the player walks out of the broken room; around the shell, for
+  a failure with nothing left to preserve, where the honest offer is a reload.
+
+And the coverage that would have caught all three on its own, because a fix without one is
+a promise: `e2e/visible.spec.ts` asserts that the things a player must be able to see are
+the topmost elements at their own centres — not how they look, which would fail on a font
+hint and teach everyone to ignore it — and that the page holds exactly one canvas, that no
+image is broken, and that the icon sprite is inlined. `e2e/resilience.spec.ts` breaks a
+screen from outside the app, by answering one endpoint with a shape the client does not
+expect, and watches the game stay standing around it.
+
+
 ### Fixed — one root-owned file could stop the box updating itself
 
 Found on the real VPS, on the first update after P10. Five files in the checkout belonged to root rather than to the app user — left by a deploy that once ran git as root, months earlier. `git checkout` wrote most of the release, reached them, could not unlink them, and stopped; the retried `git pull` then reported the half-applied tree as eighty files of "local changes" and a hundred untracked ones, five times over. Two hundred lines of git output for a `chown`, and no way forward without resetting the checkout by hand.

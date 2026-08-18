@@ -5,6 +5,6 @@ Third-party assets used by Mistvale. Everything in `assets/` not listed here is 
 | Asset | Source | License | Status |
 |---|---|---|---|
 | Fantasy UI Borders (panels, borders, dividers) | [Kenney](https://kenney.nl) — `assets/ui/Kenney Fantasy UI Borders/` | CC0 (license file included in folder) | In repo |
-| UI icons (items, stats, navigation, status effects) — 79 icons from 7 authors | [game-icons.net](https://game-icons.net) — fetched via `tools/icon-fetch` (`pnpm icons`) | CC BY 3.0 — per-icon authors listed in the generated `apps/client/public/icons/ATTRIBUTION.md`, surfaced in-game under Settings → Credits | In use (P0) |
+| UI icons (items, stats, navigation, status effects, champion placeholder) — 84 icons from 7 authors | [game-icons.net](https://game-icons.net) — fetched via `tools/icon-fetch` (`pnpm icons`) | CC BY 3.0 — per-icon authors listed in the generated `apps/client/public/icons/ATTRIBUTION.md`, surfaced in-game under Settings → Credits | In use (P0) |
 | Fonts: Pixelify Sans, Inter | Google Fonts (self-hosted) | OFL 1.1 | Planned (P0) |
 | Placeholder SFX & music | Kenney Audio packs / OpenGameArt CC0 (exact packs listed when added) | CC0 | Planned (P10, owner-approved) |

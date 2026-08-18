@@ -1,0 +1,53 @@
+.fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-3;
+  height: 100%;
+  min-height: 240px;
+  padding: $space-5;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  color: $parchment;
+  font-size: 1.1rem;
+}
+
+.blurb {
+  max-width: 46ch;
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  gap: $space-2;
+}
+
+// Deliberately not the Button primitive: a boundary must not depend on the kit it is
+// there to catch. If Button is what threw, this still renders.
+.button {
+  padding: $space-2 $space-4;
+  border: 1px solid $edge;
+  background: $ground;
+  color: $parchment;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $edge-bright;
+  }
+}
+
+.detail {
+  margin: 0;
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.72rem;
+  opacity: 0.6;
+}
