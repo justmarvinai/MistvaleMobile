@@ -5,6 +5,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — something opened (P9d)
+
+Features have always unlocked on account level, and until now they did it in silence: a dock tile shrouded on Tuesday was simply lit on Wednesday. That is the moment the whole gating structure exists to create.
+
+- **One card per unlock, at the moment it opens**, with a line about what the thing is and a way straight to it. Level 8 hands over the Arena *and* the Hall of Valor, so they queue rather than merge — "2 things unlocked" would be worth less than either.
+- **Derived from the level, not from watching the flags flip.** A flag diff cannot tell "just unlocked" from "unlocked before this tab was open", so the first load of every session would have celebrated everything the account ever earned. The last celebrated level is remembered per account, seeded silently the first time a browser sees it: somebody returning at level 30 is not owed a parade for last month.
+- **A level-up that arrives four levels at once celebrates all four gates.** A mission milestone can pay that much, and every gate it crossed is one the player earned.
+- The copy is written by hand but the levels are not — they come from the server's own `UNLOCK_LEVELS`, so a gate moved there moves the celebration with it, and a new flag added without copy fails the build rather than opening a silent feature.
+
+### Changed — the tutorial's rewards stopped being a gate
+
+What a step paid used to appear behind its own acknowledge button. It now rides along on the *next* step's card. The second click was a stage the player could not always reach: a step that opens a modal — the starter choice does — puts it on top of the parchment, and a reward card nobody can dismiss is worse than one nobody was asked to.
+
+### Verified — the first evening, on every screen
+
+The zero-content pass. A brand-new account — no champions, no relics, no clears, nothing farmed — now has a browser test that opens every screen it is allowed into and checks the shrouded ones say when they open. Every screen renders, none reports an error, and every locked station names its level.
+
+One thing the pass established rather than fixed: **an empty roster is unreachable.** The starter choice is a modal with no dismiss, so an account with no champions is always looking at the one screen that fixes that. The Champions screen keeps its "No champions yet" copy as a guard rather than a state.
+
 ### Added — the Wardenmaster, on screen (P9c)
 
 The fifteen steps existed and were invisible. Now there is an overlay for them.

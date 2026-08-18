@@ -1,0 +1,75 @@
+import { describe, expect, it } from 'vitest';
+import { UNLOCK_LEVELS, computeUnlocks, type UnlockFlags } from '@mistvale/shared';
+import { UNLOCKS, unlockedBetween } from './unlocks';
+
+/**
+ * What a level opened.
+ *
+ * The property worth pinning is that this list and the server's gates cannot drift: the
+ * copy is written by hand and the levels are not, so a gate moved in `UNLOCK_LEVELS` moves
+ * the celebration with it — and a flag added without copy fails here rather than opening
+ * a silent feature.
+ */
+
+describe('the unlock catalogue', () => {
+  it('covers every flag the server computes, and invents none', () => {
+    const flags = Object.keys(computeUnlocks(60)) as (keyof UnlockFlags)[];
+    expect([...UNLOCKS].map((unlock) => unlock.key).sort()).toEqual([...flags].sort());
+  });
+
+  it('takes its levels from the server’s gates rather than repeating them', () => {
+    for (const unlock of UNLOCKS) {
+      expect(unlock.level, unlock.key).toBe(UNLOCK_LEVELS[unlock.key]);
+    }
+  });
+
+  it('is ordered the way the game hands things over', () => {
+    const levels = UNLOCKS.map((unlock) => unlock.level);
+    expect([...levels].sort((a, b) => a - b)).toEqual(levels);
+  });
+
+  it('says something about each one', () => {
+    for (const unlock of UNLOCKS) {
+      expect(unlock.title.length, unlock.key).toBeGreaterThan(0);
+      expect(unlock.blurb.length, unlock.key).toBeGreaterThan(40);
+    }
+  });
+});
+
+describe('what a level-up opened', () => {
+  it('reports the gate a single level crossed', () => {
+    const opened = unlockedBetween(4, 5);
+    expect(opened.map((unlock) => unlock.key)).toEqual(['bazaar']);
+  });
+
+  it('reports every gate when several levels arrive at once', () => {
+    // A mission milestone can pay enough XP to move an account four levels; each gate it
+    // passed is one the player earned and would otherwise never hear about.
+    const opened = unlockedBetween(4, 8);
+    expect(opened.map((unlock) => unlock.key)).toEqual([
+      'bazaar',
+      'multiBattle',
+      'events',
+      'arena',
+      'hallOfValor',
+    ]);
+  });
+
+  it('hands over both of a level’s unlocks rather than picking one', () => {
+    expect(unlockedBetween(7, 8)).toHaveLength(2);
+    expect(unlockedBetween(13, 14)).toHaveLength(2);
+  });
+
+  it('says nothing when the level did not move', () => {
+    expect(unlockedBetween(5, 5)).toEqual([]);
+  });
+
+  it('says nothing when the level went down', () => {
+    // Only an operator's account reset does this, and it is not a moment for fanfare.
+    expect(unlockedBetween(20, 1)).toEqual([]);
+  });
+
+  it('covers the whole ladder between one and the cap without a gap', () => {
+    expect(unlockedBetween(1, 60)).toHaveLength(UNLOCKS.length);
+  });
+});

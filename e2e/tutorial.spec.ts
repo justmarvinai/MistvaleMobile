@@ -97,6 +97,49 @@ test.describe('the tutorial', () => {
     expect(marked).toContain('modal:starter-choice');
   });
 
+  test('celebrates the first thing the script opens', async ({ page }) => {
+    test.slow();
+    test.setTimeout(240_000);
+    await arrive(page, 'e2tc');
+
+    const overlay = page.getByRole('region', { name: 'Tutorial' });
+    await expect(overlay).toBeVisible({ timeout: 20_000 });
+
+    // Step 1: the cold open. It pays nothing — the account is still level 1 after it.
+    await page.getByRole('button', { name: /meet them on the road/i }).click();
+    await page.getByRole('button', { name: /^auto$/i }).click();
+    const results = page.getByRole('dialog', { name: 'Results' });
+    await expect(results).toBeVisible({ timeout: 120_000 });
+    await results.getByRole('button', { name: /^close$/i }).click();
+    await advance(page);
+
+    // Step 2: the Wardenmaster's greeting, and the first XP of the game.
+    await advance(page);
+
+    // Step 3: the starter choice. Sixty more XP takes the account to level 2, which is
+    // where the calendar opens — the first gate the game has ever crossed for anybody.
+    const starterDialog = page.getByRole('dialog', { name: /choose your first champion/i });
+    await expect(starterDialog).toBeVisible({ timeout: 30_000 });
+    await starterDialog
+      .getByRole('button', { name: /^choose /i })
+      .first()
+      .click();
+    await starterDialog.getByRole('button', { name: /stand together/i }).click();
+    await expect(starterDialog).toBeHidden({ timeout: 20_000 });
+    await advance(page);
+
+    const celebration = page.getByRole('dialog', { name: /the mist thins/i });
+    await expect(celebration).toBeVisible({ timeout: 30_000 });
+    await expect(celebration).toContainText(/level 2/i);
+    await expect(celebration).toContainText(/calendar/i);
+
+    // And it is a one-off: dismissed, it does not come back on a reload.
+    await celebration.getByRole('button', { name: /later/i }).click();
+    await expect(celebration).toBeHidden();
+    await page.reload();
+    await expect(celebration).toBeHidden({ timeout: 20_000 });
+  });
+
   test('a skip is final, and the overlay does not come back', async ({ page }) => {
     test.slow();
     await arrive(page, 'e2ts');
@@ -117,6 +160,20 @@ test.describe('the tutorial', () => {
     await expect(overlay).toBeHidden();
   });
 });
+
+/**
+ * Closes the open step once the server agrees it is finished.
+ *
+ * One click, always. What the step paid appears on the *next* step's card rather than
+ * behind an acknowledgement, so there is no second gate to get past.
+ */
+async function advance(page: Page): Promise<void> {
+  const button = page
+    .getByRole('region', { name: 'Tutorial' })
+    .getByRole('button', { name: /continue/i });
+  await expect(button).toBeEnabled({ timeout: 30_000 });
+  await button.click();
+}
 
 /** Registers a fresh warden and leaves them exactly where the script puts them. */
 async function arrive(page: Page, account: string): Promise<void> {

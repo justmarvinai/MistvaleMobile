@@ -65,6 +65,13 @@ export function TutorialOverlay() {
   // Take the player to the step's screen the first time it opens, and only then. Keyed on
   // the step number rather than on `screen`, so wandering off does not drag them back.
   const stepNumber = step?.step ?? 0;
+  // The payout belongs to the card it is shown on; two steps later it is somebody else's
+  // news. Cleared when the step it arrived with is completed.
+  useEffect(() => {
+    if (stepNumber === 0) return;
+    return () => clearPayout();
+  }, [stepNumber, clearPayout]);
+
   const destination = step?.screen as ScreenId | undefined;
   useEffect(() => {
     if (!destination || stepNumber === 0) return;
@@ -74,7 +81,6 @@ export function TutorialOverlay() {
 
   if (!step) return null;
 
-  const showingPayout = payout !== null;
   const goal = step.goal;
   const target = goal?.target ?? 0;
 
@@ -148,9 +154,14 @@ export function TutorialOverlay() {
           </p>
         )}
 
-        {showingPayout && (
+        {/* What the *previous* step paid, carried onto this one's card rather than held
+            behind an acknowledge button. The second click was a stage the player could not
+            always reach: a step that opens a modal — the starter choice does — puts it on
+            top of the parchment, and a reward card nobody can dismiss is worse than one
+            nobody was asked to. */}
+        {payout && (
           <div className={styles.payout}>
-            <span className={styles.payoutLabel}>For your trouble</span>
+            <span className={styles.payoutLabel}>For the last one</span>
             <Rewards rewards={payout.paid} signed />
             {payout.relics.length > 0 && (
               <span className={styles.payoutRelics}>
@@ -183,20 +194,14 @@ export function TutorialOverlay() {
               <Button variant="ghost" onClick={() => setConfirmingSkip(true)} disabled={busy}>
                 Skip tutorial
               </Button>
-              {showingPayout ? (
-                <Button variant="primary" onClick={clearPayout} disabled={busy}>
-                  Good
-                </Button>
-              ) : (
-                <Button
-                  variant="primary"
-                  onClick={() => void advance()}
-                  disabled={busy || !step.ready}
-                  title={step.ready ? undefined : 'Finish the step first'}
-                >
-                  {step.ready ? 'Continue' : waitingLabel(step.screen as ScreenId, screen)}
-                </Button>
-              )}
+              <Button
+                variant="primary"
+                onClick={() => void advance()}
+                disabled={busy || !step.ready}
+                title={step.ready ? undefined : 'Finish the step first'}
+              >
+                {step.ready ? 'Continue' : waitingLabel(step.screen as ScreenId, screen)}
+              </Button>
             </>
           )}
         </div>

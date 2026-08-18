@@ -27,8 +27,10 @@ import { useContentStore } from '@/state/contentStore';
 import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screens';
 import { useNavStore } from '@/state/navStore';
 import { useTutorialStore } from '@/state/tutorialStore';
+import { useUnlockStore } from '@/state/unlockStore';
 import { TopBar } from './TopBar';
 import { TutorialOverlay } from './TutorialOverlay';
+import { UnlockCelebration } from './UnlockCelebration';
 import { Dock } from './Dock';
 import { BootScreen } from './BootScreen';
 import styles from './App.module.scss';
@@ -83,6 +85,7 @@ export function App() {
       resetPlayer();
       // The next account gets its own script, not this one's step 7.
       useTutorialStore.getState().reset();
+      useUnlockStore.getState().reset();
     }
   }, [status, refreshPlayer, resetPlayer]);
 
@@ -134,6 +137,9 @@ export function App() {
 function GameShell() {
   const screen = useNavStore((state) => state.screen);
   const setScreen = useNavStore((state) => state.setScreen);
+  const account = useSessionStore((state) => state.account);
+  const level = usePlayerStore((state) => state.player?.level ?? null);
+  const observeUnlocks = useUnlockStore((state) => state.observe);
   const loadTutorial = useTutorialStore((state) => state.load);
   const refreshTutorial = useTutorialStore((state) => state.refresh);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -144,6 +150,14 @@ function GameShell() {
   useEffect(() => {
     void loadTutorial();
   }, [loadTutorial]);
+
+  // Every gate the account has crossed since this browser last looked. The shell re-reads
+  // the player snapshot after every action, so a level-up lands here within a request of
+  // happening — and the store seeds silently the first time it sees an account, because
+  // somebody returning at level 30 is not owed a parade for last month's unlocks.
+  useEffect(() => {
+    if (account && level !== null) observeUnlocks(account.id, level);
+  }, [account, level, observeUnlocks]);
 
   // A step's goal is completed by *doing the thing*, and the module that did it reports to
   // the server rather than to the overlay. Re-reading on every screen change is what turns
@@ -231,6 +245,7 @@ function GameShell() {
       <NewsPanel open={newsOpen} onClose={() => setNewsOpen(false)} />
       <ProfilePanel />
       <TutorialOverlay />
+      <UnlockCelebration />
     </>
   );
 }
