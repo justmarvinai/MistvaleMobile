@@ -4,7 +4,17 @@
 
 ## Open questions
 
-**None.** Q1–Q3 were answered on 2026-08-17 ("as you recommend" to all three) and are in the decision record below.
+**Q4. What should Mistvale actually sound like at EA?** — *default active, work not blocked*
+
+Audio is P10c and the mixer is being built either way. The question is where the sounds come from, and it needs deciding because I cannot fetch the CC0 packs myself: this build environment's network policy refuses everything outside the package registries, so Kenney Audio and OpenGameArt are both unreachable from here. Nothing about that changes what the game *can* do — it changes who does one step of it.
+
+- **A — synthesised, and a sample beats it whenever one exists (recommended).** Every cue is a `soundCue` content entry naming a bus and either a sample or a handful of synth parameters — a short envelope over an oscillator or a noise burst, which is what a pixel game's clicks, coin clinks and forge clangs are anyway. Nothing to license, nothing to credit, nothing to download, and every cue is retunable in the Admin config without a deploy. When you drop a pack into `assets/`, pointing a cue at a file overrides the synth for that cue alone — one field, no code.
+- **B — you pick a CC0 pack and I wire it.** Drop the files into `assets/audio/` (or name the pack and I will write the manifest); I register them, credit them in `CREDITS.md`, and the same `soundCue` entries point at samples from the start. Better-sounding, and it costs one round trip through you.
+- **C — silence at EA.** The sliders in Settings stay, and stay inert. I would rather not: they are on screen now and connected to nothing, which is exactly the placeholder the brief rules out.
+
+**Music is a separate answer.** Procedural ambient is a much bigger swing and much likelier to sound bad, so under any option above the music bus ships with volume control and no track until you choose one. That is a bus with nothing on it rather than a broken feature — but say if you would rather I attempt a loop.
+
+*Proceeding with **A** unless you say otherwise; B remains a drop-in afterwards, since the cue is the thing that names the sound.*
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
