@@ -46,6 +46,19 @@ test.describe('preferences', () => {
     // the sentence that keeps it honest until a track exists (USER_QUESTIONS Q4).
     await registerRaw(page, 'e2esnd', 'Listener');
 
+    // `registerRaw` stops with the starter choice open, and that dialog has no dismiss —
+    // deliberately, since an account with no champions is always looking at the one screen
+    // that fixes that. Its backdrop owns every click until a champion is taken, which is
+    // the modal stack working rather than getting in the way.
+    const starter = page.getByRole('dialog', { name: /choose your first champion/i });
+    await expect(starter).toBeVisible({ timeout: 20_000 });
+    await starter
+      .getByRole('button', { name: /^choose /i })
+      .first()
+      .click();
+    await starter.getByRole('button', { name: /stand together/i }).click();
+    await expect(starter).toBeHidden({ timeout: 15_000 });
+
     await page
       .getByRole('button', { name: /settings/i })
       .first()
