@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Modal } from '@/ui/Modal/Modal';
+import { CUE, playCue } from '@/audio';
 import { Button } from '@/ui/Button/Button';
 import { useUnlockStore } from '@/state/unlockStore';
 import { useNavStore } from '@/state/navStore';
@@ -21,6 +23,14 @@ export function UnlockCelebration(): JSX.Element | null {
   const dismiss = useUnlockStore((state) => state.dismiss);
   const setScreen = useNavStore((state) => state.setScreen);
   const screen = useNavStore((state) => state.screen);
+
+  // The card's own fanfare, over the modal's ordinary open cue. Keyed on the flag so a
+  // queue of two — level 8 opens the Arena and the Hall together — sounds twice.
+  const showing = unlock !== null && screen !== 'battle';
+  const flag = unlock?.key ?? '';
+  useEffect(() => {
+    if (showing) playCue(CUE.unlock);
+  }, [showing, flag]);
 
   if (!unlock) return null;
   // Never over a fight. A level-up almost always arrives *from* one, and the results are

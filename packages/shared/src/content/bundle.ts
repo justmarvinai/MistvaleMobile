@@ -13,6 +13,7 @@ import {
   itemDefSchema,
   loginTrackDefSchema,
   newsPostDefSchema,
+  soundCueDefSchema,
   tutorialStepDefSchema,
   shopDefSchema,
   skillDefSchema,
@@ -62,6 +63,7 @@ export const contentBundleSchema = z.object({
   loginTracks: z.array(loginTrackDefSchema),
   newsPosts: z.array(newsPostDefSchema),
   tutorialSteps: z.array(tutorialStepDefSchema),
+  soundCues: z.array(soundCueDefSchema),
   /** Flattened to a plain map — the client only ever reads values. */
   config: z.record(z.string(), gameConfigEntrySchema.shape.value),
 });

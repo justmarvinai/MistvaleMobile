@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from 're
 import { createPortal } from 'react-dom';
 import { Panel } from '../Panel/Panel';
 import { Button } from '../Button/Button';
+import { CUE, playCue } from '../../audio';
 import { useLayer } from './stack';
 import styles from './Modal.module.scss';
 
@@ -43,8 +44,13 @@ export function Modal({
   // Focus follows the *dialog*, not the stack. Opening one over another captures the
   // element inside the lower one and gives it back on close, so a picker dismissed over a
   // champion sheet returns the caret to the slot it was opened from.
+  //
+  // The open and close cues ride the same effect, which is what keeps them honest: they
+  // are tied to the dialog actually appearing rather than to whatever button was pressed,
+  // so a modal opened by a keystroke or by the tutorial sounds the same as one clicked.
   useEffect(() => {
     if (!open) return;
+    playCue(CUE.open);
 
     previouslyFocused.current = document.activeElement as HTMLElement | null;
     // Move focus into the dialog so keyboard users are not left behind it.
@@ -54,6 +60,7 @@ export function Modal({
     (firstFocusable ?? dialogRef.current)?.focus();
 
     return () => {
+      playCue(CUE.close);
       previouslyFocused.current?.focus();
     };
   }, [open]);

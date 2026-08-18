@@ -10,6 +10,7 @@ import {
   trimFloaters,
   type PlaybackView,
 } from '../game/playback';
+import { CUE, playCue, type CueName } from '../audio';
 import { useContentStore } from './contentStore';
 
 /**
@@ -81,6 +82,40 @@ function stopTimer(): void {
 }
 
 export const useBattleStore = create<BattleStoreState>((set, get) => {
+  /**
+   * The sound a battle event makes, if any.
+   *
+   * Driven off the event log rather than off the store's own state, which means it is
+   * driven off *playback* — a fight the server resolved thirty seconds ago is heard as
+   * the player watches it, not when the response landed. The same reason the results
+   * modal waits (see battleClocks.ts).
+   *
+   * Most events are silent on purpose. A cue per event type would be a wall of noise;
+   * what a listener needs is the shape of the fight — hits, the ones that hurt, healing,
+   * a death, a wave, and how it ended.
+   */
+  const cueFor = (event: BattleEvent): CueName | null => {
+    switch (event.type) {
+      case 'damage':
+        // Only the first hit of a multi-hit skill announces itself as an event; the rest
+        // are the same action landing, and the throttle catches what this does not.
+        return event.crit ? CUE.crit : event.hitIndex === 0 ? CUE.hit : null;
+      case 'heal':
+      case 'shieldGained':
+        return CUE.heal;
+      case 'statusApplied':
+        return statusKind(event.status) === 'buff' ? CUE.buff : CUE.debuff;
+      case 'died':
+        return CUE.death;
+      case 'waveStart':
+        return CUE.wave;
+      case 'battleEnd':
+        return event.outcome === 'victory' ? CUE.victory : CUE.defeat;
+      default:
+        return null;
+    }
+  };
+
   /** Plays the next queued event, then schedules the one after it. */
   const tick = (): void => {
     const { pending, speed } = get();
@@ -95,6 +130,9 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
     applyEvent(view, next, statusKind);
     trimFloaters(view);
     set({ view, pending: rest });
+
+    const cue = cueFor(next);
+    if (cue) playCue(cue);
 
     const delay = eventDuration(next) / speed;
     if (delay <= 0) {

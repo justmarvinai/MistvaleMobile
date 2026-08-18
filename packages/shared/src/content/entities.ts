@@ -998,3 +998,76 @@ export const tutorialStepDefSchema = contentMetaSchema.extend({
   active: z.boolean().default(true),
 });
 export type TutorialStepDef = z.infer<typeof tutorialStepDefSchema>;
+
+// ── Sound cues ──────────────────────────────────────────────────────────────
+
+/**
+ * How a cue is made, when no recording stands behind it.
+ *
+ * A pixel game's interface sounds are short shaped tones and noise bursts — a click, a
+ * coin, a forge clang, a refusal. Describing one takes half a dozen numbers, and doing it
+ * that way rather than shipping files means every cue is retunable by an operator, weighs
+ * nothing, and needs no licence or attribution. A recording always wins where one exists;
+ * this is what plays until then.
+ */
+export const synthVoiceSchema = z.object({
+  /** `tone` is an oscillator, `noise` is filtered white noise — a hit rather than a note. */
+  source: z.enum(['tone', 'noise']).default('tone'),
+  wave: z.enum(['sine', 'square', 'sawtooth', 'triangle']).default('square'),
+  /** Hz at the attack. Ignored by `noise`, which has no pitch to speak of. */
+  startHz: z.number().min(20).max(12_000).default(660),
+  /**
+   * Hz at the end of the sweep. Above `startHz` reads as a question or an opening; below
+   * reads as a thud or a refusal. Equal is a flat beep.
+   */
+  endHz: z.number().min(20).max(12_000).default(660),
+  /** Seconds. Everything here is interface-length; a second is already a long cue. */
+  attack: z.number().min(0).max(1).default(0.004),
+  decay: z.number().min(0.01).max(4).default(0.12),
+  /** Peak gain before the bus applies the player's volume. */
+  gain: z.number().min(0).max(1).default(0.5),
+  /** Low-pass corner. The single knob that separates a bright click from a dull knock. */
+  filterHz: z.number().min(80).max(20_000).default(20_000),
+  /**
+   * Extra voices stacked above the first, as semitone offsets.
+   *
+   * What makes a level-up an arpeggio rather than a beep. Each entry replays the voice
+   * transposed and slightly later, so three numbers buy a chord or a flourish.
+   */
+  overtones: z.array(z.number().int().min(-24).max(24)).max(4).default([]),
+});
+export type SynthVoice = z.infer<typeof synthVoiceSchema>;
+
+/**
+ * One sound the game can make.
+ *
+ * Named by key rather than by file so the thing that asks — a button, a battle event, a
+ * payout — names *what happened* and never how it is produced. Pointing a cue at a
+ * recording later is one field, and nothing that plays it changes.
+ */
+export const soundCueDefSchema = contentMetaSchema.extend({
+  /**
+   * Which fader this answers to. `ui` rides the effects slider with the rest; it is a
+   * separate bus so a future "interface sounds only" preference has somewhere to go.
+   */
+  bus: z.enum(['music', 'sfx', 'ui']).default('sfx'),
+  /**
+   * An `asset` of kind `audio` to play instead of synthesising.
+   *
+   * The upgrade path, and the reason the cue is the unit rather than the sound: drop a
+   * pack into `assets/`, point the cues at it, and the synth stops being used for those
+   * without a line of code moving.
+   */
+  sample: z.string().max(64).default(''),
+  voice: synthVoiceSchema.prefault({}),
+  /**
+   * Ignore a repeat inside this many milliseconds.
+   *
+   * A battle can land five hits in one skill and a list can render forty rows; without a
+   * floor the same cue stacks into a buzz. Zero lets every trigger through, which is right
+   * for anything deliberate.
+   */
+  throttleMs: z.number().int().min(0).max(2000).default(40),
+  active: z.boolean().default(true),
+});
+export type SoundCueDef = z.infer<typeof soundCueDefSchema>;

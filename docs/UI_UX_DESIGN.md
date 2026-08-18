@@ -29,7 +29,8 @@
 ### 1.2 Motion principles ("highly animated, feeling alive")
 - Ambient life on every screen: mist drift shader layer (Pixi) behind Haven + battle; torch/ember particle accents on key panels; idle loops always playing wherever a unit is shown (roster cards use the 9-frame idle, not stills).
 - UI micro-motion: panels slide+fade in 120–180 ms staggered 30 ms; number count-ups on resources; reward chests burst with particle + easing pop; button hover = glow pulse; tab underline slides.
-- Feedback rule: **every** player action gets sub-100 ms visual+audio acknowledgment (press SFX, coin clink, forge clang, summon whoosh).
+- Feedback rule: **every** player action gets sub-100 ms visual+audio acknowledgment (press SFX, coin clink, forge clang, summon whoosh). The audio half lives in the `Button` and `Modal` primitives rather than in screens, so it is a property of the kit: a press is a press wherever it happens, and a screen that forgets to make a noise cannot exist.
+- **Sound is content.** Each cue is a `soundCue` entry naming a bus and either a recording or a few synth parameters, so what the game sounds like is retunable by an operator and a dropped-in pack replaces a voice one field at a time. Screens name *what happened* (`CUE.relic`, `CUE.denied`) and never how it is produced. Battle cues ride the **playback** clock, so a fight resolved thirty seconds ago is heard as it is watched.
 - Restraint rule: durations ≤ 250 ms for navigation; long celebratory moments (summon reveal, victory) are skippable by click. `prefers-reduced-motion` honored.
 
 ## 2. App frame & navigation

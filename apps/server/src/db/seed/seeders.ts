@@ -8,6 +8,7 @@ import { MISSIONS } from './data/missions';
 import { EVENTS } from './data/events';
 import { LOGIN_TRACKS } from './data/login';
 import { NEWS_POSTS } from './data/news';
+import { SOUND_CUES } from './data/sounds';
 import { TUTORIAL_STAGES, TUTORIAL_STEPS } from './data/tutorial';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
@@ -71,6 +72,7 @@ export function buildSeedContent(): SeedContent[] {
     loginTrack: LOGIN_TRACKS.map((data) => ({ key: data.key, data })),
     newsPost: NEWS_POSTS.map((data) => ({ key: data.key, data })),
     tutorialStep: TUTORIAL_STEPS.map((data) => ({ key: data.key, data })),
+    soundCue: SOUND_CUES.map((data) => ({ key: data.key, data })),
     gameConfig: GAME_CONFIG.map((data) => ({ key: data.key, data })),
   };
 

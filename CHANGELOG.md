@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Mistvale makes a noise (P10c)
+
+The volume sliders in Settings have been on screen since P8 and connected to nothing. They are connected now.
+
+- **Sound is content.** `soundCue` is the twenty-fourth content type: a key, a bus, and either a recording or a handful of envelope-and-oscillator numbers. What the game sounds like is retunable by an operator in Admin without a deploy, and a dropped-in audio pack replaces a synth voice one field at a time rather than in a commit.
+- **Twenty-six cues, and no audio files.** This build environment cannot reach Kenney or OpenGameArt, and rather than ship inert sliders the cues are synthesised: short shaped tones and filtered noise bursts, which is what a pixel game's interface has always been made of. Nothing to licence, nothing to credit, nothing to download. **USER_QUESTIONS Q4** asks whether that stays the voice of the game or whether a CC0 pack should be picked; either answer is a content change, not a code one.
+- **The vocabulary is small on purpose.** A distinct noise per control sounds like a switchboard. What a player learns is a handful of meanings — something happened, you spent, you gained, no, something rare — and each is one cue used everywhere it applies.
+- **A press is a property of the kit.** `Button` and `Modal` make the sound, so a press is a press wherever it happens and a screen cannot forget. A `danger` button answers with the spend cue rather than the press — releasing a champion is giving something up — and never with the refusal, which belongs to an action the server turned down.
+- **Battle rides the playback clock**, like everything else that gives a fight away: hits, the ones that crit, healing, a death, a wave turning, and how it ended. Multi-hit skills announce the first landing only, and a throttle catches what that does not — five hits inside a third of a second is five hits, not a buzz.
+- **Nothing plays before the player has touched the page.** Browsers refuse audio started without a gesture and a refused context stays refused, so a cue asked for too early is dropped rather than queued: a click nobody made must not arrive late.
+- **A missing cue is silence, never an error.** A client older than the bundle, or a cue an operator switched off, makes the game quieter and nothing else.
+- **Music is a bus with no track**, and the slider says so instead of pretending. The setting is kept for when there is one.
+
 ### Fixed — a level-up never refilled the energy bar (P10d)
 
 ECONOMY_BALANCE has said since P0 that a level-up fills the bar and allows overfill; it is one of the three listed sources of energy, and it is what paces a new account's first evening — level, and keep playing. The reward path wrote the new level and left the energy column alone, so the only energy anybody ever got was the twenty they registered with and the clock. Nothing had ever asked, which is why it survived nine phases.

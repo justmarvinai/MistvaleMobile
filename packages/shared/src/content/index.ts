@@ -6,3 +6,4 @@ export * from './masteries';
 export * from './entities';
 export * from './registry';
 export * from './bundle';
+export * from './sound-keys';

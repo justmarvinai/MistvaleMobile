@@ -1,5 +1,6 @@
 import { useEffect, useId, type CSSProperties } from 'react';
 import { Button } from '../../ui/Button/Button';
+import { playCue, summonCue } from '../../audio';
 import { useLayer } from '../../ui/Modal/stack';
 import { avatarPath } from '../../game/sprites';
 import { useContentStore } from '../../state/contentStore';
@@ -46,6 +47,14 @@ export function RevealOverlay(): JSX.Element {
     const handle = window.setTimeout(advance, delay);
     return () => window.clearTimeout(handle);
   }, [done, results, revealed, advance]);
+
+  // Each card that turns says what it is worth. Keyed on the count rather than on the
+  // card, because ten commons in a row are ten separate moments and each one should be
+  // heard — the gap between the three chimes is what the pull's drama is made of.
+  const turned = results[revealed - 1]?.rarity ?? null;
+  useEffect(() => {
+    if (turned) playCue(summonCue(turned));
+  }, [turned, revealed]);
 
   // A Legendary earns a full-screen flash; anything less would undersell it. Rendered
   // rather than stored: keying the element by the card that caused it remounts it, which

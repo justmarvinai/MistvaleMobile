@@ -1419,6 +1419,12 @@
               "$ref": "#/components/schemas/TutorialStepDef"
             }
           },
+          "soundCues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SoundCueDef"
+            }
+          },
           "config": {
             "type": "object",
             "propertyNames": {
@@ -1475,6 +1481,7 @@
           "loginTracks",
           "newsPosts",
           "tutorialSteps",
+          "soundCues",
           "config"
         ],
         "additionalProperties": false
@@ -1723,6 +1730,7 @@
               "loginTrack",
               "newsPost",
               "tutorialStep",
+              "soundCue",
               "gameConfig"
             ]
           },
@@ -1815,6 +1823,7 @@
               "loginTrack",
               "newsPost",
               "tutorialStep",
+              "soundCue",
               "gameConfig"
             ]
           },
@@ -1874,6 +1883,7 @@
               "loginTrack",
               "newsPost",
               "tutorialStep",
+              "soundCue",
               "gameConfig"
             ]
           },
@@ -2937,6 +2947,7 @@
               "loginTrack",
               "newsPost",
               "tutorialStep",
+              "soundCue",
               "gameConfig"
             ]
           },
@@ -3154,6 +3165,7 @@
               "loginTrack",
               "newsPost",
               "tutorialStep",
+              "soundCue",
               "gameConfig"
             ]
           },
@@ -5299,6 +5311,7 @@
               "loginTrack",
               "newsPost",
               "tutorialStep",
+              "soundCue",
               "gameConfig"
             ]
           },
@@ -7167,6 +7180,138 @@
         ],
         "additionalProperties": false
       },
+      "SoundCueDef": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999
+          },
+          "bus": {
+            "default": "sfx",
+            "type": "string",
+            "enum": [
+              "music",
+              "sfx",
+              "ui"
+            ]
+          },
+          "sample": {
+            "default": "",
+            "type": "string",
+            "maxLength": 64
+          },
+          "voice": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "default": "tone",
+                "type": "string",
+                "enum": [
+                  "tone",
+                  "noise"
+                ]
+              },
+              "wave": {
+                "default": "square",
+                "type": "string",
+                "enum": [
+                  "sine",
+                  "square",
+                  "sawtooth",
+                  "triangle"
+                ]
+              },
+              "startHz": {
+                "default": 660,
+                "type": "number",
+                "minimum": 20,
+                "maximum": 12000
+              },
+              "endHz": {
+                "default": 660,
+                "type": "number",
+                "minimum": 20,
+                "maximum": 12000
+              },
+              "attack": {
+                "default": 0.004,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "decay": {
+                "default": 0.12,
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 4
+              },
+              "gain": {
+                "default": 0.5,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "filterHz": {
+                "default": 20000,
+                "type": "number",
+                "minimum": 80,
+                "maximum": 20000
+              },
+              "overtones": {
+                "default": [],
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -24,
+                  "maximum": 24
+                }
+              }
+            },
+            "required": [
+              "source",
+              "wave",
+              "startHz",
+              "endHz",
+              "attack",
+              "decay",
+              "gain",
+              "filterHz",
+              "overtones"
+            ],
+            "additionalProperties": false
+          },
+          "throttleMs": {
+            "default": 40,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000
+          },
+          "active": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "sortOrder",
+          "bus",
+          "sample",
+          "voice",
+          "throttleMs",
+          "active"
+        ],
+        "additionalProperties": false
+      },
       "StageDef": {
         "type": "object",
         "properties": {
@@ -8962,6 +9107,7 @@
                 "login-tracks",
                 "news",
                 "tutorial",
+                "sounds",
                 "config"
               ]
             }
@@ -9152,6 +9298,7 @@
                 "login-tracks",
                 "news",
                 "tutorial",
+                "sounds",
                 "config"
               ]
             }
@@ -9377,6 +9524,7 @@
                 "login-tracks",
                 "news",
                 "tutorial",
+                "sounds",
                 "config"
               ]
             }
@@ -9585,6 +9733,7 @@
                 "login-tracks",
                 "news",
                 "tutorial",
+                "sounds",
                 "config"
               ]
             }
@@ -9784,6 +9933,7 @@
                 "login-tracks",
                 "news",
                 "tutorial",
+                "sounds",
                 "config"
               ]
             }

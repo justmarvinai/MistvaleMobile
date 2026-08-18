@@ -57,13 +57,18 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
       {tab === 'preferences' ? (
         <div className={styles.section}>
+          {/* Said out loud rather than left as a dead control: the bus and the fader are
+              real and the setting is kept, but Mistvale has no soundtrack yet. A slider
+              that does nothing without saying so is worse than no slider. */}
           <SliderRow
             label="Music"
+            description="No soundtrack yet — this remembers your level for when there is one."
             value={settings.musicVolume}
             onChange={(musicVolume) => void patch({ musicVolume })}
           />
           <SliderRow
             label="Sound effects"
+            description="Interface, battle and rewards."
             value={settings.sfxVolume}
             onChange={(sfxVolume) => void patch({ sfxVolume })}
           />
@@ -119,10 +124,12 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
 function SliderRow({
   label,
+  description,
   value,
   onChange,
 }: {
   label: string;
+  description?: string;
   value: number;
   onChange: (value: number) => void;
 }) {
@@ -130,6 +137,7 @@ function SliderRow({
     <div className={styles.row}>
       <div className={styles.rowText}>
         <span className={styles.rowLabel}>{label}</span>
+        {description && <span className={styles.rowDescription}>{description}</span>}
       </div>
       <div className={styles.sliderWrap}>
         <input

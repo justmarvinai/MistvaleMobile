@@ -35,7 +35,7 @@
 | Game rendering | PixiJS v8 | WebGL2 sprite rendering for battle scenes, summon animations, ambient/map effects; nearest-neighbor pixel-perfect scaling |
 | Client state | Zustand | Small, unopinionated stores per domain; no boilerplate |
 | Styling | SCSS Modules + design tokens | Hand-built pixel UI kit (no Tailwind, no component library in the game client — see UI_UX_DESIGN.md) |
-| Audio | Howler.js | Sprite-based SFX, music channels, mobile unlock handling |
+| Audio | Web Audio (`src/audio`) | Cues are content (`soundCue`), rendered from parameters into a buffer once per session and played per bus. Howler stays a dependency for sample playback when a pack lands; it has no notion of a cue built from numbers, and wrapping it to add one would be more code than the mixer is. |
 | Testing | Vitest (unit/engine), Playwright (E2E smoke) | Engine correctness is the #1 test target |
 | Lint/format | ESLint 9 (flat config) + Prettier | Enforced in CI |
 | CI | GitHub Actions | typecheck + lint + test on every push; build artifact check |
@@ -70,7 +70,7 @@ MistvaleMobile/
 │   │   │   ├── ui/             # Mistvale UI kit: Panel, Button, Bar, Modal, ...
 │   │   │   ├── state/          # zustand stores (session, player, roster, content, battle)
 │   │   │   ├── api/            # typed API client (generated from shared DTOs)
-│   │   │   ├── audio/          # howler wrapper, sound registry
+│   │   │   ├── audio/          # mixer (buses, unlock, throttle) + synth (pure: voice → samples)
 │   │   │   └── styles/         # tokens.scss, mixins, global
 │   │   └── public/             # packed atlases, fonts, icons, audio (build output of asset pipeline)
 │   └── server/

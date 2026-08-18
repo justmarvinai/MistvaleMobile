@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { PixiStage } from '@/game/PixiStage';
+import { useAudio } from '@/audio/useAudio';
 import { ToastHost } from '@/ui/Toast/Toast';
 import { AuthScreen } from '@/screens/Auth/AuthScreen';
 import { HavenScreen } from '@/screens/Haven/HavenScreen';
@@ -43,6 +44,10 @@ import styles from './App.module.scss';
  * new sign-in always starts fresh without any state-resetting effects.
  */
 export function App() {
+  // The mixer wants the published cue catalogue, the player's volumes, and a gesture it is
+  // allowed to start on. Mounted here so all three exist for the whole session.
+  useAudio();
+
   const status = useSessionStore((state) => state.status);
   const account = useSessionStore((state) => state.account);
   const restore = useSessionStore((state) => state.restore);

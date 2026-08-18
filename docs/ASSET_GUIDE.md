@@ -34,7 +34,8 @@ Panels/borders/dividers (Default + Double styles, 32 variants each + transparent
 | Icons (items, stats, nav, status effects) | game-icons.net exclusively (CC BY 3.0, attributed in-game); fetched + tinted by `tools/icon-fetch`; if site unreachable → GitHub mirror `game-icons/icons` |
 | Battle/scene backgrounds | Mist-layered gradient + silhouette compositions built from tinted shapes/particles in Pixi (art-free, moody) until real backdrops are provided; slot exists in `campaign_chapter_defs.background_asset` |
 | Gear item art | game-icons.net placeholders (per-slot icon + set-color frame + rank pips) — explicitly placeholder until custom icons arrive |
-| Audio (SFX + music) | None in repo → CC0 packs (Kenney Audio, OpenGameArt CC0) as placeholders, registered in `asset_defs`, listed in CREDITS.md — pending approval in USER_QUESTIONS.md |
+| Audio (SFX) | **Synthesised, no files** — each cue is a `soundCue` content entry naming a bus and a handful of envelope/oscillator parameters, rendered in the browser (P10c). Nothing to licence, nothing to credit, nothing to download, and every cue retunable in Admin. A `sample` field on the same entry takes a recording the moment one exists: drop a CC0 pack into `assets/audio/`, register it as an `asset` of kind `audio`, point the cue at it, and the synth stops being used for that cue alone. See USER_QUESTIONS Q4. |
+| Audio (music) | **None.** The bus, the fader and the stored setting are real; there is no track. The Settings slider says so rather than pretending. A CC0 loop is one `soundCue` on the `music` bus away. |
 | VFX (slashes, sparks, mist) | Hand-built Pixi particle presets + tiny hand-drawn pixel overlay strips (authored during P3, kept in `assets/vfx/`) |
 | Summon portal, Haven vista | Composited from tinted Kenney frames + particles + our pixel ornaments in P5; upgrade path via admin upload |
 

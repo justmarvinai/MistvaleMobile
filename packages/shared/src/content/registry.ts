@@ -20,6 +20,7 @@ import {
   questDefSchema,
   summonPoolDefSchema,
   stageDefSchema,
+  soundCueDefSchema,
   tutorialStepDefSchema,
   statusDefSchema,
 } from './entities';
@@ -56,6 +57,7 @@ export const CONTENT_TYPES = [
   'loginTrack',
   'newsPost',
   'tutorialStep',
+  'soundCue',
   'gameConfig',
 ] as const;
 
@@ -228,6 +230,16 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: [],
     inBundle: true,
   },
+  soundCue: {
+    label: 'Sounds',
+    path: 'sounds',
+    // A cue may name an `asset` to play, but the reference is deliberately not declared:
+    // a cue that falls back to its synth voice is complete on its own, and publish must
+    // not refuse a script that points at a pack nobody has uploaded yet.
+    schema: soundCueDefSchema,
+    references: [],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -261,6 +273,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'loginTrack',
   'newsPost',
   'tutorialStep',
+  'soundCue',
   'gameConfig',
 ];
 
