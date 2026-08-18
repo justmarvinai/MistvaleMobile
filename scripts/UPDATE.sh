@@ -35,6 +35,12 @@ enable_error_trap
 # Running this as root would leave root-owned files the app user cannot rewrite.
 reexec_as_app_user "$@"
 
+# And this script lives in the checkout it is about to reset. bash reads a script
+# by file offset as it goes, so rewriting it mid-run can splice the new file onto
+# the old one — see reexec_from_copy.
+reexec_from_copy "$@"
+trap clean_script_copy EXIT
+
 usage() {
 	cat <<EOF
 ${C_BOLD}UPDATE.sh${C_RESET} — deploy the current branch, with automatic rollback

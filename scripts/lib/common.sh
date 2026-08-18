@@ -584,6 +584,43 @@ reexec_as_app_user() {
 		"${SCRIPTS_DIR}/${SCRIPT_NAME}" "$@"
 }
 
+# reexec_from_copy <script args...>
+#
+# Re-runs the calling script from a throwaway copy when it lives inside the
+# checkout it is about to rewrite.
+#
+# bash reads a script incrementally, by file offset — so replacing the file
+# under a running one makes the next read return whatever now sits at that
+# offset. A deploy that changes UPDATE.sh (or common.sh, which every script
+# sources) can therefore execute a fragment of the new file spliced onto the old
+# one, and the failure looks like nothing at all: a syntax error partway through
+# a release, or worse, a command nobody wrote.
+#
+# The whole scripts directory is copied rather than the one file, because
+# SCRIPTS_DIR is how the scripts find each other — UPDATE.sh calls BACKUP.sh and
+# SEED.sh by that path, and those are being rewritten too. APP_ROOT is a fixed
+# constant rather than something derived from the script's location, so a copy
+# in /tmp still targets the real deployment.
+reexec_from_copy() {
+	[[ -z "${MISTVALE_SCRIPT_COPY:-}" ]] || return 0
+	[[ "${SCRIPTS_DIR}" == "${REPO_DIR}"/* ]] || return 0
+
+	local copy
+	copy="$(mktemp -d -t mistvale-scripts-XXXXXX)" || die "could not create a scripts copy"
+	cp -R "${SCRIPTS_DIR}/." "${copy}/" || die "could not copy ${SCRIPTS_DIR}"
+	log "running from ${copy} — this script is inside the checkout it replaces"
+	exec env "MISTVALE_SCRIPT_COPY=${copy}" "${copy}/${SCRIPT_NAME}" "$@"
+}
+
+# clean_script_copy — remove the throwaway copy reexec_from_copy made.
+# Registered as an EXIT trap by the script that used it; a no-op otherwise, and
+# deliberately fussy about what it will delete.
+clean_script_copy() {
+	local copy="${MISTVALE_SCRIPT_COPY:-}"
+	[[ -n "${copy}" && "${copy}" == /tmp/mistvale-scripts-* && -d "${copy}" ]] || return 0
+	rm -rf -- "${copy}"
+}
+
 # run_server_entry <dist entry> <pnpm script> [args...]
 # Runs one of the server's built one-shot entrypoints (apps/server/build.js):
 #   dist/db/migrate.js · dist/db/seed.js · dist/scripts/set-rank.js

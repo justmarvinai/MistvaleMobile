@@ -13,6 +13,7 @@ Found on the real VPS, on the first update after P10. Five files in the checkout
 - **A deployment checkout is reset, not merged.** Nothing is ever authored there and every build is copied into `releases/`, so the only correct outcome is "exactly what origin says" — `pull --ff-only` was the wrong verb, and it failed on any drift at all. The update now recovers from a partially-applied checkout by itself.
 - **The dirty-tree warning shows what it found** instead of asking about files it will not name, and says plainly that they will be discarded.
 - **`--content-only` shares the same implementation.** It carried its own copy of the fragile pull, so a checkout one mode could not recover from was one the other mode could.
+- **And the script no longer rewrites itself while running.** `UPDATE.sh` lives in the checkout it resets, and bash reads a script incrementally by file offset — so replacing the file mid-run can splice the new content onto the old at whatever byte it had reached. It re-runs itself from a throwaway copy of the whole `scripts/` directory first, and deletes it on the way out. This has been latent since the first deploy; a release that changes the deploy scripts is what makes it bite.
 
 ### Added — the mist closes between screens, and Reduce motion means something (P10f)
 
