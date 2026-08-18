@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — one root-owned file could stop the box updating itself
+
+Found on the real VPS, on the first update after P10. Five files in the checkout belonged to root rather than to the app user — left by a deploy that once ran git as root, months earlier. `git checkout` wrote most of the release, reached them, could not unlink them, and stopped; the retried `git pull` then reported the half-applied tree as eighty files of "local changes" and a hundred untracked ones, five times over. Two hundred lines of git output for a `chown`, and no way forward without resetting the checkout by hand.
+
+- **Ownership is checked before git is touched**, and the failure is one line naming the command that fixes it.
+- **A deployment checkout is reset, not merged.** Nothing is ever authored there and every build is copied into `releases/`, so the only correct outcome is "exactly what origin says" — `pull --ff-only` was the wrong verb, and it failed on any drift at all. The update now recovers from a partially-applied checkout by itself.
+- **The dirty-tree warning shows what it found** instead of asking about files it will not name, and says plainly that they will be discarded.
+- **`--content-only` shares the same implementation.** It carried its own copy of the fragile pull, so a checkout one mode could not recover from was one the other mode could.
+
 ### Added — the mist closes between screens, and Reduce motion means something (P10f)
 
 Two more controls that looked connected and were not.

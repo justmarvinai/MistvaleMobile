@@ -262,6 +262,77 @@ if [[ -z "${BRANCH}" ]]; then
 	[[ "${BRANCH}" == "detached" || "${BRANCH}" == "unknown" ]] && BRANCH="main"
 fi
 
+# --- 2. Pull -----------------------------------------------------------------
+
+# assert_owned <dir> <label>
+#
+# Every file in a checkout must belong to the app user, and one that does not
+# will wedge the next update in a way that reads like something else entirely.
+#
+# This is not hypothetical. A deploy that once ran git as root left five
+# root-owned files behind; months later `git checkout` wrote most of a release,
+# hit them, could not unlink them, and stopped — leaving a half-applied tree
+# that the retried `git pull` then reported as eighty files of "local changes"
+# and a hundred untracked ones. Two hundred lines of git output for a chown.
+#
+# So it is checked first, and it says the one command that fixes it.
+assert_owned() {
+	local dir="$1" label="$2" strays count
+	# -xdev keeps this out of a bind mount; `head` bounds the report to something
+	# a person can read when every file is wrong.
+	strays="$(find "${dir}" -xdev ! -user "${APP_USER}" -printf '%u %p\n' 2>/dev/null | head -10 || true)"
+	[[ -n "${strays}" ]] || return 0
+
+	count="$(find "${dir}" -xdev ! -user "${APP_USER}" 2>/dev/null | wc -l || echo '?')"
+	warn "${count} file(s) in ${dir} are not owned by ${APP_USER}:"
+	printf '%s\n' "${strays}" >&2
+	[[ "${count}" -gt 10 ]] 2>/dev/null && printf '    …\n' >&2
+	die "fix the ownership and re-run:  sudo chown -R ${APP_USER}:${APP_GROUP} ${dir}"
+}
+
+pull_repo() { # pull_repo <dir> <label>
+	local dir="$1" label="$2"
+	[[ -d "${dir}/.git" ]] || die "${label} checkout missing at ${dir} — run DEPLOY.sh first"
+
+	assert_owned "${dir}" "${label}"
+
+	# Refuse to blow away uncommitted work silently (hand-edits on the box happen).
+	if ! run_as_app_user git -C "${dir}" diff --quiet --ignore-submodules HEAD 2>/dev/null; then
+		warn "${label} has uncommitted local changes in ${dir}:"
+		run_as_app_user git -C "${dir}" status --short | head -20 >&2
+		confirm "DISCARD-LOCAL" "They will be discarded — this checkout is deployment state, not a workspace."
+	fi
+
+	log "${label}: fetching origin"
+	retry 5 run_as_app_user git -C "${dir}" fetch --prune --quiet origin ||
+		die "${label}: git fetch failed after 5 attempts"
+
+	if ! run_as_app_user git -C "${dir}" rev-parse --verify --quiet "origin/${BRANCH}" >/dev/null; then
+		die "${label}: branch '${BRANCH}' does not exist on origin"
+	fi
+
+	# Reset rather than merge. This checkout is *deployment state*: nothing is
+	# ever authored in it, and every build is copied into releases/ — so the only
+	# correct outcome is "exactly what origin says", and a merge is the wrong verb
+	# for that. `pull --ff-only` failed on any drift at all, which meant a single
+	# partially-applied checkout could leave the box unable to update itself until
+	# somebody reset it by hand.
+	#
+	# Not retried: a reset that fails once fails five times, and the retry only
+	# ever buried the reason under four more copies of it.
+	log "${label}: resetting to origin/${BRANCH}"
+	run_as_app_user git -C "${dir}" checkout --quiet -B "${BRANCH}" "origin/${BRANCH}" ||
+		die "${label}: could not check out ${BRANCH}"
+	run_as_app_user git -C "${dir}" reset --hard --quiet "origin/${BRANCH}" ||
+		die "${label}: could not reset to origin/${BRANCH}"
+	# `-fd` without `-x`: build outputs and node_modules are ignored files and must
+	# survive, or every update pays for a cold install.
+	run_as_app_user git -C "${dir}" clean -fdq ||
+		die "${label}: could not clean the checkout"
+
+	ok "${label}: $(repo_branch "${dir}") @ $(repo_sha "${dir}")"
+}
+
 # =============================================================================
 # Mode: --content-only (no rebuild)
 # =============================================================================
@@ -272,11 +343,10 @@ if ((CONTENT_ONLY == 1)); then
 		"${SCRIPTS_DIR}/BACKUP.sh" --label pre-content || die "backup failed — aborting"
 	fi
 
-	log "pulling ${BRANCH} in ${REPO_DIR} (seeds live in the game repo)"
-	run_as_app_user git -C "${REPO_DIR}" fetch --quiet --prune origin
-	run_as_app_user git -C "${REPO_DIR}" checkout --quiet "${BRANCH}"
-	retry 5 run_as_app_user git -C "${REPO_DIR}" pull --ff-only --quiet origin "${BRANCH}" ||
-		die "git pull failed for ${REPO_DIR}"
+	# The same pull the full update uses — ownership checked, reset rather than
+	# merged. This was a second copy of the fragile version until P10, which meant
+	# a checkout one mode could not recover from was one the other mode could.
+	pull_repo "${REPO_DIR}" "game repo"
 
 	# SEED.sh takes its own backup + confirmation and restarts the service so the
 	# in-memory ContentCache reloads.
@@ -310,35 +380,6 @@ if ((SKIP_BACKUP == 0)); then
 else
 	((INITIAL == 1)) || warn "--skip-backup: deploying without a fresh database backup"
 fi
-
-# --- 2. Pull -----------------------------------------------------------------
-pull_repo() { # pull_repo <dir> <label>
-	local dir="$1" label="$2"
-	[[ -d "${dir}/.git" ]] || die "${label} checkout missing at ${dir} — run DEPLOY.sh first"
-
-	# Refuse to blow away uncommitted work (hand-edits on the box happen).
-	if ! run_as_app_user git -C "${dir}" diff --quiet --ignore-submodules HEAD 2>/dev/null; then
-		warn "${label} has uncommitted local changes in ${dir}"
-		confirm "DISCARD-LOCAL" "Continuing pulls on top of them; conflicting files will make the pull fail."
-	fi
-
-	log "${label}: fetching origin"
-	retry 5 run_as_app_user git -C "${dir}" fetch --prune --quiet origin ||
-		die "${label}: git fetch failed after 5 attempts"
-
-	if ! run_as_app_user git -C "${dir}" rev-parse --verify --quiet "origin/${BRANCH}" >/dev/null; then
-		die "${label}: branch '${BRANCH}' does not exist on origin"
-	fi
-
-	log "${label}: checking out ${BRANCH}"
-	run_as_app_user git -C "${dir}" checkout --quiet "${BRANCH}" ||
-		run_as_app_user git -C "${dir}" checkout --quiet -B "${BRANCH}" "origin/${BRANCH}"
-
-	retry 5 run_as_app_user git -C "${dir}" pull --ff-only --quiet origin "${BRANCH}" ||
-		die "${label}: git pull failed after 5 attempts (fast-forward only — local commits on the box block this)"
-
-	ok "${label}: $(repo_branch "${dir}") @ $(repo_sha "${dir}")"
-}
 
 if ((INITIAL == 0)); then
 	step "2/7 Pulling both repositories"
