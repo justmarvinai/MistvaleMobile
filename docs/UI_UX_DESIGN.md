@@ -51,6 +51,7 @@
 - **Haven** (home) is an illustrated animated camp: clickable stations (Mistgate portal glow, Bazaar stall, Depths cave mouth, Arena banner, Hall of Valor statue, Crystal Mine, Training Yard) — doubling the dock for flavor; dock is the fast path. Locked features show as mist-shrouded silhouettes with unlock level tooltip (visible ambition = retention).
 - Screen transitions: quick mist-wipe (Pixi overlay) 200 ms.
 - Keyboard: 1-9 dock hotkeys, ESC = back/close-modal everywhere, Enter confirms default action. Every modal is also fully mouse-operable. Breadcrumb-free — max depth 3 with persistent back.
+- **One overlay owns the keyboard at a time.** Dialogs register as they open (`ui/Modal/stack.ts`) and the last one in takes Escape, the backdrop and the focus trap; its depth is added to the modal layer so two on screen stack in the order the player opened them rather than in mount order. Before P10b every open dialog listened on `document`, so one Escape closed the relic picker *and* the champion sheet behind it. Any full-screen overlay outside the `Modal` primitive — the Mistgate reveal — joins the same stack.
 - Badging: red pips on dock items (claimable quest, free summon, mail, arena tokens full) — computed from `/player` snapshot flags, not polled.
 
 ## 3. Screen inventory (all built for EA-0.1)
@@ -103,7 +104,8 @@
 - Targeting: hover-highlight + click enemy (or ally for ally-target skills); default target auto-highlighted; AoE skills glow all targets. Keyboard: 1-4 skills, tab targets, space = confirm/auto.
 - Buff/debuff icons: 16px chips with turn-count pips, hover = tooltip with exact effect; stacks numbered.
 - Floaters: damage (element-tinted, crit = bigger + shake char), heal green, RESIST steel-grey, WEAK/STRONG hit markers.
-- Speed x1/x2 (persisted), Auto toggle (server resolves ahead; playback continues at speed), instant-finish button appears for already-resolved autos.
+- Speed x1/x2 (persisted), Auto toggle (server resolves ahead; playback continues at speed), **Skip** appears for already-resolved autos.
+- **The results wait for the playback, never for the response.** Auto settles the whole fight in one call, so a screen keyed on the server's answer shows the outcome about three seconds in, over a HUD reading "Turn 0" — which is what shipped until P10a. Two rules follow: anything that gives the outcome away (results, the closing line, the wallet re-sync) waits for the event log to be played out; anything that *sends* something (Auto, Retreat) goes dark as soon as the session closes. Skip is the deliberate way past the rest, and the only one.
 - Death: dissolve + slot dims; wave clear: banner sweep + next wave slides in; victory: standstill → banner → results.
 
 ## 5. UX guardrails

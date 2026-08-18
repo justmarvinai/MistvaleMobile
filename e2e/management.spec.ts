@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial } from './support';
+import { dismissUnlocks, leaveTutorial, resolveBattle } from './support';
 
 /**
  * The management loop, in a real browser.
@@ -93,8 +93,7 @@ test.describe('the management loop', () => {
         .click();
       await teamDialog.getByRole('button', { name: /into the mist/i }).click();
 
-      await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 20_000 });
-      await page.getByRole('button', { name: /^auto$/i }).click();
+      await resolveBattle(page);
 
       const results = page.getByRole('dialog', { name: /results/i });
       await expect(results).toBeVisible({ timeout: 60_000 });
@@ -150,6 +149,21 @@ test.describe('the management loop', () => {
       .first()
       .click();
     const picker = page.getByRole('dialog', { name: /weapon relic/i });
+    await expect(picker).toBeVisible();
+
+    // Two dialogs, one keystroke. Escape belongs to the top one only — before the overlay
+    // stack (apps/client/src/ui/Modal/stack.ts) both had their own listener on `document`,
+    // and `stopPropagation` does nothing about a sibling listener on the same node, so
+    // this closed the champion sheet along with the picker and dropped the player back on
+    // the roster.
+    await page.keyboard.press('Escape');
+    await expect(picker).toBeHidden({ timeout: 10_000 });
+    await expect(detail.getByRole('tab', { name: /relics/i })).toBeVisible();
+
+    await detail
+      .getByRole('button', { name: /weapon/i })
+      .first()
+      .click();
     await expect(picker).toBeVisible();
     await picker
       .getByRole('button', { name: /ironroot|wolfsfang|★/i })

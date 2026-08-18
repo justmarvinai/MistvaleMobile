@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial } from './support';
+import { dismissUnlocks, leaveTutorial, resolveBattle } from './support';
 
 /**
  * The sandbox, in a real browser.
@@ -69,8 +69,7 @@ test.describe('the practice sandbox', () => {
       const dialog = await openStage();
       await dialog.getByRole('button', { name: /into the mist/i }).click();
 
-      await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 20_000 });
-      await page.getByRole('button', { name: /^auto$/i }).click();
+      await resolveBattle(page);
 
       const results = page.getByRole('dialog', { name: /^results$/i });
       await expect(results).toBeVisible({ timeout: 60_000 });
@@ -90,8 +89,7 @@ test.describe('the practice sandbox', () => {
     const energyBefore = await dialog.getByText(/you have \d+/i).textContent();
     await dialog.getByRole('button', { name: /^practise$/i }).click();
 
-    await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 20_000 });
-    await page.getByRole('button', { name: /^auto$/i }).click();
+    await resolveBattle(page);
 
     const practiceResults = page.getByRole('dialog', { name: /^practice$/i });
     await expect(practiceResults).toBeVisible({ timeout: 60_000 });

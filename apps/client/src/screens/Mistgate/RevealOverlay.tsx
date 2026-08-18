@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useId, type CSSProperties } from 'react';
 import { Button } from '../../ui/Button/Button';
+import { useLayer } from '../../ui/Modal/stack';
 import { avatarPath } from '../../game/sprites';
 import { useContentStore } from '../../state/contentStore';
 import { useSummonStore } from '../../state/summonStore';
@@ -32,6 +33,9 @@ export function RevealOverlay(): JSX.Element {
   const dismiss = useSummonStore((state) => state.dismissReveal);
   const bundle = useContentStore((state) => state.bundle);
 
+  // Only mounted while there is something to reveal, so being mounted *is* being open.
+  const { depth } = useLayer(useId(), true);
+
   const done = revealed >= results.length;
 
   // Turn the next card after its predecessor has had its moment.
@@ -63,7 +67,13 @@ export function RevealOverlay(): JSX.Element {
   }, 'common');
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Summon results">
+    <div
+      className={styles.overlay}
+      style={{ '--mv-layer-depth': depth } as CSSProperties}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Summon results"
+    >
       {flashKey && <div key={flashKey} className={styles.flash} aria-hidden="true" />}
 
       <div className={styles.cards} data-count={results.length}>

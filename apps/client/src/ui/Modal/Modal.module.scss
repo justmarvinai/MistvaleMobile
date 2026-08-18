@@ -1,7 +1,10 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  z-index: $z-modal;
+  // One above the last one opened. `--mv-layer-depth` comes from ui/Modal/stack.ts, so
+  // two dialogs on screen stack in the order the player opened them rather than in
+  // whatever order their components happened to mount.
+  z-index: calc(#{$z-modal} + var(--mv-layer-depth, 0));
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial } from './support';
+import { dismissUnlocks, leaveTutorial, resolveBattle } from './support';
 
 /**
  * The loop, in a real browser.
@@ -65,10 +65,11 @@ test.describe('the campaign loop', () => {
     await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/wave 1/i)).toBeVisible();
 
-    await page.getByRole('button', { name: /^auto$/i }).click();
+    // Auto hands the fight to the server; Skip jumps the playback to the end of what came
+    // back. The results modal waits for the *playback*, not the response — so both presses
+    // are needed, and this spec is about the loop rather than the animation.
+    await resolveBattle(page);
 
-    // Auto resolves server-side, so the results modal is the thing to wait for; the
-    // playback in between is animation, not a gate.
     const results = page.getByRole('dialog', { name: /results/i });
     await expect(results).toBeVisible({ timeout: 60_000 });
     await expect(results.getByText(/victory|defeat|withdrawn|the mist closed in/i)).toBeVisible();

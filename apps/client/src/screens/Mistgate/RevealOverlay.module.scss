@@ -3,7 +3,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: $z-modal;
+  // A full-screen cinematic, but it joins the same stack as the dialogs (see
+  // ui/Modal/stack.ts) so anything opened over it lands on top rather than behind it.
+  z-index: calc(#{$z-modal} + var(--mv-layer-depth, 0));
   display: flex;
   flex-direction: column;
   align-items: center;

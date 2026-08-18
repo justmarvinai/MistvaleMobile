@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial } from './support';
+import { dismissUnlocks, leaveTutorial, resolveBattle } from './support';
 
 /**
  * The login calendar, in a real browser.
@@ -152,8 +152,7 @@ async function winFirstStage(page: Page): Promise<void> {
     .click();
   await teamDialog.getByRole('button', { name: /into the mist/i }).click();
 
-  await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 20_000 });
-  await page.getByRole('button', { name: /^auto$/i }).click();
+  await resolveBattle(page);
 
   const results = page.getByRole('dialog', { name: /results/i });
   await expect(results).toBeVisible({ timeout: 60_000 });

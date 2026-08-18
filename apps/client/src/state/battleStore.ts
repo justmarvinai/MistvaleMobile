@@ -20,6 +20,9 @@ import { useContentStore } from './contentStore';
  * position** (how much of that log the player has actually watched). Keeping them apart
  * is what lets speed, skip and reconnect all work without any of them lying about what
  * really happened.
+ *
+ * Which of the two a screen should be asking is answered in `battleClocks.ts`, and it is
+ * worth reading before wiring anything to `battle.status`.
  */
 
 interface BattleStoreState {
@@ -229,11 +232,16 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
       const battle = get().battle;
       if (!battle) return;
       stopTimer();
+      // What the player has actually watched: the queue is always a suffix of the log.
+      // The tail below is applied *on top of* the current view, so re-applying events
+      // already in it would land every hit a second time and leave a corpse or two on a
+      // screen the player is walking away from.
+      const playedThrough = battle.events.length - get().pending.length;
       set({ busy: true, error: null });
       try {
         const updated = await gameApi.retreat(battle.id);
         const view = structuredClone(get().view);
-        applyAll(view, updated.events, statusKind);
+        applyAll(view, updated.events.slice(playedThrough), statusKind);
         set({ busy: false, battle: updated, view, pending: [], playing: false });
       } catch (cause) {
         set({ busy: false, error: messageOf(cause) });

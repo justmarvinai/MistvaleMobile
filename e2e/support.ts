@@ -87,3 +87,31 @@ export async function dismissUnlocks(page: Page): Promise<void> {
     await card.getByRole('button', { name: /later/i }).click();
   }
 }
+
+/**
+ * Fights the battle on screen through to its results, without watching it.
+ *
+ * Two presses, and both are things a real player does: **Auto** asks the server to
+ * resolve the whole fight in one response, **Skip** jumps the playback to the end of what
+ * came back. Before P10 the second press was unnecessary because the results modal opened
+ * on the server's answer rather than on the playback — which is the bug it opened on, and
+ * which meant no fight in the game was ever actually watched.
+ *
+ * Now that playback is a real gate, forty specs sitting through forty animated battles at
+ * ×1 would add something like ten minutes of sprites hitting each other to a suite that is
+ * about the loop *around* the fight. The playback itself is watched in `tutorial.spec.ts`,
+ * where it is the subject rather than the setup.
+ */
+export async function resolveBattle(page: Page): Promise<void> {
+  const auto = page.getByRole('button', { name: /^auto$/i });
+  await auto.waitFor({ timeout: 20_000 });
+  await auto.click();
+
+  // Skip exists only while there is playback left to skip — a fight short enough to drain
+  // first is a fight that needed no skipping. ("Skip tutorial" is a different button and
+  // deliberately does not match.)
+  await page
+    .getByRole('button', { name: /^skip$/i })
+    .click({ timeout: 20_000 })
+    .catch(() => undefined);
+}

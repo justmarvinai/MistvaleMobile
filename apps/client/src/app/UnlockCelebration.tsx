@@ -27,6 +27,9 @@ export function UnlockCelebration(): JSX.Element | null {
   // already a modal — stacking a second on top would bury the loot the player is reading
   // under news about a screen they have not asked for yet. The queue waits until they come
   // back out, which is a better moment for it anyway.
+  //
+  // This is a decision about attention, not a workaround for layering: the overlay stack
+  // would put the card on top correctly, and on top is precisely the wrong place for it.
   if (screen === 'battle') return null;
 
   const goThere = (): void => {

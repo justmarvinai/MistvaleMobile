@@ -5,6 +5,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — every fight in the game was spoiled before it was watched (P10a)
+
+Auto-battle asks the server to resolve the whole fight in one response, and the results modal was keyed on *that response* rather than on the playback that follows it. So it opened about three seconds in — victory banner, stars, reward list — on top of a HUD still reading "Wave 1 · Turn 0". The fight then played out underneath a modal announcing how it ended.
+
+- **A battle runs on two clocks, and they are now named.** The server's, which decides when there is nothing left to send it, and the playback's, which decides when the player has seen the fight. Commands read the first: Auto and Retreat go dark the moment the session closes, because pressing either would earn an error rather than an action. Everything that gives the outcome away reads the second: the results, the "fight is over" line, and the wallet refresh.
+- **The wallet moved with them.** The top bar is on screen throughout a battle, and silver climbing at turn three announces a win as plainly as the modal did. It re-syncs when the player reaches the end.
+- **Skip is the way past a fight you would rather not watch**, and it is now the only one, which it should always have been. While the server is still thinking the bar says "Resolving…"; once the fight on screen is a recording, it says so and names the button.
+- The cold open's near-death beat — tuned in P9b, gated by `pnpm sim`, and never once visible — is visible.
+- Retreating mid-playback used to re-apply the whole event log on top of a view that already held part of it, landing every blow a second time on the way out. It now applies only what the player had not yet watched.
+
+### Fixed — one keystroke closed two dialogs (P10b)
+
+Every modal portals to the same layer, so which of two was "on top" was whichever mounted first — a detail nobody chose and nothing tested. Open the relic picker over a champion sheet and press Escape and both closed, dropping the player back on the roster; Tab wandered out of the top dialog into the one behind it, because that one's focus trap was still running.
+
+- **Overlays register when they open, and the last one in owns the keyboard.** Escape and backdrop clicks belong to it alone, and its depth is added to the modal layer so two dialogs stack in the order the player opened them. The Mistgate's reveal cinematic joins the same stack, so a card landing over it lands on top of it rather than behind it.
+- **Focus follows the dialog rather than the stack.** Opening one over another remembers the element inside the lower one and gives it back on close, so a picker dismissed over a champion sheet returns the caret to the slot it was opened from — and no longer yanks focus back to the first button on every re-render of the screen underneath.
+
 ### Added — something opened (P9d)
 
 Features have always unlocked on account level, and until now they did it in silence: a dock tile shrouded on Tuesday was simply lit on Wednesday. That is the moment the whole gating structure exists to create.

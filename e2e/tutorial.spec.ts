@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { leaveTutorial, resolveBattle } from './support';
 
 /**
  * The first hour, in a real browser.
@@ -57,10 +57,22 @@ test.describe('the tutorial', () => {
     expect(roster).toBe(0);
 
     await page.getByRole('button', { name: /^auto$/i }).click();
-    // Auto resolves it server-side and plays it back; the results modal is the cue that
-    // the playback has caught up with the outcome.
+
+    // The one place in the suite where the playback itself is the subject.
+    //
+    // Auto resolves the whole fight in a single response, and the results modal used to
+    // open on *that* — about three seconds in, on top of a HUD still reading "Turn 0".
+    // Every battle in the game gave its outcome away before it was watched, and the cold
+    // open's tuned near-death beat was never once seen. So: the fight must be visibly
+    // under way with the outcome still hidden.
     const results = page.getByRole('dialog', { name: 'Results' });
-    await expect(results).toBeVisible({ timeout: 120_000 });
+    await expect(page.getByText(/^Wave \d+ · Turn [1-9]/)).toBeVisible({ timeout: 30_000 });
+    await expect(results).toBeHidden();
+
+    // And Skip is the deliberate way past the rest of it — the battle's own Skip, not the
+    // Wardenmaster's, which is why the two are named apart.
+    await page.getByRole('button', { name: /^skip$/i }).click();
+    await expect(results).toBeVisible({ timeout: 30_000 });
     await expect(results).toContainText(/victory/i);
 
     // The results sit *over* the parchment — the overlay is deliberately below modals so
@@ -107,9 +119,9 @@ test.describe('the tutorial', () => {
 
     // Step 1: the cold open. It pays nothing — the account is still level 1 after it.
     await page.getByRole('button', { name: /meet them on the road/i }).click();
-    await page.getByRole('button', { name: /^auto$/i }).click();
+    await resolveBattle(page);
     const results = page.getByRole('dialog', { name: 'Results' });
-    await expect(results).toBeVisible({ timeout: 120_000 });
+    await expect(results).toBeVisible({ timeout: 60_000 });
     await results.getByRole('button', { name: /^close$/i }).click();
     await advance(page);
 

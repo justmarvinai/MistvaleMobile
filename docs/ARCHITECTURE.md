@@ -124,6 +124,7 @@ MistvaleMobile/
 
 ### 4.4 State & data flow
 - Zustand stores: `session` (auth), `content` (static content bundle + revision), `player` (profile, resources, energy), `roster`, `inventory`, `battle` (live battle playback state), `ui` (modals, toasts).
+- The `battle` store holds **two clocks** and they are deliberately far apart: server truth (the session, its whole event log, whether it wants an action) and playback position (how much of that log the player has watched). An auto-battle settles in one response and then animates for half a minute, so which clock a piece of UI reads is a decision, not a detail — `state/battleClocks.ts` names both and every screen reads them through it.
 - Server is the source of truth; every mutating API response returns the **authoritative deltas** (e.g. new resource totals, changed champion) which stores apply. No optimistic writes in EA — latency to a EU VPS is fine and correctness is simpler.
 - Energy and other timers: server returns `{ value, cap, nextTickAt, regenSeconds }`; client animates the countdown locally and never self-credits — screen entry / actions re-sync.
 - The **content bundle** (all champion/skill/item/stage definitions needed to render the game) is fetched once per content revision (`GET /api/content` with ETag), cached in IndexedDB, keyed by revision. Bundle target < 500 KB gzipped at EA content size.
@@ -163,7 +164,7 @@ MistvaleMobile/
 ### 5.5 Battle session management
 - Battles live in an in-memory `Map<battleId, BattleSession>` + a `battles` DB snapshot updated after each action (crash recovery = load snapshot; a restart mid-battle costs nobody anything).
 - Manual play: client sends `{ actionId, skillId, targetSlot }` → server advances the engine until the next player decision point (enemy/auto turns resolve inline) → returns the ordered `BattleEvent[]` slice.
-- Auto: the whole battle resolves in one call and the event log streams back for playback at client-chosen speed.
+- Auto: the whole battle resolves in one call and the event log streams back for playback at client-chosen speed. The client must not treat that response as the end of the fight — see §4.4 on the two clocks.
 - Multi-battle: N repeats resolve in one call under one player lock, and **write no session rows at all** — thirty states and thirty event logs is megabytes per farm, and a batch has nothing to resume. The summary is the record; it lives on the player row (`last_multi_battle`) so a retried request replays it rather than farming twice.
 - Sessions expire after 30 min idle (counts as retreat: energy spent, no reward — same as RSL).
 - Engine CPU budget: a full 3-wave stage resolves in **< 20 ms**; even aggressive multi-battle x10 stays trivially within the 1-core budget.

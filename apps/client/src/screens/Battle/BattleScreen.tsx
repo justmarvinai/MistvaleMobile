@@ -5,6 +5,7 @@ import { Button } from '../../ui/Button/Button';
 import { BattleScene } from '../../game/battleScene';
 import { PixiStage } from '../../game/PixiStage';
 import { setScene } from '../../game/stage';
+import { settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
 import { useBattleStore } from '../../state/battleStore';
 import { useContentStore } from '../../state/contentStore';
 import { useNavStore } from '../../state/navStore';
@@ -40,6 +41,12 @@ export function BattleScreen(): JSX.Element {
   const skipToLatest = useBattleStore((state) => state.skipToLatest);
   const resume = useBattleStore((state) => state.resume);
   const resetBattle = useBattleStore((state) => state.reset);
+
+  // Two clocks, two questions — see state/battleClocks.ts. `settled` is the server's
+  // answer and gates the buttons that talk to it; `watched` is the playback's and gates
+  // everything that gives the outcome away.
+  const settled = useBattleStore(settledOnServer);
+  const watched = useBattleStore(watchedToTheEnd);
 
   const bundle = useContentStore((state) => state.bundle);
   const back = useNavStore((state) => state.back);
@@ -81,11 +88,13 @@ export function BattleScreen(): JSX.Element {
     if (!battle) void resume();
   }, [battle, resume]);
 
-  // The wallet moved when the fight resolved.
-  const finished = view.finished || battle?.status === 'finished';
+  // The wallet moved when the fight resolved — but the top bar is on screen throughout a
+  // battle, and silver climbing at turn three announces the win as plainly as the modal
+  // would. So it re-syncs when the player has watched the end, not when the server got
+  // there.
   useEffect(() => {
-    if (finished) void refreshPlayer();
-  }, [finished, refreshPlayer]);
+    if (watched) void refreshPlayer();
+  }, [watched, refreshPlayer]);
 
   const skillsByKey = useMemo(
     () => new Map((bundle?.skills ?? []).map((skill) => [skill.key, skill])),
@@ -168,7 +177,7 @@ export function BattleScreen(): JSX.Element {
             type="button"
             className={styles.toggle}
             aria-pressed={auto}
-            disabled={busy || finished}
+            disabled={busy || settled}
             onClick={() => void runAuto()}
           >
             Auto
@@ -176,7 +185,7 @@ export function BattleScreen(): JSX.Element {
           <button
             type="button"
             className={styles.toggle}
-            disabled={finished}
+            disabled={settled}
             onClick={() => void retreat()}
           >
             Retreat
@@ -189,10 +198,16 @@ export function BattleScreen(): JSX.Element {
       </div>
 
       <div className={styles.bar}>
-        {finished ? (
+        {watched ? (
           <span className={styles.hint}>The fight is over.</span>
         ) : playing ? (
-          <span className={styles.hint}>Resolving…</span>
+          // Two different waits wear the same spinner otherwise. Before the server
+          // answers there is genuinely nothing to see; after it has, the fight on screen
+          // is a recording, and the player who would rather not sit through it deserves
+          // to be told where the button is.
+          <span className={styles.hint}>
+            {settled ? 'Playing out — Skip to jump to the end.' : 'Resolving…'}
+          </span>
         ) : awaitingInput && actingUnit ? (
           <>
             <div className={styles.actor}>
@@ -234,7 +249,7 @@ export function BattleScreen(): JSX.Element {
         {error && <span className={styles.error}>{error}</span>}
       </div>
 
-      {finished && <Results onLeave={leave} />}
+      {watched && <Results onLeave={leave} />}
     </div>
   );
 }

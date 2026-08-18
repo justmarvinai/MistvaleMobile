@@ -1,7 +1,8 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Panel } from '../Panel/Panel';
 import { Button } from '../Button/Button';
+import { useLayer } from './stack';
 import styles from './Modal.module.scss';
 
 export interface ModalProps {
@@ -21,6 +22,10 @@ export interface ModalProps {
  * Escape closes, focus moves in on open and returns to the trigger on close, and Tab
  * cycles within the dialog — the behaviour a native `<dialog>` gives, implemented here
  * so the pixel framing and animation stay under our control.
+ *
+ * When two are open — the relic picker over the champion sheet, a celebration over a
+ * screen's own dialog — only the top one is live. Which one that is comes from
+ * `./stack`, not from the order the components happen to be written in.
  */
 export function Modal({
   open,
@@ -33,7 +38,11 @@ export function Modal({
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const { top, depth } = useLayer(useId(), open);
 
+  // Focus follows the *dialog*, not the stack. Opening one over another captures the
+  // element inside the lower one and gives it back on close, so a picker dismissed over a
+  // champion sheet returns the caret to the slot it was opened from.
   useEffect(() => {
     if (!open) return;
 
@@ -43,6 +52,17 @@ export function Modal({
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     (firstFocusable ?? dialogRef.current)?.focus();
+
+    return () => {
+      previouslyFocused.current?.focus();
+    };
+  }, [open]);
+
+  // Keys belong to the top dialog alone. Installed unconditionally, this is the listener
+  // that used to close two modals with one Escape and let Tab wander into the dialog
+  // underneath.
+  useEffect(() => {
+    if (!open || !top) return;
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape' && dismissible) {
@@ -76,17 +96,19 @@ export function Modal({
     document.addEventListener('keydown', onKeyDown, true);
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
-      previouslyFocused.current?.focus();
     };
-  }, [open, dismissible, onClose]);
+  }, [open, top, dismissible, onClose]);
 
   if (!open) return null;
 
   return createPortal(
     <div
       className={styles.backdrop}
+      // The token stays the single source of truth in SCSS; only the offset comes from
+      // here, so a modal opened second genuinely sits above the one it was opened from.
+      style={{ '--mv-layer-depth': depth } as CSSProperties}
       onMouseDown={(event) => {
-        if (dismissible && event.target === event.currentTarget) onClose();
+        if (top && dismissible && event.target === event.currentTarget) onClose();
       }}
     >
       <div
