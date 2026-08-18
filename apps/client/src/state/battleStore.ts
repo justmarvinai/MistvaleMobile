@@ -64,6 +64,19 @@ interface BattleStoreState {
   setAuto: (auto: boolean) => void;
   /** Jumps to the end of what has already resolved. */
   skipToLatest: () => void;
+  /**
+   * Stops the playback clock without touching the fight.
+   *
+   * `tick` chains one `setTimeout` into the next for as long as there are events left,
+   * and it belongs to the store rather than to the screen — so a `BattleScreen` that goes
+   * away mid-fight leaves it running, cloning the view, moving health bars and playing hit
+   * cues at somebody who is looking at the sign-in form. A fight cannot normally be
+   * navigated away from, which is why this went unnoticed; signing out does it, and so
+   * does an error boundary catching a render.
+   */
+  pausePlayback: () => void;
+  /** Picks the clock back up where it stopped, if anything is left to watch. */
+  resumePlayback: () => void;
   reset: () => void;
 }
 
@@ -79,6 +92,25 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 function stopTimer(): void {
   if (timer) clearTimeout(timer);
   timer = null;
+}
+
+/**
+ * The id the *next* attempt at opening a fight will carry.
+ *
+ * An `actionId` only buys anything if it survives the retry it exists for. Minting a fresh
+ * one per call would mean the player pressing "Into the mist" again — after a lost
+ * response, which is precisely when it matters — asks for a *second* battle and is told
+ * they are already in one, about a fight they cannot see. So it is kept until a start
+ * succeeds, and reused for as long as the request is the same one.
+ *
+ * Keyed on the intent rather than held blindly: a player who gives up on one stage and
+ * picks another is not retrying, and must not inherit the abandoned attempt's id.
+ */
+let pendingStart: { key: string; actionId: string } | null = null;
+
+function startIdFor(key: string): string {
+  if (pendingStart?.key !== key) pendingStart = { key, actionId: newActionId() };
+  return pendingStart.actionId;
 }
 
 export const useBattleStore = create<BattleStoreState>((set, get) => {
@@ -179,9 +211,11 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
 
     async startBattle(input) {
       stopTimer();
+      const actionId = startIdFor(`${input.mode}:${input.stageKey}:${input.team.join(',')}`);
       set({ busy: true, error: null, view: emptyView(), pending: [], battle: null });
       try {
-        const battle = await gameApi.startBattle(input);
+        const battle = await gameApi.startBattle({ ...input, actionId });
+        pendingStart = null;
         set({ busy: false });
         adopt(battle, 0);
       } catch (cause) {
@@ -192,9 +226,11 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
 
     async startArena(input) {
       stopTimer();
+      const actionId = startIdFor(`arena:${input.offerId}:${input.team.join(',')}`);
       set({ busy: true, error: null, view: emptyView(), pending: [], battle: null });
       try {
-        const battle = await gameApi.attack(input);
+        const battle = await gameApi.attack({ ...input, actionId });
+        pendingStart = null;
         set({ busy: false });
         adopt(battle, 0);
       } catch (cause) {
@@ -304,8 +340,20 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
       set({ awaitingInput: computeAwaiting(get()) });
     },
 
+    pausePlayback() {
+      stopTimer();
+      set({ playing: false });
+    },
+
+    resumePlayback() {
+      // Nothing to resume is the common case: the screen mounts before a fight exists,
+      // and `startBattle` starts its own playback.
+      if (get().pending.length > 0 && !get().playing) play();
+    },
+
     reset() {
       stopTimer();
+      pendingStart = null;
       set({
         battle: null,
         view: emptyView(),

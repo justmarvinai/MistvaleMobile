@@ -130,6 +130,38 @@ describe.skipIf(!dbUp)('the mailbox', () => {
 
   // ── Reading ───────────────────────────────────────────────────────────────
 
+  it('caps a huge mailbox without lying about what is in it', async () => {
+    // A mailbox has no natural ceiling — mail without an expiry is never pruned, and an
+    // operator batch-send adds a row to every account at once — so reading "all of it" was
+    // a query that grew for the life of the account. It is capped now; the counts are not,
+    // because a pip that stopped at a hundred would be a pip that lies.
+    const many = Array.from({ length: 130 }, (_, index) => ({
+      playerId,
+      title: `Message ${index}`,
+      body: 'Words.',
+      attachments: (index % 2 === 0 ? { silver: 10 } : {}) as Record<string, number>,
+    }));
+    await app.db.insert(mailbox).values(many);
+
+    const view = await read();
+    expect(view.messages).toHaveLength(100);
+    expect(view.truncated).toBe(true);
+    expect(view.unread).toBe(130);
+    expect(view.claimable).toBe(65);
+    // Newest first, so what is dropped is the oldest — the end nobody scrolls to.
+    expect(view.messages[0]!.title).toBe('Message 129');
+
+    // …and the pip counts the whole box, not the page.
+    expect(await mail.waitingCount(ctx(), playerId)).toBe(130);
+  });
+
+  it('says nothing was truncated when nothing was', async () => {
+    await deliver();
+    const view = await read();
+    expect(view.truncated).toBe(false);
+    expect(view.messages).toHaveLength(1);
+  });
+
   it('starts empty, and says so without inventing a message', async () => {
     const view = await read();
     expect(view.messages).toEqual([]);

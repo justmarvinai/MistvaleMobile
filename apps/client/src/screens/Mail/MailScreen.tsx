@@ -72,6 +72,10 @@ export function MailScreen(): JSX.Element {
           <div className={styles.list}>
             <div className={styles.listHead}>
               <span className={styles.count}>
+                {/* The server caps a very large mailbox at its newest hundred, and says so
+                    rather than quietly showing a hundred of a hundred and thirty. The
+                    unread count is over the whole box either way. */}
+                {mail?.truncated ? 'newest ' : ''}
                 {messages.length} message{messages.length === 1 ? '' : 's'}
                 {mail && mail.unread > 0 ? ` · ${mail.unread} unread` : ''}
               </span>

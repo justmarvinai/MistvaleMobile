@@ -96,7 +96,7 @@ export const ICONS = {
   'nav-mail': { group: 'nav', name: 'envelope', use: 'Mail' },
   'nav-settings': { group: 'nav', name: 'cog', use: 'Settings', author: 'lorc' },
   'nav-locked': { group: 'nav', name: 'padlock', use: 'Locked feature / locked champion' },
-  // The five the dock needed and the set did not have. Every screen in `app/screens.ts`
+  // The four the dock needed and the set did not have. Every screen in `app/screens.ts`
   // now names an icon rather than a Unicode glyph — the file's own comment had said
   // "until the game-icons sprite sheet is wired in" since P0.
   'nav-champions': {
@@ -106,12 +106,6 @@ export const ICONS = {
     author: 'lorc',
   },
   'nav-relics': { group: 'nav', name: 'gem-chain', use: 'Relics (gear vault)', author: 'lorc' },
-  'nav-chronicle': {
-    group: 'nav',
-    name: 'book-cover',
-    use: 'Chronicle (summon history)',
-    author: 'lorc',
-  },
   'nav-calendar': { group: 'nav', name: 'calendar', use: 'Login calendar', author: 'delapouite' },
   'nav-battle': {
     group: 'nav',
@@ -119,6 +113,8 @@ export const ICONS = {
     use: 'Battle (in progress)',
     author: 'lorc',
   },
+  'nav-chronicle': { group: 'nav', name: 'open-book', use: 'Chronicle (collection)' },
+  'nav-valor': { group: 'nav', name: 'stone-stack', use: 'Hall of Valor' },
 
   // ── Portraits — stand-ins for art that does not exist yet ─────────────────────────────
   //
@@ -133,8 +129,6 @@ export const ICONS = {
     use: 'Champion whose portrait has not been drawn yet',
     author: 'lorc',
   },
-  'nav-chronicle': { group: 'nav', name: 'open-book', use: 'Chronicle (collection)' },
-  'nav-valor': { group: 'nav', name: 'stone-stack', use: 'Hall of Valor' },
 
   // ── Buffs — COMBAT_SYSTEM §7, the 13 shipped buffs (16px chips on unit frames) ───────
   'buff-atk-up': { group: 'buff', name: 'sword-brandish', use: 'ATK Up 25/50%' },

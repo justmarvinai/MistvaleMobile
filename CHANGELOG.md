@@ -5,6 +5,56 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — signing out left the last account behind, and four more from the QA pass
+
+The rest of the ranked list, and the first one is the one worth reading twice.
+
+- **Signing out forgot three stores out of eighteen.** Sign out on a shared machine, sign
+  back in as somebody else without reloading, and the first paint of the roster was the
+  previous player's champions, the mailbox was their mail, and `resume()` — which only asks
+  the server when it is holding no battle — showed their fight. Every screen re-fetches on
+  mount, so the wrong data was replaced within a second or two, which is exactly why nobody
+  caught it. There is one place that forgets an account now, and a test that fails when a
+  store with a `reset` is missing from it — because the failure mode of the alternative is
+  silence, in a later phase, by somebody who did not know the list existed.
+- **The playback clock outlived its screen.** A fight's playback is one `setTimeout`
+  chained into the next, owned by the store rather than by the battle screen, and nothing
+  stopped it when that screen went away — so signing out mid-fight left health bars moving
+  and hit cues playing over the sign-in form. Paused on the way out, picked up on the way
+  in, and the fight itself untouched either way.
+- **A retried start was told it was already in a battle.** An `actionId` has covered every
+  other mutation since P0; opening a fight had none. So a dropped response — a phone on a
+  train, which is the whole reason idempotency exists — left the player holding "You are
+  already in a battle. Finish or retreat first." about a fight they could not see and had
+  paid the energy for, with nothing to do but retreat out of it. Both entry points carry
+  one now, campaign and Arena, and the id survives the retry it exists for: it is kept
+  until a start succeeds and reused for as long as the request is the same one, rather than
+  minted fresh per call, which would have made the retry a *second* request and changed
+  nothing.
+- **The mailbox had no ceiling.** Mail without an expiry is never pruned and an operator
+  batch-send adds a row to every account at once, so reading "all of it" was a query that
+  grew for the life of the account — and the top bar's unread pip was hydrating every
+  message's title, body and attachments on every player snapshot in order to count them.
+  The list is the newest hundred and says when it is capped; the counts are two integers
+  off an index, over the whole mailbox, so a capped list never makes the pip lie.
+- **A missing sprite failed silently, and a missing manifest failed forever.** The manifest
+  latch that stops eight units racing for the same file kept the *rejected* promise too, so
+  one blocked request at boot meant no sprites for the rest of the session with no request
+  ever made again. And every texture load ended in `.catch(() => null)`: an enemy that
+  never appeared left nothing anywhere to say why. The latch clears on failure, a manifest
+  that cannot be read degrades to static sprites rather than to nothing, and a missing path
+  is named in the console once — once, because a battle asks for the same eight units on
+  every frame of playback.
+- **Settings was a screen that did not exist.** It has been a modal since P8, deliberately,
+  so it opens over a fight as well as over the Haven — but it kept a row in the screen
+  registry that nothing navigated to and the shell had no branch for, so reaching it would
+  have shown the "not built yet" placeholder.
+
+One finding is deliberately **not** fixed here: the relic vault has no cap, and
+`GET /player/gear` returns all of it. That is a design decision rather than a bug — a cap
+is what makes selling and dismantling matter — so it is **Q5** in `USER_QUESTIONS.md` with
+a recommended default, not a change made on the owner's behalf.
+
 ### Fixed — a missing file answered 200, and handed back the game
 
 The SPA fallback has been `try_files $uri $uri/ /index.html` since P0, which is correct for

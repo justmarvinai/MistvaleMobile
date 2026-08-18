@@ -4,7 +4,22 @@
 
 ## Open questions
 
-**None.** Q4 was answered on 2026-08-18 ("as you recommend") and is in the decision record below.
+**Q5. Should the relic vault have a cap?** Found in the QA pass, and the one remaining read in the
+game with no ceiling on it: `GET /player/gear` returns every relic an account has ever kept, and the
+Relics screen sorts and filters the whole vault client-side. Relics drop from nearly every fight, so
+a heavy farmer's vault grows for as long as they play — a thousand relics is roughly a third of a
+megabyte of JSON on every visit to the screen, on a box with one core. Nothing is wrong at EA (no
+account has more than a few dozen), and I have not capped it unilaterally because a cap is a
+*design* decision: it is what makes selling and dismantling relics matter, and Raid uses one for
+exactly that reason.
+
+**Recommended default: a vault cap of 500, held in `game_config` so it is retunable without a
+deploy, with the Bazaar's sell flow as the pressure valve and mail as the overflow.** Say the word
+and it goes in; say nothing and I will implement that default in P11 rather than at EA, since the
+alternative — server-side pagination of a screen built to sort the whole vault — is a bigger change
+to a screen that works.
+
+Q4 was answered on 2026-08-18 ("as you recommend") and is in the decision record below.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)

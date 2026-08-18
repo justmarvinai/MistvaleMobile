@@ -579,6 +579,7 @@ describe.skipIf(!dbUp)('the bot ladder', () => {
         playerId: human.playerId,
         offerId: state.offers[0]!.offerId,
         team,
+        actionId: 'bots-test-0001-idem',
       });
       const played = await app.inject({
         method: 'POST',

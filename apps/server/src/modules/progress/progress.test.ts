@@ -158,7 +158,12 @@ describe.skipIf(!dbUp)('progress', () => {
       const response = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'campaign', stageKey: 'c01_s7_normal', team: [championId] },
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s7_normal',
+          team: [championId],
+          actionId: 'start-progresste-001',
+        },
       });
       expect(response.statusCode).toBe(403);
       expect(response.json().error.code).toBe('LOCKED_CONTENT');
@@ -285,7 +290,12 @@ describe.skipIf(!dbUp)('progress', () => {
     const started = await as({
       method: 'POST',
       url: apiPath(ROUTES.battle.start),
-      payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [championId] },
+      payload: {
+        mode: 'campaign',
+        stageKey: 'c01_s1_normal',
+        team: [championId],
+        actionId: 'start-progresste-002',
+      },
     });
     expect(started.statusCode, started.body).toBe(200);
     const battleId = started.json().data.id as string;

@@ -402,7 +402,12 @@ describe.skipIf(!dbUp)('training a champion', () => {
       const started = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [championId] },
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [championId],
+          actionId: 'start-masterytes-001',
+        },
       });
       expect(started.statusCode, started.body).toBe(200);
       const battleId = started.json().data.id as string;

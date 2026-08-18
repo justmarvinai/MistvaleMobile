@@ -75,6 +75,8 @@ export interface StartOptions {
   stageKey: string;
   /** `player_champions` ids, in formation order. The first is the leader (aura). */
   team: string[];
+  /** Client-generated. Replaying it returns the fight that was already opened. */
+  actionId: string;
 }
 
 export interface BattleView {
@@ -325,13 +327,17 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     if (!player) throw AppError.notFound('No such player.');
 
     const [existing] = await tx
-      .select({ id: battleSessions.id })
+      .select()
       .from(battleSessions)
       .where(
         and(eq(battleSessions.playerId, options.playerId), eq(battleSessions.status, 'active')),
       );
     if (existing) {
-      // A conflict, not a cooldown: the fix is to finish the fight, not to wait.
+      // Unless it is the fight this very request opened. A retry on a dropped connection
+      // used to be told it was already in a battle — about a fight it could not see and
+      // had to retreat out of, having spent the energy for it.
+      if (existing.lastActionId === options.actionId) return toView(existing);
+      // Otherwise a conflict, not a cooldown: the fix is to finish the fight, not to wait.
       throw new AppError('ALREADY_EXISTS', 'You are already in a battle. Finish or retreat first.');
     }
 
@@ -419,6 +425,10 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         state: opened.state,
         events: opened.events,
         energySpent: cost,
+        // The id of the request that opened it, so a retry of *this* request finds the
+        // fight rather than an error. Each turn then overwrites it with its own, which is
+        // right: by the time an action has been taken, a replayed start is not a retry.
+        lastActionId: options.actionId,
       })
       .returning({ id: battleSessions.id });
     if (!row) throw new AppError('INTERNAL', 'Could not start that battle.');
@@ -1142,7 +1152,8 @@ export function starsFor(stage: StageDef, state: BattleState): number {
   return stars;
 }
 
-function toView(row: typeof battleSessions.$inferSelect): BattleView {
+/** Exported for the Arena, which opens battles of its own through the same table. */
+export function toView(row: typeof battleSessions.$inferSelect): BattleView {
   return {
     id: row.id,
     mode: row.mode,

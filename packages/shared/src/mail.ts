@@ -28,8 +28,19 @@ export const mailMessageSchema = z.object({
 export type MailMessage = z.infer<typeof mailMessageSchema>;
 
 export const mailViewSchema = z.object({
+  /**
+   * The newest messages, capped server-side.
+   *
+   * A mailbox is one of the few things in the game with no ceiling on it — mail without an
+   * expiry is never pruned, and an operator can batch-send to everybody — so reading "all
+   * of it" was a query whose cost grew forever, on the screen a player opens most. The
+   * counts below are still counted over the whole mailbox, so the pip never lies about
+   * what is waiting even when the list does not show all of it.
+   */
   messages: z.array(mailMessageSchema),
-  /** Never opened. */
+  /** True when older messages exist beyond the ones listed. */
+  truncated: z.boolean(),
+  /** Never opened. Counted over the whole mailbox, not over `messages`. */
   unread: z.number().int(),
   /** Carrying attachments nobody has taken — what the top bar's pip counts. */
   claimable: z.number().int(),

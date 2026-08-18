@@ -386,6 +386,8 @@ export interface AttackOptions {
   playerId: string;
   offerId: string;
   team: string[];
+  /** Client-generated. Replaying it returns the fight that was already opened. */
+  actionId: string;
 }
 
 /**
@@ -423,12 +425,16 @@ export async function attack(
     assertUnlocked(player.level, ctx);
 
     const [existing] = await tx
-      .select({ id: battleSessions.id })
+      .select()
       .from(battleSessions)
       .where(
         and(eq(battleSessions.playerId, options.playerId), eq(battleSessions.status, 'active')),
       );
     if (existing) {
+      // A retry finds its own fight. An attack spends a token and opens the one battle a
+      // player may have, so a dropped response used to leave them holding an error about
+      // a fight they could not see — and no way back to it but a retreat.
+      if (existing.lastActionId === options.actionId) return battle.toView(existing);
       throw new AppError('ALREADY_EXISTS', 'You are already in a battle. Finish or retreat first.');
     }
 
@@ -516,6 +522,7 @@ export async function attack(
         state: opened.state,
         events: opened.events,
         energySpent: 0,
+        lastActionId: options.actionId,
       })
       .returning({ id: battleSessions.id });
     if (!session) throw AppError.internal('Could not start that battle.');

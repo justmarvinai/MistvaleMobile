@@ -57,6 +57,7 @@ export const arenaRoutes: FastifyPluginAsync = async (app) => {
       playerId: requirePlayer(request),
       offerId: body.offerId,
       team: body.team,
+      actionId: body.actionId,
     });
     return reply.status(201).send(apiSuccess({ battle }, app.content.rev));
   });

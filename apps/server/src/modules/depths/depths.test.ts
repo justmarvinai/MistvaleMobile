@@ -295,7 +295,12 @@ describe.skipIf(!dbUp)('the Depths API', () => {
       const response = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'dungeon', stageKey: 'wyrms_hollow_f01', team: [championId] },
+        payload: {
+          mode: 'dungeon',
+          stageKey: 'wyrms_hollow_f01',
+          team: [championId],
+          actionId: 'start-depthstest-001',
+        },
       });
       expect(response.statusCode).toBe(403);
       expect(response.json().error.code).toBe('LOCKED_CONTENT');
@@ -319,7 +324,12 @@ describe.skipIf(!dbUp)('the Depths API', () => {
       const response = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'springs', stageKey: floorKey, team: [championId] },
+        payload: {
+          mode: 'springs',
+          stageKey: floorKey,
+          team: [championId],
+          actionId: 'start-depthstest-002',
+        },
       });
       expect(response.statusCode).toBe(403);
       expect(response.json().error.code).toBe('LOCKED_CONTENT');
@@ -333,7 +343,12 @@ describe.skipIf(!dbUp)('the Depths API', () => {
       const started = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'dungeon', stageKey: 'wyrms_hollow_f01', team: [championId] },
+        payload: {
+          mode: 'dungeon',
+          stageKey: 'wyrms_hollow_f01',
+          team: [championId],
+          actionId: 'start-depthstest-003',
+        },
       });
       expect(started.statusCode, started.body).toBe(200);
 

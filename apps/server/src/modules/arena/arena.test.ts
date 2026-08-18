@@ -178,6 +178,7 @@ describe.skipIf(!dbUp)('the Arena', () => {
       playerId: fighter.playerId,
       offerId,
       team: fighter.team,
+      actionId: 'arena-test-0001-idem',
     });
     const played = await as(fighter.cookie, {
       method: 'POST',
@@ -297,7 +298,12 @@ describe.skipIf(!dbUp)('the Arena', () => {
       const row = await stateRow(attacker.playerId);
       expect(row.offers.some((offer) => offer.offerId === offerId)).toBe(false);
       await expect(
-        arena.attack(ctx, { playerId: attacker.playerId, offerId, team: attacker.team }),
+        arena.attack(ctx, {
+          playerId: attacker.playerId,
+          offerId,
+          team: attacker.team,
+          actionId: 'arena-test-0008-idem',
+        }),
       ).rejects.toThrow(/no longer on offer/i);
     });
 
@@ -340,14 +346,37 @@ describe.skipIf(!dbUp)('the Arena', () => {
         playerId: attacker.playerId,
         offerId: before.offers[0]!.offerId,
         team: attacker.team,
+        actionId: 'arena-test-0002-idem',
       });
       await expect(
         arena.attack(ctx, {
           playerId: attacker.playerId,
           offerId: before.offers[0]!.offerId,
           team: attacker.team,
+          actionId: 'arena-test-0003-idem',
         }),
       ).rejects.toThrow(/already in a battle/i);
+    });
+
+    it('gives a retried attack the fight it already opened, and spends one token', async () => {
+      const { attacker } = await pair();
+      const before = await arena.overview(ctx, attacker.playerId);
+      const request = {
+        playerId: attacker.playerId,
+        offerId: before.offers[0]!.offerId,
+        team: attacker.team,
+        actionId: 'the-response-was-lost',
+      };
+
+      const first = await arena.attack(ctx, request);
+      const retry = await arena.attack(ctx, request);
+      expect(retry.id).toBe(first.id);
+
+      // The token is the thing a retry must not cost twice. It was never at risk of being
+      // double-spent — the second call threw before reaching the decrement — but it is
+      // what the player would have lost if the guard had been written the other way.
+      const after = await arena.overview(ctx, attacker.playerId);
+      expect(after.tokens.value).toBe(before.tokens.value - 1);
     });
 
     it('refuses to start with no tokens left', async () => {
@@ -363,6 +392,7 @@ describe.skipIf(!dbUp)('the Arena', () => {
           playerId: attacker.playerId,
           offerId: before.offers[0]!.offerId,
           team: attacker.team,
+          actionId: 'arena-test-0004-idem',
         }),
       ).rejects.toThrow(/no attack tokens/i);
     });
@@ -377,6 +407,7 @@ describe.skipIf(!dbUp)('the Arena', () => {
         playerId: attacker.playerId,
         offerId: before.offers[0]!.offerId,
         team: attacker.team,
+        actionId: 'arena-test-0005-idem',
       });
       const walked = await as(attacker.cookie, {
         method: 'POST',
@@ -685,6 +716,7 @@ describe.skipIf(!dbUp)('the Arena', () => {
         mode: 'campaign',
         stageKey: 'c01_s1_normal',
         team: fighter.team,
+        actionId: 'arena-test-0006-idem',
       });
       const plainAtk = plain.state.allies[0]!.stats.atk;
       await as(fighter.cookie, {
@@ -705,6 +737,7 @@ describe.skipIf(!dbUp)('the Arena', () => {
         mode: 'campaign',
         stageKey: 'c01_s1_normal',
         team: fighter.team,
+        actionId: 'arena-test-0007-idem',
       });
       const boostedAtk = boosted.state.allies[0]!.stats.atk;
       expect(boostedAtk).toBeGreaterThan(plainAtk);
@@ -783,7 +816,11 @@ describe.skipIf(!dbUp)('the Arena', () => {
       const response = await as(attacker.cookie, {
         method: 'POST',
         url: apiPath(ROUTES.arena.attack),
-        payload: { offerId: state.offers[0]!.offerId, team: attacker.team },
+        payload: {
+          offerId: state.offers[0]!.offerId,
+          team: attacker.team,
+          actionId: 'arena-route-attack-01',
+        },
       });
       expect(response.statusCode, response.body).toBe(201);
       const battleView = response.json().data.battle as { mode: string; status: string };

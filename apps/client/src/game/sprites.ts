@@ -31,12 +31,23 @@ let manifestLoad: Promise<Map<string, SpriteManifestEntry>> | null = null;
 
 export async function loadSpriteManifest(): Promise<Map<string, SpriteManifestEntry>> {
   if (manifest) return manifest;
+  // The latch is what stops eight units racing to fetch the same file. It is cleared on
+  // failure, because a *rejected* promise left in it is permanent: one blocked request at
+  // boot — a proxy hiccup, a deploy mid-flight — and every sprite for the rest of the
+  // session fails instantly against a stale rejection, with no request ever made again.
   manifestLoad ??= (async () => {
-    const response = await fetch(`/${SPRITE_ROOT}/manifest.json`);
-    if (!response.ok) throw new Error('Could not load the sprite manifest.');
-    const data = (await response.json()) as SpriteManifest;
-    manifest = new Map(data.units.map((unit) => [unit.basePath, unit]));
-    return manifest;
+    try {
+      const response = await fetch(`/${SPRITE_ROOT}/manifest.json`);
+      if (!response.ok) {
+        throw new Error(`sprite manifest: ${response.status} ${response.statusText}`);
+      }
+      const data = (await response.json()) as SpriteManifest;
+      manifest = new Map(data.units.map((unit) => [unit.basePath, unit]));
+      return manifest;
+    } catch (cause) {
+      manifestLoad = null;
+      throw cause;
+    }
   })();
   return manifestLoad;
 }
@@ -52,29 +63,59 @@ export const stillPath = (basePath: string): string => `/${SPRITE_ROOT}/${basePa
 export const avatarPath = (basePath: string): string => `/${SPRITE_ROOT}/${basePath}/avatar.png`;
 
 /**
+ * Every art path already reported as missing.
+ *
+ * A failed load must be visible — a champion that does not appear in a fight is the sort
+ * of thing that reaches the owner as "the enemy was invisible" weeks later — but a battle
+ * asks for the same eight units on every frame of playback, and the same warning six
+ * hundred times is a console nobody reads. Once each.
+ */
+const reported = new Set<string>();
+
+function reportMissing(url: string, cause: unknown): null {
+  if (!reported.has(url)) {
+    reported.add(url);
+    console.warn(`Mistvale: no art at ${url}`, cause);
+  }
+  return null;
+}
+
+/**
  * Loads a unit's idle frames.
  *
  * Falls back to the still image when a unit has no frames published yet, so an
  * art-pending champion renders as a static sprite rather than as nothing at all.
+ *
+ * A frame that will not load is skipped rather than fatal — nine frames of a ten-frame
+ * loop is a slightly quick animation, and no animation at all would be a slot with a
+ * health bar hovering over nothing — but it is never silent.
  */
 export async function loadIdleFrames(basePath: string): Promise<Texture[]> {
-  const entries = await loadSpriteManifest();
+  // The manifest carries frame counts, which is an optimisation and not a dependency: if
+  // it cannot be read, a unit still has a still image. Degrading to a static sprite beats
+  // rejecting, which reaches `attachSprite` as an unhandled rejection and leaves a health
+  // bar hovering over an empty slot.
+  const entries = await loadSpriteManifest().catch((cause: unknown) => {
+    reportMissing(`/${SPRITE_ROOT}/manifest.json`, cause);
+    return new Map<string, SpriteManifestEntry>();
+  });
   const entry = entries.get(basePath);
 
   if (!entry || entry.idleFrames === 0) {
-    const still = await Assets.load<Texture>(stillPath(basePath)).catch(() => null);
+    const url = stillPath(basePath);
+    const still = await Assets.load<Texture>(url).catch((cause: unknown) =>
+      reportMissing(url, cause),
+    );
     return still ? [still] : [];
   }
 
   const urls = Array.from({ length: entry.idleFrames }, (_, index) => framePath(basePath, index));
   const textures = await Promise.all(
-    urls.map((url) => Assets.load<Texture>(url).catch(() => null)),
+    urls.map((url) =>
+      Assets.load<Texture>(url).catch((cause: unknown) => reportMissing(url, cause)),
+    ),
   );
-  return textures.filter((texture): texture is Texture => texture !== null);
-}
-
-/** Preloads every unit a battle needs, so the fight opens without a pop-in. */
-export async function preloadUnits(basePaths: readonly string[]): Promise<void> {
-  await loadSpriteManifest();
-  await Promise.all([...new Set(basePaths)].map((path) => loadIdleFrames(path)));
+  const loaded = textures.filter((texture): texture is Texture => texture !== null);
+  if (loaded.length === 0) reportMissing(`${SPRITE_ROOT}/${basePath}`, 'no frame loaded');
+  return loaded;
 }

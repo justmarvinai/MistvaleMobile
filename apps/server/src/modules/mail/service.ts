@@ -55,14 +55,20 @@ function toMessage(row: typeof mailbox.$inferSelect): MailMessage {
   };
 }
 
-function build(rows: (typeof mailbox.$inferSelect)[]): MailView {
-  const messages = rows.map(toMessage);
-  return {
-    messages,
-    unread: messages.filter((message) => !message.read).length,
-    claimable: messages.filter((message) => message.claimable).length,
-  };
-}
+/**
+ * How many messages one read of the mailbox returns.
+ *
+ * A mailbox has no natural ceiling: mail without an expiry is never pruned (the daily pass
+ * only removes rows whose `expires_at` has passed), and one operator batch-send adds a row
+ * to every account at once. Reading all of it was a query whose cost grew for the life of
+ * the account, on a screen a player opens most days and a box with one core.
+ *
+ * Newest first, which is the order the screen shows and the order anybody actually reads.
+ * Generous enough that no real inbox reaches it — a hundred unexpiring messages is a year
+ * of apologies — and the counts below are still counted over the whole mailbox, so a
+ * capped list never makes the pip lie.
+ */
+const INBOX_LIMIT = 100;
 
 async function inboxRows(
   tx: Executor | Database,
@@ -73,7 +79,32 @@ async function inboxRows(
     .select()
     .from(mailbox)
     .where(and(eq(mailbox.playerId, playerId), unexpired(now)))
-    .orderBy(desc(mailbox.createdAt));
+    .orderBy(desc(mailbox.createdAt))
+    .limit(INBOX_LIMIT + 1);
+}
+
+/**
+ * Unread and claimable across the *whole* mailbox, counted rather than hydrated.
+ *
+ * Two integers off an index, instead of every row's title, body and attachments pulled
+ * into memory to be filtered — which is what the top bar's pip used to cost on every
+ * player snapshot.
+ */
+async function counts(
+  tx: Executor | Database,
+  playerId: string,
+  now: Date,
+): Promise<{ unread: number; claimable: number }> {
+  const [row] = await tx
+    .select({
+      unread: sql<number>`count(*) filter (where ${mailbox.readAt} is null)::int`,
+      claimable: sql<number>`count(*) filter (
+        where ${mailbox.claimedAt} is null and ${mailbox.attachments}::text <> '{}'
+      )::int`,
+    })
+    .from(mailbox)
+    .where(and(eq(mailbox.playerId, playerId), unexpired(now)));
+  return { unread: row?.unread ?? 0, claimable: row?.claimable ?? 0 };
 }
 
 export async function overview(
@@ -81,7 +112,19 @@ export async function overview(
   playerId: string,
   now = new Date(),
 ): Promise<MailView> {
-  return build(await inboxRows(ctx.db, playerId, now));
+  const [rows, totals] = await Promise.all([
+    inboxRows(ctx.db, playerId, now),
+    counts(ctx.db, playerId, now),
+  ]);
+  // One row over the limit is fetched purely to answer "is there more?" without a second
+  // count; it is never shown.
+  const truncated = rows.length > INBOX_LIMIT;
+  return {
+    messages: rows.slice(0, INBOX_LIMIT).map(toMessage),
+    truncated,
+    unread: totals.unread,
+    claimable: totals.claimable,
+  };
 }
 
 /**
@@ -89,15 +132,24 @@ export async function overview(
  *
  * Unread *plus* claimable rather than one or the other: a message with a gift in it that
  * has been opened and not emptied is still something waiting, and a plain message nobody
- * has read is too.
+ * has read is too. Counted over the whole mailbox — a pip that stopped at a hundred would
+ * be a pip that lies.
  */
 export async function waitingCount(
   ctx: MailContext,
   playerId: string,
   now = new Date(),
 ): Promise<number> {
-  const view = build(await inboxRows(ctx.db, playerId, now));
-  return view.messages.filter((message) => !message.read || message.claimable).length;
+  const [row] = await ctx.db
+    .select({
+      waiting: sql<number>`count(*) filter (
+        where ${mailbox.readAt} is null
+           or (${mailbox.claimedAt} is null and ${mailbox.attachments}::text <> '{}')
+      )::int`,
+    })
+    .from(mailbox)
+    .where(and(eq(mailbox.playerId, playerId), unexpired(now)));
+  return row?.waiting ?? 0;
 }
 
 // ── Reading and claiming ────────────────────────────────────────────────────
@@ -254,11 +306,22 @@ async function finish(
   claimedCount: number,
   now: Date,
 ): Promise<ClaimResult> {
+  // Read inside the caller's transaction rather than through `overview`, so what comes
+  // back is the mailbox as this claim left it and not as a second connection found it.
+  const [rows, totals] = await Promise.all([
+    inboxRows(tx, playerId, now),
+    counts(tx, playerId, now),
+  ]);
   return {
     paid,
     levelsGained,
     claimedCount,
-    mail: build(await inboxRows(tx, playerId, now)),
+    mail: {
+      messages: rows.slice(0, INBOX_LIMIT).map(toMessage),
+      truncated: rows.length > INBOX_LIMIT,
+      unread: totals.unread,
+      claimable: totals.claimable,
+    },
   };
 }
 

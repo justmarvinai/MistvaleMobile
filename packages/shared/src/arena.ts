@@ -204,6 +204,16 @@ export type ArenaDefenceRequest = z.infer<typeof arenaDefenceRequestSchema>;
 export const arenaAttackRequestSchema = z.object({
   offerId: z.string().min(4).max(64),
   team: z.array(z.string().uuid()).min(1).max(4),
+  /**
+   * Client-generated. Replaying it returns the fight that was already opened.
+   *
+   * An attack spends a token and creates the one active battle a player is allowed, so a
+   * retried request — a tapped button on a dropped connection — used to come back as
+   * "You are already in a battle", about a fight the player could not see and had to
+   * retreat out of. The token was never double-spent; the fight was simply lost behind an
+   * error message.
+   */
+  actionId: z.string().min(8).max(64),
 });
 export type ArenaAttackRequest = z.infer<typeof arenaAttackRequestSchema>;
 

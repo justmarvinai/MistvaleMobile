@@ -133,7 +133,7 @@ export const gameApi = {
       .post<{ champions: RosterChampion[] }>(ROUTES.roster.chooseStarter, { championKey })
       .then((data) => data.champions),
 
-  startBattle: (input: { mode: string; stageKey: string; team: string[] }) =>
+  startBattle: (input: { mode: string; stageKey: string; team: string[]; actionId: string }) =>
     api.post<BattleView>(ROUTES.battle.start, input),
 
   activeBattle: () =>

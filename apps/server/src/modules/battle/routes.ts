@@ -50,6 +50,8 @@ const startSchema = z.object({
    * which modes it serves.
    */
   team: z.array(z.string().uuid()).max(4).default([]),
+  /** Client-generated. Replaying it returns the fight that was already opened. */
+  actionId: z.string().min(8).max(64),
 });
 
 const actionSchema = z.object({

@@ -181,7 +181,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       const response = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [champions[0]!.id] },
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [champions[0]!.id],
+          actionId: 'start-battletest-001',
+        },
       });
       expect(response.statusCode, response.body).toBe(200);
 
@@ -205,6 +210,7 @@ describe.skipIf(!dbUp)('the game loop', () => {
           mode: 'campaign',
           stageKey: 'c01_s1_normal',
           team: ['00000000-0000-4000-8000-000000000000'],
+          actionId: 'start-battletest-002',
         },
       });
       expect(response.statusCode).toBe(400);
@@ -212,14 +218,48 @@ describe.skipIf(!dbUp)('the game loop', () => {
 
     it('refuses a second battle while one is running', async () => {
       const champions = await chooseStarter();
-      const payload = { mode: 'campaign', stageKey: 'c01_s1_normal', team: [champions[0]!.id] };
+      const stage = { mode: 'campaign', stageKey: 'c01_s1_normal', team: [champions[0]!.id] };
       expect(
-        (await as({ method: 'POST', url: apiPath(ROUTES.battle.start), payload })).statusCode,
+        (
+          await as({
+            method: 'POST',
+            url: apiPath(ROUTES.battle.start),
+            payload: { ...stage, actionId: 'one-fight-at-a-time-1' },
+          })
+        ).statusCode,
       ).toBe(200);
 
-      const second = await as({ method: 'POST', url: apiPath(ROUTES.battle.start), payload });
+      // A *different* request, not a retry: a second intent while the first fight is open.
+      const second = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: { ...stage, actionId: 'one-fight-at-a-time-2' },
+      });
       expect(second.statusCode).toBe(409);
       expect(second.json().error.code).toBe('ALREADY_EXISTS');
+    });
+
+    it('gives a retried start the fight it already opened', async () => {
+      // The other half of the rule above, and the reason it needs an actionId at all: a
+      // dropped response used to leave a player holding "you are already in a battle"
+      // about a fight they could not see, having paid the energy for it. Pressing the
+      // button again is a retry of the same intent, and answers with the same battle.
+      const champions = await chooseStarter();
+      const payload = {
+        mode: 'campaign',
+        stageKey: 'c01_s1_normal',
+        team: [champions[0]!.id],
+        actionId: 'the-response-was-lost',
+      };
+
+      const first = await as({ method: 'POST', url: apiPath(ROUTES.battle.start), payload });
+      expect(first.statusCode, first.body).toBe(200);
+
+      const retry = await as({ method: 'POST', url: apiPath(ROUTES.battle.start), payload });
+      expect(retry.statusCode, retry.body).toBe(200);
+      expect(retry.json().data.id).toBe(first.json().data.id);
+      // …and it cost nothing the second time: same fight, same seed, same opening events.
+      expect(retry.json().data.events).toEqual(first.json().data.events);
     });
 
     it('reports the battle in progress', async () => {
@@ -227,7 +267,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [champions[0]!.id] },
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [champions[0]!.id],
+          actionId: 'start-battletest-003',
+        },
       });
 
       const active = await as({ method: 'GET', url: apiPath(ROUTES.battle.active) });
@@ -240,7 +285,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       const response = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'campaign', stageKey: 'not_a_stage', team: [champions[0]!.id] },
+        payload: {
+          mode: 'campaign',
+          stageKey: 'not_a_stage',
+          team: [champions[0]!.id],
+          actionId: 'start-battletest-004',
+        },
       });
       expect(response.statusCode).toBe(404);
     });
@@ -252,7 +302,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       const response = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [champions[0]!.id] },
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [champions[0]!.id],
+          actionId: 'start-battletest-005',
+        },
       });
       return response.json().data.id as string;
     }
@@ -421,7 +476,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       const again = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [champion!.id] },
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [champion!.id],
+          actionId: 'start-battletest-006',
+        },
       });
       expect(again.statusCode, again.body).toBe(200);
     });
@@ -625,7 +685,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [championId] },
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [championId],
+          actionId: 'start-battletest-007',
+        },
       });
 
       const response = await farm([championId], 2, 'batch-00000008');
@@ -661,7 +726,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
         const started = await as({
           method: 'POST',
           url: apiPath(ROUTES.battle.start),
-          payload: { mode: 'campaign', stageKey: 'c01_s1_normal', team: [championId] },
+          payload: {
+            mode: 'campaign',
+            stageKey: 'c01_s1_normal',
+            team: [championId],
+            actionId: 'start-battletest-008',
+          },
         });
         const battleId = started.json().data.id as string;
         const finished = await as({
@@ -688,7 +758,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       const started = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'practice', stageKey: 'c01_s1_normal', team: [championId] },
+        payload: {
+          mode: 'practice',
+          stageKey: 'c01_s1_normal',
+          team: [championId],
+          actionId: 'start-battletest-009',
+        },
       });
       expect(started.statusCode, started.body).toBe(200);
       const battleId = started.json().data.id as string;
@@ -727,7 +802,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       const response = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'practice', stageKey: 'c01_s1_normal', team: [champions[0]!.id] },
+        payload: {
+          mode: 'practice',
+          stageKey: 'c01_s1_normal',
+          team: [champions[0]!.id],
+          actionId: 'start-battletest-010',
+        },
       });
       expect(response.statusCode).toBe(403);
       expect(response.json().error.code).toBe('LOCKED_CONTENT');
@@ -751,7 +831,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
       as({
         method: 'POST',
         url: apiPath(ROUTES.battle.start),
-        payload: { mode: 'tutorial', stageKey: COLD_OPEN, team: [] },
+        payload: {
+          mode: 'tutorial',
+          stageKey: COLD_OPEN,
+          team: [],
+          actionId: 'start-battletest-011',
+        },
       });
 
     it('is fought with the stage’s own team, by an account that owns nobody', async () => {
@@ -811,7 +896,12 @@ describe.skipIf(!dbUp)('the game loop', () => {
         await app.inject({
           method: 'POST',
           url: apiPath(ROUTES.battle.start),
-          payload: { mode: 'tutorial', stageKey: COLD_OPEN, team: [] },
+          payload: {
+            mode: 'tutorial',
+            stageKey: COLD_OPEN,
+            team: [],
+            actionId: 'start-battletest-012',
+          },
           cookies: { mv_session: otherCookie },
         })
       ).json().data;

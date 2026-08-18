@@ -30,6 +30,7 @@ import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screen
 import { useNavStore } from '@/state/navStore';
 import { useTutorialStore } from '@/state/tutorialStore';
 import { useUnlockStore } from '@/state/unlockStore';
+import { resetAccountState } from '@/state/resetAccount';
 import { TopBar } from './TopBar';
 import { TutorialOverlay } from './TutorialOverlay';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -58,7 +59,6 @@ export function App() {
   const restore = useSessionStore((state) => state.restore);
   const player = usePlayerStore((state) => state.player);
   const refreshPlayer = usePlayerStore((state) => state.refresh);
-  const resetPlayer = usePlayerStore((state) => state.reset);
 
   const ensureContent = useContentStore((state) => state.ensureLoaded);
 
@@ -92,12 +92,12 @@ export function App() {
           setBootError('Signed in, but the player snapshot could not be loaded.');
         });
     } else if (status === 'anonymous') {
-      resetPlayer();
-      // The next account gets its own script, not this one's step 7.
-      useTutorialStore.getState().reset();
-      useUnlockStore.getState().reset();
+      // Everything one account left behind, in one call — the next account gets its own
+      // script rather than this one's step 7, its own roster rather than a first paint of
+      // somebody else's, and no playback clock still ticking from a fight it never fought.
+      resetAccountState();
     }
-  }, [status, refreshPlayer, resetPlayer]);
+  }, [status, refreshPlayer]);
 
   // The Pixi stage is mounted once, outside every branch below. It used to appear in
   // each of them, so signing in unmounted one and mounted another — and `PixiStage`'s

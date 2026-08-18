@@ -25,7 +25,6 @@ export type ScreenId =
   | 'events'
   | 'calendar'
   | 'mail'
-  | 'settings'
   | 'battle';
 
 export interface ScreenDefinition {
@@ -120,9 +119,11 @@ export const SCREENS: readonly ScreenDefinition[] = [
     lockedHint: 'Opens at level 2',
     inDock: true,
   },
-  // Reached from the top bar, like Settings — mail is an errand, not a destination.
+  // Reached from the top bar rather than the dock — mail is an errand, not a destination.
+  // Settings is not here at all: it is a modal, so it can be opened over a fight as well
+  // as over the Haven. It carried a registry row for nine phases that nothing navigated
+  // to and `App` had no branch for, so reaching it would have shown the placeholder.
   { id: 'mail', label: 'Mail', icon: 'nav-mail', inDock: false },
-  { id: 'settings', label: 'Settings', icon: 'nav-settings', inDock: false },
   // A full-screen takeover reached from team select, never from the dock.
   { id: 'battle', label: 'Battle', icon: 'nav-battle', inDock: false },
 ];

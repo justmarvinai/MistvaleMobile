@@ -40,6 +40,8 @@ export function BattleScreen(): JSX.Element {
   const skipToLatest = useBattleStore((state) => state.skipToLatest);
   const resume = useBattleStore((state) => state.resume);
   const resetBattle = useBattleStore((state) => state.reset);
+  const pausePlayback = useBattleStore((state) => state.pausePlayback);
+  const resumePlayback = useBattleStore((state) => state.resumePlayback);
 
   // Two clocks, two questions — see state/battleClocks.ts. `settled` is the server's
   // answer and gates the buttons that talk to it; `watched` is the playback's and gates
@@ -81,6 +83,15 @@ export function BattleScreen(): JSX.Element {
   useEffect(() => {
     void sceneRef.current?.sync(view);
   }, [view]);
+
+  // The playback clock lives in the store and outlived this screen: nothing stopped it
+  // when the screen went away, so a sign-out mid-fight left it ticking — health bars
+  // moving and hit cues playing over the sign-in form. Paused on the way out, picked back
+  // up on the way in, and the fight itself is untouched either way.
+  useEffect(() => {
+    resumePlayback();
+    return pausePlayback;
+  }, [resumePlayback, pausePlayback]);
 
   // Recover a fight the player refreshed out of.
   useEffect(() => {
