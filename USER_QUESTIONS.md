@@ -4,17 +4,7 @@
 
 ## Open questions
 
-**Q4. What should Mistvale actually sound like at EA?** — *default active, work not blocked*
-
-Audio is P10c and the mixer is being built either way. The question is where the sounds come from, and it needs deciding because I cannot fetch the CC0 packs myself: this build environment's network policy refuses everything outside the package registries, so Kenney Audio and OpenGameArt are both unreachable from here. Nothing about that changes what the game *can* do — it changes who does one step of it.
-
-- **A — synthesised, and a sample beats it whenever one exists (recommended).** Every cue is a `soundCue` content entry naming a bus and either a sample or a handful of synth parameters — a short envelope over an oscillator or a noise burst, which is what a pixel game's clicks, coin clinks and forge clangs are anyway. Nothing to license, nothing to credit, nothing to download, and every cue is retunable in the Admin config without a deploy. When you drop a pack into `assets/`, pointing a cue at a file overrides the synth for that cue alone — one field, no code.
-- **B — you pick a CC0 pack and I wire it.** Drop the files into `assets/audio/` (or name the pack and I will write the manifest); I register them, credit them in `CREDITS.md`, and the same `soundCue` entries point at samples from the start. Better-sounding, and it costs one round trip through you.
-- **C — silence at EA.** The sliders in Settings stay, and stay inert. I would rather not: they are on screen now and connected to nothing, which is exactly the placeholder the brief rules out.
-
-**Music is a separate answer.** Procedural ambient is a much bigger swing and much likelier to sound bad, so under any option above the music bus ships with volume control and no track until you choose one. That is a bus with nothing on it rather than a broken feature — but say if you would rather I attempt a loop.
-
-*Proceeding with **A** unless you say otherwise; B remains a drop-in afterwards, since the cue is the thing that names the sound.*
+**None.** Q4 was answered on 2026-08-18 ("as you recommend") and is in the decision record below.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
@@ -42,6 +32,7 @@ Each has a phase and a default, so none of them blocks anything. Listed here so 
 | # | Decision | Where it lives now |
 |---|---|---|
 | A1–A6 | Defaults confirmed by silence: 2D pixel-art (the "3D MMORPG" brief line was a leftover) · no payments in EA · English-only, i18n-ready · daily reset Europe/Berlin · CC0 audio placeholders · 9 fps idles + procedural animation fallbacks | GDD, ECONOMY, DEPLOYMENT, ASSET_GUIDE |
+| Q4 | **Synthesised sound cues stay the voice of the game at EA** (2026-08-18, "as you recommend"). Each cue is a `soundCue` content entry naming a bus and either a recording or a handful of synth parameters; twenty-seven ship, none of them a file. A CC0 pack remains a drop-in whenever one is picked — one field per cue, no code. **Music is a bus with no track**, and the Settings slider says so rather than pretending. | ASSET_GUIDE §audio, UI_UX §1.2, `db/seed/data/sounds.ts` |
 | A7 | Champion identities approved, **except Anuria = archer/ranger** (kit + visuals reworked to ranged) | GDD §6, CONTENT_PLAN §1, ASSET_GUIDE |
 | A8 | World/system names approved | — |
 | B1 | **Broodlings approved**; many more champions/food designs coming later; art-pending champions use the `teritorial_lizard` model until sprites are swapped via Admin | GDD §5, CONTENT_PLAN §1b, ASSET_GUIDE §placeholder |
