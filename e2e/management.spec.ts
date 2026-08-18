@@ -17,14 +17,26 @@ function unique(prefix: string): string {
 }
 
 /**
- * One retry, for one honestly random step.
+ * Two retries, for one honestly random step, sized against the measured odds.
  *
- * The farm below waits for a relic to drop, and 1-1 parts with one 42% of the time against
- * an energy budget that buys about six runs — so roughly one run in twenty ends dry
- * through bad luck rather than a broken drop table. A retry costs a minute in that case
- * and nothing otherwise; a drop table that is actually broken still fails both attempts.
+ * The farm below waits for a relic to drop and cannot make that happen. Twenty energy at
+ * four a run buys exactly five clears of 1-1 — a level-up would refill the bar, but 1-1
+ * pays about 17 account XP against the 120 the first level costs, so it never arrives
+ * inside the budget. Five clears at a 42% drop chance run dry **6.5% of the time**, which
+ * is a coin flip in front of every push to `main`.
+ *
+ * That number is measured rather than assumed: walking the real loot stream
+ * (`createRng(seed ^ 0x5f3759df)`, one draw consumed for silver, then the gear chance)
+ * across 200,000 battle seeds pays out 42.12%, and five dry runs in a row happen to 6.54%
+ * of accounts against a theoretical 6.56%. The drop table is right and the RNG is even.
+ * The test is simply staking a P4 exit criterion on a coin.
+ *
+ * So: three attempts, ~0.03% of ending dry, and a failure that survives all three means
+ * something is genuinely broken rather than unlucky. The alternative — reaching past the
+ * UI to plant a relic — would delete the only browser-level proof that farming produces
+ * one.
  */
-test.describe.configure({ retries: 1 });
+test.describe.configure({ retries: 2 });
 
 test.describe('the management loop', () => {
   test('a warden farms a relic, equips it, and grows stronger for it', async ({ page }) => {
@@ -55,11 +67,11 @@ test.describe('the management loop', () => {
     // without the test having to reach past the UI to plant one.
     //
     // The loop is bounded by *energy*, not by a run count. A fresh account holds twenty
-    // and 1-1 costs four, and the level-ups along the way refill the bar — so how many
-    // runs are affordable is something only the server knows. Clicking blindly past that
-    // point used to park the test on a disabled "Into the mist" for the full timeout,
-    // which reads as a hang rather than as the plain fact that the warden is out of
-    // energy.
+    // and 1-1 costs four; a level-up refills the bar, though 1-1 pays too little XP for
+    // one to arrive inside the budget. How many runs are affordable is something only the
+    // server knows. Clicking blindly past that point used to park the test on a disabled
+    // "Into the mist" for the full timeout, which reads as a hang rather than as the plain
+    // fact that the warden is out of energy.
     const energyLeft = async (): Promise<number> =>
       page.evaluate(async () => {
         const response = await fetch('/api/player', { credentials: 'include' });

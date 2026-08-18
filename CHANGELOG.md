@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a level-up never refilled the energy bar (P10d)
+
+ECONOMY_BALANCE has said since P0 that a level-up fills the bar and allows overfill; it is one of the three listed sources of energy, and it is what paces a new account's first evening — level, and keep playing. The reward path wrote the new level and left the energy column alone, so the only energy anybody ever got was the twenty they registered with and the clock. Nothing had ever asked, which is why it survived nine phases.
+
+- **Filled to the new cap**, which is larger than the old one, and the regeneration clock is restamped so the refill does not read as hours old on the next request.
+- **An overfilled bar is left alone.** Refill items and event payouts can push a bar past its cap, and a level is good news — it must not be the thing that trims it back.
+- **A grant with no level in it still changes no energy.** The common case by far is silver from a cleared stage, and a payout is not a refill.
+- Four levels arriving in one bundle — a mission milestone can do that — fill once, to the cap of the level actually reached.
+
 ### Fixed — a mistyped id said the server was broken (P10d)
 
 `GET /api/profiles/not-a-uuid` answered **500 "Something went wrong on our end."** Seven routes did, on paths reachable from every player name in the game. Nothing was actually wrong: the id went to a `uuid` column, PostgreSQL raised 22P02, and the error handler — correctly refusing to guess — called it ours. A typo'd or stale profile link therefore told the player the game was down and paged whoever was on call.

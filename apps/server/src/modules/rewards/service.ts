@@ -3,7 +3,7 @@ import { CURRENCIES, splitRewards, type Currency } from '@mistvale/shared';
 import { economyLog, playerChampions, playerItems, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
-import { applyAccountXp } from '../../lib/progression';
+import { applyAccountXp, computeEnergy, energyCapForLevel } from '../../lib/progression';
 
 /** Anything that can run a query: the pool, or a transaction inside it. */
 type Executor = Database | Parameters<Parameters<Database['transaction']>[0]>[0];
@@ -61,6 +61,8 @@ export async function grant(
       silver: players.silver,
       crystals: players.crystals,
       valorMedals: players.valorMedals,
+      energy: players.energy,
+      energyUpdatedAt: players.energyUpdatedAt,
     })
     .from(players)
     .where(eq(players.id, playerId));
@@ -91,6 +93,36 @@ export async function grant(
   const progressed = applyAccountXp(player, bundle.playerXp ?? 0);
   const { level, xp } = progressed;
 
+  const now = new Date();
+
+  /**
+   * A level-up fills the bar (ECONOMY_BALANCE.md §energy — "level-up: full-bar refill,
+   * overfill allowed"). Documented since P0 and not implemented until P10d: the reward
+   * path wrote the new level and left the energy column alone, so the promise the design
+   * makes about the pace of an early evening — level, keep playing — was never kept. A
+   * fresh account got its twenty energy at registration and then only the clock.
+   *
+   * Written rather than derived because energy *is* the stored value plus elapsed time:
+   * stamping `energyUpdatedAt` alongside is what stops the refill decaying backwards.
+   * `Math.max` is the overfill rule — a bar already above the new cap, from a refill
+   * item, must not be trimmed by the good news of a level.
+   */
+  const refill =
+    progressed.levelsGained > 0
+      ? (() => {
+          const current = computeEnergy({
+            storedValue: player.energy,
+            updatedAt: player.energyUpdatedAt,
+            level: player.level,
+            now,
+          });
+          return {
+            energy: Math.max(current.value, energyCapForLevel(level)),
+            energyUpdatedAt: now,
+          };
+        })()
+      : {};
+
   await tx
     .update(players)
     .set({
@@ -99,7 +131,8 @@ export async function grant(
       valorMedals: wallet.valorMedals,
       level,
       xp,
-      updatedAt: new Date(),
+      ...refill,
+      updatedAt: now,
     })
     .where(eq(players.id, playerId));
 
