@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { dismissUnlocks, leaveTutorial } from './support';
 
 /**
  * The sandbox, in a real browser.
@@ -76,6 +76,7 @@ test.describe('the practice sandbox', () => {
       await expect(results).toBeVisible({ timeout: 60_000 });
       won = await results.getByText(/victory/i).isVisible();
       await results.getByRole('button', { name: /back to the campaign/i }).click();
+      await dismissUnlocks(page);
       await expect(results).toBeHidden();
     }
     expect(won, 'the starter could not clear 1-1 in three attempts').toBe(true);
@@ -96,6 +97,7 @@ test.describe('the practice sandbox', () => {
     await expect(practiceResults).toBeVisible({ timeout: 60_000 });
     await expect(practiceResults.getByText(/no energy spent, nothing earned/i)).toBeVisible();
     await practiceResults.getByRole('button', { name: /back to the campaign/i }).click();
+    await dismissUnlocks(page);
 
     // The energy line reads the same as it did before the practice fight, which is the
     // player-visible form of "the sandbox is free".

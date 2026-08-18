@@ -20,8 +20,14 @@ export function UnlockCelebration(): JSX.Element | null {
   const unlock = useUnlockStore((state) => state.queue[0] ?? null);
   const dismiss = useUnlockStore((state) => state.dismiss);
   const setScreen = useNavStore((state) => state.setScreen);
+  const screen = useNavStore((state) => state.screen);
 
   if (!unlock) return null;
+  // Never over a fight. A level-up almost always arrives *from* one, and the results are
+  // already a modal — stacking a second on top would bury the loot the player is reading
+  // under news about a screen they have not asked for yet. The queue waits until they come
+  // back out, which is a better moment for it anyway.
+  if (screen === 'battle') return null;
 
   const goThere = (): void => {
     if (unlock.screen) setScreen(unlock.screen);

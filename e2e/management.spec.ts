@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { dismissUnlocks, leaveTutorial } from './support';
 
 /**
  * The management loop, in a real browser.
@@ -89,6 +89,8 @@ test.describe('the management loop', () => {
       const results = page.getByRole('dialog', { name: /results/i });
       await expect(results).toBeVisible({ timeout: 60_000 });
       await results.getByRole('button', { name: /back to the campaign/i }).click();
+      // Farming levels an account; the celebration is part of what that looks like.
+      await dismissUnlocks(page);
       await expect(results).toBeHidden();
 
       relicsHeld = await page.evaluate(async () => {

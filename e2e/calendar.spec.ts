@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { dismissUnlocks, leaveTutorial } from './support';
 
 /**
  * The login calendar, in a real browser.
@@ -158,6 +158,8 @@ async function winFirstStage(page: Page): Promise<void> {
   const results = page.getByRole('dialog', { name: /results/i });
   await expect(results).toBeVisible({ timeout: 60_000 });
   await results.getByRole('button', { name: /back to the campaign/i }).click();
+  // A first win can be a first level, and a first level can open something.
+  await dismissUnlocks(page);
   await expect(results).toBeHidden();
 }
 

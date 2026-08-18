@@ -13,6 +13,7 @@ Features have always unlocked on account level, and until now they did it in sil
 - **Derived from the level, not from watching the flags flip.** A flag diff cannot tell "just unlocked" from "unlocked before this tab was open", so the first load of every session would have celebrated everything the account ever earned. The last celebrated level is remembered per account, seeded silently the first time a browser sees it: somebody returning at level 30 is not owed a parade for last month.
 - **A level-up that arrives four levels at once celebrates all four gates.** A mission milestone can pay that much, and every gate it crossed is one the player earned.
 - The copy is written by hand but the levels are not — they come from the server's own `UNLOCK_LEVELS`, so a gate moved there moves the celebration with it, and a new flag added without copy fails the build rather than opening a silent feature.
+- **Never over a fight.** A level-up almost always arrives *from* one, and the results are already a modal — a second stacked on top would bury the loot somebody is reading under news about a screen they have not asked for. The queue waits until they leave the battle, which is a better moment for it anyway.
 
 ### Changed — the tutorial's rewards stopped being a gate
 

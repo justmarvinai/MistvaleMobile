@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { dismissUnlocks, leaveTutorial } from './support';
 
 /**
  * The loop, in a real browser.
@@ -74,6 +74,8 @@ test.describe('the campaign loop', () => {
     await expect(results.getByText(/victory|defeat|withdrawn|the mist closed in/i)).toBeVisible();
 
     await results.getByRole('button', { name: /back to the campaign/i }).click();
+    // A first win can be a first level, and a first level can open something.
+    await dismissUnlocks(page);
     await expect(results).toBeHidden();
     await expect(page.getByText(/veilwood fringe/i)).toBeVisible();
   });
