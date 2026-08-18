@@ -1,0 +1,138 @@
+/* Toast — notification corner for pickups, quest updates and warnings. */
+
+.fui-toasts {
+  position: fixed;
+  z-index: 880;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 320px;
+  pointer-events: none;
+}
+
+.fui-toasts[data-position='top-right'] {
+  top: 18px;
+  right: 18px;
+}
+.fui-toasts[data-position='top-left'] {
+  top: 18px;
+  left: 18px;
+}
+.fui-toasts[data-position='top-center'] {
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.fui-toasts[data-position='bottom-right'] {
+  right: 18px;
+  bottom: 18px;
+  flex-direction: column-reverse;
+}
+.fui-toasts[data-position='bottom-left'] {
+  bottom: 18px;
+  left: 18px;
+  flex-direction: column-reverse;
+}
+
+.fui-toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 15px;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: fui-rise 260ms var(--fui-ease);
+}
+
+.fui-toast.is-leaving {
+  animation: fui-rise 200ms var(--fui-ease) reverse forwards;
+}
+
+.fui-toast__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-surface-bw);
+  border-image-source: var(--fui-surface-src);
+  border-image-slice: var(--fui-surface-sl) fill;
+  border-image-repeat: stretch;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6));
+}
+
+/* A left-edge accent stripe carries the tone. */
+.fui-toast::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 3px;
+  z-index: 1;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--fui-toast-accent, var(--fui-accent));
+  box-shadow: 0 0 7px var(--fui-toast-accent, var(--fui-accent));
+}
+
+.fui-toast[data-tone='success'] {
+  --fui-toast-accent: var(--fui-success);
+}
+.fui-toast[data-tone='warn'] {
+  --fui-toast-accent: var(--fui-warn);
+}
+.fui-toast[data-tone='danger'] {
+  --fui-toast-accent: var(--fui-danger);
+}
+.fui-toast[data-tone='gold'] {
+  --fui-toast-accent: var(--fui-gold);
+}
+
+.fui-toast[data-rarity='uncommon'] {
+  --fui-toast-accent: var(--fui-rarity-uncommon);
+}
+.fui-toast[data-rarity='rare'] {
+  --fui-toast-accent: var(--fui-rarity-rare);
+}
+.fui-toast[data-rarity='epic'] {
+  --fui-toast-accent: var(--fui-rarity-epic);
+}
+.fui-toast[data-rarity='legendary'] {
+  --fui-toast-accent: var(--fui-rarity-legendary);
+}
+.fui-toast[data-rarity='mythic'] {
+  --fui-toast-accent: var(--fui-rarity-mythic);
+}
+
+.fui-toast__icon {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+
+.fui-toast__body {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.fui-toast__title {
+  font-family: var(--fui-font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fui-toast-accent, var(--fui-ink));
+  text-shadow: 0 1px 2px #000;
+}
+
+.fui-toast__text {
+  margin-top: 1px;
+  font-size: 12px;
+  color: var(--fui-ink-dim);
+}

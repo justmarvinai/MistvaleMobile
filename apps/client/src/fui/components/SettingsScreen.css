@@ -1,0 +1,127 @@
+/* SettingsScreen — sectioned options with toggles, sliders and keybinds. */
+
+.fui-settings {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 84vh;
+}
+
+.fui-settings__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-settings__title {
+  position: relative;
+  z-index: 1;
+  padding: 22px 28px 8px;
+  font-size: 18px;
+}
+
+.fui-settings__tabs {
+  position: relative;
+  z-index: 1;
+  padding: 0 24px;
+}
+
+.fui-settings__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding: 20px 28px;
+}
+
+.fui-settings__row {
+  display: block;
+}
+
+.fui-settings__row .fui-slider,
+.fui-settings__row .fui-select {
+  width: 100%;
+}
+
+.fui-settings__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 2px;
+}
+
+.fui-settings__divider::before,
+.fui-settings__divider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fui-accent) 45%, transparent),
+    transparent
+  );
+}
+
+.fui-settings__divider:not(:has(span))::after {
+  display: none;
+}
+
+/* ── Keybinds ─────────────────────────────────────────────────────────────── */
+.fui-settings__keyrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.fui-settings__keylabel {
+  font-family: var(--fui-font-ui);
+  font-size: 13px;
+  color: var(--fui-ink-dim);
+}
+
+.fui-settings__keybind {
+  min-width: 110px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.5);
+  font-family: var(--fui-font-mono);
+  font-size: 12px;
+  color: var(--fui-ink);
+  cursor: pointer;
+  transition:
+    border-color var(--fui-t-fast) var(--fui-ease),
+    background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-settings__keybind:hover {
+  border-color: color-mix(in srgb, var(--fui-accent) 60%, transparent);
+}
+
+.fui-settings__keybind.is-listening {
+  border-color: var(--fui-gold);
+  background: color-mix(in srgb, var(--fui-gold) 18%, rgba(0, 0, 0, 0.5));
+  color: var(--fui-gold-soft);
+  animation: fui-pulse 900ms ease-in-out infinite;
+}
+
+.fui-settings__foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  padding: 0 28px 24px;
+}

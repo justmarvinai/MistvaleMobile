@@ -1,0 +1,185 @@
+/* Leaderboard — ranked table with medal treatments for the top three. */
+
+.fui-board {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 18px;
+}
+
+.fui-board__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-board__title {
+  position: relative;
+  z-index: 1;
+  padding: 20px 24px 8px;
+  font-size: 17px;
+}
+
+.fui-board__head,
+.fui-board__row {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.fui-board__head {
+  position: relative;
+  z-index: 1;
+  padding: 0 26px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--fui-font-ui);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}
+
+.fui-board__hscore {
+  text-align: right;
+}
+
+.fui-board__body {
+  position: relative;
+  z-index: 1;
+  max-height: 380px;
+  padding: 4px 22px 0;
+}
+
+.fui-board__row {
+  width: 100%;
+  padding: 7px 4px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-board__row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.fui-board__row.is-you {
+  background: color-mix(in srgb, var(--fui-accent) 18%, transparent);
+  box-shadow: inset 2px 0 0 var(--fui-accent);
+}
+
+.fui-board__rank {
+  font-family: var(--fui-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--fui-medal, var(--fui-ink-faint));
+}
+
+/* Podium treatments. */
+.fui-board__row[data-medal='1'] {
+  --fui-medal: #ffd36b;
+}
+.fui-board__row[data-medal='2'] {
+  --fui-medal: #d7dce4;
+}
+.fui-board__row[data-medal='3'] {
+  --fui-medal: #d59a6a;
+}
+
+.fui-board__row[data-medal] .fui-board__rank {
+  text-shadow: 0 0 8px var(--fui-medal);
+}
+
+.fui-board__row[data-medal] .fui-board__name {
+  color: var(--fui-medal);
+}
+
+.fui-board__who {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.fui-board__avatar {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  background: center / cover no-repeat rgba(0, 0, 0, 0.4);
+}
+
+.fui-board__avatar.is-icon {
+  background-size: 76%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.fui-board__names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fui-board__name {
+  overflow: hidden;
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fui-ink);
+}
+
+.fui-board__detail {
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-board__scorecol {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  justify-content: flex-end;
+}
+
+.fui-board__score {
+  font-family: var(--fui-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-board__change {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.fui-board__change.is-up {
+  color: var(--fui-success);
+}
+
+.fui-board__change.is-down {
+  color: var(--fui-danger);
+}
+
+/* The local player's row, pinned below the list when they fall off it. */
+.fui-board__pinned {
+  position: relative;
+  z-index: 1;
+  margin: 8px 22px 0;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.14);
+}

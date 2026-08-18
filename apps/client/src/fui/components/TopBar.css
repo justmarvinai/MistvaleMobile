@@ -1,0 +1,206 @@
+/* TopBar — the persistent resource header above every screen. */
+
+.fui-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap);
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.5));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.fui-topbar--compact {
+  gap: var(--fui-gap-sm);
+  padding: 4px 7px;
+  font-size: 12px;
+}
+
+.fui-topbar__player {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* The level ring is a conic gradient behind a punched-out centre, so the
+   avatar itself needs no extra element to carry XP progress. */
+.fui-topbar__avatar {
+  --fui-top-xp: 0;
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5) center / cover no-repeat;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.fui-topbar__avatar::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--fui-xp) calc(var(--fui-top-xp) * 360deg),
+    rgba(255, 255, 255, 0.12) calc(var(--fui-top-xp) * 360deg)
+  );
+  mask: radial-gradient(circle closest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+  -webkit-mask: radial-gradient(circle closest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+}
+
+.fui-topbar__level {
+  position: absolute;
+  right: -5px;
+  bottom: -4px;
+  min-width: 18px;
+  padding: 0 3px;
+  border-radius: 9px;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  background: var(--fui-slate, #22222a);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
+  color: var(--fui-gold-soft);
+}
+
+.fui-topbar__name {
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--fui-ink);
+}
+
+.fui-topbar__rail {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap);
+  margin-left: auto;
+}
+
+.fui-topbar--compact .fui-topbar__rail {
+  gap: var(--fui-gap-sm);
+}
+
+.fui-topbar__res {
+  --fui-top-ink: var(--fui-accent-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 4px 3px 6px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.fui-topbar__icon {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  background-color: var(--fui-top-ink);
+  mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+}
+
+.fui-topbar__icon.is-art {
+  background-color: transparent;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  mask: none;
+  -webkit-mask: none;
+}
+
+.fui-topbar__stack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.fui-topbar__value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-topbar__value.is-capped {
+  color: var(--fui-success);
+}
+
+.fui-topbar__refill {
+  font-size: 9px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-topbar__plus {
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fui-success);
+  color: #06210c;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 15px;
+  cursor: pointer;
+  transition: filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-topbar__plus:hover {
+  filter: brightness(1.25);
+}
+
+.fui-topbar__actions {
+  display: flex;
+  gap: 5px;
+}
+
+.fui-topbar__action {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-topbar__action::after {
+  content: '';
+  position: absolute;
+  inset: 22%;
+  background-color: var(--fui-ink-dim);
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-topbar__action:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.fui-topbar__action:hover::after {
+  background-color: var(--fui-ink);
+}
+
+.fui-topbar__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  z-index: 1;
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--fui-danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}

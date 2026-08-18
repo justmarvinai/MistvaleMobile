@@ -1,0 +1,177 @@
+/* LeaderboardPodium — the ceremony above a leaderboard's list. */
+
+.fui-podium {
+  --fui-podium-size: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap);
+  padding: var(--fui-gap) var(--fui-gap) 0;
+}
+
+.fui-podium__head {
+  text-align: center;
+}
+
+/* Room for the winner's crown, which sits above the avatar box. */
+.fui-podium__stage {
+  padding-top: 14px;
+}
+
+.fui-podium__title {
+  font-size: 17px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-podium__subtitle {
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}
+
+.fui-podium__stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-podium__place {
+  --fui-podium-ink: var(--fui-gold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: calc(var(--fui-podium-size) + 34px);
+}
+
+/* The ornament overhangs the avatar by 12%, so the box reserves that much room
+   underneath or the frame lands on the name. */
+.fui-podium__avatar {
+  position: relative;
+  width: var(--fui-podium-size);
+  height: var(--fui-podium-size);
+  margin-bottom: calc(var(--fui-podium-size) * 0.1);
+}
+
+.fui-podium__place[data-place='2'] .fui-podium__avatar,
+.fui-podium__place[data-place='3'] .fui-podium__avatar {
+  width: calc(var(--fui-podium-size) * 0.82);
+  height: calc(var(--fui-podium-size) * 0.82);
+}
+
+.fui-podium__art {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  border: 2px solid var(--fui-podium-ink);
+  background: rgba(0, 0, 0, 0.5) center / cover no-repeat;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--fui-podium-ink) 55%, transparent);
+}
+
+/* One ornament asset, three metals — the frame is a 9-sliced mask over the
+   place colour rather than three separate images. */
+.fui-podium__frame {
+  position: absolute;
+  inset: -12%;
+  background: var(--fui-podium-ink);
+  border-style: solid;
+  border-color: transparent;
+  border-width: 18px;
+  border-image-source: var(--fui-podium-frame);
+  border-image-slice: 32 fill;
+  border-image-repeat: stretch;
+  pointer-events: none;
+}
+
+@supports (-webkit-mask-box-image: url('a') 32 stretch) {
+  .fui-podium__frame {
+    border: 0;
+    -webkit-mask-box-image: var(--fui-podium-frame) 32 stretch;
+    -webkit-mask-box-image-width: 18px;
+    mask-border: var(--fui-podium-frame) 32 fill stretch;
+    mask-border-width: 18px;
+  }
+}
+
+/* A simple CSS crown: three points over a band, drawn with clip-path so it
+   needs no asset of its own. */
+.fui-podium__crown {
+  position: absolute;
+  left: 50%;
+  top: -13px;
+  width: 30px;
+  height: 20px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffe9a8, var(--fui-podium-ink));
+  clip-path: polygon(0 100%, 0 20%, 22% 55%, 50% 0, 78% 55%, 100% 20%, 100% 100%);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+}
+
+.fui-podium__name {
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: var(--fui-ink);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.fui-podium__place.is-you .fui-podium__name {
+  color: var(--fui-gold-soft);
+}
+
+.fui-podium__tag {
+  font-family: var(--fui-font-mono);
+  font-size: 10px;
+  color: var(--fui-accent-soft);
+}
+
+.fui-podium__score {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fui-podium-ink);
+}
+
+/* The plinth heights encode the ranking, so the shape reads before the numbers. */
+.fui-podium__plinth {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 6px 4px;
+  border: 1px solid color-mix(in srgb, var(--fui-podium-ink) 45%, rgba(0, 0, 0, 0.6));
+  border-bottom: 0;
+  border-radius: var(--fui-radius) var(--fui-radius) 0 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fui-podium-ink) 26%, transparent),
+    rgba(0, 0, 0, 0.35)
+  );
+}
+
+.fui-podium__place[data-place='1'] .fui-podium__plinth { min-height: 74px; }
+.fui-podium__place[data-place='2'] .fui-podium__plinth { min-height: 54px; }
+.fui-podium__place[data-place='3'] .fui-podium__plinth { min-height: 40px; }
+
+.fui-podium__rank {
+  font-family: var(--fui-font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fui-podium-ink);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.fui-podium__reward {
+  font-size: 9.5px;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--fui-ink-faint);
+}

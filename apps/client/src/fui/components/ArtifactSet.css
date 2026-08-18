@@ -1,0 +1,129 @@
+/* ArtifactSet — equipped slots plus the set bonuses they add up to. */
+
+.fui-set {
+  --fui-set-size: 62px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap);
+}
+
+.fui-set__title {
+  font-size: 10px;
+}
+
+.fui-set__slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-set__slot {
+  --fui-set-rarity: var(--fui-rarity-common);
+  position: relative;
+  width: var(--fui-set-size);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.fui-set__slot[data-rarity='uncommon'] { --fui-set-rarity: var(--fui-rarity-uncommon); }
+.fui-set__slot[data-rarity='rare'] { --fui-set-rarity: var(--fui-rarity-rare); }
+.fui-set__slot[data-rarity='epic'] { --fui-set-rarity: var(--fui-rarity-epic); }
+.fui-set__slot[data-rarity='legendary'] { --fui-set-rarity: var(--fui-rarity-legendary); }
+.fui-set__slot[data-rarity='mythic'] { --fui-set-rarity: var(--fui-rarity-mythic); }
+.fui-set__slot[data-rarity='empty'] { --fui-set-rarity: rgba(255, 255, 255, 0.14); }
+
+.fui-set__art {
+  width: var(--fui-set-size);
+  height: var(--fui-set-size);
+  border: 1px solid color-mix(in srgb, var(--fui-set-rarity) 60%, rgba(0, 0, 0, 0.6));
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.45) center / cover no-repeat;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+/* An empty slot shows the slot's own glyph, dimmed — the player can tell what
+   goes there without hovering. */
+.fui-set__art.is-glyph {
+  background-image: none;
+  position: relative;
+}
+
+.fui-set__art.is-glyph::after {
+  content: '';
+  position: absolute;
+  inset: 26%;
+  background-color: var(--fui-ink-faint);
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  opacity: 0.5;
+}
+
+.fui-set__slot.is-empty .fui-set__art {
+  border-style: dashed;
+}
+
+.fui-set__level {
+  position: absolute;
+  top: calc(var(--fui-set-size) - 15px);
+  right: 2px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.85);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-set__label {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--fui-ink-faint);
+  text-align: center;
+}
+
+.fui-set__bonuses {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fui-set__bonus {
+  --fui-set-ink: var(--fui-accent);
+  display: flex;
+  align-items: baseline;
+  gap: var(--fui-gap-sm);
+  padding: 5px 9px;
+  border-left: 3px solid var(--fui-set-ink);
+  border-radius: 0 var(--fui-radius) var(--fui-radius) 0;
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 12px;
+}
+
+/* An unfinished bonus is deliberately dimmed rather than hidden: the gap is
+   the thing that makes a player go hunting for the fourth piece. */
+.fui-set__bonus[data-done='false'] {
+  opacity: 0.55;
+  border-left-style: dashed;
+}
+
+.fui-set__bonus-name {
+  font-family: var(--fui-font-display);
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--fui-set-ink) 55%, var(--fui-ink));
+}
+
+.fui-set__bonus-count {
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-set__bonus[data-done='true'] .fui-set__bonus-count {
+  color: var(--fui-success);
+}
+
+.fui-set__bonus-effect {
+  margin-left: auto;
+  color: var(--fui-ink-dim);
+}

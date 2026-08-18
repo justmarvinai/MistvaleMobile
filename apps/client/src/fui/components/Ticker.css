@@ -1,0 +1,113 @@
+/* Ticker — the scrolling announcement rail. */
+
+.fui-ticker {
+  --fui-ticker-speed: 26s;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 30px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.fui-ticker__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 0 10px;
+  background: linear-gradient(180deg, var(--fui-accent), var(--fui-accent-deep));
+  color: #071a18;
+  font-family: var(--fui-font-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.fui-ticker__badge-glyph {
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-ticker__viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  /* Fading both ends keeps a message from appearing to pop in and out at a
+     hard edge. */
+  mask: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+}
+
+.fui-ticker__track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  animation: fui-ticker-scroll var(--fui-ticker-speed) linear infinite;
+}
+
+.fui-ticker--pausable:hover .fui-ticker__track {
+  animation-play-state: paused;
+}
+
+.fui-ticker__run {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.fui-ticker__item {
+  --fui-ticker-ink: var(--fui-ink-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 var(--fui-gap-lg);
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--fui-ticker-ink);
+}
+
+.fui-ticker__item::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  margin-left: var(--fui-gap-lg);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.fui-ticker__item[data-tone='warn'] { --fui-ticker-ink: var(--fui-warn); }
+.fui-ticker__item[data-tone='rare'] { --fui-ticker-ink: var(--fui-rarity-legendary); }
+.fui-ticker__item[data-tone='event'] { --fui-ticker-ink: var(--fui-accent-soft); }
+
+.fui-ticker__glyph {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-ticker__from {
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+/* Exactly one run's width, so the duplicated second run lands where the first
+   started and the seam is invisible. */
+@keyframes fui-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}

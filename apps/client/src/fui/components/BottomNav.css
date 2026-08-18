@@ -1,0 +1,125 @@
+/* BottomNav — persistent mobile section bar with per-tab badges. */
+
+.fui-bottomnav {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 2px;
+  width: 100%;
+  padding: 6px 8px 8px;
+  border-top: 1px solid color-mix(in srgb, var(--fui-accent) 28%, rgba(255, 255, 255, 0.08));
+  background: linear-gradient(180deg, rgba(12, 12, 16, 0.94), rgba(6, 6, 9, 0.98));
+  backdrop-filter: blur(6px);
+}
+
+.fui-bottomnav__item {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 2px 4px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fui-ink-faint);
+  cursor: pointer;
+  transition: color var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-bottomnav__item:hover:not(:disabled) {
+  color: var(--fui-ink-dim);
+}
+
+.fui-bottomnav__item:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.fui-bottomnav__glyph {
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  transition: transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-bottomnav__label {
+  font-family: var(--fui-font-ui);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.fui-bottomnav__item.is-active {
+  color: var(--fui-accent-soft);
+}
+
+.fui-bottomnav__item.is-active .fui-bottomnav__glyph {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 7px var(--fui-accent));
+}
+
+/* Active tab gets an underline pip. */
+.fui-bottomnav__item.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--fui-accent);
+  box-shadow: 0 0 6px var(--fui-accent);
+  transform: translateX(-50%);
+}
+
+/* The centre action sits proud of the bar. */
+.fui-bottomnav__item.is-primary {
+  flex: 0 0 auto;
+  margin-top: -22px;
+  padding: 12px 16px 6px;
+  border-radius: 50% 50% 8px 8px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fui-accent) 42%, #0b0b10),
+    rgba(8, 8, 12, 0.95)
+  );
+  box-shadow: 0 -3px 14px color-mix(in srgb, var(--fui-accent) 40%, transparent);
+  color: var(--fui-ink);
+}
+
+.fui-bottomnav__item.is-primary .fui-bottomnav__glyph {
+  width: 30px;
+  height: 30px;
+}
+
+/* Badges. */
+.fui-bottomnav__badge {
+  position: absolute;
+  top: 2px;
+  right: 22%;
+  min-width: 17px;
+  padding: 0 4px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 9px;
+  background: var(--fui-danger);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  color: #fff;
+}
+
+.fui-bottomnav__dot {
+  position: absolute;
+  top: 5px;
+  right: 27%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fui-danger);
+  box-shadow: 0 0 6px var(--fui-danger);
+}

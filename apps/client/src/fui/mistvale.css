@@ -1,0 +1,90 @@
+/* ===========================================================================
+   Mistvale's layer over Dark Ember.
+
+   The library's three-layer indirection is assets → themes → components, and a
+   component only ever reads a *semantic slot*. So making the library look like
+   Mistvale is a matter of rebinding slots, not of touching any of the 99
+   vendored components — which is what keeps `pnpm fui:vendor` a clean overwrite.
+
+   This file is loaded after `theme-dark-ember.css` and re-declares the same
+   selector, so it wins on source order at equal specificity. Everything it does
+   not name keeps the library's value.
+
+   Two rules from the library's own notes are load-bearing here:
+     - a theme must bind to `:root, [data-fui-theme='…']` and never to `.fui`,
+       because component roots carry that class and would re-declare the theme
+       on themselves, blocking inheritance;
+     - `--fui-bw-*` custom properties substitute at their declaration site, so a
+       scale overridden on a descendant does not re-resolve. Anything needing
+       its own scale writes the calc out in full.
+   =========================================================================== */
+
+:root,
+[data-fui-theme='dark-ember'] {
+  /* ── Type ──────────────────────────────────────────────────────────────────
+     **No serif fonts. Anywhere.** (owner's brief, reaffirmed 2026-08-18 when
+     this rework was commissioned: "No Serife Fonts only Sans Serif").
+
+     The library ships Cinzel for display and Spectral for body — both serif,
+     and a real part of why it reads as fantasy. Mistvale gets that character
+     from its art instead, and keeps its own faces: Pixelify Sans is the game's
+     voice and has been since P0. Bound through Mistvale's own `--mv-font-*`
+     custom properties rather than restating the stacks, so there stays exactly
+     one place where the game's type is decided. */
+  --fui-font-display: var(--mv-font-display);
+  --fui-font-body: var(--mv-font-body);
+  --fui-font-ui: var(--mv-font-body);
+  --fui-font-mono: var(--mv-font-mono);
+
+  /* ── Palette ───────────────────────────────────────────────────────────────
+     Dark Ember is bronze-on-black; Mistvale is that seen through mist. The
+     accent moves off pure bronze toward the game's own pale teal so the two art
+     languages — painted chrome and pixel sprites — share a light source, and
+     the grounds go a touch cooler and darker to sit under the Pixi backdrop
+     rather than compete with it. */
+  --fui-accent: #7fd4c1;
+  --fui-accent-soft: #b7ece0;
+  --fui-accent-deep: #1f4a44;
+  --fui-gold: #d9b45a;
+  --fui-gold-soft: #f0dda6;
+
+  --fui-ink: #e8e3d8;
+  --fui-ink-dim: #9aa0a2;
+  --fui-ink-faint: #5d6468;
+
+  --fui-stone: #2b3138;
+  --fui-stone-dark: #171b21;
+  --fui-slate: #0b0e14;
+  --fui-blood: #8a2b24;
+}
+
+/* ── The seam between the library and the game ────────────────────────────────
+   Mistvale's own kit and the vendored components share a page, so the two have
+   to agree about a few things the library cannot know.
+
+   `.fui` is the class every component root carries. Styling it here is fine —
+   the warning above is specifically about *declaring theme variables* on it. */
+.fui {
+  /* Pixel art is integer-scaled everywhere else in this game; the library's art
+     is painted and must not be. Scoped to the library's own subtree so the two
+     rules never argue. */
+  image-rendering: auto;
+}
+
+/* A component dropped into a Mistvale layout should inherit the layout's
+   sizing, not impose its own document box. */
+.fui:where(:not(dialog)) {
+  box-sizing: border-box;
+}
+
+/* Reduce motion is the game's setting as well as the machine's (P10f), and the
+   library animates a good deal — shimmering rarity frames, breathing rings,
+   sweeping bar fills. `data-mv-motion` is written by `usePreferences`. */
+:root[data-mv-motion='reduced'] .fui,
+:root[data-mv-motion='reduced'] .fui *,
+:root[data-mv-motion='reduced'] .fui *::before,
+:root[data-mv-motion='reduced'] .fui *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}

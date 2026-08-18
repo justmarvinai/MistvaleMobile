@@ -1,0 +1,207 @@
+/* BossHealthBar — the wide phase bar across the top of a raid fight. */
+
+.fui-boss {
+  --fui-boss-ink: var(--fui-danger);
+  --fui-boss-enrage: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.fui-boss__head {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-boss__glyph {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  background-color: var(--fui-boss-ink);
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  filter: drop-shadow(0 0 4px var(--fui-boss-ink));
+}
+
+.fui-boss__titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-boss__name {
+  font-size: 16px;
+  color: var(--fui-ink);
+}
+
+.fui-boss__subtitle {
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}
+
+.fui-boss__phase {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-gold-soft);
+}
+
+.fui-boss__track {
+  position: relative;
+  height: 22px;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.62);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+/* The trail is a pale ghost of the previous value that catches up a beat late,
+   so a burst of damage is legible as a burst. */
+.fui-boss__trail {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(255, 255, 255, 0.4);
+  transition: width var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-boss__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fui-boss-ink) 70%, white) 0%,
+    var(--fui-boss-ink) 45%,
+    color-mix(in srgb, var(--fui-boss-ink) 65%, black) 100%
+  );
+  box-shadow: 0 0 10px color-mix(in srgb, var(--fui-boss-ink) 60%, transparent);
+  transition: width var(--fui-t-fast) linear;
+}
+
+.fui-boss__notches {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fui-boss__notch {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: rgba(0, 0, 0, 0.75);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.14);
+}
+
+.fui-boss__numbers {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+}
+
+.fui-boss__enrage {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-boss__enrage-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fui-warn);
+}
+
+.fui-boss__enrage-track {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.fui-boss__enrage-track::before {
+  content: '';
+  display: block;
+  width: calc(var(--fui-boss-enrage) * 100%);
+  height: 100%;
+  background: linear-gradient(90deg, var(--fui-warn), var(--fui-danger));
+  transition: width 1s linear;
+}
+
+.fui-boss.is-enraged .fui-boss__enrage-label {
+  color: var(--fui-danger);
+  animation: fui-pulse 0.8s var(--fui-ease) infinite;
+}
+
+.fui-boss.is-enraged .fui-boss__fill {
+  animation: fui-glow 1.2s var(--fui-ease) infinite;
+}
+
+.fui-boss__effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.fui-boss__effect {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid;
+  border-radius: 3px;
+  font-size: 10px;
+}
+
+.fui-boss__effect[data-kind='buff'] {
+  border-color: color-mix(in srgb, var(--fui-success) 55%, transparent);
+  background: color-mix(in srgb, var(--fui-success) 18%, transparent);
+  color: var(--fui-success);
+}
+
+.fui-boss__effect[data-kind='debuff'] {
+  border-color: color-mix(in srgb, var(--fui-danger) 55%, transparent);
+  background: color-mix(in srgb, var(--fui-danger) 18%, transparent);
+  color: #f0897d;
+}
+
+.fui-boss__effect-turns {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Effects carry either a glyph or their name in words; the glyph is drawn as a
+   mask so it inherits the buff / debuff colour. */
+.fui-boss__effect::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  flex: none;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+}
+
+.fui-boss__effect:not([style*='--fui-glyph-src'])::before {
+  display: none;
+}
+
+.fui-boss__effect-text {
+  letter-spacing: 0.03em;
+}

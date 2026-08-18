@@ -1,0 +1,64 @@
+/* BattleControls — auto, speed, pause and retreat for auto-battle RPGs. */
+
+.fui-battlectl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fui-battlectl__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 46px;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 19px;
+  background: rgba(6, 6, 10, 0.72);
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--fui-ink-dim);
+  cursor: pointer;
+  transition:
+    border-color var(--fui-t-fast) var(--fui-ease),
+    background var(--fui-t-fast) var(--fui-ease),
+    color var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-battlectl__btn:hover {
+  border-color: color-mix(in srgb, var(--fui-accent) 55%, transparent);
+  color: var(--fui-ink);
+}
+
+/* Engaged controls light up in the theme accent. */
+.fui-battlectl__btn.is-on {
+  border-color: var(--fui-accent);
+  background: color-mix(in srgb, var(--fui-accent) 26%, rgba(6, 6, 10, 0.72));
+  color: var(--fui-ink);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--fui-accent) 45%, transparent);
+}
+
+.fui-battlectl__glyph {
+  width: 15px;
+  height: 15px;
+  background-color: currentColor;
+  -webkit-mask: var(--fui-img-glyph-hourglass) center / contain no-repeat;
+  mask: var(--fui-img-glyph-hourglass) center / contain no-repeat;
+}
+
+.fui-battlectl__auto.is-on .fui-battlectl__glyph {
+  animation: fui-spin 2.4s linear infinite;
+}
+
+.fui-battlectl__retreat {
+  color: color-mix(in srgb, var(--fui-danger) 60%, var(--fui-ink-dim));
+}
+
+.fui-battlectl__retreat:hover {
+  border-color: var(--fui-danger);
+  color: #ffb4ac;
+}

@@ -1,0 +1,79 @@
+/* ProgressRing — conic-gradient dial for cooldowns, timers and completion. */
+
+.fui-ring {
+  --fui-ring-size: 84px;
+  --fui-ring-thick: 8px;
+  --fui-ring-pct: 0;
+  --fui-ring-color: var(--fui-accent);
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--fui-ring-size);
+  height: var(--fui-ring-size);
+  flex: none;
+}
+
+.fui-ring[data-kind='health'] { --fui-ring-color: var(--fui-health); }
+.fui-ring[data-kind='mana'] { --fui-ring-color: var(--fui-mana); }
+.fui-ring[data-kind='stamina'] { --fui-ring-color: var(--fui-stamina); }
+.fui-ring[data-kind='xp'] { --fui-ring-color: var(--fui-xp); }
+.fui-ring[data-kind='rage'] { --fui-ring-color: var(--fui-rage); }
+.fui-ring[data-kind='neutral'] { --fui-ring-color: var(--fui-accent); }
+
+/* The dial is one element: a conic sweep with the middle punched out by a
+   radial mask, so there is no SVG and nothing to reflow when the value moves. */
+.fui-ring__track {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      var(--fui-ring-color) calc(var(--fui-ring-pct) * 360deg),
+      rgba(0, 0, 0, 0.55) calc(var(--fui-ring-pct) * 360deg)
+    );
+  mask: radial-gradient(
+    circle closest-side,
+    transparent calc(100% - var(--fui-ring-thick) - 0.5px),
+    #000 calc(100% - var(--fui-ring-thick))
+  );
+  box-shadow: 0 0 calc(var(--fui-ring-thick) * 0.9) rgba(0, 0, 0, 0.55);
+  transition: background var(--fui-t) linear;
+}
+
+.fui-ring--reverse .fui-ring__track {
+  transform: scaleX(-1);
+}
+
+.fui-ring::after {
+  /* A hairline rim keeps the dial legible against a busy background. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.fui-ring__centre {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.fui-ring__label {
+  font-family: var(--fui-font-display);
+  font-weight: 700;
+  font-size: calc(var(--fui-ring-size) * 0.24);
+  color: var(--fui-ink);
+  text-shadow: 0 2px 3px var(--fui-ink-shadow);
+}
+
+.fui-ring__sub {
+  font-size: calc(var(--fui-ring-size) * 0.13);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-ink-dim);
+  white-space: nowrap;
+}

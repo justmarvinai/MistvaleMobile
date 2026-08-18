@@ -1,0 +1,146 @@
+/* FormationGrid — positional party layout where the cell carries meaning. */
+
+.fui-formation {
+  --fui-form-size: 74px;
+  --fui-form-cols: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-formation__board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap-sm);
+  padding: var(--fui-gap);
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.34));
+}
+
+.fui-formation__row {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-formation__row-label {
+  width: 44px;
+  flex: none;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--fui-ink-faint);
+}
+
+.fui-formation__cells {
+  display: grid;
+  grid-template-columns: repeat(var(--fui-form-cols), var(--fui-form-size));
+  gap: 6px;
+}
+
+.fui-formation__cell {
+  --fui-form-rarity: var(--fui-rarity-common);
+  position: relative;
+  width: var(--fui-form-size);
+  height: var(--fui-form-size);
+  border: 1px solid color-mix(in srgb, var(--fui-form-rarity) 55%, rgba(0, 0, 0, 0.6));
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+  transition: border-color var(--fui-t-fast) var(--fui-ease), transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-formation__cell[data-rarity='uncommon'] { --fui-form-rarity: var(--fui-rarity-uncommon); }
+.fui-formation__cell[data-rarity='rare'] { --fui-form-rarity: var(--fui-rarity-rare); }
+.fui-formation__cell[data-rarity='epic'] { --fui-form-rarity: var(--fui-rarity-epic); }
+.fui-formation__cell[data-rarity='legendary'] { --fui-form-rarity: var(--fui-rarity-legendary); }
+.fui-formation__cell[data-rarity='mythic'] { --fui-form-rarity: var(--fui-rarity-mythic); }
+
+.fui-formation__cell.is-empty {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.fui-formation__cell.is-empty::after {
+  content: '+';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* A blocked cell is crossed out rather than merely dimmed, so it is obviously
+   unusable rather than just unfilled. */
+.fui-formation__cell.is-blocked {
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.08);
+  background:
+    repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.5) 0 5px, rgba(30, 30, 38, 0.5) 5px 10px);
+}
+
+.fui-formation__cell.is-dragging {
+  opacity: 0.4;
+}
+
+.fui-formation__cell.is-over {
+  border-color: var(--fui-gold);
+  transform: scale(1.05);
+}
+
+.fui-formation__art {
+  position: absolute;
+  inset: 0;
+  background: center / cover no-repeat;
+}
+
+.fui-formation__level {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.8);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-formation__role {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  background-color: #fff;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  filter: drop-shadow(0 1px 2px #000);
+}
+
+.fui-formation__name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px 3px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.88));
+  font-size: 9.5px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--fui-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fui-formation__power {
+  font-size: 12px;
+  text-align: center;
+  color: var(--fui-gold-soft);
+}

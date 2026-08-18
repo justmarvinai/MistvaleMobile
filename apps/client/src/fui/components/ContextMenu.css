@@ -1,0 +1,105 @@
+/* ContextMenu — right-click menu for items, units and map pins. */
+
+.fui-menu {
+  position: fixed;
+  z-index: 950;
+  display: none;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.7));
+}
+
+.fui-menu.is-open {
+  display: block;
+  animation: fui-rise 130ms var(--fui-ease);
+}
+
+.fui-menu__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-surface-bw);
+  border-image-source: var(--fui-surface-src);
+  border-image-slice: var(--fui-surface-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-menu__list {
+  position: relative;
+  z-index: 1;
+  padding: 8px 7px;
+}
+
+.fui-menu__title {
+  padding: 2px 9px 7px;
+  font-size: 10.5px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-menu__sep {
+  height: 1px;
+  margin: 5px 6px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fui-accent) 45%, transparent),
+    transparent
+  );
+}
+
+.fui-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  font-family: var(--fui-font-ui);
+  font-size: 13px;
+  color: var(--fui-ink-dim);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--fui-t-fast) var(--fui-ease),
+    color var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-menu__item:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--fui-accent) 22%, transparent);
+  color: var(--fui-ink);
+}
+
+.fui-menu__item.is-danger {
+  color: color-mix(in srgb, var(--fui-danger) 70%, var(--fui-ink-dim));
+}
+
+.fui-menu__item.is-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--fui-danger) 26%, transparent);
+  color: #ffb9b1;
+}
+
+.fui-menu__item:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.fui-menu__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  background: center / contain no-repeat;
+}
+
+.fui-menu__label {
+  flex: 1 1 auto;
+}
+
+.fui-menu__hint {
+  flex: none;
+  font-family: var(--fui-font-mono);
+  font-size: 10px;
+  color: var(--fui-ink-faint);
+}

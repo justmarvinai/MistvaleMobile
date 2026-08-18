@@ -5,6 +5,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the game is dressed (design rework, D0: the foundation)
+
+Commissioned by the owner on 2026-08-18: *"I want you to FULLY rework the Design of the
+whole Game"*, using **FantasyUIs** — their own component library of painted 9-sliced
+panels, ornament frames, unit frames and turn meters. This is the groundwork the other
+nine phases stand on; the screens follow.
+
+Two standing rules were superseded in the same breath and are recorded as such: the game
+client may now use a component library, and the hand-built pixel kit is retired. Two
+answers came with it — **sans-serif only**, and **the Admin Panel is not touched**.
+
+- **99 components vendored**, resolved through the library's own `/r/<Name>.json` records:
+  the `copy` field is the transitive closure of real import statements, so a component that
+  grows a dependency upstream brings it along without anyone maintaining a list for it.
+  `pnpm fui:vendor` does the copy and `pnpm fui:check` fails when a vendored file has
+  drifted. The copies are byte-identical to upstream, which is what keeps a newer library a
+  clean overwrite rather than a merge — and why the tree is excluded from this repo's
+  linting and formatting, and carries a `@ts-nocheck` banner rather than being patched to
+  satisfy a stricter config than its own.
+- **The art is self-hosted** — 457 files, 6.4 MB, in `public/fui/`. Not a preference: nginx
+  sends `img-src 'self' data: blob:`, so a component streaming its panel fill from the
+  library's CDN renders nothing in production. `setAssetBase('/fui')` is the library's own
+  answer to exactly this.
+- **A theme layer rather than a fork.** The library's indirection is assets → themes →
+  components, and a component only ever reads a semantic slot — so making it look like
+  Mistvale is a matter of rebinding slots, and no vendored file is touched.
+  `fui/mistvale.css` moves the palette off bronze toward the game's pale teal, and rebinds
+  the display and body faces: **Cinzel and Spectral are serif and the brief has forbidden
+  serif since P0**, so both point at Mistvale's own `--mv-font-*`, where the game's type has
+  always been decided.
+- **One React bridge for all of them.** The library is vanilla TypeScript by design and
+  names "a React ref" as a host; `useFui`/`Fui`/`FuiSlotted` are that host. A component is
+  constructed once and updated through its own `update()` — never rebuilt, which would
+  restart every animation and drop focus mid-interaction — and content goes in through a
+  portal, because the library's containers take DOM nodes and React cannot supply those.
+- **`Panel` is the first primitive swapped**, and the signature did not change, so thirty
+  call sites across sixteen screens got painted leather, a bronze rule and corner filigree
+  without one of them being edited. That is the whole reason the swap happens in the kit.
+
+Two bugs found and fixed in the bridge on the way, both only visible in a browser: a
+callback ref with a fresh identity each render, which React tears down and re-attaches —
+an infinite loop; and an effect cleanup destroying the component during StrictMode's
+simulated unmount, after which the ref never re-ran to rebuild it, so every panel
+constructed successfully and then vanished. Teardown belongs to the ref alone.
+
+
 ### Added — the relic vault has a ceiling, and room is something you buy (Q5)
 
 Answered by the owner on 2026-08-18: *"yes there should be a cap which can gradually be

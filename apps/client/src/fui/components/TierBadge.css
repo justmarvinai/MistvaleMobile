@@ -1,0 +1,108 @@
+/* TierBadge — arena / ladder rank emblem with tier metal and division. */
+
+.fui-tier {
+  --fui-tier-size: 72px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.fui-tier__emblem {
+  position: relative;
+  width: var(--fui-tier-size);
+  height: var(--fui-tier-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fui-tier__ring {
+  position: absolute;
+  inset: 0;
+  background: var(--fui-round-frame-img) center / contain no-repeat;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--fui-tier-metal) 55%, transparent));
+}
+
+/* Trophy sits inside the ring, tinted to the tier metal. */
+.fui-tier__crest {
+  position: absolute;
+  inset: 24%;
+  background-color: var(--fui-tier-metal);
+  -webkit-mask: var(--fui-img-glyph-trophy-cup) center / contain no-repeat;
+  mask: var(--fui-img-glyph-trophy-cup) center / contain no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+}
+
+.fui-tier__division {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  min-width: calc(var(--fui-tier-size) * 0.3);
+  padding: 0 4px;
+  border: 1px solid color-mix(in srgb, var(--fui-tier-metal) 65%, #000);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #24201b, #100e0b);
+  font-family: var(--fui-font-display);
+  font-size: calc(var(--fui-tier-size) * 0.19);
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--fui-tier-metal);
+  text-shadow: 0 1px 2px #000;
+}
+
+.fui-tier__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.fui-tier__name {
+  font-family: var(--fui-font-display);
+  font-size: calc(var(--fui-tier-size) * 0.18);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fui-tier-metal);
+  text-shadow: 0 1px 3px #000;
+}
+
+.fui-tier__points {
+  font-size: calc(var(--fui-tier-size) * 0.15);
+  color: var(--fui-ink-dim);
+}
+
+.fui-tier__rank {
+  font-size: calc(var(--fui-tier-size) * 0.14);
+  color: var(--fui-ink-faint);
+}
+
+/* Tier metals. */
+.fui-tier[data-tier='bronze'] {
+  --fui-tier-metal: #c07a45;
+}
+.fui-tier[data-tier='silver'] {
+  --fui-tier-metal: #c9d2dc;
+}
+.fui-tier[data-tier='gold'] {
+  --fui-tier-metal: #ecc14e;
+}
+.fui-tier[data-tier='platinum'] {
+  --fui-tier-metal: #9fe5e0;
+}
+.fui-tier[data-tier='diamond'] {
+  --fui-tier-metal: #7fd3ff;
+}
+.fui-tier[data-tier='master'] {
+  --fui-tier-metal: #c78dff;
+}
+.fui-tier[data-tier='legend'] {
+  --fui-tier-metal: #ff9a4d;
+}
+
+.fui-tier[data-tier='legend'] .fui-tier__ring,
+.fui-tier[data-tier='master'] .fui-tier__ring {
+  animation: fui-pulse 2.6s ease-in-out infinite;
+}

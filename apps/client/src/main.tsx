@@ -4,6 +4,17 @@ import { App } from './app/App';
 import { ErrorBoundary } from './app/ErrorBoundary';
 import { registerServiceWorker } from './app/registerServiceWorker';
 import './styles/global.scss';
+// The vendored library, then Mistvale's layer over it. Order matters: `mistvale.css`
+// re-declares the same selector as the theme it overrides and wins on source order.
+import './fui/styles.css';
+import './fui/mistvale.css';
+import { setAssetBase } from './fui/core/assets.ts';
+
+// Art is served from this origin, never from the library's CDN: nginx sends
+// `img-src 'self' data: blob:`, so a component reaching for a third-party host renders
+// nothing in production — and a game must not depend on somebody else's uptime to draw
+// its own buttons. `tools/fui-vendor` is what puts the files under `public/fui/`.
+setAssetBase('/fui');
 
 const container = document.getElementById('root');
 if (!container) {

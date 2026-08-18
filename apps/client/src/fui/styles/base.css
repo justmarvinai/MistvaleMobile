@@ -1,0 +1,332 @@
+/* ===========================================================================
+   FantasyUIs — foundation layer
+   Design tokens, scoped reset, shared 9-slice machinery and keyframes.
+   Everything is namespaced under `.fui` so dropping this into an existing game
+   never leaks styles into your own markup.
+   =========================================================================== */
+
+:root {
+  /* ── Global scale ──────────────────────────────────────────────────────
+     Source art is high-resolution so it stays crisp on retina panels. This
+     multiplier converts art pixels to screen pixels for every 9-slice border.
+     Raise it for a chunkier, more storybook UI; lower it for a denser HUD. */
+  --fui-ui-scale: 0.5;
+
+  /* ── Typography ────────────────────────────────────────────────────────
+     Google Fonts are optional. Without them these fall back to serif stacks
+     that still read as fantasy, so the library has zero hard dependencies. */
+  --fui-font-display: 'Cinzel', 'Trajan Pro', 'Palatino Linotype', Georgia, serif;
+  --fui-font-body: 'Spectral', 'Palatino Linotype', Georgia, 'Times New Roman', serif;
+  --fui-font-ui: 'Alegreya Sans', 'Optima', 'Segoe UI', system-ui, sans-serif;
+  --fui-font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+
+  /* ── Ink ───────────────────────────────────────────────────────────────── */
+  --fui-ink: #ece4d2;
+  --fui-ink-dim: #a89f8c;
+  --fui-ink-faint: #6f6857;
+  --fui-ink-inverse: #14110c;
+  --fui-ink-shadow: rgba(0, 0, 0, 0.85);
+
+  /* ── Accents (each theme overrides these) ──────────────────────────────── */
+  --fui-accent: #6fb3a8;
+  --fui-accent-soft: #9ed3ca;
+  --fui-accent-deep: #2c5a54;
+  --fui-gold: #d9a441;
+  --fui-gold-soft: #f0cf85;
+
+  /* ── Resource colours ──────────────────────────────────────────────────── */
+  --fui-health: #4bbf5c;
+  --fui-mana: #4a8ede;
+  --fui-stamina: #d9a441;
+  --fui-xp: #b46fd9;
+  --fui-rage: #c0392b;
+  --fui-neutral: #8b8578;
+
+  /* ── Feedback ──────────────────────────────────────────────────────────── */
+  --fui-danger: #d0453a;
+  --fui-warn: #dd9a2b;
+  --fui-success: #52b96b;
+  --fui-info: #4a8ede;
+
+  /* ── Rarity (the palette RPG players read instantly) ───────────────────── */
+  --fui-rarity-common: #9d9d9d;
+  --fui-rarity-uncommon: #38d13c;
+  --fui-rarity-rare: #3b8ae0;
+  --fui-rarity-epic: #a335ee;
+  --fui-rarity-legendary: #ff8000;
+  --fui-rarity-mythic: #e6cc80;
+
+  /* ── Geometry ──────────────────────────────────────────────────────────── */
+  --fui-gap-xs: 4px;
+  --fui-gap-sm: 8px;
+  --fui-gap: 12px;
+  --fui-gap-lg: 20px;
+  --fui-radius: 3px;
+  --fui-slot-size: 64px;
+
+  /* ── Masking ───────────────────────────────────────────────────────────
+     The fallback for an unset mask image. `none` cannot be used: it means
+     "no mask", which paints the whole box, so an optional glyph slot with no
+     glyph in it would render as a solid rectangle. A fully transparent
+     gradient masks the element away instead. */
+  --fui-mask-none: linear-gradient(transparent, transparent);
+
+  /* ── Motion ────────────────────────────────────────────────────────────── */
+  --fui-t-fast: 120ms;
+  --fui-t: 220ms;
+  --fui-t-slow: 420ms;
+  --fui-ease: cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* ── Scoped reset ─────────────────────────────────────────────────────────
+   Applies only inside `.fui` roots.
+
+   Everything below is wrapped in `:where()`, which contributes zero
+   specificity. That matters: a plain `.fui button { margin: 0 }` scores
+   (0,1,1) and silently beats a component's own `.fui-x__btn { margin-left:
+   auto }` at (0,1,0), so the reset would quietly win arguments it has no
+   business being in. At zero specificity a reset can only ever fill in
+   defaults nobody has set. */
+:where(.fui, .fui *, .fui *::before, .fui *::after) {
+  box-sizing: border-box;
+}
+
+.fui {
+  font-family: var(--fui-font-ui);
+  color: var(--fui-ink);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:where(.fui) :where(button, input, select, textarea) {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+:where(.fui) :where(img) {
+  display: block;
+  max-width: 100%;
+}
+
+:where(.fui) :where(h1, h2, h3, h4, p, ul, ol, figure) {
+  margin: 0;
+}
+
+:where(.fui) :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+
+/* ── Shared text treatments ───────────────────────────────────────────────── */
+.fui-title {
+  font-family: var(--fui-font-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 3px var(--fui-ink-shadow);
+}
+
+.fui-label {
+  font-family: var(--fui-font-ui);
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fui-ink-dim);
+}
+
+.fui-body {
+  font-family: var(--fui-font-body);
+  color: var(--fui-ink-dim);
+}
+
+.fui-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.fui-engrave {
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.9),
+    0 -1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* ── 9-slice utility ──────────────────────────────────────────────────────
+   Components set --fui-src / --fui-sl / --fui-bw from the generated asset
+   variables, e.g.
+
+     --fui-src: var(--fui-img-panel-stone);
+     --fui-sl:  var(--fui-slice-panel-stone);
+     --fui-bw:  var(--fui-bw-panel-stone);
+
+   `border-image-width` inherits from `border-width`, so the art's corners land
+   at exactly (slice x --fui-ui-scale) screen pixels and the edges stretch. */
+.fui-9 {
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-bw);
+  border-image-source: var(--fui-src);
+  border-image-slice: var(--fui-sl) fill;
+  border-image-repeat: stretch;
+}
+
+/* Same geometry, but the middle tile repeats instead of stretching — better for
+   strongly textured fills like leather and stone at large sizes. */
+.fui-9-round {
+  border-image-repeat: round;
+}
+
+/* A frame with a hollow centre, layered *over* content rather than behind it. */
+.fui-9-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-bw);
+  border-image-source: var(--fui-src);
+  border-image-slice: var(--fui-sl);
+  border-image-repeat: stretch;
+}
+
+/* ── Focus ────────────────────────────────────────────────────────────────── */
+.fui :focus-visible {
+  outline: 2px solid var(--fui-gold-soft);
+  outline-offset: 2px;
+}
+
+/* ── Scrollbars ───────────────────────────────────────────────────────────── */
+.fui-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fui-accent-deep) rgba(0, 0, 0, 0.35);
+}
+
+.fui-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.fui-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 5px;
+}
+
+.fui-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--fui-accent) 0%, var(--fui-accent-deep) 100%);
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.fui-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--fui-accent-soft) 0%, var(--fui-accent) 100%);
+}
+
+/* ── Shared keyframes ─────────────────────────────────────────────────────── */
+@keyframes fui-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes fui-glow {
+  0%,
+  100% {
+    filter: brightness(1) drop-shadow(0 0 3px currentColor);
+  }
+  50% {
+    filter: brightness(1.25) drop-shadow(0 0 10px currentColor);
+  }
+}
+
+@keyframes fui-shimmer {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(320%) skewX(-18deg);
+  }
+}
+
+@keyframes fui-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* The 100% frame declares `opacity` deliberately. Without it, an element whose
+   own rule sets `opacity: 0` would interpolate back down to 0 between 60% and
+   100% and finish invisible under `animation-fill-mode: forwards`. */
+@keyframes fui-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fui-float-up {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -8px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -68px) scale(1);
+  }
+}
+
+@keyframes fui-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes fui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fui *,
+  .fui *::before,
+  .fui *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

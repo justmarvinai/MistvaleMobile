@@ -1,39 +1,35 @@
+/* Layout and type only.
+
+   The border, the fill, the corner filigree and the shadow are painted by the FantasyUIs
+   panel underneath since the design rework. Anything here declaring a background or a
+   border would draw a second frame *inside* the painted one, which reads as a mistake
+   rather than as depth — so this module positions, spaces and types the content, and
+   nothing else. */
+
 .panel {
-  @include panel;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
+/* The three variants are chosen in Panel.tsx, where they pick the library's art. Kept as
+   selectors because screens attach layout to them — a hero panel is usually the one that
+   grows, an inset one usually the one that scrolls. */
 .default {
-  // Base treatment from the mixin.
+  /* The theme's primary window art. */
 }
 
 .hero {
-  @include mist-veil(0.07);
-
-  border-width: 2px;
-  border-color: $edge-bright;
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 8px 32px rgba(0, 0, 0, 0.6);
-
-  // The corner ticks that read as "forged metal" rather than a rounded card.
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 3px;
-    border: 1px solid rgba(127, 212, 193, 0.15);
-    pointer-events: none;
-  }
+  /* The ornate art. Focal surfaces only: the Mistgate's banner, a results panel. */
 }
 
 .inset {
-  @include inset-well;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.55);
+  /* A flat inner surface. Nested lists sit on it without a frame-in-a-frame. */
 }
 
 .padded {
-  padding: $space-4;
+  padding: $space-2 0;
 }
 
 .header {
@@ -41,15 +37,19 @@
   align-items: center;
   justify-content: space-between;
   gap: $space-3;
-  margin: (-$space-4) (-$space-4) $space-4;
-  padding: $space-3 $space-4;
-  border-bottom: 1px solid $edge;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+  margin-bottom: $space-3;
+  padding-bottom: $space-2;
+  /* The one rule kept: a hairline under the header separates it from the body without
+     competing with the painted edge, which stops well outside it. */
+  border-bottom: 1px solid rgba(127, 212, 193, 0.14);
 }
 
 .title {
   @include display-text(16px);
   margin: 0;
+  color: var(--fui-accent-soft, #{$mist});
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .actions {

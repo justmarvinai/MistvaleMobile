@@ -1,0 +1,127 @@
+/* Tabs — category strip for inventories, settings and shops. */
+
+.fui-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.fui-tabs[data-orientation='vertical'] {
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fui-tabs--stretch .fui-tabs__tab {
+  flex: 1 1 0;
+}
+
+.fui-tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 6px 16px;
+  border: 0;
+  background: none;
+  font-family: var(--fui-font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  transition:
+    color var(--fui-t-fast) var(--fui-ease),
+    filter var(--fui-t-fast) var(--fui-ease);
+}
+
+/* The texture only appears once a tab is selected, so the strip stays quiet. */
+.fui-tabs__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-btn-ghost-bw);
+  border-image-source: var(--fui-btn-ghost-src);
+  border-image-slice: var(--fui-btn-ghost-sl) fill;
+  border-image-repeat: stretch;
+  transition: opacity var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-tabs__tab:hover:not(:disabled) {
+  color: var(--fui-ink-dim);
+}
+
+.fui-tabs__tab:hover:not(:disabled) .fui-tabs__art {
+  opacity: 0.5;
+}
+
+.fui-tabs__tab.is-active {
+  color: var(--fui-ink);
+}
+
+.fui-tabs__tab.is-active .fui-tabs__art {
+  opacity: 1;
+}
+
+.fui-tabs__tab.is-active::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--fui-accent), transparent);
+}
+
+.fui-tabs[data-orientation='vertical'] .fui-tabs__tab {
+  justify-content: flex-start;
+}
+
+.fui-tabs[data-orientation='vertical'] .fui-tabs__tab.is-active::after {
+  left: 2px;
+  right: auto;
+  top: 24%;
+  bottom: 24%;
+  width: 2px;
+  height: auto;
+  background: linear-gradient(180deg, transparent, var(--fui-accent), transparent);
+}
+
+.fui-tabs__tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.fui-tabs__icon {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  background: center / contain no-repeat;
+}
+
+.fui-tabs__label {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.fui-tabs__count {
+  position: relative;
+  z-index: 1;
+  min-width: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--fui-accent) 30%, rgba(0, 0, 0, 0.6));
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--fui-ink);
+}

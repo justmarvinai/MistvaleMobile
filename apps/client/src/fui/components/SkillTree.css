@@ -1,0 +1,195 @@
+/* SkillTree — tiered talent nodes wired by dependency lines. */
+
+.fui-tree {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-tree__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-tree__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 26px 6px;
+}
+
+.fui-tree__title {
+  font-size: 17px;
+}
+
+.fui-tree__points {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid color-mix(in srgb, var(--fui-gold) 45%, transparent);
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.fui-tree__pointsnum {
+  font-family: var(--fui-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-tree__stage {
+  position: relative;
+  z-index: 1;
+  padding: 18px 26px 26px;
+}
+
+.fui-tree__lines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.fui-tree__line {
+  stroke: rgba(255, 255, 255, 0.13);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.fui-tree__line.is-active {
+  stroke: color-mix(in srgb, var(--fui-accent) 70%, transparent);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px var(--fui-accent));
+}
+
+.fui-tree__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--fui-tree-cols, 4), 1fr);
+  gap: 30px 12px;
+  justify-items: center;
+}
+
+/* ── Node ─────────────────────────────────────────────────────────────────── */
+.fui-tree__node {
+  position: relative;
+  width: 58px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-tree__node:hover:not(.is-locked) {
+  transform: translateY(-3px);
+}
+
+/* The ability art itself is set inline from the node's icon id; this rule only
+   supplies the round well it sits in. */
+.fui-tree__icon {
+  display: block;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background-color: rgba(6, 6, 10, 0.72);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 74%;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.fui-tree__ring {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 58px;
+  height: 58px;
+  margin-left: -29px;
+  margin-top: -3px;
+  pointer-events: none;
+  background: var(--fui-round-frame-img) center / contain no-repeat;
+  transition: filter var(--fui-t) var(--fui-ease);
+}
+
+/* Keystones read as diamonds so capstones stand out at a glance. */
+.fui-tree__node.is-keystone .fui-tree__icon,
+.fui-tree__node.is-keystone .fui-tree__ring {
+  transform: rotate(45deg);
+  border-radius: 8px;
+}
+
+.fui-tree__node.is-keystone .fui-tree__icon {
+  background-size: 60%;
+  transform: rotate(45deg);
+}
+
+/* States. */
+.fui-tree__node.is-locked {
+  cursor: not-allowed;
+}
+
+.fui-tree__node.is-locked .fui-tree__icon {
+  filter: grayscale(1) brightness(0.4);
+}
+
+.fui-tree__node.is-invested .fui-tree__ring {
+  filter: drop-shadow(0 0 6px var(--fui-accent)) brightness(1.2);
+}
+
+.fui-tree__node.is-maxed .fui-tree__ring {
+  filter: drop-shadow(0 0 9px var(--fui-gold)) brightness(1.35) sepia(0.4) saturate(2);
+}
+
+.fui-tree__node.is-denied {
+  animation: fui-shake 300ms var(--fui-ease);
+}
+
+.fui-tree__rank {
+  position: absolute;
+  right: 1px;
+  top: 38px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.82);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--fui-ink);
+}
+
+.fui-tree__node.is-maxed .fui-tree__rank {
+  color: var(--fui-gold-soft);
+}
+
+.fui-tree__name {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--fui-font-ui);
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: var(--fui-ink-dim);
+  text-shadow: 0 1px 2px #000;
+}
+
+.fui-tree__node.is-locked .fui-tree__name {
+  color: var(--fui-ink-faint);
+}

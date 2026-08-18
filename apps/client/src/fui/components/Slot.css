@@ -1,0 +1,231 @@
+/* Slot — inventory cell / action button / equipment socket.
+   Layer order: fill → rarity glow → item art → ornament frame → badges. */
+
+.fui-slot {
+  --fui-slot-size: 64px;
+  position: relative;
+  width: var(--fui-slot-size);
+  height: var(--fui-slot-size);
+  flex: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  outline-offset: 3px;
+  transition:
+    transform var(--fui-t-fast) var(--fui-ease),
+    filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-slot[data-size='sm'] {
+  --fui-slot-size: 46px;
+}
+.fui-slot[data-size='lg'] {
+  --fui-slot-size: 88px;
+}
+
+.fui-slot__fill,
+.fui-slot__frame {
+  position: absolute;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-image-repeat: stretch;
+}
+
+.fui-slot__fill {
+  inset: 0;
+  z-index: 0;
+  border-width: var(--fui-slot-fill-bw);
+  border-image-source: var(--fui-slot-fill-src);
+  border-image-slice: var(--fui-slot-fill-sl) fill;
+}
+
+.fui-slot__frame {
+  inset: var(--fui-slot-frame-inset, 0);
+  z-index: 3;
+  border-width: var(--fui-slot-frame-bw);
+  border-image-source: var(--fui-slot-frame-src);
+  border-image-slice: var(--fui-slot-frame-sl);
+}
+
+.fui-slot:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.14);
+}
+
+.fui-slot:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Item art. */
+.fui-slot__icon {
+  position: absolute;
+  inset: var(--fui-slot-inset);
+  z-index: 2;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+  transition: transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-slot:hover .fui-slot__icon {
+  transform: scale(1.07);
+}
+
+.fui-slot--empty .fui-slot__icon {
+  background-image: var(--fui-slot-placeholder, none);
+  opacity: 0.18;
+  filter: grayscale(1);
+}
+
+/* Rarity halo behind the item. */
+.fui-slot__glow {
+  position: absolute;
+  inset: calc(var(--fui-slot-inset) * 0.4);
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 52%,
+    var(--fui-slot-rarity, transparent) 0%,
+    transparent 70%
+  );
+  transition: opacity var(--fui-t) var(--fui-ease);
+}
+
+.fui-slot[data-rarity]:not([data-rarity='']) .fui-slot__glow {
+  opacity: 1;
+}
+
+.fui-slot[data-rarity='common'] {
+  --fui-slot-rarity: color-mix(in srgb, var(--fui-rarity-common) 45%, transparent);
+}
+.fui-slot[data-rarity='uncommon'] {
+  --fui-slot-rarity: color-mix(in srgb, var(--fui-rarity-uncommon) 45%, transparent);
+}
+.fui-slot[data-rarity='rare'] {
+  --fui-slot-rarity: color-mix(in srgb, var(--fui-rarity-rare) 58%, transparent);
+}
+.fui-slot[data-rarity='epic'] {
+  --fui-slot-rarity: color-mix(in srgb, var(--fui-rarity-epic) 60%, transparent);
+}
+.fui-slot[data-rarity='legendary'] {
+  --fui-slot-rarity: color-mix(in srgb, var(--fui-rarity-legendary) 65%, transparent);
+}
+.fui-slot[data-rarity='mythic'] {
+  --fui-slot-rarity: color-mix(in srgb, var(--fui-rarity-mythic) 68%, transparent);
+}
+
+/* Rarity also tints the frame, so the tier reads at a glance in a dense grid. */
+.fui-slot[data-rarity='rare'] .fui-slot__frame,
+.fui-slot[data-rarity='epic'] .fui-slot__frame,
+.fui-slot[data-rarity='legendary'] .fui-slot__frame,
+.fui-slot[data-rarity='mythic'] .fui-slot__frame {
+  filter: drop-shadow(0 0 4px var(--fui-slot-rarity));
+}
+
+/* Stack count. */
+.fui-slot__qty {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  z-index: 4;
+  display: none;
+  padding: 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--fui-ink);
+  text-shadow:
+    0 1px 2px #000,
+    0 0 4px #000,
+    1px 0 1px #000,
+    -1px 0 1px #000;
+}
+
+.fui-slot__qty.is-visible {
+  display: block;
+}
+
+/* Keybind pip. */
+.fui-slot__key {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  z-index: 4;
+  font-family: var(--fui-font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--fui-ink-dim);
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Radial cooldown sweep. */
+.fui-slot__cd {
+  --fui-cd: 0;
+  position: absolute;
+  inset: calc(var(--fui-slot-inset) * 0.6);
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: conic-gradient(rgba(4, 6, 10, 0.8) calc(var(--fui-cd) * 360deg), transparent 0);
+}
+
+.fui-slot--cooling .fui-slot__cd {
+  display: flex;
+}
+
+.fui-slot__cd-text {
+  font-family: var(--fui-font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fui-ink);
+  text-shadow: 0 1px 3px #000;
+}
+
+.fui-slot--cooling .fui-slot__icon {
+  filter: grayscale(0.6) brightness(0.7);
+}
+
+/* Flash when the ability comes off cooldown. */
+.fui-slot--ready::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  z-index: 6;
+  pointer-events: none;
+  border-radius: 6px;
+  box-shadow: 0 0 14px 3px var(--fui-accent-soft);
+  animation: fui-pulse 300ms ease-out 2;
+}
+
+/* States. */
+.fui-slot--selected {
+  filter: brightness(1.2);
+}
+
+.fui-slot--selected .fui-slot__frame {
+  filter: drop-shadow(0 0 6px var(--fui-gold-soft));
+}
+
+.fui-slot--locked {
+  cursor: not-allowed;
+  filter: grayscale(0.85) brightness(0.5);
+}
+
+.fui-slot--locked:hover {
+  transform: none;
+}
+
+.fui-slot--dragging {
+  opacity: 0.4;
+}
+
+.fui-slot--dragover .fui-slot__frame {
+  filter: drop-shadow(0 0 8px var(--fui-accent-soft)) brightness(1.4);
+}
+
+.fui-slot--flash {
+  animation: fui-pop 420ms var(--fui-ease);
+}

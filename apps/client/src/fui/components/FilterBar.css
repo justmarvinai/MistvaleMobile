@@ -1,0 +1,101 @@
+/* FilterBar — the faceted chip row above a roster or inventory. */
+
+.fui-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--fui-gap) var(--fui-gap-lg);
+}
+
+.fui-filters--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--fui-gap);
+}
+
+.fui-filters__group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fui-filters__label {
+  font-size: 10px;
+}
+
+.fui-filters__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.fui-filters__chip {
+  --fui-filter-ink: var(--fui-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--fui-ink-dim);
+  font-family: var(--fui-font-ui);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--fui-t-fast) var(--fui-ease),
+    color var(--fui-t-fast) var(--fui-ease),
+    border-color var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-filters__chip:hover {
+  color: var(--fui-ink);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.fui-filters__chip.is-on {
+  /* color-mix keeps one declaration working for every chip colour, including
+     the rarity palette a caller passes in. */
+  background: color-mix(in srgb, var(--fui-filter-ink) 26%, transparent);
+  border-color: var(--fui-filter-ink);
+  color: var(--fui-ink);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--fui-filter-ink) 45%, transparent);
+}
+
+.fui-filters__glyph {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-filters__count {
+  padding-left: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 10px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-filters__chip.is-on .fui-filters__count {
+  color: inherit;
+}
+
+.fui-filters__clear {
+  align-self: flex-end;
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 0;
+  background: none;
+  color: var(--fui-ink-faint);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.fui-filters__clear:hover {
+  color: var(--fui-danger);
+}

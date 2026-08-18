@@ -1,0 +1,179 @@
+/* TutorialTip — the coach mark a first-time-user flow is built from. */
+
+.fui-tip {
+  --fui-tip-x: 50vw;
+  --fui-tip-y: 50vh;
+  --fui-tip-w: 80px;
+  --fui-tip-h: 40px;
+  --fui-tip-gap: 16px;
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  /* Only the card and the hole are interactive; the dimmed area stays
+     click-through so a tutorial never traps the player. */
+  pointer-events: none;
+}
+
+/* One element dims the whole viewport: a transparent box over the anchor with a
+   huge shadow spread, which paints everything outside it. No canvas, no mask. */
+.fui-tip__hole {
+  position: absolute;
+  left: calc(var(--fui-tip-x) - var(--fui-tip-w) / 2 - 8px);
+  top: calc(var(--fui-tip-y) - var(--fui-tip-h) / 2 - 8px);
+  width: calc(var(--fui-tip-w) + 16px);
+  height: calc(var(--fui-tip-h) + 16px);
+  border-radius: var(--fui-radius);
+  box-shadow:
+    0 0 0 100vmax rgba(0, 0, 0, 0.72),
+    0 0 0 2px var(--fui-gold) inset;
+  animation: fui-pulse 2.2s var(--fui-ease) infinite;
+}
+
+.fui-tip__card {
+  position: absolute;
+  width: min(300px, calc(100vw - 32px));
+  padding: var(--fui-gap);
+  border: 1px solid var(--fui-gold);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(30, 28, 24, 0.98), rgba(14, 13, 11, 0.98));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+  animation: fui-rise var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-tip[data-placement='bottom'] .fui-tip__card {
+  left: var(--fui-tip-x);
+  top: calc(var(--fui-tip-y) + var(--fui-tip-h) / 2 + var(--fui-tip-gap));
+  transform: translateX(-50%);
+}
+
+.fui-tip[data-placement='top'] .fui-tip__card {
+  left: var(--fui-tip-x);
+  top: calc(var(--fui-tip-y) - var(--fui-tip-h) / 2 - var(--fui-tip-gap));
+  transform: translate(-50%, -100%);
+}
+
+.fui-tip[data-placement='right'] .fui-tip__card {
+  left: calc(var(--fui-tip-x) + var(--fui-tip-w) / 2 + var(--fui-tip-gap));
+  top: var(--fui-tip-y);
+  transform: translateY(-50%);
+}
+
+.fui-tip[data-placement='left'] .fui-tip__card {
+  left: calc(var(--fui-tip-x) - var(--fui-tip-w) / 2 - var(--fui-tip-gap));
+  top: var(--fui-tip-y);
+  transform: translate(-100%, -50%);
+}
+
+.fui-tip__arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(30, 28, 24, 0.98);
+  border: 1px solid var(--fui-gold);
+  transform: rotate(45deg);
+}
+
+.fui-tip[data-placement='bottom'] .fui-tip__arrow {
+  top: -7px;
+  left: 50%;
+  margin-left: -6px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.fui-tip[data-placement='top'] .fui-tip__arrow {
+  bottom: -7px;
+  left: 50%;
+  margin-left: -6px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.fui-tip[data-placement='right'] .fui-tip__arrow {
+  left: -7px;
+  top: 50%;
+  margin-top: -6px;
+  border-right: 0;
+  border-top: 0;
+}
+
+.fui-tip[data-placement='left'] .fui-tip__arrow {
+  right: -7px;
+  top: 50%;
+  margin-top: -6px;
+  border-left: 0;
+  border-bottom: 0;
+}
+
+.fui-tip__title {
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-tip__text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--fui-ink);
+}
+
+.fui-tip__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  margin-top: var(--fui-gap);
+}
+
+.fui-tip__pips {
+  display: flex;
+  gap: 4px;
+}
+
+.fui-tip__pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.fui-tip__pip.is-done { background: var(--fui-gold-soft); opacity: 0.5; }
+.fui-tip__pip.is-on { background: var(--fui-gold); box-shadow: 0 0 5px var(--fui-gold); }
+
+.fui-tip__count {
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-tip__skip {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: var(--fui-ink-faint);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.fui-tip__next {
+  margin-left: auto;
+  padding: 6px 16px;
+  border: 1px solid var(--fui-gold);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.32), rgba(217, 164, 65, 0.12));
+  color: var(--fui-gold-soft);
+  font-family: var(--fui-font-ui);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-tip__skip + .fui-tip__next {
+  margin-left: 0;
+}
+
+.fui-tip__next:hover {
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.5), rgba(217, 164, 65, 0.24));
+}

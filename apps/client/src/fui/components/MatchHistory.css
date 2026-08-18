@@ -1,0 +1,143 @@
+/* MatchHistory — recent battles, their swing and the team that was fielded. */
+
+.fui-matches {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+}
+
+.fui-matches__head {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap);
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.fui-matches__title {
+  font-size: 10px;
+}
+
+.fui-matches__summary {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--fui-ink-dim);
+}
+
+.fui-matches__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-matches__row {
+  --fui-match-ink: var(--fui-ink-faint);
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  border-left: 3px solid var(--fui-match-ink);
+}
+
+.fui-matches__row:last-child {
+  border-bottom: 0;
+}
+
+.fui-matches__row[data-result='win'] { --fui-match-ink: var(--fui-success); }
+.fui-matches__row[data-result='loss'] { --fui-match-ink: var(--fui-danger); }
+.fui-matches__row[data-result='draw'] { --fui-match-ink: var(--fui-ink-faint); }
+
+/* One bold letter carries the outcome, so a session's shape is readable by
+   scanning the left edge alone. */
+.fui-matches__result {
+  width: 20px;
+  flex: none;
+  font-family: var(--fui-font-display);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--fui-match-ink);
+}
+
+.fui-matches__art {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.45) center / cover no-repeat;
+}
+
+.fui-matches__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-matches__opponent {
+  font-size: 13px;
+  color: var(--fui-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fui-matches__meta {
+  display: flex;
+  gap: var(--fui-gap-sm);
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-matches__team {
+  display: flex;
+  gap: 2px;
+}
+
+.fui-matches__unit {
+  width: 22px;
+  height: 22px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.45) center / cover no-repeat;
+}
+
+.fui-matches__delta {
+  min-width: 42px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fui-match-ink);
+}
+
+.fui-matches__replay {
+  padding: 3px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--fui-ink-dim);
+  font-family: var(--fui-font-ui);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-matches__replay:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--fui-ink);
+}
+
+.fui-matches__empty {
+  padding: var(--fui-gap-lg);
+  text-align: center;
+  font-size: 13px;
+  color: var(--fui-ink-faint);
+}

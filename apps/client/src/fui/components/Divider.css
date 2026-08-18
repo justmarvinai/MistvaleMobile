@@ -1,0 +1,44 @@
+/* Divider — painted vine ornament, or an etched rule with an optional caption. */
+
+.fui-divider {
+  --fui-divider-scale: 0.34;
+  width: 100%;
+}
+
+.fui-divider[data-variant='art'] {
+  height: calc(190px * var(--fui-divider-scale));
+  background: var(--fui-divider-img) center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+}
+
+.fui-divider[data-variant='rule'] {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap);
+  margin: var(--fui-gap-sm) 0;
+}
+
+.fui-divider[data-variant='rule']::before,
+.fui-divider[data-variant='rule']::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fui-accent) 60%, transparent),
+    transparent
+  );
+}
+
+/* With no caption there is nothing to sit between the two halves, so collapse
+   to a single unbroken line. */
+.fui-divider[data-variant='rule']:not(:has(.fui-divider__label))::after {
+  display: none;
+}
+
+.fui-divider__label {
+  flex: none;
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+}

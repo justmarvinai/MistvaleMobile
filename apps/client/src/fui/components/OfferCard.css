@@ -1,0 +1,178 @@
+/* OfferCard — shop bundle with contents, saving and an expiry clock. */
+
+.fui-offer {
+  position: relative;
+  width: 260px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: #0d0d13;
+  isolation: isolate;
+}
+
+.fui-offer.is-featured {
+  border-color: color-mix(in srgb, var(--fui-gold) 65%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--fui-gold) 32%, transparent);
+}
+
+.fui-offer.is-expired {
+  filter: grayscale(0.85) brightness(0.6);
+  pointer-events: none;
+}
+
+.fui-offer__art {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 0;
+  height: 120px;
+  background: center / cover no-repeat #16161f;
+}
+
+.fui-offer__scrim {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+  height: 130px;
+  background: linear-gradient(180deg, transparent 30%, #0d0d13 100%);
+}
+
+/* Corner flash for the saving. */
+.fui-offer__discount {
+  position: absolute;
+  top: 10px;
+  right: -30px;
+  z-index: 3;
+  width: 110px;
+  padding: 3px 0;
+  background: linear-gradient(90deg, #c0392b, #f0736a);
+  font-family: var(--fui-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: #fff;
+  transform: rotate(38deg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.fui-offer__tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  padding: 2px 9px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--fui-gold) 85%, #000);
+  font-family: var(--fui-font-ui);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #1a1206;
+}
+
+.fui-offer__body {
+  position: relative;
+  z-index: 2;
+  padding: 78px 16px 16px;
+  text-align: center;
+}
+
+.fui-offer__title {
+  font-size: 16px;
+  color: var(--fui-ink);
+  text-shadow: 0 2px 5px #000;
+}
+
+.fui-offer__sub {
+  margin-top: 2px;
+  font-size: 10px;
+}
+
+.fui-offer__contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.fui-offer__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.fui-offer__icon {
+  width: 32px;
+  height: 32px;
+  background: center / contain no-repeat;
+}
+
+.fui-offer__qty {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-offer__meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.fui-offer__remaining {
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}
+
+/* Price button. */
+.fui-offer__buy {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--fui-success) 55%, transparent);
+  border-radius: 5px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fui-success) 32%, rgba(0, 0, 0, 0.4)),
+    rgba(0, 0, 0, 0.55)
+  );
+  cursor: pointer;
+  transition: filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-offer__buy:hover {
+  filter: brightness(1.28);
+}
+
+.fui-offer__was {
+  font-size: 12px;
+  color: var(--fui-ink-faint);
+  text-decoration: line-through;
+}
+
+.fui-offer__price {
+  font-family: var(--fui-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: #d3f5dd;
+  text-shadow: 0 1px 3px #000;
+}
+
+.fui-offer__buylabel {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-ink-dim);
+}

@@ -135,11 +135,16 @@ describe.skipIf(!dbUp)('the mailbox', () => {
     // operator batch-send adds a row to every account at once — so reading "all of it" was
     // a query that grew for the life of the account. It is capped now; the counts are not,
     // because a pip that stopped at a hundred would be a pip that lies.
+    // Distinct arrival times, because "newest first" is only a defined order if they
+    // differ: a single insert statement stamps every row with the same `now()`, and the
+    // test then passed or failed on whatever order the planner happened to return.
+    const base = Date.now() - 130 * 60_000;
     const many = Array.from({ length: 130 }, (_, index) => ({
       playerId,
       title: `Message ${index}`,
       body: 'Words.',
       attachments: (index % 2 === 0 ? { silver: 10 } : {}) as Record<string, number>,
+      createdAt: new Date(base + index * 60_000),
     }));
     await app.db.insert(mailbox).values(many);
 

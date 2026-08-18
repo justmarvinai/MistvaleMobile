@@ -1,0 +1,15 @@
+{
+  "name": "@mistvale/fui-vendor",
+  "version": "0.1.0-ea.0",
+  "private": true,
+  "type": "module",
+  "description": "Copies the FantasyUIs component library and its art into the client, from the registry records the library publishes.",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "vendor": "tsx src/index.ts",
+    "check": "tsx src/index.ts --check"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}

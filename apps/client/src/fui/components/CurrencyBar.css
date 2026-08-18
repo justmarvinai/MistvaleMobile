@@ -1,0 +1,88 @@
+/* CurrencyBar — wallet strip for gold, gems and materials. */
+
+.fui-currency {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.fui-currency--plate {
+  padding: 7px 18px;
+}
+
+.fui-currency__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-banner-bw);
+  border-image-source: var(--fui-banner-src);
+  border-image-slice: var(--fui-banner-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-currency__item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-currency__item.is-clickable {
+  cursor: pointer;
+}
+
+.fui-currency__item.is-clickable:hover {
+  transform: scale(1.06);
+}
+
+.fui-currency__icon {
+  width: 22px;
+  height: 22px;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65));
+}
+
+.fui-currency__value {
+  font-family: var(--fui-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Flash green on a gain, red on a spend. */
+.fui-currency__item.is-gain .fui-currency__value {
+  animation: fui-currency-gain 700ms var(--fui-ease);
+}
+
+.fui-currency__item.is-loss .fui-currency__value {
+  animation: fui-currency-loss 700ms var(--fui-ease);
+}
+
+@keyframes fui-currency-gain {
+  0% {
+    color: #8fe89f;
+    transform: scale(1.22);
+  }
+  100% {
+    color: var(--fui-gold-soft);
+    transform: scale(1);
+  }
+}
+
+@keyframes fui-currency-loss {
+  0% {
+    color: #f08e84;
+    transform: scale(0.88);
+  }
+  100% {
+    color: var(--fui-gold-soft);
+    transform: scale(1);
+  }
+}

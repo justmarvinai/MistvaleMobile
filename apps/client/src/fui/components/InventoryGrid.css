@@ -1,0 +1,7 @@
+/* InventoryGrid — grid of slots with drag-and-drop. */
+
+.fui-inv {
+  display: grid;
+  justify-content: start;
+  align-content: start;
+}

@@ -1,0 +1,116 @@
+/* LootWindow — reward window with hero art, currency chips and a list. */
+
+.fui-loot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px 22px;
+  text-align: center;
+}
+
+.fui-loot__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-loot > * {
+  position: relative;
+  z-index: 1;
+}
+
+.fui-loot__hero {
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 8px;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6))
+    drop-shadow(0 0 18px color-mix(in srgb, var(--fui-gold) 45%, transparent));
+  animation: fui-pop 500ms var(--fui-ease);
+}
+
+.fui-loot__title {
+  font-size: 19px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-loot__source {
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.fui-loot__chips {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.fui-loot__chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.fui-loot__chip.is-gold {
+  color: var(--fui-gold-soft);
+}
+
+.fui-loot__chip.is-xp {
+  color: var(--fui-xp);
+}
+
+.fui-loot__coin {
+  width: 16px;
+  height: 16px;
+  background: var(--fui-img-icon-coins) center / contain no-repeat;
+}
+
+.fui-loot__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 300px;
+  margin-top: 16px;
+  text-align: left;
+}
+
+.fui-loot__empty {
+  padding: 20px 0;
+  font-style: italic;
+  text-align: center;
+}
+
+.fui-loot__takeall {
+  margin-top: 16px;
+  padding: 9px 20px;
+  border: 1px solid color-mix(in srgb, var(--fui-gold) 50%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--fui-gold) 16%, rgba(0, 0, 0, 0.45));
+  font-family: var(--fui-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fui-gold-soft);
+  cursor: pointer;
+  transition: filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-loot__takeall:hover {
+  filter: brightness(1.25);
+}

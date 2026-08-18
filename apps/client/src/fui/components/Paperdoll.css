@@ -1,0 +1,77 @@
+/* Paperdoll — equipment sockets arranged around a character silhouette. */
+
+.fui-doll {
+  position: relative;
+  padding: 22px 22px 20px;
+}
+
+.fui-doll__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-doll__stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fui-doll__col {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.fui-doll__figure {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-height: 300px;
+  background: center bottom / contain no-repeat;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.7));
+  opacity: 0.85;
+}
+
+.fui-doll__row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+/* Empty sockets read as recessed holes rather than filled cells. */
+.fui-doll .fui-slot--empty {
+  filter: brightness(0.72) saturate(0.7);
+}
+
+.fui-doll__score {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fui-doll__scorenum {
+  font-family: var(--fui-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 2px 3px #000;
+}

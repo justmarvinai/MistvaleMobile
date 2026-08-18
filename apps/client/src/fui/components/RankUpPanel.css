@@ -1,0 +1,218 @@
+/* RankUpPanel — the ascension screen: target, fodder, odds, cost, commit. */
+
+.fui-rankup {
+  --fui-rankup-ink: var(--fui-rarity-rare);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap);
+  width: 300px;
+  padding: var(--fui-gap);
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.34);
+}
+
+.fui-rankup__target {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap);
+}
+
+.fui-rankup__target[data-rarity='epic'] { --fui-rankup-ink: var(--fui-rarity-epic); }
+.fui-rankup__target[data-rarity='legendary'] { --fui-rankup-ink: var(--fui-rarity-legendary); }
+.fui-rankup__target[data-rarity='mythic'] { --fui-rankup-ink: var(--fui-rarity-mythic); }
+.fui-rankup__target[data-rarity='rare'] { --fui-rankup-ink: var(--fui-rarity-rare); }
+
+.fui-rankup__art {
+  width: 72px;
+  height: 72px;
+  flex: none;
+  border: 2px solid var(--fui-rankup-ink);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.5) center / cover no-repeat;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--fui-rankup-ink) 45%, transparent);
+}
+
+.fui-rankup__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fui-rankup__name {
+  font-size: 15px;
+  color: color-mix(in srgb, var(--fui-rankup-ink) 55%, var(--fui-ink));
+}
+
+.fui-rankup__level {
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-rankup__stars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  letter-spacing: -1px;
+}
+
+.fui-rankup__star-row {
+  color: var(--fui-gold);
+}
+
+/* The gained star is the payoff, so the "after" row glows and the arrow points
+   at it rather than the two rows reading as equals. */
+.fui-rankup__star-row.is-next {
+  color: var(--fui-gold-soft);
+  text-shadow: 0 0 8px var(--fui-gold);
+}
+
+.fui-rankup__arrow {
+  color: var(--fui-ink-faint);
+  letter-spacing: 0;
+}
+
+.fui-rankup__label {
+  font-size: 10px;
+}
+
+.fui-rankup__slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fui-rankup__slot {
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.42) center / cover no-repeat;
+  cursor: pointer;
+  transition: border-color var(--fui-t-fast) var(--fui-ease);
+  position: relative;
+}
+
+.fui-rankup__slot::after {
+  content: '+';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.fui-rankup__slot.is-filled {
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.fui-rankup__slot.is-filled::after {
+  content: none;
+}
+
+.fui-rankup__slot[data-rarity='epic'] { border-color: var(--fui-rarity-epic); }
+.fui-rankup__slot[data-rarity='legendary'] { border-color: var(--fui-rarity-legendary); }
+.fui-rankup__slot[data-rarity='rare'] { border-color: var(--fui-rarity-rare); }
+.fui-rankup__slot[data-rarity='uncommon'] { border-color: var(--fui-rarity-uncommon); }
+
+.fui-rankup__slot:hover {
+  border-color: var(--fui-gold-soft);
+}
+
+.fui-rankup__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--fui-gap);
+}
+
+.fui-rankup__chance {
+  --fui-rankup-chance: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 6px;
+}
+
+.fui-rankup__chance-label {
+  font-size: 10px;
+}
+
+.fui-rankup__chance-value {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.fui-rankup__chance-bar {
+  grid-column: 1 / -1;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.fui-rankup__chance-bar::before {
+  content: '';
+  display: block;
+  width: calc(var(--fui-rankup-chance) * 100%);
+  height: 100%;
+  border-radius: 3px;
+  background: currentColor;
+}
+
+.fui-rankup__chance[data-risk='low'] { color: var(--fui-success); }
+.fui-rankup__chance[data-risk='mid'] { color: var(--fui-warn); }
+.fui-rankup__chance[data-risk='high'] { color: var(--fui-danger); }
+
+.fui-rankup__cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-rankup__cost-glyph {
+  width: 15px;
+  height: 15px;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-rankup__warning {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--fui-warn);
+}
+
+.fui-rankup__action {
+  padding: 11px;
+  border: 1px solid var(--fui-gold);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.44), rgba(217, 164, 65, 0.16));
+  color: var(--fui-gold-soft);
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-rankup__action:hover:not(:disabled) {
+  filter: brightness(1.25);
+}
+
+.fui-rankup__action:disabled {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--fui-ink-faint);
+  cursor: not-allowed;
+}

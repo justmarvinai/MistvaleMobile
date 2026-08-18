@@ -1,0 +1,63 @@
+/* AffinityBadge — element / affinity marker for cards and battle previews. */
+
+.fui-affinity {
+  --fui-aff-size: 26px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.fui-affinity__glyph {
+  width: var(--fui-aff-size);
+  height: var(--fui-aff-size);
+  flex: none;
+  padding: calc(var(--fui-aff-size) * 0.2);
+  border: 1px solid color-mix(in srgb, var(--fui-aff) 70%, #000);
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--fui-aff) 26%, rgba(6, 6, 10, 0.9));
+  box-shadow:
+    0 0 7px color-mix(in srgb, var(--fui-aff) 55%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-sizing: border-box;
+}
+
+/* The glyph itself is a mask so it inherits the affinity colour. */
+.fui-affinity__glyph::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: color-mix(in srgb, var(--fui-aff) 55%, #fff);
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-affinity__label {
+  font-family: var(--fui-font-ui);
+  font-size: calc(var(--fui-aff-size) * 0.46);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fui-aff) 45%, var(--fui-ink));
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Counter-relationship arrow: up means this side is strong here. */
+.fui-affinity__arrow {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+.fui-affinity[data-advantage='up'] .fui-affinity__arrow {
+  border-bottom: 7px solid var(--fui-success);
+  filter: drop-shadow(0 0 4px var(--fui-success));
+}
+
+.fui-affinity[data-advantage='down'] .fui-affinity__arrow {
+  border-top: 7px solid var(--fui-danger);
+  filter: drop-shadow(0 0 4px var(--fui-danger));
+}

@@ -1,0 +1,130 @@
+/* TeamSlots — the battle lineup: filled champion cards and empty add tiles. */
+
+.fui-team {
+  display: inline-block;
+}
+
+.fui-team__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fui-gap);
+  margin-bottom: 8px;
+}
+
+.fui-team__title {
+  font-size: 10.5px;
+}
+
+.fui-team__powerbox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fui-team__powericon {
+  width: 15px;
+  height: 15px;
+  background-color: var(--fui-gold-soft);
+  -webkit-mask: var(--fui-img-glyph-crossed-swords) center / contain no-repeat;
+  mask: var(--fui-img-glyph-crossed-swords) center / contain no-repeat;
+}
+
+.fui-team__power {
+  font-family: var(--fui-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 1px 2px #000;
+}
+
+.fui-team__list {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.fui-team__cell {
+  position: relative;
+}
+
+.fui-team__cell.is-dragging {
+  opacity: 0.4;
+}
+
+.fui-team__cell.is-over .fui-champ__frame,
+.fui-team__cell.is-over .fui-team__empty {
+  border-color: var(--fui-gold-soft);
+  box-shadow: 0 0 14px var(--fui-gold);
+}
+
+/* Empty position: a dashed well with a plus. */
+.fui-team__empty {
+  --fui-champ-w: 108px;
+  width: var(--fui-champ-w);
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: 2px dashed rgba(255, 255, 255, 0.18);
+  border-radius: calc(var(--fui-champ-w) * 0.05);
+  background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition:
+    border-color var(--fui-t-fast) var(--fui-ease),
+    background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-team__empty:hover {
+  border-color: color-mix(in srgb, var(--fui-accent) 65%, transparent);
+  background: color-mix(in srgb, var(--fui-accent) 12%, rgba(0, 0, 0, 0.35));
+}
+
+.fui-team__plus {
+  font-family: var(--fui-font-display);
+  font-size: calc(var(--fui-champ-w) * 0.34);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fui-ink-faint);
+}
+
+.fui-team__empty:hover .fui-team__plus {
+  color: var(--fui-accent-soft);
+}
+
+/* Leader crown and remove pip. */
+.fui-team__crown {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  background-color: var(--fui-gold);
+  transform: translateX(-50%);
+  -webkit-mask: var(--fui-img-glyph-trophy-cup) center / contain no-repeat;
+  mask: var(--fui-img-glyph-trophy-cup) center / contain no-repeat;
+  filter: drop-shadow(0 0 6px var(--fui-gold));
+}
+
+.fui-team__remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 8;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  background: var(--fui-danger);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-team__cell:hover .fui-team__remove,
+.fui-team__remove:focus-visible {
+  opacity: 1;
+}

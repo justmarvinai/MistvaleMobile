@@ -1,0 +1,231 @@
+/* UpgradePanel — cost, consumption and payoff for an upgrade or ascension. */
+
+.fui-upgrade {
+  position: relative;
+  width: 320px;
+  padding: 20px 22px 22px;
+  text-align: center;
+}
+
+.fui-upgrade__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-surface-bw);
+  border-image-source: var(--fui-surface-src);
+  border-image-slice: var(--fui-surface-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-upgrade > *:not(.fui-upgrade__fill) {
+  position: relative;
+  z-index: 1;
+}
+
+.fui-upgrade__title {
+  font-size: 16px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-upgrade__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.fui-upgrade__icon {
+  width: 56px;
+  height: 56px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  background: center / cover no-repeat rgba(0, 0, 0, 0.4);
+}
+
+.fui-upgrade__transition {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--fui-font-display);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.fui-upgrade__from {
+  color: var(--fui-ink-dim);
+}
+
+.fui-upgrade__to {
+  color: var(--fui-success);
+  text-shadow: 0 0 9px color-mix(in srgb, var(--fui-success) 55%, transparent);
+}
+
+/* Shared arrow between before and after. */
+.fui-upgrade__arrow {
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 9px solid var(--fui-accent);
+}
+
+.fui-upgrade__arrow.sm {
+  border-top-width: 4px;
+  border-bottom-width: 4px;
+  border-left-width: 6px;
+}
+
+/* ── Stats ────────────────────────────────────────────────────────────────── */
+.fui-upgrade__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 16px;
+  text-align: left;
+}
+
+.fui-upgrade__stats li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 12px;
+}
+
+.fui-upgrade__statlabel {
+  flex: 1 1 auto;
+  color: var(--fui-ink-dim);
+}
+
+.fui-upgrade__statfrom {
+  color: var(--fui-ink-faint);
+}
+
+.fui-upgrade__statto {
+  font-weight: 700;
+  color: var(--fui-success);
+}
+
+/* ── Materials ────────────────────────────────────────────────────────────── */
+.fui-upgrade__sub {
+  margin: 16px 0 8px;
+  font-size: 10px;
+  text-align: left;
+  color: var(--fui-accent-soft);
+}
+
+.fui-upgrade__materials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.fui-upgrade__mat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.fui-upgrade__maticon {
+  width: 34px;
+  height: 34px;
+  background: center / contain no-repeat;
+}
+
+.fui-upgrade__matcount {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fui-success);
+}
+
+.fui-upgrade__mat.is-short {
+  border-color: color-mix(in srgb, var(--fui-danger) 50%, transparent);
+}
+
+.fui-upgrade__mat.is-short .fui-upgrade__matcount {
+  color: var(--fui-danger);
+}
+
+.fui-upgrade__mat.is-short .fui-upgrade__maticon {
+  filter: grayscale(1) brightness(0.6);
+}
+
+/* ── Foot ─────────────────────────────────────────────────────────────────── */
+.fui-upgrade__foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 12.5px;
+}
+
+.fui-upgrade__chance {
+  color: var(--fui-success);
+}
+
+.fui-upgrade__chance.is-risky {
+  color: var(--fui-warn);
+}
+
+.fui-upgrade__cost {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-upgrade__cost.is-short {
+  color: var(--fui-danger);
+}
+
+.fui-upgrade__costicon {
+  width: 17px;
+  height: 17px;
+  background: center / contain no-repeat;
+}
+
+.fui-upgrade__confirm {
+  width: 100%;
+  margin-top: 18px;
+  padding: 11px;
+  border: 1px solid color-mix(in srgb, var(--fui-gold) 55%, transparent);
+  border-radius: 4px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fui-gold) 26%, rgba(0, 0, 0, 0.4)),
+    rgba(0, 0, 0, 0.5)
+  );
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fui-gold-soft);
+  cursor: pointer;
+  transition: filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-upgrade__confirm:hover:not(:disabled) {
+  filter: brightness(1.28);
+}
+
+.fui-upgrade__confirm:disabled {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--fui-ink-faint);
+  cursor: not-allowed;
+}

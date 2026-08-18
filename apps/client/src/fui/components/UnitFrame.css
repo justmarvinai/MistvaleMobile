@@ -1,0 +1,110 @@
+/* UnitFrame — portrait + name + resource bars. Player, target, boss, party row. */
+
+.fui-unit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 300px;
+  padding: 10px 14px;
+}
+
+.fui-unit__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-surface-bw);
+  border-image-source: var(--fui-surface-src);
+  border-image-slice: var(--fui-surface-sl) fill;
+  border-image-repeat: stretch;
+  opacity: 0.92;
+}
+
+.fui-unit > .fui-portrait,
+.fui-unit__stack {
+  position: relative;
+  z-index: 1;
+}
+
+.fui-unit__stack {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fui-unit__namerow {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+
+.fui-unit__name {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fui-ink);
+}
+
+.fui-unit__elite {
+  flex: none;
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--fui-gold) 55%, transparent);
+  border-radius: 3px;
+  font-family: var(--fui-font-ui);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fui-gold-soft);
+}
+
+/* Target frames mirror so the portrait faces the centre of the screen. */
+.fui-unit[data-kind='target'] {
+  flex-direction: row-reverse;
+}
+
+.fui-unit[data-kind='target'] .fui-unit__namerow {
+  flex-direction: row-reverse;
+}
+
+.fui-unit[data-kind='target'] .fui-unit__name {
+  text-align: right;
+}
+
+.fui-unit[data-kind='boss'] {
+  width: 420px;
+  padding: 14px 18px;
+}
+
+.fui-unit[data-kind='boss'] .fui-unit__name {
+  font-size: 18px;
+}
+
+/* ── Modifiers ────────────────────────────────────────────────────────────── */
+.fui-unit--compact {
+  width: 210px;
+  gap: 8px;
+  padding: 6px 9px;
+}
+
+.fui-unit--compact .fui-unit__name {
+  font-size: 12px;
+}
+
+.fui-unit--elite .fui-unit__fill {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--fui-gold) 45%, transparent));
+}
+
+.fui-unit--inactive {
+  filter: grayscale(0.8) brightness(0.6);
+}
+
+.fui-unit--active .fui-unit__fill {
+  filter: brightness(1.25) drop-shadow(0 0 7px color-mix(in srgb, var(--fui-accent) 60%, transparent));
+}

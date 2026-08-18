@@ -1,0 +1,144 @@
+/* BannerCarousel — the rotating summon rail on a gacha front page. */
+
+.fui-banners {
+  --fui-banner-ink: var(--fui-rarity-epic);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap-sm);
+  width: 100%;
+}
+
+.fui-banners__tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.fui-banners__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.fui-banners__tab {
+  padding: 6px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-bottom: 0;
+  border-radius: var(--fui-radius) var(--fui-radius) 0 0;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--fui-ink-faint);
+  font-family: var(--fui-font-ui);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--fui-t-fast) var(--fui-ease), background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-banners__tab.is-on {
+  background: color-mix(in srgb, var(--fui-banner-ink) 30%, rgba(0, 0, 0, 0.4));
+  color: var(--fui-ink);
+  box-shadow: inset 0 2px 0 var(--fui-banner-ink);
+}
+
+.fui-banners__stage {
+  position: relative;
+  min-height: 180px;
+  padding: var(--fui-gap-lg);
+  border: 1px solid color-mix(in srgb, var(--fui-banner-ink) 50%, rgba(0, 0, 0, 0.6));
+  border-radius: var(--fui-radius);
+  background:
+    linear-gradient(
+      92deg,
+      rgba(6, 6, 10, 0.95) 10%,
+      rgba(6, 6, 10, 0.55) 55%,
+      color-mix(in srgb, var(--fui-banner-ink) 30%, transparent)
+    ),
+    var(--fui-banner-art, none) center / cover no-repeat,
+    rgba(10, 10, 14, 0.9);
+  overflow: hidden;
+  animation: fui-rise var(--fui-t-slow) var(--fui-ease);
+}
+
+/* The featured champion is the sell — big, bleeding off the right edge, with a
+   soft vignette so it dissolves into the banner rather than sitting in a box.
+   The box is square because the painted icon sets are square and opaque: match
+   the aspect and the mask lands on the art itself instead of on the letterbox
+   `contain` would otherwise leave around it. */
+.fui-banners__featured {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  height: 132%;
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  background: center / contain no-repeat;
+  mask: radial-gradient(closest-side, #000 46%, transparent 82%);
+  -webkit-mask: radial-gradient(closest-side, #000 46%, transparent 82%);
+  filter: drop-shadow(0 0 24px color-mix(in srgb, var(--fui-banner-ink) 70%, transparent));
+  pointer-events: none;
+}
+
+.fui-banners__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 60%;
+}
+
+.fui-banners__title {
+  font-size: 24px;
+  line-height: 1.15;
+  color: var(--fui-ink);
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.9);
+}
+
+.fui-banners__subtitle {
+  font-size: 13px;
+  color: color-mix(in srgb, var(--fui-banner-ink) 45%, var(--fui-ink));
+}
+
+.fui-banners__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fui-gap);
+  margin-top: 5px;
+  font-size: 11.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-banners__rate {
+  color: var(--fui-gold-soft);
+  font-weight: 700;
+}
+
+.fui-banners__actions {
+  display: flex;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-banners__pull {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.4));
+  color: var(--fui-ink);
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-banners__pull--multi {
+  border-color: var(--fui-gold);
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.5), rgba(217, 164, 65, 0.18));
+  color: var(--fui-gold-soft);
+}
+
+.fui-banners__pull:hover {
+  filter: brightness(1.25);
+}

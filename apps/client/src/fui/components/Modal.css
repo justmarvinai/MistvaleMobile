@@ -1,0 +1,63 @@
+/* Modal — centred window over a dimmed backdrop. */
+
+.fui-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--fui-t) var(--fui-ease),
+    visibility var(--fui-t) var(--fui-ease);
+}
+
+.fui-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.fui-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.88));
+  backdrop-filter: blur(2px);
+}
+
+/* Scenic mode paints the pack's backdrop art behind the dim layer, for
+   full-screen moments like level-up and chapter transitions. */
+.fui-modal--scenic .fui-modal__backdrop {
+  background:
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.9)),
+    var(--fui-backdrop-img) center / cover no-repeat;
+}
+
+.fui-modal__panel {
+  position: relative;
+  max-height: calc(100vh - 48px);
+  transform: translateY(16px) scale(0.97);
+  transition: transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-modal.is-open .fui-modal__panel {
+  transform: translateY(0) scale(1);
+}
+
+.fui-modal__message {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.fui-modal__actions {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fui-gap-sm);
+  padding: 0 var(--fui-pad-x) var(--fui-pad-b);
+}

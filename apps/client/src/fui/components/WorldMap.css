@@ -1,0 +1,187 @@
+/* WorldMap — campaign nodes placed on painted art, joined by paths. */
+
+.fui-map {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: var(--fui-radius);
+  background: #0b0b10;
+  overflow: hidden;
+}
+
+/* Backdrop art in these packs is painted dark already, so it is lifted rather
+   than dimmed; the vignette only has to hold the corners for the labels. */
+.fui-map__art {
+  position: absolute;
+  inset: 0;
+  background: var(--fui-map-art, none) center / cover no-repeat;
+  filter: brightness(1.35) saturate(1.1);
+}
+
+.fui-map__art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(135% 105% at 50% 42%, transparent 45%, rgba(4, 4, 8, 0.78) 100%);
+}
+
+.fui-map__head {
+  position: absolute;
+  top: var(--fui-gap);
+  left: var(--fui-gap);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 46%;
+  pointer-events: none;
+}
+
+.fui-map__title {
+  font-size: 17px;
+  color: var(--fui-ink);
+  text-shadow: 0 2px 6px #000;
+}
+
+.fui-map__progress {
+  --fui-map-p: 0;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.fui-map__progress-fill {
+  display: block;
+  width: calc(var(--fui-map-p) * 100%);
+  height: 100%;
+  background: var(--fui-gold);
+  box-shadow: 0 0 6px var(--fui-gold);
+}
+
+/* The path layer stretches with the map, so node coordinates stay in the same
+   percentage space whatever the element's aspect ratio is. */
+.fui-map__paths {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.fui-map__paths line {
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 0.5;
+  stroke-dasharray: 1.6 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.fui-map__paths line.is-walked {
+  stroke: var(--fui-gold);
+  stroke-dasharray: none;
+  opacity: 0.75;
+}
+
+.fui-map__node {
+  --fui-map-ink: var(--fui-accent);
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.fui-map__node:disabled {
+  cursor: not-allowed;
+}
+
+.fui-map__node[data-state='cleared'] { --fui-map-ink: var(--fui-success); }
+.fui-map__node[data-state='current'] { --fui-map-ink: var(--fui-gold); }
+.fui-map__node[data-state='locked'] { --fui-map-ink: #555; }
+.fui-map__node.is-boss { --fui-map-ink: var(--fui-danger); }
+
+.fui-map__disc {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--fui-map-ink);
+  border-radius: 50%;
+  background: rgba(6, 6, 10, 0.9);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--fui-map-ink) 55%, transparent);
+  transition: transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-map__disc::after {
+  content: '';
+  position: absolute;
+  inset: 22%;
+  background-color: var(--fui-map-ink);
+  mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+}
+
+/* A boss node is bigger and diamond-shaped, so a chapter's end is findable
+   without reading a single label. */
+.fui-map__node.is-boss .fui-map__disc {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  transform: rotate(45deg);
+}
+
+.fui-map__node.is-boss .fui-map__disc::after {
+  transform: rotate(-45deg);
+}
+
+.fui-map__node[data-state='current'] .fui-map__disc {
+  animation: fui-glow 1.8s var(--fui-ease) infinite;
+}
+
+.fui-map__node[data-state='locked'] {
+  opacity: 0.5;
+}
+
+.fui-map__node:not(:disabled):hover .fui-map__disc {
+  transform: scale(1.16);
+}
+
+.fui-map__node.is-boss:not(:disabled):hover .fui-map__disc {
+  transform: rotate(45deg) scale(1.16);
+}
+
+.fui-map__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px #000;
+  pointer-events: none;
+}
+
+.fui-map__name {
+  font-family: var(--fui-font-display);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--fui-ink);
+}
+
+.fui-map__stars {
+  font-size: 10px;
+  letter-spacing: -1px;
+  color: var(--fui-gold);
+}
+
+.fui-map__note {
+  font-size: 9.5px;
+  color: var(--fui-ink-faint);
+}

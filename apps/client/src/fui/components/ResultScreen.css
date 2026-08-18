@@ -1,0 +1,197 @@
+/* ResultScreen — victory / defeat summary with stats, stars and rewards. */
+
+.fui-result {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+  padding: 40px 24px;
+  overflow: hidden;
+}
+
+.fui-result--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 850;
+  min-height: 100vh;
+}
+
+.fui-result__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 32%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.92)),
+    var(--fui-backdrop-img) center / cover no-repeat;
+}
+
+/* Light rays behind the card, tinted by the outcome. */
+.fui-result__rays {
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  width: 900px;
+  height: 900px;
+  margin-left: -450px;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--fui-result-glow, transparent) 6deg,
+    transparent 12deg,
+    transparent 30deg,
+    var(--fui-result-glow, transparent) 36deg,
+    transparent 42deg,
+    transparent 60deg,
+    var(--fui-result-glow, transparent) 66deg,
+    transparent 72deg
+  );
+  opacity: 0.24;
+  animation: fui-spin 90s linear infinite;
+  mask-image: radial-gradient(circle, #000 20%, transparent 62%);
+}
+
+.fui-result[data-outcome='victory'] {
+  --fui-result-glow: var(--fui-gold);
+  --fui-result-ink: var(--fui-gold-soft);
+}
+.fui-result[data-outcome='defeat'] {
+  --fui-result-glow: var(--fui-danger);
+  --fui-result-ink: #f0a49c;
+}
+.fui-result[data-outcome='neutral'] {
+  --fui-result-glow: var(--fui-accent);
+  --fui-result-ink: var(--fui-accent-soft);
+}
+
+.fui-result__card {
+  position: relative;
+  z-index: 1;
+  width: min(430px, 92vw);
+  text-align: center;
+  animation: fui-rise 520ms var(--fui-ease);
+}
+
+.fui-result__title {
+  font-size: clamp(34px, 5.5vw, 54px);
+  letter-spacing: 0.14em;
+  color: var(--fui-result-ink, var(--fui-ink));
+  text-shadow:
+    0 4px 14px #000,
+    0 0 34px var(--fui-result-glow, transparent);
+}
+
+.fui-result__subtitle {
+  margin-top: 6px;
+  font-family: var(--fui-font-body);
+  font-size: 14px;
+  font-style: italic;
+  letter-spacing: 0.1em;
+  color: var(--fui-ink-dim);
+}
+
+/* ── Stars ────────────────────────────────────────────────────────────────── */
+.fui-result__stars {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.fui-result__star {
+  width: 44px;
+  height: 44px;
+  background: var(--fui-img-icon-star) center / contain no-repeat;
+  filter: grayscale(1) brightness(0.32);
+}
+
+.fui-result__star.is-earned {
+  filter: drop-shadow(0 0 12px var(--fui-gold));
+  animation: fui-pop 520ms var(--fui-ease) backwards;
+}
+
+.fui-result__rule {
+  height: 34px;
+  margin: 18px 0 4px;
+  background: var(--fui-divider-img) center / contain no-repeat;
+  opacity: 0.8;
+}
+
+/* ── Stats ────────────────────────────────────────────────────────────────── */
+.fui-result__stats {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 18px;
+  margin-top: 14px;
+  text-align: left;
+}
+
+.fui-result__stats dt {
+  font-size: 12.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-result__stats dd {
+  margin: 0;
+  font-family: var(--fui-font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--fui-ink);
+}
+
+.fui-result__stats dd.is-best {
+  color: var(--fui-gold-soft);
+  text-shadow: 0 0 9px color-mix(in srgb, var(--fui-gold) 55%, transparent);
+}
+
+/* ── Rewards ──────────────────────────────────────────────────────────────── */
+.fui-result__rewards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.fui-result__chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.5);
+  font-family: var(--fui-font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--fui-ink-dim);
+}
+
+.fui-result__chip.is-xp {
+  color: var(--fui-xp);
+}
+
+.fui-result__chip.is-gold {
+  color: var(--fui-gold-soft);
+}
+
+.fui-result__coin {
+  width: 16px;
+  height: 16px;
+  background: var(--fui-img-icon-coins) center / contain no-repeat;
+}
+
+.fui-result__ricon {
+  width: 24px;
+  height: 24px;
+  background: center / contain no-repeat;
+}
+
+.fui-result__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}

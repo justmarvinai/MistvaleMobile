@@ -1,0 +1,133 @@
+/* CompareStats — the before / after table behind every upgrade decision. */
+
+.fui-compare {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.fui-compare__head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.fui-compare__col {
+  font-size: 10px;
+}
+
+.fui-compare__head .fui-compare__col:last-child {
+  text-align: right;
+}
+
+.fui-compare__spacer {
+  width: 96px;
+}
+
+.fui-compare__row {
+  --fui-cmp-from: 0;
+  --fui-cmp-to: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 96px 1fr;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+}
+
+.fui-compare__row:last-child {
+  border-bottom: 0;
+}
+
+/* The two bars grow inward from the outer edges, so the pair meets in the
+   middle under the stat name and the longer one is obvious. */
+.fui-compare__row.has-bars::before,
+.fui-compare__row.has-bars::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  height: 20px;
+  margin-top: -10px;
+  border-radius: 2px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.fui-compare__row.has-bars::before {
+  left: 6px;
+  width: calc((50% - 54px) * var(--fui-cmp-from));
+  background: var(--fui-ink-dim);
+}
+
+.fui-compare__row.has-bars::after {
+  right: 6px;
+  width: calc((50% - 54px) * var(--fui-cmp-to));
+  background: var(--fui-accent);
+}
+
+.fui-compare__from {
+  position: relative;
+  color: var(--fui-ink-dim);
+}
+
+.fui-compare__mid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.fui-compare__glyph {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background-color: var(--fui-ink-faint);
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-compare__label {
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+  white-space: nowrap;
+}
+
+.fui-compare__to {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.fui-compare__value {
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-compare__delta {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.fui-compare__row[data-dir='up'] .fui-compare__delta { color: var(--fui-success); }
+.fui-compare__row[data-dir='up'] .fui-compare__value { color: var(--fui-success); }
+.fui-compare__row[data-dir='down'] .fui-compare__delta { color: var(--fui-danger); }
+.fui-compare__row[data-dir='down'] .fui-compare__value { color: var(--fui-danger); }
+
+.fui-compare__none {
+  padding: var(--fui-gap);
+  text-align: center;
+  font-size: 12px;
+  color: var(--fui-ink-faint);
+}

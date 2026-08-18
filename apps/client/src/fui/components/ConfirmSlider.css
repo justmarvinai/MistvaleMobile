@@ -1,0 +1,135 @@
+/* ConfirmSlider — slide-to-commit for actions that must not misfire. */
+
+.fui-confirm {
+  --fui-confirm-p: 0;
+  --fui-confirm-h: 46px;
+  --fui-confirm-ink: var(--fui-accent);
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 200px;
+  height: var(--fui-confirm-h);
+  border: 1px solid rgba(0, 0, 0, 0.65);
+  border-radius: calc(var(--fui-confirm-h) / 2);
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  /* The handle travels the track's own width, so the track declares itself the
+     query container and the handle's transform can be written in cqw. */
+  container-type: inline-size;
+}
+
+.fui-confirm[data-tone='gold'] { --fui-confirm-ink: var(--fui-gold); }
+.fui-confirm[data-tone='danger'] { --fui-confirm-ink: var(--fui-danger); }
+
+.fui-confirm.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.fui-confirm__fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(var(--fui-confirm-p));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--fui-confirm-ink) 45%, transparent),
+    var(--fui-confirm-ink)
+  );
+  transition: transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-confirm.is-dragging .fui-confirm__fill {
+  transition: none;
+}
+
+.fui-confirm__label,
+.fui-confirm__done {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-left: var(--fui-confirm-h);
+  font-family: var(--fui-font-ui);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.fui-confirm__label {
+  color: var(--fui-ink-dim);
+  /* Fades out as the handle travels, so the prompt clears before the payoff. */
+  opacity: calc(1 - var(--fui-confirm-p) * 1.6);
+}
+
+.fui-confirm__done {
+  color: #fff;
+  opacity: 0;
+  transition: opacity var(--fui-t) var(--fui-ease);
+}
+
+.fui-confirm.is-done .fui-confirm__done {
+  opacity: 1;
+}
+
+.fui-confirm__handle {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(var(--fui-confirm-h) - 6px);
+  height: calc(var(--fui-confirm-h) - 6px);
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(0, 0, 0, 0.35)),
+    var(--fui-confirm-ink);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+  transform: translateX(calc(var(--fui-confirm-p) * (100cqw - var(--fui-confirm-h))));
+  transition: transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-confirm.is-dragging .fui-confirm__handle {
+  cursor: grabbing;
+  transition: none;
+}
+
+.fui-confirm__handle::after {
+  content: '';
+  position: absolute;
+  inset: 26%;
+  background-color: rgba(255, 255, 255, 0.92);
+  mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  opacity: 0;
+}
+
+.fui-confirm__handle.has-glyph::after {
+  opacity: 1;
+}
+
+/* Without a glyph the handle still needs an affordance: a chevron pointing the
+   way the player is meant to drag. */
+.fui-confirm__handle:not(.has-glyph)::after {
+  opacity: 1;
+  mask: none;
+  -webkit-mask: none;
+  inset: 0;
+  background: none;
+  border-right: 2px solid rgba(255, 255, 255, 0.9);
+  border-top: 2px solid rgba(255, 255, 255, 0.9);
+  width: 9px;
+  height: 9px;
+  margin: auto;
+  transform: rotate(45deg) translate(-1px, 1px);
+  animation: fui-pulse 1.6s var(--fui-ease) infinite;
+}
+
+.fui-confirm.is-done .fui-confirm__handle::after {
+  animation: none;
+}

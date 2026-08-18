@@ -1,0 +1,88 @@
+/* PowerRating — the headline number, its change, and where it comes from. */
+
+.fui-power {
+  --fui-power-size: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--fui-gap-sm) var(--fui-gap);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.09), rgba(0, 0, 0, 0.36));
+}
+
+.fui-power[data-size='sm'] { --fui-power-size: 20px; }
+.fui-power[data-size='lg'] { --fui-power-size: 44px; }
+
+.fui-power__label {
+  font-size: 10px;
+}
+
+.fui-power__line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-power__value {
+  font-family: var(--fui-font-display);
+  font-size: var(--fui-power-size);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.fui-power__delta {
+  font-size: calc(var(--fui-power-size) * 0.42);
+  font-weight: 700;
+}
+
+.fui-power__delta[data-dir='up'] { color: var(--fui-success); }
+.fui-power__delta[data-dir='down'] { color: var(--fui-danger); }
+
+.fui-power__rank {
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  color: var(--fui-accent-soft);
+}
+
+/* A single stacked bar answers "where does my power come from" in one glance,
+   which is the question that follows the number every time. */
+.fui-power__bar {
+  display: flex;
+  height: 7px;
+  margin-top: 3px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.fui-power__seg {
+  height: 100%;
+  transition: width var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-power__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--fui-gap);
+  font-size: 11px;
+  color: var(--fui-ink-dim);
+}
+
+.fui-power__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fui-power__swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.fui-power__legend-value {
+  color: var(--fui-ink-faint);
+}

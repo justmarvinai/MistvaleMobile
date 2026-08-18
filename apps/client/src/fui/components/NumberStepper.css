@@ -1,0 +1,103 @@
+/* NumberStepper — quantity picker with hold-to-repeat and a running cost. */
+
+.fui-stepper {
+  --fui-stepper-h: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-stepper[data-size='sm'] { --fui-stepper-h: 26px; font-size: 12px; }
+
+.fui-stepper__box {
+  display: inline-flex;
+  align-items: stretch;
+  background: rgba(0, 0, 0, 0.46);
+  border: 1px solid rgba(0, 0, 0, 0.65);
+  border-radius: var(--fui-radius);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.fui-stepper__btn {
+  width: calc(var(--fui-stepper-h) * 1.05);
+  min-height: var(--fui-stepper-h);
+  border: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(0, 0, 0, 0.28));
+  color: var(--fui-ink);
+  font-size: calc(var(--fui-stepper-h) * 0.52);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+  /* Repeat-on-hold means the pointer sits on this button for seconds at a time;
+     suppressing selection stops it highlighting the glyph mid-press. */
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.fui-stepper__btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--fui-accent) 0%, var(--fui-accent-deep) 100%);
+}
+
+.fui-stepper__btn:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.fui-stepper__value,
+.fui-stepper__input {
+  /* An <input> is a flex child that would otherwise stretch, so the width is
+     pinned rather than left to `min-width` alone. */
+  flex: none;
+  width: calc(var(--fui-stepper-h) * 1.9);
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-left: 1px solid rgba(0, 0, 0, 0.55);
+  border-right: 1px solid rgba(0, 0, 0, 0.55);
+  background: none;
+  color: var(--fui-ink);
+  font-weight: 700;
+  text-align: center;
+}
+
+.fui-stepper__input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.fui-stepper__max {
+  min-height: var(--fui-stepper-h);
+  padding: 0 12px;
+  border: 1px solid var(--fui-gold);
+  border-radius: var(--fui-radius);
+  background: rgba(217, 164, 65, 0.14);
+  color: var(--fui-gold-soft);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-stepper__max:hover {
+  background: rgba(217, 164, 65, 0.3);
+}
+
+.fui-stepper__cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--fui-gold-soft);
+  font-weight: 700;
+}
+
+.fui-stepper__cost-glyph {
+  width: 1.1em;
+  height: 1.1em;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}

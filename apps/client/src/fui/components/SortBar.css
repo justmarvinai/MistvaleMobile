@@ -1,0 +1,75 @@
+/* SortBar — field + direction strip for long lists. */
+
+.fui-sort {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.fui-sort[data-size='sm'] {
+  padding: 3px 7px;
+  font-size: 12px;
+}
+
+.fui-sort__label {
+  margin-right: 2px;
+  font-size: 10px;
+}
+
+.fui-sort__field {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--fui-radius);
+  background: none;
+  color: var(--fui-ink-dim);
+  font-family: var(--fui-font-ui);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color var(--fui-t-fast) var(--fui-ease), background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-sort__field:hover {
+  color: var(--fui-ink);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.fui-sort__field.is-on {
+  color: var(--fui-accent-soft);
+  border-color: color-mix(in srgb, var(--fui-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--fui-accent) 18%, transparent);
+}
+
+/* The arrow only exists on the active field, and flips with the direction. */
+.fui-sort__arrow {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  opacity: 0;
+  transition: transform var(--fui-t) var(--fui-ease), opacity var(--fui-t) var(--fui-ease);
+}
+
+.fui-sort__field.is-on .fui-sort__arrow {
+  opacity: 1;
+}
+
+.fui-sort__field[data-dir='asc'] .fui-sort__arrow {
+  transform: rotate(180deg);
+}
+
+.fui-sort__total {
+  margin-left: auto;
+  padding-left: var(--fui-gap);
+  font-size: 12px;
+  color: var(--fui-ink-faint);
+}

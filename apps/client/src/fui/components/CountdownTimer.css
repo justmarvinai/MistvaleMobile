@@ -1,0 +1,63 @@
+/* CountdownTimer — the "ends in…" clock on offers, resets and battle passes. */
+
+.fui-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fui-ink-dim);
+}
+
+.fui-countdown[data-variant='chip'] {
+  padding: 3px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  font-size: 11.5px;
+}
+
+.fui-countdown[data-variant='block'] {
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 16px;
+}
+
+.fui-countdown__glyph {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background-color: currentColor;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-countdown__label {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.86em;
+  color: var(--fui-ink-faint);
+}
+
+.fui-countdown__time {
+  font-family: var(--fui-font-display);
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-countdown[data-variant='block'] .fui-countdown__time {
+  font-size: 24px;
+  letter-spacing: 0.04em;
+}
+
+.fui-countdown.is-urgent {
+  border-color: color-mix(in srgb, var(--fui-danger) 55%, transparent);
+}
+
+.fui-countdown.is-urgent .fui-countdown__time {
+  color: #ffb4ac;
+  animation: fui-pulse 1.4s ease-in-out infinite;
+}
+
+.fui-countdown.is-done .fui-countdown__time {
+  color: var(--fui-success);
+  animation: none;
+}

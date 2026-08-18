@@ -1,0 +1,85 @@
+/* HUD — nine-zone overlay frame that widgets are dropped into. */
+
+.fui-hud {
+  --fui-hud-inset: 18px;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  min-height: 420px;
+  padding: var(--fui-hud-inset);
+  gap: 12px;
+  /* Empty space never eats clicks meant for the game canvas below. */
+  pointer-events: none;
+  transition: opacity var(--fui-t) var(--fui-ease);
+}
+
+.fui-hud--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  min-height: 100vh;
+}
+
+.fui-hud--solid {
+  pointer-events: auto;
+}
+
+.fui-hud.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Zone children *do* receive events. */
+.fui-hud__zone > * {
+  pointer-events: auto;
+}
+
+.fui-hud__zone {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.fui-hud__zone[data-zone^='top'] {
+  grid-row: 1;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.fui-hud__zone[data-zone^='center'] {
+  grid-row: 2;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fui-hud__zone[data-zone^='bottom'] {
+  grid-row: 3;
+  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.fui-hud__zone[data-zone$='left'] {
+  grid-column: 1;
+  align-items: flex-start;
+}
+
+.fui-hud__zone[data-zone$='center'],
+.fui-hud__zone[data-zone='center'] {
+  grid-column: 2;
+  align-items: center;
+}
+
+.fui-hud__zone[data-zone$='right'] {
+  grid-column: 3;
+  align-items: flex-end;
+}
+
+/* The middle band is reserved for cast bars and boss frames, which read best
+   laid out horizontally. */
+.fui-hud__zone[data-zone='center'] {
+  grid-row: 2;
+}

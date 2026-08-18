@@ -1,0 +1,69 @@
+/* StatRadar — the stat web that lets two champions be compared by silhouette. */
+
+.fui-radar {
+  --fui-radar-size: 200px;
+  --fui-radar-color: var(--fui-accent);
+  --fui-radar-compare: var(--fui-gold);
+  /* Axis labels sit outside the outermost ring, so the element reserves side
+     margin for them rather than letting them hang over whatever is next to it. */
+  --fui-radar-pad: calc(var(--fui-radar-size) * 0.22);
+  position: relative;
+  display: inline-block;
+  width: calc(var(--fui-radar-size) + var(--fui-radar-pad) * 2);
+  height: var(--fui-radar-size);
+  padding: 0 var(--fui-radar-pad);
+}
+
+.fui-radar svg {
+  display: block;
+  width: var(--fui-radar-size);
+  height: 100%;
+  overflow: visible;
+}
+
+.fui-radar__ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.09);
+  stroke-width: 0.6;
+}
+
+.fui-radar__spoke {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 0.5;
+}
+
+.fui-radar__shape {
+  fill: color-mix(in srgb, var(--fui-radar-color) 32%, transparent);
+  stroke: var(--fui-radar-color);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--fui-radar-color) 60%, transparent));
+}
+
+.fui-radar__shape--compare {
+  fill: color-mix(in srgb, var(--fui-radar-compare) 18%, transparent);
+  stroke: var(--fui-radar-compare);
+  stroke-dasharray: 3 2;
+  filter: none;
+}
+
+/* Inset to the web's own box, so a label's percentage lines up with the SVG
+   coordinate it was computed from while still being free to spill into the
+   padding either side. */
+.fui-radar__labels {
+  position: absolute;
+  inset: 0 var(--fui-radar-pad);
+  pointer-events: none;
+}
+
+.fui-radar__label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-ink-dim);
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
+}
+

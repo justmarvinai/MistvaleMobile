@@ -1,0 +1,226 @@
+/* Button — 9-sliced, theme-swappable, with icon / label / keyhint slots.
+   The texture lives on an absolutely-positioned art layer so icons and labels
+   can be laid out against the button's real box rather than its padding box. */
+
+.fui-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fui-gap-sm);
+  min-height: var(--fui-btn-min-h);
+  padding: var(--fui-btn-pad);
+  border: 0;
+  background: none;
+  color: var(--fui-btn-ink);
+  font-family: var(--fui-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    filter var(--fui-t-fast) var(--fui-ease),
+    transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-btn__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-btn-bw);
+  border-image-source: var(--fui-btn-src);
+  border-image-slice: var(--fui-btn-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-btn:hover:not(:disabled) {
+  filter: var(--fui-btn-hover-filter);
+}
+
+.fui-btn:hover:not(:disabled) > .fui-btn__art {
+  border-image-source: var(--fui-btn-hover-src);
+}
+
+.fui-btn:active:not(:disabled) {
+  filter: var(--fui-btn-active-filter);
+  transform: translateY(1px);
+}
+
+.fui-btn:active:not(:disabled) > .fui-btn__art {
+  border-image-source: var(--fui-btn-active-src);
+}
+
+.fui-btn:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.75) brightness(0.6);
+  color: var(--fui-ink-faint);
+}
+
+.fui-btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* ── Sizes ────────────────────────────────────────────────────────────────── */
+.fui-btn[data-size='sm'] {
+  min-height: max(38px, calc(var(--fui-btn-min-h) * 0.78));
+  padding: 4px 18px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.fui-btn[data-size='lg'] {
+  min-height: calc(var(--fui-btn-min-h) * 1.32);
+  padding: 12px 34px;
+  font-size: 17px;
+}
+
+/* ── Variants ─────────────────────────────────────────────────────────────── */
+.fui-btn[data-variant='long'] {
+  min-width: 250px;
+}
+
+.fui-btn[data-variant='long'] > .fui-btn__art {
+  border-width: var(--fui-btn-long-bw);
+  border-image-source: var(--fui-btn-long-src);
+  border-image-slice: var(--fui-btn-long-sl) fill;
+}
+
+.fui-btn[data-variant='ghost'] {
+  color: var(--fui-ink-dim);
+}
+
+.fui-btn[data-variant='ghost'] > .fui-btn__art {
+  border-width: var(--fui-btn-ghost-bw);
+  border-image-source: var(--fui-btn-ghost-src);
+  border-image-slice: var(--fui-btn-ghost-sl) fill;
+}
+
+.fui-btn[data-variant='ghost']:hover:not(:disabled) {
+  color: var(--fui-ink);
+  filter: brightness(1.28);
+}
+
+/* These variants have no separate hover artwork, so they must re-assert their
+   own texture — otherwise the base hover rule would swap in the primary one. */
+.fui-btn[data-variant='ghost']:hover:not(:disabled) > .fui-btn__art,
+.fui-btn[data-variant='ghost']:active:not(:disabled) > .fui-btn__art {
+  border-image-source: var(--fui-btn-ghost-src);
+}
+
+.fui-btn[data-variant='square']:hover:not(:disabled) > .fui-btn__art,
+.fui-btn[data-variant='square']:active:not(:disabled) > .fui-btn__art {
+  border-image-source: var(--fui-btn-sq-hover-src, var(--fui-btn-sq-src));
+}
+
+.fui-btn[data-variant='long']:hover:not(:disabled) > .fui-btn__art,
+.fui-btn[data-variant='long']:active:not(:disabled) > .fui-btn__art {
+  border-image-source: var(--fui-btn-long-hover-src, var(--fui-btn-long-src));
+}
+
+.fui-btn[data-variant='square'] {
+  width: var(--fui-btn-square-size, 52px);
+  height: var(--fui-btn-square-size, 52px);
+  min-height: 0;
+  padding: 0;
+}
+
+.fui-btn[data-variant='square'] > .fui-btn__art {
+  border-width: var(--fui-btn-sq-bw);
+  border-image-source: var(--fui-btn-sq-src);
+  border-image-slice: var(--fui-btn-sq-sl) fill;
+}
+
+.fui-btn[data-variant='round'] {
+  width: var(--fui-btn-square-size, 52px);
+  height: var(--fui-btn-square-size, 52px);
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.fui-btn[data-variant='round'] > .fui-btn__art {
+  border: 0;
+  background: var(--fui-img-btn-ember-round) center / 100% 100% no-repeat;
+  border-radius: 50%;
+}
+
+.fui-btn[data-variant='round']:hover:not(:disabled) {
+  filter: brightness(1.22);
+}
+
+/* ── Inner parts ──────────────────────────────────────────────────────────── */
+.fui-btn__icon {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 1.55em;
+  height: 1.55em;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
+}
+
+.fui-btn__label {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.fui-btn[data-variant='square'] > .fui-btn__icon,
+.fui-btn[data-variant='round'] > .fui-btn__icon {
+  position: absolute;
+  inset: 24%;
+  width: auto;
+  height: auto;
+}
+
+.fui-btn__hint {
+  position: relative;
+  z-index: 1;
+  margin-left: 4px;
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, var(--fui-ink) 28%, transparent);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  font-family: var(--fui-font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--fui-ink-dim);
+}
+
+/* Sheen that sweeps across the face on hover. */
+.fui-btn__art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 62%
+  );
+  background-size: 230% 100%;
+  background-position: 150% 0;
+  transition:
+    background-position var(--fui-t-slow) var(--fui-ease),
+    opacity var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-btn:hover:not(:disabled) > .fui-btn__art::after {
+  opacity: 1;
+  background-position: -50% 0;
+}
+
+.fui-btn--deny {
+  animation: fui-shake 320ms var(--fui-ease);
+}

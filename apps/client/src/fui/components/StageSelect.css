@@ -1,0 +1,152 @@
+/* StageSelect — campaign map nodes with clear ratings and lock state. */
+
+.fui-stages {
+  display: inline-block;
+}
+
+.fui-stages__head {
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.fui-stages__title {
+  font-size: 17px;
+}
+
+.fui-stages__sub {
+  margin-top: 2px;
+  font-size: 10.5px;
+}
+
+.fui-stages__list {
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;
+}
+
+.fui-stages[data-layout='grid'] .fui-stages__list {
+  display: grid;
+  grid-template-columns: repeat(var(--fui-stage-cols, 5), auto);
+  gap: 18px;
+}
+
+.fui-stages__node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform var(--fui-t-fast) var(--fui-ease);
+}
+
+/* The connecting path between nodes on a campaign run. */
+.fui-stages[data-layout='path'] .fui-stages__node:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 27px;
+  left: 100%;
+  width: 26px;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--fui-accent) 55%, transparent) 0 5px,
+    transparent 5px 9px
+  );
+}
+
+/* A cleared node's outgoing path is solid — progress reads at a glance. */
+.fui-stages[data-layout='path'] .fui-stages__node[data-state='cleared']:not(:last-child)::after {
+  background: var(--fui-success);
+  box-shadow: 0 0 6px var(--fui-success);
+}
+
+.fui-stages__node:not(:disabled):hover {
+  transform: translateY(-3px);
+}
+
+.fui-stages__disc {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border: 2px solid var(--fui-stage-edge, rgba(255, 255, 255, 0.22));
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.08), transparent 60%),
+    var(--fui-stage-bg, rgba(10, 10, 14, 0.85));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.fui-stages__num {
+  font-family: var(--fui-font-display);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--fui-ink);
+  text-shadow: 0 1px 3px #000;
+}
+
+.fui-stages__icon {
+  width: 26px;
+  height: 26px;
+  background-color: var(--fui-ink);
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+/* States. */
+.fui-stages__node[data-state='cleared'] {
+  --fui-stage-edge: color-mix(in srgb, var(--fui-success) 70%, transparent);
+}
+
+.fui-stages__node[data-state='current'] {
+  --fui-stage-edge: var(--fui-gold);
+  --fui-stage-bg: color-mix(in srgb, var(--fui-gold) 16%, rgba(10, 10, 14, 0.85));
+}
+
+.fui-stages__node[data-state='current'] .fui-stages__disc {
+  box-shadow: 0 0 16px var(--fui-gold);
+  animation: fui-pulse 1.8s ease-in-out infinite;
+}
+
+.fui-stages__node[data-state='locked'] {
+  cursor: not-allowed;
+  filter: grayscale(1) brightness(0.5);
+}
+
+.fui-stages__node[data-state='locked'] .fui-stages__num {
+  visibility: hidden;
+}
+
+.fui-stages__node[data-state='locked'] .fui-stages__disc::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background-color: var(--fui-ink-faint);
+  -webkit-mask: var(--fui-img-glyph-broken-shackle) center / contain no-repeat;
+  mask: var(--fui-img-glyph-broken-shackle) center / contain no-repeat;
+}
+
+.fui-stages__node.is-boss .fui-stages__disc {
+  width: 64px;
+  height: 64px;
+  border-color: var(--fui-danger);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--fui-danger) 60%, transparent);
+}
+
+.fui-stages__node.is-boss .fui-stages__num {
+  font-size: 22px;
+  color: #ffb4ac;
+}
+
+.fui-stages__cost {
+  font-size: 10.5px;
+  color: var(--fui-mana);
+  text-shadow: 0 1px 2px #000;
+}

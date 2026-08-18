@@ -1,0 +1,160 @@
+/* ChampionList — the dense roster view that scales past a card grid. */
+
+.fui-roster {
+  --fui-roster-h: 54px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.fui-roster--dense {
+  --fui-roster-h: 40px;
+}
+
+.fui-roster__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-roster__row {
+  --fui-roster-affinity: transparent;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  min-height: var(--fui-roster-h);
+  padding: 5px 10px 5px 13px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-roster__row:last-child {
+  border-bottom: 0;
+}
+
+/* The affinity reads as a colour bar on the leading edge — scannable at a
+   glance without spending width on a badge. */
+.fui-roster__row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--fui-roster-affinity);
+}
+
+.fui-roster__row:hover:not(.is-disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.fui-roster__row.is-selected {
+  background: color-mix(in srgb, var(--fui-accent) 20%, transparent);
+  box-shadow: inset 0 0 0 1px var(--fui-accent);
+}
+
+.fui-roster__row.is-disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.fui-roster__art {
+  width: calc(var(--fui-roster-h) - 14px);
+  height: calc(var(--fui-roster-h) - 14px);
+  flex: none;
+  border-radius: var(--fui-radius);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.45) center / cover no-repeat;
+}
+
+/* Rarity is carried by the portrait's rim, which keeps it visible even when a
+   row is selected and tinted. */
+.fui-roster__row[data-rarity='uncommon'] .fui-roster__art { border-color: var(--fui-rarity-uncommon); }
+.fui-roster__row[data-rarity='rare'] .fui-roster__art { border-color: var(--fui-rarity-rare); }
+.fui-roster__row[data-rarity='epic'] .fui-roster__art { border-color: var(--fui-rarity-epic); }
+.fui-roster__row[data-rarity='legendary'] .fui-roster__art { border-color: var(--fui-rarity-legendary); }
+.fui-roster__row[data-rarity='mythic'] .fui-roster__art { border-color: var(--fui-rarity-mythic); }
+
+.fui-roster__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.fui-roster__name {
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: var(--fui-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fui-roster__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-roster__stars {
+  color: var(--fui-gold);
+  letter-spacing: -1px;
+}
+
+.fui-roster__note {
+  color: var(--fui-accent-soft);
+}
+
+.fui-roster__role {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  background-color: var(--fui-ink-dim);
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-roster__power {
+  min-width: 52px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-roster__lock {
+  width: 11px;
+  height: 13px;
+  flex: none;
+  border: 2px solid var(--fui-ink-faint);
+  border-radius: 2px;
+  border-top-width: 1px;
+  position: relative;
+}
+
+.fui-roster__lock::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  width: 8px;
+  height: 7px;
+  margin-left: -4px;
+  border: 2px solid var(--fui-ink-faint);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+.fui-roster__empty {
+  padding: var(--fui-gap-lg);
+  text-align: center;
+  font-size: 13px;
+  color: var(--fui-ink-faint);
+}

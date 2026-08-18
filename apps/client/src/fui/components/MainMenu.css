@@ -1,0 +1,121 @@
+/* MainMenu — title screen with backdrop, logo and a stack of menu buttons. */
+
+.fui-mainmenu {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+  overflow: hidden;
+}
+
+.fui-mainmenu--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  min-height: 100vh;
+}
+
+.fui-mainmenu__bg {
+  position: absolute;
+  inset: 0;
+  background: var(--fui-backdrop-img) center / cover no-repeat;
+  /* A very slow drift keeps the title screen from feeling like a static image. */
+  animation: fui-menu-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes fui-menu-drift {
+  from {
+    transform: scale(1.04) translate(-0.8%, -0.4%);
+  }
+  to {
+    transform: scale(1.1) translate(0.8%, 0.4%);
+  }
+}
+
+.fui-mainmenu__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 40%, transparent 30%, rgba(0, 0, 0, 0.72) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.25) 40%, rgba(0, 0, 0, 0.8));
+}
+
+.fui-mainmenu__stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  padding: 48px 32px;
+}
+
+.fui-mainmenu[data-align='left'] .fui-mainmenu__stage {
+  align-items: flex-start;
+  padding-left: clamp(32px, 9vw, 140px);
+  text-align: left;
+}
+
+.fui-mainmenu__header {
+  text-align: center;
+}
+
+.fui-mainmenu[data-align='left'] .fui-mainmenu__header {
+  text-align: left;
+}
+
+.fui-mainmenu__logo {
+  width: min(460px, 70vw);
+  height: 150px;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.8));
+}
+
+.fui-mainmenu__title {
+  font-size: clamp(38px, 7vw, 76px);
+  line-height: 1.05;
+  letter-spacing: 0.1em;
+  color: var(--fui-ink);
+  text-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.95),
+    0 0 40px color-mix(in srgb, var(--fui-accent) 45%, transparent);
+}
+
+.fui-mainmenu__tagline {
+  margin-top: 10px;
+  font-family: var(--fui-font-body);
+  font-size: clamp(13px, 1.6vw, 17px);
+  font-style: italic;
+  letter-spacing: 0.16em;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 2px 6px #000;
+}
+
+.fui-mainmenu__rule {
+  height: 40px;
+  margin-top: 14px;
+  background: var(--fui-divider-img) center / contain no-repeat;
+  opacity: 0.85;
+}
+
+.fui-mainmenu__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: min(320px, 80vw);
+}
+
+.fui-mainmenu__foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--fui-gap);
+  padding: 14px 26px;
+  font-family: var(--fui-font-mono);
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+  text-shadow: 0 1px 3px #000;
+}

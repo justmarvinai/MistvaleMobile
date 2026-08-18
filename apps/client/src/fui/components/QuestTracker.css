@@ -1,0 +1,134 @@
+/* QuestTracker — compact HUD objective list. */
+
+.fui-tracker {
+  padding: 8px 12px;
+  border-left: 2px solid color-mix(in srgb, var(--fui-accent) 45%, transparent);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.12));
+  text-shadow: 0 1px 3px #000;
+}
+
+.fui-tracker__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.fui-tracker__caret {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid var(--fui-accent);
+  transform: rotate(90deg);
+  transition: transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-tracker.is-collapsed .fui-tracker__caret {
+  transform: rotate(0deg);
+}
+
+.fui-tracker__heading {
+  font-size: 10px;
+  color: var(--fui-accent-soft);
+}
+
+.fui-tracker__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 9px;
+}
+
+.fui-tracker.is-collapsed .fui-tracker__list {
+  display: none;
+}
+
+.fui-tracker__title {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--fui-font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-align: left;
+  color: var(--fui-quest-mark, var(--fui-ink));
+  cursor: pointer;
+}
+
+.fui-tracker__title:hover {
+  filter: brightness(1.25);
+}
+
+.fui-tracker__quest[data-kind='main'] {
+  --fui-quest-mark: var(--fui-gold-soft);
+}
+.fui-tracker__quest[data-kind='side'] {
+  --fui-quest-mark: var(--fui-ink);
+}
+.fui-tracker__quest[data-kind='daily'] {
+  --fui-quest-mark: #9cc6f0;
+}
+.fui-tracker__quest[data-kind='bounty'] {
+  --fui-quest-mark: #f0a49c;
+}
+
+.fui-tracker__objectives {
+  margin-top: 4px;
+}
+
+.fui-tracker__objective {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 1.5px 0 1.5px 10px;
+  font-size: 11.5px;
+  color: var(--fui-ink-dim);
+}
+
+.fui-tracker__objective::before {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  margin-left: -9px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.fui-tracker__objective.is-done {
+  color: var(--fui-success);
+  text-decoration: line-through;
+}
+
+.fui-tracker__otext {
+  flex: 1 1 auto;
+}
+
+.fui-tracker__count {
+  flex: none;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-tracker__objective.is-done .fui-tracker__count {
+  color: var(--fui-success);
+}
+
+.fui-tracker__ready {
+  margin-top: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-gold-soft);
+  animation: fui-pulse 2s ease-in-out infinite;
+}

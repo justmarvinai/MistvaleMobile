@@ -1,0 +1,99 @@
+/* Banner — nameplate ribbon for headers, unit names and objectives. */
+
+.fui-banner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  min-height: 38px;
+  padding: var(--fui-banner-pad);
+}
+
+.fui-banner__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-banner-bw);
+  border-image-source: var(--fui-banner-src);
+  border-image-slice: var(--fui-banner-sl) fill;
+  border-image-repeat: stretch;
+}
+
+/* The chevron ribbon needs its long right-hand point preserved, so its slice is
+   deliberately lopsided. */
+.fui-banner[data-variant='arrow'] > .fui-banner__art {
+  border-width: calc(40px * 0.34) calc(150px * 0.34) calc(40px * 0.34) calc(40px * 0.34);
+  border-image-source: var(--fui-img-banner-arrow);
+  border-image-slice: 40 150 40 40 fill;
+}
+
+.fui-banner[data-variant='arrow'] {
+  padding-right: 54px;
+}
+
+.fui-banner[data-variant='dark'] > .fui-banner__art {
+  border-image-source: var(--fui-img-banner-dark);
+  border-image-slice: 40 40 40 40 fill;
+  border-width: calc(40px * 0.34);
+}
+
+.fui-banner[data-size='sm'] {
+  min-height: 30px;
+  padding: 2px 16px;
+}
+
+.fui-banner[data-size='lg'] {
+  min-height: 52px;
+  padding: 8px 32px;
+}
+
+.fui-banner__icon {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
+}
+
+.fui-banner__text {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fui-banner[data-size='sm'] .fui-banner__text {
+  font-size: 12px;
+}
+
+.fui-banner[data-size='lg'] .fui-banner__text {
+  font-size: 19px;
+}
+
+.fui-banner__meta {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--fui-ink-dim);
+}
+
+.fui-banner[data-tone='gold'] .fui-banner__text {
+  color: var(--fui-gold-soft);
+}
+.fui-banner[data-tone='danger'] .fui-banner__text {
+  color: color-mix(in srgb, var(--fui-danger) 75%, var(--fui-ink));
+}
+.fui-banner[data-tone='accent'] .fui-banner__text {
+  color: var(--fui-accent-soft);
+}

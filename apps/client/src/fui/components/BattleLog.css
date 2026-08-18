@@ -1,0 +1,121 @@
+/* BattleLog — the scrolling record of what hit what, and for how much. */
+
+.fui-log {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.42);
+  overflow: hidden;
+}
+
+.fui-log__head {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap);
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.fui-log__title {
+  font-size: 10px;
+}
+
+.fui-log__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.fui-log__filter {
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: none;
+  color: var(--fui-ink-faint);
+  font-family: var(--fui-font-ui);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-log__filter.is-on {
+  opacity: 1;
+  border-color: var(--fui-accent);
+  color: var(--fui-accent-soft);
+}
+
+.fui-log__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 4px;
+  font-family: var(--fui-font-mono);
+  font-size: 11.5px;
+}
+
+.fui-log__turn {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  margin: 5px 6px 3px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}
+
+.fui-log__turn::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.fui-log__line {
+  --fui-log-ink: var(--fui-ink-dim);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px 8px;
+  border-left: 2px solid var(--fui-log-ink);
+  line-height: 1.45;
+  color: var(--fui-ink-dim);
+}
+
+.fui-log__line[data-kind='damage'] { --fui-log-ink: var(--fui-danger); }
+.fui-log__line[data-kind='crit'] { --fui-log-ink: var(--fui-rarity-legendary); }
+.fui-log__line[data-kind='heal'] { --fui-log-ink: var(--fui-success); }
+.fui-log__line[data-kind='buff'] { --fui-log-ink: var(--fui-info); }
+.fui-log__line[data-kind='debuff'] { --fui-log-ink: var(--fui-xp); }
+.fui-log__line[data-kind='death'] { --fui-log-ink: #6f6857; }
+.fui-log__line[data-kind='turn'] { --fui-log-ink: var(--fui-gold); }
+
+.fui-log__line[data-kind='crit'] {
+  background: rgba(255, 128, 0, 0.08);
+}
+
+.fui-log__line[data-kind='death'] {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.fui-log__actor {
+  font-weight: 700;
+  color: var(--fui-ink);
+  white-space: nowrap;
+}
+
+.fui-log__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.fui-log__value {
+  font-weight: 700;
+  color: var(--fui-log-ink);
+}

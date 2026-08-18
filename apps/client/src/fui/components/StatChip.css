@@ -1,0 +1,62 @@
+/* StatChip — the labelled stat atom used across rosters, gear and compare views. */
+
+.fui-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 9px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.3));
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.fui-chip[data-size='sm'] {
+  padding: 1px 6px;
+  font-size: 11px;
+  gap: 4px;
+}
+
+.fui-chip__glyph {
+  align-self: center;
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+  background-color: var(--fui-chip-ink, var(--fui-ink-dim));
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-chip__label {
+  font-size: 0.82em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}
+
+.fui-chip__value {
+  font-weight: 700;
+  color: var(--fui-chip-ink, var(--fui-ink));
+}
+
+.fui-chip[data-tone='accent'] { --fui-chip-ink: var(--fui-accent-soft); }
+.fui-chip[data-tone='gold'] { --fui-chip-ink: var(--fui-gold-soft); }
+.fui-chip[data-tone='good'] { --fui-chip-ink: var(--fui-success); }
+.fui-chip[data-tone='bad'] { --fui-chip-ink: var(--fui-danger); }
+.fui-chip[data-tone='info'] { --fui-chip-ink: var(--fui-info); }
+
+.fui-chip[data-tone='gold'] {
+  border-color: rgba(217, 164, 65, 0.45);
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.16), rgba(0, 0, 0, 0.3));
+}
+
+.fui-chip__delta {
+  font-size: 0.85em;
+  font-weight: 700;
+}
+
+.fui-chip__delta[data-dir='up'] { color: var(--fui-success); }
+.fui-chip__delta[data-dir='down'] { color: var(--fui-danger); }
+.fui-chip__delta[data-dir='flat'] { color: var(--fui-ink-faint); }

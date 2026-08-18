@@ -1,0 +1,155 @@
+/* Tooltip — rarity-tinted item card. Static by default; `.is-open` when bound
+   to a hover target and positioned by script. */
+
+.fui-tooltip {
+  position: relative;
+  display: block;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.65));
+}
+
+/* Positioned mode, used by attach() / showAt(). */
+.fui-tooltip[style*='left'] {
+  position: fixed;
+  z-index: 900;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-tooltip.is-open {
+  opacity: 1;
+}
+
+.fui-tooltip__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-surface-bw);
+  border-image-source: var(--fui-surface-src);
+  border-image-slice: var(--fui-surface-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-tooltip__body {
+  position: relative;
+  z-index: 1;
+  padding: 14px 16px;
+}
+
+/* Rarity-coloured title and edge glow. */
+.fui-tooltip__title {
+  font-size: 15px;
+  line-height: 1.25;
+  color: var(--fui-tip-rarity, var(--fui-ink));
+}
+
+.fui-tooltip[data-rarity='common'] {
+  --fui-tip-rarity: var(--fui-rarity-common);
+}
+.fui-tooltip[data-rarity='uncommon'] {
+  --fui-tip-rarity: var(--fui-rarity-uncommon);
+}
+.fui-tooltip[data-rarity='rare'] {
+  --fui-tip-rarity: var(--fui-rarity-rare);
+}
+.fui-tooltip[data-rarity='epic'] {
+  --fui-tip-rarity: var(--fui-rarity-epic);
+}
+.fui-tooltip[data-rarity='legendary'] {
+  --fui-tip-rarity: var(--fui-rarity-legendary);
+}
+.fui-tooltip[data-rarity='mythic'] {
+  --fui-tip-rarity: var(--fui-rarity-mythic);
+}
+
+.fui-tooltip[data-rarity] .fui-tooltip__fill {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--fui-tip-rarity) 45%, transparent));
+}
+
+.fui-tooltip__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--fui-gap-sm);
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--fui-ink-dim);
+}
+
+.fui-tooltip__slot {
+  color: var(--fui-ink-faint);
+}
+
+.fui-tooltip__stats {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+}
+
+.fui-tooltip__stats li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--fui-gap);
+  padding: 1.5px 0;
+}
+
+.fui-tooltip__stat-label {
+  color: var(--fui-ink-dim);
+}
+
+.fui-tooltip__stat-value {
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-tooltip__stats li[data-tone='good'] .fui-tooltip__stat-value {
+  color: var(--fui-success);
+}
+.fui-tooltip__stats li[data-tone='bad'] .fui-tooltip__stat-value {
+  color: var(--fui-danger);
+}
+.fui-tooltip__stats li[data-tone='magic'] .fui-tooltip__stat-value {
+  color: var(--fui-accent-soft);
+}
+
+.fui-tooltip__requires {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--fui-danger);
+}
+
+.fui-tooltip__flavor {
+  margin-top: 10px;
+  font-family: var(--fui-font-body);
+  font-size: 12.5px;
+  font-style: italic;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--fui-gold) 55%, var(--fui-ink-dim));
+}
+
+.fui-tooltip__price {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-tooltip__coin {
+  width: 15px;
+  height: 15px;
+  background: var(--fui-img-icon-coins) center / contain no-repeat;
+}
+
+.fui-tooltip__hint {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}

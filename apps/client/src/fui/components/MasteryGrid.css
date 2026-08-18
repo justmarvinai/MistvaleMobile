@@ -1,0 +1,156 @@
+/* MasteryGrid — the tiered passive board that sits on top of a skill tree. */
+
+.fui-mastery {
+  --fui-mastery-size: 46px;
+  --fui-mastery-cols: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap-sm);
+  padding: var(--fui-gap);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.fui-mastery__head,
+.fui-mastery__tier {
+  display: grid;
+  grid-template-columns: repeat(var(--fui-mastery-cols), 1fr);
+  gap: var(--fui-gap-sm);
+}
+
+.fui-mastery__branch {
+  --fui-mastery-ink: var(--fui-accent);
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--fui-mastery-ink);
+  font-family: var(--fui-font-display);
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-align: center;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fui-mastery-ink) 55%, var(--fui-ink));
+}
+
+.fui-mastery__board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap);
+}
+
+/* The connector between tiers is drawn by the row itself rather than by each
+   node, so a gap in a branch simply has no line through it. */
+.fui-mastery__tier {
+  position: relative;
+}
+
+.fui-mastery__tier + .fui-mastery__tier::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--fui-gap) * -1);
+  height: var(--fui-gap);
+  background:
+    repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(255, 255, 255, 0.09) 2px, rgba(255, 255, 255, 0.09) 3px);
+  mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  pointer-events: none;
+}
+
+.fui-mastery__node {
+  --fui-mastery-ink: var(--fui-accent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+.fui-mastery__node:disabled {
+  cursor: default;
+}
+
+.fui-mastery__icon {
+  position: relative;
+  width: var(--fui-mastery-size);
+  height: var(--fui-mastery-size);
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  /* An octagon reads as "board node" rather than "inventory slot", which keeps
+     the mastery grid visually distinct from the gear screen. */
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+  background: rgba(0, 0, 0, 0.5);
+  transition: background var(--fui-t) var(--fui-ease), box-shadow var(--fui-t) var(--fui-ease);
+}
+
+.fui-mastery__icon::after {
+  content: '';
+  position: absolute;
+  inset: 24%;
+  background-color: var(--fui-ink-faint);
+  mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+}
+
+.fui-mastery__node.is-active .fui-mastery__icon {
+  border-color: var(--fui-mastery-ink);
+  background: color-mix(in srgb, var(--fui-mastery-ink) 28%, rgba(0, 0, 0, 0.5));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--fui-mastery-ink) 45%, transparent);
+}
+
+.fui-mastery__node.is-active .fui-mastery__icon::after {
+  background-color: #fff;
+}
+
+.fui-mastery__node.is-maxed .fui-mastery__icon {
+  border-color: var(--fui-gold);
+  box-shadow: 0 0 12px rgba(217, 164, 65, 0.5);
+}
+
+.fui-mastery__node.is-keystone .fui-mastery__icon {
+  width: calc(var(--fui-mastery-size) * 1.2);
+  height: calc(var(--fui-mastery-size) * 1.2);
+  border-width: 3px;
+}
+
+.fui-mastery__node.is-locked {
+  opacity: 0.34;
+}
+
+.fui-mastery__node:not(:disabled):hover .fui-mastery__icon {
+  border-color: var(--fui-gold-soft);
+}
+
+.fui-mastery__rank {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--fui-ink-dim);
+}
+
+.fui-mastery__node.is-maxed .fui-mastery__rank {
+  color: var(--fui-gold-soft);
+}
+
+.fui-mastery__name {
+  font-size: 9.5px;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-align: center;
+  color: var(--fui-ink-faint);
+}
+
+.fui-mastery__gap {
+  display: block;
+}
+
+.fui-mastery__points {
+  padding-top: var(--fui-gap-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  text-align: center;
+  color: var(--fui-gold-soft);
+}

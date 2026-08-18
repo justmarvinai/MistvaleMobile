@@ -1,0 +1,40 @@
+/* Icon — square art box with rarity tinting and optional glow. */
+
+.fui-icon {
+  display: inline-block;
+  flex: none;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+
+.fui-icon[data-rarity] {
+  filter: drop-shadow(0 0 5px var(--fui-icon-glow, transparent))
+    drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+
+.fui-icon[data-rarity='common'] {
+  --fui-icon-glow: color-mix(in srgb, var(--fui-rarity-common) 60%, transparent);
+}
+.fui-icon[data-rarity='uncommon'] {
+  --fui-icon-glow: color-mix(in srgb, var(--fui-rarity-uncommon) 60%, transparent);
+}
+.fui-icon[data-rarity='rare'] {
+  --fui-icon-glow: color-mix(in srgb, var(--fui-rarity-rare) 70%, transparent);
+}
+.fui-icon[data-rarity='epic'] {
+  --fui-icon-glow: color-mix(in srgb, var(--fui-rarity-epic) 70%, transparent);
+}
+.fui-icon[data-rarity='legendary'] {
+  --fui-icon-glow: color-mix(in srgb, var(--fui-rarity-legendary) 75%, transparent);
+}
+.fui-icon[data-rarity='mythic'] {
+  --fui-icon-glow: color-mix(in srgb, var(--fui-rarity-mythic) 80%, transparent);
+}
+
+.fui-icon--glow {
+  animation: fui-glow 2.2s ease-in-out infinite;
+}
+
+.fui-icon--muted {
+  filter: grayscale(0.85) brightness(0.55);
+}

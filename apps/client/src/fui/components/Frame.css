@@ -1,0 +1,38 @@
+/* Frame — hollow decorative border around arbitrary content. */
+
+.fui-frame {
+  position: relative;
+  display: inline-flex;
+  --fui-frame-pad: 22px;
+}
+
+.fui-frame__art {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-frame-bw);
+  border-image-source: var(--fui-frame-src);
+  border-image-slice: var(--fui-frame-sl);
+  border-image-repeat: stretch;
+}
+
+.fui-frame[data-size='sm'] > .fui-frame__art {
+  border-width: var(--fui-frame-sm-bw);
+  border-image-source: var(--fui-frame-sm-src);
+  border-image-slice: var(--fui-frame-sm-sl);
+}
+
+.fui-frame__inner {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--fui-frame-pad);
+}
+
+.fui-frame[data-size='sm'] {
+  --fui-frame-pad: 12px;
+}

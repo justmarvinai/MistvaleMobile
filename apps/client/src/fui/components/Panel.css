@@ -1,0 +1,179 @@
+/* Panel — 9-sliced window built from stacked art layers.
+   The art lives on absolutely-positioned children rather than on the root's own
+   border, because `inset: 0` resolves against the PADDING box: put a
+   border-image on the root and every overlay silently shifts inward by the
+   border width. Separate layers keep fill and frame in exact registration. */
+
+.fui-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  min-height: 90px;
+  isolation: isolate;
+}
+
+.fui-panel__fill,
+.fui-panel__frame {
+  position: absolute;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-image-repeat: stretch;
+}
+
+/* Fill sits behind everything. */
+.fui-panel__fill {
+  inset: 0;
+  z-index: 0;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+}
+
+/* Ornament frame is drawn over the fill and may overhang it, matching how the
+   source art was painted. */
+.fui-panel__frame {
+  inset: var(--fui-panel-frame-inset, 0);
+  z-index: 4;
+  border-width: var(--fui-panel-frame-bw);
+  border-image-source: var(--fui-panel-frame-src);
+  border-image-slice: var(--fui-panel-frame-sl);
+}
+
+.fui-panel[data-variant='alt'] > .fui-panel__fill {
+  border-width: var(--fui-panel-alt-fill-bw);
+  border-image-source: var(--fui-panel-alt-fill-src);
+  border-image-slice: var(--fui-panel-alt-fill-sl) fill;
+}
+
+.fui-panel[data-variant='alt'] > .fui-panel__frame {
+  inset: var(--fui-panel-alt-frame-inset, 0);
+  border-width: var(--fui-panel-alt-frame-bw);
+  border-image-source: var(--fui-panel-alt-frame-src);
+  border-image-slice: var(--fui-panel-alt-frame-sl);
+}
+
+.fui-panel[data-variant='surface'] > .fui-panel__fill {
+  border-width: var(--fui-surface-bw);
+  border-image-source: var(--fui-surface-src);
+  border-image-slice: var(--fui-surface-sl) fill;
+}
+
+.fui-panel[data-variant='bare'] > .fui-panel__fill {
+  border: 0;
+  background: var(--fui-surface-flat);
+  border-radius: var(--fui-radius);
+}
+
+/* Padding that keeps content clear of the frame ornament. Ornament depth is
+   not uniform — the arched window is far deeper at the top — so the inset is
+   directional. */
+.fui-panel {
+  --fui-pad-t: var(--fui-panel-pad-t);
+  --fui-pad-x: var(--fui-panel-pad-x);
+  --fui-pad-b: var(--fui-panel-pad-b);
+}
+
+.fui-panel[data-variant='alt'] {
+  --fui-pad-t: var(--fui-panel-alt-pad-t);
+  --fui-pad-x: var(--fui-panel-alt-pad-x);
+  --fui-pad-b: var(--fui-panel-alt-pad-b);
+}
+
+.fui-panel[data-variant='surface'],
+.fui-panel[data-variant='bare'] {
+  --fui-pad-t: var(--fui-surface-pad, 14px);
+  --fui-pad-x: var(--fui-surface-pad, 14px);
+  --fui-pad-b: var(--fui-surface-pad, 14px);
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.fui-panel__head {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--fui-gap);
+  padding: var(--fui-pad-t) var(--fui-pad-x) 0;
+}
+
+.fui-panel__heading {
+  min-width: 0;
+}
+
+.fui-panel__title {
+  font-size: clamp(15px, 1.4vw, 19px);
+  color: var(--fui-ink);
+}
+
+.fui-panel__subtitle {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.fui-panel__head::after {
+  content: '';
+  position: absolute;
+  left: var(--fui-pad-x);
+  right: var(--fui-pad-x);
+  bottom: -7px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fui-accent) 55%, transparent),
+    transparent
+  );
+}
+
+.fui-panel__close {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: -3px -6px 0 0;
+  padding: 0;
+  border: 0;
+  background: var(--fui-btn-close-img) center / contain no-repeat;
+  cursor: pointer;
+  transition:
+    transform var(--fui-t-fast) var(--fui-ease),
+    filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-panel__close:hover {
+  transform: scale(1.09);
+  filter: brightness(1.22);
+}
+
+.fui-panel__close:active {
+  transform: scale(0.94);
+}
+
+/* ── Body & footer ────────────────────────────────────────────────────────── */
+.fui-panel__body {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--fui-pad-t) var(--fui-pad-x) var(--fui-pad-b);
+}
+
+.fui-panel__head + .fui-panel__body {
+  padding-top: calc(var(--fui-pad-t) * 0.42);
+}
+
+.fui-panel__body:has(+ .fui-panel__foot) {
+  padding-bottom: calc(var(--fui-pad-b) * 0.35);
+}
+
+.fui-panel__foot {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--fui-gap-sm);
+  padding: 0 var(--fui-pad-x) var(--fui-pad-b);
+}

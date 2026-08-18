@@ -1,0 +1,49 @@
+/* Glyph — monochrome vector icon painted through a CSS mask.
+   The shape comes from the SVG's alpha and the colour from `currentColor`, so
+   one file covers every state and tint the interface needs. */
+
+.fui-glyph {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  background-color: currentColor;
+  -webkit-mask-image: var(--fui-glyph-src);
+  mask-image: var(--fui-glyph-src);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.fui-glyph[data-tone='ink'] {
+  color: var(--fui-ink);
+}
+.fui-glyph[data-tone='dim'] {
+  color: var(--fui-ink-dim);
+}
+.fui-glyph[data-tone='accent'] {
+  color: var(--fui-accent);
+}
+.fui-glyph[data-tone='gold'] {
+  color: var(--fui-gold);
+}
+.fui-glyph[data-tone='danger'] {
+  color: var(--fui-danger);
+}
+.fui-glyph[data-tone='success'] {
+  color: var(--fui-success);
+}
+.fui-glyph[data-tone='health'] {
+  color: var(--fui-health);
+}
+.fui-glyph[data-tone='mana'] {
+  color: var(--fui-mana);
+}
+
+/* A mask has no drop shadow of its own, so the halo is a same-colour blur
+   behind the shape. */
+.fui-glyph--glow {
+  filter: drop-shadow(0 0 5px currentColor);
+}

@@ -1,0 +1,170 @@
+/* ItemCard — horizontal item row shared by shops, loot and crafting. */
+
+.fui-itemcard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 13px;
+  cursor: pointer;
+  transition: transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-itemcard__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: var(--fui-radius);
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid var(--fui-card-rarity, transparent);
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-itemcard:hover .fui-itemcard__fill {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.fui-itemcard.is-selected .fui-itemcard__fill {
+  background: color-mix(in srgb, var(--fui-accent) 20%, transparent);
+}
+
+.fui-itemcard.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.fui-itemcard--dense {
+  padding: 5px 10px;
+  gap: 9px;
+}
+
+/* Rarity accent stripe + name colour. */
+.fui-itemcard[data-rarity='common'] {
+  --fui-card-rarity: var(--fui-rarity-common);
+}
+.fui-itemcard[data-rarity='uncommon'] {
+  --fui-card-rarity: var(--fui-rarity-uncommon);
+}
+.fui-itemcard[data-rarity='rare'] {
+  --fui-card-rarity: var(--fui-rarity-rare);
+}
+.fui-itemcard[data-rarity='epic'] {
+  --fui-card-rarity: var(--fui-rarity-epic);
+}
+.fui-itemcard[data-rarity='legendary'] {
+  --fui-card-rarity: var(--fui-rarity-legendary);
+}
+.fui-itemcard[data-rarity='mythic'] {
+  --fui-card-rarity: var(--fui-rarity-mythic);
+}
+
+.fui-itemcard__art {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.fui-itemcard--dense .fui-itemcard__art {
+  width: 32px;
+  height: 32px;
+}
+
+.fui-itemcard__icon {
+  position: absolute;
+  inset: 3px;
+  background: center / contain no-repeat;
+}
+
+.fui-itemcard__qty {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fui-ink);
+  text-shadow: 0 1px 2px #000, 0 0 3px #000;
+}
+
+.fui-itemcard__body {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.fui-itemcard__name {
+  overflow: hidden;
+  font-family: var(--fui-font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fui-card-rarity, var(--fui-ink));
+}
+
+.fui-itemcard__meta {
+  display: flex;
+  gap: 9px;
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-itemcard__detail {
+  color: var(--fui-success);
+}
+
+.fui-itemcard__price {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-itemcard__coin {
+  width: 15px;
+  height: 15px;
+  background: var(--fui-img-icon-coins) center / contain no-repeat;
+}
+
+.fui-itemcard__action {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  padding: 5px 14px;
+  border: 1px solid color-mix(in srgb, var(--fui-accent) 45%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--fui-accent) 18%, rgba(0, 0, 0, 0.45));
+  font-family: var(--fui-font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-ink);
+  cursor: pointer;
+  transition:
+    background var(--fui-t-fast) var(--fui-ease),
+    filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-itemcard__action:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--fui-accent) 34%, rgba(0, 0, 0, 0.4));
+  filter: brightness(1.15);
+}
+
+.fui-itemcard__action:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

@@ -1,0 +1,150 @@
+/* EventBanner — the live-ops tile an events hub is tiled from. */
+
+.fui-event {
+  --fui-event-ink: var(--fui-accent);
+  --fui-event-p: 0;
+  --fui-event-pad: var(--fui-gap);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 128px;
+  padding: var(--fui-event-pad);
+  border: 1px solid color-mix(in srgb, var(--fui-event-ink) 45%, rgba(0, 0, 0, 0.6));
+  border-radius: var(--fui-radius);
+  background: rgba(10, 10, 14, 0.9);
+  overflow: hidden;
+}
+
+.fui-event[data-size='sm'] { min-height: 92px; --fui-event-pad: var(--fui-gap-sm); }
+.fui-event[data-size='lg'] { min-height: 180px; --fui-event-pad: var(--fui-gap-lg); }
+
+/* Key art sits behind a gradient scrim so the title stays readable no matter
+   what the artwork is doing underneath. */
+.fui-event__art {
+  position: absolute;
+  inset: 0;
+  background: var(--fui-event-art, none) center / cover no-repeat;
+  opacity: 0.55;
+}
+
+.fui-event__art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    92deg,
+    rgba(6, 6, 10, 0.94) 12%,
+    rgba(6, 6, 10, 0.5) 62%,
+    color-mix(in srgb, var(--fui-event-ink) 25%, transparent) 100%
+  );
+}
+
+.fui-event__tag {
+  position: absolute;
+  top: 14px;
+  right: -42px;
+  z-index: 2;
+  width: 150px;
+  padding: 3px 0;
+  transform: rotate(45deg);
+  background: var(--fui-event-ink);
+  color: #10100c;
+  font-family: var(--fui-font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.fui-event__body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fui-event__title {
+  font-size: 17px;
+  color: var(--fui-ink);
+}
+
+.fui-event[data-size='sm'] .fui-event__title { font-size: 14px; }
+.fui-event[data-size='lg'] .fui-event__title { font-size: 22px; }
+
+.fui-event__subtitle {
+  max-width: 30ch;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--fui-ink-dim);
+}
+
+.fui-event__time {
+  margin-top: auto;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: var(--fui-ink-faint);
+}
+
+.fui-event.is-urgent .fui-event__time {
+  color: var(--fui-warn);
+  animation: fui-pulse 2s var(--fui-ease) infinite;
+}
+
+.fui-event.is-over {
+  filter: grayscale(0.8);
+  opacity: 0.6;
+}
+
+.fui-event__progress {
+  position: relative;
+  z-index: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.fui-event__fill {
+  display: block;
+  width: calc(var(--fui-event-p) * 100%);
+  height: 100%;
+  border-radius: 3px;
+  background: var(--fui-event-ink);
+  box-shadow: 0 0 7px var(--fui-event-ink);
+  transition: width var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-event__progress-label {
+  position: relative;
+  z-index: 1;
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-event__action {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  margin-top: 5px;
+  padding: 6px 18px;
+  border: 1px solid var(--fui-event-ink);
+  border-radius: var(--fui-radius);
+  background: color-mix(in srgb, var(--fui-event-ink) 26%, transparent);
+  color: var(--fui-ink);
+  font-family: var(--fui-font-ui);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-event__action:hover {
+  background: color-mix(in srgb, var(--fui-event-ink) 48%, transparent);
+}

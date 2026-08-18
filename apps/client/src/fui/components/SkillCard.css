@@ -1,0 +1,179 @@
+/* SkillCard — one champion ability: art, cooldown, level, effects. */
+
+.fui-skill {
+  --fui-skill-art: 74px;
+  display: flex;
+  gap: var(--fui-gap);
+  padding: var(--fui-gap);
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.32));
+}
+
+.fui-skill--compact {
+  --fui-skill-art: 52px;
+  gap: var(--fui-gap-sm);
+  padding: var(--fui-gap-sm);
+}
+
+/* The signature ability earns the gold rim — it is the one players build around. */
+.fui-skill--ultimate {
+  border-color: color-mix(in srgb, var(--fui-gold) 55%, transparent);
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.12), rgba(0, 0, 0, 0.34));
+}
+
+.fui-skill__art {
+  position: relative;
+  width: var(--fui-skill-art);
+  height: var(--fui-skill-art);
+  flex: none;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.5) center / cover no-repeat;
+  overflow: hidden;
+}
+
+.fui-skill--ultimate .fui-skill__art {
+  border-color: var(--fui-gold);
+  box-shadow: 0 0 10px rgba(217, 164, 65, 0.35);
+}
+
+/* A conic sweep over the art, exactly like the action bar's cooldown, so the
+   two read as the same language. */
+.fui-skill__sweep {
+  --fui-skill-p: 0;
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(
+    rgba(0, 0, 0, 0.78) calc(var(--fui-skill-p) * 360deg),
+    transparent calc(var(--fui-skill-p) * 360deg)
+  );
+  transition: background var(--fui-t) linear;
+}
+
+.fui-skill__cd {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--fui-font-display);
+  font-size: calc(var(--fui-skill-art) * 0.4);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px #000;
+}
+
+.fui-skill__passive {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1px 0;
+  background: rgba(0, 0, 0, 0.72);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--fui-accent-soft);
+}
+
+.fui-skill__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fui-skill__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-skill__name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--fui-ink);
+}
+
+.fui-skill--ultimate .fui-skill__name {
+  color: var(--fui-gold-soft);
+}
+
+.fui-skill__level {
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-skill__level[data-maxed='true'] {
+  color: var(--fui-success);
+}
+
+.fui-skill__mult {
+  font-family: var(--fui-font-mono);
+  font-size: 11px;
+  color: var(--fui-accent-soft);
+}
+
+.fui-skill__desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.fui-skill__effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.fui-skill__effect {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+}
+
+.fui-skill__effect[data-kind='buff'] {
+  border-color: color-mix(in srgb, var(--fui-success) 55%, transparent);
+  background: color-mix(in srgb, var(--fui-success) 15%, transparent);
+  color: var(--fui-success);
+}
+
+.fui-skill__effect[data-kind='debuff'] {
+  border-color: color-mix(in srgb, var(--fui-danger) 55%, transparent);
+  background: color-mix(in srgb, var(--fui-danger) 15%, transparent);
+  color: #f0897d;
+}
+
+.fui-skill__effect-glyph {
+  width: 11px;
+  height: 11px;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-skill__turns {
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+.fui-skill__foot {
+  display: flex;
+  gap: var(--fui-gap);
+  margin-top: 2px;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}
+
+.fui-skill__books {
+  color: var(--fui-gold);
+}

@@ -1,0 +1,210 @@
+/* ArtifactCard — one gear piece with main stat, substats and roll pips. */
+
+.fui-artifact {
+  --fui-art-rarity: var(--fui-rarity-common);
+  --fui-art-set: var(--fui-accent);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-gap-sm);
+  width: 236px;
+  padding: var(--fui-gap-sm) 10px 10px;
+  border: 1px solid color-mix(in srgb, var(--fui-art-rarity) 45%, rgba(0, 0, 0, 0.6));
+  border-radius: var(--fui-radius);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fui-art-rarity) 14%, transparent),
+    rgba(0, 0, 0, 0.42)
+  );
+}
+
+.fui-artifact[data-rarity='uncommon'] { --fui-art-rarity: var(--fui-rarity-uncommon); }
+.fui-artifact[data-rarity='rare'] { --fui-art-rarity: var(--fui-rarity-rare); }
+.fui-artifact[data-rarity='epic'] { --fui-art-rarity: var(--fui-rarity-epic); }
+.fui-artifact[data-rarity='legendary'] { --fui-art-rarity: var(--fui-rarity-legendary); }
+.fui-artifact[data-rarity='mythic'] { --fui-art-rarity: var(--fui-rarity-mythic); }
+
+.fui-artifact.is-selectable {
+  cursor: pointer;
+  transition: transform var(--fui-t-fast) var(--fui-ease), box-shadow var(--fui-t) var(--fui-ease);
+}
+
+.fui-artifact.is-selectable:hover {
+  transform: translateY(-2px);
+}
+
+.fui-artifact.is-selected {
+  box-shadow:
+    0 0 0 2px var(--fui-art-rarity),
+    0 0 14px color-mix(in srgb, var(--fui-art-rarity) 50%, transparent);
+}
+
+.fui-artifact__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-artifact__art {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border: 1px solid color-mix(in srgb, var(--fui-art-rarity) 60%, rgba(0, 0, 0, 0.6));
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.45) center / cover no-repeat;
+}
+
+.fui-artifact__level {
+  position: absolute;
+  right: -3px;
+  bottom: -4px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid color-mix(in srgb, var(--fui-art-rarity) 60%, transparent);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-artifact__title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fui-artifact__name {
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  line-height: 1.25;
+  color: color-mix(in srgb, var(--fui-art-rarity) 60%, var(--fui-ink));
+}
+
+.fui-artifact__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.fui-artifact__slot,
+.fui-artifact__set {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.fui-artifact__slot {
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--fui-ink-faint);
+}
+
+.fui-artifact__slot-glyph {
+  width: 10px;
+  height: 10px;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-artifact__set {
+  background: color-mix(in srgb, var(--fui-art-set) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fui-art-set) 50%, transparent);
+  color: color-mix(in srgb, var(--fui-art-set) 55%, var(--fui-ink));
+}
+
+.fui-artifact__lock {
+  position: relative;
+  width: 10px;
+  height: 12px;
+  flex: none;
+  margin-top: 3px;
+  border: 2px solid var(--fui-gold);
+  border-radius: 2px;
+}
+
+.fui-artifact__lock::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  width: 8px;
+  height: 7px;
+  margin-left: -4px;
+  border: 2px solid var(--fui-gold);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+.fui-artifact__main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.fui-artifact__main-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}
+
+.fui-artifact__main-value {
+  font-family: var(--fui-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-artifact__subs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fui-artifact__sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.fui-artifact__sub-label {
+  color: var(--fui-ink-dim);
+}
+
+/* Roll pips are the whole point of the substat line: they say how much of this
+   number came from upgrades rather than the initial roll. */
+.fui-artifact__rolls {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.fui-artifact__roll {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--fui-gold);
+  box-shadow: 0 0 3px rgba(217, 164, 65, 0.6);
+}
+
+.fui-artifact__sub-value {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-artifact__equipped {
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  color: var(--fui-accent-soft);
+}

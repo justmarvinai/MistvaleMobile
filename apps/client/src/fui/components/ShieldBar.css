@@ -1,0 +1,87 @@
+/* ShieldBar — health with an absorb layer riding on top of it. */
+
+.fui-shieldbar {
+  --fui-shield-h: 18px;
+  --fui-shield-ink: var(--fui-health);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+
+.fui-shieldbar[data-kind='mana'] { --fui-shield-ink: var(--fui-mana); }
+.fui-shieldbar[data-kind='stamina'] { --fui-shield-ink: var(--fui-stamina); }
+.fui-shieldbar[data-kind='xp'] { --fui-shield-ink: var(--fui-xp); }
+.fui-shieldbar[data-kind='rage'] { --fui-shield-ink: var(--fui-rage); }
+.fui-shieldbar[data-kind='neutral'] { --fui-shield-ink: var(--fui-neutral); }
+
+.fui-shieldbar__label {
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fui-ink-dim);
+}
+
+.fui-shieldbar__track {
+  position: relative;
+  height: var(--fui-shield-h);
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+
+.fui-shieldbar__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fui-shield-ink) 70%, white),
+    var(--fui-shield-ink)
+  );
+  transition: width var(--fui-t) var(--fui-ease);
+}
+
+/* The shield sits past the health fill instead of over it, so the player reads
+   "620 health, plus 240 of barrier" rather than one ambiguous length. */
+.fui-shieldbar__shield {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.75) 0 3px,
+      rgba(180, 220, 255, 0.55) 3px 6px
+    );
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.5);
+  transition: width var(--fui-t) var(--fui-ease), left var(--fui-t) var(--fui-ease);
+}
+
+.fui-shieldbar__locked {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.55) 0 4px,
+    rgba(80, 20, 20, 0.55) 4px 8px
+  );
+  pointer-events: none;
+}
+
+.fui-shieldbar__numbers {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--fui-shield-h) * 0.62);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+}

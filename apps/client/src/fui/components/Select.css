@@ -1,0 +1,168 @@
+/* Select — dropdown with icon + hint support that native <option> cannot do. */
+
+.fui-select {
+  position: relative;
+  display: block;
+  width: 240px;
+}
+
+.fui-select__label {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--fui-font-ui);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-ink-dim);
+}
+
+.fui-select__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 6px 16px;
+  border: 0;
+  background: none;
+  font-family: var(--fui-font-ui);
+  font-size: 13px;
+  color: var(--fui-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.fui-select__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-btn-ghost-bw);
+  border-image-source: var(--fui-btn-ghost-src);
+  border-image-slice: var(--fui-btn-ghost-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-select__trigger:hover:not(:disabled) {
+  filter: brightness(1.18);
+}
+
+.fui-select__trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.fui-select__icon {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: center / contain no-repeat;
+}
+
+.fui-select__value {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fui-select__value.is-placeholder {
+  color: var(--fui-ink-faint);
+}
+
+.fui-select__caret {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--fui-ink-dim);
+  transition: transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-select.is-open .fui-select__caret {
+  transform: rotate(180deg);
+}
+
+/* ── Option list ──────────────────────────────────────────────────────────── */
+.fui-select__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: none;
+  max-height: 260px;
+  padding: 5px;
+  border: 1px solid color-mix(in srgb, var(--fui-accent) 32%, rgba(0, 0, 0, 0.7));
+  border-radius: var(--fui-radius);
+  background: var(--fui-surface-flat);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(3px);
+}
+
+.fui-select.is-open .fui-select__list {
+  display: block;
+  animation: fui-rise 140ms var(--fui-ease);
+}
+
+.fui-select__option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  font-family: var(--fui-font-ui);
+  font-size: 13px;
+  color: var(--fui-ink-dim);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--fui-t-fast) var(--fui-ease),
+    color var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-select__option:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--fui-accent) 20%, transparent);
+  color: var(--fui-ink);
+}
+
+.fui-select__option.is-selected {
+  background: color-mix(in srgb, var(--fui-accent) 28%, transparent);
+  color: var(--fui-ink);
+}
+
+.fui-select__option:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.fui-select__opt-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  background: center / contain no-repeat;
+}
+
+.fui-select__opt-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fui-select__opt-text small {
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}

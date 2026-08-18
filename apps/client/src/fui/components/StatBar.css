@@ -1,0 +1,148 @@
+/* StatBar — 9-sliced track with an animated fill and a lagging damage trail. */
+
+.fui-bar {
+  position: relative;
+  display: block;
+  width: 260px;
+  height: var(--fui-bar-h);
+}
+
+/* Track artwork, behind the fill. */
+.fui-bar__track {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-bar-track-bw);
+  border-image-source: var(--fui-bar-track-src);
+  border-image-slice: var(--fui-bar-track-sl) fill;
+  border-image-repeat: stretch;
+}
+
+/* The groove the fill sits in, nudged onto the painted recess. */
+.fui-bar__well {
+  position: absolute;
+  inset: var(--fui-bar-inset-y) var(--fui-bar-inset-x);
+  z-index: 1;
+  overflow: hidden;
+  border-radius: var(--fui-bar-radius, 999px);
+}
+
+.fui-bar__fill,
+.fui-bar__trail {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 100%;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-bar-fill-bw);
+  border-image-slice: var(--fui-bar-fill-sl) fill;
+  border-image-repeat: stretch;
+  transition: width var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-bar__fill {
+  z-index: 2;
+  border-image-source: var(--fui-bar-fill-health-src);
+}
+
+/* The ghost left behind when you take damage. */
+.fui-bar__trail {
+  z-index: 1;
+  border: 0;
+  background: color-mix(in srgb, var(--fui-danger) 70%, transparent);
+  transition: width var(--fui-t-slow) var(--fui-ease) 60ms;
+}
+
+.fui-bar--noanim .fui-bar__fill,
+.fui-bar--noanim .fui-bar__trail {
+  transition: none;
+}
+
+/* ── Resource kinds ───────────────────────────────────────────────────────── */
+.fui-bar[data-kind='mana'] .fui-bar__fill {
+  border-image-source: var(--fui-bar-fill-mana-src);
+}
+
+.fui-bar[data-kind='stamina'] .fui-bar__fill,
+.fui-bar[data-kind='xp'] .fui-bar__fill {
+  border-image-source: var(--fui-bar-fill-stamina-src);
+}
+
+.fui-bar[data-kind='xp'] .fui-bar__fill {
+  filter: hue-rotate(255deg) saturate(1.25);
+}
+
+.fui-bar[data-kind='rage'] .fui-bar__fill {
+  border-image-source: var(--fui-bar-fill-health-src);
+  filter: hue-rotate(-105deg) saturate(1.5) brightness(1.05);
+}
+
+.fui-bar[data-kind='neutral'] .fui-bar__fill {
+  border-image-source: var(--fui-bar-fill-health-src);
+  filter: grayscale(0.9) brightness(1.1);
+}
+
+/* ── Segment pips ─────────────────────────────────────────────────────────── */
+.fui-bar__segments {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent calc(100% / var(--fui-seg) - 2px),
+    rgba(0, 0, 0, 0.75) calc(100% / var(--fui-seg) - 2px),
+    rgba(0, 0, 0, 0.75) calc(100% / var(--fui-seg))
+  );
+}
+
+/* ── Readout ──────────────────────────────────────────────────────────────── */
+.fui-bar__text {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fui-gap-sm);
+  padding: 0 10px;
+  pointer-events: none;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 5px rgba(0, 0, 0, 0.9);
+}
+
+.fui-bar__label {
+  font-family: var(--fui-font-ui);
+  text-transform: uppercase;
+  color: var(--fui-ink-dim);
+}
+
+.fui-bar__value {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+/* ── Danger state ─────────────────────────────────────────────────────────── */
+.fui-bar--danger .fui-bar__fill {
+  animation: fui-pulse 900ms ease-in-out infinite;
+}
+
+/* ── Compact modifier for party rows and nameplates ───────────────────────── */
+.fui-bar--compact {
+  min-height: calc(var(--fui-bar-h) * 0.62);
+  width: 100%;
+}
+
+.fui-bar--compact .fui-bar__text {
+  font-size: 9px;
+  padding: 0 6px;
+}

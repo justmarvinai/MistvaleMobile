@@ -1,0 +1,214 @@
+/* AchievementList — the ledger behind the unlock toast. */
+
+.fui-achievements {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+}
+
+.fui-achievements__head {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap);
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.fui-achievements__title {
+  font-size: 10px;
+}
+
+.fui-achievements__score {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-achievements__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-achievements__row {
+  --fui-ach-p: 0;
+  --fui-ach-ink: var(--fui-accent);
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap);
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.fui-achievements__row:last-child {
+  border-bottom: 0;
+}
+
+.fui-achievements__row[data-state='ready'] {
+  --fui-ach-ink: var(--fui-gold);
+  background: rgba(217, 164, 65, 0.07);
+}
+
+.fui-achievements__row[data-state='claimed'] {
+  --fui-ach-ink: var(--fui-success);
+  opacity: 0.62;
+}
+
+.fui-achievements__row[data-state='open'] .fui-achievements__badge::after {
+  opacity: 0.7;
+}
+
+.fui-achievements__badge {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  /* A shield-ish octagon, so an achievement badge never reads as an item slot.
+     The clip-path eats a border, so the shape is carried by its fill. */
+  clip-path: polygon(50% 0, 90% 18%, 100% 58%, 50% 100%, 0 58%, 10% 18%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fui-ach-ink) 46%, transparent),
+    color-mix(in srgb, var(--fui-ach-ink) 14%, rgba(0, 0, 0, 0.55))
+  );
+}
+
+.fui-achievements__badge::after {
+  content: '';
+  position: absolute;
+  inset: 26% 26% 30%;
+  background-color: #fff;
+  mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+}
+
+.fui-achievements__row[data-state='ready'] .fui-achievements__badge {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--fui-gold) 60%, transparent);
+}
+
+.fui-achievements__tier {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  transform: translateX(-50%);
+  padding: 0 4px;
+  border-radius: 6px;
+  background: #14141a;
+  font-family: var(--fui-font-display);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--fui-ach-ink);
+}
+
+.fui-achievements__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fui-achievements__name {
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: var(--fui-ink);
+}
+
+.fui-achievements__desc {
+  font-size: 11.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-achievements__track {
+  position: relative;
+  height: 13px;
+  margin-top: 2px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.fui-achievements__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--fui-ach-p) * 100%);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--fui-ach-ink) 70%, transparent);
+  transition: width var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-achievements__count {
+  position: relative;
+  display: block;
+  line-height: 13px;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--fui-ink);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.fui-achievements__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex: none;
+}
+
+.fui-achievements__reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-achievements__reward-art {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.4) center / contain no-repeat;
+}
+
+.fui-achievements__points {
+  font-size: 10px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-achievements__claim {
+  padding: 4px 13px;
+  border: 1px solid var(--fui-gold);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.4), rgba(217, 164, 65, 0.14));
+  color: var(--fui-gold-soft);
+  font-family: var(--fui-font-ui);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-achievements__claim:hover {
+  filter: brightness(1.28);
+}
+
+.fui-achievements__claimed {
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fui-success);
+}
+
+.fui-achievements__empty {
+  padding: var(--fui-gap-lg);
+  text-align: center;
+  font-size: 13px;
+  color: var(--fui-ink-faint);
+}

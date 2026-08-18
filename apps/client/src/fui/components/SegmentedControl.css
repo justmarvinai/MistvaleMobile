@@ -1,0 +1,112 @@
+/* SegmentedControl — a one-of-N switch that keeps every option visible. */
+
+.fui-seg {
+  --fui-seg-count: 1;
+  --fui-seg-index: 0;
+  --fui-seg-h: 34px;
+  --fui-seg-pad: 14px;
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  padding: 3px;
+  gap: 0;
+  background: rgba(0, 0, 0, 0.46);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: calc(var(--fui-seg-h) / 2 + 3px);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.fui-seg[data-size='sm'] { --fui-seg-h: 26px; --fui-seg-pad: 10px; font-size: 12px; }
+.fui-seg[data-size='lg'] { --fui-seg-h: 44px; --fui-seg-pad: 20px; font-size: 16px; }
+
+.fui-seg--block {
+  display: flex;
+  width: 100%;
+}
+
+.fui-seg--block .fui-seg__item {
+  flex: 1;
+}
+
+/* One thumb slides between the segments, so selection reads as a single
+   travelling object rather than two independent fades. */
+.fui-seg__thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  /* Equal-share fallback, correct for `block` and close enough for the
+     pre-rendered snapshot; replaced by measured values once laid out. */
+  width: calc((100% - 6px) / var(--fui-seg-count));
+  transform: translateX(calc(100% * var(--fui-seg-index)));
+  border-radius: calc(var(--fui-seg-h) / 2);
+  background: linear-gradient(180deg, var(--fui-accent) 0%, var(--fui-accent-deep) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 2px 5px rgba(0, 0, 0, 0.5);
+  transition:
+    transform var(--fui-t) var(--fui-ease),
+    width var(--fui-t) var(--fui-ease);
+  pointer-events: none;
+}
+
+.fui-seg.is-measured .fui-seg__thumb {
+  width: var(--fui-seg-w);
+  transform: translateX(var(--fui-seg-x));
+}
+
+.fui-seg__item {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--fui-seg-h);
+  padding: 0 var(--fui-seg-pad);
+  border: 0;
+  background: none;
+  border-radius: calc(var(--fui-seg-h) / 2);
+  font-family: var(--fui-font-ui);
+  font-size: inherit;
+  letter-spacing: 0.05em;
+  color: var(--fui-ink-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--fui-t) var(--fui-ease);
+}
+
+.fui-seg__item:hover:not(:disabled):not(.is-on) {
+  color: var(--fui-ink);
+}
+
+.fui-seg__item.is-on {
+  color: var(--fui-btn-ink, #fff);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.fui-seg__item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fui-seg__glyph {
+  width: 1.1em;
+  height: 1.1em;
+  background-color: currentColor;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  flex: none;
+}
+
+.fui-seg__badge {
+  min-width: 17px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--fui-danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+}

@@ -1,0 +1,87 @@
+/* ShopPanel — merchant window with category tabs, stock list and purse. */
+
+.fui-shop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.fui-shop__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-shop__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--fui-gap);
+  padding: 22px 26px 12px;
+}
+
+.fui-shop__title {
+  font-size: 18px;
+}
+
+.fui-shop__merchant {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.fui-shop__purse {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.fui-shop__coin {
+  width: 18px;
+  height: 18px;
+  background: var(--fui-img-icon-coins) center / contain no-repeat;
+}
+
+.fui-shop__gold {
+  font-family: var(--fui-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-shop__tabs {
+  position: relative;
+  z-index: 1;
+  padding: 0 22px;
+}
+
+.fui-shop__list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 0;
+  padding: 12px 22px 24px;
+}
+
+.fui-shop__empty {
+  padding: 26px 4px;
+  font-size: 13px;
+  font-style: italic;
+  text-align: center;
+}

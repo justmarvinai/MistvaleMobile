@@ -186,6 +186,12 @@ importers:
         specifier: ^4.19.2
         version: 4.23.12
 
+  tools/fui-vendor:
+    devDependencies:
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.12
+
   tools/icon-fetch:
     devDependencies:
       tsx:

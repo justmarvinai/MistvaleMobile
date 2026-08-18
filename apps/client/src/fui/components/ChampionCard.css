@@ -1,0 +1,288 @@
+/* ChampionCard — the collection card gacha and squad-RPG games are built on.
+   Everything scales from --fui-champ-w so one card works from a 96px roster
+   thumbnail up to a 220px summon reveal. */
+
+.fui-champ {
+  --fui-champ-w: 150px;
+  position: relative;
+  display: block;
+  width: var(--fui-champ-w);
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--fui-champ-w) * 0.05);
+  background: #0a0a0e;
+  overflow: hidden;
+  cursor: pointer;
+  isolation: isolate;
+  transition:
+    transform var(--fui-t) var(--fui-ease),
+    box-shadow var(--fui-t) var(--fui-ease);
+}
+
+.fui-champ:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6);
+}
+
+.fui-champ:active {
+  transform: translateY(-1px) scale(0.985);
+}
+
+/* ── Art ──────────────────────────────────────────────────────────────────── */
+.fui-champ__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: center / cover no-repeat #14141b;
+  transition: transform var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-champ:hover .fui-champ__art {
+  transform: scale(1.06);
+}
+
+/* Reads the name and stars over any artwork. */
+.fui-champ__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    transparent 26%,
+    transparent 44%,
+    rgba(0, 0, 0, 0.82) 82%,
+    rgba(0, 0, 0, 0.94) 100%
+  );
+}
+
+/* Rarity frame: an inset border plus a matching outer glow. */
+.fui-champ__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border: 2px solid var(--fui-champ-rarity, var(--fui-rarity-common));
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 14px color-mix(in srgb, var(--fui-champ-rarity, transparent) 40%, transparent),
+    0 0 12px color-mix(in srgb, var(--fui-champ-rarity, transparent) 34%, transparent);
+}
+
+.fui-champ[data-rarity='common'] {
+  --fui-champ-rarity: var(--fui-rarity-common);
+}
+.fui-champ[data-rarity='uncommon'] {
+  --fui-champ-rarity: var(--fui-rarity-uncommon);
+}
+.fui-champ[data-rarity='rare'] {
+  --fui-champ-rarity: var(--fui-rarity-rare);
+}
+.fui-champ[data-rarity='epic'] {
+  --fui-champ-rarity: var(--fui-rarity-epic);
+}
+.fui-champ[data-rarity='legendary'] {
+  --fui-champ-rarity: var(--fui-rarity-legendary);
+}
+.fui-champ[data-rarity='mythic'] {
+  --fui-champ-rarity: var(--fui-rarity-mythic);
+}
+
+/* The top tiers earn a slow shimmer so they stand out in a full roster. */
+.fui-champ[data-rarity='legendary'] .fui-champ__frame,
+.fui-champ[data-rarity='mythic'] .fui-champ__frame {
+  animation: fui-champ-shine 3.4s ease-in-out infinite;
+}
+
+@keyframes fui-champ-shine {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 14px color-mix(in srgb, var(--fui-champ-rarity) 40%, transparent),
+      0 0 12px color-mix(in srgb, var(--fui-champ-rarity) 34%, transparent);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 22px color-mix(in srgb, var(--fui-champ-rarity) 62%, transparent),
+      0 0 22px color-mix(in srgb, var(--fui-champ-rarity) 58%, transparent);
+  }
+}
+
+/* ── Top row ──────────────────────────────────────────────────────────────── */
+.fui-champ__top {
+  position: absolute;
+  top: calc(var(--fui-champ-w) * 0.04);
+  left: calc(var(--fui-champ-w) * 0.04);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fui-champ__role {
+  width: calc(var(--fui-champ-w) * 0.15);
+  height: calc(var(--fui-champ-w) * 0.15);
+  background-color: var(--fui-ink);
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+/* ── Level ────────────────────────────────────────────────────────────────── */
+.fui-champ__level {
+  position: absolute;
+  top: calc(var(--fui-champ-w) * 0.04);
+  right: calc(var(--fui-champ-w) * 0.04);
+  z-index: 4;
+  padding: 1px calc(var(--fui-champ-w) * 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.72);
+  font-family: var(--fui-font-display);
+  font-size: calc(var(--fui-champ-w) * 0.085);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--fui-ink);
+  text-shadow: 0 1px 2px #000;
+}
+
+/* ── Bottom stack ─────────────────────────────────────────────────────────── */
+.fui-champ__bottom {
+  position: absolute;
+  right: calc(var(--fui-champ-w) * 0.05);
+  bottom: calc(var(--fui-champ-w) * 0.045);
+  left: calc(var(--fui-champ-w) * 0.05);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--fui-champ-w) * 0.012);
+}
+
+.fui-champ__name {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--fui-font-display);
+  font-size: calc(var(--fui-champ-w) * 0.093);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fui-ink);
+  text-shadow: 0 2px 4px #000;
+}
+
+.fui-champ__powerrow {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.fui-champ__powericon {
+  width: calc(var(--fui-champ-w) * 0.075);
+  height: calc(var(--fui-champ-w) * 0.075);
+  background-color: var(--fui-gold-soft);
+  -webkit-mask: var(--fui-img-glyph-crossed-swords) center / contain no-repeat;
+  mask: var(--fui-img-glyph-crossed-swords) center / contain no-repeat;
+}
+
+.fui-champ__power {
+  font-size: calc(var(--fui-champ-w) * 0.077);
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 1px 2px #000;
+}
+
+/* ── Corner markers ───────────────────────────────────────────────────────── */
+.fui-champ__new {
+  position: absolute;
+  top: calc(var(--fui-champ-w) * 0.09);
+  left: calc(var(--fui-champ-w) * -0.16);
+  z-index: 5;
+  width: calc(var(--fui-champ-w) * 0.62);
+  padding: 2px 0;
+  background: linear-gradient(90deg, #d0453a, #f0736a);
+  font-family: var(--fui-font-ui);
+  font-size: calc(var(--fui-champ-w) * 0.068);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-align: center;
+  color: #fff;
+  transform: rotate(-38deg);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.fui-champ__count {
+  position: absolute;
+  right: calc(var(--fui-champ-w) * 0.04);
+  bottom: calc(var(--fui-champ-w) * 0.04);
+  z-index: 5;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.78);
+  font-size: calc(var(--fui-champ-w) * 0.075);
+  font-weight: 700;
+  color: var(--fui-accent-soft);
+}
+
+.fui-champ__lock {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: rgba(4, 5, 8, 0.6);
+}
+
+.fui-champ__lock::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28%;
+  height: 28%;
+  background-color: var(--fui-ink-dim);
+  transform: translate(-50%, -50%);
+  -webkit-mask: var(--fui-img-glyph-broken-shackle) center / contain no-repeat;
+  mask: var(--fui-img-glyph-broken-shackle) center / contain no-repeat;
+}
+
+/* ── States ───────────────────────────────────────────────────────────────── */
+.fui-champ.is-selected {
+  transform: translateY(-4px);
+}
+
+.fui-champ.is-selected .fui-champ__frame {
+  border-color: var(--fui-gold-soft);
+  box-shadow:
+    inset 0 0 18px color-mix(in srgb, var(--fui-gold) 45%, transparent),
+    0 0 20px var(--fui-gold);
+}
+
+.fui-champ.is-unowned .fui-champ__art {
+  filter: grayscale(1) brightness(0.22) contrast(1.4);
+}
+
+.fui-champ.is-unowned .fui-champ__name {
+  color: var(--fui-ink-faint);
+}
+
+.fui-champ.is-locked {
+  cursor: not-allowed;
+}
+
+.fui-champ.is-celebrating {
+  animation: fui-pop 620ms var(--fui-ease);
+}
+
+.fui-champ.is-celebrating .fui-champ__frame {
+  animation: fui-champ-flare 900ms var(--fui-ease);
+}
+
+@keyframes fui-champ-flare {
+  0% {
+    box-shadow: 0 0 0 0 var(--fui-champ-rarity);
+  }
+  100% {
+    box-shadow: 0 0 0 calc(var(--fui-champ-w) * 0.2) transparent;
+  }
+}

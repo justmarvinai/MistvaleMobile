@@ -1,0 +1,165 @@
+/* ===========================================================================
+   Theme — Dark Ember
+   Bronze art-deco line work over black leather, glossy blood-red buttons.
+   Reads as: combat HUD, dungeon, endgame, dark-fantasy UI.
+
+   Binds the same semantic slots as Stone & Vine, so every component swaps look
+   with a single `data-fui-theme` attribute and no code change.
+   =========================================================================== */
+
+[data-fui-theme='dark-ember'] {
+  --fui-theme-name: 'dark-ember';
+
+  /* ── Palette ─────────────────────────────────────────────────────────── */
+  --fui-accent: #c2764a;
+  --fui-accent-soft: #e5b184;
+  --fui-accent-deep: #5a3320;
+  --fui-gold: #c9a227;
+  --fui-gold-soft: #e8d08a;
+  --fui-ink: #e6dccb;
+  --fui-ink-dim: #9c9382;
+  --fui-ink-faint: #635c4f;
+
+  --fui-stone: #3a332c;
+  --fui-stone-dark: #201c18;
+  --fui-slate: #14110e;
+  --fui-blood: #7d1f1a;
+
+  /* ── Windows ─────────────────────────────────────────────────────────────
+     This pack's panels are one solid piece — leather field plus bronze rule
+     plus corner filigree — so the fill layer carries the whole thing and the
+     ornament layer is switched off. */
+  --fui-panel-scale: 0.5;
+  --fui-panel-fill-src: var(--fui-img-panel-wide-ornate);
+  --fui-panel-fill-sl: 70 70 70 70;
+  --fui-panel-fill-bw: calc(70px * var(--fui-panel-scale));
+  --fui-panel-frame-src: none;
+  --fui-panel-frame-sl: 0;
+  --fui-panel-frame-bw: 0;
+  --fui-panel-pad-t: 34px;
+  --fui-panel-pad-x: 40px;
+  --fui-panel-pad-b: 34px;
+
+  --fui-panel-alt-fill-src: var(--fui-img-panel-tall-ornate);
+  --fui-panel-alt-fill-sl: 85 85 85 85;
+  --fui-panel-alt-fill-bw: calc(85px * var(--fui-panel-scale));
+  --fui-panel-alt-frame-src: none;
+  --fui-panel-alt-frame-sl: 0;
+  --fui-panel-alt-frame-bw: 0;
+  --fui-panel-alt-pad-t: 46px;
+  --fui-panel-alt-pad-x: 48px;
+  --fui-panel-alt-pad-b: 46px;
+
+  /* ── Inner surfaces ──────────────────────────────────────────────────── */
+  --fui-surface-src: var(--fui-img-bg-wide);
+  --fui-surface-sl: 30 30 30 30;
+  --fui-surface-bw: calc(30px * 0.5);
+  --fui-surface-flat: rgba(14, 12, 10, 0.86);
+  --fui-surface-pad: 14px;
+
+  /* ── Hollow overlay frames ───────────────────────────────────────────── */
+  --fui-frame-src: var(--fui-img-frame-wide);
+  --fui-frame-sl: 50 50 50 50;
+  --fui-frame-bw: calc(50px * 0.5);
+  --fui-frame-sm-src: var(--fui-img-frame-sm-double);
+  --fui-frame-sm-sl: 36 36 36 36;
+  --fui-frame-sm-bw: calc(36px * 0.4);
+
+  /* ── Buttons ─────────────────────────────────────────────────────────────
+     This pack ships real idle / active artwork, so hover swaps the texture
+     instead of merely brightening it. */
+  --fui-btn-scale: 0.42;
+  --fui-btn-src: var(--fui-img-btn-ember-wide-off);
+  --fui-btn-sl: 48 58 48 58;
+  --fui-btn-bw: calc(48px * var(--fui-btn-scale)) calc(58px * var(--fui-btn-scale))
+    calc(48px * var(--fui-btn-scale)) calc(58px * var(--fui-btn-scale));
+  --fui-btn-hover-src: var(--fui-img-btn-ember-wide-on);
+  --fui-btn-active-src: var(--fui-img-btn-ember-wide);
+  --fui-btn-hover-filter: brightness(1.08);
+  --fui-btn-active-filter: brightness(0.9);
+  --fui-btn-pad: 8px 20px;
+  --fui-btn-min-h: 48px;
+  --fui-btn-ink: #f2e4d4;
+  --fui-btn-square-size: 54px;
+
+  --fui-btn-long-src: var(--fui-img-btn-ember-wide-off);
+  --fui-btn-long-sl: 48 58 48 58;
+  --fui-btn-long-bw: calc(48px * var(--fui-btn-scale)) calc(58px * var(--fui-btn-scale))
+    calc(48px * var(--fui-btn-scale)) calc(58px * var(--fui-btn-scale));
+  --fui-btn-long-hover-src: var(--fui-img-btn-ember-wide-on);
+
+  --fui-btn-ghost-src: var(--fui-img-btn-ember-frame);
+  --fui-btn-ghost-sl: 44 50 44 50;
+  --fui-btn-ghost-bw: calc(44px * var(--fui-btn-scale)) calc(50px * var(--fui-btn-scale))
+    calc(44px * var(--fui-btn-scale)) calc(50px * var(--fui-btn-scale));
+
+  --fui-btn-sq-src: var(--fui-img-btn-ember-square-off);
+  --fui-btn-sq-sl: 48 48 48 48;
+  --fui-btn-sq-bw: calc(48px * 0.3);
+  --fui-btn-sq-hover-src: var(--fui-img-btn-ember-square-on);
+
+  --fui-btn-close-img: var(--fui-img-btn-icon-close);
+  --fui-btn-back-img: var(--fui-img-btn-icon-back);
+  --fui-btn-settings-img: var(--fui-img-btn-icon-settings);
+
+  /* ── Slots ───────────────────────────────────────────────────────────── */
+  --fui-slot-scale: 0.26;
+  --fui-slot-fill-src: var(--fui-img-bg-tile-sm);
+  --fui-slot-fill-sl: 24 24 24 24;
+  --fui-slot-fill-bw: calc(24px * var(--fui-slot-scale));
+  --fui-slot-frame-src: var(--fui-img-frame-sm-bevel);
+  --fui-slot-frame-sl: 36 36 36 36;
+  --fui-slot-frame-bw: calc(36px * var(--fui-slot-scale));
+  --fui-slot-frame-inset: 0px;
+  --fui-slot-inset: 11px;
+
+  --fui-slot-lg-frame-src: var(--fui-img-frame-sm-double);
+  --fui-slot-lg-frame-sl: 36 36 36 36;
+  --fui-slot-lg-frame-bw: calc(36px * var(--fui-slot-scale));
+
+  /* ── Bars ────────────────────────────────────────────────────────────────
+     A slim 1024x64 strip, so it reads correctly at a larger scale than
+     Stone & Vine's chunky carved bar. */
+  --fui-bar-scale: 0.5;
+  --fui-bar-h: 32px;
+  --fui-bar-track-src: var(--fui-img-bar-track-ember);
+  --fui-bar-track-sl: 16 26 16 26;
+  --fui-bar-track-bw: calc(16px * var(--fui-bar-scale)) calc(26px * var(--fui-bar-scale))
+    calc(16px * var(--fui-bar-scale)) calc(26px * var(--fui-bar-scale));
+  --fui-bar-inset-x: 7px;
+  --fui-bar-inset-y: 8px;
+
+  --fui-bar-fill-health-src: var(--fui-img-bar-fill-ember);
+  --fui-bar-fill-mana-src: var(--fui-img-bar-fill-mana);
+  --fui-bar-fill-stamina-src: var(--fui-img-bar-fill-stamina);
+  --fui-bar-fill-sl: 14 22 14 22;
+  --fui-bar-fill-bw: calc(14px * var(--fui-bar-scale)) calc(22px * var(--fui-bar-scale))
+    calc(14px * var(--fui-bar-scale)) calc(22px * var(--fui-bar-scale));
+
+  /* ── Nameplates ──────────────────────────────────────────────────────── */
+  --fui-banner-src: var(--fui-img-banner-plain);
+  --fui-banner-sl: 40 40 40 40;
+  --fui-banner-bw: calc(40px * 0.34);
+  --fui-banner-pad: 5px 20px;
+
+  /* ── Portraits ───────────────────────────────────────────────────────── */
+  --fui-portrait-frame-src: var(--fui-img-frame-sm-double);
+  --fui-portrait-frame-sl: 36 36 36 36;
+  --fui-portrait-frame-bw: calc(36px * 0.34);
+  --fui-portrait-fill-src: var(--fui-img-bg-tile-sm);
+  --fui-portrait-fill-sl: 24 24 24 24;
+  --fui-portrait-fill-bw: calc(24px * 0.34);
+  --fui-portrait-radius: 2px;
+
+  /* ── Misc art ────────────────────────────────────────────────────────── */
+  --fui-divider-img: var(--fui-img-divider-vine);
+  --fui-divider-ar: var(--fui-ar-divider-vine);
+  --fui-backdrop-img: var(--fui-img-bg-tall);
+  --fui-round-frame-img: var(--fui-img-frame-round-lg);
+  --fui-round-bg-img: var(--fui-img-bg-round-sm);
+}
+
+/* Dark Ember's scrollbar takes the bronze rather than the teal. */
+[data-fui-theme='dark-ember'] .fui-scroll {
+  scrollbar-color: var(--fui-accent-deep) rgba(0, 0, 0, 0.4);
+}

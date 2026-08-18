@@ -1,0 +1,125 @@
+/* StreakMeter — consecutive logins or wins, with milestones and an expiry. */
+
+.fui-streak {
+  --fui-streak-pip: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--fui-gap-sm) var(--fui-gap);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--fui-radius);
+  background: linear-gradient(180deg, rgba(255, 122, 61, 0.1), rgba(0, 0, 0, 0.36));
+}
+
+.fui-streak[data-size='sm'] {
+  --fui-streak-pip: 10px;
+  gap: 4px;
+  padding: 6px 10px;
+}
+
+.fui-streak__head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.fui-streak__flame {
+  align-self: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  background-color: var(--fui-ink-faint);
+  mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  transition: background-color var(--fui-t) var(--fui-ease);
+}
+
+.fui-streak.is-hot .fui-streak__flame {
+  background-color: #ff7a3d;
+  filter: drop-shadow(0 0 6px #ff7a3d);
+  animation: fui-pulse 2.4s var(--fui-ease) infinite;
+}
+
+.fui-streak__count {
+  font-family: var(--fui-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fui-ink);
+}
+
+.fui-streak.is-hot .fui-streak__count {
+  color: #ffa06d;
+}
+
+.fui-streak__unit {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-ink-faint);
+}
+
+.fui-streak__track {
+  display: flex;
+  gap: 4px;
+}
+
+.fui-streak__pip {
+  flex: 1;
+  height: var(--fui-streak-pip);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  transition: background var(--fui-t) var(--fui-ease);
+}
+
+.fui-streak__pip.is-on {
+  background: linear-gradient(180deg, #ffa06d, #ff7a3d);
+  box-shadow: 0 0 7px rgba(255, 122, 61, 0.55);
+}
+
+/* A milestone pip is notched at the top so the payout days are visible before
+   the player reaches them. */
+.fui-streak__pip.is-milestone {
+  position: relative;
+  border-top: 3px solid var(--fui-gold);
+}
+
+.fui-streak__pip.is-milestone.is-on {
+  border-top-color: var(--fui-gold-soft);
+}
+
+.fui-streak__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-streak__expiry {
+  font-size: 11px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-streak__expiry[data-urgent='true'] {
+  color: var(--fui-warn);
+}
+
+.fui-streak__claim {
+  margin-left: auto;
+  padding: 5px 14px;
+  border: 1px solid var(--fui-success);
+  border-radius: var(--fui-radius);
+  background: color-mix(in srgb, var(--fui-success) 22%, transparent);
+  color: var(--fui-success);
+  font-family: var(--fui-font-ui);
+  font-size: 11.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-streak__claim:hover {
+  background: color-mix(in srgb, var(--fui-success) 40%, transparent);
+}

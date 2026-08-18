@@ -1,0 +1,123 @@
+/* WaveTracker — how much of a stage run is left, with the boss wave marked. */
+
+.fui-waves {
+  --fui-waves-size: 20px;
+  --fui-waves-p: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-waves[data-size='sm'] {
+  --fui-waves-size: 13px;
+}
+
+.fui-waves__label {
+  font-size: 10px;
+}
+
+.fui-waves__list {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--fui-waves-size) * 0.7);
+}
+
+/* The rail runs behind the pips and fills to the current wave, so the row reads
+   as a route rather than a set of unrelated dots. */
+.fui-waves--rail .fui-waves__list::before,
+.fui-waves--rail .fui-waves__list::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc(var(--fui-waves-size) / 2);
+  right: calc(var(--fui-waves-size) / 2);
+  height: 2px;
+  margin-top: -1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.fui-waves--rail .fui-waves__list::after {
+  right: auto;
+  width: calc((100% - var(--fui-waves-size)) * var(--fui-waves-p));
+  background: var(--fui-accent);
+  box-shadow: 0 0 6px var(--fui-accent);
+  transition: width var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-waves__pip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.fui-waves__dot {
+  position: relative;
+  width: var(--fui-waves-size);
+  height: var(--fui-waves-size);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  background: var(--fui-slate, #22222a);
+  transition:
+    background var(--fui-t) var(--fui-ease),
+    border-color var(--fui-t) var(--fui-ease),
+    transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-waves__dot::after {
+  content: '';
+  position: absolute;
+  inset: 22%;
+  background-color: #fff;
+  mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src, var(--fui-mask-none)) center / contain no-repeat;
+}
+
+.fui-waves__pip.is-done .fui-waves__dot {
+  border-color: var(--fui-accent);
+  background: var(--fui-accent);
+}
+
+.fui-waves__pip.is-now .fui-waves__dot {
+  border-color: var(--fui-gold);
+  background: var(--fui-gold);
+  transform: scale(1.28);
+  box-shadow: 0 0 10px var(--fui-gold);
+}
+
+/* The boss pip is a rotated square: different enough in silhouette to spot
+   without reading the label. */
+.fui-waves__pip.is-boss .fui-waves__dot {
+  border-radius: 3px;
+  transform: rotate(45deg);
+  border-color: var(--fui-danger);
+}
+
+.fui-waves__pip.is-boss.is-now .fui-waves__dot {
+  transform: rotate(45deg) scale(1.28);
+  background: var(--fui-danger);
+  box-shadow: 0 0 10px var(--fui-danger);
+}
+
+.fui-waves__pip.is-boss .fui-waves__dot::after {
+  transform: rotate(-45deg);
+}
+
+.fui-waves__tick {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--fui-ink-faint);
+}
+
+.fui-waves__pip.is-now .fui-waves__tick {
+  color: var(--fui-gold-soft);
+}
+
+.fui-waves__count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fui-ink-dim);
+}

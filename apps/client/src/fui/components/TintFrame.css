@@ -1,0 +1,60 @@
+/* TintFrame — a 9-sliced ornament drawn as a mask, so it takes its colour from
+   CSS instead of from the file. */
+
+.fui-tintframe {
+  --fui-tf-scale: 0.75;
+  --fui-tf-tint: var(--fui-gold);
+  --fui-tf-corner: calc(32px * var(--fui-tf-scale));
+  --fui-tf-pad: calc(10px + var(--fui-tf-corner) * 0.35);
+  position: relative;
+  display: block;
+  padding: var(--fui-tf-pad);
+  /* The mask layer and the content share a stacking context so a glow filter on
+     the ornament never bleeds over the content. */
+  isolation: isolate;
+}
+
+/* Fallback path: the raw white ornament via border-image. Correct everywhere,
+   just not tintable. */
+.fui-tintframe__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-tf-corner);
+  border-image-source: var(--fui-tf-src);
+  border-image-slice: 32 fill;
+  border-image-repeat: var(--fui-tf-repeat, stretch);
+}
+
+/* Enhanced path: the same art as a 9-sliced mask over an arbitrary paint.
+   Chromium and Safari ship the prefixed property; the unprefixed `mask-border`
+   is not implemented anywhere yet, so it is listed second for the day it is. */
+@supports (-webkit-mask-box-image: url('a') 32 stretch) {
+  .fui-tintframe__art {
+    border: 0;
+    background: var(--fui-tf-tint);
+    -webkit-mask-box-image: var(--fui-tf-src) 32 var(--fui-tf-repeat, stretch);
+    -webkit-mask-box-image-width: var(--fui-tf-corner);
+    mask-border: var(--fui-tf-src) 32 fill var(--fui-tf-repeat, stretch);
+    mask-border-width: var(--fui-tf-corner);
+  }
+}
+
+.fui-tintframe--glow .fui-tintframe__art {
+  filter: drop-shadow(0 0 calc(var(--fui-tf-corner) * 0.34) var(--fui-tf-tint));
+}
+
+.fui-tintframe__inner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+
+/* A hollow ring adds no surface of its own, so content needs less breathing
+   room than it does inside a filled one. */
+.fui-tintframe[data-fill='hollow'] {
+  --fui-tf-pad: calc(6px + var(--fui-tf-corner) * 0.3);
+}

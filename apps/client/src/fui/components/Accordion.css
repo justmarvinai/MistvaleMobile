@@ -1,0 +1,90 @@
+/* Accordion — collapsible sections for settings, objectives and mechanics. */
+
+.fui-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fui-accordion__item {
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.fui-accordion__head {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.22));
+  color: var(--fui-ink);
+  font-family: var(--fui-font-ui);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-accordion__head:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.18));
+}
+
+.fui-accordion__glyph {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  background-color: var(--fui-accent-soft);
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-accordion__title {
+  flex: 1;
+}
+
+.fui-accordion__meta {
+  font-size: 12px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-accordion__caret {
+  width: 0;
+  height: 0;
+  flex: none;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--fui-ink-dim);
+  transition: transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-accordion__item.is-open .fui-accordion__caret {
+  transform: rotate(180deg);
+}
+
+/* Animating grid-template-rows from 0fr to 1fr is what lets the body slide open
+   without anyone having to measure the content's height first. */
+.fui-accordion__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--fui-t) var(--fui-ease);
+}
+
+.fui-accordion__item.is-open .fui-accordion__body {
+  grid-template-rows: 1fr;
+}
+
+.fui-accordion__inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Padding lives one level below the clipper. Put it on the clipper itself and
+   it would pop in and out instantly instead of collapsing with the row. */
+.fui-accordion__pad {
+  padding: var(--fui-gap) 12px;
+}

@@ -1,0 +1,34 @@
+/* PartyFrame — stack of compact unit frames. */
+
+.fui-party {
+  display: inline-block;
+}
+
+.fui-party__title {
+  margin-bottom: 6px;
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-party__list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fui-party[data-orientation='horizontal'] .fui-party__list {
+  flex-direction: row;
+}
+
+.fui-party .fui-unit {
+  cursor: pointer;
+  transition: transform var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-party .fui-unit:hover {
+  transform: translateX(3px);
+}
+
+.fui-party[data-orientation='horizontal'] .fui-unit:hover {
+  transform: translateY(-3px);
+}

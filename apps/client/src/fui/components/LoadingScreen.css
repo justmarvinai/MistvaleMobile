@@ -1,0 +1,148 @@
+/* LoadingScreen — backdrop, progress bar, rotating tips. */
+
+.fui-loading {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 420px;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-loading--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 990;
+  min-height: 100vh;
+}
+
+.fui-loading.is-leaving {
+  opacity: 0;
+}
+
+.fui-loading__bg {
+  position: absolute;
+  inset: 0;
+  background: var(--fui-backdrop-img) center / cover no-repeat;
+  transform: scale(1.05);
+}
+
+.fui-loading__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.9));
+}
+
+.fui-loading__stage {
+  position: relative;
+  z-index: 1;
+  padding: 0 clamp(24px, 6vw, 90px) 8px;
+}
+
+.fui-loading__title {
+  margin-bottom: 14px;
+  font-size: clamp(18px, 2.6vw, 28px);
+  color: var(--fui-ink);
+  text-shadow: 0 3px 10px #000;
+}
+
+/* ── Bar ──────────────────────────────────────────────────────────────────── */
+.fui-loading__track {
+  position: relative;
+  height: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9);
+}
+
+.fui-loading__fill {
+  height: 100%;
+  width: 0;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--fui-accent) 70%, #000),
+    var(--fui-accent-soft)
+  );
+  box-shadow: 0 0 12px color-mix(in srgb, var(--fui-accent) 70%, transparent);
+  transition: width var(--fui-t-slow) var(--fui-ease);
+}
+
+/* A travelling sheen so the bar reads as active even when progress stalls. */
+.fui-loading__fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 90px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: fui-shimmer 1.8s linear infinite;
+}
+
+.fui-loading.is-indeterminate .fui-loading__fill {
+  width: 34%;
+  animation: fui-loading-slide 1.5s var(--fui-ease) infinite;
+}
+
+@keyframes fui-loading-slide {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(330%);
+  }
+}
+
+.fui-loading.is-indeterminate .fui-loading__pct {
+  visibility: hidden;
+}
+
+.fui-loading__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--fui-gap);
+  margin-top: 8px;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--fui-ink-dim);
+  text-shadow: 0 1px 3px #000;
+}
+
+.fui-loading__pct {
+  font-weight: 700;
+  color: var(--fui-accent-soft);
+}
+
+/* ── Tips ─────────────────────────────────────────────────────────────────── */
+.fui-loading__tipbox {
+  position: relative;
+  z-index: 1;
+  min-height: 58px;
+  padding: 14px clamp(24px, 6vw, 90px) 26px;
+}
+
+.fui-loading__tip {
+  max-width: 62ch;
+  font-size: 13.5px;
+  font-style: italic;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--fui-gold) 45%, var(--fui-ink-dim));
+  text-shadow: 0 1px 3px #000;
+}
+
+.fui-loading__tip.is-in {
+  animation: fui-rise 460ms var(--fui-ease);
+}
+
+.fui-loading__tip:not(:empty)::before {
+  content: 'Tip — ';
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fui-gold-soft);
+}

@@ -1,0 +1,56 @@
+/* StarRating — rarity, ascension and stage-clear stars. */
+
+.fui-stars {
+  --fui-star-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--fui-star-size) * 0.1);
+}
+
+.fui-stars__star {
+  width: var(--fui-star-size);
+  height: var(--fui-star-size);
+  background: var(--fui-img-icon-star) center / contain no-repeat;
+  filter: grayscale(1) brightness(0.34);
+  transition: filter var(--fui-t) var(--fui-ease);
+}
+
+.fui-stars__star.is-on {
+  filter: drop-shadow(0 0 calc(var(--fui-star-size) * 0.22) var(--fui-star-glow, var(--fui-gold)));
+}
+
+/* Ascension / awakening runs hotter than the base rarity track. */
+.fui-stars[data-variant='awaken'] {
+  --fui-star-glow: #ff7a3d;
+}
+
+.fui-stars[data-variant='awaken'] .fui-stars__star.is-on {
+  filter: drop-shadow(0 0 calc(var(--fui-star-size) * 0.3) #ff7a3d) hue-rotate(-28deg)
+    saturate(1.6) brightness(1.1);
+}
+
+.fui-stars[data-variant='stage'] {
+  --fui-star-glow: var(--fui-gold-soft);
+  gap: 1px;
+}
+
+.fui-stars__star.is-new {
+  animation: fui-pop 480ms var(--fui-ease);
+}
+
+.fui-stars--interactive .fui-stars__star {
+  cursor: pointer;
+}
+
+.fui-stars--interactive .fui-stars__star:hover {
+  filter: brightness(1.35) drop-shadow(0 0 6px var(--fui-gold));
+}
+
+.fui-stars__value {
+  margin-left: 4px;
+  font-family: var(--fui-font-display);
+  font-size: calc(var(--fui-star-size) * 0.78);
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 1px 2px #000;
+}

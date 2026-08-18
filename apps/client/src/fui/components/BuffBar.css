@@ -1,0 +1,74 @@
+/* BuffBar — buff/debuff strip with depletion sweeps and countdowns. */
+
+.fui-buffs {
+  --fui-buff-size: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.fui-buffs__item {
+  position: relative;
+  width: var(--fui-buff-size);
+  height: var(--fui-buff-size);
+  border: 1px solid var(--fui-buff-edge, rgba(255, 255, 255, 0.2));
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.fui-buffs__item[data-kind='buff'] {
+  --fui-buff-edge: color-mix(in srgb, var(--fui-success) 60%, transparent);
+}
+
+.fui-buffs__item[data-kind='debuff'] {
+  --fui-buff-edge: color-mix(in srgb, var(--fui-danger) 65%, transparent);
+}
+
+.fui-buffs__icon {
+  position: absolute;
+  inset: 1px;
+  background: center / contain no-repeat;
+}
+
+/* Drains from the bottom as the effect runs out. */
+.fui-buffs__sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(3, 4, 8, 0.72) calc(var(--fui-buff-sweep, 0) * 100%),
+    transparent calc(var(--fui-buff-sweep, 0) * 100%)
+  );
+}
+
+.fui-buffs__stacks {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 1px 2px #000, 0 0 3px #000;
+}
+
+.fui-buffs__time {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--fui-ink);
+  text-shadow: 0 1px 2px #000, 0 0 3px #000;
+}
+
+.fui-buffs__item.is-ending {
+  animation: fui-pulse 700ms ease-in-out infinite;
+}
+
+.fui-buffs__item.is-ending .fui-buffs__time {
+  color: #ffb4ac;
+}

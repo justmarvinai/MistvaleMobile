@@ -1,0 +1,82 @@
+/* TurnMeter — live turn-order queue driven by each unit's speed stat. */
+
+.fui-turnmeter {
+  --fui-turn-size: 52px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.3));
+}
+
+.fui-turnmeter__label {
+  font-size: 9.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-turnmeter__queue {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.fui-turnmeter__unit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: var(--fui-turn-size);
+  /* Positions shuffle as meters fill, so animate the reflow. */
+  transition: transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-turnmeter__art {
+  width: var(--fui-turn-size);
+  height: var(--fui-turn-size);
+  border: 2px solid var(--fui-turn-edge, rgba(255, 255, 255, 0.2));
+  border-radius: 50%;
+  background: center / cover no-repeat #14141b;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.fui-turnmeter__unit[data-side='ally'] {
+  --fui-turn-edge: color-mix(in srgb, var(--fui-accent) 70%, transparent);
+  --fui-turn-fill: var(--fui-accent);
+}
+
+.fui-turnmeter__unit[data-side='enemy'] {
+  --fui-turn-edge: color-mix(in srgb, var(--fui-danger) 70%, transparent);
+  --fui-turn-fill: var(--fui-danger);
+}
+
+/* The unit acting next is bigger and haloed — the one thing players scan for. */
+.fui-turnmeter__unit.is-next {
+  transform: scale(1.16);
+  z-index: 1;
+}
+
+.fui-turnmeter__unit.is-next .fui-turnmeter__art {
+  border-color: var(--fui-gold-soft);
+  box-shadow: 0 0 12px var(--fui-gold);
+}
+
+.fui-turnmeter__unit.is-ready .fui-turnmeter__art {
+  animation: fui-pulse 900ms ease-in-out infinite;
+}
+
+.fui-turnmeter__bar {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.fui-turnmeter__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  background: var(--fui-turn-fill, var(--fui-accent));
+  box-shadow: 0 0 5px var(--fui-turn-fill, var(--fui-accent));
+}

@@ -23,3 +23,16 @@ docs/openapi
 # Prettier restyle it would mean every export showed a diff until somebody reformatted
 # it, which is exactly the churn the sorting exists to prevent.
 content-snapshot/*.json
+
+# The vendored FantasyUIs library. `pnpm fui:vendor` copies these byte-for-byte from
+# upstream so a newer version is a clean overwrite rather than a merge — reformatting them
+# would make every re-vendor a diff of whitespace, and `pnpm fui:check` would fail on a
+# tree nobody had touched. The library formats itself upstream.
+#
+# Mistvale's own bridge (`src/fui/react.tsx`) and theme layer (`src/fui/mistvale.css`) are
+# not vendored and are formatted like everything else we wrote.
+apps/client/src/fui/components/
+apps/client/src/fui/core/
+apps/client/src/fui/styles/
+apps/client/src/fui/styles.css
+apps/client/src/fui/VENDORED.md

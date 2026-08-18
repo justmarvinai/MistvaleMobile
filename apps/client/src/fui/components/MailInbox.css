@@ -1,0 +1,201 @@
+/* MailInbox — compensation, event payouts and gifts, with claimable attachments. */
+
+.fui-mail {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+}
+
+.fui-mail__head {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.fui-mail__title {
+  font-size: 10px;
+}
+
+.fui-mail__count {
+  font-size: 11px;
+  color: var(--fui-danger);
+}
+
+.fui-mail__claim-all {
+  margin-left: auto;
+  padding: 4px 12px;
+  border: 1px solid var(--fui-gold);
+  border-radius: var(--fui-radius);
+  background: rgba(217, 164, 65, 0.16);
+  color: var(--fui-gold-soft);
+  font-family: var(--fui-font-ui);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-mail__claim-all:hover:not(:disabled) {
+  background: rgba(217, 164, 65, 0.34);
+}
+
+.fui-mail__claim-all:disabled {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--fui-ink-faint);
+  background: none;
+  cursor: not-allowed;
+}
+
+.fui-mail__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-mail__msg {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 12px 9px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-mail__msg:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.fui-mail__msg:last-child {
+  border-bottom: 0;
+}
+
+/* Unread is a dot on the leading edge rather than a bold row — it survives
+   theming, and it stays legible against the artwork behind. */
+.fui-mail__msg.is-unread::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 15px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--fui-danger);
+  box-shadow: 0 0 5px var(--fui-danger);
+}
+
+.fui-mail__msg-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-mail__subject {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--fui-ink-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fui-mail__msg.is-unread .fui-mail__subject {
+  color: var(--fui-ink);
+}
+
+.fui-mail__time {
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-mail__from {
+  font-size: 11px;
+  color: var(--fui-accent-soft);
+}
+
+.fui-mail__preview {
+  font-size: 12px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fui-mail__atts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 3px;
+}
+
+.fui-mail__att {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.45) center / contain no-repeat;
+}
+
+.fui-mail__att.is-glyph::after {
+  content: '';
+  position: absolute;
+  inset: 22%;
+  background-color: var(--fui-gold-soft);
+  mask: var(--fui-glyph-src) center / contain no-repeat;
+  -webkit-mask: var(--fui-glyph-src) center / contain no-repeat;
+}
+
+.fui-mail__att-qty {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0 3px;
+  background: rgba(0, 0, 0, 0.85);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-mail__claim {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 4px 14px;
+  border: 1px solid var(--fui-success);
+  border-radius: var(--fui-radius);
+  background: color-mix(in srgb, var(--fui-success) 20%, transparent);
+  color: var(--fui-success);
+  font-family: var(--fui-font-ui);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-mail__claim:hover {
+  background: color-mix(in srgb, var(--fui-success) 40%, transparent);
+}
+
+.fui-mail__expires {
+  font-size: 10.5px;
+  color: var(--fui-warn);
+}
+
+.fui-mail__empty {
+  padding: var(--fui-gap-lg);
+  text-align: center;
+  font-size: 13px;
+  color: var(--fui-ink-faint);
+}

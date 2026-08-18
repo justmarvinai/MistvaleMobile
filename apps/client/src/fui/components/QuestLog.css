@@ -1,0 +1,285 @@
+/* QuestLog — journal with a quest list and a detail pane. */
+
+.fui-questlog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-questlog__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-questlog__title {
+  position: relative;
+  z-index: 1;
+  padding: 20px 26px 10px;
+  font-size: 18px;
+}
+
+.fui-questlog__cols {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 250px 1fr;
+  min-height: 0;
+  gap: 0;
+  padding: 0 22px 22px;
+}
+
+/* ── List ─────────────────────────────────────────────────────────────────── */
+.fui-questlog__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fui-questlog__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-questlog__row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.fui-questlog__row.is-selected {
+  background: color-mix(in srgb, var(--fui-accent) 20%, transparent);
+}
+
+.fui-questlog__marker {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  background: var(--fui-quest-mark, var(--fui-ink-faint));
+}
+
+.fui-questlog__row[data-kind='main'] {
+  --fui-quest-mark: var(--fui-gold);
+}
+.fui-questlog__row[data-kind='side'] {
+  --fui-quest-mark: var(--fui-accent);
+}
+.fui-questlog__row[data-kind='daily'] {
+  --fui-quest-mark: var(--fui-rarity-rare);
+}
+.fui-questlog__row[data-kind='bounty'] {
+  --fui-quest-mark: var(--fui-danger);
+}
+
+.fui-questlog__row.is-complete .fui-questlog__marker {
+  background: var(--fui-success);
+  box-shadow: 0 0 7px var(--fui-success);
+}
+
+.fui-questlog__rowbody {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fui-questlog__rowtitle {
+  overflow: hidden;
+  font-family: var(--fui-font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fui-ink);
+}
+
+.fui-questlog__row.is-complete .fui-questlog__rowtitle {
+  color: var(--fui-success);
+}
+
+.fui-questlog__rowmeta {
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-questlog__pin {
+  flex: none;
+  font-size: 10px;
+}
+
+/* ── Detail ───────────────────────────────────────────────────────────────── */
+.fui-questlog__detail {
+  padding: 0 4px 0 20px;
+}
+
+.fui-questlog__dtitle {
+  font-size: 16px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-questlog__dmeta {
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.fui-questlog__summary {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.fui-questlog__sub {
+  margin-top: 18px;
+  margin-bottom: 7px;
+  font-size: 10.5px;
+  color: var(--fui-accent-soft);
+}
+
+.fui-questlog__objectives {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fui-questlog__objective {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--fui-ink-dim);
+}
+
+.fui-questlog__tick {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border: 1px solid var(--fui-ink-faint);
+  border-radius: 2px;
+}
+
+.fui-questlog__objective.is-done {
+  color: var(--fui-ink-faint);
+  text-decoration: line-through;
+}
+
+.fui-questlog__objective.is-done .fui-questlog__tick {
+  border-color: var(--fui-success);
+  background: var(--fui-success);
+}
+
+.fui-questlog__objective.is-optional::after {
+  content: '(optional)';
+  font-size: 10px;
+  font-style: italic;
+  color: var(--fui-ink-faint);
+}
+
+.fui-questlog__count {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+/* ── Rewards ──────────────────────────────────────────────────────────────── */
+.fui-questlog__rewards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.fui-questlog__reward {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+  color: var(--fui-ink-dim);
+}
+
+.fui-questlog__ricon {
+  width: 26px;
+  height: 26px;
+  background: center / contain no-repeat;
+}
+
+.fui-questlog__xp {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fui-xp);
+}
+
+.fui-questlog__goldchip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fui-gold-soft);
+}
+
+.fui-questlog__coin {
+  width: 15px;
+  height: 15px;
+  background: var(--fui-img-icon-coins) center / contain no-repeat;
+}
+
+/* ── Actions ──────────────────────────────────────────────────────────────── */
+.fui-questlog__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.fui-questlog__btn {
+  padding: 6px 16px;
+  border: 1px solid color-mix(in srgb, var(--fui-accent) 45%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--fui-accent) 16%, rgba(0, 0, 0, 0.4));
+  font-family: var(--fui-font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fui-ink);
+  cursor: pointer;
+}
+
+.fui-questlog__btn:hover {
+  filter: brightness(1.2);
+}
+
+.fui-questlog__btn.is-danger {
+  border-color: color-mix(in srgb, var(--fui-danger) 50%, transparent);
+  background: color-mix(in srgb, var(--fui-danger) 16%, rgba(0, 0, 0, 0.4));
+}
+
+.fui-questlog__empty {
+  padding: 30px 0;
+  font-style: italic;
+  text-align: center;
+}

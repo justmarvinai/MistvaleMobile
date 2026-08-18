@@ -1,0 +1,86 @@
+/* FloatingText — damage numbers, heals, XP and gold pops. */
+
+.fui-float {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.fui-float--anchored {
+  position: absolute;
+}
+
+.fui-float__item {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--fui-font-display);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translate(-50%, 0);
+  text-shadow:
+    0 2px 3px #000,
+    0 0 7px rgba(0, 0, 0, 0.9),
+    1px 0 0 #000,
+    -1px 0 0 #000;
+  animation: fui-float-up 1100ms var(--fui-ease) forwards;
+}
+
+.fui-float__icon {
+  width: 18px;
+  height: 18px;
+  background: center / contain no-repeat;
+}
+
+.fui-float__item[data-kind='damage'] {
+  color: #f0e6d8;
+}
+
+.fui-float__item[data-kind='crit'] {
+  font-size: 32px;
+  color: #ffd166;
+  text-shadow:
+    0 2px 4px #000,
+    0 0 14px rgba(255, 150, 40, 0.9),
+    1px 0 0 #000,
+    -1px 0 0 #000;
+}
+
+.fui-float__item[data-kind='crit']::after {
+  content: '!';
+}
+
+.fui-float__item[data-kind='heal'] {
+  color: #7ceb8e;
+}
+
+.fui-float__item[data-kind='mana'] {
+  color: #7cb6f0;
+}
+
+.fui-float__item[data-kind='miss'] {
+  font-size: 17px;
+  font-style: italic;
+  color: var(--fui-ink-faint);
+}
+
+.fui-float__item[data-kind='xp'] {
+  font-size: 17px;
+  color: #d6a4f5;
+}
+
+.fui-float__item[data-kind='gold'] {
+  font-size: 17px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-float__item[data-kind='info'] {
+  font-family: var(--fui-font-ui);
+  font-size: 15px;
+  color: var(--fui-accent-soft);
+}

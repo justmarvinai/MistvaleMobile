@@ -1,0 +1,109 @@
+/* Portrait — framed character art with level pip and role badge. */
+
+.fui-portrait {
+  position: relative;
+  flex: none;
+}
+
+.fui-portrait__fill,
+.fui-portrait__frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-image-repeat: stretch;
+}
+
+.fui-portrait__fill {
+  z-index: 0;
+  border-width: var(--fui-portrait-fill-bw);
+  border-image-source: var(--fui-portrait-fill-src);
+  border-image-slice: var(--fui-portrait-fill-sl) fill;
+}
+
+.fui-portrait__frame {
+  z-index: 3;
+  border-width: var(--fui-portrait-frame-bw);
+  border-image-source: var(--fui-portrait-frame-src);
+  border-image-slice: var(--fui-portrait-frame-sl);
+}
+
+.fui-portrait__img {
+  position: absolute;
+  inset: 8px;
+  z-index: 2;
+  background: center 18% / cover no-repeat;
+  border-radius: var(--fui-portrait-radius);
+}
+
+/* Full-body art needs to fit rather than crop, and to stand on the frame's
+   lower edge instead of floating in the middle. */
+.fui-portrait[data-fit='contain'] .fui-portrait__img {
+  background-position: center bottom;
+  background-size: contain;
+}
+
+/* Round medallion uses the circular art instead of a 9-slice. */
+.fui-portrait[data-shape='round'] > .fui-portrait__fill {
+  border: 0;
+  background: var(--fui-round-bg-img) center / 100% 100% no-repeat;
+}
+
+.fui-portrait[data-shape='round'] > .fui-portrait__frame {
+  border: 0;
+  background: var(--fui-round-frame-img) center / 100% 100% no-repeat;
+}
+
+.fui-portrait[data-shape='round'] .fui-portrait__img {
+  inset: 11%;
+  border-radius: 50%;
+}
+
+/* Level pip. */
+.fui-portrait__level {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  z-index: 4;
+  min-width: 22px;
+  padding: 0 4px;
+  border: 1px solid color-mix(in srgb, var(--fui-gold) 65%, #000);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #2b2620, #14110d);
+  font-family: var(--fui-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Role / class badge. */
+.fui-portrait__badge {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  z-index: 4;
+  width: 24px;
+  height: 24px;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+}
+
+/* States. */
+.fui-portrait--inactive {
+  filter: grayscale(0.9) brightness(0.55);
+}
+
+.fui-portrait--active::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 16px 2px var(--fui-gold-soft);
+  animation: fui-pulse 1.8s ease-in-out infinite;
+}

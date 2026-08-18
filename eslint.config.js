@@ -18,6 +18,18 @@ export default tseslint.config(
       '**/public/**',
       '**/coverage/**',
       'assets/**',
+      // The vendored FantasyUIs library. Held to this repo's rules it raises a hundred
+      // findings about code nobody here may edit — `pnpm fui:vendor` overwrites the tree
+      // byte-for-byte from upstream, so a fix applied here would vanish on the next
+      // vendor and turn a copy into a merge. The library lints itself upstream, with its
+      // own `npm run audit` enforcing invariants a linter cannot see (teardown for every
+      // timer, `ns:verb` on every event, no reach for the global `document`).
+      //
+      // Only the vendored subdirectories. `src/fui/react.tsx` is Mistvale's own bridge
+      // and is linted like everything else we wrote.
+      'apps/client/src/fui/components/**',
+      'apps/client/src/fui/core/**',
+      'apps/client/src/fui/styles/**',
     ],
   },
   js.configs.recommended,

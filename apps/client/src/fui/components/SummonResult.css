@@ -1,0 +1,169 @@
+/* SummonResult — the gacha reveal: face-down cards that flip to their pull. */
+
+.fui-summon {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 28px 24px;
+  overflow: hidden;
+}
+
+/* Backdrop rays, tinted by the best rarity in the pull. */
+.fui-summon__rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 900px;
+  height: 900px;
+  margin: -450px 0 0 -450px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--fui-summon-glow, transparent) 55%, transparent) 0%,
+    transparent 62%
+  );
+  transition: opacity var(--fui-t-slow) var(--fui-ease);
+}
+
+.fui-summon[data-best='legendary'] {
+  --fui-summon-glow: var(--fui-rarity-legendary);
+}
+.fui-summon[data-best='mythic'] {
+  --fui-summon-glow: var(--fui-rarity-mythic);
+}
+
+.fui-summon.is-flaring .fui-summon__rays {
+  opacity: 1;
+  animation: fui-summon-flare 1.2s var(--fui-ease);
+}
+
+@keyframes fui-summon-flare {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1) rotate(22deg);
+  }
+}
+
+.fui-summon__title {
+  position: relative;
+  font-size: 22px;
+  letter-spacing: 0.16em;
+  color: var(--fui-gold-soft);
+  text-shadow: 0 3px 10px #000;
+}
+
+.fui-summon__grid {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 760px;
+}
+
+/* Each cell holds a back and a face; only one is visible at a time. */
+.fui-summon__cell {
+  position: relative;
+  perspective: 900px;
+}
+
+.fui-summon__back,
+.fui-summon__face {
+  transition: transform var(--fui-t-slow) var(--fui-ease), opacity var(--fui-t) var(--fui-ease);
+  backface-visibility: hidden;
+}
+
+.fui-summon__back {
+  --fui-champ-w: 130px;
+  display: block;
+  width: var(--fui-champ-w);
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: 2px solid color-mix(in srgb, var(--fui-gold) 45%, transparent);
+  border-radius: calc(var(--fui-champ-w) * 0.05);
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 210, 130, 0.16), transparent 60%),
+    linear-gradient(160deg, #241d16, #0d0b09);
+  cursor: pointer;
+}
+
+.fui-summon__back:hover {
+  border-color: var(--fui-gold);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--fui-gold) 45%, transparent);
+}
+
+.fui-summon__seal {
+  display: block;
+  width: 46%;
+  height: 46%;
+  margin: 0 auto;
+  background-color: var(--fui-gold);
+  -webkit-mask: var(--fui-img-glyph-arcane-symbol) center / contain no-repeat;
+  mask: var(--fui-img-glyph-arcane-symbol) center / contain no-repeat;
+  animation: fui-pulse 2.2s ease-in-out infinite;
+}
+
+.fui-summon__face {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: rotateY(-180deg);
+  pointer-events: none;
+}
+
+.fui-summon__cell.is-revealed .fui-summon__back {
+  opacity: 0;
+  transform: rotateY(180deg);
+  pointer-events: none;
+}
+
+.fui-summon__cell.is-revealed .fui-summon__face {
+  opacity: 1;
+  transform: rotateY(0deg);
+  pointer-events: auto;
+}
+
+.fui-summon__newtag {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  padding: 1px 9px;
+  border-radius: 9px;
+  background: var(--fui-danger);
+  font-family: var(--fui-font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #fff;
+  transform: translateX(-50%);
+  animation: fui-pop 500ms var(--fui-ease) 200ms backwards;
+}
+
+.fui-summon__all {
+  position: relative;
+  padding: 9px 26px;
+  border: 1px solid color-mix(in srgb, var(--fui-gold) 50%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--fui-gold) 16%, rgba(0, 0, 0, 0.5));
+  font-family: var(--fui-font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fui-gold-soft);
+  cursor: pointer;
+}
+
+.fui-summon__all:hover {
+  filter: brightness(1.25);
+}
