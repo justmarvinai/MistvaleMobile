@@ -1,0 +1,507 @@
+[
+  {
+    "key": "chapter_01",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_01",
+      "lore": "Where the old road gives out and the fog begins. The Sskarn came through here first, and left the treeline chewed.",
+      "name": "Veilwood Fringe",
+      "number": 1,
+      "region": "The Fringe",
+      "setKey": "ironroot",
+      "sortOrder": 1,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 5000
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 12000
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 30000
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 70000
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_02",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_02",
+      "lore": "The causeway is under a foot of black water now, and something down there keeps pace with anyone walking it.",
+      "name": "The Drowned Road",
+      "number": 2,
+      "region": "Sunken Marches",
+      "setKey": "wolfsfang",
+      "sortOrder": 2,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 6750
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 16200
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 40500
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 94500
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_03",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_03",
+      "lore": "A brood-warren dug into the hillside. The Sskarn do not guard it so much as feed it.",
+      "name": "Silkmire Hollow",
+      "number": 3,
+      "region": "Sunken Marches",
+      "setKey": "stoneguard",
+      "sortOrder": 3,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 8500
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 20400
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 51000
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 119000
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_04",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_04",
+      "lore": "Reed and root and standing water, and every third step is a hole. The brood grew up in it and you did not.",
+      "name": "Thornmere Marsh",
+      "number": 4,
+      "region": "The Thornmere",
+      "setKey": "hawkeye",
+      "sortOrder": 4,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 10250
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 24600
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 61500
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 143500
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_05",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_05",
+      "lore": "The great bridge went down in the first month. What holds the gap now was not built by anyone who wanted it crossed.",
+      "name": "The Shattered Span",
+      "number": 5,
+      "region": "The Thornmere",
+      "setKey": "truestrike",
+      "sortOrder": 5,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 12000
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 28800
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 72000
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 168000
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_06",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_06",
+      "lore": "Wind comes off the sea hard enough to lean on. The Sskarn nest in the hollows and drop on whatever the gale slows down.",
+      "name": "Galehollow Cliffs",
+      "number": 6,
+      "region": "The Windward Rise",
+      "setKey": "swiftwind",
+      "sortOrder": 6,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 13750
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 33000
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 82500
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 192500
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_07",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_07",
+      "lore": "Somebody burned this to deny it to the brood. It did not work, and now nothing grows and the brood is still here.",
+      "name": "The Ashen Reach",
+      "number": 7,
+      "region": "The Windward Rise",
+      "setKey": "wardweave",
+      "sortOrder": 7,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 15500
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 37200
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 93000
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 217000
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_08",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_08",
+      "lore": "The fen goes down further than it goes across. Wardens who went in after the missing did not come back up either.",
+      "name": "Fenwrack Deeps",
+      "number": 8,
+      "region": "The Sunless Fen",
+      "setKey": "bloodthorn",
+      "sortOrder": 8,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 17250
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 41400
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 103500
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 241500
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_09",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_09",
+      "lore": "The valley the mist came out of. Every account of it disagrees about the shape of the place, which is itself the warning.",
+      "name": "The Hollow Vale",
+      "number": 9,
+      "region": "The Sunless Fen",
+      "setKey": "reaver",
+      "sortOrder": 9,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 19000
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 45600
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 114000
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 266000
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_10",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_10",
+      "lore": "Steps cut into the mountain by something with more time than hands. The Sskarn did not build them; they moved in.",
+      "name": "Coilstone Terraces",
+      "number": 10,
+      "region": "The Coilstone",
+      "setKey": "gravebind",
+      "sortOrder": 10,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 20750
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 49800
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 124500
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 290500
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_11",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_11",
+      "lore": "The last gate the vale had. It held for eleven years and then it did not, and the keeper is still standing in it.",
+      "name": "The Fallen Gates",
+      "number": 11,
+      "region": "The Coilstone",
+      "setKey": "stormcoil",
+      "sortOrder": 11,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 22500
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 54000
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 135000
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 315000
+          },
+          "stars": 63
+        }
+      ]
+    }
+  },
+  {
+    "key": "chapter_12",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "key": "chapter_12",
+      "lore": "Where the invasion is *from*. She has been waiting the whole time, and she was never in a hurry.",
+      "name": "The Coilmother’s Court",
+      "number": 12,
+      "region": "The Coilstone",
+      "setKey": "mendersong",
+      "sortOrder": 12,
+      "starRewards": [
+        {
+          "rewards": {
+            "silver": 24250
+          },
+          "stars": 7
+        },
+        {
+          "rewards": {
+            "crystals": 25,
+            "silver": 58200
+          },
+          "stars": 21
+        },
+        {
+          "rewards": {
+            "crystals": 50,
+            "silver": 145500
+          },
+          "stars": 42
+        },
+        {
+          "rewards": {
+            "crystals": 100,
+            "silver": 339500,
+            "valorMedals": 200
+          },
+          "stars": 63
+        }
+      ]
+    }
+  }
+]

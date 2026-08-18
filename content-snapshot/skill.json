@@ -1,0 +1,7967 @@
+[
+  {
+    "key": "aldemar_the_cartographer_a1_survey_strike",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "staff"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.23,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "weaken_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A staff-blow with a surveyor’s precision, scaling from MaxHP. 25% chance to Weaken for 1 turn.",
+      "key": "aldemar_the_cartographer_a1_survey_strike",
+      "name": "Survey Strike",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "aldemar_the_cartographer_a2_safe_passage",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "shield",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "map"
+      },
+      "components": [
+        {
+          "mult": 0.22,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "shield"
+        },
+        {
+          "status": "spd_up_15",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Marks the road through: Shields every ally for 22% of his MaxHP and grants SPD Up 15%, both for 2 turns.",
+      "key": "aldemar_the_cartographer_a2_safe_passage",
+      "name": "Safe Passage",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "shield",
+          "pct": 10
+        },
+        {
+          "effect": "shield",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "aldemar_the_cartographer_a3_uncharted_ruin",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "fogroad"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.21,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.75,
+          "status": "weaken_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Walks the enemy line into the tenth road: MaxHP-scaled damage to all, 75% chance to Weaken for 2 turns.",
+      "key": "aldemar_the_cartographer_a3_uncharted_ruin",
+      "name": "Uncharted Ruin",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "anuria_a1_twinshot",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "arrow",
+        "track": "attack",
+        "vfx": "arrow"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 1.1,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.2,
+          "status": "weaken_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Looses two arrows. Each has a 20% chance to Weaken for 1 turn.",
+      "key": "anuria_a1_twinshot",
+      "name": "Twinshot",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "anuria_a2_wardens_aim",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "atk_up_50",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "focus"
+      },
+      "components": [
+        {
+          "status": "atk_up_50",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "crit_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "deltaPct": 30,
+          "target": "self",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Steadies the draw: Increase ATK and C.RATE for 2 turns, and fills 30% of her turn meter.",
+      "key": "anuria_a2_wardens_aim",
+      "name": "Warden's Aim",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "anuria_a3_arrowstorm",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "arrow",
+        "track": "attack",
+        "vfx": "volley"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.75,
+          "status": "weaken_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "A volley across the enemy line with a 75% chance to Weaken for 2 turns.",
+      "key": "anuria_a3_arrowstorm",
+      "name": "Arrowstorm",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "ashka_torchhand_a1_torchslash",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "ember"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 0.95,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.2,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Two swipes with a burning brand. Each hit has a 20% chance to place HP Burn for 2 turns.",
+      "key": "ashka_torchhand_a1_torchslash",
+      "name": "Torchslash",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "ashka_torchhand_a2_cinder_rush",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "hp_burn",
+        "prefer": "lowestHp"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "ember_burst"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 4.2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.6,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "spd_up_15",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "A running strike that leaves the target alight — 60% chance of HP Burn for 2 turns — and quickens Ashka for 2 turns.",
+      "key": "ashka_torchhand_a2_cinder_rush",
+      "name": "Cinder Rush",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "aureleth_a1_valesong",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "valesong",
+        "track": "attack",
+        "vfx": "valesong"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "block_buffs",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A single held note. 30% chance of Block Buffs for 1 turn.",
+      "key": "aureleth_a1_valesong",
+      "name": "Valesong",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "aureleth_a2_voice_of_the_vale",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "atk_up_50",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "vale_voice"
+      },
+      "components": [
+        {
+          "status": "atk_up_50",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "crit_up_30",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Speaks the oaths in her own cadence: ATK Up 50% and C.RATE Up 30% for the whole team, 2 turns.",
+      "key": "aureleth_a2_voice_of_the_vale",
+      "name": "Voice of the Vale",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "aureleth_a3_second_dawn",
+    "data": {
+      "aiHints": {
+        "onlyBelowHpPct": 70
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "second_dawn"
+      },
+      "components": [
+        {
+          "mult": 0.3,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        },
+        {
+          "count": "all",
+          "target": "allAllies",
+          "type": "cleanse"
+        },
+        {
+          "deltaPct": 25,
+          "target": "allAllies",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Heals the team for 30% of her MaxHP, clears every debuff and fills 25% of each ally’s turn meter.",
+      "key": "aureleth_a3_second_dawn",
+      "name": "Second Dawn",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "aureleth_a4_the_gate_remembers",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHpAlly"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "gate_remembers"
+      },
+      "components": [
+        {
+          "mult": 0.4,
+          "scale": "maxHp",
+          "target": "lowestHpAlly",
+          "type": "heal"
+        },
+        {
+          "count": "all",
+          "target": "lowestHpAlly",
+          "type": "cleanse"
+        },
+        {
+          "deltaPct": 50,
+          "target": "lowestHpAlly",
+          "type": "turnMeter"
+        },
+        {
+          "status": "block_debuffs",
+          "target": "lowestHpAlly",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Pulls the worst-wounded ally back from the edge: heals 40% of Aureleth’s MaxHP, clears every debuff, fills half their turn meter and grants Block Debuffs for 2 turns.",
+      "key": "aureleth_a4_the_gate_remembers",
+      "name": "The Gate Remembers",
+      "slot": "a4",
+      "sortOrder": 4,
+      "targeting": {
+        "mode": "lowestHp",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "boss_a3_brood_bulwark",
+    "data": {
+      "aiHints": {
+        "onlyBelowHpPct": 70
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "bulwark"
+      },
+      "components": [
+        {
+          "mult": 0.18,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 3,
+          "type": "shield"
+        },
+        {
+          "status": "def_up_60",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.12,
+          "scale": "maxHp",
+          "target": "self",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The tyrant hunkers behind its own bulk and comes back harder.",
+      "key": "boss_a3_brood_bulwark",
+      "name": "Brood Bulwark",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "self",
+        "side": "ally"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_coilmother_wrath",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "wrath"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.6,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.7,
+          "status": "def_down_60",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The warqueen’s full attention, brought down on the whole line.",
+      "key": "boss_a3_coilmother_wrath",
+      "name": "Coilmother’s Wrath",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_coilstone_quake",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "quake"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.14,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.75,
+          "status": "def_down_60",
+          "target": "hitTargets",
+          "turns": 3,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.3,
+          "status": "stun",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The terrace shifts underfoot, and the line comes apart with it.",
+      "key": "boss_a3_coilstone_quake",
+      "name": "Coilstone Quake",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_fenblade_sweep",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "sweep"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 1.5,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.55,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Two long cuts across the line, delivered before anyone has drawn.",
+      "key": "boss_a3_fenblade_sweep",
+      "name": "Fenblade Sweep",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_fenwrack_feast",
+    "data": {
+      "aiHints": {
+        "onlyBelowHpPct": 80
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "feast"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.3,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "status": "vampiric_25",
+          "target": "self",
+          "turns": 3,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.1,
+          "scale": "maxHp",
+          "target": "self",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 4,
+      "description": "She takes what she needs out of whoever is closest.",
+      "key": "boss_a3_fenwrack_feast",
+      "name": "Feast",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_galescream",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "gale"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "count": 2,
+          "target": "hitTargets",
+          "type": "dispel"
+        },
+        {
+          "deltaPct": -25,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 4,
+      "description": "A shriek off the cliff face that scatters a formation.",
+      "key": "boss_a3_galescream",
+      "name": "Galescream",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_gate_ward",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "reflect_30",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "ward"
+      },
+      "components": [
+        {
+          "mult": 0.22,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 3,
+          "type": "shield"
+        },
+        {
+          "count": "all",
+          "target": "self",
+          "type": "cleanse"
+        },
+        {
+          "status": "reflect_30",
+          "target": "self",
+          "turns": 3,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "She was set here to hold a door, and she has not stopped.",
+      "key": "boss_a3_gate_ward",
+      "name": "Gate-Ward",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "self",
+        "side": "ally"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_hollow_gaze",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "gaze"
+      },
+      "components": [
+        {
+          "count": "all",
+          "target": "allEnemies",
+          "type": "dispel"
+        },
+        {
+          "chance": 0.6,
+          "status": "block_buffs",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "hits": 1,
+          "mult": 1.8,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Whatever protection you brought, she looks at it until it is not there.",
+      "key": "boss_a3_hollow_gaze",
+      "name": "Hollow Gaze",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_marshbind",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "bind"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.75,
+          "status": "spd_down_30",
+          "target": "hitTargets",
+          "turns": 3,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.5,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Roots come up through the water and take hold of ankles.",
+      "key": "boss_a3_marshbind",
+      "name": "Marshbind",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_reachburn",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "pyre"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.7,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 3,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.5,
+          "status": "heal_reduction_50",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The ash catches, and keeps catching.",
+      "key": "boss_a3_reachburn",
+      "name": "Reachburn",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_span_break",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "break"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "ignoreDefPct": 0.3,
+          "mult": 4.4,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "status": "stun",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "One blow meant for a bridge, spent on a person instead.",
+      "key": "boss_a3_span_break",
+      "name": "Span-Break",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "boss_a3_tidecall",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "tide"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.1,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "deltaPct": -20,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        },
+        {
+          "chance": 0.6,
+          "status": "spd_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The water answers, and drags at everything standing in it.",
+      "key": "boss_a3_tidecall",
+      "name": "Tidecall",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "bracken_puck_a1_pinprick",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "thorn"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 0.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.2,
+          "deltaPct": -10,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Two thorn-jabs, each with a 20% chance to steal 10% of the target’s turn meter.",
+      "key": "bracken_puck_a1_pinprick",
+      "name": "Pinprick",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "bracken_puck_a2_hourthief",
+    "data": {
+      "aiHints": {
+        "prefer": "highestTm"
+      },
+      "animation": {
+        "track": "attack",
+        "vfx": "thorn_snatch"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.8,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.8,
+          "deltaPct": -30,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        },
+        {
+          "deltaPct": 20,
+          "target": "self",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 3,
+      "description": "Picks a pocket full of minutes: 80% chance to drain 30% of the target’s turn meter, and fills 20% of his own.",
+      "key": "bracken_puck_a2_hourthief",
+      "name": "Hourthief",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "bracken_puck_a3_briar_dance",
+    "data": {
+      "aiHints": {
+        "openWith": true,
+        "prefer": "random"
+      },
+      "animation": {
+        "track": "attack",
+        "vfx": "briar"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.75,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "status": "spd_down_15",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Three thorn passes across three random enemies, each with a 50% chance of SPD Down 15% for 1 turn.",
+      "key": "bracken_puck_a3_briar_dance",
+      "name": "Briar Dance",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "count": 3,
+        "mode": "random",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "brekka_foehammer_a1_hammerfall",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "hammer"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.22,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.2,
+          "status": "stun",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "One enormous note. Damage scales from Brekka’s MaxHP; 20% chance to Stun for 1 turn.",
+      "key": "brekka_foehammer_a1_hammerfall",
+      "name": "Hammerfall",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "brekka_foehammer_a2_skullring",
+    "data": {
+      "aiHints": {
+        "prefer": "highestAtk"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "hammer"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 0.21,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.4,
+          "status": "stun",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Two ringing blows scaling from MaxHP, each with a 40% chance to Stun for 1 turn.",
+      "key": "brekka_foehammer_a2_skullring",
+      "name": "Skullring",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "brekka_foehammer_a3_quake_step",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "quake"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.2,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.6,
+          "status": "spd_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.2,
+          "status": "stun",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Drops the hammer through the floor: hits every enemy, 60% chance of SPD Down 30% for 2 turns and 20% chance to Stun for 1 turn.",
+      "key": "brekka_foehammer_a3_quake_step",
+      "name": "Quake Step",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "briar_knight_a1_thorn_guard",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "thorn_steel"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.6,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "provoke",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "The armour answers for itself, scaling from DEF. 30% chance to Provoke for 1 turn.",
+      "key": "briar_knight_a1_thorn_guard",
+      "name": "Thorn Guard",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "briar_knight_a2_bramble_mantle",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "reflect_30",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "bramble"
+      },
+      "components": [
+        {
+          "status": "reflect_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "def_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 2,
+          "scale": "def",
+          "target": "self",
+          "turns": 2,
+          "type": "shield"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The briars close over the plate: Reflect Damage 30% and DEF Up 30% for 2 turns, plus a DEF-scaled Shield.",
+      "key": "briar_knight_a2_bramble_mantle",
+      "name": "Bramble Mantle",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "shield",
+          "pct": 10
+        },
+        {
+          "effect": "shield",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "briar_knight_a3_crown_of_briars",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "briar_crown"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.4,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.7,
+          "status": "provoke",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Thorns erupt across the enemy line for DEF-scaled damage, with a 70% chance to Provoke for 1 turn.",
+      "key": "briar_knight_a3_crown_of_briars",
+      "name": "Crown of Briars",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "cantor_maelis_a1_dirge_note",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "note",
+        "track": "attack",
+        "vfx": "note"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 0.95,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "spd_down_15",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Two notes, held. Each has a 25% chance of SPD Down 15% for 1 turn.",
+      "key": "cantor_maelis_a1_dirge_note",
+      "name": "Dirge Note",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "cantor_maelis_a2_undertow_hymn",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "undertow"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.3,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.7,
+          "status": "spd_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Pulls the whole line under the beat: 70% chance of SPD Down 30% for 2 turns.",
+      "key": "cantor_maelis_a2_undertow_hymn",
+      "name": "Undertow Hymn",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "cantor_maelis_a3_drowning_chorus",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "chorus"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 1.25,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.6,
+          "deltaPct": -20,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        },
+        {
+          "chance": 0.5,
+          "status": "block_buffs",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Two swells across the enemy line: 60% chance to drain 20% turn meter and 50% chance of Block Buffs for 1 turn.",
+      "key": "cantor_maelis_a3_drowning_chorus",
+      "name": "Drowning Chorus",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "castellan_ordwin_a1_tower_strike",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "steel"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.6,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Brings the tower shield down edge-first for DEF-scaled damage. 30% chance of DEF Down 30% for 1 turn.",
+      "key": "castellan_ordwin_a1_tower_strike",
+      "name": "Tower Strike",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "castellan_ordwin_a2_hold_the_gate",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "gate"
+      },
+      "components": [
+        {
+          "chance": 0.75,
+          "status": "provoke",
+          "target": "allEnemies",
+          "turns": 1,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.22,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 2,
+          "type": "shield"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Orders the whole line onto himself: 75% chance to Provoke every enemy for 1 turn, and a Shield worth 22% of his MaxHP for 2 turns.",
+      "key": "castellan_ordwin_a2_hold_the_gate",
+      "name": "Hold the Gate",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "castellan_ordwin_a3_sentinels_vow",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "def_up_60"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "oath"
+      },
+      "components": [
+        {
+          "status": "def_up_60",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "count": 1,
+          "target": "allAllies",
+          "type": "cleanse"
+        },
+        {
+          "status": "counterattack",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 5,
+      "description": "The old oath, spoken over the whole line: DEF Up 60% for 2 turns and 1 debuff cleansed, plus Counterattack on Ordwin for 2 turns.",
+      "key": "castellan_ordwin_a3_sentinels_vow",
+      "name": "Sentinel’s Vow",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "darius_a1_hexbolt",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "bolt",
+        "track": "cast",
+        "vfx": "hexbolt"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.1,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "spd_down_15",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A bolt of mist with a 30% chance to Decrease SPD for 1 turn.",
+      "key": "darius_a1_hexbolt",
+      "name": "Hexbolt",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "darius_a2_umbral_torrent",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "torrent"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.15,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "status": "spd_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Mist floods the field, 50% chance to Decrease SPD by 30% for 2 turns.",
+      "key": "darius_a2_umbral_torrent",
+      "name": "Umbral Torrent",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "darius_a3_rite_of_ruin",
+    "data": {
+      "aiHints": {
+        "prefer": "highestAtk"
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "ruin"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "ignoreDefPct": 0.25,
+          "mult": 5.9,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 5,
+      "description": "A single devastating word, ignoring 25% of the target’s defence.",
+      "key": "darius_a3_rite_of_ruin",
+      "name": "Rite of Ruin",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "depths_a1_ash_brand",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "ember"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.35,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A brand pressed rather than swung.",
+      "key": "depths_a1_ash_brand",
+      "name": "Ashbrand",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a1_brood_bite",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "bite"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.6,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Small, quick, and there are more behind it.",
+      "key": "depths_a1_brood_bite",
+      "name": "Brood Bite",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a1_pit_cut",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "cut"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.2,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Technique, not temper.",
+      "key": "depths_a1_pit_cut",
+      "name": "Pit Cut",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a1_rime_strike",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "frost"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.4,
+          "scale": "def",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A cold, deliberate blow that scales with the sentinel’s own guard.",
+      "key": "depths_a1_rime_strike",
+      "name": "Rimebrand",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a1_warden_lash",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "lash"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A warning, delivered properly.",
+      "key": "depths_a1_warden_lash",
+      "name": "Warden’s Lash",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a1_wyrm_rake",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "claw"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.1,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A low, fast swipe from something that has never had to hurry.",
+      "key": "depths_a1_wyrm_rake",
+      "name": "Rake",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a2_ash_censer",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "censer"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.8,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 3,
+      "description": "Coals scattered wide, and everything they land on starts to smoke.",
+      "key": "depths_a2_ash_censer",
+      "name": "Swinging Censer",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a2_brood_spit",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "spray"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.7,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.55,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 3,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 3,
+      "description": "A wide, sour spray that keeps working after it lands.",
+      "key": "depths_a2_brood_spit",
+      "name": "Brood Spit",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a2_pit_sweep",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "sweep"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.1,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 3,
+      "description": "One turn on the heel, and the whole ring is in range.",
+      "key": "depths_a2_pit_sweep",
+      "name": "Ring Sweep",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a2_rime_gaze",
+    "data": {
+      "aiHints": {
+        "prefer": "highestAtk"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "gaze"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.4,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.55,
+          "status": "freeze",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "It looks at you, and the air between stops moving.",
+      "key": "depths_a2_rime_gaze",
+      "name": "Rime Gaze",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a2_warden_ward",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "def_up_30",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "ward"
+      },
+      "components": [
+        {
+          "mult": 0.12,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "shield"
+        },
+        {
+          "status": "def_up_30",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The water answers, and closes over the keepers.",
+      "key": "depths_a2_warden_ward",
+      "name": "Springward",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a2_wyrm_breath",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "breath"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.3,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.6,
+          "status": "spd_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 3,
+      "description": "Cave-damp exhaled hot across the whole line, slowing what it touches.",
+      "key": "depths_a2_wyrm_breath",
+      "name": "Hollow Breath",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a3_ash_pyre",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHp"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "pyre"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "ignoreDefPct": 0.3,
+          "mult": 4.4,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The rite finishes, and one of you is the offering.",
+      "key": "depths_a3_ash_pyre",
+      "name": "Pyre Rite",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a3_devour",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHp"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "devour"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.4,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "mult": 0.08,
+          "scale": "maxHp",
+          "target": "self",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 4,
+      "description": "She takes a bite and looks better for it.",
+      "key": "depths_a3_devour",
+      "name": "Devour",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a3_pit_challenge",
+    "data": {
+      "aiHints": {
+        "prefer": "highestAtk"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "challenge"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.8,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "status": "atk_up_25",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The pitmaster names one of you, and means it.",
+      "key": "depths_a3_pit_challenge",
+      "name": "Called Out",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a3_rime_mend",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHpAlly"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "mend"
+      },
+      "components": [
+        {
+          "mult": 0.16,
+          "scale": "maxHp",
+          "target": "self",
+          "type": "heal"
+        },
+        {
+          "count": 2,
+          "target": "self",
+          "type": "cleanse"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Cracks close over as if they had never been there.",
+      "key": "depths_a3_rime_mend",
+      "name": "Vaultmend",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "self"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a3_warden_surge",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "surge"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.4,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The spring rises all at once, and takes the wind out of everything.",
+      "key": "depths_a3_warden_surge",
+      "name": "Wellspring Surge",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "depths_a3_wyrm_carapace",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "def_up_60",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "carapace"
+      },
+      "components": [
+        {
+          "mult": 0.18,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 2,
+          "type": "shield"
+        },
+        {
+          "status": "def_up_60",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "It folds in on itself, and the scales thicken.",
+      "key": "depths_a3_wyrm_carapace",
+      "name": "Stone Carapace",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "self"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "grib_the_unburied_a1_gravehook",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "bone"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.22,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Hooks the target with a rusted spike for damage based on Grib’s MaxHP. 25% chance to weaken their ATK for 1 turn.",
+      "key": "grib_the_unburied_a1_gravehook",
+      "name": "Gravehook",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "grib_the_unburied_a2_rotroot_vigil",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "continuous_heal_15",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "roots"
+      },
+      "components": [
+        {
+          "status": "continuous_heal_15",
+          "target": "self",
+          "turns": 3,
+          "type": "applyStatus"
+        },
+        {
+          "status": "reflect_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 5,
+      "description": "The roots that grew through him tighten: Continuous Heal for 3 turns and Reflect Damage for 2 turns on himself.",
+      "key": "grib_the_unburied_a2_rotroot_vigil",
+      "name": "Rotroot Vigil",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "hodrek_deepline_a1_rune_lash",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "rune_bolt",
+        "track": "attack",
+        "vfx": "rune"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "block_buffs",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A cut of carved light with a 25% chance to Block Buffs for 1 turn.",
+      "key": "hodrek_deepline_a1_rune_lash",
+      "name": "Rune Lash",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "hodrek_deepline_a2_deepline_bolt",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHp"
+      },
+      "animation": {
+        "projectile": "rune_bolt",
+        "track": "cast",
+        "vfx": "rune_bolt"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "ignoreDefPct": 0.2,
+          "mult": 4,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 3,
+      "description": "A single verse of the deep lines, ignoring 20% of the target’s DEF.",
+      "key": "hodrek_deepline_a2_deepline_bolt",
+      "name": "Deepline Bolt",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "hodrek_deepline_a3_sunder_rune",
+    "data": {
+      "aiHints": {
+        "prefer": "highestAtk"
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "rune_sunder"
+      },
+      "components": [
+        {
+          "count": 1,
+          "target": "hitTargets",
+          "type": "dispel"
+        },
+        {
+          "hits": 1,
+          "ignoreDefPct": 0.35,
+          "mult": 6.2,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Strips 1 buff, then cuts through 35% of the target’s DEF. Armour is treated as an opinion.",
+      "key": "hodrek_deepline_a3_sunder_rune",
+      "name": "Sunder Rune",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "kerra_palewatch_a1_riposte",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "steel"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A measured counter-thrust with a 30% chance to lower the target’s ATK for 1 turn.",
+      "key": "kerra_palewatch_a1_riposte",
+      "name": "Riposte",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "kerra_palewatch_a2_find_the_seam",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "def_down_60",
+        "openWith": true
+      },
+      "animation": {
+        "track": "attack",
+        "vfx": "steel"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.5,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.8,
+          "status": "def_down_60",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 3,
+      "description": "Opens the guard: 80% chance to apply DEF Down 60% for 2 turns.",
+      "key": "kerra_palewatch_a2_find_the_seam",
+      "name": "Find the Seam",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "kerra_palewatch_a3_pale_verdict",
+    "data": {
+      "aiHints": {
+        "prefer": "highestAtk"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "pale_slash"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "ignoreDefPct": 0.15,
+          "mult": 5,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "condition": {
+            "status": "def_down_60",
+            "type": "targetHasStatus"
+          },
+          "hits": 1,
+          "mult": 1.2,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 4,
+      "description": "One unhurried thrust ignoring 15% of the target’s DEF, striking far harder into a target already suffering DEF Down 60%.",
+      "key": "kerra_palewatch_a3_pale_verdict",
+      "name": "Pale Verdict",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "khazgor_a1_gravecleave",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "cleave"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.5,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A defence-scaled cut with a 25% chance to Decrease DEF for 1 turn.",
+      "key": "khazgor_a1_gravecleave",
+      "name": "Gravecleave",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "khazgor_a2_deadmans_bulwark",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "bulwark"
+      },
+      "components": [
+        {
+          "mult": 0.25,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 2,
+          "type": "shield"
+        },
+        {
+          "chance": 0.75,
+          "status": "provoke",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Raises a Shield worth 25% of his max HP and drags the enemy line into Provoke.",
+      "key": "khazgor_a2_deadmans_bulwark",
+      "name": "Deadman's Bulwark",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "khazgor_a3_standfast_eternal",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "def_up_60"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "standfast"
+      },
+      "components": [
+        {
+          "status": "def_up_60",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "counterattack",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 5,
+      "description": "The rank holds: Increase DEF for the team and Counterattack for himself, 2 turns.",
+      "key": "khazgor_a3_standfast_eternal",
+      "name": "Standfast Eternal",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "krosska_shieldback_a1_carapace_slam",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "shell"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.4,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.2,
+          "status": "spd_down_15",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Throws her shell forward for DEF-scaled damage. 20% chance of SPD Down 15% for 1 turn.",
+      "key": "krosska_shieldback_a1_carapace_slam",
+      "name": "Carapace Slam",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "krosska_shieldback_a2_scale_wall",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "shield",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "scale_wall"
+      },
+      "components": [
+        {
+          "mult": 0.18,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "shield"
+        },
+        {
+          "status": "def_up_30",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Shields every ally for 18% of her MaxHP and grants DEF Up 30%, both for 2 turns.",
+      "key": "krosska_shieldback_a2_scale_wall",
+      "name": "Scale Wall",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "shield",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "krosska_shieldback_a3_draw_the_brood",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "roar"
+      },
+      "components": [
+        {
+          "chance": 0.7,
+          "status": "provoke",
+          "target": "allEnemies",
+          "turns": 1,
+          "type": "applyStatus"
+        },
+        {
+          "status": "ally_protection_25",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "def_up_60",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Roars the line onto herself: 70% chance to Provoke every enemy for 1 turn, then takes Ally Protection duty and DEF Up 60% for 2 turns.",
+      "key": "krosska_shieldback_a3_draw_the_brood",
+      "name": "Draw the Brood",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "lady_merrow_a1_fen_whisper",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "fen"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.85,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "sleep",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A courteous word at close range. 30% chance to put the target to Sleep for 1 turn.",
+      "key": "lady_merrow_a1_fen_whisper",
+      "name": "Fen Whisper",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "lady_merrow_a2_drowsing_mist",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "lullaby"
+      },
+      "components": [
+        {
+          "chance": 0.6,
+          "status": "sleep",
+          "target": "allEnemies",
+          "turns": 1,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.5,
+          "status": "spd_down_30",
+          "target": "allEnemies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Sings the fen to sleep: 60% chance of Sleep for 1 turn and 50% chance of SPD Down 30% for 2 turns on every enemy.",
+      "key": "lady_merrow_a2_drowsing_mist",
+      "name": "Drowsing Mist",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "lady_merrow_a3_still_waters",
+    "data": {
+      "aiHints": {
+        "onlyBelowHpPct": 70
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "still_water"
+      },
+      "components": [
+        {
+          "mult": 0.25,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        },
+        {
+          "count": 2,
+          "target": "allAllies",
+          "type": "cleanse"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Heals every ally for 25% of Merrow’s MaxHP and cleanses 2 debuffs from each.",
+      "key": "lady_merrow_a3_still_waters",
+      "name": "Still Waters",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "maddoc_threefingers_a1_knuckle_rake",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "fist"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 0.95,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "weaken_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Two bare-handed swings, each with a 25% chance to Weaken for 1 turn.",
+      "key": "maddoc_threefingers_a1_knuckle_rake",
+      "name": "Knuckle Rake",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "maddoc_threefingers_a2_broken_guard",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHp"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "fist"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 4.4,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.75,
+          "status": "weaken_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Comes inside the guard and stays there: 75% chance to Weaken for 2 turns.",
+      "key": "maddoc_threefingers_a2_broken_guard",
+      "name": "Broken Guard",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "maddoc_threefingers_a3_bare_knuckle_oath",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "counterattack",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "blood"
+      },
+      "components": [
+        {
+          "status": "counterattack",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "atk_up_25",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.15,
+          "scale": "maxHp",
+          "target": "self",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Invites the room in: Counterattack and ATK Up 25% for 2 turns, and heals himself for 15% of his MaxHP.",
+      "key": "maddoc_threefingers_a3_bare_knuckle_oath",
+      "name": "Bare-Knuckle Oath",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "maruan_a1_thornlash",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "poison_5"
+      },
+      "animation": {
+        "track": "attack",
+        "vfx": "vine"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.4,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A whipping vine with a 40% chance to Poison for 2 turns.",
+      "key": "maruan_a1_thornlash",
+      "name": "Thornlash",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "maruan_a2_rite_of_reeds",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHpAlly"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "reeds"
+      },
+      "components": [
+        {
+          "mult": 0.2,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        },
+        {
+          "count": 1,
+          "target": "allAllies",
+          "type": "cleanse"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Heals the team for 20% of his max HP and cleanses one debuff from each ally.",
+      "key": "maruan_a2_rite_of_reeds",
+      "name": "Rite of Reeds",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 5
+        },
+        {
+          "effect": "heal",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "maruan_a3_verdant_ruin",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "rot"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.8,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.75,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.75,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Rot spreads across the enemy line: 75% chance for two Poisons, 2 turns.",
+      "key": "maruan_a3_verdant_ruin",
+      "name": "Verdant Ruin",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "old_gharssa_a1_venom_spit",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "venom_glob",
+        "track": "attack",
+        "vfx": "venom"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.8,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.4,
+          "status": "poison_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Spits brood-venom. 40% chance to apply Poison 2.5% for 2 turns.",
+      "key": "old_gharssa_a1_venom_spit",
+      "name": "Venom Spit",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "old_gharssa_a2_brood_brew",
+    "data": {
+      "aiHints": {
+        "onlyBelowHpPct": 80
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "brew"
+      },
+      "components": [
+        {
+          "mult": 0.18,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        },
+        {
+          "count": 1,
+          "target": "allAllies",
+          "type": "cleanse"
+        }
+      ],
+      "cooldown": 3,
+      "description": "Ladles out the pot: heals every ally for 18% of Gharssa’s MaxHP and cleanses 1 debuff.",
+      "key": "old_gharssa_a2_brood_brew",
+      "name": "Brood Brew",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "old_gharssa_a3_mire_bloom",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "mire"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.05,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.75,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.5,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "The marsh flowers all at once: two separate 75% / 50% chances to apply Poison 5% for 2 turns to every enemy.",
+      "key": "old_gharssa_a3_mire_bloom",
+      "name": "Mire Bloom",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "orenna_veilmother_a1_veil_touch",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "veil_touch"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "block_buffs",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Unpicks a knot in the fog around the target. 30% chance of Block Buffs for 1 turn.",
+      "key": "orenna_veilmother_a1_veil_touch",
+      "name": "Veil Touch",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "orenna_veilmother_a2_unbinding",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "unbinding"
+      },
+      "components": [
+        {
+          "count": "all",
+          "target": "allAllies",
+          "type": "cleanse"
+        },
+        {
+          "mult": 0.18,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Clears every debuff from the whole team and heals them for 18% of Orenna’s MaxHP.",
+      "key": "orenna_veilmother_a2_unbinding",
+      "name": "Unbinding",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "orenna_veilmother_a3_mothers_veil",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "block_debuffs",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "mother_veil"
+      },
+      "components": [
+        {
+          "status": "block_debuffs",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "spd_up_30",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Draws the veil over her own: Block Debuffs and SPD Up 30% for the whole team, 2 turns.",
+      "key": "orenna_veilmother_a3_mothers_veil",
+      "name": "Mother’s Veil",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "orenna_veilmother_a4_gate_of_hours",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "gate_hours"
+      },
+      "components": [
+        {
+          "deltaPct": 30,
+          "target": "allAllies",
+          "type": "turnMeter"
+        },
+        {
+          "delta": -1,
+          "target": "allAllies",
+          "type": "cooldown"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Forty missing years, handed back: fills 30% of every ally’s turn meter and reduces all their cooldowns by 1.",
+      "key": "orenna_veilmother_a4_gate_of_hours",
+      "name": "Gate of Hours",
+      "slot": "a4",
+      "sortOrder": 4,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "pale_duke_a1_pale_hand",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "pale_hand"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.24,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.35,
+          "status": "leech",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Collects on account, scaling from the Duke’s MaxHP. 35% chance to place Leech for 2 turns.",
+      "key": "pale_duke_a1_pale_hand",
+      "name": "Pale Hand",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "pale_duke_a2_court_of_hollows",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "hollow_court"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.21,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.8,
+          "status": "weaken_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Convenes the court across the enemy line: MaxHP-scaled damage with an 80% chance to Weaken for 2 turns.",
+      "key": "pale_duke_a2_court_of_hollows",
+      "name": "Court of Hollows",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "pale_duke_a3_debt_collected",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "debt"
+      },
+      "components": [
+        {
+          "chance": 0.75,
+          "status": "leech",
+          "target": "allEnemies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "vampiric_25",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.2,
+          "scale": "maxHp",
+          "target": "self",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 4,
+      "description": "75% chance of Leech for 2 turns on every enemy; the Duke takes Vampiric for 2 turns and heals 20% of his MaxHP.",
+      "key": "pale_duke_a3_debt_collected",
+      "name": "Debt Collected",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "pale_duke_a4_the_long_dark",
+    "data": {
+      "aiHints": {
+        "prefer": "highestAtk"
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "long_dark"
+      },
+      "components": [
+        {
+          "count": "all",
+          "target": "hitTargets",
+          "type": "dispel"
+        },
+        {
+          "hits": 1,
+          "mult": 0.26,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.9,
+          "status": "heal_reduction_50",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.15,
+          "scale": "maxHp",
+          "target": "self",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Strips every buff, strikes for 26% of his MaxHP, applies Heal Reduction 50% for 2 turns and returns 15% of his MaxHP to him.",
+      "key": "pale_duke_a4_the_long_dark",
+      "name": "The Long Dark",
+      "slot": "a4",
+      "sortOrder": 4,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "petta_lanternmaid_a1_lanternstrike",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "lamp"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.8,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "acc_down_50",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Swings the lamp into their eyes. 25% chance of ACC Down 50 for 1 turn.",
+      "key": "petta_lanternmaid_a1_lanternstrike",
+      "name": "Lanternstrike",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "petta_lanternmaid_a2_kindled_mercy",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHpAlly"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "lamp_glow"
+      },
+      "components": [
+        {
+          "mult": 0.28,
+          "scale": "maxHp",
+          "target": "lowestHpAlly",
+          "type": "heal"
+        },
+        {
+          "count": 2,
+          "target": "lowestHpAlly",
+          "type": "cleanse"
+        },
+        {
+          "status": "continuous_heal_15",
+          "target": "lowestHpAlly",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 3,
+      "description": "Drags the worst-wounded ally back to the fire: heals 28% of Petta’s MaxHP, cleanses 2 debuffs and grants Continuous Heal for 2 turns.",
+      "key": "petta_lanternmaid_a2_kindled_mercy",
+      "name": "Kindled Mercy",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "lowestHp",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "petta_lanternmaid_a3_watchfire",
+    "data": {
+      "aiHints": {
+        "onlyBelowHpPct": 75
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "watchfire"
+      },
+      "components": [
+        {
+          "mult": 0.15,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        },
+        {
+          "count": 1,
+          "target": "allAllies",
+          "type": "cleanse"
+        },
+        {
+          "status": "continuous_heal_15",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Sets the night watch: heals every ally for 15% of her MaxHP, cleanses 1 debuff and grants Continuous Heal for 2 turns.",
+      "key": "petta_lanternmaid_a3_watchfire",
+      "name": "Watchfire",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "rattledagger_a1_bonestab",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "stab"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.85,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A quick thrust that finds the gap, with a bonus to critical rate.",
+      "key": "rattledagger_a1_bonestab",
+      "name": "Bonestab",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "rattledagger_a2_marrowdrain",
+    "data": {
+      "aiHints": {
+        "prefer": "highestTm"
+      },
+      "animation": {
+        "track": "attack",
+        "vfx": "drain"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.4,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "deltaPct": -25,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        },
+        {
+          "deltaPct": 25,
+          "target": "self",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 3,
+      "description": "Steals 25% of the target’s turn meter.",
+      "key": "rattledagger_a2_marrowdrain",
+      "name": "Marrowdrain",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "rattledagger_a3_deathrattle",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "attack",
+        "vfx": "rattle"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.7,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.6,
+          "deltaPct": -30,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Three strikes at random foes, each with a 60% chance to drain turn meter.",
+      "key": "rattledagger_a3_deathrattle",
+      "name": "Deathrattle",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "count": 3,
+        "mode": "random",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "serjeant_bramwell_a1_shield_bash",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "steel"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.5,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A shield-first blow scaling from DEF, with a 25% chance to lower the target’s DEF for 1 turn.",
+      "key": "serjeant_bramwell_a1_shield_bash",
+      "name": "Shield Bash",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "serjeant_bramwell_a2_bulwark_oath",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "shield",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "ward"
+      },
+      "components": [
+        {
+          "mult": 0.25,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 2,
+          "type": "shield"
+        },
+        {
+          "status": "def_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Plants the shield: a Shield worth 25% of his MaxHP and DEF Up 30%, both for 2 turns.",
+      "key": "serjeant_bramwell_a2_bulwark_oath",
+      "name": "Bulwark Oath",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "shield",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "serjeant_bramwell_a3_hold_the_doorway",
+    "data": {
+      "aiHints": {
+        "prefer": "highestAtk"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "steel"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.8,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.8,
+          "status": "provoke",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.6,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Steps into the gap: DEF-scaled damage with an 80% chance to Provoke for 1 turn and a 60% chance of DEF Down 30% for 2 turns.",
+      "key": "serjeant_bramwell_a3_hold_the_doorway",
+      "name": "Hold the Doorway",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "sethlurias_a1_tidebrand",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "tide"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.23,
+          "scale": "maxHp",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A strike that scales with his own vitality.",
+      "key": "sethlurias_a1_tidebrand",
+      "name": "Tidebrand",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "sethlurias_a2_scalesong_ward",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "shield",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "ward"
+      },
+      "components": [
+        {
+          "mult": 0.2,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "shield"
+        },
+        {
+          "status": "spd_up_15",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Shields the team for 20% of his max HP and hastens them, 2 turns.",
+      "key": "sethlurias_a2_scalesong_ward",
+      "name": "Scalesong Ward",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "shield",
+          "pct": 5
+        }
+      ]
+    }
+  },
+  {
+    "key": "sethlurias_a3_coilguard",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHpAlly"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "coil"
+      },
+      "components": [
+        {
+          "mult": 0.3,
+          "scale": "maxHp",
+          "target": "lowestHpAlly",
+          "type": "heal"
+        },
+        {
+          "status": "ally_protection_25",
+          "target": "lowestHpAlly",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "count": 1,
+          "target": "lowestHpAlly",
+          "type": "cleanse"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Heals the weakest ally for 30% of his max HP, shelters them, and clears a debuff.",
+      "key": "sethlurias_a3_coilguard",
+      "name": "Coilguard",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "lowestHp",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 5
+        },
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "sister_nerissa_a1_tidecall",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "tide"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.85,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A note that pulls the water in. 30% chance to lower the target’s ATK for 1 turn.",
+      "key": "sister_nerissa_a1_tidecall",
+      "name": "Tidecall",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "sister_nerissa_a2_choral_tide",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "continuous_heal_15",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "choir"
+      },
+      "components": [
+        {
+          "status": "continuous_heal_15",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.12,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Grants every ally Continuous Heal for 2 turns and heals them for 12% of Nerissa’s MaxHP.",
+      "key": "sister_nerissa_a2_choral_tide",
+      "name": "Choral Tide",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "sister_nerissa_a3_deep_communion",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "block_debuffs"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "communion"
+      },
+      "components": [
+        {
+          "status": "block_debuffs",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "count": 1,
+          "target": "allAllies",
+          "type": "cleanse"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Holds the team under the surface with her: Block Debuffs for 2 turns and 1 debuff cleansed.",
+      "key": "sister_nerissa_a3_deep_communion",
+      "name": "Deep Communion",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "ssiv_quickfang_a1_twin_fangs",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "fang"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 0.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.15,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Two quick bites. Each has a 15% chance to lower the target’s DEF for 1 turn.",
+      "key": "ssiv_quickfang_a1_twin_fangs",
+      "name": "Twin Fangs",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "ssiv_quickfang_a2_shedskin_sprint",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "spd_up_30",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "dust"
+      },
+      "components": [
+        {
+          "status": "spd_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "deltaPct": 25,
+          "target": "self",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Sheds and runs: SPD Up 30% for 2 turns and fills 25% of her own turn meter.",
+      "key": "ssiv_quickfang_a2_shedskin_sprint",
+      "name": "Shedskin Sprint",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_a1_brute_slam",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "slam"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.2,
+          "scale": "maxHp",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A heavy sweep scaling with the brute’s bulk.",
+      "key": "sskarn_a1_brute_slam",
+      "name": "Tail Slam",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a1_claw",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "claw"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A raking swipe.",
+      "key": "sskarn_a1_claw",
+      "name": "Rending Claw",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a1_spearguard",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "thrust"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.2,
+          "scale": "def",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A defence-scaled jab from behind a shield wall.",
+      "key": "sskarn_a1_spearguard",
+      "name": "Bracing Thrust",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a1_venom_spit",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "spit",
+        "track": "attack",
+        "vfx": "venom"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.7,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "poison_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Corrosive spittle with a 30% chance to Poison.",
+      "key": "sskarn_a1_venom_spit",
+      "name": "Venom Spit",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a2_broodguard_taunt",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "bellow"
+      },
+      "components": [
+        {
+          "chance": 0.6,
+          "status": "provoke",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        },
+        {
+          "status": "def_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Drags attention onto itself and hardens its scales.",
+      "key": "sskarn_a2_broodguard_taunt",
+      "name": "Bellowing Guard",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a2_lunge",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHp"
+      },
+      "animation": {
+        "track": "attack",
+        "vfx": "lunge"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.2,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 3,
+      "description": "A committed strike from low ground.",
+      "key": "sskarn_a2_lunge",
+      "name": "Marsh Lunge",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a2_mire_mend",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHpAlly"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "mend"
+      },
+      "components": [
+        {
+          "mult": 0.15,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 3,
+      "description": "Closes the brood’s wounds with marsh-craft.",
+      "key": "sskarn_a2_mire_mend",
+      "name": "Mire Mend",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a2_shieldwall",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "def_up_30",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "wall"
+      },
+      "components": [
+        {
+          "status": "def_up_30",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Raises defence for the brood.",
+      "key": "sskarn_a2_shieldwall",
+      "name": "Shieldwall",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a2_stunning_blow",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "concussion"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.24,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.35,
+          "status": "stun",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "A concussive strike that can leave the target reeling.",
+      "key": "sskarn_a2_stunning_blow",
+      "name": "Stunning Blow",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a2_venom_cloud",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "cloud"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "A spreading haze that Poisons the line.",
+      "key": "sskarn_a2_venom_cloud",
+      "name": "Venom Cloud",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_a3_warcall",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "atk_up_25",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "warcall"
+      },
+      "components": [
+        {
+          "status": "atk_up_25",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "A rallying shriek that sharpens every claw in earshot.",
+      "key": "sskarn_a3_warcall",
+      "name": "Warcall",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": []
+    }
+  },
+  {
+    "key": "sskarn_broodguard_ember_a1_ashen_check",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "shell"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.3,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.15,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A shell-first shove scaling from DEF. 15% chance to lower the target’s ATK for 1 turn.",
+      "key": "sskarn_broodguard_ember_a1_ashen_check",
+      "name": "Ashen Check",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_broodguard_ember_a2_bank_the_coals",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "shield",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "dig_in"
+      },
+      "components": [
+        {
+          "status": "def_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.15,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 2,
+          "type": "shield"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Hunkers down: DEF Up 30% and a Shield worth 15% of its MaxHP, both for 2 turns.",
+      "key": "sskarn_broodguard_ember_a2_bank_the_coals",
+      "name": "Bank the Coals",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_broodguard_tide_a1_brine_check",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "shell"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.3,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.15,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A shell-first shove scaling from DEF. 15% chance to lower the target’s ATK for 1 turn.",
+      "key": "sskarn_broodguard_tide_a1_brine_check",
+      "name": "Brine Check",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_broodguard_tide_a2_settle_the_silt",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "shield",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "dig_in"
+      },
+      "components": [
+        {
+          "status": "def_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.15,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 2,
+          "type": "shield"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Hunkers down: DEF Up 30% and a Shield worth 15% of its MaxHP, both for 2 turns.",
+      "key": "sskarn_broodguard_tide_a2_settle_the_silt",
+      "name": "Settle the Silt",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_broodguard_verdant_a1_bramble_check",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "shell"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.3,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.15,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A shell-first shove scaling from DEF. 15% chance to lower the target’s ATK for 1 turn.",
+      "key": "sskarn_broodguard_verdant_a1_bramble_check",
+      "name": "Bramble Check",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_broodguard_verdant_a2_root_down",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "shield",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "dig_in"
+      },
+      "components": [
+        {
+          "status": "def_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.15,
+          "scale": "maxHp",
+          "target": "self",
+          "turns": 2,
+          "type": "shield"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Hunkers down: DEF Up 30% and a Shield worth 15% of its MaxHP, both for 2 turns.",
+      "key": "sskarn_broodguard_verdant_a2_root_down",
+      "name": "Root Down",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_broodling_ember_a1_cinder_nip",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "fang"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.75,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.1,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A hatchling’s bite with an ember on it. 10% chance to place HP Burn for 2 turns.",
+      "key": "sskarn_broodling_ember_a1_cinder_nip",
+      "name": "Cinder Nip",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_broodling_tide_a1_brine_nip",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "fang"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.75,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.1,
+          "status": "spd_down_15",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A hatchling’s bite, cold and wet. 10% chance of SPD Down 15% for 1 turn.",
+      "key": "sskarn_broodling_tide_a1_brine_nip",
+      "name": "Brine Nip",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "sskarn_broodling_verdant_a1_mire_nip",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "fang"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.75,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.1,
+          "status": "poison_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A hatchling’s bite out of the marsh. 10% chance of Poison 2.5% for 2 turns.",
+      "key": "sskarn_broodling_verdant_a1_mire_nip",
+      "name": "Mire Nip",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "sylvi_mistreader_a1_veilspike",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "veil_shard",
+        "track": "attack",
+        "vfx": "veil"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.85,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "deltaPct": -15,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A shard of read fog. 30% chance to drain 15% of the target’s turn meter.",
+      "key": "sylvi_mistreader_a1_veilspike",
+      "name": "Veilspike",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "sylvi_mistreader_a2_tide_of_hours",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "hourglass"
+      },
+      "components": [
+        {
+          "deltaPct": 15,
+          "target": "allAllies",
+          "type": "turnMeter"
+        },
+        {
+          "status": "spd_up_15",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Fills 15% of every ally’s turn meter and grants SPD Up 15% for 2 turns.",
+      "key": "sylvi_mistreader_a2_tide_of_hours",
+      "name": "Tide of Hours",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "sylvi_mistreader_a3_unspooling",
+    "data": {
+      "aiHints": {
+        "prefer": "highestTm"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "unspool"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.75,
+          "deltaPct": -20,
+          "target": "hitTargets",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Pulls the thread out of the enemy line: 75% chance to drain 20% of each target’s turn meter.",
+      "key": "sylvi_mistreader_a3_unspooling",
+      "name": "Unspooling",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "szarran_coilfather_a1_coil_bite",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "coil_bite"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.22,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.45,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A century-brewed bite scaling from MaxHP. 45% chance of Poison 5% for 2 turns.",
+      "key": "szarran_coilfather_a1_coil_bite",
+      "name": "Coil Bite",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "szarran_coilfather_a2_broodmire",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "broodmire"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.2,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.8,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.6,
+          "status": "poison_5",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Floods the field: MaxHP-scaled damage to all, with 80% and 60% chances of two separate Poison 5% for 2 turns.",
+      "key": "szarran_coilfather_a2_broodmire",
+      "name": "Broodmire",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "szarran_coilfather_a3_venom_crown",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "venom_crown"
+      },
+      "components": [
+        {
+          "chance": 0.8,
+          "status": "poison_5",
+          "target": "allEnemies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.6,
+          "status": "heal_reduction_50",
+          "target": "allEnemies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.5,
+          "status": "spd_down_15",
+          "target": "allEnemies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Crowns the enemy line in venom: 80% Poison 5%, 60% Heal Reduction 50% and 50% SPD Down 15%, all for 2 turns.",
+      "key": "szarran_coilfather_a3_venom_crown",
+      "name": "Venom Crown",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "szarran_coilfather_a4_the_coil_closes",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHp"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "coil_close"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 0.26,
+          "scale": "maxHp",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "condition": {
+            "status": "poison_5",
+            "type": "targetHasStatus"
+          },
+          "status": "stun",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        },
+        {
+          "condition": {
+            "pct": 30,
+            "type": "targetHpBelow"
+          },
+          "delta": -1,
+          "target": "self",
+          "type": "cooldown"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Constricts for 26% of his MaxHP. A poisoned target has a 50% chance to be Stunned for 1 turn, and finishing a target below 30% HP shortens his own cooldowns by 1.",
+      "key": "szarran_coilfather_a4_the_coil_closes",
+      "name": "The Coil Closes",
+      "slot": "a4",
+      "sortOrder": 4,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "thordakk_a1_axefall",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "cleave"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A heavy overhead blow with a 30% chance to Decrease ATK for 1 turn.",
+      "key": "thordakk_a1_axefall",
+      "name": "Axefall",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "thordakk_a2_emberwake",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "ember_sweep"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.1,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.6,
+          "status": "atk_down_50",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Sweeps the line, 60% chance to Decrease ATK by 50% for 2 turns.",
+      "key": "thordakk_a2_emberwake",
+      "name": "Emberwake",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "thordakk_a3_ashen_roar",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "roar"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.5,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "status": "counterattack",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 5,
+      "description": "A bellow and a wide swing, then Counterattack for 2 turns.",
+      "key": "thordakk_a3_ashen_roar",
+      "name": "Ashen Roar",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "torvi_anvilborn_a1_anvil_stroke",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "forge"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.5,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.25,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A smith’s downstroke scaling from DEF. 25% chance to lower the target’s ATK for 1 turn.",
+      "key": "torvi_anvilborn_a1_anvil_stroke",
+      "name": "Anvil Stroke",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        }
+      ]
+    }
+  },
+  {
+    "key": "torvi_anvilborn_a2_forgequake",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "forge_wave"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.4,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.5,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Strikes the ground like an anvil: DEF-scaled damage to every enemy, 50% chance of DEF Down 30% for 2 turns.",
+      "key": "torvi_anvilborn_a2_forgequake",
+      "name": "Forgequake",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "torvi_anvilborn_a3_runebound_stand",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "def_up_60",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "rune_ring"
+      },
+      "components": [
+        {
+          "status": "def_up_60",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "block_debuffs",
+          "target": "allAllies",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Cuts a holding-rune under the team: DEF Up 60% for 2 turns and Block Debuffs for 1 turn.",
+      "key": "torvi_anvilborn_a3_runebound_stand",
+      "name": "Runebound Stand",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "ugrim_pyrechant_a1_drumfire",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "drum"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "One struck note that lands like a coal. 30% chance to place HP Burn for 2 turns.",
+      "key": "ugrim_pyrechant_a1_drumfire",
+      "name": "Drumfire",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "ugrim_pyrechant_a2_war_cadence",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "atk_up_50",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "drum_ring"
+      },
+      "components": [
+        {
+          "status": "atk_up_50",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "deltaPct": 15,
+          "target": "allAllies",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Beats the march: ATK Up 50% for 2 turns and 15% of every ally’s turn meter.",
+      "key": "ugrim_pyrechant_a2_war_cadence",
+      "name": "War Cadence",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "ugrim_pyrechant_a3_pyre_chorus",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "hp_burn"
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "pyre"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.8,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.4,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Sings the whole enemy line alight: 80% chance of HP Burn for 2 turns and 40% chance of ATK Down 25% for 2 turns.",
+      "key": "ugrim_pyrechant_a3_pyre_chorus",
+      "name": "Pyre Chorus",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "vessaryn_a1_thorn_kiss",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "thorn_kiss"
+      },
+      "components": [
+        {
+          "hits": 2,
+          "mult": 0.95,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.2,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "Two cuts in the time it takes to notice one. Each has a 20% chance of DEF Down 30% for 1 turn.",
+      "key": "vessaryn_a1_thorn_kiss",
+      "name": "Thorn Kiss",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "vessaryn_a2_deep_veil",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "block_debuffs",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "deep_veil"
+      },
+      "components": [
+        {
+          "status": "strengthen_25",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "block_debuffs",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "spd_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "deltaPct": 20,
+          "target": "self",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Steps into the fog: Strengthen, Block Debuffs and SPD Up 30% for 2 turns, and fills 20% of her turn meter.",
+      "key": "vessaryn_a2_deep_veil",
+      "name": "Deep Veil",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "vessaryn_a3_severing_thorn",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "severing_thorn"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "ignoreDefPct": 0.25,
+          "mult": 4.4,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.6,
+          "status": "heal_reduction_50",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "A cut through 25% of the target’s DEF, with a 60% chance of Heal Reduction 50% for 2 turns.",
+      "key": "vessaryn_a3_severing_thorn",
+      "name": "Severing Thorn",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "vessaryn_a4_the_last_bloom",
+    "data": {
+      "aiHints": {
+        "prefer": "lowestHp"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "last_bloom"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "ignoreDefPct": 0.3,
+          "mult": 4.8,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "condition": {
+            "pct": 40,
+            "type": "targetHpBelow"
+          },
+          "hits": 1,
+          "mult": 1.6,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "condition": {
+            "pct": 40,
+            "type": "targetHpBelow"
+          },
+          "delta": -1,
+          "target": "self",
+          "type": "cooldown"
+        }
+      ],
+      "cooldown": 5,
+      "description": "Ignores 30% of the target’s DEF and strikes far harder into anything below 40% HP — and a target that low leaves her ready again a turn sooner.",
+      "key": "vessaryn_a4_the_last_bloom",
+      "name": "The Last Bloom",
+      "slot": "a4",
+      "sortOrder": 4,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "vessk_the_unchained_a1_lash_out",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "chain"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.1,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 0,
+      "description": "One unplanned, extremely committed swing.",
+      "key": "vessk_the_unchained_a1_lash_out",
+      "name": "Lash Out",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "vessk_the_unchained_a2_unshackled",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "atk_up_50",
+        "openWith": true
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "chain_break"
+      },
+      "components": [
+        {
+          "status": "atk_up_50",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "crit_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "deltaPct": 25,
+          "target": "self",
+          "type": "turnMeter"
+        }
+      ],
+      "cooldown": 3,
+      "description": "ATK Up 50% and C.RATE Up 30% for 2 turns, and fills 25% of his own turn meter.",
+      "key": "vessk_the_unchained_a2_unshackled",
+      "name": "Unshackled",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "vessk_the_unchained_a3_frenzy_of_scales",
+    "data": {
+      "aiHints": {
+        "prefer": "random"
+      },
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "frenzy"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "condition": {
+            "pct": 50,
+            "type": "selfHpBelow"
+          },
+          "hits": 1,
+          "mult": 0.4,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.4,
+          "status": "def_down_30",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Three passes across three random enemies, harder still while Vessk is below 50% HP; 40% chance of DEF Down 30% for 2 turns.",
+      "key": "vessk_the_unchained_a3_frenzy_of_scales",
+      "name": "Frenzy of Scales",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "count": 3,
+        "mode": "random",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "vulkas_emberlord_a1_emberlash",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "attack",
+        "vfx": "ember_whip"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.1,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A whip of live coal. 30% chance to place HP Burn for 2 turns.",
+      "key": "vulkas_emberlord_a1_emberlash",
+      "name": "Emberlash",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "vulkas_emberlord_a2_cinder_crown",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "hp_burn",
+        "openWith": true
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "cinder_crown"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.85,
+          "status": "hp_burn",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Sets the caldera’s crown over the enemy line: 85% chance of HP Burn for 2 turns.",
+      "key": "vulkas_emberlord_a2_cinder_crown",
+      "name": "Cinder Crown",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "vulkas_emberlord_a3_pyre_of_kings",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "pyre_kings"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.2,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "condition": {
+            "status": "hp_burn",
+            "type": "targetHasStatus"
+          },
+          "hits": 1,
+          "mult": 0.35,
+          "scale": "atk",
+          "type": "damage"
+        }
+      ],
+      "cooldown": 5,
+      "description": "A pyre across the field that burns hotter into anything already suffering HP Burn.",
+      "key": "vulkas_emberlord_a3_pyre_of_kings",
+      "name": "Pyre of Kings",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "vulkas_emberlord_a4_ashen_wrath",
+    "data": {
+      "aiHints": {
+        "onlyBelowHpPct": 60
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "ashen_wrath"
+      },
+      "components": [
+        {
+          "status": "atk_up_50",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "crit_up_30",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "status": "vampiric_25",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "delta": -1,
+          "target": "self",
+          "type": "cooldown"
+        }
+      ],
+      "cooldown": 5,
+      "description": "The mountain remembers it is active: ATK Up 50%, C.RATE Up 30% and Vampiric for 2 turns, and every other cooldown drops by 1.",
+      "key": "vulkas_emberlord_a4_ashen_wrath",
+      "name": "Ashen Wrath",
+      "slot": "a4",
+      "sortOrder": 4,
+      "targeting": {
+        "mode": "self",
+        "side": "self"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "warden_elstan_a1_bulwark_blow",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "shake": true,
+        "track": "attack",
+        "vfx": "steel"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 3.7,
+          "scale": "def",
+          "type": "damage"
+        },
+        {
+          "chance": 0.3,
+          "status": "atk_down_25",
+          "target": "hitTargets",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A commander’s blow scaling from DEF, with a 30% chance to lower the target’s ATK for 1 turn.",
+      "key": "warden_elstan_a1_bulwark_blow",
+      "name": "Bulwark Blow",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "warden_elstan_a2_shieldwall",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "shield",
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "shieldwall"
+      },
+      "components": [
+        {
+          "mult": 0.24,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "shield"
+        },
+        {
+          "status": "block_debuffs",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Locks the line: Shields every ally for 24% of Elstan’s MaxHP and grants Block Debuffs, both for 2 turns.",
+      "key": "warden_elstan_a2_shieldwall",
+      "name": "Shieldwall",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "shield",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "shield",
+          "pct": 10
+        },
+        {
+          "effect": "shield",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "warden_elstan_a3_oath_of_the_line",
+    "data": {
+      "aiHints": {
+        "dontRepeatWhileActive": "ally_protection_25"
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "oath"
+      },
+      "components": [
+        {
+          "status": "ally_protection_25",
+          "target": "allAllies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "count": 1,
+          "target": "allAllies",
+          "type": "cleanse"
+        },
+        {
+          "status": "counterattack",
+          "target": "self",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Ally Protection 25% on the whole team and 1 debuff cleansed, with Counterattack on Elstan — all for 2 turns.",
+      "key": "warden_elstan_a3_oath_of_the_line",
+      "name": "Oath of the Line",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "warden_elstan_a4_last_rampart",
+    "data": {
+      "aiHints": {
+        "onlyBelowHpPct": 50
+      },
+      "animation": {
+        "shake": true,
+        "track": "cast",
+        "vfx": "rampart"
+      },
+      "components": [
+        {
+          "status": "unkillable",
+          "target": "allAllies",
+          "turns": 1,
+          "type": "applyStatus"
+        },
+        {
+          "mult": 0.2,
+          "scale": "maxHp",
+          "target": "allAllies",
+          "type": "heal"
+        }
+      ],
+      "cooldown": 5,
+      "description": "The ledger stays at its number: Unkillable for 1 turn on the whole team and a heal worth 20% of Elstan’s MaxHP.",
+      "key": "warden_elstan_a4_last_rampart",
+      "name": "Last Rampart",
+      "slot": "a4",
+      "sortOrder": 4,
+      "targeting": {
+        "mode": "all",
+        "side": "ally"
+      },
+      "upgrades": [
+        {
+          "effect": "heal",
+          "pct": 10
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        },
+        {
+          "effect": "heal",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "wisp_of_hallen_a1_coldlight",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "projectile": "wisp_mote",
+        "track": "attack",
+        "vfx": "wisp"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 1.9,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.35,
+          "status": "leech",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 0,
+      "description": "A touch of lantern-cold with a 35% chance to place Leech for 2 turns.",
+      "key": "wisp_of_hallen_a1_coldlight",
+      "name": "Coldlight",
+      "slot": "a1",
+      "sortOrder": 1,
+      "targeting": {
+        "mode": "single",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        }
+      ]
+    }
+  },
+  {
+    "key": "wisp_of_hallen_a2_hollow_draught",
+    "data": {
+      "aiHints": {},
+      "animation": {
+        "track": "cast",
+        "vfx": "wisp_wave"
+      },
+      "components": [
+        {
+          "hits": 1,
+          "mult": 2.1,
+          "scale": "atk",
+          "type": "damage"
+        },
+        {
+          "chance": 0.7,
+          "status": "heal_reduction_50",
+          "target": "hitTargets",
+          "turns": 2,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Draws the warmth out of the whole enemy line, with a 70% chance of Heal Reduction 50% for 2 turns.",
+      "key": "wisp_of_hallen_a2_hollow_draught",
+      "name": "Hollow Draught",
+      "slot": "a2",
+      "sortOrder": 2,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "damage",
+          "pct": 5
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  },
+  {
+    "key": "wisp_of_hallen_a3_lanternward",
+    "data": {
+      "aiHints": {
+        "openWith": true
+      },
+      "animation": {
+        "track": "cast",
+        "vfx": "lantern"
+      },
+      "components": [
+        {
+          "chance": 0.75,
+          "status": "leech",
+          "target": "allEnemies",
+          "turns": 2,
+          "type": "applyStatus"
+        },
+        {
+          "chance": 0.5,
+          "status": "block_buffs",
+          "target": "allEnemies",
+          "turns": 1,
+          "type": "applyStatus"
+        }
+      ],
+      "cooldown": 4,
+      "description": "Leads the enemy line downward: 75% chance of Leech for 2 turns and 50% chance of Block Buffs for 1 turn.",
+      "key": "wisp_of_hallen_a3_lanternward",
+      "name": "Lanternward",
+      "slot": "a3",
+      "sortOrder": 3,
+      "targeting": {
+        "mode": "all",
+        "side": "enemy"
+      },
+      "upgrades": [
+        {
+          "effect": "chance",
+          "pct": 10
+        },
+        {
+          "effect": "chance",
+          "pct": 15
+        },
+        {
+          "effect": "cooldown",
+          "turns": 1
+        }
+      ]
+    }
+  }
+]

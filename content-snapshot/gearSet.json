@@ -1,0 +1,239 @@
+[
+  {
+    "key": "bloodthorn",
+    "data": {
+      "bonus": {
+        "pct": 30
+      },
+      "bonusType": "lifesteal",
+      "key": "bloodthorn",
+      "lore": "It drinks, and passes some back.",
+      "name": "Bloodthorn",
+      "pieces": 4,
+      "sortOrder": 100
+    }
+  },
+  {
+    "key": "bulwark_of_thorns",
+    "data": {
+      "bonus": {
+        "chance": 0.2
+      },
+      "bonusType": "counterOnHit",
+      "key": "bulwark_of_thorns",
+      "lore": "Strike it and it strikes back.",
+      "name": "Bulwark of Thorns",
+      "pieces": 4,
+      "sortOrder": 160
+    }
+  },
+  {
+    "key": "emberheart",
+    "data": {
+      "bonus": {
+        "chance": 0.25,
+        "turns": 2
+      },
+      "bonusType": "burnOnHit",
+      "key": "emberheart",
+      "lore": "Keeps a coal burning where a heart should be.",
+      "name": "Emberheart",
+      "pieces": 4,
+      "sortOrder": 150
+    }
+  },
+  {
+    "key": "gravebind",
+    "data": {
+      "bonus": {
+        "chance": 0.25,
+        "turns": 1
+      },
+      "bonusType": "provokeOnHit",
+      "key": "gravebind",
+      "lore": "The dead insist on being looked at.",
+      "name": "Gravebind",
+      "pieces": 4,
+      "sortOrder": 120
+    }
+  },
+  {
+    "key": "hawkeye",
+    "data": {
+      "bonus": {
+        "pct": 12,
+        "stat": "critRate"
+      },
+      "bonusType": "stat",
+      "key": "hawkeye",
+      "lore": "Sights the gap before it opens.",
+      "name": "Hawkeye",
+      "pieces": 2,
+      "sortOrder": 50
+    }
+  },
+  {
+    "key": "ironroot",
+    "data": {
+      "bonus": {
+        "pct": 15,
+        "stat": "hp"
+      },
+      "bonusType": "stat",
+      "key": "ironroot",
+      "lore": "Roots that outlived the forest above them.",
+      "name": "Ironroot",
+      "pieces": 2,
+      "sortOrder": 10
+    }
+  },
+  {
+    "key": "leadenscale",
+    "data": {
+      "bonus": {
+        "chance": 0.18,
+        "turns": 1
+      },
+      "bonusType": "stunOnHit",
+      "key": "leadenscale",
+      "lore": "Heavy enough to stop a thought mid-sentence.",
+      "name": "Leadenscale",
+      "pieces": 4,
+      "sortOrder": 140
+    }
+  },
+  {
+    "key": "mendersong",
+    "data": {
+      "bonus": {
+        "pct": 10
+      },
+      "bonusType": "regen",
+      "key": "mendersong",
+      "lore": "A hymn that closes wounds slowly.",
+      "name": "Mendersong",
+      "pieces": 4,
+      "sortOrder": 110
+    }
+  },
+  {
+    "key": "pathfinder",
+    "data": {
+      "bonus": {
+        "flat": 20,
+        "pct": 5,
+        "stat": "spd"
+      },
+      "bonusType": "stat",
+      "key": "pathfinder",
+      "lore": "For those who go first and come back.",
+      "name": "Pathfinder",
+      "pieces": 2,
+      "sortOrder": 90
+    }
+  },
+  {
+    "key": "reaver",
+    "data": {
+      "bonus": {
+        "pct": 20,
+        "stat": "critDmg"
+      },
+      "bonusType": "stat",
+      "key": "reaver",
+      "lore": "Made for finishing, not fighting.",
+      "name": "Reaver",
+      "pieces": 2,
+      "sortOrder": 60
+    }
+  },
+  {
+    "key": "stoneguard",
+    "data": {
+      "bonus": {
+        "pct": 15,
+        "stat": "def"
+      },
+      "bonusType": "stat",
+      "key": "stoneguard",
+      "lore": "Quarried from a wall that never fell.",
+      "name": "Stoneguard",
+      "pieces": 2,
+      "sortOrder": 30
+    }
+  },
+  {
+    "key": "stormcoil",
+    "data": {
+      "bonus": {
+        "pct": 8
+      },
+      "bonusType": "tmOnDamageTaken",
+      "key": "stormcoil",
+      "lore": "Stores every blow it takes.",
+      "name": "Stormcoil",
+      "pieces": 4,
+      "sortOrder": 130
+    }
+  },
+  {
+    "key": "swiftwind",
+    "data": {
+      "bonus": {
+        "pct": 12,
+        "stat": "spd"
+      },
+      "bonusType": "stat",
+      "key": "swiftwind",
+      "lore": "Light enough to outrun the mist itself.",
+      "name": "Swiftwind",
+      "pieces": 2,
+      "sortOrder": 40
+    }
+  },
+  {
+    "key": "truestrike",
+    "data": {
+      "bonus": {
+        "flat": 40,
+        "stat": "acc"
+      },
+      "bonusType": "stat",
+      "key": "truestrike",
+      "lore": "The mist cannot turn a blow it never sees coming.",
+      "name": "Truestrike",
+      "pieces": 2,
+      "sortOrder": 70
+    }
+  },
+  {
+    "key": "wardweave",
+    "data": {
+      "bonus": {
+        "flat": 40,
+        "stat": "res"
+      },
+      "bonusType": "stat",
+      "key": "wardweave",
+      "lore": "Woven against curses older than the vale.",
+      "name": "Wardweave",
+      "pieces": 2,
+      "sortOrder": 80
+    }
+  },
+  {
+    "key": "wolfsfang",
+    "data": {
+      "bonus": {
+        "pct": 15,
+        "stat": "atk"
+      },
+      "bonusType": "stat",
+      "key": "wolfsfang",
+      "lore": "Taken from something that hunted in the fog.",
+      "name": "Wolfsfang",
+      "pieces": 2,
+      "sortOrder": 20
+    }
+  }
+]

@@ -51,8 +51,10 @@ All scripts read one `/srv/mistvale/.env`; no secrets in git; `.env.example` doc
 ## 4. Operational routines
 - **Daily reset** (in-process cron, default 04:00 Europe/Berlin, configurable in `game_config`): quest/shop/arena-token-bonus rotation, event activation/expiry, bot ladder nightly refresh, battle-log pruning, economy-log pruning (90 d).
 - **Monitoring (EA-appropriate):** `STATUS.sh` on demand (reads `/api/health-lite`, and the full `/api/health` payload when `OPS_SESSION_TOKEN` holds an admin session token); optional free UptimeRobot ping to `/api/health-lite`; systemd `OnFailure` writes a crash marker that `STATUS.sh` and the Admin dashboard surface.
-- **Content workflow reminder:** git seeds bootstrap; after that the DB is content truth. Admin "Export content" downloads JSON for git-committing back when you want content in version control (recommended after big authoring sessions — makes content reviewable + disaster-proof).
-- **Disaster recovery:** VPS dies → new VPS + `DEPLOY.sh` + `RESTORE.sh` from offsite backup ≈ 30 min. Documented drill in P10 checklist.
+- **Content workflow reminder:** git seeds bootstrap; after that the DB is content truth. `pnpm content:export` writes it back into `content-snapshot/` for committing (recommended after big authoring sessions — makes content reviewable + disaster-proof).
+- **Disaster recovery:** VPS dies → new VPS + `DEPLOY.sh` + `RESTORE.sh` from offsite backup ≈ 30 min. The drill is in `docs/LAUNCH_CHECKLIST.md`, and it is on the launch list rather than in a folder: a backup nobody has ever restored is not a recovery plan, and the only day it is cheap to prove that is the day before there are players.
+- **Deploy assets are checked in CI.** `scripts/CHECK_DEPLOY.sh` parses and lints every operations script and hands the rendered nginx site to nginx's own parser — the least-exercised code in the repository, checked on every push instead of first thing on a deploy.
+- **Content in git:** `pnpm content:export` writes the live content to `content-snapshot/` as sorted, byte-stable JSON. Commit after an authoring session and `git diff` says what the operator changed.
 - **TLS:** certbot auto-renew (systemd timer) for both subdomains.
 
 ## 5. Release process (per phase / content drop)

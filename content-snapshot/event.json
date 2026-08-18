@@ -1,0 +1,252 @@
+[
+  {
+    "key": "event_champion_training",
+    "data": {
+      "active": true,
+      "bannerAsset": "",
+      "description": "The Vale rewards patience this week. Every level fed to a champion, every rank earned and every ascension counts towards the ladder.",
+      "key": "event_champion_training",
+      "milestones": [
+        {
+          "points": 400,
+          "rewards": {
+            "silver": 20000
+          }
+        },
+        {
+          "points": 1000,
+          "rewards": {
+            "energy_pack_small": 2
+          }
+        },
+        {
+          "points": 1800,
+          "rewards": {
+            "sigil_faded": 3
+          }
+        },
+        {
+          "points": 2800,
+          "rewards": {
+            "crystals": 30,
+            "tome_rare": 1
+          }
+        },
+        {
+          "points": 4200,
+          "rewards": {
+            "sigil_gleaming": 1
+          }
+        },
+        {
+          "points": 6000,
+          "rewards": {
+            "crystals": 60,
+            "tome_epic": 1
+          }
+        }
+      ],
+      "name": "Champion Training",
+      "pointRules": [
+        {
+          "filters": {},
+          "label": "Each champion level",
+          "points": 10,
+          "type": "championLevelUp"
+        },
+        {
+          "filters": {},
+          "label": "Each rank earned",
+          "points": 400,
+          "type": "championRankUp"
+        },
+        {
+          "filters": {},
+          "label": "Each ascension",
+          "points": 600,
+          "type": "championAscend"
+        },
+        {
+          "filters": {},
+          "label": "Each mastery node",
+          "points": 150,
+          "type": "masteryLearn"
+        }
+      ],
+      "schedule": {
+        "durationDays": 5,
+        "kind": "weekly",
+        "startWeekday": 1
+      },
+      "sortOrder": 10,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "event_depths_delve",
+    "data": {
+      "active": true,
+      "bannerAsset": "",
+      "description": "Something in the keeps is restless. Floors cleared below the Vale are worth more than usual until Sunday closes.",
+      "key": "event_depths_delve",
+      "milestones": [
+        {
+          "points": 600,
+          "rewards": {
+            "silver": 25000
+          }
+        },
+        {
+          "points": 1500,
+          "rewards": {
+            "emblem_bronze": 30
+          }
+        },
+        {
+          "points": 2800,
+          "rewards": {
+            "essence_pure": 3
+          }
+        },
+        {
+          "points": 4300,
+          "rewards": {
+            "crystals": 40,
+            "emblem_silver": 60
+          }
+        },
+        {
+          "points": 6300,
+          "rewards": {
+            "sigil_gleaming": 2
+          }
+        },
+        {
+          "points": 9000,
+          "rewards": {
+            "crystals": 80,
+            "emblem_gold": 80
+          }
+        }
+      ],
+      "name": "Depths Delve",
+      "pointRules": [
+        {
+          "filters": {},
+          "label": "Each Depths floor",
+          "points": 100,
+          "type": "dungeonClear"
+        },
+        {
+          "filters": {},
+          "label": "Each floor boss or warlord",
+          "points": 150,
+          "type": "bossKill"
+        },
+        {
+          "filters": {},
+          "label": "Each point of energy spent",
+          "points": 4,
+          "type": "useEnergy"
+        }
+      ],
+      "schedule": {
+        "durationDays": 3,
+        "kind": "weekly",
+        "startWeekday": 5
+      },
+      "sortOrder": 20,
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "event_summon_surge",
+    "data": {
+      "active": true,
+      "bannerAsset": "",
+      "description": "The Mistgate is loud this weekend. Every sigil spent scores, and the rarer the sigil the louder it is.",
+      "key": "event_summon_surge",
+      "milestones": [
+        {
+          "points": 10,
+          "rewards": {
+            "silver": 20000
+          }
+        },
+        {
+          "points": 25,
+          "rewards": {
+            "sigil_faded": 3
+          }
+        },
+        {
+          "points": 50,
+          "rewards": {
+            "crystals": 40
+          }
+        },
+        {
+          "points": 90,
+          "rewards": {
+            "sigil_gleaming": 1
+          }
+        },
+        {
+          "points": 140,
+          "rewards": {
+            "crystals": 80
+          }
+        },
+        {
+          "points": 200,
+          "rewards": {
+            "crystals": 60,
+            "sigil_gleaming": 2
+          }
+        }
+      ],
+      "name": "Summon Surge",
+      "pointRules": [
+        {
+          "filters": {
+            "poolKey": "faded"
+          },
+          "label": "Each Faded Sigil pull",
+          "points": 1,
+          "type": "summon"
+        },
+        {
+          "filters": {
+            "poolKey": "gleaming"
+          },
+          "label": "Each Gleaming Sigil pull",
+          "points": 20,
+          "type": "summon"
+        },
+        {
+          "filters": {
+            "poolKey": "mistwoven"
+          },
+          "label": "Each Mistwoven Sigil pull",
+          "points": 120,
+          "type": "summon"
+        },
+        {
+          "filters": {
+            "poolKey": "radiant"
+          },
+          "label": "Each Radiant Sigil pull",
+          "points": 500,
+          "type": "summon"
+        }
+      ],
+      "schedule": {
+        "durationDays": 2,
+        "kind": "weekly",
+        "startWeekday": 6
+      },
+      "sortOrder": 30,
+      "unlockLevel": 1
+    }
+  }
+]

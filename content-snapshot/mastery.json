@@ -1,0 +1,987 @@
+[
+  {
+    "key": "bulwark_bloodguard",
+    "data": {
+      "description": "Ally Protection redirects 10% more onto this champion.",
+      "effects": [
+        {
+          "pct": 10,
+          "type": "protectionBonus"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_bloodguard",
+      "name": "Bloodguard",
+      "sortOrder": 260,
+      "tier": 4,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_braced",
+    "data": {
+      "description": "Takes 5% less damage from skills that strike more than one target.",
+      "effects": [
+        {
+          "condition": {
+            "type": "aoeSkill"
+          },
+          "pct": -5,
+          "type": "damageTaken"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_braced",
+      "name": "Braced",
+      "sortOrder": 190,
+      "tier": 1,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_cleansing_surge",
+    "data": {
+      "description": "A 25% chance to shrug off one debuff at the start of its turn.",
+      "effects": [
+        {
+          "chance": 0.25,
+          "count": 1,
+          "type": "cleanseProc"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_cleansing_surge",
+      "name": "Cleansing Surge",
+      "sortOrder": 280,
+      "tier": 4,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_first_stand",
+    "data": {
+      "description": "Begins each battle behind a Shield worth 10% of maximum health.",
+      "effects": [
+        {
+          "pctMaxHp": 10,
+          "turns": 2,
+          "type": "battleStartShield"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_first_stand",
+      "name": "First Stand",
+      "sortOrder": 220,
+      "tier": 2,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_grit",
+    "data": {
+      "description": "A single blow costing a quarter of its health has a 50% chance to be answered.",
+      "effects": [
+        {
+          "chance": 0.5,
+          "hpLostPct": 25,
+          "trigger": "heavyHit",
+          "type": "counterProc"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_grit",
+      "name": "Grit",
+      "sortOrder": 230,
+      "tier": 3,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_immovable",
+    "data": {
+      "description": "Stun, Freeze and Provoke land 5% more often, and maximum health rises 10%.",
+      "effects": [
+        {
+          "hardCcOnly": true,
+          "pct": 5,
+          "type": "debuffChance"
+        },
+        {
+          "flat": 0,
+          "pct": 10,
+          "stat": "hp",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_immovable",
+      "name": "Immovable",
+      "sortOrder": 320,
+      "tier": 6,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_ironhide",
+    "data": {
+      "description": "Defence +75.",
+      "effects": [
+        {
+          "flat": 75,
+          "pct": 0,
+          "stat": "def",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_ironhide",
+      "name": "Ironhide",
+      "sortOrder": 170,
+      "tier": 1,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_last_bastion",
+    "data": {
+      "description": "Survives one lethal blow per battle at a single point of health.",
+      "effects": [
+        {
+          "type": "lastStand"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_last_bastion",
+      "name": "Last Bastion",
+      "sortOrder": 310,
+      "tier": 6,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_menders_gift",
+    "data": {
+      "description": "Healing and Shields received are 5% stronger.",
+      "effects": [
+        {
+          "mode": "received",
+          "pct": 5,
+          "type": "healing"
+        },
+        {
+          "mode": "shieldReceived",
+          "pct": 5,
+          "type": "healing"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_menders_gift",
+      "name": "Mender’s Gift",
+      "sortOrder": 200,
+      "tier": 2,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_rooted",
+    "data": {
+      "description": "Defence +15% while carrying no buffs at all.",
+      "effects": [
+        {
+          "condition": {
+            "type": "selfHasNoBuffs"
+          },
+          "flat": 0,
+          "pct": 15,
+          "stat": "def",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_rooted",
+      "name": "Rooted",
+      "sortOrder": 270,
+      "tier": 4,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_shieldwall",
+    "data": {
+      "description": "Takes 5% of every blow aimed at an ally.",
+      "effects": [
+        {
+          "pct": 5,
+          "type": "redirect"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_shieldwall",
+      "name": "Shieldwall",
+      "sortOrder": 210,
+      "tier": 2,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_stonefoot",
+    "data": {
+      "description": "Health +10%.",
+      "effects": [
+        {
+          "flat": 0,
+          "pct": 10,
+          "stat": "hp",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_stonefoot",
+      "name": "Stonefoot",
+      "sortOrder": 250,
+      "tier": 3,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_thickblood",
+    "data": {
+      "description": "Health +810.",
+      "effects": [
+        {
+          "flat": 810,
+          "pct": 0,
+          "stat": "hp",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_thickblood",
+      "name": "Thickblood",
+      "sortOrder": 180,
+      "tier": 1,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_unbroken",
+    "data": {
+      "description": "Resistance +50.",
+      "effects": [
+        {
+          "flat": 50,
+          "pct": 0,
+          "stat": "res",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_unbroken",
+      "name": "Unbroken",
+      "sortOrder": 290,
+      "tier": 5,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_vengeful",
+    "data": {
+      "description": "Counterattacks deal 25% more damage.",
+      "effects": [
+        {
+          "pct": 25,
+          "type": "counterDamage"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_vengeful",
+      "name": "Vengeful",
+      "sortOrder": 300,
+      "tier": 5,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "bulwark_wardens_eye",
+    "data": {
+      "description": "A 20% chance to counterattack whoever silences an ally.",
+      "effects": [
+        {
+          "chance": 0.2,
+          "hpLostPct": 25,
+          "trigger": "allyCrowdControlled",
+          "type": "counterProc"
+        }
+      ],
+      "icon": "",
+      "key": "bulwark_wardens_eye",
+      "name": "Warden’s Eye",
+      "sortOrder": 240,
+      "tier": 3,
+      "tree": "bulwark"
+    }
+  },
+  {
+    "key": "insight_attuned",
+    "data": {
+      "description": "Healing received is 10% stronger.",
+      "effects": [
+        {
+          "mode": "received",
+          "pct": 10,
+          "type": "healing"
+        }
+      ],
+      "icon": "",
+      "key": "insight_attuned",
+      "name": "Attuned",
+      "sortOrder": 440,
+      "tier": 4,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_bated_breath",
+    "data": {
+      "description": "A 30% chance of 10% turn meter whenever one of its own buffs runs out.",
+      "effects": [
+        {
+          "chance": 0.3,
+          "pct": 10,
+          "target": "self",
+          "threshold": 1,
+          "trigger": "ownBuffExpired",
+          "type": "turnMeterProc"
+        }
+      ],
+      "icon": "",
+      "key": "insight_bated_breath",
+      "name": "Bated Breath",
+      "sortOrder": 370,
+      "tier": 2,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_cold_read",
+    "data": {
+      "description": "A 30% chance of 10% turn meter whenever one of its own debuffs runs out.",
+      "effects": [
+        {
+          "chance": 0.3,
+          "pct": 10,
+          "target": "self",
+          "threshold": 1,
+          "trigger": "ownDebuffExpired",
+          "type": "turnMeterProc"
+        }
+      ],
+      "icon": "",
+      "key": "insight_cold_read",
+      "name": "Cold Read",
+      "sortOrder": 380,
+      "tier": 2,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_eagle_sight",
+    "data": {
+      "description": "Accuracy +50.",
+      "effects": [
+        {
+          "flat": 50,
+          "pct": 0,
+          "stat": "acc",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "insight_eagle_sight",
+      "name": "Eagle Sight",
+      "sortOrder": 450,
+      "tier": 5,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_first_strike",
+    "data": {
+      "description": "The first basic attack against each enemy takes 20% of its turn meter.",
+      "effects": [
+        {
+          "pct": 20,
+          "type": "firstStrike"
+        }
+      ],
+      "icon": "",
+      "key": "insight_first_strike",
+      "name": "First Strike",
+      "sortOrder": 420,
+      "tier": 4,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_hexweaver",
+    "data": {
+      "description": "Debuffs land 5% more often.",
+      "effects": [
+        {
+          "hardCcOnly": false,
+          "pct": 5,
+          "type": "debuffChance"
+        }
+      ],
+      "icon": "",
+      "key": "insight_hexweaver",
+      "name": "Hexweaver",
+      "sortOrder": 390,
+      "tier": 3,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_longbrew",
+    "data": {
+      "description": "Buffs it places on allies have a 25% chance to last a turn longer.",
+      "effects": [
+        {
+          "chance": 0.25,
+          "excludeHardCc": false,
+          "mode": "allyBuffs",
+          "turns": 1,
+          "type": "statusDuration"
+        }
+      ],
+      "icon": "",
+      "key": "insight_longbrew",
+      "name": "Longbrew",
+      "sortOrder": 430,
+      "tier": 4,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_lorekeeper",
+    "data": {
+      "description": "Healing given is 5% stronger.",
+      "effects": [
+        {
+          "mode": "dealt",
+          "pct": 5,
+          "type": "healing"
+        }
+      ],
+      "icon": "",
+      "key": "insight_lorekeeper",
+      "name": "Lorekeeper",
+      "sortOrder": 350,
+      "tier": 1,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_nullfield",
+    "data": {
+      "description": "Resistance +30.",
+      "effects": [
+        {
+          "flat": 30,
+          "pct": 0,
+          "stat": "res",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "insight_nullfield",
+      "name": "Nullfield",
+      "sortOrder": 460,
+      "tier": 5,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_quickstudy",
+    "data": {
+      "description": "Accuracy +25 and Resistance +10.",
+      "effects": [
+        {
+          "flat": 25,
+          "pct": 0,
+          "stat": "acc",
+          "type": "stat"
+        },
+        {
+          "flat": 10,
+          "pct": 0,
+          "stat": "res",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "insight_quickstudy",
+      "name": "Quickstudy",
+      "sortOrder": 340,
+      "tier": 1,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_sharpened_senses",
+    "data": {
+      "description": "Accuracy +40.",
+      "effects": [
+        {
+          "flat": 40,
+          "pct": 0,
+          "stat": "acc",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "insight_sharpened_senses",
+      "name": "Sharpened Senses",
+      "sortOrder": 330,
+      "tier": 1,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_springstep",
+    "data": {
+      "description": "Gains 5% turn meter when an ally falls.",
+      "effects": [
+        {
+          "chance": 1,
+          "pct": 5,
+          "target": "self",
+          "threshold": 1,
+          "trigger": "allyDied",
+          "type": "turnMeterProc"
+        }
+      ],
+      "icon": "",
+      "key": "insight_springstep",
+      "name": "Springstep",
+      "sortOrder": 400,
+      "tier": 3,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_sustained_ward",
+    "data": {
+      "description": "Two-piece relic set bonuses are 15% stronger.",
+      "effects": [
+        {
+          "pct": 15,
+          "type": "setBonusAmplify"
+        }
+      ],
+      "icon": "",
+      "key": "insight_sustained_ward",
+      "name": "Sustained Ward",
+      "sortOrder": 410,
+      "tier": 3,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_swarmreader",
+    "data": {
+      "description": "Accuracy +4 for each living enemy, up to four of them.",
+      "effects": [
+        {
+          "condition": {
+            "maxStacks": 4,
+            "type": "perLivingEnemy"
+          },
+          "flat": 4,
+          "pct": 0,
+          "stat": "acc",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "insight_swarmreader",
+      "name": "Swarmreader",
+      "sortOrder": 360,
+      "tier": 2,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_veilbinder",
+    "data": {
+      "description": "Its own debuffs have a 30% chance to last a turn longer. Stun, Freeze, Sleep and Provoke are excluded.",
+      "effects": [
+        {
+          "chance": 0.3,
+          "excludeHardCc": true,
+          "mode": "ownDebuffs",
+          "turns": 1,
+          "type": "statusDuration"
+        }
+      ],
+      "icon": "",
+      "key": "insight_veilbinder",
+      "name": "Veilbinder",
+      "sortOrder": 470,
+      "tier": 6,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "insight_wellspring",
+    "data": {
+      "description": "Landing two debuffs in a single turn hands the whole team 5% turn meter.",
+      "effects": [
+        {
+          "chance": 1,
+          "pct": 5,
+          "target": "team",
+          "threshold": 2,
+          "trigger": "debuffsLandedInTurn",
+          "type": "turnMeterProc"
+        }
+      ],
+      "icon": "",
+      "key": "insight_wellspring",
+      "name": "Wellspring",
+      "sortOrder": 480,
+      "tier": 6,
+      "tree": "insight"
+    }
+  },
+  {
+    "key": "onslaught_blade_oath",
+    "data": {
+      "description": "Attack +75.",
+      "effects": [
+        {
+          "flat": 75,
+          "pct": 0,
+          "stat": "atk",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_blade_oath",
+      "name": "Blade Oath",
+      "sortOrder": 10,
+      "tier": 1,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_bloodrush",
+    "data": {
+      "description": "Heals for 5% of the damage dealt while below half health.",
+      "effects": [
+        {
+          "condition": {
+            "pct": 50,
+            "type": "selfHpBelow"
+          },
+          "pct": 5,
+          "type": "lifesteal"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_bloodrush",
+      "name": "Bloodrush",
+      "sortOrder": 50,
+      "tier": 2,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_bounty_shield",
+    "data": {
+      "description": "Felling an enemy grants a Shield worth 15% of maximum health.",
+      "effects": [
+        {
+          "flat": 0,
+          "maxStacks": 1,
+          "shieldPctMaxHp": 15,
+          "type": "onKill"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_bounty_shield",
+      "name": "Bounty Shield",
+      "sortOrder": 110,
+      "tier": 4,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_deathmark",
+    "data": {
+      "description": "A landed skill has a 60% chance to deal a further 10% of the target’s maximum health — 4% against a boss.",
+      "effects": [
+        {
+          "bossPct": 4,
+          "chance": 0.6,
+          "pct": 10,
+          "type": "bonusDamageMaxHp"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_deathmark",
+      "name": "Deathmark",
+      "sortOrder": 150,
+      "tier": 6,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_duelists_focus",
+    "data": {
+      "description": "Deals 6% more damage in the Arena.",
+      "effects": [
+        {
+          "condition": {
+            "mode": "arena",
+            "type": "mode"
+          },
+          "pct": 6,
+          "type": "damageDealt"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_duelists_focus",
+      "name": "Duellist’s Focus",
+      "sortOrder": 120,
+      "tier": 4,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_executioner",
+    "data": {
+      "description": "Deals 8% more damage to a target below 40% health.",
+      "effects": [
+        {
+          "condition": {
+            "pct": 40,
+            "type": "targetHpBelow"
+          },
+          "pct": 8,
+          "type": "damageDealt"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_executioner",
+      "name": "Executioner",
+      "sortOrder": 130,
+      "tier": 5,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_fell_the_great",
+    "data": {
+      "description": "Deals 6% more damage to anything with a larger health pool than its own.",
+      "effects": [
+        {
+          "condition": {
+            "type": "targetMaxHpAbove"
+          },
+          "pct": 6,
+          "type": "damageDealt"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_fell_the_great",
+      "name": "Fell the Great",
+      "sortOrder": 70,
+      "tier": 3,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_flawless_edge",
+    "data": {
+      "description": "Critical Damage +20%.",
+      "effects": [
+        {
+          "flat": 20,
+          "pct": 0,
+          "stat": "critDmg",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_flawless_edge",
+      "name": "Flawless Edge",
+      "sortOrder": 160,
+      "tier": 6,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_fury_brand",
+    "data": {
+      "description": "Deals 4% more damage for each debuff it is carrying, up to five.",
+      "effects": [
+        {
+          "condition": {
+            "maxStacks": 5,
+            "type": "perOwnDebuff"
+          },
+          "pct": 4,
+          "type": "damageDealt"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_fury_brand",
+      "name": "Fury Brand",
+      "sortOrder": 140,
+      "tier": 5,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_grim_cycle",
+    "data": {
+      "description": "A blow costing a target at least 30% of its health has a 30% chance to shorten a cooldown by a turn.",
+      "effects": [
+        {
+          "chance": 0.3,
+          "minDamagePctMaxHp": 30,
+          "type": "cooldownProc"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_grim_cycle",
+      "name": "Grim Cycle",
+      "sortOrder": 90,
+      "tier": 3,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_heavy_hand",
+    "data": {
+      "description": "Critical Damage +10%.",
+      "effects": [
+        {
+          "flat": 10,
+          "pct": 0,
+          "stat": "critDmg",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_heavy_hand",
+      "name": "Heavy Hand",
+      "sortOrder": 30,
+      "tier": 1,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_keen_eye",
+    "data": {
+      "description": "Critical Rate +5%.",
+      "effects": [
+        {
+          "flat": 5,
+          "pct": 0,
+          "stat": "critRate",
+          "type": "stat"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_keen_eye",
+      "name": "Keen Eye",
+      "sortOrder": 20,
+      "tier": 1,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_methodical",
+    "data": {
+      "description": "Each consecutive basic attack hits 2% harder, to a maximum of 10%. Any other skill resets it.",
+      "effects": [
+        {
+          "maxPct": 10,
+          "pctPerUse": 2,
+          "type": "a1Ramp"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_methodical",
+      "name": "Methodical",
+      "sortOrder": 100,
+      "tier": 4,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_momentum",
+    "data": {
+      "description": "Speed +6 for each enemy felled, up to three times.",
+      "effects": [
+        {
+          "flat": 6,
+          "maxStacks": 3,
+          "shieldPctMaxHp": 0,
+          "stat": "spd",
+          "type": "onKill"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_momentum",
+      "name": "Momentum",
+      "sortOrder": 60,
+      "tier": 2,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_opportunist",
+    "data": {
+      "description": "Deals 12% more damage to a target that cannot act.",
+      "effects": [
+        {
+          "condition": {
+            "type": "targetCrowdControlled"
+          },
+          "pct": 12,
+          "type": "damageDealt"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_opportunist",
+      "name": "Opportunist",
+      "sortOrder": 80,
+      "tier": 3,
+      "tree": "onslaught"
+    }
+  },
+  {
+    "key": "onslaught_shieldcracker",
+    "data": {
+      "description": "Deals 25% more damage to a target holding a Shield.",
+      "effects": [
+        {
+          "condition": {
+            "type": "targetShielded"
+          },
+          "pct": 25,
+          "type": "damageDealt"
+        }
+      ],
+      "icon": "",
+      "key": "onslaught_shieldcracker",
+      "name": "Shieldcracker",
+      "sortOrder": 40,
+      "tier": 2,
+      "tree": "onslaught"
+    }
+  }
+]

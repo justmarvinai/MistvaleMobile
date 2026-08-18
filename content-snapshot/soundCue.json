@@ -1,0 +1,627 @@
+[
+  {
+    "key": "battle_buff",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "battle_buff",
+      "sample": "",
+      "sortOrder": 230,
+      "throttleMs": 90,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.2,
+        "endHz": 660,
+        "filterHz": 4000,
+        "gain": 0.2,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 440,
+        "wave": "triangle"
+      }
+    }
+  },
+  {
+    "key": "battle_crit",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "battle_crit",
+      "sample": "",
+      "sortOrder": 210,
+      "throttleMs": 90,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.2,
+        "endHz": 660,
+        "filterHz": 4200,
+        "gain": 0.38,
+        "overtones": [],
+        "source": "noise",
+        "startHz": 660,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "battle_death",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "battle_death",
+      "sample": "",
+      "sortOrder": 250,
+      "throttleMs": 120,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.5,
+        "endHz": 90,
+        "filterHz": 1100,
+        "gain": 0.3,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 340,
+        "wave": "sawtooth"
+      }
+    }
+  },
+  {
+    "key": "battle_debuff",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "battle_debuff",
+      "sample": "",
+      "sortOrder": 240,
+      "throttleMs": 90,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.22,
+        "endHz": 260,
+        "filterHz": 1400,
+        "gain": 0.2,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 440,
+        "wave": "sawtooth"
+      }
+    }
+  },
+  {
+    "key": "battle_heal",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "battle_heal",
+      "sample": "",
+      "sortOrder": 220,
+      "throttleMs": 90,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.3,
+        "endHz": 880,
+        "filterHz": 5000,
+        "gain": 0.24,
+        "overtones": [
+          7
+        ],
+        "source": "tone",
+        "startHz": 520,
+        "wave": "sine"
+      }
+    }
+  },
+  {
+    "key": "battle_hit",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "battle_hit",
+      "sample": "",
+      "sortOrder": 200,
+      "throttleMs": 55,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.1,
+        "endHz": 660,
+        "filterHz": 1900,
+        "gain": 0.26,
+        "overtones": [],
+        "source": "noise",
+        "startHz": 660,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "battle_wave",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "battle_wave",
+      "sample": "",
+      "sortOrder": 260,
+      "throttleMs": 200,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.45,
+        "endHz": 660,
+        "filterHz": 1200,
+        "gain": 0.3,
+        "overtones": [],
+        "source": "noise",
+        "startHz": 660,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "defeat",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "defeat",
+      "sample": "",
+      "sortOrder": 310,
+      "throttleMs": 0,
+      "voice": {
+        "attack": 0.01,
+        "decay": 1.1,
+        "endHz": 196,
+        "filterHz": 1400,
+        "gain": 0.28,
+        "overtones": [
+          -5
+        ],
+        "source": "tone",
+        "startHz": 392,
+        "wave": "sawtooth"
+      }
+    }
+  },
+  {
+    "key": "forge_fail",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "forge_fail",
+      "sample": "",
+      "sortOrder": 150,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.22,
+        "endHz": 660,
+        "filterHz": 300,
+        "gain": 0.26,
+        "overtones": [],
+        "source": "noise",
+        "startHz": 660,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "forge_success",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "forge_success",
+      "sample": "",
+      "sortOrder": 140,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.3,
+        "endHz": 660,
+        "filterHz": 700,
+        "gain": 0.34,
+        "overtones": [],
+        "source": "noise",
+        "startHz": 660,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "level_up",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "level_up",
+      "sample": "",
+      "sortOrder": 320,
+      "throttleMs": 0,
+      "voice": {
+        "attack": 0.008,
+        "decay": 0.7,
+        "endHz": 1046,
+        "filterHz": 7000,
+        "gain": 0.3,
+        "overtones": [
+          4,
+          7,
+          12
+        ],
+        "source": "tone",
+        "startHz": 659,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "relic_drop",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "relic_drop",
+      "sample": "",
+      "sortOrder": 130,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.4,
+        "endHz": 1400,
+        "filterHz": 8000,
+        "gain": 0.32,
+        "overtones": [
+          5,
+          12
+        ],
+        "source": "tone",
+        "startHz": 700,
+        "wave": "triangle"
+      }
+    }
+  },
+  {
+    "key": "reward_crystals",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "reward_crystals",
+      "sample": "",
+      "sortOrder": 110,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.34,
+        "endHz": 2100,
+        "filterHz": 9000,
+        "gain": 0.28,
+        "overtones": [
+          12,
+          19
+        ],
+        "source": "tone",
+        "startHz": 1320,
+        "wave": "sine"
+      }
+    }
+  },
+  {
+    "key": "reward_silver",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "reward_silver",
+      "sample": "",
+      "sortOrder": 100,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.22,
+        "endHz": 1560,
+        "filterHz": 7000,
+        "gain": 0.3,
+        "overtones": [
+          7,
+          12
+        ],
+        "source": "tone",
+        "startHz": 1180,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "reward_spend",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "reward_spend",
+      "sample": "",
+      "sortOrder": 120,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.18,
+        "endHz": 560,
+        "filterHz": 4200,
+        "gain": 0.26,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 900,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "summon_common",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "summon_common",
+      "sample": "",
+      "sortOrder": 340,
+      "throttleMs": 0,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.28,
+        "endHz": 620,
+        "filterHz": 3000,
+        "gain": 0.22,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 500,
+        "wave": "triangle"
+      }
+    }
+  },
+  {
+    "key": "summon_legendary",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "summon_legendary",
+      "sample": "",
+      "sortOrder": 360,
+      "throttleMs": 0,
+      "voice": {
+        "attack": 0.02,
+        "decay": 1.4,
+        "endHz": 1568,
+        "filterHz": 9000,
+        "gain": 0.34,
+        "overtones": [
+          7,
+          12,
+          16,
+          19
+        ],
+        "source": "tone",
+        "startHz": 523,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "summon_rare",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "summon_rare",
+      "sample": "",
+      "sortOrder": 350,
+      "throttleMs": 0,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.5,
+        "endHz": 1100,
+        "filterHz": 6000,
+        "gain": 0.28,
+        "overtones": [
+          7
+        ],
+        "source": "tone",
+        "startHz": 700,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "ui_back",
+    "data": {
+      "active": true,
+      "bus": "ui",
+      "key": "ui_back",
+      "sample": "",
+      "sortOrder": 20,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.07,
+        "endHz": 300,
+        "filterHz": 1800,
+        "gain": 0.2,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 420,
+        "wave": "triangle"
+      }
+    }
+  },
+  {
+    "key": "ui_close",
+    "data": {
+      "active": true,
+      "bus": "ui",
+      "key": "ui_close",
+      "sample": "",
+      "sortOrder": 40,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.12,
+        "endHz": 360,
+        "filterHz": 2400,
+        "gain": 0.24,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 720,
+        "wave": "triangle"
+      }
+    }
+  },
+  {
+    "key": "ui_denied",
+    "data": {
+      "active": true,
+      "bus": "ui",
+      "key": "ui_denied",
+      "sample": "",
+      "sortOrder": 60,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.18,
+        "endHz": 150,
+        "filterHz": 900,
+        "gain": 0.3,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 300,
+        "wave": "sawtooth"
+      }
+    }
+  },
+  {
+    "key": "ui_open",
+    "data": {
+      "active": true,
+      "bus": "ui",
+      "key": "ui_open",
+      "sample": "",
+      "sortOrder": 30,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.14,
+        "endHz": 720,
+        "filterHz": 3200,
+        "gain": 0.26,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 380,
+        "wave": "triangle"
+      }
+    }
+  },
+  {
+    "key": "ui_press",
+    "data": {
+      "active": true,
+      "bus": "ui",
+      "key": "ui_press",
+      "sample": "",
+      "sortOrder": 10,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.05,
+        "endHz": 560,
+        "filterHz": 2600,
+        "gain": 0.22,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 620,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "ui_tab",
+    "data": {
+      "active": true,
+      "bus": "ui",
+      "key": "ui_tab",
+      "sample": "",
+      "sortOrder": 50,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.04,
+        "endHz": 880,
+        "filterHz": 3400,
+        "gain": 0.16,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 880,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "ui_toggle",
+    "data": {
+      "active": true,
+      "bus": "ui",
+      "key": "ui_toggle",
+      "sample": "",
+      "sortOrder": 70,
+      "throttleMs": 40,
+      "voice": {
+        "attack": 0.004,
+        "decay": 0.05,
+        "endHz": 780,
+        "filterHz": 3000,
+        "gain": 0.18,
+        "overtones": [],
+        "source": "tone",
+        "startHz": 520,
+        "wave": "square"
+      }
+    }
+  },
+  {
+    "key": "unlock",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "unlock",
+      "sample": "",
+      "sortOrder": 330,
+      "throttleMs": 0,
+      "voice": {
+        "attack": 0.01,
+        "decay": 0.8,
+        "endHz": 1320,
+        "filterHz": 6000,
+        "gain": 0.28,
+        "overtones": [
+          7,
+          12
+        ],
+        "source": "tone",
+        "startHz": 440,
+        "wave": "triangle"
+      }
+    }
+  },
+  {
+    "key": "victory",
+    "data": {
+      "active": true,
+      "bus": "sfx",
+      "key": "victory",
+      "sample": "",
+      "sortOrder": 300,
+      "throttleMs": 0,
+      "voice": {
+        "attack": 0.01,
+        "decay": 0.9,
+        "endHz": 784,
+        "filterHz": 6000,
+        "gain": 0.3,
+        "overtones": [
+          4,
+          7,
+          12
+        ],
+        "source": "tone",
+        "startHz": 523,
+        "wave": "square"
+      }
+    }
+  }
+]

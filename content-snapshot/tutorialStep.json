@@ -1,0 +1,392 @@
+[
+  {
+    "key": "tut_bazaar",
+    "data": {
+      "active": true,
+      "body": "Somebody always sets up in a Haven, and this one restocks on her own schedule and will not tell me what it is.\n\nBuy something. Silver you are holding is silver doing nothing, and the stock rotates whether you shopped or not.",
+      "goal": {
+        "filters": {
+          "shopKey": "bazaar"
+        },
+        "target": 1,
+        "type": "shopPurchase"
+      },
+      "grantsBefore": {
+        "silver": 4000
+      },
+      "grantsRelics": [],
+      "highlight": "panel:bazaar-offers",
+      "key": "tut_bazaar",
+      "rewards": {
+        "crystals": 100,
+        "playerXp": 120,
+        "silver": 3000
+      },
+      "screen": "bazaar",
+      "sortOrder": 13,
+      "step": 13,
+      "title": "The Bazaar"
+    }
+  },
+  {
+    "key": "tut_cold_open",
+    "data": {
+      "active": true,
+      "body": "Wait — do not walk out there yet. There is a Sskarn ambush on the Sunken Road and it has been there a week.\n\nI can hold three of them here, borrowed, for about as long as this takes. Watch what they do: everyone acts in turn, the fast ones twice as often, and the skills that matter are the ones you have been saving.",
+      "goal": {
+        "filters": {
+          "mode": "tutorial",
+          "stageKey": "tut_cold_open"
+        },
+        "target": 1,
+        "type": "stageClear"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "",
+      "key": "tut_cold_open",
+      "rewards": {},
+      "screen": "battle",
+      "sortOrder": 1,
+      "step": 1,
+      "title": "Something on the road"
+    }
+  },
+  {
+    "key": "tut_equip",
+    "data": {
+      "active": true,
+      "body": "The dead out there were carrying things, and I have been keeping this one for whoever walked in next. Relics — old warden kit, mostly, and it still fits.\n\nPut it on somebody. A champion wearing nothing is a champion fighting at half of what they are.",
+      "goal": {
+        "filters": {},
+        "target": 1,
+        "type": "gearEquip"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [
+        {
+          "rank": 2,
+          "rarity": "uncommon",
+          "setKey": "ironroot",
+          "slot": "weapon"
+        }
+      ],
+      "highlight": "panel:relic-list",
+      "key": "tut_equip",
+      "rewards": {
+        "playerXp": 60,
+        "silver": 4000
+      },
+      "screen": "relics",
+      "sortOrder": 6,
+      "step": 6,
+      "title": "What the road gave up"
+    }
+  },
+  {
+    "key": "tut_first_stage",
+    "data": {
+      "active": true,
+      "body": "The road east of here has not been walked in a year. Whatever has moved onto it is weak, slow, and very surprised to see a warden.\n\nGo and take the first stretch of it back. Energy is what a march costs; it comes back on its own, so spend it.",
+      "goal": {
+        "filters": {
+          "mode": "campaign",
+          "stageKey": "c01_s1_normal"
+        },
+        "target": 1,
+        "type": "stageClear"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "stage:c01_s1_normal",
+      "key": "tut_first_stage",
+      "rewards": {
+        "playerXp": 90,
+        "silver": 4000
+      },
+      "screen": "campaign",
+      "sortOrder": 4,
+      "step": 4,
+      "title": "The Sunken Road"
+    }
+  },
+  {
+    "key": "tut_first_summon",
+    "data": {
+      "active": true,
+      "body": "Here. Two sigils — I have been saving them and I am too old to use them well.\n\nThe Gate takes a sigil and gives back whatever the mist still holds a shape for. A faded one calls the least of it, but the least of it is a second pair of hands, and you have one pair.",
+      "goal": {
+        "filters": {
+          "poolKey": "faded"
+        },
+        "target": 1,
+        "type": "summon"
+      },
+      "grantsBefore": {
+        "sigil_faded": 2
+      },
+      "grantsRelics": [],
+      "highlight": "button:summon-faded",
+      "key": "tut_first_summon",
+      "rewards": {
+        "playerXp": 80,
+        "silver": 3000
+      },
+      "screen": "mistgate",
+      "sortOrder": 5,
+      "step": 5,
+      "title": "The Mistgate"
+    }
+  },
+  {
+    "key": "tut_fourth_stage",
+    "data": {
+      "active": true,
+      "body": "Past the turning the mist starts leaving things behind — sigils, sometimes, if you are the first one down the road that week.",
+      "goal": {
+        "filters": {
+          "mode": "campaign",
+          "stageKey": "c01_s4_normal"
+        },
+        "target": 1,
+        "type": "stageClear"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "stage:c01_s4_normal",
+      "key": "tut_fourth_stage",
+      "rewards": {
+        "playerXp": 100,
+        "silver": 4000
+      },
+      "screen": "campaign",
+      "sortOrder": 12,
+      "step": 12,
+      "title": "Sigil country"
+    }
+  },
+  {
+    "key": "tut_level_champion",
+    "data": {
+      "active": true,
+      "body": "The ones the Gate coughs up that are no use in a fight are still use to somebody who is. Feed them to a champion you mean to keep and they hand over what they had.\n\nTake somebody up **three levels**. Rank is the other axis — that costs champions of the same rank, and it is what raises the ceiling rather than the number.",
+      "goal": {
+        "filters": {},
+        "target": 3,
+        "type": "championLevelUp"
+      },
+      "grantsBefore": {
+        "silver": 6000
+      },
+      "grantsRelics": [],
+      "highlight": "button:champion-level",
+      "key": "tut_level_champion",
+      "rewards": {
+        "playerXp": 100,
+        "sigil_gleaming": 1,
+        "silver": 2000
+      },
+      "screen": "champions",
+      "sortOrder": 11,
+      "step": 11,
+      "title": "Feeding the fire"
+    }
+  },
+  {
+    "key": "tut_open_road",
+    "data": {
+      "active": true,
+      "body": "That is everything I know how to teach standing still.\n\nThere are keeps under the Vale — the **Depths** — and they are shut to you until you are ready, which the fog will tell you about before I do. Until then the **Path** is the list that matters: it runs from here to the far end of the Reclamation, and the last thing on it is not a relic.\n\nGo on. The lantern stays lit.",
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "dock:depths",
+      "key": "tut_open_road",
+      "rewards": {
+        "playerXp": 150,
+        "sigil_gleaming": 1,
+        "silver": 5000
+      },
+      "screen": "haven",
+      "sortOrder": 15,
+      "step": 15,
+      "title": "The Path from here"
+    }
+  },
+  {
+    "key": "tut_quests",
+    "data": {
+      "active": true,
+      "body": "A warden keeps a list. Not because anyone is checking — because the fog takes back anything you leave for a week, and a list is how you notice.\n\nThese refresh every morning. Finish one and **claim** it; the ones you leave unclaimed pay nothing.",
+      "goal": {
+        "filters": {},
+        "target": 1,
+        "type": "questClaim"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "panel:quest-daily",
+      "key": "tut_quests",
+      "rewards": {
+        "crystals": 50,
+        "playerXp": 120,
+        "silver": 3000
+      },
+      "screen": "quests",
+      "sortOrder": 9,
+      "step": 9,
+      "title": "The day’s work"
+    }
+  },
+  {
+    "key": "tut_second_stage",
+    "data": {
+      "active": true,
+      "body": "Better armed than you were an hour ago. Go and prove it on the next stretch — and watch what the relics do, because the difference is the whole lesson.",
+      "goal": {
+        "filters": {
+          "mode": "campaign",
+          "stageKey": "c01_s2_normal"
+        },
+        "target": 1,
+        "type": "stageClear"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "stage:c01_s2_normal",
+      "key": "tut_second_stage",
+      "rewards": {
+        "playerXp": 90,
+        "silver": 4000
+      },
+      "screen": "campaign",
+      "sortOrder": 8,
+      "step": 8,
+      "title": "Further out"
+    }
+  },
+  {
+    "key": "tut_starter",
+    "data": {
+      "active": true,
+      "body": "Three answered the lantern. The Gate has only enough left in it to hold **one** of them here — choose, and choose for yourself, because the other two can still be found later and this one will be with you tonight.",
+      "goal": {
+        "filters": {},
+        "target": 1,
+        "type": "championObtained"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "modal:starter-choice",
+      "key": "tut_starter",
+      "rewards": {
+        "playerXp": 60,
+        "silver": 3000
+      },
+      "screen": "haven",
+      "sortOrder": 3,
+      "step": 3,
+      "title": "One of them stays"
+    }
+  },
+  {
+    "key": "tut_third_stage",
+    "data": {
+      "active": true,
+      "body": "Third stretch. The road bends north here and the ground gets worse — which is how you know you are getting somewhere.",
+      "goal": {
+        "filters": {
+          "mode": "campaign",
+          "stageKey": "c01_s3_normal"
+        },
+        "target": 1,
+        "type": "stageClear"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "stage:c01_s3_normal",
+      "key": "tut_third_stage",
+      "rewards": {
+        "playerXp": 90,
+        "silver": 4000
+      },
+      "screen": "campaign",
+      "sortOrder": 10,
+      "step": 10,
+      "title": "The turning"
+    }
+  },
+  {
+    "key": "tut_upgrade",
+    "data": {
+      "active": true,
+      "body": "Silver and a hot enough fire will wake a relic up a little further. It does not always take — that is the nature of the thing, and no smith in the Vale has ever managed better.\n\nTake one piece to **+1**. Here is the silver for it; after this you will be finding your own.",
+      "goal": {
+        "filters": {},
+        "target": 1,
+        "type": "gearLevel"
+      },
+      "grantsBefore": {
+        "silver": 5000
+      },
+      "grantsRelics": [],
+      "highlight": "button:relic-upgrade",
+      "key": "tut_upgrade",
+      "rewards": {
+        "playerXp": 90,
+        "silver": 2000
+      },
+      "screen": "relics",
+      "sortOrder": 7,
+      "step": 7,
+      "title": "The forge"
+    }
+  },
+  {
+    "key": "tut_warlord",
+    "data": {
+      "active": true,
+      "body": "The road ends at a warlord. It always ends at a warlord.\n\nThis one is **Vrash the Fenblade**, and the Sskarn have been following him through the treeline since the fog came in. Clear your way to the seventh stretch and put him down — take a full team, because he does not fight the way the road did.",
+      "goal": {
+        "filters": {
+          "mode": "campaign",
+          "stageKey": "c01_s7_normal"
+        },
+        "target": 1,
+        "type": "stageClear"
+      },
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "stage:c01_s7_normal",
+      "key": "tut_warlord",
+      "rewards": {
+        "crystals": 150,
+        "playerXp": 200,
+        "sigil_gleaming": 2,
+        "silver": 8000
+      },
+      "screen": "campaign",
+      "sortOrder": 14,
+      "step": 14,
+      "title": "The thing at the end of the road"
+    }
+  },
+  {
+    "key": "tut_welcome",
+    "data": {
+      "active": true,
+      "body": "You came out of the mist walking, which is more than most manage. I am the Wardenmaster — the last one, unless somebody is being quiet about it.\n\nThis is the Haven. It is stone, it is dry, and nothing that lives in the fog can cross the wards. Everything else out there is yours to take back.",
+      "grantsBefore": {},
+      "grantsRelics": [],
+      "highlight": "",
+      "key": "tut_welcome",
+      "rewards": {
+        "playerXp": 60,
+        "silver": 2000
+      },
+      "screen": "haven",
+      "sortOrder": 2,
+      "step": 2,
+      "title": "The lantern in the fog"
+    }
+  }
+]

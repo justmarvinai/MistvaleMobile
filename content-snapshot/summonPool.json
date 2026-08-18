@@ -1,0 +1,525 @@
+[
+  {
+    "key": "faded",
+    "data": {
+      "description": "A worn anchor. It calls the least of what the mist holds — brood-kin, mostly, and the occasional soul worth keeping.",
+      "entries": [
+        {
+          "championKey": "ashka_torchhand",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "grib_the_unburied",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "ssiv_quickfang",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "serjeant_bramwell",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "kerra_palewatch",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "brekka_foehammer",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "maddoc_threefingers",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "wisp_of_hallen",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "petta_lanternmaid",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sylvi_mistreader",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "old_gharssa",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "krosska_shieldback",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "bracken_puck",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "torvi_anvilborn",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "hodrek_deepline",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sister_nerissa",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sskarn_broodling_ember",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sskarn_broodling_tide",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sskarn_broodling_verdant",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sskarn_broodguard_ember",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sskarn_broodguard_tide",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sskarn_broodguard_verdant",
+          "featured": false,
+          "weight": 10
+        }
+      ],
+      "key": "faded",
+      "name": "Faded Sigil",
+      "pity": {
+        "rare": {
+          "after": 30,
+          "maxBonus": 1,
+          "step": 0.03
+        }
+      },
+      "rates": {
+        "common": 0.74,
+        "rare": 0.06,
+        "uncommon": 0.2
+      },
+      "sigilKey": "sigil_faded",
+      "sortOrder": 10
+    }
+  },
+  {
+    "key": "gleaming",
+    "data": {
+      "description": "Still bright. The mist answers it properly, and sometimes generously.",
+      "entries": [
+        {
+          "championKey": "anuria",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "thordakk",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "maruan",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "darius",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "khazgor",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "rattledagger",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sethlurias",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "serjeant_bramwell",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "kerra_palewatch",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "brekka_foehammer",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "maddoc_threefingers",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "wisp_of_hallen",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "petta_lanternmaid",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sylvi_mistreader",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "old_gharssa",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "krosska_shieldback",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "bracken_puck",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "torvi_anvilborn",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "hodrek_deepline",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sister_nerissa",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "castellan_ordwin",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "ugrim_pyrechant",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "aldemar_the_cartographer",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "lady_merrow",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "vessk_the_unchained",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "briar_knight",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "cantor_maelis",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "warden_elstan",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "vulkas_emberlord",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "orenna_veilmother",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "pale_duke",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "szarran_coilfather",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "vessaryn",
+          "featured": false,
+          "weight": 10
+        }
+      ],
+      "key": "gleaming",
+      "name": "Gleaming Sigil",
+      "pity": {
+        "epic": {
+          "after": 20,
+          "maxBonus": 1,
+          "step": 0.02
+        },
+        "legendary": {
+          "after": 200,
+          "maxBonus": 1,
+          "step": 0.05
+        }
+      },
+      "rates": {
+        "epic": 0.08,
+        "legendary": 0.005,
+        "rare": 0.915
+      },
+      "sigilKey": "sigil_gleaming",
+      "sortOrder": 20,
+      "tenPullFloor": "rare"
+    }
+  },
+  {
+    "key": "mistwoven",
+    "data": {
+      "description": "Woven from the fog itself. It calls only its own, and they answer readily.",
+      "entries": [
+        {
+          "championKey": "darius",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "rattledagger",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "wisp_of_hallen",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sylvi_mistreader",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "hodrek_deepline",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "orenna_veilmother",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "pale_duke",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "vessaryn",
+          "featured": false,
+          "weight": 10
+        }
+      ],
+      "key": "mistwoven",
+      "name": "Mistwoven Sigil",
+      "pity": {
+        "epic": {
+          "after": 20,
+          "maxBonus": 1,
+          "step": 0.02
+        },
+        "legendary": {
+          "after": 200,
+          "maxBonus": 1,
+          "step": 0.05
+        }
+      },
+      "rates": {
+        "epic": 0.08,
+        "legendary": 0.005,
+        "rare": 0.915
+      },
+      "sigilKey": "sigil_mistwoven",
+      "sortOrder": 30,
+      "tenPullFloor": "rare"
+    }
+  },
+  {
+    "key": "radiant",
+    "data": {
+      "description": "It does not so much call as demand. Nothing small comes through it.",
+      "entries": [
+        {
+          "championKey": "anuria",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "thordakk",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "maruan",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "darius",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "khazgor",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "rattledagger",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "sethlurias",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "castellan_ordwin",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "ugrim_pyrechant",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "aldemar_the_cartographer",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "lady_merrow",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "vessk_the_unchained",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "briar_knight",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "cantor_maelis",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "warden_elstan",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "vulkas_emberlord",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "orenna_veilmother",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "pale_duke",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "szarran_coilfather",
+          "featured": false,
+          "weight": 10
+        },
+        {
+          "championKey": "vessaryn",
+          "featured": false,
+          "weight": 10
+        }
+      ],
+      "key": "radiant",
+      "name": "Radiant Sigil",
+      "pity": {
+        "legendary": {
+          "after": 12,
+          "maxBonus": 1,
+          "step": 0.02
+        }
+      },
+      "rates": {
+        "epic": 0.94,
+        "legendary": 0.06
+      },
+      "sigilKey": "sigil_radiant",
+      "sortOrder": 40,
+      "tenPullFloor": "epic"
+    }
+  }
+]

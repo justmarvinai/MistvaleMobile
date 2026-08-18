@@ -1,0 +1,1255 @@
+[
+  {
+    "key": "arena.botBands",
+    "data": {
+      "group": "arena",
+      "help": "How many bots each band holds and what they are built from: the rating window they spread across, the level they show, and the champions and relics their defence is synthesised at. The ladder must never be empty — a new account has to find somebody to fight on its first evening. Sixty by default, weighted to the bottom (ECONOMY_BALANCE §12).",
+      "key": "arena.botBands",
+      "label": "Bot ladder recipes",
+      "value": {
+        "bronze": {
+          "ascension": 0,
+          "championLevelMax": 25,
+          "championLevelMin": 15,
+          "championRank": 3,
+          "count": 24,
+          "gearLevel": 4,
+          "gearRank": 2,
+          "gearRarity": "rare",
+          "gearSlots": 6,
+          "levelMax": 18,
+          "levelMin": 8,
+          "ratingMax": 1150,
+          "ratingMin": 400,
+          "teamSize": 3
+        },
+        "gold": {
+          "ascension": 4,
+          "championLevelMax": 50,
+          "championLevelMin": 35,
+          "championRank": 5,
+          "count": 12,
+          "gearLevel": 12,
+          "gearRank": 4,
+          "gearRarity": "epic",
+          "gearSlots": 8,
+          "levelMax": 45,
+          "levelMin": 30,
+          "ratingMax": 2950,
+          "ratingMin": 2000,
+          "teamSize": 4
+        },
+        "platinum": {
+          "ascension": 6,
+          "championLevelMax": 60,
+          "championLevelMin": 50,
+          "championRank": 6,
+          "count": 4,
+          "gearLevel": 16,
+          "gearRank": 5,
+          "gearRarity": "epic",
+          "gearSlots": 9,
+          "levelMax": 60,
+          "levelMin": 45,
+          "ratingMax": 3400,
+          "ratingMin": 3000,
+          "teamSize": 4
+        },
+        "silver": {
+          "ascension": 2,
+          "championLevelMax": 35,
+          "championLevelMin": 25,
+          "championRank": 4,
+          "count": 20,
+          "gearLevel": 8,
+          "gearRank": 3,
+          "gearRarity": "rare",
+          "gearSlots": 7,
+          "levelMax": 30,
+          "levelMin": 18,
+          "ratingMax": 1950,
+          "ratingMin": 1200,
+          "teamSize": 4
+        }
+      }
+    }
+  },
+  {
+    "key": "arena.botEpithets",
+    "data": {
+      "group": "arena",
+      "help": "The second half of a bot’s name. Keep them ≤8 characters: a profile name is at most sixteen, and a name that will not fit is a bot that cannot be created.",
+      "key": "arena.botEpithets",
+      "label": "Bot names — epithets",
+      "value": [
+        "Vale",
+        "Ashen",
+        "Thorn",
+        "Ember",
+        "Grey",
+        "Hollow",
+        "Ironhand",
+        "Fenwick",
+        "Marrow",
+        "Quill",
+        "Reed",
+        "Stone",
+        "Vesper",
+        "Wilder",
+        "Bright",
+        "Cinder",
+        "Dusk",
+        "Frost",
+        "Gale",
+        "Harrow",
+        "Larkin",
+        "Moss",
+        "Rime",
+        "Storm"
+      ]
+    }
+  },
+  {
+    "key": "arena.botGivenNames",
+    "data": {
+      "group": "arena",
+      "help": "The first half of a bot’s name. Multiplied by the epithet list, so adding one word here adds a name for every epithet. Natural names with no bot marker, by the owner’s decision (GAME_DESIGN §9.3) — keep them ≤7 characters so every combination fits a profile name.",
+      "key": "arena.botGivenNames",
+      "label": "Bot names — given",
+      "value": [
+        "Marek",
+        "Corvin",
+        "Iseld",
+        "Bran",
+        "Rook",
+        "Talia",
+        "Edrin",
+        "Halvi",
+        "Nesta",
+        "Orrin",
+        "Perrin",
+        "Quill",
+        "Sable",
+        "Torvin",
+        "Ulric",
+        "Vesna",
+        "Wren",
+        "Yarrow",
+        "Zeva",
+        "Alder",
+        "Briar",
+        "Cael",
+        "Dagna",
+        "Ember",
+        "Fennic",
+        "Garrick",
+        "Hollis",
+        "Imre",
+        "Joran",
+        "Kestrel",
+        "Lyra",
+        "Mabon",
+        "Niamh",
+        "Osric",
+        "Pell",
+        "Riven",
+        "Soren",
+        "Thalia",
+        "Ulla",
+        "Varek"
+      ]
+    }
+  },
+  {
+    "key": "arena.bronzeFloor",
+    "data": {
+      "group": "arena",
+      "help": "A loss inside Bronze cannot drop a rating below its tier floor. A friendlier smalltown ladder than the source game’s — a new account should not be able to fall out of the bottom.",
+      "key": "arena.bronzeFloor",
+      "label": "Bronze loss protection",
+      "value": true
+    }
+  },
+  {
+    "key": "arena.freeRefreshesPerDay",
+    "data": {
+      "group": "arena",
+      "help": "After these, a refresh costs crystals. Resets on the daily reset hour with every other allowance.",
+      "key": "arena.freeRefreshesPerDay",
+      "label": "Free offer refreshes per day",
+      "value": 5
+    }
+  },
+  {
+    "key": "arena.hallCosts",
+    "data": {
+      "group": "arena",
+      "help": "Medals for each level of one track, 1 → 10. Twenty-four tracks at ~2,500 each is a year-scale sink by design.",
+      "key": "arena.hallCosts",
+      "label": "Hall of Valor level costs",
+      "value": [
+        40,
+        60,
+        90,
+        130,
+        180,
+        240,
+        310,
+        390,
+        480,
+        580
+      ]
+    }
+  },
+  {
+    "key": "arena.hallPerLevel",
+    "data": {
+      "group": "arena",
+      "help": "What one level of a track gives: a percentage for HP/ATK/DEF/C.DMG, flat points for ACC/RES.",
+      "key": "arena.hallPerLevel",
+      "label": "Hall of Valor per level",
+      "value": {
+        "acc": 4,
+        "atk": 2,
+        "critDmg": 1,
+        "def": 2,
+        "hp": 2,
+        "res": 4
+      }
+    }
+  },
+  {
+    "key": "arena.medalsPerWin",
+    "data": {
+      "group": "arena",
+      "help": "By band. The only faucet for the Hall of Valor besides the weekly chest.",
+      "key": "arena.medalsPerWin",
+      "label": "Valor Medals per win",
+      "value": {
+        "bronze": 1,
+        "gold": 3,
+        "platinum": 4,
+        "silver": 2
+      }
+    }
+  },
+  {
+    "key": "arena.offerCount",
+    "data": {
+      "group": "arena",
+      "help": "How many opponents the hub shows at once.",
+      "key": "arena.offerCount",
+      "label": "Opponents on offer",
+      "value": 5
+    }
+  },
+  {
+    "key": "arena.ratingK",
+    "data": {
+      "group": "arena",
+      "help": "How far one result can move a rating. Elo-lite: the swing shrinks as the gap between the two ratings grows.",
+      "key": "arena.ratingK",
+      "label": "Rating K-factor",
+      "value": 32
+    }
+  },
+  {
+    "key": "arena.refreshCrystals",
+    "data": {
+      "group": "arena",
+      "help": "Crystals for a refresh once the free ones are gone.",
+      "key": "arena.refreshCrystals",
+      "label": "Paid offer refresh",
+      "value": 10
+    }
+  },
+  {
+    "key": "arena.startingRating",
+    "data": {
+      "group": "arena",
+      "help": "Where a new account joins the ladder — inside Bronze II, so the first win is a promotion rather than a rounding error.",
+      "key": "arena.startingRating",
+      "label": "Starting rating",
+      "value": 900
+    }
+  },
+  {
+    "key": "arena.tierThresholds",
+    "data": {
+      "group": "arena",
+      "help": "Rating at which each rung of the ladder begins. Where the rungs sit is the main lever on how a season feels (ECONOMY_BALANCE §8).",
+      "key": "arena.tierThresholds",
+      "label": "Tier thresholds",
+      "value": {
+        "bronze_1": 0,
+        "bronze_2": 800,
+        "bronze_3": 1000,
+        "gold_1": 2000,
+        "gold_2": 2300,
+        "gold_3": 2600,
+        "platinum": 3000,
+        "silver_1": 1200,
+        "silver_2": 1400,
+        "silver_3": 1700
+      }
+    }
+  },
+  {
+    "key": "arena.tokenCap",
+    "data": {
+      "group": "arena",
+      "help": "Tokens accrue to this and stop. Source-faithful.",
+      "key": "arena.tokenCap",
+      "label": "Attack token cap",
+      "value": 10
+    }
+  },
+  {
+    "key": "arena.tokenRegenSeconds",
+    "data": {
+      "group": "arena",
+      "help": "Seconds per token. Derived from the clock like energy — there is no ticking job to fall behind.",
+      "key": "arena.tokenRegenSeconds",
+      "label": "Attack token regen",
+      "value": 3600
+    }
+  },
+  {
+    "key": "arena.weeklyChest",
+    "data": {
+      "group": "arena",
+      "help": "Paid against the best tier held during the week, not the tier held on Monday morning — falling out of Gold on Sunday evening must not cost a week of Gold.",
+      "key": "arena.weeklyChest",
+      "label": "Weekly tier chest",
+      "value": {
+        "bronze": {
+          "crystals": 25,
+          "valorMedals": 20
+        },
+        "gold": {
+          "crystals": 100,
+          "valorMedals": 100
+        },
+        "platinum": {
+          "crystals": 150,
+          "valorMedals": 150
+        },
+        "silver": {
+          "crystals": 50,
+          "valorMedals": 50
+        }
+      }
+    }
+  },
+  {
+    "key": "arena.weeklyDecayPct",
+    "data": {
+      "group": "arena",
+      "help": "Percentage of the distance from the current rating down to its tier floor, shed at the Monday reset. Keeps an abandoned account from holding a Platinum slot forever without resetting anybody to zero.",
+      "key": "arena.weeklyDecayPct",
+      "label": "Weekly rating decay",
+      "value": 10
+    }
+  },
+  {
+    "key": "champion.ascensionBonusPct",
+    "data": {
+      "group": "progression",
+      "help": "Each ascension level adds this percentage to HP, ATK and DEF.",
+      "key": "champion.ascensionBonusPct",
+      "label": "Ascension bonus per level",
+      "value": 2
+    }
+  },
+  {
+    "key": "champion.levelCurveExponent",
+    "data": {
+      "group": "progression",
+      "help": "Primary stats scale as (level / 60) ^ exponent, then blend with the level-1 floor. Higher means more of a champion's power arrives late.",
+      "key": "champion.levelCurveExponent",
+      "label": "Level curve exponent",
+      "value": 1.35
+    }
+  },
+  {
+    "key": "champion.levelFloorPct",
+    "data": {
+      "group": "progression",
+      "help": "What percentage of its level-60 primaries a champion has at level 1, before rank.",
+      "key": "champion.levelFloorPct",
+      "label": "Level 1 share of final stats",
+      "value": 18
+    }
+  },
+  {
+    "key": "champion.rankMultipliers",
+    "data": {
+      "group": "progression",
+      "help": "One entry per star, ★1 first. Multiplies HP, ATK and DEF. ★6 must be 1.0 — it is the authored anchor.",
+      "key": "champion.rankMultipliers",
+      "label": "Star rank multipliers",
+      "value": [
+        0.42,
+        0.55,
+        0.68,
+        0.79,
+        0.9,
+        1
+      ]
+    }
+  },
+  {
+    "key": "combat.accuracyBonusPerPoint",
+    "data": {
+      "group": "combat",
+      "help": "Added to the parity chance for each point of ACC over RES, up to the bonus cap.",
+      "key": "combat.accuracyBonusPerPoint",
+      "label": "Land chance gained per point of accuracy above resistance",
+      "value": 0.0025
+    }
+  },
+  {
+    "key": "combat.accuracyMaxBonus",
+    "data": {
+      "group": "combat",
+      "help": "At the default 0.0025 per point this caps out at 28 accuracy over resistance.",
+      "key": "combat.accuracyMaxBonus",
+      "label": "Cap on the accuracy bonus",
+      "value": 0.07
+    }
+  },
+  {
+    "key": "combat.accuracyMaxLandChance",
+    "data": {
+      "group": "combat",
+      "help": "Irreducible resist floor of 3%.",
+      "key": "combat.accuracyMaxLandChance",
+      "label": "Maximum land chance",
+      "value": 0.97
+    }
+  },
+  {
+    "key": "combat.accuracyMinLandChance",
+    "data": {
+      "group": "combat",
+      "help": "However high resistance climbs, debuffs still land occasionally.",
+      "key": "combat.accuracyMinLandChance",
+      "label": "Minimum land chance",
+      "value": 0.05
+    }
+  },
+  {
+    "key": "combat.accuracyParityLandChance",
+    "data": {
+      "group": "combat",
+      "help": "Probability a debuff sticks when accuracy exactly matches resistance.",
+      "key": "combat.accuracyParityLandChance",
+      "label": "Land chance at ACC = RES",
+      "value": 0.9
+    }
+  },
+  {
+    "key": "combat.accuracyPenaltyPerPoint",
+    "data": {
+      "group": "combat",
+      "help": "Each point of RES over ACC costs roughly one percentage point of land chance.",
+      "key": "combat.accuracyPenaltyPerPoint",
+      "label": "Land chance lost per point of resistance above accuracy",
+      "value": 0.01
+    }
+  },
+  {
+    "key": "combat.arenaCcDiminishing",
+    "data": {
+      "group": "combat",
+      "help": "Extra resist chance per consecutive hard crowd control on the same unit, Arena only.",
+      "key": "combat.arenaCcDiminishing",
+      "label": "Arena crowd-control resistance",
+      "value": 0.25
+    }
+  },
+  {
+    "key": "combat.damageVariance",
+    "data": {
+      "group": "combat",
+      "help": "Random spread applied to every damage roll.",
+      "key": "combat.damageVariance",
+      "label": "Damage variance",
+      "value": 0.05
+    }
+  },
+  {
+    "key": "combat.defenceConstantPerLevel",
+    "data": {
+      "group": "combat",
+      "help": "K in K/(K+DEF), computed as this × attacker level. 10 gives K=600 at level 60.",
+      "key": "combat.defenceConstantPerLevel",
+      "label": "Defence mitigation constant",
+      "value": 10
+    }
+  },
+  {
+    "key": "combat.disadvantagePenalty",
+    "data": {
+      "group": "combat",
+      "help": "Blanket damage reduction when attacking into a stronger element.",
+      "key": "combat.disadvantagePenalty",
+      "label": "Disadvantage damage penalty",
+      "value": 0.2
+    }
+  },
+  {
+    "key": "combat.effectBarCap",
+    "data": {
+      "group": "combat",
+      "help": "Buffs and debuffs are capped separately. A full bar rejects further effects of that kind.",
+      "key": "combat.effectBarCap",
+      "label": "Maximum buffs or debuffs per unit",
+      "value": 10
+    }
+  },
+  {
+    "key": "combat.hpBurnSplashPct",
+    "data": {
+      "group": "combat",
+      "help": "Share of the burning unit's max HP dealt to each of its allies when the burn ticks.",
+      "key": "combat.hpBurnSplashPct",
+      "label": "HP Burn splash to allies",
+      "value": 3
+    }
+  },
+  {
+    "key": "combat.maxTurns",
+    "data": {
+      "group": "combat",
+      "help": "Battles cannot run longer than this.",
+      "key": "combat.maxTurns",
+      "label": "Hard turn cap",
+      "value": 300
+    }
+  },
+  {
+    "key": "combat.poisonStackCap",
+    "data": {
+      "group": "combat",
+      "help": "Poison is the one status that stacks. The source game allows ten; five suits a smaller roster.",
+      "key": "combat.poisonStackCap",
+      "label": "Maximum poison stacks per unit",
+      "value": 5
+    }
+  },
+  {
+    "key": "combat.strongHitBonus",
+    "data": {
+      "group": "combat",
+      "help": "Extra damage on a strong hit.",
+      "key": "combat.strongHitBonus",
+      "label": "Strong hit damage bonus",
+      "value": 0.3
+    }
+  },
+  {
+    "key": "combat.strongHitChance",
+    "data": {
+      "group": "combat",
+      "help": "Chance of a strong hit when attacking into a weaker element.",
+      "key": "combat.strongHitChance",
+      "label": "Strong hit chance",
+      "value": 0.5
+    }
+  },
+  {
+    "key": "combat.strongHitCritBonus",
+    "data": {
+      "group": "combat",
+      "help": "Percentage points of critical rate added when attacking with advantage.",
+      "key": "combat.strongHitCritBonus",
+      "label": "Strong hit crit bonus",
+      "value": 15
+    }
+  },
+  {
+    "key": "combat.turnMeterPerTick",
+    "data": {
+      "group": "combat",
+      "help": "The tempo constant: TM per tick = SPD × this. 0.07 matches the source game.",
+      "key": "combat.turnMeterPerTick",
+      "label": "Turn meter gained per speed per tick",
+      "value": 0.07
+    }
+  },
+  {
+    "key": "combat.waveHealPct",
+    "data": {
+      "group": "combat",
+      "help": "Share of max HP restored to survivors when a wave clears.",
+      "key": "combat.waveHealPct",
+      "label": "Between-wave heal",
+      "value": 10
+    }
+  },
+  {
+    "key": "combat.weakHitChance",
+    "data": {
+      "group": "combat",
+      "help": "Chance of a weak hit when attacking into a stronger element.",
+      "key": "combat.weakHitChance",
+      "label": "Weak hit chance",
+      "value": 0.35
+    }
+  },
+  {
+    "key": "combat.weakHitPenalty",
+    "data": {
+      "group": "combat",
+      "help": "Damage lost on a weak hit.",
+      "key": "combat.weakHitPenalty",
+      "label": "Weak hit damage penalty",
+      "value": 0.3
+    }
+  },
+  {
+    "key": "depths.springsGraceDays",
+    "data": {
+      "group": "ops",
+      "help": "A new account sees every Essence Spring open, rotation or not, for this many days after registering — so a first week is never spent waiting for a Tuesday.",
+      "key": "depths.springsGraceDays",
+      "label": "Springs grace period (days)",
+      "value": 7
+    }
+  },
+  {
+    "key": "economy.ascensionCosts",
+    "data": {
+      "group": "economy",
+      "help": "Costs for an Epic champion. `element_*` resolves to the champion’s own element. Rare champions pay the Rare multiplier, Legendary the Legendary one.",
+      "key": "economy.ascensionCosts",
+      "label": "Ascension cost per level",
+      "value": {
+        "1": {
+          "element_lesser": 8
+        },
+        "2": {
+          "element_lesser": 15,
+          "essence_pure": 5
+        },
+        "3": {
+          "element_greater": 12,
+          "essence_pure": 8
+        },
+        "4": {
+          "element_greater": 20,
+          "essence_pure": 12
+        },
+        "5": {
+          "element_prime": 15,
+          "essence_pure": 20
+        },
+        "6": {
+          "element_prime": 25,
+          "essence_pure": 30
+        }
+      }
+    }
+  },
+  {
+    "key": "economy.ascensionRarityMultiplier",
+    "data": {
+      "group": "economy",
+      "help": "Multiplies every essence in the ascension table.",
+      "key": "economy.ascensionRarityMultiplier",
+      "label": "Ascension cost by rarity",
+      "value": {
+        "common": 0.4,
+        "epic": 1,
+        "legendary": 1.6,
+        "rare": 0.6,
+        "uncommon": 0.5
+      }
+    }
+  },
+  {
+    "key": "economy.championReleaseSilver",
+    "data": {
+      "group": "economy",
+      "help": "By the released champion’s rarity, scaled by its star rank.",
+      "key": "economy.championReleaseSilver",
+      "label": "Silver for releasing a champion",
+      "value": {
+        "common": 250,
+        "epic": 6000,
+        "legendary": 25000,
+        "rare": 1500,
+        "uncommon": 500
+      }
+    }
+  },
+  {
+    "key": "economy.gearDropRarityWeights",
+    "data": {
+      "group": "economy",
+      "help": "Used when a stage or shop offer names no distribution of its own.",
+      "key": "economy.gearDropRarityWeights",
+      "label": "Default relic rarity weights",
+      "value": {
+        "common": 45,
+        "epic": 6,
+        "legendary": 1,
+        "rare": 18,
+        "uncommon": 30
+      }
+    }
+  },
+  {
+    "key": "economy.gearRemovalFree",
+    "data": {
+      "group": "economy",
+      "help": "The source game made removal free in 2025; Mistvale adopts that from the start.",
+      "key": "economy.gearRemovalFree",
+      "label": "Free relic removal",
+      "value": true
+    }
+  },
+  {
+    "key": "economy.gearSellBase",
+    "data": {
+      "group": "economy",
+      "help": "Before the rarity multiplier and the per-level bonus. About 95% of drops are meant to be sold — this is the silver faucet.",
+      "key": "economy.gearSellBase",
+      "label": "Relic sell base by rank",
+      "value": [
+        120,
+        300,
+        800,
+        1800,
+        3400,
+        8000
+      ]
+    }
+  },
+  {
+    "key": "economy.gearSellPerLevel",
+    "data": {
+      "group": "economy",
+      "help": "Sell value is base × rarity × (1 + this × level), so upgrading is never wholly wasted.",
+      "key": "economy.gearSellPerLevel",
+      "label": "Relic sell bonus per upgrade level",
+      "value": 0.35
+    }
+  },
+  {
+    "key": "economy.gearSellRarityMultiplier",
+    "data": {
+      "group": "economy",
+      "help": "Multiplies the rank base.",
+      "key": "economy.gearSellRarityMultiplier",
+      "label": "Relic sell multiplier by rarity",
+      "value": {
+        "common": 1,
+        "epic": 2,
+        "legendary": 2.8,
+        "rare": 1.5,
+        "uncommon": 1.2
+      }
+    }
+  },
+  {
+    "key": "economy.gearSubstatsByRarity",
+    "data": {
+      "group": "economy",
+      "help": "How many substats a relic drops with. It gains one at +4, +8, +12 and +16 until it holds four.",
+      "key": "economy.gearSubstatsByRarity",
+      "label": "Relic starting substats by rarity",
+      "value": {
+        "common": 0,
+        "epic": 3,
+        "legendary": 4,
+        "rare": 2,
+        "uncommon": 1
+      }
+    }
+  },
+  {
+    "key": "economy.gearUpgradeCost",
+    "data": {
+      "group": "economy",
+      "help": "Silver per attempt at each level 1–16, for a ★6 relic. Lower ranks scale by the rank multipliers. Expected total to +16 at ★6 ≈ 1.8M.",
+      "key": "economy.gearUpgradeCost",
+      "label": "Relic upgrade cost per level (★6)",
+      "value": [
+        3000,
+        3000,
+        3000,
+        3000,
+        6000,
+        6000,
+        6000,
+        6000,
+        12000,
+        12000,
+        12000,
+        12000,
+        28000,
+        28000,
+        28000,
+        28000
+      ]
+    }
+  },
+  {
+    "key": "economy.gearUpgradeCostByRank",
+    "data": {
+      "group": "economy",
+      "help": "Multiplier applied to the per-level cost, indexed by rank − 1.",
+      "key": "economy.gearUpgradeCostByRank",
+      "label": "Relic upgrade cost by rank",
+      "value": [
+        0.1,
+        0.18,
+        0.3,
+        0.45,
+        0.65,
+        1
+      ]
+    }
+  },
+  {
+    "key": "economy.gearUpgradeSuccess",
+    "data": {
+      "group": "economy",
+      "help": "Probability each upgrade attempt succeeds. Failures still cost silver — the gamble is the sink.",
+      "key": "economy.gearUpgradeSuccess",
+      "label": "Relic upgrade success by level",
+      "value": {
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 0.85,
+        "6": 0.78,
+        "7": 0.71,
+        "8": 0.64,
+        "9": 0.55,
+        "10": 0.48,
+        "11": 0.42,
+        "12": 0.36,
+        "13": 0.3,
+        "14": 0.26,
+        "15": 0.23,
+        "16": 0.2
+      }
+    }
+  },
+  {
+    "key": "economy.masteryCosts",
+    "data": {
+      "group": "economy",
+      "help": "What one node of each tier costs. A full fifteen-node build comes to 100 Bronze, 600 Silver and 950 Gold (ECONOMY_BALANCE §7).",
+      "key": "economy.masteryCosts",
+      "label": "Mastery cost per tier",
+      "value": {
+        "1": {
+          "amount": 20,
+          "itemKey": "emblem_bronze"
+        },
+        "2": {
+          "amount": 20,
+          "itemKey": "emblem_bronze"
+        },
+        "3": {
+          "amount": 100,
+          "itemKey": "emblem_silver"
+        },
+        "4": {
+          "amount": 100,
+          "itemKey": "emblem_silver"
+        },
+        "5": {
+          "amount": 150,
+          "itemKey": "emblem_gold"
+        },
+        "6": {
+          "amount": 500,
+          "itemKey": "emblem_gold"
+        }
+      }
+    }
+  },
+  {
+    "key": "economy.masteryResetCrystals",
+    "data": {
+      "group": "economy",
+      "help": "Crystals to forget a champion’s masteries. The first reset on each champion is free.",
+      "key": "economy.masteryResetCrystals",
+      "label": "Mastery reset cost",
+      "value": 150
+    }
+  },
+  {
+    "key": "economy.maxAscensionByRank",
+    "data": {
+      "group": "economy",
+      "help": "A champion cannot ascend past this for its rank — indexed by rank − 1, so ★1 cannot ascend at all and ★6 reaches 6.",
+      "key": "economy.maxAscensionByRank",
+      "label": "Ascension cap by star rank",
+      "value": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        6
+      ]
+    }
+  },
+  {
+    "key": "economy.multiBattleDailyCap",
+    "data": {
+      "group": "economy",
+      "help": "How many automated repeats a player gets each day. Resets at the daily reset hour, not at midnight.",
+      "key": "economy.multiBattleDailyCap",
+      "label": "Multi-battle runs per day",
+      "value": 30
+    }
+  },
+  {
+    "key": "economy.multiBattleMaxPerCall",
+    "data": {
+      "group": "economy",
+      "help": "The largest batch one press may ask for. Smaller than the daily cap on purpose: a batch is a decision the player makes several times a day, not once.",
+      "key": "economy.multiBattleMaxPerCall",
+      "label": "Multi-battle runs per press",
+      "value": 10
+    }
+  },
+  {
+    "key": "economy.powerWeights",
+    "data": {
+      "group": "economy",
+      "help": "Informational only — power sorts lists and bands the arena, and is never a combat input.",
+      "key": "economy.powerWeights",
+      "label": "Power score weights",
+      "value": {
+        "acc": 3,
+        "atk": 1,
+        "critDmg": 4,
+        "critRate": 8,
+        "def": 0.9,
+        "hp": 0.06,
+        "res": 3,
+        "spd": 12
+      }
+    }
+  },
+  {
+    "key": "economy.rankUpSilver",
+    "data": {
+      "group": "economy",
+      "help": "Indexed by the current rank − 1: 1★→2★ costs the first entry. Food champions are consumed on top.",
+      "key": "economy.rankUpSilver",
+      "label": "Rank-up silver fee",
+      "value": [
+        2000,
+        8000,
+        30000,
+        100000,
+        300000
+      ]
+    }
+  },
+  {
+    "key": "economy.skillUpgradeMaxLevel",
+    "data": {
+      "group": "economy",
+      "help": "How many tome or duplicate upgrades one skill can take, on top of its published ladder.",
+      "key": "economy.skillUpgradeMaxLevel",
+      "label": "Maximum skill upgrade level",
+      "value": 5
+    }
+  },
+  {
+    "key": "economy.tomeByRarity",
+    "data": {
+      "group": "economy",
+      "help": "Tome rarity must match the champion’s (GAME_DESIGN §7).",
+      "key": "economy.tomeByRarity",
+      "label": "Which tome a rarity needs",
+      "value": {
+        "common": "tome_rare",
+        "epic": "tome_epic",
+        "legendary": "tome_legendary",
+        "rare": "tome_rare",
+        "uncommon": "tome_rare"
+      }
+    }
+  },
+  {
+    "key": "energy.capBase",
+    "data": {
+      "group": "energy",
+      "help": "Cap is base + perLevel × account level; 18 + 1.85/level gives 20 at level 1 and 129 at 60.",
+      "key": "energy.capBase",
+      "label": "Energy cap base",
+      "value": 18
+    }
+  },
+  {
+    "key": "energy.capPerLevel",
+    "data": {
+      "group": "energy",
+      "help": "Added to the cap for each account level.",
+      "key": "energy.capPerLevel",
+      "label": "Energy cap per level",
+      "value": 1.85
+    }
+  },
+  {
+    "key": "energy.refillCrystals",
+    "data": {
+      "group": "energy",
+      "help": "Flat cost of refilling the bar.",
+      "key": "energy.refillCrystals",
+      "label": "Crystal cost of a refill",
+      "value": 40
+    }
+  },
+  {
+    "key": "energy.regenSeconds",
+    "data": {
+      "group": "energy",
+      "help": "How long one point of energy takes to return. The source game uses 180.",
+      "key": "energy.regenSeconds",
+      "label": "Seconds per energy point",
+      "value": 180
+    }
+  },
+  {
+    "key": "events.claimGraceDays",
+    "data": {
+      "group": "quests",
+      "help": "How long after an event shuts its milestones can still be collected. Points stop the moment the window closes — this is only about picking up what was already earned, so somebody who finished a ladder on Sunday evening still has it on Monday morning.",
+      "key": "events.claimGraceDays",
+      "label": "Event claim grace (days)",
+      "value": 3
+    }
+  },
+  {
+    "key": "ops.dailyResetHour",
+    "data": {
+      "group": "ops",
+      "help": "Local hour at which quests, shops and rotations roll over.",
+      "key": "ops.dailyResetHour",
+      "label": "Daily reset hour",
+      "value": 4
+    }
+  },
+  {
+    "key": "ops.dailyResetTimezone",
+    "data": {
+      "group": "ops",
+      "help": "Timezone the reset hour is interpreted in.",
+      "key": "ops.dailyResetTimezone",
+      "label": "Reset timezone",
+      "value": "Europe/Berlin"
+    }
+  },
+  {
+    "key": "ops.retainBattleDays",
+    "data": {
+      "group": "ops",
+      "help": "Resolved battles and the event logs they carry. Active battles are never pruned at any setting — somebody who left a fight open over a weekend comes back to it. Nothing a player sees depends on this: the prune is about disk.",
+      "key": "ops.retainBattleDays",
+      "label": "Keep finished battles (days)",
+      "value": 14
+    }
+  },
+  {
+    "key": "ops.retainEconomyDays",
+    "data": {
+      "group": "ops",
+      "help": "The audit trail behind the player inspector and the economy dashboards. Lower it on a box that is filling up; raise it before an investigation.",
+      "key": "ops.retainEconomyDays",
+      "label": "Keep the economy log (days)",
+      "value": 90
+    }
+  },
+  {
+    "key": "ops.retainEventDays",
+    "data": {
+      "group": "ops",
+      "help": "A past occurrence’s points and claimed milestones. Dead once the claim grace closes; kept longer so a question about last month’s ladder can still be answered.",
+      "key": "ops.retainEventDays",
+      "label": "Keep event scores (days)",
+      "value": 60
+    }
+  },
+  {
+    "key": "ops.retainMailDays",
+    "data": {
+      "group": "ops",
+      "help": "How long an expired message stays in the database after it has already vanished from the inbox. Kept a while on purpose: “what did that compensation mail say” is asked after it is gone. Mail with no expiry is never pruned.",
+      "key": "ops.retainMailDays",
+      "label": "Keep expired mail (days)",
+      "value": 30
+    }
+  },
+  {
+    "key": "ops.retainQuestDays",
+    "data": {
+      "group": "ops",
+      "help": "One row per active quest per player per day, so this is the table that grows fastest. A period older than the longest quest period is dead weight — nothing reads it.",
+      "key": "ops.retainQuestDays",
+      "label": "Keep quest instances (days)",
+      "value": 90
+    }
+  },
+  {
+    "key": "progression.maxAccountLevel",
+    "data": {
+      "group": "progression",
+      "help": "Highest reachable account level.",
+      "key": "progression.maxAccountLevel",
+      "label": "Account level cap",
+      "value": 60
+    }
+  },
+  {
+    "key": "progression.rosterCapacityDefault",
+    "data": {
+      "group": "progression",
+      "help": "How many champions a new account can hold.",
+      "key": "progression.rosterCapacityDefault",
+      "label": "Starting roster slots",
+      "value": 60
+    }
+  },
+  {
+    "key": "progression.starterGrant",
+    "data": {
+      "group": "progression",
+      "help": "Items handed over with the starter champion. A new warden should be able to reach the Mistgate on their first evening — ten Faded Sigils is a ×10 on the brood banner, which teaches the mechanic and stocks the first rank-up.",
+      "key": "progression.starterGrant",
+      "label": "Welcome grant",
+      "value": {
+        "sigil_faded": 10,
+        "sigil_gleaming": 3
+      }
+    }
+  },
+  {
+    "key": "progression.xpCurveBase",
+    "data": {
+      "group": "progression",
+      "help": "XP needed for level 1 → 2.",
+      "key": "progression.xpCurveBase",
+      "label": "Account XP base",
+      "value": 120
+    }
+  },
+  {
+    "key": "progression.xpCurveGrowth",
+    "data": {
+      "group": "progression",
+      "help": "Multiplier applied per level.",
+      "key": "progression.xpCurveGrowth",
+      "label": "Account XP growth",
+      "value": 1.14
+    }
+  },
+  {
+    "key": "quests.firstWinBonuses",
+    "data": {
+      "group": "quests",
+      "help": "Paid automatically on the day’s first victory in each mode — no claim, because it is a reason to open the game rather than a thing to remember. A mode left out pays nothing. Practice is deliberately absent: it costs nothing and pays nothing by design.",
+      "key": "quests.firstWinBonuses",
+      "label": "First win of the day, per mode",
+      "value": {
+        "arena": {
+          "valorMedals": 3
+        },
+        "campaign": {
+          "playerXp": 120,
+          "silver": 3000
+        },
+        "dungeon": {
+          "emblem_bronze": 5,
+          "silver": 5000
+        },
+        "proving": {
+          "emblem_bronze": 8,
+          "silver": 4000
+        },
+        "springs": {
+          "essence_pure": 1,
+          "silver": 4000
+        }
+      }
+    }
+  },
+  {
+    "key": "quests.periodChests",
+    "data": {
+      "group": "quests",
+      "help": "Paid for claiming every chest-counting quest of a period. A period left out of this map simply has no chest — which is how the weekly and monthly currently stand, their pull being the quests themselves. Worth more than any single line, so the last quest of a day is still worth doing.",
+      "key": "quests.periodChests",
+      "label": "Completion chests",
+      "value": {
+        "daily": {
+          "crystals": 10,
+          "playerXp": 400,
+          "sigil_faded": 1
+        }
+      }
+    }
+  },
+  {
+    "key": "unlocks.arenaLevel",
+    "data": {
+      "group": "arena",
+      "help": "Account level at which the Arena and the Hall of Valor open.",
+      "key": "unlocks.arenaLevel",
+      "label": "Arena unlock level",
+      "value": 8
+    }
+  },
+  {
+    "key": "unlocks.loginCalendarLevel",
+    "data": {
+      "group": "quests",
+      "help": "Account level at which the calendar opens. Nothing is lost by arriving late: a track pays its Nth day on the Nth claim, so somebody who unlocks it on their third evening still starts at day one.",
+      "key": "unlocks.loginCalendarLevel",
+      "label": "Login calendar unlock level",
+      "value": 2
+    }
+  },
+  {
+    "key": "unlocks.masteryLevel",
+    "data": {
+      "group": "economy",
+      "help": "Account level at which champions may be trained — the same level the Proving Grounds opens at, because that is where emblems come from.",
+      "key": "unlocks.masteryLevel",
+      "label": "Masteries unlock level",
+      "value": 14
+    }
+  },
+  {
+    "key": "unlocks.multiBattleLevel",
+    "data": {
+      "group": "economy",
+      "help": "Account level at which farming without watching becomes available — late enough that a new player has fought a stage by hand first.",
+      "key": "unlocks.multiBattleLevel",
+      "label": "Multi-battle unlock level",
+      "value": 6
+    }
+  },
+  {
+    "key": "unlocks.questsLevel",
+    "data": {
+      "group": "quests",
+      "help": "Account level at which the checklist appears. Below it, quests still track — so the first day’s progress is not lost — but nothing is claimable.",
+      "key": "unlocks.questsLevel",
+      "label": "Quests unlock level",
+      "value": 4
+    }
+  }
+]

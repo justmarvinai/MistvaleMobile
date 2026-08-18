@@ -1,0 +1,331 @@
+[
+  {
+    "key": "emblem_bronze",
+    "data": {
+      "category": "emblem",
+      "description": "Mastery training, in its coarsest form.",
+      "icon": "mv-item-emblem",
+      "key": "emblem_bronze",
+      "name": "Bronze Emblem",
+      "payload": {},
+      "rarity": "common",
+      "sortOrder": 80
+    }
+  },
+  {
+    "key": "emblem_gold",
+    "data": {
+      "category": "emblem",
+      "description": "Mastery training few champions ever finish.",
+      "icon": "mv-item-emblem",
+      "key": "emblem_gold",
+      "name": "Gold Emblem",
+      "payload": {},
+      "rarity": "epic",
+      "sortOrder": 82
+    }
+  },
+  {
+    "key": "emblem_silver",
+    "data": {
+      "category": "emblem",
+      "description": "Mastery training for the committed.",
+      "icon": "mv-item-emblem",
+      "key": "emblem_silver",
+      "name": "Silver Emblem",
+      "payload": {},
+      "rarity": "rare",
+      "sortOrder": 81
+    }
+  },
+  {
+    "key": "energy_pack_large",
+    "data": {
+      "category": "consumable",
+      "description": "Restores 60 energy.",
+      "icon": "mv-item-consumable",
+      "key": "energy_pack_large",
+      "name": "Warden’s Ration",
+      "payload": {
+        "energy": 60
+      },
+      "rarity": "rare",
+      "sortOrder": 91
+    }
+  },
+  {
+    "key": "energy_pack_small",
+    "data": {
+      "category": "consumable",
+      "description": "Restores 30 energy.",
+      "icon": "mv-item-consumable",
+      "key": "energy_pack_small",
+      "name": "Traveller’s Ration",
+      "payload": {
+        "energy": 30
+      },
+      "rarity": "common",
+      "sortOrder": 90
+    }
+  },
+  {
+    "key": "essence_ember_greater",
+    "data": {
+      "category": "essence",
+      "description": "A coal that has not gone out in a century.",
+      "icon": "mv-item-essence",
+      "key": "essence_ember_greater",
+      "name": "Greater Ember Essence",
+      "payload": {},
+      "rarity": "rare",
+      "sortOrder": 54
+    }
+  },
+  {
+    "key": "essence_ember_lesser",
+    "data": {
+      "category": "essence",
+      "description": "A guttering coal of the Ember breath.",
+      "icon": "mv-item-essence",
+      "key": "essence_ember_lesser",
+      "name": "Lesser Ember Essence",
+      "payload": {},
+      "rarity": "common",
+      "sortOrder": 50
+    }
+  },
+  {
+    "key": "essence_ember_prime",
+    "data": {
+      "category": "essence",
+      "description": "A coal that has not gone out in a century. Concentrated past what the springs give up willingly.",
+      "icon": "mv-item-essence",
+      "key": "essence_ember_prime",
+      "name": "Prime Ember Essence",
+      "payload": {},
+      "rarity": "epic",
+      "sortOrder": 58
+    }
+  },
+  {
+    "key": "essence_mist_greater",
+    "data": {
+      "category": "essence",
+      "description": "Fog that remembers a shape.",
+      "icon": "mv-item-essence",
+      "key": "essence_mist_greater",
+      "name": "Greater Mist Essence",
+      "payload": {},
+      "rarity": "rare",
+      "sortOrder": 57
+    }
+  },
+  {
+    "key": "essence_mist_lesser",
+    "data": {
+      "category": "essence",
+      "description": "Fog in a stoppered jar.",
+      "icon": "mv-item-essence",
+      "key": "essence_mist_lesser",
+      "name": "Lesser Mist Essence",
+      "payload": {},
+      "rarity": "common",
+      "sortOrder": 53
+    }
+  },
+  {
+    "key": "essence_mist_prime",
+    "data": {
+      "category": "essence",
+      "description": "Fog that remembers a shape. Concentrated past what the springs give up willingly.",
+      "icon": "mv-item-essence",
+      "key": "essence_mist_prime",
+      "name": "Prime Mist Essence",
+      "payload": {},
+      "rarity": "epic",
+      "sortOrder": 61
+    }
+  },
+  {
+    "key": "essence_pure",
+    "data": {
+      "category": "essence",
+      "description": "Elementally silent, and useful to everyone.",
+      "icon": "mv-item-essence",
+      "key": "essence_pure",
+      "name": "Pure Essence",
+      "payload": {},
+      "rarity": "rare",
+      "sortOrder": 70
+    }
+  },
+  {
+    "key": "essence_tide_greater",
+    "data": {
+      "category": "essence",
+      "description": "Water under pressure, still moving.",
+      "icon": "mv-item-essence",
+      "key": "essence_tide_greater",
+      "name": "Greater Tide Essence",
+      "payload": {},
+      "rarity": "rare",
+      "sortOrder": 55
+    }
+  },
+  {
+    "key": "essence_tide_lesser",
+    "data": {
+      "category": "essence",
+      "description": "A cupful of the deep.",
+      "icon": "mv-item-essence",
+      "key": "essence_tide_lesser",
+      "name": "Lesser Tide Essence",
+      "payload": {},
+      "rarity": "common",
+      "sortOrder": 51
+    }
+  },
+  {
+    "key": "essence_tide_prime",
+    "data": {
+      "category": "essence",
+      "description": "Water under pressure, still moving. Concentrated past what the springs give up willingly.",
+      "icon": "mv-item-essence",
+      "key": "essence_tide_prime",
+      "name": "Prime Tide Essence",
+      "payload": {},
+      "rarity": "epic",
+      "sortOrder": 59
+    }
+  },
+  {
+    "key": "essence_verdant_greater",
+    "data": {
+      "category": "essence",
+      "description": "Growth that has learned to be patient.",
+      "icon": "mv-item-essence",
+      "key": "essence_verdant_greater",
+      "name": "Greater Verdant Essence",
+      "payload": {},
+      "rarity": "rare",
+      "sortOrder": 56
+    }
+  },
+  {
+    "key": "essence_verdant_lesser",
+    "data": {
+      "category": "essence",
+      "description": "Sap from something still growing.",
+      "icon": "mv-item-essence",
+      "key": "essence_verdant_lesser",
+      "name": "Lesser Verdant Essence",
+      "payload": {},
+      "rarity": "common",
+      "sortOrder": 52
+    }
+  },
+  {
+    "key": "essence_verdant_prime",
+    "data": {
+      "category": "essence",
+      "description": "Growth that has learned to be patient. Concentrated past what the springs give up willingly.",
+      "icon": "mv-item-essence",
+      "key": "essence_verdant_prime",
+      "name": "Prime Verdant Essence",
+      "payload": {},
+      "rarity": "epic",
+      "sortOrder": 60
+    }
+  },
+  {
+    "key": "sigil_faded",
+    "data": {
+      "category": "sigil",
+      "description": "A worn anchor. Calls the least of what the mist holds.",
+      "icon": "mv-item-sigil",
+      "key": "sigil_faded",
+      "name": "Faded Sigil",
+      "payload": {},
+      "rarity": "common",
+      "sortOrder": 10
+    }
+  },
+  {
+    "key": "sigil_gleaming",
+    "data": {
+      "category": "sigil",
+      "description": "Still bright. The mist answers it properly.",
+      "icon": "mv-item-sigil",
+      "key": "sigil_gleaming",
+      "name": "Gleaming Sigil",
+      "payload": {},
+      "rarity": "rare",
+      "sortOrder": 20
+    }
+  },
+  {
+    "key": "sigil_mistwoven",
+    "data": {
+      "category": "sigil",
+      "description": "Woven from the fog itself; it calls only its own.",
+      "icon": "mv-item-sigil",
+      "key": "sigil_mistwoven",
+      "name": "Mistwoven Sigil",
+      "payload": {},
+      "rarity": "epic",
+      "sortOrder": 30
+    }
+  },
+  {
+    "key": "sigil_radiant",
+    "data": {
+      "category": "sigil",
+      "description": "It does not so much call as demand.",
+      "icon": "mv-item-sigil",
+      "key": "sigil_radiant",
+      "name": "Radiant Sigil",
+      "payload": {},
+      "rarity": "legendary",
+      "sortOrder": 40
+    }
+  },
+  {
+    "key": "tome_epic",
+    "data": {
+      "category": "tome",
+      "description": "Teaches an Epic champion a little more.",
+      "icon": "mv-item-tome",
+      "key": "tome_epic",
+      "name": "Epic Tome",
+      "payload": {},
+      "rarity": "epic",
+      "sortOrder": 71
+    }
+  },
+  {
+    "key": "tome_legendary",
+    "data": {
+      "category": "tome",
+      "description": "Teaches a Legendary champion a little more.",
+      "icon": "mv-item-tome",
+      "key": "tome_legendary",
+      "name": "Legendary Tome",
+      "payload": {},
+      "rarity": "legendary",
+      "sortOrder": 72
+    }
+  },
+  {
+    "key": "tome_rare",
+    "data": {
+      "category": "tome",
+      "description": "Teaches a Rare champion a little more.",
+      "icon": "mv-item-tome",
+      "key": "tome_rare",
+      "name": "Rare Tome",
+      "payload": {},
+      "rarity": "rare",
+      "sortOrder": 70
+    }
+  }
+]

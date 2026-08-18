@@ -1,0 +1,1611 @@
+[
+  {
+    "key": "boss_ashpriest",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "ashpriest",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 55,
+        "atk": 640,
+        "critDmg": 60,
+        "critRate": 20,
+        "def": 500,
+        "hp": 50000,
+        "res": 65,
+        "spd": 101
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "hitShield": {
+          "hits": 9,
+          "punishTmPct": 30
+        },
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "boss_ashpriest",
+      "name": "The Ashpriest",
+      "role": "support",
+      "skills": [
+        "depths_a1_ash_brand",
+        "depths_a2_ash_censer",
+        "depths_a3_ash_pyre"
+      ],
+      "sortOrder": 251
+    }
+  },
+  {
+    "key": "boss_ashpriest_deep",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "ashpriest",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 60,
+        "atk": 680,
+        "critDmg": 65,
+        "critRate": 22,
+        "def": 530,
+        "hp": 54000,
+        "res": 70,
+        "spd": 103
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "hitShield": {
+          "hits": 12,
+          "punishTmPct": 35
+        },
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "boss_ashpriest_deep",
+      "name": "The Ashpriest",
+      "role": "support",
+      "skills": [
+        "depths_a1_ash_brand",
+        "depths_a2_ash_censer",
+        "depths_a3_ash_pyre"
+      ],
+      "sortOrder": 252
+    }
+  },
+  {
+    "key": "boss_ashpriest_lesser",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "ashpriest",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 50,
+        "atk": 610,
+        "critDmg": 60,
+        "critRate": 20,
+        "def": 470,
+        "hp": 46000,
+        "res": 60,
+        "spd": 101
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "hitShield": {
+          "hits": 6,
+          "punishTmPct": 25
+        },
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "boss_ashpriest_lesser",
+      "name": "The Ashpriest",
+      "role": "support",
+      "skills": [
+        "depths_a1_ash_brand",
+        "depths_a2_ash_censer",
+        "depths_a3_ash_pyre"
+      ],
+      "sortOrder": 250
+    }
+  },
+  {
+    "key": "boss_broodmother_ssarethi",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "broodmother",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 50,
+        "atk": 590,
+        "critDmg": 60,
+        "critRate": 18,
+        "def": 560,
+        "hp": 64000,
+        "res": 65,
+        "spd": 97
+      },
+      "bossMechanics": {
+        "addSummon": {
+          "cap": 6,
+          "perTurn": 2,
+          "unitKey": "silkmire_spawn"
+        },
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "boss_broodmother_ssarethi",
+      "name": "Broodmother Ssarethi",
+      "role": "hp",
+      "skills": [
+        "depths_a1_brood_bite",
+        "depths_a2_brood_spit",
+        "depths_a3_devour"
+      ],
+      "sortOrder": 270
+    }
+  },
+  {
+    "key": "boss_broodwyrm",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "broodwyrm",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 45,
+        "atk": 560,
+        "critDmg": 60,
+        "critRate": 20,
+        "def": 520,
+        "hp": 58000,
+        "res": 60,
+        "spd": 99
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "tmReductionImmune": true
+      },
+      "element": "verdant",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "boss_broodwyrm",
+      "name": "The Broodwyrm",
+      "role": "hp",
+      "skills": [
+        "depths_a1_wyrm_rake",
+        "depths_a2_wyrm_breath",
+        "depths_a3_wyrm_carapace"
+      ],
+      "sortOrder": 210
+    }
+  },
+  {
+    "key": "boss_gorrakh_broodtyrant",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 35,
+        "atk": 470,
+        "critDmg": 55,
+        "critRate": 15,
+        "def": 520,
+        "hp": 22400,
+        "res": 60,
+        "spd": 94
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 24,
+          "dmgPctPerTurn": 9
+        },
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_gorrakh_broodtyrant",
+      "name": "Gorrakh the Broodtyrant",
+      "role": "defense",
+      "skills": [
+        "sskarn_a1_brute_slam",
+        "sskarn_a2_stunning_blow",
+        "boss_a3_brood_bulwark"
+      ],
+      "sortOrder": 120
+    }
+  },
+  {
+    "key": "boss_hessk_marshbinder",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 45,
+        "atk": 510,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 420,
+        "hp": 25000,
+        "res": 55,
+        "spd": 104
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 24,
+          "dmgPctPerTurn": 8
+        },
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_hessk_marshbinder",
+      "name": "Hessk the Marshbinder",
+      "role": "support",
+      "skills": [
+        "sskarn_a1_venom_spit",
+        "sskarn_a2_venom_cloud",
+        "boss_a3_marshbind"
+      ],
+      "sortOrder": 130
+    }
+  },
+  {
+    "key": "boss_hissrad_spantaker",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 45,
+        "atk": 550,
+        "critDmg": 65,
+        "critRate": 22,
+        "def": 450,
+        "hp": 28000,
+        "res": 55,
+        "spd": 99
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 26,
+          "dmgPctPerTurn": 8
+        },
+        "hitShield": {
+          "hits": 6,
+          "punishTmPct": 25
+        },
+        "tmReductionImmune": false
+      },
+      "element": "tide",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_hissrad_spantaker",
+      "name": "Hissrad the Span-Taker",
+      "role": "attack",
+      "skills": [
+        "sskarn_a1_brute_slam",
+        "sskarn_a2_stunning_blow",
+        "boss_a3_span_break"
+      ],
+      "sortOrder": 140
+    }
+  },
+  {
+    "key": "boss_korrash_reachburner",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 50,
+        "atk": 630,
+        "critDmg": 65,
+        "critRate": 22,
+        "def": 500,
+        "hp": 34000,
+        "res": 60,
+        "spd": 101
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 28,
+          "dmgPctPerTurn": 9
+        },
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_korrash_reachburner",
+      "name": "Korrash Reachburner",
+      "role": "attack",
+      "skills": [
+        "sskarn_a1_claw",
+        "sskarn_a2_venom_cloud",
+        "boss_a3_reachburn"
+      ],
+      "sortOrder": 160
+    }
+  },
+  {
+    "key": "boss_mama_fenwrack",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 50,
+        "atk": 660,
+        "critDmg": 60,
+        "critRate": 20,
+        "def": 540,
+        "hp": 37000,
+        "res": 65,
+        "spd": 96
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 28,
+          "dmgPctPerTurn": 10
+        },
+        "thresholdRetaliation": {
+          "perHpPct": 12.5,
+          "skipIfDot": true
+        },
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_mama_fenwrack",
+      "name": "Mama Fenwrack",
+      "role": "hp",
+      "skills": [
+        "sskarn_a1_brute_slam",
+        "sskarn_a2_mire_mend",
+        "boss_a3_fenwrack_feast"
+      ],
+      "sortOrder": 170
+    }
+  },
+  {
+    "key": "boss_nulla_holloweye",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 60,
+        "atk": 690,
+        "critDmg": 60,
+        "critRate": 20,
+        "def": 580,
+        "hp": 40000,
+        "res": 70,
+        "spd": 106
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 30,
+          "dmgPctPerTurn": 9
+        },
+        "tmReductionImmune": true
+      },
+      "element": "mist",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_nulla_holloweye",
+      "name": "Nulla Holloweye",
+      "role": "support",
+      "skills": [
+        "sskarn_a1_venom_spit",
+        "sskarn_a3_warcall",
+        "boss_a3_hollow_gaze"
+      ],
+      "sortOrder": 180
+    }
+  },
+  {
+    "key": "boss_pitmaster_drazhak",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "pitmaster",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 55,
+        "atk": 700,
+        "critDmg": 70,
+        "critRate": 25,
+        "def": 540,
+        "hp": 60000,
+        "res": 60,
+        "spd": 105
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 12,
+          "dmgPctPerTurn": 8
+        },
+        "tmReductionImmune": false
+      },
+      "element": "mist",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "boss_pitmaster_drazhak",
+      "name": "Pitmaster Drazhak",
+      "role": "attack",
+      "skills": [
+        "depths_a1_pit_cut",
+        "depths_a2_pit_sweep",
+        "depths_a3_pit_challenge"
+      ],
+      "sortOrder": 290
+    }
+  },
+  {
+    "key": "boss_rimebound_sentinel",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "sentinel",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 40,
+        "atk": 480,
+        "critDmg": 55,
+        "critRate": 15,
+        "def": 760,
+        "hp": 72000,
+        "res": 70,
+        "spd": 92
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "thresholdRetaliation": {
+          "perHpPct": 10,
+          "skipIfDot": true
+        },
+        "tmReductionImmune": false
+      },
+      "element": "tide",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "boss_rimebound_sentinel",
+      "name": "The Rimebound Sentinel",
+      "role": "defense",
+      "skills": [
+        "depths_a1_rime_strike",
+        "depths_a2_rime_gaze",
+        "depths_a3_rime_mend"
+      ],
+      "sortOrder": 230
+    }
+  },
+  {
+    "key": "boss_ryssa_gatekeeper",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 55,
+        "atk": 750,
+        "critDmg": 60,
+        "critRate": 18,
+        "def": 700,
+        "hp": 48000,
+        "res": 75,
+        "spd": 98
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 32,
+          "dmgPctPerTurn": 10
+        },
+        "hitShield": {
+          "hits": 12,
+          "punishTmPct": 35
+        },
+        "tmReductionImmune": false
+      },
+      "element": "tide",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_ryssa_gatekeeper",
+      "name": "Ryssa Gatekeeper",
+      "role": "defense",
+      "skills": [
+        "sskarn_a1_spearguard",
+        "sskarn_a2_broodguard_taunt",
+        "boss_a3_gate_ward"
+      ],
+      "sortOrder": 200
+    }
+  },
+  {
+    "key": "boss_ssyleth_coilmother",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 65,
+        "atk": 800,
+        "critDmg": 70,
+        "critRate": 25,
+        "def": 720,
+        "hp": 55000,
+        "res": 80,
+        "spd": 108
+      },
+      "bossMechanics": {
+        "addSummon": {
+          "cap": 4,
+          "perTurn": 1,
+          "unitKey": "sskarn_broodguard"
+        },
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 30,
+          "dmgPctPerTurn": 12
+        },
+        "tmReductionImmune": true
+      },
+      "element": "mist",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_ssyleth_coilmother",
+      "name": "Ssyleth the Coilmother",
+      "role": "attack",
+      "skills": [
+        "sskarn_a1_claw",
+        "sskarn_a2_stunning_blow",
+        "boss_a3_coilmother_wrath"
+      ],
+      "sortOrder": 210
+    }
+  },
+  {
+    "key": "boss_ssythra_tidecaller",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 40,
+        "atk": 400,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 380,
+        "hp": 17800,
+        "res": 55,
+        "spd": 101
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 22,
+          "dmgPctPerTurn": 7
+        },
+        "tmReductionImmune": true
+      },
+      "element": "tide",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_ssythra_tidecaller",
+      "name": "Ssythra the Tidecaller",
+      "role": "support",
+      "skills": [
+        "sskarn_a1_venom_spit",
+        "sskarn_a2_mire_mend",
+        "boss_a3_tidecall"
+      ],
+      "sortOrder": 110
+    }
+  },
+  {
+    "key": "boss_tszar_coilstone",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 55,
+        "atk": 720,
+        "critDmg": 60,
+        "critRate": 18,
+        "def": 660,
+        "hp": 44000,
+        "res": 70,
+        "spd": 93
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 30,
+          "dmgPctPerTurn": 10
+        },
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_tszar_coilstone",
+      "name": "Tszar Coilstone",
+      "role": "defense",
+      "skills": [
+        "sskarn_a1_spearguard",
+        "sskarn_a2_shieldwall",
+        "boss_a3_coilstone_quake"
+      ],
+      "sortOrder": 190
+    }
+  },
+  {
+    "key": "boss_vrash_fenblade",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 30,
+        "atk": 430,
+        "critDmg": 60,
+        "critRate": 20,
+        "def": 300,
+        "hp": 14500,
+        "res": 45,
+        "spd": 97
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 20,
+          "dmgPctPerTurn": 8
+        },
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_vrash_fenblade",
+      "name": "Vrash the Fenblade",
+      "role": "attack",
+      "skills": [
+        "sskarn_a1_claw",
+        "sskarn_a2_lunge",
+        "boss_a3_fenblade_sweep"
+      ],
+      "sortOrder": 100
+    }
+  },
+  {
+    "key": "boss_vyss_galetongue",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warlord",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 50,
+        "atk": 590,
+        "critDmg": 70,
+        "critRate": 25,
+        "def": 470,
+        "hp": 31000,
+        "res": 60,
+        "spd": 112
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 26,
+          "dmgPctPerTurn": 9
+        },
+        "tmReductionImmune": true
+      },
+      "element": "mist",
+      "growth": 1.045,
+      "isBoss": true,
+      "key": "boss_vyss_galetongue",
+      "name": "Vyss Galetongue",
+      "role": "attack",
+      "skills": [
+        "sskarn_a1_claw",
+        "sskarn_a2_lunge",
+        "boss_a3_galescream"
+      ],
+      "sortOrder": 150
+    }
+  },
+  {
+    "key": "cinder_acolyte",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "acolyte",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 35,
+        "atk": 400,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 265,
+        "hp": 6600,
+        "res": 45,
+        "spd": 108
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "cinder_acolyte",
+      "name": "Cinderspire Acolyte",
+      "role": "support",
+      "skills": [
+        "depths_a1_ash_brand",
+        "sskarn_a2_mire_mend"
+      ],
+      "sortOrder": 240
+    }
+  },
+  {
+    "key": "cinder_emberguard",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "emberguard",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 10,
+        "atk": 330,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 460,
+        "hp": 10400,
+        "res": 50,
+        "spd": 96
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "cinder_emberguard",
+      "name": "Cinderspire Emberguard",
+      "role": "defense",
+      "skills": [
+        "depths_a1_ash_brand",
+        "sskarn_a2_broodguard_taunt"
+      ],
+      "sortOrder": 241
+    }
+  },
+  {
+    "key": "frostgrave_rimeguard",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "rimeguard",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 0,
+        "atk": 280,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 530,
+        "hp": 11200,
+        "res": 55,
+        "spd": 90
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "tide",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "frostgrave_rimeguard",
+      "name": "Frostgrave Rimeguard",
+      "role": "defense",
+      "skills": [
+        "depths_a1_rime_strike",
+        "sskarn_a2_shieldwall"
+      ],
+      "sortOrder": 221
+    }
+  },
+  {
+    "key": "frostgrave_sentry",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "sentry",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 25,
+        "atk": 405,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 300,
+        "hp": 6900,
+        "res": 40,
+        "spd": 103
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "tide",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "frostgrave_sentry",
+      "name": "Frostgrave Sentry",
+      "role": "attack",
+      "skills": [
+        "depths_a1_rime_strike",
+        "sskarn_a2_stunning_blow"
+      ],
+      "sortOrder": 220
+    }
+  },
+  {
+    "key": "hollow_broodling",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "broodling",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 20,
+        "atk": 430,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 240,
+        "hp": 6400,
+        "res": 30,
+        "spd": 106
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "hollow_broodling",
+      "name": "Hollow Broodling",
+      "role": "attack",
+      "skills": [
+        "depths_a1_wyrm_rake",
+        "sskarn_a2_lunge"
+      ],
+      "sortOrder": 200
+    }
+  },
+  {
+    "key": "hollow_wyrmguard",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "wyrmguard",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 0,
+        "atk": 300,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 470,
+        "hp": 9800,
+        "res": 45,
+        "spd": 94
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "hollow_wyrmguard",
+      "name": "Hollow Wyrmguard",
+      "role": "defense",
+      "skills": [
+        "sskarn_a1_spearguard",
+        "depths_a3_wyrm_carapace"
+      ],
+      "sortOrder": 201
+    }
+  },
+  {
+    "key": "pit_challenger",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "challenger",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 30,
+        "atk": 460,
+        "critDmg": 60,
+        "critRate": 20,
+        "def": 285,
+        "hp": 7200,
+        "res": 35,
+        "spd": 109
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "pit_challenger",
+      "name": "Pit Challenger",
+      "role": "attack",
+      "skills": [
+        "depths_a1_pit_cut",
+        "sskarn_a2_lunge"
+      ],
+      "sortOrder": 280
+    }
+  },
+  {
+    "key": "pit_veteran",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "veteran",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 20,
+        "atk": 370,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 440,
+        "hp": 10600,
+        "res": 50,
+        "spd": 98
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "mist",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "pit_veteran",
+      "name": "Pit Veteran",
+      "role": "defense",
+      "skills": [
+        "depths_a1_pit_cut",
+        "sskarn_a2_shieldwall"
+      ],
+      "sortOrder": 281
+    }
+  },
+  {
+    "key": "silkmire_spawn",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "spawn",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 10,
+        "atk": 320,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 170,
+        "hp": 3200,
+        "res": 20,
+        "spd": 112
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "silkmire_spawn",
+      "name": "Silkmire Spawn",
+      "role": "attack",
+      "skills": [
+        "depths_a1_brood_bite"
+      ],
+      "sortOrder": 260
+    }
+  },
+  {
+    "key": "silkmire_spinner",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "spinner",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 40,
+        "atk": 445,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 250,
+        "hp": 6800,
+        "res": 35,
+        "spd": 107
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "silkmire_spinner",
+      "name": "Silkmire Spinner",
+      "role": "attack",
+      "skills": [
+        "depths_a1_brood_bite",
+        "sskarn_a2_venom_cloud"
+      ],
+      "sortOrder": 261
+    }
+  },
+  {
+    "key": "silkmire_weaver",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "weaver",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 45,
+        "atk": 360,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 330,
+        "hp": 8200,
+        "res": 50,
+        "spd": 100
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "mist",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "silkmire_weaver",
+      "name": "Silkmire Weaver",
+      "role": "support",
+      "skills": [
+        "depths_a1_brood_bite",
+        "sskarn_a3_warcall"
+      ],
+      "sortOrder": 262
+    }
+  },
+  {
+    "key": "spring_adept",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "adept",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 30,
+        "atk": 380,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 280,
+        "hp": 6200,
+        "res": 45,
+        "spd": 104
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "mist",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "spring_adept",
+      "name": "Spring Adept",
+      "role": "support",
+      "skills": [
+        "depths_a1_warden_lash",
+        "sskarn_a2_mire_mend"
+      ],
+      "sortOrder": 300
+    }
+  },
+  {
+    "key": "spring_keeper",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "keeper",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 10,
+        "atk": 320,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 430,
+        "hp": 9400,
+        "res": 50,
+        "spd": 95
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "mist",
+      "growth": 1.048,
+      "isBoss": false,
+      "key": "spring_keeper",
+      "name": "Spring Keeper",
+      "role": "defense",
+      "skills": [
+        "depths_a1_warden_lash",
+        "depths_a2_warden_ward"
+      ],
+      "sortOrder": 301
+    }
+  },
+  {
+    "key": "sskarn_broodguard",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "broodguard",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 0,
+        "atk": 200,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 360,
+        "hp": 4600,
+        "res": 35,
+        "spd": 90
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.045,
+      "isBoss": false,
+      "key": "sskarn_broodguard",
+      "name": "Sskarn Broodguard",
+      "role": "defense",
+      "skills": [
+        "sskarn_a1_spearguard",
+        "sskarn_a2_broodguard_taunt"
+      ],
+      "sortOrder": 40
+    }
+  },
+  {
+    "key": "sskarn_brute",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "brute",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 0,
+        "atk": 190,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 240,
+        "hp": 6200,
+        "res": 25,
+        "spd": 86
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.045,
+      "isBoss": false,
+      "key": "sskarn_brute",
+      "name": "Sskarn Brute",
+      "role": "hp",
+      "skills": [
+        "sskarn_a1_brute_slam",
+        "sskarn_a2_stunning_blow"
+      ],
+      "sortOrder": 70
+    }
+  },
+  {
+    "key": "sskarn_mireshaman",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "mireshaman",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 15,
+        "atk": 230,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 220,
+        "hp": 3400,
+        "res": 40,
+        "spd": 103
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "tide",
+      "growth": 1.045,
+      "isBoss": false,
+      "key": "sskarn_mireshaman",
+      "name": "Sskarn Mireshaman",
+      "role": "support",
+      "skills": [
+        "sskarn_a1_venom_spit",
+        "sskarn_a2_mire_mend"
+      ],
+      "sortOrder": 50
+    }
+  },
+  {
+    "key": "sskarn_skirmisher",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "skirmisher",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 10,
+        "atk": 320,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 180,
+        "hp": 3200,
+        "res": 20,
+        "spd": 98
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.045,
+      "isBoss": false,
+      "key": "sskarn_skirmisher",
+      "name": "Sskarn Skirmisher",
+      "role": "attack",
+      "skills": [
+        "sskarn_a1_claw",
+        "sskarn_a2_lunge"
+      ],
+      "sortOrder": 10
+    }
+  },
+  {
+    "key": "sskarn_spearguard",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "spearguard",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 0,
+        "atk": 210,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 340,
+        "hp": 4100,
+        "res": 30,
+        "spd": 92
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "tide",
+      "growth": 1.045,
+      "isBoss": false,
+      "key": "sskarn_spearguard",
+      "name": "Sskarn Spearguard",
+      "role": "defense",
+      "skills": [
+        "sskarn_a1_spearguard",
+        "sskarn_a2_shieldwall"
+      ],
+      "sortOrder": 30
+    }
+  },
+  {
+    "key": "sskarn_venomspitter",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "venomspitter",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 25,
+        "atk": 335,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 165,
+        "hp": 3000,
+        "res": 20,
+        "spd": 101
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.045,
+      "isBoss": false,
+      "key": "sskarn_venomspitter",
+      "name": "Sskarn Venomspitter",
+      "role": "attack",
+      "skills": [
+        "sskarn_a1_venom_spit",
+        "sskarn_a2_venom_cloud"
+      ],
+      "sortOrder": 20
+    }
+  },
+  {
+    "key": "sskarn_warcaller",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "warcaller",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 20,
+        "atk": 260,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 210,
+        "hp": 3500,
+        "res": 35,
+        "spd": 100
+      },
+      "bossMechanics": {
+        "almightyImmunity": false,
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.045,
+      "isBoss": false,
+      "key": "sskarn_warcaller",
+      "name": "Sskarn Warcaller",
+      "role": "support",
+      "skills": [
+        "sskarn_a1_claw",
+        "sskarn_a3_warcall"
+      ],
+      "sortOrder": 60
+    }
+  },
+  {
+    "key": "warden_ember",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "spring_warden",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 40,
+        "atk": 520,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 500,
+        "hp": 40000,
+        "res": 60,
+        "spd": 100
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "tmReductionImmune": false
+      },
+      "element": "ember",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "warden_ember",
+      "name": "Warden of the Ember Spring",
+      "role": "support",
+      "skills": [
+        "depths_a1_warden_lash",
+        "depths_a2_warden_ward",
+        "depths_a3_warden_surge"
+      ],
+      "sortOrder": 310
+    }
+  },
+  {
+    "key": "warden_mist",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "spring_warden",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 40,
+        "atk": 520,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 500,
+        "hp": 40000,
+        "res": 60,
+        "spd": 100
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "tmReductionImmune": false
+      },
+      "element": "mist",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "warden_mist",
+      "name": "Warden of the Mist Spring",
+      "role": "support",
+      "skills": [
+        "depths_a1_warden_lash",
+        "depths_a2_warden_ward",
+        "depths_a3_warden_surge"
+      ],
+      "sortOrder": 313
+    }
+  },
+  {
+    "key": "warden_pure",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "spring_warden",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 40,
+        "atk": 520,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 500,
+        "hp": 40000,
+        "res": 60,
+        "spd": 100
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "tmReductionImmune": false
+      },
+      "element": "mist",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "warden_pure",
+      "name": "Warden of the Pure Spring",
+      "role": "support",
+      "skills": [
+        "depths_a1_warden_lash",
+        "depths_a2_warden_ward",
+        "depths_a3_warden_surge"
+      ],
+      "sortOrder": 314
+    }
+  },
+  {
+    "key": "warden_tide",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "spring_warden",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 40,
+        "atk": 520,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 500,
+        "hp": 40000,
+        "res": 60,
+        "spd": 100
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "tmReductionImmune": false
+      },
+      "element": "tide",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "warden_tide",
+      "name": "Warden of the Tide Spring",
+      "role": "support",
+      "skills": [
+        "depths_a1_warden_lash",
+        "depths_a2_warden_ward",
+        "depths_a3_warden_surge"
+      ],
+      "sortOrder": 311
+    }
+  },
+  {
+    "key": "warden_verdant",
+    "data": {
+      "anchorLevel": 60,
+      "archetype": "spring_warden",
+      "assetKey": "enemy_lizard",
+      "baseStats": {
+        "acc": 40,
+        "atk": 520,
+        "critDmg": 55,
+        "critRate": 18,
+        "def": 500,
+        "hp": 40000,
+        "res": 60,
+        "spd": 100
+      },
+      "bossMechanics": {
+        "almightyImmunity": true,
+        "enrage": {
+          "afterTurn": 40,
+          "dmgPctPerTurn": 6
+        },
+        "tmReductionImmune": false
+      },
+      "element": "verdant",
+      "growth": 1.05,
+      "isBoss": true,
+      "key": "warden_verdant",
+      "name": "Warden of the Verdant Spring",
+      "role": "support",
+      "skills": [
+        "depths_a1_warden_lash",
+        "depths_a2_warden_ward",
+        "depths_a3_warden_surge"
+      ],
+      "sortOrder": 312
+    }
+  }
+]

@@ -1,0 +1,694 @@
+[
+  {
+    "key": "acc_down_50",
+    "data": {
+      "description": "Accuracy lowered by 50.",
+      "engineType": "statModifier",
+      "family": "acc_down",
+      "icon": "mv-debuff-acc_down",
+      "key": "acc_down_50",
+      "kind": "debuff",
+      "name": "Decrease ACC",
+      "params": {
+        "flat": -50,
+        "maxStacks": 1,
+        "stat": "acc",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 47
+    }
+  },
+  {
+    "key": "ally_protection_25",
+    "data": {
+      "description": "Takes 25% of the damage dealt to protected allies.",
+      "engineType": "allyProtection",
+      "family": "ally_protection",
+      "icon": "mv-buff-ally_protection",
+      "key": "ally_protection_25",
+      "kind": "buff",
+      "name": "Ally Protection",
+      "params": {
+        "maxStacks": 1,
+        "ratio": 25,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 22
+    }
+  },
+  {
+    "key": "atk_down_25",
+    "data": {
+      "description": "Attack lowered by 25%.",
+      "engineType": "statModifier",
+      "family": "atk_down",
+      "icon": "mv-debuff-atk_down",
+      "key": "atk_down_25",
+      "kind": "debuff",
+      "name": "Decrease ATK",
+      "params": {
+        "maxStacks": 1,
+        "pct": -25,
+        "stat": "atk",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 40
+    }
+  },
+  {
+    "key": "atk_down_50",
+    "data": {
+      "description": "Attack lowered by 50%.",
+      "engineType": "statModifier",
+      "family": "atk_down",
+      "icon": "mv-debuff-atk_down",
+      "key": "atk_down_50",
+      "kind": "debuff",
+      "name": "Decrease ATK",
+      "params": {
+        "maxStacks": 1,
+        "pct": -50,
+        "stat": "atk",
+        "tick": "none"
+      },
+      "potency": 2,
+      "sortOrder": 41
+    }
+  },
+  {
+    "key": "atk_up_25",
+    "data": {
+      "description": "Attack raised by 25%.",
+      "engineType": "statModifier",
+      "family": "atk_up",
+      "icon": "mv-buff-atk_up",
+      "key": "atk_up_25",
+      "kind": "buff",
+      "name": "Increase ATK",
+      "params": {
+        "maxStacks": 1,
+        "pct": 25,
+        "stat": "atk",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 10
+    }
+  },
+  {
+    "key": "atk_up_50",
+    "data": {
+      "description": "Attack raised by 50%.",
+      "engineType": "statModifier",
+      "family": "atk_up",
+      "icon": "mv-buff-atk_up",
+      "key": "atk_up_50",
+      "kind": "buff",
+      "name": "Increase ATK",
+      "params": {
+        "maxStacks": 1,
+        "pct": 50,
+        "stat": "atk",
+        "tick": "none"
+      },
+      "potency": 2,
+      "sortOrder": 11
+    }
+  },
+  {
+    "key": "block_buffs",
+    "data": {
+      "description": "Cannot receive buffs.",
+      "engineType": "blockBuffs",
+      "family": "block_buffs",
+      "icon": "mv-debuff-block_buffs",
+      "key": "block_buffs",
+      "kind": "debuff",
+      "name": "Block Buffs",
+      "params": {
+        "maxStacks": 1,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 58
+    }
+  },
+  {
+    "key": "block_debuffs",
+    "data": {
+      "description": "Debuffs cannot be applied.",
+      "engineType": "blockDebuffs",
+      "family": "block_debuffs",
+      "icon": "mv-buff-block_debuffs",
+      "key": "block_debuffs",
+      "kind": "buff",
+      "name": "Block Debuffs",
+      "params": {
+        "maxStacks": 1,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 23
+    }
+  },
+  {
+    "key": "continuous_heal_15",
+    "data": {
+      "description": "Heals 15% of max HP at the start of each turn.",
+      "engineType": "healOverTime",
+      "family": "continuous_heal",
+      "icon": "mv-buff-continuous_heal",
+      "key": "continuous_heal_15",
+      "kind": "buff",
+      "name": "Continuous Heal",
+      "params": {
+        "maxStacks": 1,
+        "tick": "ownerTurnStart",
+        "tickPct": 15
+      },
+      "potency": 2,
+      "sortOrder": 20
+    }
+  },
+  {
+    "key": "counterattack",
+    "data": {
+      "description": "Strikes back with A1 at 75% damage when hit.",
+      "engineType": "counterattack",
+      "family": "counterattack",
+      "icon": "mv-buff-counterattack",
+      "key": "counterattack",
+      "kind": "buff",
+      "name": "Counterattack",
+      "params": {
+        "maxStacks": 1,
+        "ratio": 75,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 21
+    }
+  },
+  {
+    "key": "crit_down_30",
+    "data": {
+      "description": "Critical rate lowered by 30%.",
+      "engineType": "statModifier",
+      "family": "crit_down",
+      "icon": "mv-debuff-crit_down",
+      "key": "crit_down_30",
+      "kind": "debuff",
+      "name": "Decrease C.RATE",
+      "params": {
+        "flat": -30,
+        "maxStacks": 1,
+        "stat": "critRate",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 46
+    }
+  },
+  {
+    "key": "crit_up_15",
+    "data": {
+      "description": "Critical rate raised by 15%.",
+      "engineType": "statModifier",
+      "family": "crit_up",
+      "icon": "mv-buff-crit_up",
+      "key": "crit_up_15",
+      "kind": "buff",
+      "name": "Increase C.RATE",
+      "params": {
+        "flat": 15,
+        "maxStacks": 1,
+        "stat": "critRate",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 16
+    }
+  },
+  {
+    "key": "crit_up_30",
+    "data": {
+      "description": "Critical rate raised by 30%.",
+      "engineType": "statModifier",
+      "family": "crit_up",
+      "icon": "mv-buff-crit_up",
+      "key": "crit_up_30",
+      "kind": "buff",
+      "name": "Increase C.RATE",
+      "params": {
+        "flat": 30,
+        "maxStacks": 1,
+        "stat": "critRate",
+        "tick": "none"
+      },
+      "potency": 2,
+      "sortOrder": 17
+    }
+  },
+  {
+    "key": "def_down_30",
+    "data": {
+      "description": "Defence lowered by 30%.",
+      "engineType": "statModifier",
+      "family": "def_down",
+      "icon": "mv-debuff-def_down",
+      "key": "def_down_30",
+      "kind": "debuff",
+      "name": "Decrease DEF",
+      "params": {
+        "maxStacks": 1,
+        "pct": -30,
+        "stat": "def",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 42
+    }
+  },
+  {
+    "key": "def_down_60",
+    "data": {
+      "description": "Defence lowered by 60%.",
+      "engineType": "statModifier",
+      "family": "def_down",
+      "icon": "mv-debuff-def_down",
+      "key": "def_down_60",
+      "kind": "debuff",
+      "name": "Decrease DEF",
+      "params": {
+        "maxStacks": 1,
+        "pct": -60,
+        "stat": "def",
+        "tick": "none"
+      },
+      "potency": 2,
+      "sortOrder": 43
+    }
+  },
+  {
+    "key": "def_up_30",
+    "data": {
+      "description": "Defence raised by 30%.",
+      "engineType": "statModifier",
+      "family": "def_up",
+      "icon": "mv-buff-def_up",
+      "key": "def_up_30",
+      "kind": "buff",
+      "name": "Increase DEF",
+      "params": {
+        "maxStacks": 1,
+        "pct": 30,
+        "stat": "def",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 12
+    }
+  },
+  {
+    "key": "def_up_60",
+    "data": {
+      "description": "Defence raised by 60%.",
+      "engineType": "statModifier",
+      "family": "def_up",
+      "icon": "mv-buff-def_up",
+      "key": "def_up_60",
+      "kind": "buff",
+      "name": "Increase DEF",
+      "params": {
+        "maxStacks": 1,
+        "pct": 60,
+        "stat": "def",
+        "tick": "none"
+      },
+      "potency": 2,
+      "sortOrder": 13
+    }
+  },
+  {
+    "key": "freeze",
+    "data": {
+      "description": "Frozen solid and cannot act.",
+      "engineType": "skipTurn",
+      "family": "hard_cc",
+      "icon": "mv-debuff-hard_cc",
+      "key": "freeze",
+      "kind": "debuff",
+      "name": "Freeze",
+      "params": {
+        "maxStacks": 1,
+        "tick": "none"
+      },
+      "potency": 3,
+      "sortOrder": 55
+    }
+  },
+  {
+    "key": "heal_reduction_50",
+    "data": {
+      "description": "Healing received is halved.",
+      "engineType": "healReduction",
+      "family": "heal_reduction",
+      "icon": "mv-debuff-heal_reduction",
+      "key": "heal_reduction_50",
+      "kind": "debuff",
+      "name": "Heal Reduction",
+      "params": {
+        "maxStacks": 1,
+        "pct": 50,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 52
+    }
+  },
+  {
+    "key": "hp_burn",
+    "data": {
+      "description": "Burns for 3% of max HP at the start of each turn.",
+      "engineType": "damageOverTime",
+      "family": "hp_burn",
+      "icon": "mv-debuff-hp_burn",
+      "key": "hp_burn",
+      "kind": "debuff",
+      "name": "HP Burn",
+      "params": {
+        "maxStacks": 1,
+        "tick": "ownerTurnStart",
+        "tickPct": 3
+      },
+      "potency": 1,
+      "sortOrder": 51
+    }
+  },
+  {
+    "key": "leech",
+    "data": {
+      "description": "Attackers heal for 18% of the damage they deal to this unit.",
+      "engineType": "lifesteal",
+      "family": "leech",
+      "icon": "mv-debuff-leech",
+      "key": "leech",
+      "kind": "debuff",
+      "name": "Leech",
+      "params": {
+        "maxStacks": 1,
+        "ratio": 18,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 53
+    }
+  },
+  {
+    "key": "poison_25",
+    "data": {
+      "description": "Loses 2.5% of max HP at the start of each turn.",
+      "engineType": "damageOverTime",
+      "family": "poison",
+      "icon": "mv-debuff-poison",
+      "key": "poison_25",
+      "kind": "debuff",
+      "name": "Poison",
+      "params": {
+        "maxStacks": 5,
+        "tick": "ownerTurnStart",
+        "tickPct": 2.5
+      },
+      "potency": 1,
+      "sortOrder": 49
+    }
+  },
+  {
+    "key": "poison_5",
+    "data": {
+      "description": "Loses 5% of max HP at the start of each turn.",
+      "engineType": "damageOverTime",
+      "family": "poison",
+      "icon": "mv-debuff-poison",
+      "key": "poison_5",
+      "kind": "debuff",
+      "name": "Poison",
+      "params": {
+        "maxStacks": 5,
+        "tick": "ownerTurnStart",
+        "tickPct": 5
+      },
+      "potency": 2,
+      "sortOrder": 50
+    }
+  },
+  {
+    "key": "provoke",
+    "data": {
+      "description": "Forced to attack the provoker with A1.",
+      "engineType": "forceTargetA1",
+      "family": "hard_cc",
+      "icon": "mv-debuff-hard_cc",
+      "key": "provoke",
+      "kind": "debuff",
+      "name": "Provoke",
+      "params": {
+        "maxStacks": 1,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 57
+    }
+  },
+  {
+    "key": "reflect_30",
+    "data": {
+      "description": "Returns 30% of damage taken to the attacker.",
+      "engineType": "reflectDamage",
+      "family": "reflect",
+      "icon": "mv-buff-reflect",
+      "key": "reflect_30",
+      "kind": "buff",
+      "name": "Reflect Damage",
+      "params": {
+        "maxStacks": 1,
+        "ratio": 30,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 24
+    }
+  },
+  {
+    "key": "shield",
+    "data": {
+      "description": "Absorbs damage until it breaks or expires.",
+      "engineType": "shield",
+      "family": "shield",
+      "icon": "mv-buff-shield",
+      "key": "shield",
+      "kind": "buff",
+      "name": "Shield",
+      "params": {
+        "maxStacks": 1,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 19
+    }
+  },
+  {
+    "key": "sleep",
+    "data": {
+      "description": "Cannot act until damaged.",
+      "engineType": "skipTurnBreakOnDamage",
+      "family": "hard_cc",
+      "icon": "mv-debuff-hard_cc",
+      "key": "sleep",
+      "kind": "debuff",
+      "name": "Sleep",
+      "params": {
+        "maxStacks": 1,
+        "tick": "none"
+      },
+      "potency": 2,
+      "sortOrder": 56
+    }
+  },
+  {
+    "key": "spd_down_15",
+    "data": {
+      "description": "Speed lowered by 15%.",
+      "engineType": "statModifier",
+      "family": "spd_down",
+      "icon": "mv-debuff-spd_down",
+      "key": "spd_down_15",
+      "kind": "debuff",
+      "name": "Decrease SPD",
+      "params": {
+        "maxStacks": 1,
+        "pct": -15,
+        "stat": "spd",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 44
+    }
+  },
+  {
+    "key": "spd_down_30",
+    "data": {
+      "description": "Speed lowered by 30%.",
+      "engineType": "statModifier",
+      "family": "spd_down",
+      "icon": "mv-debuff-spd_down",
+      "key": "spd_down_30",
+      "kind": "debuff",
+      "name": "Decrease SPD",
+      "params": {
+        "maxStacks": 1,
+        "pct": -30,
+        "stat": "spd",
+        "tick": "none"
+      },
+      "potency": 2,
+      "sortOrder": 45
+    }
+  },
+  {
+    "key": "spd_up_15",
+    "data": {
+      "description": "Speed raised by 15%.",
+      "engineType": "statModifier",
+      "family": "spd_up",
+      "icon": "mv-buff-spd_up",
+      "key": "spd_up_15",
+      "kind": "buff",
+      "name": "Increase SPD",
+      "params": {
+        "maxStacks": 1,
+        "pct": 15,
+        "stat": "spd",
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 14
+    }
+  },
+  {
+    "key": "spd_up_30",
+    "data": {
+      "description": "Speed raised by 30%.",
+      "engineType": "statModifier",
+      "family": "spd_up",
+      "icon": "mv-buff-spd_up",
+      "key": "spd_up_30",
+      "kind": "buff",
+      "name": "Increase SPD",
+      "params": {
+        "maxStacks": 1,
+        "pct": 30,
+        "stat": "spd",
+        "tick": "none"
+      },
+      "potency": 2,
+      "sortOrder": 15
+    }
+  },
+  {
+    "key": "strengthen_25",
+    "data": {
+      "description": "Takes 25% less damage.",
+      "engineType": "statModifier",
+      "family": "strengthen",
+      "icon": "mv-buff-strengthen",
+      "key": "strengthen_25",
+      "kind": "buff",
+      "name": "Strengthen",
+      "params": {
+        "maxStacks": 1,
+        "pct": -25,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 18
+    }
+  },
+  {
+    "key": "stun",
+    "data": {
+      "description": "Cannot act.",
+      "engineType": "skipTurn",
+      "family": "hard_cc",
+      "icon": "mv-debuff-hard_cc",
+      "key": "stun",
+      "kind": "debuff",
+      "name": "Stun",
+      "params": {
+        "maxStacks": 1,
+        "tick": "none"
+      },
+      "potency": 3,
+      "sortOrder": 54
+    }
+  },
+  {
+    "key": "unkillable",
+    "data": {
+      "description": "HP cannot fall below 1.",
+      "engineType": "unkillable",
+      "family": "unkillable",
+      "icon": "mv-buff-unkillable",
+      "key": "unkillable",
+      "kind": "buff",
+      "name": "Unkillable",
+      "params": {
+        "maxStacks": 1,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 26
+    }
+  },
+  {
+    "key": "vampiric_25",
+    "data": {
+      "description": "Heals for 25% of the damage this unit deals.",
+      "engineType": "lifesteal",
+      "family": "vampiric",
+      "icon": "mv-buff-vampiric",
+      "key": "vampiric_25",
+      "kind": "buff",
+      "name": "Vampiric",
+      "params": {
+        "maxStacks": 1,
+        "ratio": 25,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 25
+    }
+  },
+  {
+    "key": "weaken_25",
+    "data": {
+      "description": "Takes 25% more damage.",
+      "engineType": "statModifier",
+      "family": "weaken",
+      "icon": "mv-debuff-weaken",
+      "key": "weaken_25",
+      "kind": "debuff",
+      "name": "Weaken",
+      "params": {
+        "maxStacks": 1,
+        "pct": 25,
+        "tick": "none"
+      },
+      "potency": 1,
+      "sortOrder": 48
+    }
+  }
+]

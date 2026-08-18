@@ -1,0 +1,486 @@
+[
+  {
+    "key": "acc_flat",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "acc_flat",
+      "mainBase": [
+        4,
+        6,
+        9,
+        12,
+        17,
+        24
+      ],
+      "mainMax": [
+        16,
+        24,
+        36,
+        50,
+        69,
+        96
+      ],
+      "name": "ACC",
+      "percent": false,
+      "sortOrder": 60,
+      "stat": "acc",
+      "subMax": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        12
+      ],
+      "subMin": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        8
+      ]
+    }
+  },
+  {
+    "key": "atk_flat",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "atk_flat",
+      "mainBase": [
+        11,
+        17,
+        25,
+        34,
+        48,
+        66
+      ],
+      "mainMax": [
+        45,
+        66,
+        98,
+        138,
+        191,
+        265
+      ],
+      "name": "ATK",
+      "percent": false,
+      "sortOrder": 20,
+      "stat": "atk",
+      "subMax": [
+        4,
+        7,
+        10,
+        14,
+        19,
+        26
+      ],
+      "subMin": [
+        3,
+        4,
+        6,
+        8,
+        11,
+        15
+      ]
+    }
+  },
+  {
+    "key": "atk_pct",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "atk_pct",
+      "mainBase": [
+        2.6,
+        3.8,
+        5.6,
+        7.8,
+        10.8,
+        15
+      ],
+      "mainMax": [
+        10.2,
+        15,
+        22.2,
+        31.2,
+        43.2,
+        60
+      ],
+      "name": "ATK %",
+      "percent": true,
+      "sortOrder": 21,
+      "stat": "atk",
+      "subMax": [
+        1,
+        1.5,
+        2.2,
+        3.1,
+        4.3,
+        6
+      ],
+      "subMin": [
+        0.7,
+        1,
+        1.5,
+        2.1,
+        2.9,
+        4
+      ]
+    }
+  },
+  {
+    "key": "crit_dmg_pct",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "crit_dmg_pct",
+      "mainBase": [
+        3.4,
+        5,
+        7.4,
+        10.4,
+        14.4,
+        20
+      ],
+      "mainMax": [
+        13.6,
+        20,
+        29.6,
+        41.6,
+        57.6,
+        80
+      ],
+      "name": "C.DMG",
+      "percent": true,
+      "sortOrder": 51,
+      "stat": "critDmg",
+      "subMax": [
+        1.2,
+        1.8,
+        2.6,
+        3.6,
+        5,
+        7
+      ],
+      "subMin": [
+        0.7,
+        1,
+        1.5,
+        2.1,
+        2.9,
+        4
+      ]
+    }
+  },
+  {
+    "key": "crit_rate_pct",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "crit_rate_pct",
+      "mainBase": [
+        2.6,
+        3.8,
+        5.6,
+        7.8,
+        10.8,
+        15
+      ],
+      "mainMax": [
+        10.2,
+        15,
+        22.2,
+        31.2,
+        43.2,
+        60
+      ],
+      "name": "C.RATE",
+      "percent": true,
+      "sortOrder": 50,
+      "stat": "critRate",
+      "subMax": [
+        1,
+        1.5,
+        2.2,
+        3.1,
+        4.3,
+        6
+      ],
+      "subMin": [
+        0.7,
+        1,
+        1.5,
+        2.1,
+        2.9,
+        4
+      ]
+    }
+  },
+  {
+    "key": "def_flat",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "def_flat",
+      "mainBase": [
+        11,
+        17,
+        25,
+        34,
+        48,
+        66
+      ],
+      "mainMax": [
+        45,
+        66,
+        98,
+        138,
+        191,
+        265
+      ],
+      "name": "DEF",
+      "percent": false,
+      "sortOrder": 30,
+      "stat": "def",
+      "subMax": [
+        4,
+        7,
+        10,
+        14,
+        19,
+        26
+      ],
+      "subMin": [
+        3,
+        4,
+        6,
+        8,
+        11,
+        15
+      ]
+    }
+  },
+  {
+    "key": "def_pct",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "def_pct",
+      "mainBase": [
+        2.6,
+        3.8,
+        5.6,
+        7.8,
+        10.8,
+        15
+      ],
+      "mainMax": [
+        10.2,
+        15,
+        22.2,
+        31.2,
+        43.2,
+        60
+      ],
+      "name": "DEF %",
+      "percent": true,
+      "sortOrder": 31,
+      "stat": "def",
+      "subMax": [
+        1,
+        1.5,
+        2.2,
+        3.1,
+        4.3,
+        6
+      ],
+      "subMin": [
+        0.7,
+        1,
+        1.5,
+        2.1,
+        2.9,
+        4
+      ]
+    }
+  },
+  {
+    "key": "hp_flat",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "hp_flat",
+      "mainBase": [
+        173,
+        255,
+        377,
+        530,
+        734,
+        1020
+      ],
+      "mainMax": [
+        694,
+        1020,
+        1510,
+        2122,
+        2938,
+        4080
+      ],
+      "name": "HP",
+      "percent": false,
+      "sortOrder": 10,
+      "stat": "hp",
+      "subMax": [
+        44,
+        65,
+        96,
+        135,
+        187,
+        260
+      ],
+      "subMin": [
+        26,
+        38,
+        56,
+        78,
+        108,
+        150
+      ]
+    }
+  },
+  {
+    "key": "hp_pct",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "hp_pct",
+      "mainBase": [
+        2.6,
+        3.8,
+        5.6,
+        7.8,
+        10.8,
+        15
+      ],
+      "mainMax": [
+        10.2,
+        15,
+        22.2,
+        31.2,
+        43.2,
+        60
+      ],
+      "name": "HP %",
+      "percent": true,
+      "sortOrder": 11,
+      "stat": "hp",
+      "subMax": [
+        1,
+        1.5,
+        2.2,
+        3.1,
+        4.3,
+        6
+      ],
+      "subMin": [
+        0.7,
+        1,
+        1.5,
+        2.1,
+        2.9,
+        4
+      ]
+    }
+  },
+  {
+    "key": "res_flat",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "res_flat",
+      "mainBase": [
+        4,
+        6,
+        9,
+        12,
+        17,
+        24
+      ],
+      "mainMax": [
+        16,
+        24,
+        36,
+        50,
+        69,
+        96
+      ],
+      "name": "RES",
+      "percent": false,
+      "sortOrder": 61,
+      "stat": "res",
+      "subMax": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        12
+      ],
+      "subMin": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        8
+      ]
+    }
+  },
+  {
+    "key": "spd_flat",
+    "data": {
+      "canBeMain": true,
+      "canBeSub": true,
+      "key": "spd_flat",
+      "mainBase": [
+        2,
+        3,
+        4,
+        6,
+        8,
+        11
+      ],
+      "mainMax": [
+        8,
+        11,
+        17,
+        23,
+        32,
+        45
+      ],
+      "name": "SPD",
+      "percent": false,
+      "sortOrder": 40,
+      "stat": "spd",
+      "subMax": [
+        1,
+        2,
+        2,
+        3,
+        4,
+        6
+      ],
+      "subMin": [
+        1,
+        1,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  }
+]

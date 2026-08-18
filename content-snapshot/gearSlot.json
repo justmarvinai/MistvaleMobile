@@ -1,0 +1,148 @@
+[
+  {
+    "key": "amulet",
+    "data": {
+      "accessory": true,
+      "allowedMainStats": [
+        "hp",
+        "atk",
+        "def",
+        "critDmg"
+      ],
+      "allowsPercentMain": false,
+      "ascensionRequired": 4,
+      "key": "amulet",
+      "name": "Amulet",
+      "sortOrder": 80
+    }
+  },
+  {
+    "key": "banner",
+    "data": {
+      "accessory": true,
+      "allowedMainStats": [
+        "hp",
+        "atk",
+        "def",
+        "acc",
+        "res"
+      ],
+      "allowsPercentMain": false,
+      "ascensionRequired": 6,
+      "key": "banner",
+      "name": "Banner",
+      "sortOrder": 90
+    }
+  },
+  {
+    "key": "boots",
+    "data": {
+      "accessory": false,
+      "allowedMainStats": [
+        "hp",
+        "atk",
+        "def",
+        "spd"
+      ],
+      "allowsPercentMain": true,
+      "ascensionRequired": 0,
+      "key": "boots",
+      "name": "Boots",
+      "sortOrder": 60
+    }
+  },
+  {
+    "key": "cuirass",
+    "data": {
+      "accessory": false,
+      "allowedMainStats": [
+        "hp",
+        "atk",
+        "def",
+        "acc",
+        "res"
+      ],
+      "allowsPercentMain": true,
+      "ascensionRequired": 0,
+      "key": "cuirass",
+      "name": "Cuirass",
+      "sortOrder": 50
+    }
+  },
+  {
+    "key": "gauntlets",
+    "data": {
+      "accessory": false,
+      "allowedMainStats": [
+        "hp",
+        "atk",
+        "def",
+        "critRate",
+        "critDmg"
+      ],
+      "allowsPercentMain": true,
+      "ascensionRequired": 0,
+      "key": "gauntlets",
+      "name": "Gauntlets",
+      "sortOrder": 40
+    }
+  },
+  {
+    "key": "helm",
+    "data": {
+      "accessory": false,
+      "allowedMainStats": [
+        "hp"
+      ],
+      "allowsPercentMain": false,
+      "ascensionRequired": 0,
+      "key": "helm",
+      "name": "Helm",
+      "sortOrder": 20
+    }
+  },
+  {
+    "key": "ring",
+    "data": {
+      "accessory": true,
+      "allowedMainStats": [
+        "hp",
+        "atk",
+        "def"
+      ],
+      "allowsPercentMain": false,
+      "ascensionRequired": 2,
+      "key": "ring",
+      "name": "Ring",
+      "sortOrder": 70
+    }
+  },
+  {
+    "key": "shield",
+    "data": {
+      "accessory": false,
+      "allowedMainStats": [
+        "def"
+      ],
+      "allowsPercentMain": false,
+      "ascensionRequired": 0,
+      "key": "shield",
+      "name": "Shield",
+      "sortOrder": 30
+    }
+  },
+  {
+    "key": "weapon",
+    "data": {
+      "accessory": false,
+      "allowedMainStats": [
+        "atk"
+      ],
+      "allowsPercentMain": false,
+      "ascensionRequired": 0,
+      "key": "weapon",
+      "name": "Weapon",
+      "sortOrder": 10
+    }
+  }
+]

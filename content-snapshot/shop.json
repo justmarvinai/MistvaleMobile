@@ -1,0 +1,245 @@
+[
+  {
+    "key": "bazaar",
+    "data": {
+      "baseSlots": 4,
+      "crystalSlotCost": 150,
+      "crystalSlots": 4,
+      "description": "Traders who follow the mist line. What they have depends entirely on where they have been.",
+      "key": "bazaar",
+      "name": "The Bazaar",
+      "offers": [
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "faded_sigil",
+          "kind": "item",
+          "minAccountLevel": 1,
+          "name": "Faded Sigil",
+          "price": 5000,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "sigil_faded",
+          "weight": 120
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 1,
+          "key": "gleaming_sigil",
+          "kind": "item",
+          "minAccountLevel": 5,
+          "name": "Gleaming Sigil",
+          "price": 200000,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "sigil_gleaming",
+          "weight": 12
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "lesser_essence_bundle",
+          "kind": "item",
+          "minAccountLevel": 1,
+          "name": "Lesser Essence Cache",
+          "price": 12000,
+          "pricePerRank": 0,
+          "quantity": 5,
+          "refKey": "essence_pure",
+          "weight": 70
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "greater_essence_bundle",
+          "kind": "item",
+          "minAccountLevel": 8,
+          "name": "Greater Essence Cache",
+          "price": 45000,
+          "pricePerRank": 0,
+          "quantity": 22,
+          "refKey": "essence_pure",
+          "weight": 35
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "broodling_ember",
+          "kind": "champion",
+          "minAccountLevel": 1,
+          "name": "Ember Broodling",
+          "price": 6000,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "sskarn_broodling_ember",
+          "weight": 28
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "broodguard_ember",
+          "kind": "champion",
+          "minAccountLevel": 6,
+          "name": "Ember Broodguard",
+          "price": 39000,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "sskarn_broodguard_ember",
+          "weight": 9
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "broodling_tide",
+          "kind": "champion",
+          "minAccountLevel": 1,
+          "name": "Tide Broodling",
+          "price": 6000,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "sskarn_broodling_tide",
+          "weight": 28
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "broodguard_tide",
+          "kind": "champion",
+          "minAccountLevel": 6,
+          "name": "Tide Broodguard",
+          "price": 39000,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "sskarn_broodguard_tide",
+          "weight": 9
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "broodling_verdant",
+          "kind": "champion",
+          "minAccountLevel": 1,
+          "name": "Verdant Broodling",
+          "price": 6000,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "sskarn_broodling_verdant",
+          "weight": 28
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "key": "broodguard_verdant",
+          "kind": "champion",
+          "minAccountLevel": 6,
+          "name": "Verdant Broodguard",
+          "price": 39000,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "sskarn_broodguard_verdant",
+          "weight": 9
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "gear": {
+            "rankMax": 3,
+            "rankMin": 1,
+            "rarityWeights": {
+              "common": 50,
+              "epic": 3,
+              "rare": 15,
+              "uncommon": 32
+            },
+            "setKeys": []
+          },
+          "key": "relic_common",
+          "kind": "gear",
+          "minAccountLevel": 1,
+          "name": "Relic",
+          "price": 8000,
+          "pricePerRank": 6000,
+          "quantity": 1,
+          "refKey": "",
+          "weight": 140
+        },
+        {
+          "currency": "silver",
+          "dailyLimit": 0,
+          "gear": {
+            "rankMax": 5,
+            "rankMin": 3,
+            "rarityWeights": {
+              "epic": 24,
+              "legendary": 4,
+              "rare": 42,
+              "uncommon": 30
+            },
+            "setKeys": []
+          },
+          "key": "relic_fine",
+          "kind": "gear",
+          "minAccountLevel": 6,
+          "name": "Fine Relic",
+          "price": 30000,
+          "pricePerRank": 14000,
+          "quantity": 1,
+          "refKey": "",
+          "weight": 60
+        },
+        {
+          "currency": "crystals",
+          "dailyLimit": 0,
+          "gear": {
+            "rankMax": 6,
+            "rankMin": 5,
+            "rarityWeights": {
+              "epic": 55,
+              "legendary": 20,
+              "rare": 25
+            },
+            "setKeys": []
+          },
+          "key": "relic_master",
+          "kind": "gear",
+          "minAccountLevel": 12,
+          "name": "Master's Relic",
+          "price": 220,
+          "pricePerRank": 40,
+          "quantity": 1,
+          "refKey": "",
+          "weight": 14
+        },
+        {
+          "currency": "crystals",
+          "dailyLimit": 2,
+          "key": "rations",
+          "kind": "item",
+          "minAccountLevel": 3,
+          "name": "Warden’s Ration",
+          "price": 60,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "energy_pack_large",
+          "weight": 45
+        },
+        {
+          "currency": "crystals",
+          "dailyLimit": 1,
+          "key": "epic_tome",
+          "kind": "item",
+          "minAccountLevel": 10,
+          "name": "Epic Tome",
+          "price": 900,
+          "pricePerRank": 0,
+          "quantity": 1,
+          "refKey": "tome_epic",
+          "weight": 8
+        }
+      ],
+      "refreshCost": 50,
+      "restockMinutes": 60,
+      "sortOrder": 10
+    }
+  }
+]

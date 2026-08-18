@@ -1,0 +1,28 @@
+[
+  {
+    "key": "news_patch_template",
+    "data": {
+      "active": false,
+      "body": "**Champions.** What changed, and why it changed. Name the champion and the number that moved, not the intent alone — a player who reads \"brought in line\" learns nothing about whether to keep levelling it.\n\n**Content.** New stages, dungeons, events or shop stock.\n\n**Fixes.** What was broken and now is not. Worth listing even when it was invisible; a fix nobody hears about is a fix nobody trusts happened.\n\n_Clone this post, fill it in, set the window, and turn it on._",
+      "endsAt": "",
+      "key": "news_patch_template",
+      "pinned": false,
+      "sortOrder": 20,
+      "startsAt": "",
+      "title": "Patch notes — [version]"
+    }
+  },
+  {
+    "key": "news_welcome",
+    "data": {
+      "active": true,
+      "body": "The mist took the Vale a long time ago, and it has been giving it back one stage at a time ever since. You are a Valewarden: you gather champions, you take them down into it, and you bring back what it was holding.\n\n**Start with the campaign.** Every stage you clear pays silver, relics and account experience, and the map opens as you go. When a champion stops being able to carry you, feed it, rank it, and put better relics on it — that loop is the whole game, and it does not change shape between chapter 1 and chapter 12.\n\n**Check the calendar and your quests each day.** Both pay for things you were going to do anyway, and the day’s first victory in each mode pays a bonus with nothing to claim.\n\nThis is an early build. Numbers will move, and the Vale will get deeper.",
+      "endsAt": "",
+      "key": "news_welcome",
+      "pinned": true,
+      "sortOrder": 10,
+      "startsAt": "",
+      "title": "Welcome to the Vale"
+    }
+  }
+]

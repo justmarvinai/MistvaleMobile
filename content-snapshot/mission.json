@@ -1,0 +1,2332 @@
+[
+  {
+    "key": "m01_account_three",
+    "data": {
+      "active": true,
+      "arc": 1,
+      "arcName": "Awakening the Gate",
+      "description": "Reach account level 3.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 3,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m01_account_three",
+      "name": "A name in the Vale",
+      "rewards": {
+        "sigil_faded": 1,
+        "silver": 4000
+      },
+      "sortOrder": 50,
+      "step": 5
+    }
+  },
+  {
+    "key": "m01_chapter_one",
+    "data": {
+      "active": true,
+      "arc": 1,
+      "arcName": "Awakening the Gate",
+      "description": "Hold twelve stars in the first chapter.",
+      "goals": [
+        {
+          "filters": {
+            "chapterKey": "chapter_01"
+          },
+          "target": 12,
+          "type": "chapterStars"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m01_chapter_one",
+      "name": "Chapter one, held",
+      "rewards": {
+        "crystals": 30,
+        "sigil_faded": 3
+      },
+      "sortOrder": 80,
+      "step": 8
+    }
+  },
+  {
+    "key": "m01_energy",
+    "data": {
+      "active": true,
+      "arc": 1,
+      "arcName": "Awakening the Gate",
+      "description": "Spend sixty energy.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 60,
+          "type": "useEnergy"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m01_energy",
+      "name": "A long first day",
+      "rewards": {
+        "silver": 5000
+      },
+      "sortOrder": 70,
+      "step": 7
+    }
+  },
+  {
+    "key": "m01_first_blood",
+    "data": {
+      "active": true,
+      "arc": 1,
+      "arcName": "Awakening the Gate",
+      "description": "Win your first battle in the Vale.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 1,
+          "type": "battleWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m01_first_blood",
+      "name": "First light",
+      "rewards": {
+        "silver": 2000
+      },
+      "sortOrder": 10,
+      "step": 1
+    }
+  },
+  {
+    "key": "m01_first_summon",
+    "data": {
+      "active": true,
+      "arc": 1,
+      "arcName": "Awakening the Gate",
+      "description": "Summon a champion at the Mistgate.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 1,
+          "type": "summon"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m01_first_summon",
+      "name": "The gate answers",
+      "rewards": {
+        "silver": 3000
+      },
+      "sortOrder": 30,
+      "step": 3
+    }
+  },
+  {
+    "key": "m01_first_warlord",
+    "data": {
+      "active": true,
+      "arc": 1,
+      "arcName": "Awakening the Gate",
+      "description": "Beat a chapter warlord.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 1,
+          "type": "bossKill"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m01_first_warlord",
+      "name": "The first warlord",
+      "rewards": {
+        "energy_pack_small": 1,
+        "silver": 5000
+      },
+      "sortOrder": 60,
+      "step": 6
+    }
+  },
+  {
+    "key": "m01_five_stages",
+    "data": {
+      "active": true,
+      "arc": 1,
+      "arcName": "Awakening the Gate",
+      "description": "Clear five campaign stages.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 5,
+          "type": "stageClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m01_five_stages",
+      "name": "Down the road",
+      "rewards": {
+        "energy_pack_small": 1,
+        "silver": 3000
+      },
+      "sortOrder": 20,
+      "step": 2
+    }
+  },
+  {
+    "key": "m01_level_five",
+    "data": {
+      "active": true,
+      "arc": 1,
+      "arcName": "Awakening the Gate",
+      "description": "Level a champion five times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 5,
+          "type": "championLevelUp"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m01_level_five",
+      "name": "Learning the work",
+      "rewards": {
+        "silver": 4000
+      },
+      "sortOrder": 40,
+      "step": 4
+    }
+  },
+  {
+    "key": "m02_account_six",
+    "data": {
+      "active": true,
+      "arc": 2,
+      "arcName": "First Steel",
+      "description": "Reach account level 6.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 6,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m02_account_six",
+      "name": "Six days in",
+      "rewards": {
+        "energy_pack_small": 2
+      },
+      "sortOrder": 130,
+      "step": 5
+    }
+  },
+  {
+    "key": "m02_bazaar",
+    "data": {
+      "active": true,
+      "arc": 2,
+      "arcName": "First Steel",
+      "description": "Buy something from the Bazaar.",
+      "goals": [
+        {
+          "filters": {
+            "shopKey": "bazaar"
+          },
+          "target": 1,
+          "type": "shopPurchase"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m02_bazaar",
+      "name": "What silver buys",
+      "rewards": {
+        "silver": 10000
+      },
+      "sortOrder": 140,
+      "step": 6
+    }
+  },
+  {
+    "key": "m02_chapter_two",
+    "data": {
+      "active": true,
+      "arc": 2,
+      "arcName": "First Steel",
+      "description": "Hold sixteen stars in the second chapter.",
+      "goals": [
+        {
+          "filters": {
+            "chapterKey": "chapter_02"
+          },
+          "target": 16,
+          "type": "chapterStars"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m02_chapter_two",
+      "name": "Chapter two, held",
+      "rewards": {
+        "crystals": 40,
+        "sigil_gleaming": 1
+      },
+      "sortOrder": 160,
+      "step": 8
+    }
+  },
+  {
+    "key": "m02_rank_two",
+    "data": {
+      "active": true,
+      "arc": 2,
+      "arcName": "First Steel",
+      "description": "Rank a champion to ★2.",
+      "goals": [
+        {
+          "filters": {
+            "rank": 2
+          },
+          "target": 1,
+          "type": "championRankUp"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m02_rank_two",
+      "name": "Promoted",
+      "rewards": {
+        "silver": 8000
+      },
+      "sortOrder": 120,
+      "step": 4
+    }
+  },
+  {
+    "key": "m02_relic_four",
+    "data": {
+      "active": true,
+      "arc": 2,
+      "arcName": "First Steel",
+      "description": "Take a relic to +4.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 4,
+          "type": "gearLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m02_relic_four",
+      "name": "Sharper",
+      "rewards": {
+        "silver": 8000
+      },
+      "sortOrder": 100,
+      "step": 2
+    }
+  },
+  {
+    "key": "m02_summon_five",
+    "data": {
+      "active": true,
+      "arc": 2,
+      "arcName": "First Steel",
+      "description": "Summon five champions.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 5,
+          "type": "summon"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m02_summon_five",
+      "name": "Voices in the mist",
+      "rewards": {
+        "sigil_faded": 2
+      },
+      "sortOrder": 110,
+      "step": 3
+    }
+  },
+  {
+    "key": "m02_twenty_wins",
+    "data": {
+      "active": true,
+      "arc": 2,
+      "arcName": "First Steel",
+      "description": "Win twenty campaign battles.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 20,
+          "type": "battleWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m02_twenty_wins",
+      "name": "A road walked",
+      "rewards": {
+        "silver": 12000
+      },
+      "sortOrder": 150,
+      "step": 7
+    }
+  },
+  {
+    "key": "m02_upgrade_relic",
+    "data": {
+      "active": true,
+      "arc": 2,
+      "arcName": "First Steel",
+      "description": "Make five relic upgrade attempts.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 5,
+          "type": "gearUpgrade"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m02_upgrade_relic",
+      "name": "At the forge",
+      "rewards": {
+        "silver": 6000
+      },
+      "sortOrder": 90,
+      "step": 1
+    }
+  },
+  {
+    "key": "m03_account_ten",
+    "data": {
+      "active": true,
+      "arc": 3,
+      "arcName": "The Causeway",
+      "description": "Reach account level 10.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 10,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m03_account_ten",
+      "name": "Ten",
+      "rewards": {
+        "crystals": 30,
+        "energy_pack_small": 2
+      },
+      "sortOrder": 210,
+      "step": 5
+    }
+  },
+  {
+    "key": "m03_chapter_three",
+    "data": {
+      "active": true,
+      "arc": 3,
+      "arcName": "The Causeway",
+      "description": "Hold eighteen stars in the third chapter.",
+      "goals": [
+        {
+          "filters": {
+            "chapterKey": "chapter_03"
+          },
+          "target": 18,
+          "type": "chapterStars"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m03_chapter_three",
+      "name": "Chapter three, held",
+      "rewards": {
+        "crystals": 50,
+        "sigil_gleaming": 2
+      },
+      "sortOrder": 240,
+      "step": 8
+    }
+  },
+  {
+    "key": "m03_dailies",
+    "data": {
+      "active": true,
+      "arc": 3,
+      "arcName": "The Causeway",
+      "description": "Claim a full day of quests three times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 3,
+          "type": "claimAllDailies"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m03_dailies",
+      "name": "A habit forms",
+      "rewards": {
+        "silver": 20000
+      },
+      "sortOrder": 220,
+      "step": 6
+    }
+  },
+  {
+    "key": "m03_five_bosses",
+    "data": {
+      "active": true,
+      "arc": 3,
+      "arcName": "The Causeway",
+      "description": "Beat five chapter warlords.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 5,
+          "type": "bossKill"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m03_five_bosses",
+      "name": "Five warlords",
+      "rewards": {
+        "sigil_faded": 3
+      },
+      "sortOrder": 200,
+      "step": 4
+    }
+  },
+  {
+    "key": "m03_forty_wins",
+    "data": {
+      "active": true,
+      "arc": 3,
+      "arcName": "The Causeway",
+      "description": "Win forty campaign battles.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 40,
+          "type": "battleWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m03_forty_wins",
+      "name": "The long causeway",
+      "rewards": {
+        "silver": 18000
+      },
+      "sortOrder": 190,
+      "step": 3
+    }
+  },
+  {
+    "key": "m03_level_thirty",
+    "data": {
+      "active": true,
+      "arc": 3,
+      "arcName": "The Causeway",
+      "description": "Level champions thirty times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 30,
+          "type": "championLevelUp"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m03_level_thirty",
+      "name": "Fed and rested",
+      "rewards": {
+        "silver": 20000
+      },
+      "sortOrder": 230,
+      "step": 7
+    }
+  },
+  {
+    "key": "m03_rank_three",
+    "data": {
+      "active": true,
+      "arc": 3,
+      "arcName": "The Causeway",
+      "description": "Rank a champion to ★3.",
+      "goals": [
+        {
+          "filters": {
+            "rank": 3
+          },
+          "target": 1,
+          "type": "championRankUp"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m03_rank_three",
+      "name": "Three stars",
+      "rewards": {
+        "silver": 15000,
+        "tome_rare": 1
+      },
+      "sortOrder": 180,
+      "step": 2
+    }
+  },
+  {
+    "key": "m03_relic_eight",
+    "data": {
+      "active": true,
+      "arc": 3,
+      "arcName": "The Causeway",
+      "description": "Take a relic to +8.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 8,
+          "type": "gearLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m03_relic_eight",
+      "name": "Eight and holding",
+      "rewards": {
+        "silver": 15000
+      },
+      "sortOrder": 170,
+      "step": 1
+    }
+  },
+  {
+    "key": "m04_account_fourteen",
+    "data": {
+      "active": true,
+      "arc": 4,
+      "arcName": "Depths-Delver",
+      "description": "Reach account level 14.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 14,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m04_account_fourteen",
+      "name": "Fourteen",
+      "rewards": {
+        "crystals": 40
+      },
+      "sortOrder": 300,
+      "step": 6
+    }
+  },
+  {
+    "key": "m04_ascend",
+    "data": {
+      "active": true,
+      "arc": 4,
+      "arcName": "Depths-Delver",
+      "description": "Ascend a champion.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 1,
+          "type": "championAscend"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m04_ascend",
+      "name": "Beyond the mist",
+      "rewards": {
+        "essence_pure": 3
+      },
+      "sortOrder": 290,
+      "step": 5
+    }
+  },
+  {
+    "key": "m04_first_floor",
+    "data": {
+      "active": true,
+      "arc": 4,
+      "arcName": "Depths-Delver",
+      "description": "Clear a floor of the Depths.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 1,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m04_first_floor",
+      "name": "Down the stair",
+      "rewards": {
+        "silver": 20000
+      },
+      "sortOrder": 250,
+      "step": 1
+    }
+  },
+  {
+    "key": "m04_relic_twelve",
+    "data": {
+      "active": true,
+      "arc": 4,
+      "arcName": "Depths-Delver",
+      "description": "Take a relic to +12.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 12,
+          "type": "gearLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m04_relic_twelve",
+      "name": "Twelve",
+      "rewards": {
+        "crystals": 25,
+        "silver": 30000
+      },
+      "sortOrder": 280,
+      "step": 4
+    }
+  },
+  {
+    "key": "m04_spring",
+    "data": {
+      "active": true,
+      "arc": 4,
+      "arcName": "Depths-Delver",
+      "description": "Clear five floors of an Essence Spring.",
+      "goals": [
+        {
+          "filters": {
+            "dungeonKey": "spring_pure"
+          },
+          "target": 5,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m04_spring",
+      "name": "What the springs hold",
+      "rewards": {
+        "essence_pure": 2
+      },
+      "sortOrder": 270,
+      "step": 3
+    }
+  },
+  {
+    "key": "m04_summon_twenty",
+    "data": {
+      "active": true,
+      "arc": 4,
+      "arcName": "Depths-Delver",
+      "description": "Summon twenty champions.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 20,
+          "type": "summon"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m04_summon_twenty",
+      "name": "The gate stays open",
+      "rewards": {
+        "sigil_gleaming": 2
+      },
+      "sortOrder": 310,
+      "step": 7
+    }
+  },
+  {
+    "key": "m04_ten_floors",
+    "data": {
+      "active": true,
+      "arc": 4,
+      "arcName": "Depths-Delver",
+      "description": "Clear ten Depths floors.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 10,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m04_ten_floors",
+      "name": "Deeper",
+      "rewards": {
+        "emblem_bronze": 20
+      },
+      "sortOrder": 260,
+      "step": 2
+    }
+  },
+  {
+    "key": "m04_twentyfive_floors",
+    "data": {
+      "active": true,
+      "arc": 4,
+      "arcName": "Depths-Delver",
+      "description": "Clear twenty-five Depths floors.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 25,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m04_twentyfive_floors",
+      "name": "Delver",
+      "rewards": {
+        "crystals": 60,
+        "sigil_gleaming": 3
+      },
+      "sortOrder": 320,
+      "step": 8
+    }
+  },
+  {
+    "key": "m05_account_twenty",
+    "data": {
+      "active": true,
+      "arc": 5,
+      "arcName": "Proving Yourself",
+      "description": "Reach account level 20.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 20,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m05_account_twenty",
+      "name": "Twenty",
+      "rewards": {
+        "crystals": 80,
+        "sigil_mistwoven": 1
+      },
+      "sortOrder": 400,
+      "step": 8
+    }
+  },
+  {
+    "key": "m05_chapter_five",
+    "data": {
+      "active": true,
+      "arc": 5,
+      "arcName": "Proving Yourself",
+      "description": "Hold eighteen stars in the fifth chapter.",
+      "goals": [
+        {
+          "filters": {
+            "chapterKey": "chapter_05"
+          },
+          "target": 18,
+          "type": "chapterStars"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m05_chapter_five",
+      "name": "Chapter five, held",
+      "rewards": {
+        "sigil_gleaming": 2
+      },
+      "sortOrder": 390,
+      "step": 7
+    }
+  },
+  {
+    "key": "m05_epic",
+    "data": {
+      "active": true,
+      "arc": 5,
+      "arcName": "Proving Yourself",
+      "description": "Obtain an Epic champion.",
+      "goals": [
+        {
+          "filters": {
+            "rarity": "epic"
+          },
+          "target": 1,
+          "type": "championObtained"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m05_epic",
+      "name": "Something rarer",
+      "rewards": {
+        "tome_epic": 1
+      },
+      "sortOrder": 370,
+      "step": 5
+    }
+  },
+  {
+    "key": "m05_hundred_wins",
+    "data": {
+      "active": true,
+      "arc": 5,
+      "arcName": "Proving Yourself",
+      "description": "Win one hundred campaign battles.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 100,
+          "type": "battleWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m05_hundred_wins",
+      "name": "A hundred roads",
+      "rewards": {
+        "silver": 50000
+      },
+      "sortOrder": 380,
+      "step": 6
+    }
+  },
+  {
+    "key": "m05_mastery",
+    "data": {
+      "active": true,
+      "arc": 5,
+      "arcName": "Proving Yourself",
+      "description": "Learn five mastery nodes.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 5,
+          "type": "masteryLearn"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m05_mastery",
+      "name": "Trained",
+      "rewards": {
+        "emblem_bronze": 40
+      },
+      "sortOrder": 340,
+      "step": 2
+    }
+  },
+  {
+    "key": "m05_mastery_fifteen",
+    "data": {
+      "active": true,
+      "arc": 5,
+      "arcName": "Proving Yourself",
+      "description": "Learn fifteen mastery nodes.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 15,
+          "type": "masteryLearn"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m05_mastery_fifteen",
+      "name": "A finished tree",
+      "rewards": {
+        "crystals": 30,
+        "emblem_silver": 60
+      },
+      "sortOrder": 350,
+      "step": 3
+    }
+  },
+  {
+    "key": "m05_proving",
+    "data": {
+      "active": true,
+      "arc": 5,
+      "arcName": "Proving Yourself",
+      "description": "Clear five floors of the Proving Grounds.",
+      "goals": [
+        {
+          "filters": {
+            "dungeonKey": "proving_grounds"
+          },
+          "target": 5,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m05_proving",
+      "name": "Into the Grounds",
+      "rewards": {
+        "emblem_bronze": 30
+      },
+      "sortOrder": 330,
+      "step": 1
+    }
+  },
+  {
+    "key": "m05_rank_four",
+    "data": {
+      "active": true,
+      "arc": 5,
+      "arcName": "Proving Yourself",
+      "description": "Rank a champion to ★4.",
+      "goals": [
+        {
+          "filters": {
+            "rank": 4
+          },
+          "target": 1,
+          "type": "championRankUp"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m05_rank_four",
+      "name": "Four stars",
+      "rewards": {
+        "silver": 40000
+      },
+      "sortOrder": 360,
+      "step": 4
+    }
+  },
+  {
+    "key": "m06_bronze_three",
+    "data": {
+      "active": true,
+      "arc": 6,
+      "arcName": "Arena Blooded",
+      "description": "Reach Bronze III.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 3,
+          "type": "arenaTier"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m06_bronze_three",
+      "name": "Up from the bottom",
+      "rewards": {
+        "crystals": 40
+      },
+      "sortOrder": 440,
+      "step": 4
+    }
+  },
+  {
+    "key": "m06_dailies_ten",
+    "data": {
+      "active": true,
+      "arc": 6,
+      "arcName": "Arena Blooded",
+      "description": "Claim a full day of quests ten times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 10,
+          "type": "claimAllDailies"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m06_dailies_ten",
+      "name": "Ten good days",
+      "rewards": {
+        "sigil_gleaming": 3
+      },
+      "sortOrder": 460,
+      "step": 6
+    }
+  },
+  {
+    "key": "m06_fifty_floors",
+    "data": {
+      "active": true,
+      "arc": 6,
+      "arcName": "Arena Blooded",
+      "description": "Clear fifty Depths floors.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 50,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m06_fifty_floors",
+      "name": "Fifty floors down",
+      "rewards": {
+        "emblem_silver": 100
+      },
+      "sortOrder": 470,
+      "step": 7
+    }
+  },
+  {
+    "key": "m06_first_attack",
+    "data": {
+      "active": true,
+      "arc": 6,
+      "arcName": "Arena Blooded",
+      "description": "Fight an Arena battle.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 1,
+          "type": "arenaBattle"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m06_first_attack",
+      "name": "Onto the sand",
+      "rewards": {
+        "silver": 30000
+      },
+      "sortOrder": 410,
+      "step": 1
+    }
+  },
+  {
+    "key": "m06_first_win",
+    "data": {
+      "active": true,
+      "arc": 6,
+      "arcName": "Arena Blooded",
+      "description": "Win an Arena battle.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 1,
+          "type": "arenaWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m06_first_win",
+      "name": "First blood on the sand",
+      "rewards": {
+        "crystals": 30
+      },
+      "sortOrder": 420,
+      "step": 2
+    }
+  },
+  {
+    "key": "m06_relic_sixteen",
+    "data": {
+      "active": true,
+      "arc": 6,
+      "arcName": "Arena Blooded",
+      "description": "Take a relic to +16.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 16,
+          "type": "gearLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m06_relic_sixteen",
+      "name": "Sixteen",
+      "rewards": {
+        "silver": 60000
+      },
+      "sortOrder": 450,
+      "step": 5
+    }
+  },
+  {
+    "key": "m06_silver_tier",
+    "data": {
+      "active": true,
+      "arc": 6,
+      "arcName": "Arena Blooded",
+      "description": "Reach Silver I in the Arena.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 5,
+          "type": "arenaTier"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m06_silver_tier",
+      "name": "Silver",
+      "rewards": {
+        "crystals": 100,
+        "sigil_mistwoven": 1
+      },
+      "sortOrder": 480,
+      "step": 8
+    }
+  },
+  {
+    "key": "m06_ten_wins",
+    "data": {
+      "active": true,
+      "arc": 6,
+      "arcName": "Arena Blooded",
+      "description": "Win ten Arena battles.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 10,
+          "type": "arenaWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m06_ten_wins",
+      "name": "Blooded",
+      "rewards": {
+        "silver": 50000
+      },
+      "sortOrder": 430,
+      "step": 3
+    }
+  },
+  {
+    "key": "m07_account_thirty",
+    "data": {
+      "active": true,
+      "arc": 7,
+      "arcName": "Silver Standard",
+      "description": "Reach account level 30.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 30,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m07_account_thirty",
+      "name": "Thirty",
+      "rewards": {
+        "crystals": 120,
+        "sigil_radiant": 1
+      },
+      "sortOrder": 560,
+      "step": 8
+    }
+  },
+  {
+    "key": "m07_arena_thirty",
+    "data": {
+      "active": true,
+      "arc": 7,
+      "arcName": "Silver Standard",
+      "description": "Win thirty Arena battles.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 30,
+          "type": "arenaWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m07_arena_thirty",
+      "name": "Thirty on the sand",
+      "rewards": {
+        "crystals": 60
+      },
+      "sortOrder": 530,
+      "step": 5
+    }
+  },
+  {
+    "key": "m07_ascend_three",
+    "data": {
+      "active": true,
+      "arc": 7,
+      "arcName": "Silver Standard",
+      "description": "Ascend champions three times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 3,
+          "type": "championAscend"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m07_ascend_three",
+      "name": "Thrice beyond",
+      "rewards": {
+        "essence_pure": 8
+      },
+      "sortOrder": 500,
+      "step": 2
+    }
+  },
+  {
+    "key": "m07_chapter_eight",
+    "data": {
+      "active": true,
+      "arc": 7,
+      "arcName": "Silver Standard",
+      "description": "Hold eighteen stars in the eighth chapter.",
+      "goals": [
+        {
+          "filters": {
+            "chapterKey": "chapter_08"
+          },
+          "target": 18,
+          "type": "chapterStars"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m07_chapter_eight",
+      "name": "Chapter eight, held",
+      "rewards": {
+        "sigil_mistwoven": 1
+      },
+      "sortOrder": 550,
+      "step": 7
+    }
+  },
+  {
+    "key": "m07_hard_wins",
+    "data": {
+      "active": true,
+      "arc": 7,
+      "arcName": "Silver Standard",
+      "description": "Win two hundred campaign battles.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 200,
+          "type": "battleWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m07_hard_wins",
+      "name": "The harder road",
+      "rewards": {
+        "silver": 100000
+      },
+      "sortOrder": 540,
+      "step": 6
+    }
+  },
+  {
+    "key": "m07_mastery_thirty",
+    "data": {
+      "active": true,
+      "arc": 7,
+      "arcName": "Silver Standard",
+      "description": "Learn thirty mastery nodes.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 30,
+          "type": "masteryLearn"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m07_mastery_thirty",
+      "name": "Two trees deep",
+      "rewards": {
+        "emblem_gold": 80
+      },
+      "sortOrder": 520,
+      "step": 4
+    }
+  },
+  {
+    "key": "m07_rank_five",
+    "data": {
+      "active": true,
+      "arc": 7,
+      "arcName": "Silver Standard",
+      "description": "Rank a champion to ★5.",
+      "goals": [
+        {
+          "filters": {
+            "rank": 5
+          },
+          "target": 1,
+          "type": "championRankUp"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m07_rank_five",
+      "name": "Five stars",
+      "rewards": {
+        "silver": 80000
+      },
+      "sortOrder": 490,
+      "step": 1
+    }
+  },
+  {
+    "key": "m07_relic_twenty",
+    "data": {
+      "active": true,
+      "arc": 7,
+      "arcName": "Silver Standard",
+      "description": "Take a relic to +20.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 20,
+          "type": "gearLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m07_relic_twenty",
+      "name": "Twenty",
+      "rewards": {
+        "crystals": 80
+      },
+      "sortOrder": 510,
+      "step": 3
+    }
+  },
+  {
+    "key": "m08_account_forty",
+    "data": {
+      "active": true,
+      "arc": 8,
+      "arcName": "The Deep Floors",
+      "description": "Reach account level 40.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 40,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m08_account_forty",
+      "name": "Forty",
+      "rewards": {
+        "sigil_radiant": 1,
+        "tome_legendary": 1
+      },
+      "sortOrder": 640,
+      "step": 8
+    }
+  },
+  {
+    "key": "m08_cinderspire",
+    "data": {
+      "active": true,
+      "arc": 8,
+      "arcName": "The Deep Floors",
+      "description": "Clear twenty floors of Cinderspire.",
+      "goals": [
+        {
+          "filters": {
+            "dungeonKey": "cinderspire"
+          },
+          "target": 20,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m08_cinderspire",
+      "name": "The spire",
+      "rewards": {
+        "sigil_gleaming": 3
+      },
+      "sortOrder": 600,
+      "step": 4
+    }
+  },
+  {
+    "key": "m08_frostgrave",
+    "data": {
+      "active": true,
+      "arc": 8,
+      "arcName": "The Deep Floors",
+      "description": "Clear twenty floors of Frostgrave Vault.",
+      "goals": [
+        {
+          "filters": {
+            "dungeonKey": "frostgrave_vault"
+          },
+          "target": 20,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m08_frostgrave",
+      "name": "The frozen vault",
+      "rewards": {
+        "sigil_gleaming": 3
+      },
+      "sortOrder": 590,
+      "step": 3
+    }
+  },
+  {
+    "key": "m08_gold_tier",
+    "data": {
+      "active": true,
+      "arc": 8,
+      "arcName": "The Deep Floors",
+      "description": "Reach Gold I in the Arena.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 7,
+          "type": "arenaTier"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m08_gold_tier",
+      "name": "Gold",
+      "rewards": {
+        "sigil_mistwoven": 1
+      },
+      "sortOrder": 630,
+      "step": 7
+    }
+  },
+  {
+    "key": "m08_hundred_floors",
+    "data": {
+      "active": true,
+      "arc": 8,
+      "arcName": "The Deep Floors",
+      "description": "Clear one hundred Depths floors.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 100,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m08_hundred_floors",
+      "name": "A hundred floors",
+      "rewards": {
+        "emblem_gold": 120
+      },
+      "sortOrder": 570,
+      "step": 1
+    }
+  },
+  {
+    "key": "m08_relic_max",
+    "data": {
+      "active": true,
+      "arc": 8,
+      "arcName": "The Deep Floors",
+      "description": "Take a relic to +24.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 24,
+          "type": "gearLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m08_relic_max",
+      "name": "As far as it goes",
+      "rewards": {
+        "crystals": 150
+      },
+      "sortOrder": 620,
+      "step": 6
+    }
+  },
+  {
+    "key": "m08_silkmire",
+    "data": {
+      "active": true,
+      "arc": 8,
+      "arcName": "The Deep Floors",
+      "description": "Clear twenty floors of Silkmire Depths.",
+      "goals": [
+        {
+          "filters": {
+            "dungeonKey": "silkmire_depths"
+          },
+          "target": 20,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m08_silkmire",
+      "name": "The silk deeps",
+      "rewards": {
+        "sigil_gleaming": 3
+      },
+      "sortOrder": 610,
+      "step": 5
+    }
+  },
+  {
+    "key": "m08_wyrms_hollow",
+    "data": {
+      "active": true,
+      "arc": 8,
+      "arcName": "The Deep Floors",
+      "description": "Clear twenty floors of Wyrm’s Hollow.",
+      "goals": [
+        {
+          "filters": {
+            "dungeonKey": "wyrms_hollow"
+          },
+          "target": 20,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m08_wyrms_hollow",
+      "name": "The hollow",
+      "rewards": {
+        "sigil_gleaming": 3
+      },
+      "sortOrder": 580,
+      "step": 2
+    }
+  },
+  {
+    "key": "m09_account_fifty",
+    "data": {
+      "active": true,
+      "arc": 9,
+      "arcName": "Brutal Roads",
+      "description": "Reach account level 50.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 50,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m09_account_fifty",
+      "name": "Fifty",
+      "rewards": {
+        "crystals": 200,
+        "sigil_radiant": 2
+      },
+      "sortOrder": 720,
+      "step": 8
+    }
+  },
+  {
+    "key": "m09_arena_hundred",
+    "data": {
+      "active": true,
+      "arc": 9,
+      "arcName": "Brutal Roads",
+      "description": "Win one hundred Arena battles.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 100,
+          "type": "arenaWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m09_arena_hundred",
+      "name": "A hundred on the sand",
+      "rewards": {
+        "crystals": 200
+      },
+      "sortOrder": 700,
+      "step": 6
+    }
+  },
+  {
+    "key": "m09_ascend_six",
+    "data": {
+      "active": true,
+      "arc": 9,
+      "arcName": "Brutal Roads",
+      "description": "Ascend champions six times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 6,
+          "type": "championAscend"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m09_ascend_six",
+      "name": "Six times beyond",
+      "rewards": {
+        "essence_pure": 15
+      },
+      "sortOrder": 670,
+      "step": 3
+    }
+  },
+  {
+    "key": "m09_chapter_eleven",
+    "data": {
+      "active": true,
+      "arc": 9,
+      "arcName": "Brutal Roads",
+      "description": "Hold eighteen stars in the eleventh chapter.",
+      "goals": [
+        {
+          "filters": {
+            "chapterKey": "chapter_11"
+          },
+          "target": 18,
+          "type": "chapterStars"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m09_chapter_eleven",
+      "name": "Chapter eleven, held",
+      "rewards": {
+        "sigil_mistwoven": 1
+      },
+      "sortOrder": 680,
+      "step": 4
+    }
+  },
+  {
+    "key": "m09_dailies_thirty",
+    "data": {
+      "active": true,
+      "arc": 9,
+      "arcName": "Brutal Roads",
+      "description": "Claim a full day of quests thirty times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 30,
+          "type": "claimAllDailies"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m09_dailies_thirty",
+      "name": "A month of days",
+      "rewards": {
+        "sigil_radiant": 1
+      },
+      "sortOrder": 690,
+      "step": 5
+    }
+  },
+  {
+    "key": "m09_legendary",
+    "data": {
+      "active": true,
+      "arc": 9,
+      "arcName": "Brutal Roads",
+      "description": "Obtain a Legendary champion.",
+      "goals": [
+        {
+          "filters": {
+            "rarity": "legendary"
+          },
+          "target": 1,
+          "type": "championObtained"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m09_legendary",
+      "name": "A legend answers",
+      "rewards": {
+        "tome_legendary": 1
+      },
+      "sortOrder": 650,
+      "step": 1
+    }
+  },
+  {
+    "key": "m09_mastery_all",
+    "data": {
+      "active": true,
+      "arc": 9,
+      "arcName": "Brutal Roads",
+      "description": "Learn forty-five mastery nodes.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 45,
+          "type": "masteryLearn"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m09_mastery_all",
+      "name": "Mastered",
+      "rewards": {
+        "emblem_gold": 200
+      },
+      "sortOrder": 710,
+      "step": 7
+    }
+  },
+  {
+    "key": "m09_rank_six",
+    "data": {
+      "active": true,
+      "arc": 9,
+      "arcName": "Brutal Roads",
+      "description": "Rank a champion to ★6.",
+      "goals": [
+        {
+          "filters": {
+            "rank": 6
+          },
+          "target": 1,
+          "type": "championRankUp"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m09_rank_six",
+      "name": "Six stars",
+      "rewards": {
+        "crystals": 150
+      },
+      "sortOrder": 660,
+      "step": 2
+    }
+  },
+  {
+    "key": "m10_account_sixty",
+    "data": {
+      "active": true,
+      "arc": 10,
+      "arcName": "Court of the Coilmother",
+      "description": "Reach account level 60.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 60,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m10_account_sixty",
+      "name": "Sixty",
+      "rewards": {
+        "crystals": 300,
+        "sigil_radiant": 3
+      },
+      "sortOrder": 790,
+      "step": 7
+    }
+  },
+  {
+    "key": "m10_bosses",
+    "data": {
+      "active": true,
+      "arc": 10,
+      "arcName": "Court of the Coilmother",
+      "description": "Beat thirty chapter warlords.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 30,
+          "type": "bossKill"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m10_bosses",
+      "name": "Every warlord",
+      "rewards": {
+        "crystals": 150
+      },
+      "sortOrder": 740,
+      "step": 2
+    }
+  },
+  {
+    "key": "m10_chapter_twelve",
+    "data": {
+      "active": true,
+      "arc": 10,
+      "arcName": "Court of the Coilmother",
+      "description": "Hold eighteen stars in the twelfth chapter.",
+      "goals": [
+        {
+          "filters": {
+            "chapterKey": "chapter_12"
+          },
+          "target": 18,
+          "type": "chapterStars"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m10_chapter_twelve",
+      "name": "The last chapter",
+      "rewards": {
+        "sigil_radiant": 1
+      },
+      "sortOrder": 730,
+      "step": 1
+    }
+  },
+  {
+    "key": "m10_depths_two_hundred",
+    "data": {
+      "active": true,
+      "arc": 10,
+      "arcName": "Court of the Coilmother",
+      "description": "Clear two hundred Depths floors.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 200,
+          "type": "dungeonClear"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m10_depths_two_hundred",
+      "name": "Two hundred floors",
+      "rewards": {
+        "emblem_gold": 300
+      },
+      "sortOrder": 760,
+      "step": 4
+    }
+  },
+  {
+    "key": "m10_five_hundred_wins",
+    "data": {
+      "active": true,
+      "arc": 10,
+      "arcName": "Court of the Coilmother",
+      "description": "Win five hundred campaign battles.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 500,
+          "type": "battleWin"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m10_five_hundred_wins",
+      "name": "Five hundred roads",
+      "rewards": {
+        "silver": 300000
+      },
+      "sortOrder": 770,
+      "step": 5
+    }
+  },
+  {
+    "key": "m10_platinum",
+    "data": {
+      "active": true,
+      "arc": 10,
+      "arcName": "Court of the Coilmother",
+      "description": "Reach Platinum in the Arena.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 10,
+          "type": "arenaTier"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m10_platinum",
+      "name": "Platinum",
+      "rewards": {
+        "crystals": 200,
+        "sigil_radiant": 1
+      },
+      "sortOrder": 750,
+      "step": 3
+    }
+  },
+  {
+    "key": "m10_summon_two_hundred",
+    "data": {
+      "active": true,
+      "arc": 10,
+      "arcName": "Court of the Coilmother",
+      "description": "Summon two hundred champions.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 200,
+          "type": "summon"
+        }
+      ],
+      "grants": {
+        "champions": [],
+        "title": ""
+      },
+      "icon": "mv-mission",
+      "key": "m10_summon_two_hundred",
+      "name": "The gate, worn thin",
+      "rewards": {
+        "sigil_mistwoven": 2
+      },
+      "sortOrder": 780,
+      "step": 6
+    }
+  },
+  {
+    "key": "m10_the_voice",
+    "data": {
+      "active": true,
+      "arc": 10,
+      "arcName": "Court of the Coilmother",
+      "description": "Beat the Coilmother on Brutal, and the Vale itself will answer for you. Aureleth walks out of the mist — and she will not be summoned by anyone else.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign",
+            "stageKey": "c12_s7_brutal"
+          },
+          "target": 1,
+          "type": "stageClear"
+        },
+        {
+          "filters": {},
+          "target": 55,
+          "type": "accountLevel"
+        }
+      ],
+      "grants": {
+        "champions": [
+          "aureleth"
+        ],
+        "title": "Warden of the Reclamation"
+      },
+      "icon": "mv-mission",
+      "key": "m10_the_voice",
+      "name": "The Voice of the Vale",
+      "rewards": {
+        "crystals": 500
+      },
+      "sortOrder": 800,
+      "step": 8
+    }
+  }
+]

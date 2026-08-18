@@ -1,0 +1,1627 @@
+[
+  {
+    "key": "aldemar_the_cartographer",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "hp",
+        "value": 18
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 15,
+        "atk": 940,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1100,
+        "hp": 19000,
+        "res": 40,
+        "spd": 100
+      },
+      "element": "verdant",
+      "factionKey": "wayfarers",
+      "isFood": false,
+      "key": "aldemar_the_cartographer",
+      "lore": "Aldemar has mapped a country that rearranges itself, and his maps are still the best there are. He walks ahead of the caravan with a staff and a sheaf of corrections, and the mist parts for him roughly nine times in ten. He is very careful about the tenth.",
+      "name": "Aldemar the Cartographer",
+      "rarity": "epic",
+      "role": "hp",
+      "skills": [
+        "aldemar_the_cartographer_a1_survey_strike",
+        "aldemar_the_cartographer_a2_safe_passage",
+        "aldemar_the_cartographer_a3_uncharted_ruin"
+      ],
+      "sortOrder": 26,
+      "starter": false,
+      "summonable": true,
+      "title": "Cartographer of the Fog"
+    }
+  },
+  {
+    "key": "anuria",
+    "data": {
+      "assetKey": "champ_anuria",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "atk",
+        "value": 15
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 1390,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 990,
+        "hp": 15500,
+        "res": 30,
+        "spd": 103
+      },
+      "element": "tide",
+      "factionKey": "vale_sentinels",
+      "isFood": false,
+      "key": "anuria",
+      "lore": "She held the last bridge out of the lowlands with a quiver and a great deal of patience. The Sentinels tell that story often; Anuria tells it never.",
+      "name": "Anuria",
+      "rarity": "epic",
+      "role": "attack",
+      "skills": [
+        "anuria_a1_twinshot",
+        "anuria_a2_wardens_aim",
+        "anuria_a3_arrowstorm"
+      ],
+      "sortOrder": 1,
+      "starter": true,
+      "summonable": true,
+      "title": "Arrow of the Vale"
+    }
+  },
+  {
+    "key": "ashka_torchhand",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 10,
+        "atk": 1030,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 640,
+        "hp": 10600,
+        "res": 20,
+        "spd": 104
+      },
+      "element": "ember",
+      "factionKey": "emberclan",
+      "isFood": false,
+      "key": "ashka_torchhand",
+      "lore": "A cinder-courier of the lower holds, Ashka carries live coals bare-handed between war-camps and outruns any horse doing it. The fire-cults tolerate her because fire follows where she goes. She fights the way she runs — quick, careless, and leaving small blazes behind.",
+      "name": "Ashka Torchhand",
+      "rarity": "uncommon",
+      "role": "attack",
+      "skills": [
+        "ashka_torchhand_a1_torchslash",
+        "ashka_torchhand_a2_cinder_rush"
+      ],
+      "sortOrder": 8,
+      "starter": false,
+      "summonable": true,
+      "title": "Ember Runner"
+    }
+  },
+  {
+    "key": "aureleth",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "any",
+        "scope": "all",
+        "stat": "spd",
+        "value": 16
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 20,
+        "atk": 1080,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1230,
+        "hp": 19200,
+        "res": 50,
+        "spd": 108
+      },
+      "element": "mist",
+      "factionKey": "vale_sentinels",
+      "isFood": false,
+      "key": "aureleth",
+      "lore": "Nobody summoned Aureleth; she was standing in the refuge courtyard the morning the last Mistgate anchor was set, and she answered to the name before anyone had used it. The Sentinels say their oaths in her cadence, though none of them remember learning it. She speaks once per battle, and the dying stand up.",
+      "name": "Aureleth, Voice of the Vale",
+      "rarity": "legendary",
+      "role": "support",
+      "skills": [
+        "aureleth_a1_valesong",
+        "aureleth_a2_voice_of_the_vale",
+        "aureleth_a3_second_dawn",
+        "aureleth_a4_the_gate_remembers"
+      ],
+      "sortOrder": 37,
+      "starter": false,
+      "summonable": false,
+      "title": "Voice of the Vale"
+    }
+  },
+  {
+    "key": "bracken_puck",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "arena",
+        "scope": "all",
+        "stat": "spd",
+        "value": 9
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 20,
+        "atk": 1190,
+        "critDmg": 57,
+        "critRate": 20,
+        "def": 780,
+        "hp": 12600,
+        "res": 25,
+        "spd": 110
+      },
+      "element": "verdant",
+      "factionKey": "thornweald",
+      "isFood": false,
+      "key": "bracken_puck",
+      "lore": "A hedge-fey with a debt-ledger where a heart should be, Bracken steals minutes the way other thieves steal purses, and spends them badly. Court law says he must return what he takes; court law has never caught him. He fights in a blur of thorns and small, insulting laughter.",
+      "name": "Bracken Puck",
+      "rarity": "rare",
+      "role": "attack",
+      "skills": [
+        "bracken_puck_a1_pinprick",
+        "bracken_puck_a2_hourthief",
+        "bracken_puck_a3_briar_dance"
+      ],
+      "sortOrder": 20,
+      "starter": false,
+      "summonable": true,
+      "title": "The Hourthief"
+    }
+  },
+  {
+    "key": "brekka_foehammer",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 15,
+        "atk": 830,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 950,
+        "hp": 16900,
+        "res": 35,
+        "spd": 96
+      },
+      "element": "ember",
+      "factionKey": "emberclan",
+      "isFood": false,
+      "key": "brekka_foehammer",
+      "lore": "Brekka’s hammer was a bell once, cast for a mountain shrine that burned before it ever rang. She swings it the way it was meant to sound: one enormous note, and then silence. Emberclan children are told the silence is the part to be afraid of.",
+      "name": "Brekka Foehammer",
+      "rarity": "rare",
+      "role": "hp",
+      "skills": [
+        "brekka_foehammer_a1_hammerfall",
+        "brekka_foehammer_a2_skullring",
+        "brekka_foehammer_a3_quake_step"
+      ],
+      "sortOrder": 13,
+      "starter": false,
+      "summonable": true,
+      "title": "Foehammer"
+    }
+  },
+  {
+    "key": "briar_knight",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "def",
+        "value": 18
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 900,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1360,
+        "hp": 18400,
+        "res": 45,
+        "spd": 98
+      },
+      "element": "verdant",
+      "factionKey": "thornweald",
+      "isFood": false,
+      "key": "briar_knight",
+      "lore": "A suit of thorn-grown armour has walked the Thornweald border since before the mist, and no one has ever seen it opened. The Court insists there is a knight inside. The briars insist otherwise, and they are the ones doing the fighting.",
+      "name": "The Briar Knight",
+      "rarity": "epic",
+      "role": "defense",
+      "skills": [
+        "briar_knight_a1_thorn_guard",
+        "briar_knight_a2_bramble_mantle",
+        "briar_knight_a3_crown_of_briars"
+      ],
+      "sortOrder": 29,
+      "starter": false,
+      "summonable": true,
+      "title": "Knight of the Briar Court"
+    }
+  },
+  {
+    "key": "cantor_maelis",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 25,
+        "atk": 1395,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 920,
+        "hp": 15400,
+        "res": 30,
+        "spd": 107
+      },
+      "element": "tide",
+      "factionKey": "drowned_choir",
+      "isFood": false,
+      "key": "cantor_maelis",
+      "lore": "A cantor sets the pace the Choir drowns to. Maelis sets it slower every year, and the coast has grown quiet in a way inland folk find hard to describe. When he opens his mouth, water finds its way into places it should not be.",
+      "name": "Cantor Maelis",
+      "rarity": "epic",
+      "role": "attack",
+      "skills": [
+        "cantor_maelis_a1_dirge_note",
+        "cantor_maelis_a2_undertow_hymn",
+        "cantor_maelis_a3_drowning_chorus"
+      ],
+      "sortOrder": 30,
+      "starter": false,
+      "summonable": true,
+      "title": "Cantor of the Undertow"
+    }
+  },
+  {
+    "key": "castellan_ordwin",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "arena",
+        "scope": "all",
+        "stat": "def",
+        "value": 18
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 10,
+        "atk": 880,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1390,
+        "hp": 18200,
+        "res": 45,
+        "spd": 96
+      },
+      "element": "tide",
+      "factionKey": "vale_sentinels",
+      "isFood": false,
+      "key": "castellan_ordwin",
+      "lore": "Ordwin’s keep went under with the Causeway; he stayed at his post through the flooding and was still giving orders when the water reached the murder-holes. Something answered him. He has held a gate that no longer exists for thirty years and has no intention of standing down.",
+      "name": "Castellan Ordwin",
+      "rarity": "epic",
+      "role": "defense",
+      "skills": [
+        "castellan_ordwin_a1_tower_strike",
+        "castellan_ordwin_a2_hold_the_gate",
+        "castellan_ordwin_a3_sentinels_vow"
+      ],
+      "sortOrder": 24,
+      "starter": false,
+      "summonable": true,
+      "title": "Castellan of the Sunken Gate"
+    }
+  },
+  {
+    "key": "darius",
+    "data": {
+      "assetKey": "champ_darius",
+      "aura": {
+        "area": "depths",
+        "scope": "all",
+        "stat": "acc",
+        "value": 40
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 20,
+        "atk": 1430,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 930,
+        "hp": 14500,
+        "res": 30,
+        "spd": 105
+      },
+      "element": "mist",
+      "factionKey": "wayfarers",
+      "isFood": false,
+      "key": "darius",
+      "lore": "The conclave asked him to describe the Worldmist. He came back able to speak to it, which was not what anyone had wanted.",
+      "name": "Darius Veilcaller",
+      "rarity": "epic",
+      "role": "attack",
+      "skills": [
+        "darius_a1_hexbolt",
+        "darius_a2_umbral_torrent",
+        "darius_a3_rite_of_ruin"
+      ],
+      "sortOrder": 4,
+      "starter": false,
+      "summonable": true,
+      "title": "Reader of Fog"
+    }
+  },
+  {
+    "key": "grib_the_unburied",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 690,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 790,
+        "hp": 13700,
+        "res": 28,
+        "spd": 94
+      },
+      "element": "ember",
+      "factionKey": "hollowborn",
+      "isFood": false,
+      "key": "grib_the_unburied",
+      "lore": "Grib was pit-buried under a collapsed forge and came back out three winters later, still smouldering. Roots grew through him while he waited and he never bothered to pull them out. He is patient the way only the dead are, and he mends the way a bramble does — slowly, and everywhere at once.",
+      "name": "Grib the Unburied",
+      "rarity": "uncommon",
+      "role": "hp",
+      "skills": [
+        "grib_the_unburied_a1_gravehook",
+        "grib_the_unburied_a2_rotroot_vigil"
+      ],
+      "sortOrder": 9,
+      "starter": false,
+      "summonable": true,
+      "title": "The Unburied"
+    }
+  },
+  {
+    "key": "hodrek_deepline",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 15,
+        "atk": 1265,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 800,
+        "hp": 13000,
+        "res": 28,
+        "spd": 101
+      },
+      "element": "mist",
+      "factionKey": "runebound",
+      "isFood": false,
+      "key": "hodrek_deepline",
+      "lore": "The deep lines are the oldest carvings under the peaks, and reading them costs an eye a verse. Hodrek has read four. What he cuts now goes through armour as though the armour had merely been an opinion.",
+      "name": "Hodrek Deepline",
+      "rarity": "rare",
+      "role": "attack",
+      "skills": [
+        "hodrek_deepline_a1_rune_lash",
+        "hodrek_deepline_a2_deepline_bolt",
+        "hodrek_deepline_a3_sunder_rune"
+      ],
+      "sortOrder": 22,
+      "starter": false,
+      "summonable": true,
+      "title": "Deepline Runecutter"
+    }
+  },
+  {
+    "key": "kerra_palewatch",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 20,
+        "atk": 1255,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 790,
+        "hp": 13200,
+        "res": 25,
+        "spd": 104
+      },
+      "element": "verdant",
+      "factionKey": "vale_sentinels",
+      "isFood": false,
+      "key": "kerra_palewatch",
+      "lore": "The Pale Watch never fought in formation; they fought one at a time, in the fog, where numbers meant nothing. Kerra is the last of them. She opens every duel by finding the seam in a guard, and closes it with a single unhurried thrust.",
+      "name": "Kerra Palewatch",
+      "rarity": "rare",
+      "role": "attack",
+      "skills": [
+        "kerra_palewatch_a1_riposte",
+        "kerra_palewatch_a2_find_the_seam",
+        "kerra_palewatch_a3_pale_verdict"
+      ],
+      "sortOrder": 12,
+      "starter": false,
+      "summonable": true,
+      "title": "Last of the Pale Watch"
+    }
+  },
+  {
+    "key": "khazgor",
+    "data": {
+      "assetKey": "champ_khazgor",
+      "aura": {
+        "area": "arena",
+        "scope": "all",
+        "stat": "def",
+        "value": 20
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 850,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1400,
+        "hp": 18000,
+        "res": 45,
+        "spd": 96
+      },
+      "element": "ember",
+      "factionKey": "hollowborn",
+      "isFood": false,
+      "key": "khazgor",
+      "lore": "He remembers the order to hold, and the name of the officer who gave it, and nothing else at all. It has proved sufficient.",
+      "name": "Khazgor of the Silent Rank",
+      "rarity": "epic",
+      "role": "defense",
+      "skills": [
+        "khazgor_a1_gravecleave",
+        "khazgor_a2_deadmans_bulwark",
+        "khazgor_a3_standfast_eternal"
+      ],
+      "sortOrder": 5,
+      "starter": false,
+      "summonable": true,
+      "title": "The Standing Wall"
+    }
+  },
+  {
+    "key": "krosska_shieldback",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 760,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1230,
+        "hp": 16200,
+        "res": 42,
+        "spd": 94
+      },
+      "element": "tide",
+      "factionKey": "sskarn",
+      "isFood": false,
+      "key": "krosska_shieldback",
+      "lore": "Brood-guards are grown into their shells; Krosska outgrew hers twice and had it cut away twice more. She stands in front of a line because it is the only posture she was ever taught, and she has stopped caring whose line it is. The Valewarden’s is warm, at least.",
+      "name": "Krosska Shieldback",
+      "rarity": "rare",
+      "role": "defense",
+      "skills": [
+        "krosska_shieldback_a1_carapace_slam",
+        "krosska_shieldback_a2_scale_wall",
+        "krosska_shieldback_a3_draw_the_brood"
+      ],
+      "sortOrder": 19,
+      "starter": false,
+      "summonable": true,
+      "title": "Shieldback"
+    }
+  },
+  {
+    "key": "lady_merrow",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "depths",
+        "scope": "all",
+        "stat": "res",
+        "value": 28
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 25,
+        "atk": 960,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1160,
+        "hp": 17600,
+        "res": 48,
+        "spd": 104
+      },
+      "element": "tide",
+      "factionKey": "hollowborn",
+      "isFood": false,
+      "key": "lady_merrow",
+      "lore": "She drowned at her own wedding feast and came back up the following spring wearing most of it. Merrow is unfailingly courteous, sings the fen to sleep, and remembers every guest by name. Those she sings for do not wake until she has finished being polite.",
+      "name": "Lady Merrow of the Fen",
+      "rarity": "epic",
+      "role": "support",
+      "skills": [
+        "lady_merrow_a1_fen_whisper",
+        "lady_merrow_a2_drowsing_mist",
+        "lady_merrow_a3_still_waters"
+      ],
+      "sortOrder": 27,
+      "starter": false,
+      "summonable": true,
+      "title": "Lady of the Fen"
+    }
+  },
+  {
+    "key": "maddoc_threefingers",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 10,
+        "atk": 1210,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 850,
+        "hp": 13900,
+        "res": 30,
+        "spd": 100
+      },
+      "element": "ember",
+      "factionKey": "hollowborn",
+      "isFood": false,
+      "key": "maddoc_threefingers",
+      "lore": "He lost two fingers to a wager and the rest of his life to the mist, and insists the wager hurt more. Maddoc fights close, unarmed and grinning, on the theory that anything hitting him has come near enough to be hit back. It usually has.",
+      "name": "Maddoc Threefingers",
+      "rarity": "rare",
+      "role": "attack",
+      "skills": [
+        "maddoc_threefingers_a1_knuckle_rake",
+        "maddoc_threefingers_a2_broken_guard",
+        "maddoc_threefingers_a3_bare_knuckle_oath"
+      ],
+      "sortOrder": 14,
+      "starter": false,
+      "summonable": true,
+      "title": "Threefingers"
+    }
+  },
+  {
+    "key": "maruan",
+    "data": {
+      "assetKey": "champ_maruan",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "def",
+        "value": 15
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 950,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1150,
+        "hp": 18500,
+        "res": 50,
+        "spd": 101
+      },
+      "element": "verdant",
+      "factionKey": "wayfarers",
+      "isFood": false,
+      "key": "maruan",
+      "lore": "Walked the pilgrim roads for thirty years mending what the fog left behind, and learned somewhere along the way that rot cuts both ways.",
+      "name": "Maruan the Stillwater",
+      "rarity": "epic",
+      "role": "support",
+      "skills": [
+        "maruan_a1_thornlash",
+        "maruan_a2_rite_of_reeds",
+        "maruan_a3_verdant_ruin"
+      ],
+      "sortOrder": 3,
+      "starter": true,
+      "summonable": true,
+      "title": "Hedge-Physician"
+    }
+  },
+  {
+    "key": "old_gharssa",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "depths",
+        "scope": "all",
+        "stat": "acc",
+        "value": 25
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 25,
+        "atk": 880,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1010,
+        "hp": 15300,
+        "res": 40,
+        "spd": 98
+      },
+      "element": "verdant",
+      "factionKey": "sskarn",
+      "isFood": false,
+      "key": "old_gharssa",
+      "lore": "Gharssa was already ancient when the Coilmother hatched, and she has no interest in anybody’s war. She brews for whoever is in front of her: poison for one, poultice for the next, out of the same clay pot. The Wayfarers have learned not to ask which is which.",
+      "name": "Old Gharssa",
+      "rarity": "rare",
+      "role": "support",
+      "skills": [
+        "old_gharssa_a1_venom_spit",
+        "old_gharssa_a2_brood_brew",
+        "old_gharssa_a3_mire_bloom"
+      ],
+      "sortOrder": 18,
+      "starter": false,
+      "summonable": true,
+      "title": "Mire-Shaman"
+    }
+  },
+  {
+    "key": "orenna_veilmother",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "any",
+        "scope": "all",
+        "stat": "spd",
+        "value": 14
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 20,
+        "atk": 1050,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1240,
+        "hp": 18800,
+        "res": 50,
+        "spd": 106
+      },
+      "element": "mist",
+      "factionKey": "wayfarers",
+      "isFood": false,
+      "key": "orenna_veilmother",
+      "lore": "The conclave elects a Veilmother once a generation and expects her to walk into the deep fog and come back with something useful. Orenna came back with nine children who had been missing forty years, none of them any older. She has been unpicking the mist’s knots ever since, one at a time.",
+      "name": "Orenna Veilmother",
+      "rarity": "legendary",
+      "role": "support",
+      "skills": [
+        "orenna_veilmother_a1_veil_touch",
+        "orenna_veilmother_a2_unbinding",
+        "orenna_veilmother_a3_mothers_veil",
+        "orenna_veilmother_a4_gate_of_hours"
+      ],
+      "sortOrder": 33,
+      "starter": false,
+      "summonable": true,
+      "title": "Veilmother"
+    }
+  },
+  {
+    "key": "pale_duke",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "depths",
+        "scope": "all",
+        "stat": "hp",
+        "value": 24
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 15,
+        "atk": 1020,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1170,
+        "hp": 20600,
+        "res": 45,
+        "spd": 100
+      },
+      "element": "mist",
+      "factionKey": "hollowborn",
+      "isFood": false,
+      "key": "pale_duke",
+      "lore": "In life he held title over four valleys and lost them all in one winter of bad debts. Death corrected the ledger: everything that touches him now owes him blood, and he collects with the patience of a man who has stopped needing anything else. His court still keeps the hours.",
+      "name": "The Pale Duke",
+      "rarity": "legendary",
+      "role": "hp",
+      "skills": [
+        "pale_duke_a1_pale_hand",
+        "pale_duke_a2_court_of_hollows",
+        "pale_duke_a3_debt_collected",
+        "pale_duke_a4_the_long_dark"
+      ],
+      "sortOrder": 34,
+      "starter": false,
+      "summonable": true,
+      "title": "Duke of the Hollow Court"
+    }
+  },
+  {
+    "key": "petta_lanternmaid",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "hp",
+        "value": 12
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 830,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1040,
+        "hp": 15600,
+        "res": 45,
+        "spd": 99
+      },
+      "element": "tide",
+      "factionKey": "wayfarers",
+      "isFood": false,
+      "key": "petta_lanternmaid",
+      "lore": "Every Wayfarer caravan keeps one girl awake to hold the lamp; Petta has held it eleven years and never once let it gutter. She learned field-surgery from a dying surgeon and stubbornness from nobody at all. She will drag you back to the fire whether you consent or not.",
+      "name": "Petta Lanternmaid",
+      "rarity": "rare",
+      "role": "support",
+      "skills": [
+        "petta_lanternmaid_a1_lanternstrike",
+        "petta_lanternmaid_a2_kindled_mercy",
+        "petta_lanternmaid_a3_watchfire"
+      ],
+      "sortOrder": 16,
+      "starter": false,
+      "summonable": true,
+      "title": "Lanternmaid"
+    }
+  },
+  {
+    "key": "rattledagger",
+    "data": {
+      "assetKey": "champ_rattledagger",
+      "aura": {
+        "area": "arena",
+        "scope": "all",
+        "stat": "spd",
+        "value": 12
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 25,
+        "atk": 1410,
+        "critDmg": 57,
+        "critRate": 20,
+        "def": 900,
+        "hp": 13500,
+        "res": 25,
+        "spd": 112
+      },
+      "element": "mist",
+      "factionKey": "hollowborn",
+      "isFood": false,
+      "key": "rattledagger",
+      "lore": "Something very old came back wearing a child’s bones and a cutpurse’s habits. It is unfailingly polite, which is worse.",
+      "name": "Rattledagger",
+      "rarity": "epic",
+      "role": "attack",
+      "skills": [
+        "rattledagger_a1_bonestab",
+        "rattledagger_a2_marrowdrain",
+        "rattledagger_a3_deathrattle"
+      ],
+      "sortOrder": 6,
+      "starter": false,
+      "summonable": true,
+      "title": "Small And Patient"
+    }
+  },
+  {
+    "key": "serjeant_bramwell",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "def",
+        "value": 12
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 775,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1220,
+        "hp": 15800,
+        "res": 40,
+        "spd": 95
+      },
+      "element": "ember",
+      "factionKey": "vale_sentinels",
+      "isFood": false,
+      "key": "serjeant_bramwell",
+      "lore": "Bramwell held a doorway at Galehollow for a day and a night so that forty refugees could pass behind him. Nobody promoted him for it; the officers who could have were dead by morning. He still calls himself Serjeant, and he still stands in doorways.",
+      "name": "Serjeant Bramwell",
+      "rarity": "rare",
+      "role": "defense",
+      "skills": [
+        "serjeant_bramwell_a1_shield_bash",
+        "serjeant_bramwell_a2_bulwark_oath",
+        "serjeant_bramwell_a3_hold_the_doorway"
+      ],
+      "sortOrder": 11,
+      "starter": false,
+      "summonable": true,
+      "title": "Shield of the Fourth Line"
+    }
+  },
+  {
+    "key": "sethlurias",
+    "data": {
+      "assetKey": "champ_sethlurias",
+      "aura": {
+        "area": "depths",
+        "scope": "all",
+        "stat": "res",
+        "value": 30
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 900,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1100,
+        "hp": 21500,
+        "res": 40,
+        "spd": 100
+      },
+      "element": "tide",
+      "factionKey": "sskarn",
+      "isFood": false,
+      "key": "sethlurias",
+      "lore": "Refused the Coilmother’s war and was unmade from the brood for it. He guards the vale now, and does not discuss why.",
+      "name": "Sethlurias",
+      "rarity": "epic",
+      "role": "hp",
+      "skills": [
+        "sethlurias_a1_tidebrand",
+        "sethlurias_a2_scalesong_ward",
+        "sethlurias_a3_coilguard"
+      ],
+      "sortOrder": 7,
+      "starter": false,
+      "summonable": true,
+      "title": "Tidebound Exile"
+    }
+  },
+  {
+    "key": "sister_nerissa",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "depths",
+        "scope": "all",
+        "stat": "res",
+        "value": 25
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 820,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1030,
+        "hp": 15500,
+        "res": 48,
+        "spd": 100
+      },
+      "element": "tide",
+      "factionKey": "drowned_choir",
+      "isFood": false,
+      "key": "sister_nerissa",
+      "lore": "The Choir sings underwater, which is why nobody has heard it and gone on to describe it. Nerissa was sent inland to learn what air does to a voice. She keeps her wounded breathing on song alone, and hums when the fighting gets bad.",
+      "name": "Sister Nerissa",
+      "rarity": "rare",
+      "role": "support",
+      "skills": [
+        "sister_nerissa_a1_tidecall",
+        "sister_nerissa_a2_choral_tide",
+        "sister_nerissa_a3_deep_communion"
+      ],
+      "sortOrder": 23,
+      "starter": false,
+      "summonable": true,
+      "title": "Sister of the Drowned Choir"
+    }
+  },
+  {
+    "key": "ssiv_quickfang",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 5,
+        "atk": 1010,
+        "critDmg": 52,
+        "critRate": 18,
+        "def": 645,
+        "hp": 10400,
+        "res": 20,
+        "spd": 106
+      },
+      "element": "verdant",
+      "factionKey": "sskarn",
+      "isFood": false,
+      "key": "ssiv_quickfang",
+      "lore": "A brood-runner who broke ranks at the Sunken Causeway and sold her speed to the Valewarden instead. Her own clutch hunts her for it; she finds this motivating. Two strikes before anyone else has drawn is her entire philosophy of war.",
+      "name": "Ssiv Quickfang",
+      "rarity": "uncommon",
+      "role": "attack",
+      "skills": [
+        "ssiv_quickfang_a1_twin_fangs",
+        "ssiv_quickfang_a2_shedskin_sprint"
+      ],
+      "sortOrder": 10,
+      "starter": false,
+      "summonable": true,
+      "title": "Quickfang"
+    }
+  },
+  {
+    "key": "sskarn_broodguard_ember",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 635,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 990,
+        "hp": 12900,
+        "res": 25,
+        "spd": 90
+      },
+      "element": "ember",
+      "factionKey": "sskarn",
+      "isFood": true,
+      "key": "sskarn_broodguard_ember",
+      "lore": "A broodling that survived long enough to be grown into a shell and given a doorway to stand in. Sworn into the warband’s service, it takes the order literally and stands wherever it is put.",
+      "name": "Sskarn Broodguard",
+      "rarity": "uncommon",
+      "role": "defense",
+      "skills": [
+        "sskarn_broodguard_ember_a1_ashen_check",
+        "sskarn_broodguard_ember_a2_bank_the_coals"
+      ],
+      "sortOrder": 41,
+      "starter": false,
+      "summonable": true,
+      "title": "Ember-Tinted Guard"
+    }
+  },
+  {
+    "key": "sskarn_broodguard_tide",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 635,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 990,
+        "hp": 12900,
+        "res": 25,
+        "spd": 90
+      },
+      "element": "tide",
+      "factionKey": "sskarn",
+      "isFood": true,
+      "key": "sskarn_broodguard_tide",
+      "lore": "A broodling that survived long enough to be grown into a shell and given a doorway to stand in. The Marches taught it to hold a flooded line; the refuge has only asked it to hold a dry one.",
+      "name": "Sskarn Broodguard",
+      "rarity": "uncommon",
+      "role": "defense",
+      "skills": [
+        "sskarn_broodguard_tide_a1_brine_check",
+        "sskarn_broodguard_tide_a2_settle_the_silt"
+      ],
+      "sortOrder": 42,
+      "starter": false,
+      "summonable": true,
+      "title": "Tide-Tinted Guard"
+    }
+  },
+  {
+    "key": "sskarn_broodguard_verdant",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 635,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 990,
+        "hp": 12900,
+        "res": 25,
+        "spd": 90
+      },
+      "element": "verdant",
+      "factionKey": "sskarn",
+      "isFood": true,
+      "key": "sskarn_broodguard_verdant",
+      "lore": "A broodling that survived long enough to be grown into a shell and given a doorway to stand in. It roots itself in whatever ground it is handed and waits, which is all the Marches ever wanted from it.",
+      "name": "Sskarn Broodguard",
+      "rarity": "uncommon",
+      "role": "defense",
+      "skills": [
+        "sskarn_broodguard_verdant_a1_bramble_check",
+        "sskarn_broodguard_verdant_a2_root_down"
+      ],
+      "sortOrder": 43,
+      "starter": false,
+      "summonable": true,
+      "title": "Verdant-Tinted Guard"
+    }
+  },
+  {
+    "key": "sskarn_broodling_ember",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 780,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 495,
+        "hp": 8200,
+        "res": 15,
+        "spd": 90
+      },
+      "element": "ember",
+      "factionKey": "sskarn",
+      "isFood": true,
+      "key": "sskarn_broodling_ember",
+      "lore": "Nursery-clutches take the colour of whatever breath the marsh-water carried that spring, and this one came up red. Taken in a raid before it had learned its own name, it follows the warband mostly for the fire.",
+      "name": "Sskarn Broodling",
+      "rarity": "common",
+      "role": "attack",
+      "skills": [
+        "sskarn_broodling_ember_a1_cinder_nip"
+      ],
+      "sortOrder": 38,
+      "starter": false,
+      "summonable": true,
+      "title": "Ember-Tinted Hatchling"
+    }
+  },
+  {
+    "key": "sskarn_broodling_tide",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 780,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 495,
+        "hp": 8200,
+        "res": 15,
+        "spd": 90
+      },
+      "element": "tide",
+      "factionKey": "sskarn",
+      "isFood": true,
+      "key": "sskarn_broodling_tide",
+      "lore": "Nursery-clutches take the colour of whatever breath the marsh-water carried that spring, and this one came up blue. It was pulled out of a flooded creche and has been quietly grateful ever since.",
+      "name": "Sskarn Broodling",
+      "rarity": "common",
+      "role": "attack",
+      "skills": [
+        "sskarn_broodling_tide_a1_brine_nip"
+      ],
+      "sortOrder": 39,
+      "starter": false,
+      "summonable": true,
+      "title": "Tide-Tinted Hatchling"
+    }
+  },
+  {
+    "key": "sskarn_broodling_verdant",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 780,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 495,
+        "hp": 8200,
+        "res": 15,
+        "spd": 90
+      },
+      "element": "verdant",
+      "factionKey": "sskarn",
+      "isFood": true,
+      "key": "sskarn_broodling_verdant",
+      "lore": "Nursery-clutches take the colour of whatever breath the marsh-water carried that spring, and this one came up green. It is barely a soldier and appears to know it, which is more than most of its clutch managed.",
+      "name": "Sskarn Broodling",
+      "rarity": "common",
+      "role": "attack",
+      "skills": [
+        "sskarn_broodling_verdant_a1_mire_nip"
+      ],
+      "sortOrder": 40,
+      "starter": false,
+      "summonable": true,
+      "title": "Verdant-Tinted Hatchling"
+    }
+  },
+  {
+    "key": "sylvi_mistreader",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 20,
+        "atk": 845,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 990,
+        "hp": 14900,
+        "res": 38,
+        "spd": 107
+      },
+      "element": "mist",
+      "factionKey": "wayfarers",
+      "isFood": false,
+      "key": "sylvi_mistreader",
+      "lore": "Sylvi reads the fog the way a sailor reads swell — she can tell you what is coming and, more usefully, when. The conclave calls it scholarship. Her enemies call it cheating, generally while waiting for a turn that never arrives.",
+      "name": "Sylvi Mistreader",
+      "rarity": "rare",
+      "role": "support",
+      "skills": [
+        "sylvi_mistreader_a1_veilspike",
+        "sylvi_mistreader_a2_tide_of_hours",
+        "sylvi_mistreader_a3_unspooling"
+      ],
+      "sortOrder": 17,
+      "starter": false,
+      "summonable": true,
+      "title": "Mistreader"
+    }
+  },
+  {
+    "key": "szarran_coilfather",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "hp",
+        "value": 22
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 25,
+        "atk": 1040,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1150,
+        "hp": 20900,
+        "res": 45,
+        "spd": 101
+      },
+      "element": "verdant",
+      "factionKey": "sskarn",
+      "isFood": false,
+      "key": "szarran_coilfather",
+      "lore": "Before Ssyleth there was Szarran, and the Marches were merely wet rather than drowned. He was set aside for being too slow and too fond of his own hatchlings — Sethlurias among them. The venom he brews has had a century to improve, and he has had a century to think about his daughter.",
+      "name": "Szarran Coilfather",
+      "rarity": "legendary",
+      "role": "hp",
+      "skills": [
+        "szarran_coilfather_a1_coil_bite",
+        "szarran_coilfather_a2_broodmire",
+        "szarran_coilfather_a3_venom_crown",
+        "szarran_coilfather_a4_the_coil_closes"
+      ],
+      "sortOrder": 35,
+      "starter": false,
+      "summonable": true,
+      "title": "Coilfather of the Sunken Marches"
+    }
+  },
+  {
+    "key": "thordakk",
+    "data": {
+      "assetKey": "champ_thordakk",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "hp",
+        "value": 15
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 1330,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1050,
+        "hp": 17500,
+        "res": 35,
+        "spd": 98
+      },
+      "element": "ember",
+      "factionKey": "emberclan",
+      "isFood": false,
+      "key": "thordakk",
+      "lore": "Burned three of his own clan-holds to deny them to the mist, then walked out of the smoke to argue about it. Still arguing.",
+      "name": "Thordakk Cindermaw",
+      "rarity": "epic",
+      "role": "attack",
+      "skills": [
+        "thordakk_a1_axefall",
+        "thordakk_a2_emberwake",
+        "thordakk_a3_ashen_roar"
+      ],
+      "sortOrder": 2,
+      "starter": true,
+      "summonable": true,
+      "title": "Ashen Bull"
+    }
+  },
+  {
+    "key": "torvi_anvilborn",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 10,
+        "atk": 770,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1250,
+        "hp": 15700,
+        "res": 40,
+        "spd": 93
+      },
+      "element": "ember",
+      "factionKey": "runebound",
+      "isFood": false,
+      "key": "torvi_anvilborn",
+      "lore": "Runebound smiths mark an apprentice with a rune struck straight into the shoulder; Torvi’s was struck seven times, because she kept getting up. She fights the way a forge works — everything comes to her, and everything leaves changed. Her shield rings on the beat.",
+      "name": "Torvi Anvilborn",
+      "rarity": "rare",
+      "role": "defense",
+      "skills": [
+        "torvi_anvilborn_a1_anvil_stroke",
+        "torvi_anvilborn_a2_forgequake",
+        "torvi_anvilborn_a3_runebound_stand"
+      ],
+      "sortOrder": 21,
+      "starter": false,
+      "summonable": true,
+      "title": "Anvilborn"
+    }
+  },
+  {
+    "key": "ugrim_pyrechant",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "campaign",
+        "scope": "all",
+        "stat": "atk",
+        "value": 18
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 20,
+        "atk": 1010,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1120,
+        "hp": 17400,
+        "res": 42,
+        "spd": 103
+      },
+      "element": "ember",
+      "factionKey": "emberclan",
+      "isFood": false,
+      "key": "ugrim_pyrechant",
+      "lore": "Emberclan war-drums are tuned by burning the hide until it screams at the right pitch. Ugrim tunes his own and sings over it in a tongue the cults claim predates fire. Warbands that march to him hit harder, and the ground they leave keeps burning for a week.",
+      "name": "Ugrim Pyrechant",
+      "rarity": "epic",
+      "role": "support",
+      "skills": [
+        "ugrim_pyrechant_a1_drumfire",
+        "ugrim_pyrechant_a2_war_cadence",
+        "ugrim_pyrechant_a3_pyre_chorus"
+      ],
+      "sortOrder": 25,
+      "starter": false,
+      "summonable": true,
+      "title": "Pyrechant"
+    }
+  },
+  {
+    "key": "vessaryn",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "arena",
+        "scope": "all",
+        "stat": "critRate",
+        "value": 14
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 20,
+        "atk": 1545,
+        "critDmg": 57,
+        "critRate": 20,
+        "def": 940,
+        "hp": 15600,
+        "res": 28,
+        "spd": 112
+      },
+      "element": "mist",
+      "factionKey": "thornweald",
+      "isFood": false,
+      "key": "vessaryn",
+      "lore": "The Deep Thorn is the part of the Thornweald the Court does not map, and Vess’aryn is what it sends when a bargain is broken. She arrives as a shift in the fog and leaves before the sound does. Debtors get one warning: the smell of cut green wood.",
+      "name": "Vess’aryn of the Deep Thorn",
+      "rarity": "legendary",
+      "role": "attack",
+      "skills": [
+        "vessaryn_a1_thorn_kiss",
+        "vessaryn_a2_deep_veil",
+        "vessaryn_a3_severing_thorn",
+        "vessaryn_a4_the_last_bloom"
+      ],
+      "sortOrder": 36,
+      "starter": false,
+      "summonable": true,
+      "title": "Blade of the Deep Thorn"
+    }
+  },
+  {
+    "key": "vessk_the_unchained",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "any",
+        "scope": "faction",
+        "stat": "atk",
+        "value": 16
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 0,
+        "atk": 1440,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 900,
+        "hp": 15100,
+        "res": 30,
+        "spd": 105
+      },
+      "element": "ember",
+      "factionKey": "sskarn",
+      "isFood": false,
+      "key": "vessk_the_unchained",
+      "lore": "Emberclan pit-masters kept him for eleven fights and lost him on the twelfth, along with the pit. Vessk does not fight for the Valewarden so much as alongside her, in the same direction, very fast. Nobody has yet found a chain worth the argument.",
+      "name": "Vessk the Unchained",
+      "rarity": "epic",
+      "role": "attack",
+      "skills": [
+        "vessk_the_unchained_a1_lash_out",
+        "vessk_the_unchained_a2_unshackled",
+        "vessk_the_unchained_a3_frenzy_of_scales"
+      ],
+      "sortOrder": 28,
+      "starter": false,
+      "summonable": true,
+      "title": "The Unchained"
+    }
+  },
+  {
+    "key": "vulkas_emberlord",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "any",
+        "scope": "element",
+        "stat": "atk",
+        "value": 30
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 15,
+        "atk": 1530,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 975,
+        "hp": 16300,
+        "res": 32,
+        "spd": 108
+      },
+      "element": "ember",
+      "factionKey": "emberclan",
+      "isFood": false,
+      "key": "vulkas_emberlord",
+      "lore": "The fire-cults fought each other for two centuries until Vulkas walked down from the caldera and gave them something better to burn. He wears the crown of a mountain that is still active and treats it as a modest accessory. Where he stops, the ash stays warm for a season.",
+      "name": "Vulkas Emberlord",
+      "rarity": "legendary",
+      "role": "attack",
+      "skills": [
+        "vulkas_emberlord_a1_emberlash",
+        "vulkas_emberlord_a2_cinder_crown",
+        "vulkas_emberlord_a3_pyre_of_kings",
+        "vulkas_emberlord_a4_ashen_wrath"
+      ],
+      "sortOrder": 32,
+      "starter": false,
+      "summonable": true,
+      "title": "Emberlord"
+    }
+  },
+  {
+    "key": "warden_elstan",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": {
+        "area": "arena",
+        "scope": "all",
+        "stat": "def",
+        "value": 22
+      },
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 10,
+        "atk": 950,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1490,
+        "hp": 19500,
+        "res": 50,
+        "spd": 99
+      },
+      "element": "tide",
+      "factionKey": "vale_sentinels",
+      "isFood": false,
+      "key": "warden_elstan",
+      "lore": "Elstan commanded the last unbroken line of the old federation and has never formally been relieved of it. He counts the living every morning and writes the number in a ledger nobody else may read. It has gone up twice since the refuge opened, and he considers that a campaign.",
+      "name": "Warden-Cmdr. Elstan",
+      "rarity": "legendary",
+      "role": "defense",
+      "skills": [
+        "warden_elstan_a1_bulwark_blow",
+        "warden_elstan_a2_shieldwall",
+        "warden_elstan_a3_oath_of_the_line",
+        "warden_elstan_a4_last_rampart"
+      ],
+      "sortOrder": 31,
+      "starter": false,
+      "summonable": true,
+      "title": "Warden-Commander of the Line"
+    }
+  },
+  {
+    "key": "wisp_of_hallen",
+    "data": {
+      "assetKey": "enemy_lizard",
+      "aura": null,
+      "balanceVersion": 1,
+      "baseStats": {
+        "acc": 25,
+        "atk": 865,
+        "critDmg": 50,
+        "critRate": 15,
+        "def": 1000,
+        "hp": 15200,
+        "res": 40,
+        "spd": 101
+      },
+      "element": "mist",
+      "factionKey": "hollowborn",
+      "isFood": false,
+      "key": "wisp_of_hallen",
+      "lore": "Old Hallen drowned in fog in a single night, and only one light kept moving through it afterwards. Whatever the Wisp used to be, it now leads the living the way it once led the lost — kindly, and downward. Wounds near it close slower, and it does not appear to notice.",
+      "name": "Wisp of Old Hallen",
+      "rarity": "rare",
+      "role": "support",
+      "skills": [
+        "wisp_of_hallen_a1_coldlight",
+        "wisp_of_hallen_a2_hollow_draught",
+        "wisp_of_hallen_a3_lanternward"
+      ],
+      "sortOrder": 15,
+      "starter": false,
+      "summonable": true,
+      "title": "Lantern of Old Hallen"
+    }
+  }
+]

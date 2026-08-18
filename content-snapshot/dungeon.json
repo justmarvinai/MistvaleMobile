@@ -1,0 +1,245 @@
+[
+  {
+    "key": "cinderspire",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "boss_ashpriest_deep",
+      "floors": 15,
+      "itemKeys": [],
+      "key": "cinderspire",
+      "kind": "relic",
+      "lore": "A chimney of black glass with a rite burning at the top of it. The smoke has not changed colour in living memory.",
+      "name": "The Cinderspire",
+      "openDays": [],
+      "region": "The Ashen Reach",
+      "setKeys": [
+        "hawkeye",
+        "truestrike",
+        "wolfsfang",
+        "emberheart"
+      ],
+      "sortOrder": 12,
+      "tagline": "Accuracy and crit rate — behind a shield that counts your blows.",
+      "unlockLevel": 12
+    }
+  },
+  {
+    "key": "frostgrave_vault",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "boss_rimebound_sentinel",
+      "floors": 15,
+      "itemKeys": [],
+      "key": "frostgrave_vault",
+      "kind": "relic",
+      "lore": "A strongroom the Sskarn did not build and cannot open, guarded by something that was left behind with instructions.",
+      "name": "Frostgrave Vault",
+      "openDays": [],
+      "region": "The Rimewood",
+      "setKeys": [
+        "stoneguard",
+        "ironroot",
+        "wardweave",
+        "leadenscale"
+      ],
+      "sortOrder": 11,
+      "tagline": "Guard, resistance, and a sentinel that answers every wound.",
+      "unlockLevel": 12
+    }
+  },
+  {
+    "key": "proving_grounds",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "boss_pitmaster_drazhak",
+      "floors": 10,
+      "itemKeys": [
+        "emblem_bronze",
+        "emblem_silver",
+        "emblem_gold"
+      ],
+      "key": "proving_grounds",
+      "kind": "proving",
+      "lore": "A fighting pit older than the invasion, taken over and run exactly as it was. Drazhak keeps the rules; nobody has asked him to.",
+      "name": "The Proving Grounds",
+      "openDays": [],
+      "region": "The Old Ring",
+      "setKeys": [],
+      "sortOrder": 20,
+      "tagline": "Emblems, and a pitmaster whose patience runs out on a timer.",
+      "unlockLevel": 14
+    }
+  },
+  {
+    "key": "silkmire_depths",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "boss_broodmother_ssarethi",
+      "floors": 15,
+      "itemKeys": [],
+      "key": "silkmire_depths",
+      "kind": "relic",
+      "lore": "The warren under the warren. Every passage is somebody’s nursery, and she knows when one of them goes quiet.",
+      "name": "Silkmire Depths",
+      "openDays": [],
+      "region": "Fenwrack",
+      "setKeys": [
+        "bloodthorn",
+        "mendersong",
+        "gravebind",
+        "bulwark_of_thorns"
+      ],
+      "sortOrder": 13,
+      "tagline": "Lifesteal and regeneration — and rings, amulets and banners below the tenth.",
+      "unlockLevel": 12
+    }
+  },
+  {
+    "key": "spring_ember",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "warden_ember",
+      "floors": 10,
+      "itemKeys": [
+        "essence_ember_lesser",
+        "essence_ember_greater",
+        "essence_ember_prime"
+      ],
+      "key": "spring_ember",
+      "kind": "springs",
+      "lore": "Not water so much as heat that has agreed to hold a shape. It will not hold it every day.",
+      "name": "The Ember Spring",
+      "openDays": [
+        2,
+        5
+      ],
+      "region": "The Wellsprings",
+      "setKeys": [],
+      "sortOrder": 32,
+      "tagline": "Ember essence, on its own days.",
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "spring_mist",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "warden_mist",
+      "floors": 10,
+      "itemKeys": [
+        "essence_mist_lesser",
+        "essence_mist_greater",
+        "essence_mist_prime"
+      ],
+      "key": "spring_mist",
+      "kind": "springs",
+      "lore": "Open one day in seven. Wardens who have tried to find it on a Monday report finding nothing at all.",
+      "name": "The Mist Spring",
+      "openDays": [
+        0
+      ],
+      "region": "The Wellsprings",
+      "setKeys": [],
+      "sortOrder": 34,
+      "tagline": "Mist essence, on its own days.",
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "spring_pure",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "warden_pure",
+      "floors": 10,
+      "itemKeys": [
+        "essence_pure"
+      ],
+      "key": "spring_pure",
+      "kind": "springs",
+      "lore": "Colourless, tasteless, and useful to absolutely everyone — which is why it is the only one never barred.",
+      "name": "The Pure Spring",
+      "openDays": [],
+      "region": "The Wellsprings",
+      "setKeys": [],
+      "sortOrder": 30,
+      "tagline": "Pure Essence, every day of the week.",
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "spring_tide",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "warden_tide",
+      "floors": 10,
+      "itemKeys": [
+        "essence_tide_lesser",
+        "essence_tide_greater",
+        "essence_tide_prime"
+      ],
+      "key": "spring_tide",
+      "kind": "springs",
+      "lore": "Salt, this far inland, and it rises and falls to something that is certainly not the moon.",
+      "name": "The Tide Spring",
+      "openDays": [
+        3,
+        6
+      ],
+      "region": "The Wellsprings",
+      "setKeys": [],
+      "sortOrder": 33,
+      "tagline": "Tide essence, on its own days.",
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "spring_verdant",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "warden_verdant",
+      "floors": 10,
+      "itemKeys": [
+        "essence_verdant_lesser",
+        "essence_verdant_greater",
+        "essence_verdant_prime"
+      ],
+      "key": "spring_verdant",
+      "kind": "springs",
+      "lore": "It runs green and slow through a root-cellar of a cave, and only on the days the roots allow.",
+      "name": "The Verdant Spring",
+      "openDays": [
+        1,
+        4
+      ],
+      "region": "The Wellsprings",
+      "setKeys": [],
+      "sortOrder": 31,
+      "tagline": "Verdant essence, on its own days.",
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "wyrms_hollow",
+    "data": {
+      "backgroundAsset": "bg_veilwood",
+      "bossEnemyKey": "boss_broodwyrm",
+      "floors": 15,
+      "itemKeys": [],
+      "key": "wyrms_hollow",
+      "kind": "relic",
+      "lore": "A wind-cut throat in the rock that goes down further than anyone has mapped. Something at the bottom of it has been breathing the same air for six hundred years.",
+      "name": "Wyrm's Hollow",
+      "openDays": [],
+      "region": "Under the Galehollow",
+      "setKeys": [
+        "swiftwind",
+        "pathfinder",
+        "stormcoil",
+        "reaver"
+      ],
+      "sortOrder": 10,
+      "tagline": "Speed and crit damage — and the thing that has always lived here.",
+      "unlockLevel": 12
+    }
+  }
+]

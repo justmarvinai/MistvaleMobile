@@ -30,7 +30,9 @@
     "e2e:ui": "playwright test --ui",
     "icons": "pnpm --filter @mistvale/icon-fetch run icons",
     "assets": "pnpm --filter @mistvale/asset-sync sync",
-    "assets:check": "pnpm --filter @mistvale/asset-sync check"
+    "assets:check": "pnpm --filter @mistvale/asset-sync check",
+    "icons:pwa": "pnpm --filter @mistvale/pwa-icons run icons",
+    "content:export": "pnpm --filter @mistvale/server content:export"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",

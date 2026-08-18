@@ -1,0 +1,102 @@
+{
+  "rev": 29,
+  "total": 1049,
+  "types": [
+    {
+      "count": 8,
+      "type": "faction"
+    },
+    {
+      "count": 36,
+      "type": "status"
+    },
+    {
+      "count": 8,
+      "type": "asset"
+    },
+    {
+      "count": 165,
+      "type": "skill"
+    },
+    {
+      "count": 43,
+      "type": "champion"
+    },
+    {
+      "count": 44,
+      "type": "enemy"
+    },
+    {
+      "count": 16,
+      "type": "gearSet"
+    },
+    {
+      "count": 9,
+      "type": "gearSlot"
+    },
+    {
+      "count": 11,
+      "type": "gearStat"
+    },
+    {
+      "count": 25,
+      "type": "item"
+    },
+    {
+      "count": 12,
+      "type": "campaignChapter"
+    },
+    {
+      "count": 10,
+      "type": "dungeon"
+    },
+    {
+      "count": 373,
+      "type": "stage"
+    },
+    {
+      "count": 4,
+      "type": "summonPool"
+    },
+    {
+      "count": 1,
+      "type": "shop"
+    },
+    {
+      "count": 48,
+      "type": "mastery"
+    },
+    {
+      "count": 19,
+      "type": "quest"
+    },
+    {
+      "count": 80,
+      "type": "mission"
+    },
+    {
+      "count": 3,
+      "type": "event"
+    },
+    {
+      "count": 2,
+      "type": "loginTrack"
+    },
+    {
+      "count": 2,
+      "type": "newsPost"
+    },
+    {
+      "count": 15,
+      "type": "tutorialStep"
+    },
+    {
+      "count": 27,
+      "type": "soundCue"
+    },
+    {
+      "count": 88,
+      "type": "gameConfig"
+    }
+  ]
+}

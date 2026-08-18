@@ -192,6 +192,18 @@ importers:
         specifier: ^4.19.2
         version: 4.23.12
 
+  tools/pwa-icons:
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.50.1
+        version: 1.62.1
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.12
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
 packages:
 
   '@babel/code-frame@7.29.7':

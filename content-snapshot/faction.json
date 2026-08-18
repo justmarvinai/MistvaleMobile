@@ -1,0 +1,82 @@
+[
+  {
+    "key": "drowned_choir",
+    "data": {
+      "icon": "mv-element-tide",
+      "key": "drowned_choir",
+      "lore": "A tide-cult of the flooded coast who sing to the water and insist, unsettlingly, that it answers.",
+      "name": "The Drowned Choir",
+      "sortOrder": 80
+    }
+  },
+  {
+    "key": "emberclan",
+    "data": {
+      "icon": "mv-element-ember",
+      "key": "emberclan",
+      "lore": "A mountain warhost of feuding fire-cults, united only by their hatred of the fog. They burn the mist back one ridge at a time.",
+      "name": "Emberclan",
+      "sortOrder": 20
+    }
+  },
+  {
+    "key": "hollowborn",
+    "data": {
+      "icon": "mv-element-mist",
+      "key": "hollowborn",
+      "lore": "The mist keeps its dead, and sometimes gives them back. They walk out with their memories half-intact and their oaths wholly so.",
+      "name": "Hollowborn",
+      "sortOrder": 40
+    }
+  },
+  {
+    "key": "runebound",
+    "data": {
+      "icon": "mv-stat-def",
+      "key": "runebound",
+      "lore": "Dwarven vault-holds beneath the peaks, sealed since the mist rose. Some doors have started opening from the inside.",
+      "name": "Runebound Halls",
+      "sortOrder": 70
+    }
+  },
+  {
+    "key": "sskarn",
+    "data": {
+      "icon": "mv-element-verdant",
+      "key": "sskarn",
+      "lore": "Serpentfolk of the Sunken Marches, who thrive inside the fog that drowns everyone else. Their warqueen has decided the vale is theirs.",
+      "name": "Sskarn Broods",
+      "sortOrder": 50
+    }
+  },
+  {
+    "key": "thornweald",
+    "data": {
+      "icon": "mv-element-verdant",
+      "key": "thornweald",
+      "lore": "Fey of the deepwood, who bargain in favours and briars and have never once explained their terms plainly.",
+      "name": "Thornweald Court",
+      "sortOrder": 60
+    }
+  },
+  {
+    "key": "vale_sentinels",
+    "data": {
+      "icon": "mv-nav-haven",
+      "key": "vale_sentinels",
+      "lore": "Knight-remnants of the old federation, still keeping oaths sworn to kingdoms the mist swallowed. Discipline, steel, and a refusal to yield ground twice.",
+      "name": "Vale Sentinels",
+      "sortOrder": 10
+    }
+  },
+  {
+    "key": "wayfarers",
+    "data": {
+      "icon": "mv-nav-chronicle",
+      "key": "wayfarers",
+      "lore": "An itinerant conclave of mist-scholars, hedge-wizards and pilgrims who study the Worldmist rather than flee it.",
+      "name": "The Wayfarers",
+      "sortOrder": 30
+    }
+  }
+]

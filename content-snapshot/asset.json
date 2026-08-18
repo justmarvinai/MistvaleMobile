@@ -1,0 +1,154 @@
+[
+  {
+    "key": "champ_anuria",
+    "data": {
+      "avatarPath": "champions/epic_anuria/avatar",
+      "basePath": "champions/epic_anuria",
+      "key": "champ_anuria",
+      "kind": "unit",
+      "sortOrder": 0,
+      "source": "repo",
+      "stillPath": "champions/epic_anuria/still",
+      "tracks": {
+        "idle": {
+          "fps": 9,
+          "frames": 9,
+          "loop": true
+        }
+      }
+    }
+  },
+  {
+    "key": "champ_darius",
+    "data": {
+      "avatarPath": "",
+      "basePath": "champions/epic_darius",
+      "key": "champ_darius",
+      "kind": "unit",
+      "sortOrder": 0,
+      "source": "repo",
+      "stillPath": "champions/epic_darius/still",
+      "tracks": {
+        "idle": {
+          "fps": 9,
+          "frames": 9,
+          "loop": true
+        }
+      }
+    }
+  },
+  {
+    "key": "champ_khazgor",
+    "data": {
+      "avatarPath": "",
+      "basePath": "champions/epic_khazgor",
+      "key": "champ_khazgor",
+      "kind": "unit",
+      "sortOrder": 0,
+      "source": "repo",
+      "stillPath": "champions/epic_khazgor/still",
+      "tracks": {
+        "idle": {
+          "fps": 9,
+          "frames": 9,
+          "loop": true
+        }
+      }
+    }
+  },
+  {
+    "key": "champ_maruan",
+    "data": {
+      "avatarPath": "champions/epic_maruan/avatar",
+      "basePath": "champions/epic_maruan",
+      "key": "champ_maruan",
+      "kind": "unit",
+      "sortOrder": 0,
+      "source": "repo",
+      "stillPath": "champions/epic_maruan/still",
+      "tracks": {
+        "idle": {
+          "fps": 9,
+          "frames": 9,
+          "loop": true
+        }
+      }
+    }
+  },
+  {
+    "key": "champ_rattledagger",
+    "data": {
+      "avatarPath": "",
+      "basePath": "champions/epic_rattledagger",
+      "key": "champ_rattledagger",
+      "kind": "unit",
+      "sortOrder": 0,
+      "source": "repo",
+      "stillPath": "champions/epic_rattledagger/still",
+      "tracks": {
+        "idle": {
+          "fps": 9,
+          "frames": 9,
+          "loop": true
+        }
+      }
+    }
+  },
+  {
+    "key": "champ_sethlurias",
+    "data": {
+      "avatarPath": "",
+      "basePath": "champions/epic_sethlurias",
+      "key": "champ_sethlurias",
+      "kind": "unit",
+      "sortOrder": 0,
+      "source": "repo",
+      "stillPath": "champions/epic_sethlurias/still",
+      "tracks": {
+        "idle": {
+          "fps": 9,
+          "frames": 9,
+          "loop": true
+        }
+      }
+    }
+  },
+  {
+    "key": "champ_thordakk",
+    "data": {
+      "avatarPath": "champions/epic_thordakk/avatar",
+      "basePath": "champions/epic_thordakk",
+      "key": "champ_thordakk",
+      "kind": "unit",
+      "sortOrder": 0,
+      "source": "repo",
+      "stillPath": "champions/epic_thordakk/still",
+      "tracks": {
+        "idle": {
+          "fps": 9,
+          "frames": 9,
+          "loop": true
+        }
+      }
+    }
+  },
+  {
+    "key": "enemy_lizard",
+    "data": {
+      "avatarPath": "",
+      "basePath": "enemies/teritorial_lizard",
+      "key": "enemy_lizard",
+      "kind": "unit",
+      "sortOrder": 0,
+      "source": "repo",
+      "stillPath": "enemies/teritorial_lizard/still",
+      "tracks": {
+        "idle": {
+          "fps": 9,
+          "frames": 9,
+          "loop": true
+        }
+      }
+    }
+  }
+]

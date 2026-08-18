@@ -1,0 +1,491 @@
+[
+  {
+    "key": "calendar_the_long_watch",
+    "data": {
+      "active": true,
+      "days": [
+        {
+          "day": 1,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "playerXp": 100,
+            "silver": 3000
+          }
+        },
+        {
+          "day": 2,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "energy_pack_small": 1
+          }
+        },
+        {
+          "day": 3,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "silver": 4000
+          }
+        },
+        {
+          "day": 4,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "essence_pure": 1
+          }
+        },
+        {
+          "day": 5,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "crystals": 20
+          }
+        },
+        {
+          "day": 6,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "emblem_bronze": 10
+          }
+        },
+        {
+          "day": 7,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "sigil_gleaming": 1,
+            "silver": 5000
+          }
+        },
+        {
+          "day": 8,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "playerXp": 200,
+            "silver": 5000
+          }
+        },
+        {
+          "day": 9,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "tome_rare": 1
+          }
+        },
+        {
+          "day": 10,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "crystals": 25
+          }
+        },
+        {
+          "day": 11,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "essence_pure": 2
+          }
+        },
+        {
+          "day": 12,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "energy_pack_small": 2
+          }
+        },
+        {
+          "day": 13,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "emblem_bronze": 15
+          }
+        },
+        {
+          "day": 14,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "sigil_gleaming": 2,
+            "silver": 6000
+          }
+        },
+        {
+          "day": 15,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "crystals": 30
+          }
+        },
+        {
+          "day": 16,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "playerXp": 300,
+            "silver": 7000
+          }
+        },
+        {
+          "day": 17,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "tome_rare": 2
+          }
+        },
+        {
+          "day": 18,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "essence_pure": 2
+          }
+        },
+        {
+          "day": 19,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "emblem_silver": 5
+          }
+        },
+        {
+          "day": 20,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "crystals": 40
+          }
+        },
+        {
+          "day": 21,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "sigil_mistwoven": 1,
+            "silver": 8000
+          }
+        },
+        {
+          "day": 22,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "energy_pack_large": 1
+          }
+        },
+        {
+          "day": 23,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "playerXp": 400,
+            "silver": 9000
+          }
+        },
+        {
+          "day": 24,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "tome_epic": 1
+          }
+        },
+        {
+          "day": 25,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "crystals": 50
+          }
+        },
+        {
+          "day": 26,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "emblem_silver": 8
+          }
+        },
+        {
+          "day": 27,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "essence_pure": 3
+          }
+        },
+        {
+          "day": 28,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "sigil_mistwoven": 2,
+            "silver": 10000
+          }
+        },
+        {
+          "day": 29,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "energy_pack_large": 2
+          }
+        },
+        {
+          "day": 30,
+          "grants": {
+            "champions": [],
+            "choices": [
+              "darius",
+              "castellan_ordwin",
+              "lady_merrow",
+              "aldemar_the_cartographer"
+            ],
+            "relics": []
+          },
+          "rewards": {
+            "crystals": 150,
+            "playerXp": 1000
+          }
+        }
+      ],
+      "description": "Thirty days of keeping the lantern lit. Miss one and you lose the day, not your place — the watch counts the nights you stood it.",
+      "key": "calendar_the_long_watch",
+      "name": "The Long Watch",
+      "sortOrder": 10,
+      "track": "calendar"
+    }
+  },
+  {
+    "key": "welcome_first_week",
+    "data": {
+      "active": true,
+      "days": [
+        {
+          "day": 1,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "energy_pack_small": 1,
+            "silver": 5000
+          }
+        },
+        {
+          "day": 2,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "sigil_faded": 3
+          }
+        },
+        {
+          "day": 3,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "essence_pure": 2,
+            "silver": 6000
+          }
+        },
+        {
+          "day": 4,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "emblem_bronze": 20
+          }
+        },
+        {
+          "day": 5,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "crystals": 30,
+            "tome_rare": 1
+          }
+        },
+        {
+          "day": 6,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": []
+          },
+          "rewards": {
+            "energy_pack_large": 1,
+            "silver": 8000
+          }
+        },
+        {
+          "day": 7,
+          "grants": {
+            "champions": [],
+            "choices": [],
+            "relics": [
+              {
+                "rank": 2,
+                "rarity": "uncommon",
+                "setKey": "ironroot",
+                "slot": "weapon"
+              },
+              {
+                "rank": 2,
+                "rarity": "uncommon",
+                "setKey": "ironroot",
+                "slot": "helm"
+              },
+              {
+                "rank": 2,
+                "rarity": "uncommon",
+                "setKey": "ironroot",
+                "slot": "shield"
+              },
+              {
+                "rank": 2,
+                "rarity": "uncommon",
+                "setKey": "ironroot",
+                "slot": "gauntlets"
+              },
+              {
+                "rank": 2,
+                "rarity": "uncommon",
+                "setKey": "swiftwind",
+                "slot": "cuirass"
+              },
+              {
+                "rank": 2,
+                "rarity": "uncommon",
+                "setKey": "swiftwind",
+                "slot": "boots"
+              }
+            ]
+          },
+          "rewards": {
+            "playerXp": 500,
+            "sigil_gleaming": 2
+          }
+        }
+      ],
+      "description": "What the Vale gives someone who has only just arrived. Seven days, walked once, and then never again.",
+      "key": "welcome_first_week",
+      "name": "A Warden’s First Week",
+      "sortOrder": 20,
+      "track": "welcome"
+    }
+  }
+]

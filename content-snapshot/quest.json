@@ -1,0 +1,472 @@
+[
+  {
+    "key": "daily_arena",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Fight five arena battles.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 5,
+          "type": "arenaBattle"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "daily_arena",
+      "name": "Onto the sand",
+      "period": "daily",
+      "rewards": {
+        "energy_pack_small": 1
+      },
+      "sortOrder": 70,
+      "unlockLevel": 8
+    }
+  },
+  {
+    "key": "daily_bazaar",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Buy something from the Bazaar.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 1,
+          "type": "shopPurchase"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "daily_bazaar",
+      "name": "Trade in the Bazaar",
+      "period": "daily",
+      "rewards": {
+        "energy_pack_small": 1
+      },
+      "sortOrder": 60,
+      "unlockLevel": 5
+    }
+  },
+  {
+    "key": "daily_bosses",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Beat three warlords or floor bosses.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 3,
+          "type": "bossKill"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "daily_bosses",
+      "name": "Cut off the head",
+      "period": "daily",
+      "rewards": {
+        "silver": 5000
+      },
+      "sortOrder": 80,
+      "unlockLevel": 4
+    }
+  },
+  {
+    "key": "daily_campaign_wins",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Win seven campaign battles.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 7,
+          "type": "battleWin"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "daily_campaign_wins",
+      "name": "Walk the Vale",
+      "period": "daily",
+      "rewards": {
+        "silver": 5000
+      },
+      "sortOrder": 10,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "daily_energy",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Spend fifty energy.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 50,
+          "type": "useEnergy"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "daily_energy",
+      "name": "A day’s work",
+      "period": "daily",
+      "rewards": {
+        "essence_pure": 2
+      },
+      "sortOrder": 20,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "daily_gear_upgrade",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Make four relic upgrade attempts.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 4,
+          "type": "gearUpgrade"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "daily_gear_upgrade",
+      "name": "At the forge",
+      "period": "daily",
+      "rewards": {
+        "silver": 5000
+      },
+      "sortOrder": 50,
+      "unlockLevel": 3
+    }
+  },
+  {
+    "key": "daily_level_champions",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Level a champion three times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 3,
+          "type": "championLevelUp"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "daily_level_champions",
+      "name": "Train the warband",
+      "period": "daily",
+      "rewards": {
+        "silver": 5000
+      },
+      "sortOrder": 40,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "daily_summon",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Summon three champions.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 3,
+          "type": "summon"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "daily_summon",
+      "name": "Call through the gate",
+      "period": "daily",
+      "rewards": {
+        "silver": 5000
+      },
+      "sortOrder": 30,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "monthly_arena",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Win sixty arena battles.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 60,
+          "type": "arenaWin"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "monthly_arena",
+      "name": "A month on the sand",
+      "period": "monthly",
+      "rewards": {
+        "crystals": 60
+      },
+      "sortOrder": 180,
+      "unlockLevel": 8
+    }
+  },
+  {
+    "key": "monthly_ascend",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Ascend a champion three times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 3,
+          "type": "championAscend"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "monthly_ascend",
+      "name": "Beyond the mist",
+      "period": "monthly",
+      "rewards": {
+        "crystals": 30,
+        "essence_pure": 10
+      },
+      "sortOrder": 190,
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "monthly_campaign",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Win one hundred and fifty campaign battles.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 150,
+          "type": "battleWin"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "monthly_campaign",
+      "name": "Across the Vale",
+      "period": "monthly",
+      "rewards": {
+        "silver": 100000,
+        "tome_epic": 1
+      },
+      "sortOrder": 160,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "monthly_dailies",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Claim a full day of quests twenty times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 20,
+          "type": "claimAllDailies"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "monthly_dailies",
+      "name": "The warden’s month",
+      "period": "monthly",
+      "rewards": {
+        "sigil_mistwoven": 1,
+        "sigil_radiant": 1
+      },
+      "sortOrder": 150,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "monthly_depths",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Clear sixty Depths floors.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 60,
+          "type": "dungeonClear"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "monthly_depths",
+      "name": "What the keeps hold",
+      "period": "monthly",
+      "rewards": {
+        "crystals": 40,
+        "emblem_gold": 2
+      },
+      "sortOrder": 170,
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "weekly_arena",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Win fifteen arena battles.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 15,
+          "type": "arenaWin"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "weekly_arena",
+      "name": "Climb",
+      "period": "weekly",
+      "rewards": {
+        "crystals": 25
+      },
+      "sortOrder": 120,
+      "unlockLevel": 8
+    }
+  },
+  {
+    "key": "weekly_campaign",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Win forty campaign battles.",
+      "goals": [
+        {
+          "filters": {
+            "mode": "campaign"
+          },
+          "target": 40,
+          "type": "battleWin"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "weekly_campaign",
+      "name": "The long road",
+      "period": "weekly",
+      "rewards": {
+        "crystals": 15,
+        "silver": 40000
+      },
+      "sortOrder": 100,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "weekly_dailies",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Claim a full day of quests five times.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 5,
+          "type": "claimAllDailies"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "weekly_dailies",
+      "name": "A steady week",
+      "period": "weekly",
+      "rewards": {
+        "crystals": 30,
+        "sigil_gleaming": 1
+      },
+      "sortOrder": 90,
+      "unlockLevel": 1
+    }
+  },
+  {
+    "key": "weekly_depths",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Clear fifteen Depths floors.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 15,
+          "type": "dungeonClear"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "weekly_depths",
+      "name": "Down into the keeps",
+      "period": "weekly",
+      "rewards": {
+        "crystals": 15,
+        "emblem_silver": 3
+      },
+      "sortOrder": 110,
+      "unlockLevel": 10
+    }
+  },
+  {
+    "key": "weekly_forge",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Make thirty relic upgrade attempts.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 30,
+          "type": "gearUpgrade"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "weekly_forge",
+      "name": "Sparks and silver",
+      "period": "weekly",
+      "rewards": {
+        "silver": 50000
+      },
+      "sortOrder": 130,
+      "unlockLevel": 3
+    }
+  },
+  {
+    "key": "weekly_summon",
+    "data": {
+      "active": true,
+      "countsTowardChest": true,
+      "description": "Summon twenty champions.",
+      "goals": [
+        {
+          "filters": {},
+          "target": 20,
+          "type": "summon"
+        }
+      ],
+      "icon": "mv-quest",
+      "key": "weekly_summon",
+      "name": "The gate stays open",
+      "period": "weekly",
+      "rewards": {
+        "crystals": 15,
+        "sigil_faded": 5
+      },
+      "sortOrder": 140,
+      "unlockLevel": 1
+    }
+  }
+]
