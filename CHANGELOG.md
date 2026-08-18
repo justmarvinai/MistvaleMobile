@@ -5,6 +5,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a mistyped id said the server was broken (P10d)
+
+`GET /api/profiles/not-a-uuid` answered **500 "Something went wrong on our end."** Seven routes did, on paths reachable from every player name in the game. Nothing was actually wrong: the id went to a `uuid` column, PostgreSQL raised 22P02, and the error handler — correctly refusing to guess — called it ours. A typo'd or stale profile link therefore told the player the game was down and paged whoever was on call.
+
+- **Path and query are caller input, and are now checked like one.** Bodies have always gone through Zod; parameters went through a cast (`request.params as { id: string }`) that asserted something nobody had verified. Twenty-nine of those are now `idParam` / `keyParam` / `uuidQuery` (`lib/params.ts`).
+- **A malformed id answers exactly as a missing one does** — `NOT_FOUND`, same code, same message. Telling the two apart hands anyone who asks twice the shape of our keys.
+- **The error handler maps 22P02 as a backstop**, so a route written next month without the helper still cannot claim the server broke.
+- **Page sizes are clamped rather than trusted.** `?limit=999999` reached the database intact and `?limit=-5` became a `LIMIT` PostgreSQL refuses outright; both now land inside 1–200.
+- A sweep test walks every parameterised route with a garbage id and fails if any of them answers 500 — adding a route and forgetting the check fails in CI rather than at three in the morning.
+
+### Fixed — everyone behind one address shared a rate limit (P10d)
+
+The global limiter is documented as bucketing authenticated traffic per account. It never did: at Fastify's default `onRequest` hook `request.account` has not been resolved yet — a route's own `preHandler` does that — so the key fell through to the IP and 300 requests a minute was the whole allowance for a household, a student flat, or anyone testing two accounts side by side. Counted at `preHandler` now, with a test that fails if it slips back.
+
+### Verified — the box, measured rather than assumed (P10d)
+
+Every budget in ARCHITECTURE §9 now has a measured figure beside it, and all of them are an order of magnitude inside: 6–22 ms p95 across the hot reads against a target of 100 ms, 199 MB of Node against 1.2 GB, 302 KB of gzipped JS against 1.5 MB. Two things worth knowing:
+
+- **The content bundle is only small over the wire.** 708 KB of JSON leaves the origin uncompressed and nginx is what makes it 80 KB. A deploy that bypasses nginx, or drops `application/json` from `gzip_types`, is nine times over budget with nothing looking broken.
+- **The sequential scans on `stage_progress` are the planner being right**, not a missing index — at fourteen rows a scan beats an index, and both composite indexes are there for when it is not.
+
 ### Fixed — every fight in the game was spoiled before it was watched (P10a)
 
 Auto-battle asks the server to resolve the whole fight in one response, and the results modal was keyed on *that response* rather than on the playback that follows it. So it opened about three seconds in — victory banner, stars, reward list — on top of a HUD still reading "Wave 1 · Turn 0". The fight then played out underneath a modal announcing how it ended.

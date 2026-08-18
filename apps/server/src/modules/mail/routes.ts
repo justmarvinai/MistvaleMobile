@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import { ROUTES, apiSuccess, mailClaimRequestSchema, routePattern } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
 import * as mail from './service';
+import { idParam } from '../../lib/params';
 
 /**
  * The mailbox and the news feed.
@@ -27,13 +28,13 @@ export const mailRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ROUTES.mail.read), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const view = await mail.markRead(ctx(), requirePlayer(request), id);
     return reply.send(apiSuccess({ mail: view }, app.content.rev));
   });
 
   app.post(routePattern(ROUTES.mail.claim), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = mailClaimRequestSchema.parse(request.body);
     const result = await mail.claim(ctx(), requirePlayer(request), id, body.actionId);
     return reply.send(apiSuccess(result, app.content.rev));
@@ -46,7 +47,7 @@ export const mailRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ROUTES.mail.discard), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const view = await mail.discard(ctx(), requirePlayer(request), id);
     return reply.send(apiSuccess({ mail: view }, app.content.rev));
   });

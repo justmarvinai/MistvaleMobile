@@ -74,6 +74,13 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       global: true,
       max: 300,
       timeWindow: '1 minute',
+      // Counted at `preHandler`, after `requireAuth` has run, so `request.account` is
+      // actually populated. At the default `onRequest` it never is — the account is
+      // resolved by a route's own preHandler — so every player quietly shared one
+      // per-IP bucket and the line below was decoration. Body parsing before the
+      // count is an acceptable trade here: nginx caps the same client at 30 r/s
+      // (scripts/deploy-assets/nginx-mistvale.conf) well before this window matters.
+      hook: 'preHandler',
       // Authenticated players share a bucket per account; anonymous traffic per IP.
       keyGenerator: (request) => request.account?.id ?? request.ip,
       // No errorResponseBuilder on purpose: the plugin's own error carries statusCode

@@ -11,6 +11,7 @@ import {
 import { AppError } from '../lib/errors';
 import * as repo from '../content/repo';
 import { actorName, recordAudit } from './audit';
+import { keyParam } from '../lib/params';
 
 /**
  * Content management for the Admin Suite.
@@ -82,7 +83,7 @@ export const adminContentRoutes: FastifyPluginAsync = async (app) => {
 
   app.get('/content/:type/:key', async (request, reply) => {
     const contentType = resolveType(request.params);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
 
     const [live, draft] = await Promise.all([
       repo.findEntry(app.db, contentType, key, 'live'),
@@ -110,7 +111,7 @@ export const adminContentRoutes: FastifyPluginAsync = async (app) => {
 
   app.put('/content/:type/:key', async (request, reply) => {
     const contentType = resolveType(request.params);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     const { data } = writeBody.parse(request.body);
 
     // Validate against the type's own schema so an editor gets field-level errors
@@ -150,7 +151,7 @@ export const adminContentRoutes: FastifyPluginAsync = async (app) => {
 
   app.delete('/content/:type/:key', async (request, reply) => {
     const contentType = resolveType(request.params);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
 
     const live = await repo.findEntry(app.db, contentType, key, 'live');
 
@@ -185,7 +186,7 @@ export const adminContentRoutes: FastifyPluginAsync = async (app) => {
   /** Drops a single pending draft, restoring the live version in the editor. */
   app.post('/content/:type/:key/revert-draft', async (request, reply) => {
     const contentType = resolveType(request.params);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
 
     await app.db.transaction(async (tx) => {
       await repo.deleteEntry(tx, contentType, key, 'draft');

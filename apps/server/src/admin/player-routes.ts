@@ -12,6 +12,7 @@ import {
 import { AppError } from '../lib/errors';
 import { recordAudit } from './audit';
 import * as playerAdmin from './players';
+import { idParam } from '../lib/params';
 
 /**
  * Player-management endpoints.
@@ -57,12 +58,12 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.get(routePattern(ADMIN_ROUTES.players.detail), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     return reply.send(apiSuccess(await playerAdmin.detail(ctx(), id), app.content.rev));
   });
 
   app.post(routePattern(ADMIN_ROUTES.players.resetPassword), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const actor = operator(request);
 
     const { subject, temporaryPassword, sessionsRevoked } = await playerAdmin.resetPassword(
@@ -86,7 +87,7 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ADMIN_ROUTES.players.reset), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const actor = operator(request);
 
     // The "before" is read first and recorded whole. This is the one action with nothing
@@ -118,7 +119,7 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ADMIN_ROUTES.players.rank), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const actor = operator(request);
     const input = adminSetRankRequestSchema.parse(request.body);
 
@@ -136,7 +137,7 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ADMIN_ROUTES.players.ban), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const actor = operator(request);
     const input = adminBanRequestSchema.parse(request.body);
 
@@ -159,7 +160,7 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ADMIN_ROUTES.players.profileName), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const input = adminRenameRequestSchema.parse(request.body);
 
     const before = await playerAdmin.detail(ctx(), id);
@@ -176,7 +177,7 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ADMIN_ROUTES.players.grant), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const actor = operator(request);
     const input = adminGrantRequestSchema.parse(request.body);
 
@@ -202,7 +203,7 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.delete(routePattern(ADMIN_ROUTES.players.sessions), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
 
     const { subject, revoked } = await playerAdmin.revokeSessions(app.db, id);
     await recordAudit(app.db, request, {

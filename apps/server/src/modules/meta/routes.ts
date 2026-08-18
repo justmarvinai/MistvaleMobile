@@ -16,6 +16,7 @@ import * as login from './login';
 import * as missions from './missions';
 import * as tutorial from './tutorial';
 import * as quests from './quests';
+import { keyParam } from '../../lib/params';
 
 /**
  * The checklist.
@@ -45,7 +46,7 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ROUTES.quests.claim, 'key'), async (request, reply) => {
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     const body = questClaimRequestSchema.parse(request.body);
     const result = await quests.claim(ctx(), requirePlayer(request), key, body.actionId);
     return reply.send(apiSuccess(result, app.content.rev));
@@ -70,7 +71,7 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ROUTES.missions.claim, 'key'), async (request, reply) => {
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     const body = missionClaimRequestSchema.parse(request.body);
     const result = await missions.claim(ctx(), requirePlayer(request), key, body.actionId);
     request.log.info(
@@ -88,7 +89,7 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post(routePattern(ROUTES.events.claim, 'key'), async (request, reply) => {
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     const body = eventClaimRequestSchema.parse(request.body);
     const result = await events.claimMilestone(
       ctx(),

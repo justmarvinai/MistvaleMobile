@@ -1,9 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { ROUTES, apiPath } from '@mistvale/shared';
+import { ROUTES, SESSION_COOKIE, apiPath } from '@mistvale/shared';
 import { buildApp } from '../app';
 import {
   isDatabaseAvailable,
+  extractSessionCookie,
   testConfig,
   truncateAll,
   uniqueAccountName,
@@ -71,5 +72,57 @@ describe.skipIf(!dbUp)('rate limiting', () => {
     expect(body.error.message).toMatch(/too many/i);
     expect(body.error.requestId).toBeTypeOf('string');
     expect(body).toHaveProperty('rev');
+  });
+
+  /**
+   * Two wardens on one connection must not throttle each other.
+   *
+   * The global limiter claims to bucket authenticated traffic per account. It did not:
+   * at the default `onRequest` hook `request.account` has not been resolved yet — a
+   * route's own `preHandler` does that — so the key fell through to the IP and every
+   * player behind one address shared a single 300/minute allowance. A household, a
+   * student flat, or anyone testing two accounts side by side would have throttled a
+   * stranger.
+   */
+  it('counts an authenticated player against their account, not their address', async () => {
+    const signUp = async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: apiPath(ROUTES.auth.register),
+        payload: {
+          accountName: uniqueAccountName(),
+          profileName: uniqueProfileName(),
+          password: 'a-good-long-password',
+        },
+        remoteAddress: '198.51.100.4',
+      });
+      expect(response.statusCode).toBe(201);
+      const cookie = extractSessionCookie(response.headers['set-cookie']);
+      expect(cookie).toBeTypeOf('string');
+      return cookie as string;
+    };
+
+    // Both accounts register from the same address, and both then read from it.
+    const first = await signUp();
+    const second = await signUp();
+
+    const read = (cookie: string) =>
+      app.inject({
+        method: 'GET',
+        url: apiPath(ROUTES.player.self),
+        cookies: { [SESSION_COOKIE]: cookie },
+        remoteAddress: '198.51.100.4',
+      });
+
+    // 300 a minute is the shared allowance; spend well past it on one account.
+    for (let i = 0; i < 320; i += 1) {
+      await read(first);
+    }
+
+    const throttled = await read(first);
+    expect(throttled.statusCode, 'the busy account should be throttled').toBe(429);
+
+    const neighbour = await read(second);
+    expect(neighbour.statusCode, 'the quiet account shares only an address').toBe(200);
   });
 });

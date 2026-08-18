@@ -126,6 +126,8 @@ Keyed by **player** id, not account id — that is what `economy_log`, `stage_pr
 ## 3. Cross-cutting rules
 - **Errors:** closed enum (`AUTH_REQUIRED, FORBIDDEN, VALIDATION, NOT_FOUND, INSUFFICIENT_FUNDS, ENERGY_LOW, ROSTER_FULL, COOLDOWN, LOCKED_CONTENT, IDEMPOTENT_REPLAY, RATE_LIMITED, CONTENT_STALE, INTERNAL`). `CONTENT_STALE` tells the client to re-pull the bundle and retry once.
 - **Versioning:** `X-Client-Rev` header; `426 UPGRADE_REQUIRED` forces SPA reload after breaking deploys.
-- **Pagination:** cursor-based (`?after=id&limit=`) on gear list, summon history, leaderboard, economy log.
+- **Pagination:** cursor-based (`?after=id&limit=`) on gear list, summon history, leaderboard, economy log. `limit` is **clamped, not rejected** — a page size is a request, and the ceiling is ours (`lib/params.ts`).
+- **Path and query are input too.** Bodies have always gone through Zod; parameters go through `lib/params.ts` (`idParam`, `keyParam`, `uuidQuery`, `numberQuery`). A malformed id answers **`NOT_FOUND`, identical to a well-formed id for something that does not exist** — the distinction would hand a prober the shape of our keys for free. The error handler maps PostgreSQL's `22P02` the same way as a backstop, so a route written without the helper still cannot answer 500 to a typo. Until P10d seven routes did exactly that, on paths reachable from every player name in the game.
+- **Rate limits are counted at `preHandler`**, after the session is resolved, so an authenticated player is bucketed by account and anonymous traffic by IP. At Fastify's default `onRequest` hook the account is not known yet and everyone behind one address shared a bucket.
 - **Time:** all responses UTC ISO-8601; the client renders local. Daily reset boundary from `game_config`.
 - **No polling contract:** clients refresh on navigation/action only; the only "timers" are client-side countdowns to server-provided timestamps.

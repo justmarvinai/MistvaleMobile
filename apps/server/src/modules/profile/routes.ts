@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import { ROUTES, apiSuccess, routePattern, setShowcaseRequestSchema } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
 import * as profile from './service';
+import { idParam } from '../../lib/params';
 
 /**
  * The public profile card.
@@ -23,7 +24,7 @@ export const profileRoutes: FastifyPluginAsync = async (app) => {
   const ctx = (): profile.ProfileContext => ({ db: app.db, content: app.content });
 
   app.get(routePattern(ROUTES.profile.card), async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     return reply.send(apiSuccess({ profile: await profile.card(ctx(), id) }, app.content.rev));
   });
 

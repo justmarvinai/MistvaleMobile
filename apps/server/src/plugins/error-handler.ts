@@ -6,12 +6,23 @@ import { AppError, isAppError } from '../lib/errors';
 /**
  * Translates every thrown error into the `{ ok: false, error, rev }` envelope.
  *
- * Three cases:
+ * Four cases:
  *  - `AppError` — an outcome we modelled; reported with its code and message.
  *  - `ZodError` — request validation; reported as VALIDATION with field-level details.
+ *  - a PostgreSQL **22P02** — malformed input that reached a typed column; reported as
+ *    NOT_FOUND, because it is the caller's typo rather than our fault.
  *  - anything else — logged with its stack and reported as INTERNAL plus the request id,
  *    so a player can quote the id without us leaking implementation details.
  */
+/** PostgreSQL's "invalid input syntax for type …" — 22P02, wherever in the cause chain. */
+function isInvalidTextRepresentation(error: unknown): boolean {
+  for (let cause: unknown = error, hops = 0; cause && hops < 5; hops += 1) {
+    if ((cause as { code?: unknown }).code === '22P02') return true;
+    cause = (cause as { cause?: unknown }).cause;
+  }
+  return false;
+}
+
 export const errorHandlerPlugin = fp(
   async (app) => {
     app.setErrorHandler((error, request, reply) => {
@@ -39,6 +50,18 @@ export const errorHandlerPlugin = fp(
         return reply
           .code(400)
           .send(apiFailure('VALIDATION', ERROR_MESSAGES.VALIDATION, rev, { details, requestId }));
+      }
+
+      // A malformed id that reached a `uuid` column. `lib/params.ts` is meant to stop these
+      // at the edge and does, for every route that exists today — this is the backstop, so
+      // that a route added next month without the helper answers "we could not find that"
+      // rather than claiming the server broke. It is a narrow catch on purpose: 22P02 is
+      // *invalid text representation*, always about the value the caller sent.
+      if (isInvalidTextRepresentation(error)) {
+        request.log.debug({ requestId }, 'malformed identifier');
+        return reply
+          .code(404)
+          .send(apiFailure('NOT_FOUND', ERROR_MESSAGES.NOT_FOUND, rev, { requestId }));
       }
 
       // Fastify's own body-parse and schema errors carry a statusCode.

@@ -222,15 +222,21 @@ createBattle(setup: BattleSetup, contentView: ContentView, seed: number): Battle
 
 ## 9. Performance & capacity budget (1 core / 4 GB)
 
-| Budget item | Target |
-|---|---|
-| RAM: Postgres | ≤ 768 MB (`shared_buffers` 256 MB, `max_connections` 20, tuned in DEPLOYMENT_OPERATIONS.md) |
-| RAM: Node (server) | ≤ 1.2 GB (`--max-old-space-size=1024`; content cache ≈ tens of MB) |
-| RAM: nginx + OS headroom | remainder |
-| API latency (p95, on-box) | < 100 ms; battle action < 50 ms + engine < 20 ms |
-| Client first load (cold) | < 1.5 MB JS gz, < 2.5 s to login screen on desktop broadband |
-| Battle scene | 60 fps at ×2 zoom on integrated graphics |
-| Concurrent players | comfortably 100+ (design intent: dozens) |
+| Budget item | Target | Measured (P10d, EA content) |
+|---|---|---|
+| RAM: Postgres | ≤ 768 MB (`shared_buffers` 256 MB, `max_connections` 20, tuned in DEPLOYMENT_OPERATIONS.md) | 113 MB (dev settings) |
+| RAM: Node (server) | ≤ 1.2 GB (`--max-old-space-size=1024`; content cache ≈ tens of MB) | 199 MB RSS, tsx watch included |
+| RAM: nginx + OS headroom | remainder | — |
+| API latency (p95, on-box) | < 100 ms; battle action < 50 ms + engine < 20 ms | 6–22 ms p95 across the hot reads; engine 0.06 ms/run (`pnpm sim`) |
+| Client first load (cold) | < 1.5 MB JS gz, < 2.5 s to login screen on desktop broadband | 302 KB JS gz (pixi 164 · index 93 · react 45) |
+| Content bundle | < 500 KB gzipped | 708 KB raw → **80 KB gzipped** by nginx (`gzip_types` covers `application/json`) |
+| Battle scene | 60 fps at ×2 zoom on integrated graphics | — |
+| Concurrent players | comfortably 100+ (design intent: dozens) | — |
+
+Measured on the dev box against the published EA seed, `/api/player` `/api/content` `/api/player/champions` `/api/player/gear` `/api/quests` `/api/player/progress` at 40 samples each. Everything is an order of magnitude inside its budget, so P10d spent its effort on correctness rather than tuning. Two notes worth keeping:
+
+- **The bundle is only small over the wire.** 708 KB of JSON leaves the origin uncompressed; nginx is what makes it 80 KB. A deployment that bypasses nginx — or drops `application/json` from `gzip_types` — is nine times over budget without anything looking broken.
+- **Sequential scans on `stage_progress` are the planner being right**, not a missing index: at fourteen rows a scan beats an index, and the `(player_id, stage_key)` and `(player_id, parent_key)` indexes are both there for when it is not. Every table carries at least one index or unique constraint on the column it is looked up by.
 
 - No polling endpoints; everything event-on-action. Cron granularity ≥ 1 min. Bundle-split per screen (battle/summon Pixi chunks lazy-loaded).
 

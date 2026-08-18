@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { ROUTES, apiSuccess, routePattern, summonRequestSchema } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
+import { keyParam, numberQuery } from '../../lib/params';
 import * as summon from './service';
 
 /**
@@ -28,7 +29,7 @@ export const summonRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.summon.pull, 'key'), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     const body = summonRequestSchema.parse(request.body);
 
     const result = await summon.pull(app.db, playerId, key, body.count, body.actionId, app.content);
@@ -46,8 +47,10 @@ export const summonRoutes: FastifyPluginAsync = async (app) => {
 
   app.get(ROUTES.summon.history, async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { limit } = request.query as { limit?: string };
-    const entries = await summon.history(app.db, playerId, Number(limit) || 50);
+    // Bounded here rather than trusted: the Chronicle asks for a page, and `?limit=999999`
+    // is not a page.
+    const limit = numberQuery(request, 'limit', { min: 1, max: 200, fallback: 50 });
+    const entries = await summon.history(app.db, playerId, limit);
     return reply.send(apiSuccess({ entries }, app.content.rev));
   });
 

@@ -13,6 +13,7 @@ import { AppError } from '../../lib/errors';
 import * as championView from '../roster/champions';
 import * as roster from '../roster/service';
 import * as battle from './service';
+import { idParam } from '../../lib/params';
 
 /**
  * Roster and battle endpoints.
@@ -150,13 +151,13 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
 
   app.get(routePattern(ROUTES.battle.byId), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     return reply.send(apiSuccess(await battle.findById(ctx(), playerId, id), app.content.rev));
   });
 
   app.post(routePattern(ROUTES.battle.action), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const input = actionSchema.parse(request.body ?? {});
 
     const view = await battle.step(ctx(), {
@@ -173,7 +174,7 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.battle.retreat), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const view = await battle.retreat(ctx(), playerId, id);
     request.log.info({ playerId, battleId: id }, 'battle retreat');
     return reply.send(apiSuccess(view, app.content.rev));

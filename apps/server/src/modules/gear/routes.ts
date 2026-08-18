@@ -21,6 +21,7 @@ import * as champions from '../roster/champions';
 import * as progression from '../roster/progression';
 import { itemQuantities } from '../rewards/service';
 import * as gear from './service';
+import { idParam, uuidQuery } from '../../lib/params';
 
 /**
  * Relics and champion progression.
@@ -65,14 +66,14 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
   // ── Champions ────────────────────────────────────────────────────────────
   app.get(routePattern(ROUTES.roster.detail), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const detail = await champions.loadDetail(app.db, playerId, id, context());
     return reply.send(apiSuccess({ champion: detail }, app.content.rev));
   });
 
   app.post(routePattern(ROUTES.roster.levelUp), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = levelUpRequestSchema.parse(request.body);
 
     const result = await progression.levelUpWithFood(
@@ -102,7 +103,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.roster.rankUp), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = rankUpRequestSchema.parse(request.body);
 
     const result = await progression.rankUp(
@@ -133,7 +134,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.roster.ascend), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     ascendRequestSchema.parse(request.body);
 
     const ctx = context();
@@ -156,7 +157,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.roster.skillUpgrade), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = skillUpgradeRequestSchema.parse(request.body);
 
     const owned = await champions.loadOwned(app.db, playerId, id);
@@ -190,7 +191,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.roster.flags), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = championFlagsRequestSchema.parse(request.body);
 
     await progression.setFlags(app.db, playerId, id, body);
@@ -216,7 +217,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
   // ── Relics ───────────────────────────────────────────────────────────────
   app.post(routePattern(ROUTES.gear.equip), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = equipGearRequestSchema.parse(request.body);
 
     const ctx = context();
@@ -227,7 +228,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.gear.unequip), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
 
     const row = await gear.unequip(app.db, playerId, id);
     return reply.send(apiSuccess({ gear: gear.toDto(row, context().gear) }, app.content.rev));
@@ -235,7 +236,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.gear.lock), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = lockGearRequestSchema.parse(request.body);
 
     const row = await gear.setLocked(app.db, playerId, id, body.locked);
@@ -244,7 +245,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.gear.upgrade), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = upgradeGearRequestSchema.parse(request.body);
 
     const ctx = context();
@@ -289,9 +290,8 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
    */
   app.get(routePattern(ROUTES.gear.preview), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
-    const { championId } = request.query as { championId?: string };
-    if (!championId) throw new AppError('VALIDATION', 'Which champion? Pass ?championId=.');
+    const id = idParam(request);
+    const championId = uuidQuery(request, 'championId');
 
     const ctx = context();
     const [candidate] = await gear

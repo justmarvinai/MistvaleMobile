@@ -11,6 +11,7 @@ import { players } from '../../db/schema/index';
 import { AppError } from '../../lib/errors';
 import * as championView from '../roster/champions';
 import * as mastery from './service';
+import { idParam } from '../../lib/params';
 
 /**
  * Training a champion.
@@ -31,7 +32,7 @@ export const masteryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.roster.masteries), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     const body = masteryLearnRequestSchema.parse(request.body);
     const context = championView.championContextFrom(app.content);
 
@@ -61,7 +62,7 @@ export const masteryRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.roster.masteryReset), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { id } = request.params as { id: string };
+    const id = idParam(request);
     masteryResetRequestSchema.parse(request.body);
     const context = championView.championContextFrom(app.content);
 

@@ -9,6 +9,7 @@ import {
 import { AppError } from '../../lib/errors';
 import { gearContextFrom } from '../gear/service';
 import * as shop from './service';
+import { keyParam } from '../../lib/params';
 
 /**
  * Shop endpoints.
@@ -42,14 +43,14 @@ export const shopRoutes: FastifyPluginAsync = async (app) => {
 
   app.get(routePattern(ROUTES.shop.stock, 'key'), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     const stock = await shop.stockFor(app.db, playerId, context(key), app.content.rev);
     return reply.send(apiSuccess({ stock }, app.content.rev));
   });
 
   app.post(routePattern(ROUTES.shop.buy, 'key'), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     const body = buyShopSlotRequestSchema.parse(request.body);
 
     const result = await shop.buy(app.db, playerId, body.slotIndex, context(key), app.content);
@@ -59,7 +60,7 @@ export const shopRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.shop.refresh, 'key'), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     shopActionRequestSchema.parse(request.body);
 
     const stock = await shop.refresh(app.db, playerId, context(key), app.content.rev);
@@ -68,7 +69,7 @@ export const shopRoutes: FastifyPluginAsync = async (app) => {
 
   app.post(routePattern(ROUTES.shop.unlockSlot, 'key'), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const { key } = request.params as { key: string };
+    const key = keyParam(request);
     shopActionRequestSchema.parse(request.body);
 
     const stock = await shop.unlockSlot(app.db, playerId, context(key));
