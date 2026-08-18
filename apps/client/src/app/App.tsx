@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { PixiStage } from '@/game/PixiStage';
 import { useAudio } from '@/audio/useAudio';
+import { usePreferences } from './usePreferences';
 import { ToastHost } from '@/ui/Toast/Toast';
 import { AuthScreen } from '@/screens/Auth/AuthScreen';
 import { HavenScreen } from '@/screens/Haven/HavenScreen';
@@ -31,6 +32,7 @@ import { useTutorialStore } from '@/state/tutorialStore';
 import { useUnlockStore } from '@/state/unlockStore';
 import { TopBar } from './TopBar';
 import { TutorialOverlay } from './TutorialOverlay';
+import { ScreenWipe } from './ScreenWipe';
 import { UnlockCelebration } from './UnlockCelebration';
 import { Dock } from './Dock';
 import { BootScreen } from './BootScreen';
@@ -47,6 +49,8 @@ export function App() {
   // The mixer wants the published cue catalogue, the player's volumes, and a gesture it is
   // allowed to start on. Mounted here so all three exist for the whole session.
   useAudio();
+  // And the preferences that belong to the document rather than to a component.
+  usePreferences();
 
   const status = useSessionStore((state) => state.status);
   const account = useSessionStore((state) => state.account);
@@ -246,6 +250,9 @@ function GameShell() {
         {screen !== 'battle' && <Dock current={screen} onNavigate={navigate} />}
       </div>
 
+      {/* Under the modals and over the screens: a wipe belongs to the navigation, not to
+          whatever dialog happens to be open across it. */}
+      <ScreenWipe />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <NewsPanel open={newsOpen} onClose={() => setNewsOpen(false)} />
       <ProfilePanel />

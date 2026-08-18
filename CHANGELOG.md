@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the mist closes between screens, and Reduce motion means something (P10f)
+
+Two more controls that looked connected and were not.
+
+- **A 200 ms mist wipe on every navigation.** Without it a dock press swaps one dense screen for another in a single frame and the eye has to re-find everything; a beat of mist gives the change somewhere to happen. It is drawn *over* a navigation that has already happened rather than gating one — the new screen is live underneath and the wipe never takes a click — so pressing two dock tiles quickly is exactly as fast as it was. DOM rather than the Pixi overlay the design doc first imagined: a full-screen gradient is one composited layer the GPU handles for free, where Pixi would contend with the battle ticker for the single core the production box has.
+- **Reduce motion is the game's setting now, not only the machine's.** It has been in Settings since P8, writing to the server and changing nothing anybody could see: the stylesheet honoured `prefers-reduced-motion`, which is the operating system's answer, so a player who wanted a calmer interface had to change it for their whole computer. Both answers are now honoured identically.
+- **Sprite idle loops are untouched by either.** They are the game being alive rather than the interface being busy, and the brief asks for them always — so the setting's line now reads "Champions keep breathing" rather than promising something it should not deliver.
+
 ### Added — installable, snapshot-able, and checked before the deploy (P10e)
 
 - **Mistvale installs.** A manifest, a service worker, and home-screen icons at every size a browser asks for — exported from the one mark the repo already holds (`pnpm icons:pwa`) rather than drawn again, so redrawing the gate redraws every icon. Landscape-locked, standalone, and a maskable variant so Android does not crop the arch.

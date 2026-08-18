@@ -75,7 +75,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
           <ToggleRow
             label="Reduce motion"
-            description="Trims decorative animation across the interface."
+            description="Trims interface animation. Champions keep breathing."
             checked={settings.reducedMotion}
             onChange={(reducedMotion) => void patch({ reducedMotion })}
           />

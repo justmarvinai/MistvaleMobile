@@ -103,7 +103,26 @@ a {
   border: 0;
 }
 
+// Two ways to ask for less motion, and they mean the same thing.
+//
+// The media query is the operating system's answer and has always been honoured. The
+// attribute is the game's own **Reduce motion** setting, which until P10e was a toggle
+// that wrote to the server and changed nothing a player could see — somebody who wanted
+// calmer interface animation had to change it for their whole machine.
+//
+// Deliberately CSS only. The sprite idle loops keep playing: they are the game being
+// alive rather than the interface being busy, and the brief asks for them always.
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:root[data-mv-motion='reduced'] {
   *,
   *::before,
   *::after {

@@ -1,0 +1,37 @@
+// One pass of mist across the screen, 200 ms, and then nothing.
+//
+// `pointer-events: none` is load-bearing rather than tidy: the screen underneath is
+// already live and already correct, and a player who knows where they are going must not
+// be made to wait for an animation to agree with them.
+.wipe {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal - 2;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    120% 80% at 50% 50%,
+    rgba(126, 168, 173, 0.28) 0%,
+    rgba(20, 26, 36, 0.85) 55%,
+    rgba(11, 14, 20, 0.95) 100%
+  );
+
+  @include motion-safe {
+    animation: mist-wipe $duration-base $ease-out;
+  }
+}
+
+@keyframes mist-wipe {
+  0% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
