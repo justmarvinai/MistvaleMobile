@@ -5,6 +5,34 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a missing file answered 200, and handed back the game
+
+The SPA fallback has been `try_files $uri $uri/ /index.html` since P0, which is correct for
+a route and a lie about a file. Every asset the deploy did not ship came back as an HTML
+document with a 200: an `<img>` drew the browser's torn page, `fetch('/sprites/manifest.json')`
+died with a JSON parse error about `<`, Pixi got a texture it could not decode — and nothing
+in the network tab said *missing*, because every one of them was a success. The half-finished
+asset sync this pass started from was invisible for exactly that reason.
+
+- **Anything naming a file is a file.** A last regex location 404s any path ending in an
+  extension. It is written last on purpose: nginx tries regex locations in the order they
+  appear, so the dotfile deny and the font, audio and home-screen-icon rules above all keep
+  their say, and only what nothing else claimed reaches it. Safe because the game client has
+  no URL routing at all — every screen is a value in a store, all of it at `/` — so nothing
+  below `/` is a route.
+- **`/sprites` and `/icons` are locations of their own now**, rather than whatever `location /`
+  did with them. They are unhashed paths — a redrawn champion reuses
+  `champions/<key>/idle/frame_000.png` — so they revalidate daily instead of being immutable
+  like the hashed bundles, and the sprite manifest is `no-cache` so art that shipped this
+  morning is drawn this morning. Before this they carried no cache policy at all and browsers
+  guessed.
+- **And the check that would have caught it starts the server.** "The nginx site parses" is a
+  much weaker claim than it reads as: this config parsed perfectly for ten phases while doing
+  the wrong thing. `scripts/CHECK_DEPLOY.sh` now renders the site onto a free loopback port,
+  starts nginx against a tree of fixture files, and asks it twenty-one questions — routes that
+  must fall back, files that must be served, absences that must 404, and the `.env` that must
+  never be either.
+
 ### Fixed — the QA pass: the battle screen was invisible, and nobody could have known
 
 A full read of the game against a running box, ranked, and then fixed. The three findings

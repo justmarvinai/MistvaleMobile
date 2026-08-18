@@ -14,13 +14,15 @@
                     │    ├─ /api           → 127.0.0.1:3001 (Fastify)         │
                     │    ├─ /admin/api     → 127.0.0.1:3001 (rank-gated)      │
                     │    ├─ /admin         → /srv/mistvale/admin (admin SPA)  │
-                    │    └─ /assets /atlases /uploads (immutable caching)     │
+                    │    ├─ /assets /atlases /uploads (immutable caching)     │
+                    │    └─ /sprites /icons (unhashed art, daily revalidate)  │
                     │  mistvale-server.service (Node 22, systemd)             │
                     │  postgresql@16 (localhost only)                          │
                     │  cron-in-process (server) + system cron (backups)        │
                     └──────────────────────────────────────────────────────────┘
 ```
 - nginx location order: `/admin/api` (proxy) before `/admin` (static, SPA fallback to `/admin/index.html`) before `/api` (proxy) before `/` (static). Admin SPA builds with Vite `base: '/admin/'`.
+- **The SPA fallback answers routes, never files.** `try_files $uri $uri/ /index.html` is right for a bookmark and a lie about a missing asset: a sprite dropped by a half-finished sync came back as an HTML document with a 200, so the `<img>` drew a torn page, `fetch(…manifest.json)` failed with a parse error about `<`, and nothing in the network tab said "missing". A final regex location 404s anything whose path names a file (`^/.+\.[A-Za-z0-9]+$`), written last so the dotfile deny and the font, audio and home-screen-icon rules keep their say. Safe because the game client has no URL routing — every screen is a value in a store, all of it at `/`. **`scripts/CHECK_DEPLOY.sh` starts the rendered site on a loopback port and asks it**, twenty-one paths of routes, files and absences, so this cannot regress into a config that merely parses.
 - Everything binds localhost except nginx 80/443. UFW: allow 22/80/443 only. fail2ban on sshd + nginx auth endpoints. `location /admin` can additionally be IP-allowlisted (`ADMIN_ALLOWLIST` in deploy env, optional).
 - Single certbot cert for `play.pathlands.cc`.
 - Directory layout: `/srv/mistvale/{repo,admin-repo,client,admin,releases}` (builds symlink-swapped), `/var/lib/mistvale/uploads`, `/var/backups/mistvale`.
