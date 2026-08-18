@@ -103,6 +103,26 @@ export class BattleScene implements Scene {
     this.backdrop.addChildAt(ground, 0);
   }
 
+  /**
+   * Fits the 960×540 design canvas inside whatever viewport it is handed.
+   *
+   * Without this the scene drew at its virtual size from the canvas origin — a
+   * 960×540 rectangle in the corner of a 1440×900 window, with the champions
+   * standing wherever that happened to put them. `Scene.resize` is optional and
+   * nobody had noticed it was missing, because until the duplicate stage was
+   * removed this screen was never visible at all.
+   *
+   * Contain rather than cover: a battle is a composition with two sides in it, and
+   * cropping the edges off to fill the screen would push the flanking slots out of
+   * view on a wide monitor.
+   */
+  resize(width: number, height: number): void {
+    const scale = Math.min(width / VIRTUAL_WIDTH, height / VIRTUAL_HEIGHT);
+    this.root.scale.set(scale);
+    this.root.x = (width - VIRTUAL_WIDTH * scale) / 2;
+    this.root.y = (height - VIRTUAL_HEIGHT * scale) / 2;
+  }
+
   private key(ref: UnitRef): string {
     return `${ref.side}:${ref.slot}`;
   }

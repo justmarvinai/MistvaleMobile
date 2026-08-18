@@ -1,0 +1,8 @@
+.icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.15em;
+  // The whole point of inlining the sprite: an icon is the colour of its surroundings,
+  // so one component serves a dim label, a warning and a currency chip without variants.
+  fill: currentColor;
+}

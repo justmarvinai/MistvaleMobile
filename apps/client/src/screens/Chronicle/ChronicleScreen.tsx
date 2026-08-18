@@ -5,6 +5,7 @@ import { gameApi } from '../../api/game';
 import { avatarPath } from '../../game/sprites';
 import { useContentStore } from '../../state/contentStore';
 import styles from './ChronicleScreen.module.scss';
+import { Portrait } from '../../ui/Portrait/Portrait';
 
 /**
  * The Chronicle.
@@ -117,10 +118,10 @@ export function ChronicleScreen(): JSX.Element {
                 }
               >
                 <span className={styles.portrait}>
-                  {art && state !== 'unknown' ? (
-                    <img src={art} alt="" loading="lazy" />
-                  ) : (
+                  {state === 'unknown' ? (
                     <span className={styles.silhouette}>?</span>
+                  ) : (
+                    <Portrait src={art} name={def?.name} size={56} />
                   )}
                 </span>
                 <span className={styles.name}>

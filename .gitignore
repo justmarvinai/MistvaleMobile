@@ -16,6 +16,11 @@ apps/client/public/sprites/
 
 # tool caches
 .cache/
+# …except the icon SVGs, which are committed on purpose. They are 79 CC BY files of a
+# few hundred kilobytes, and keeping them means `pnpm icons` — which the client build
+# runs — never touches the network. A deploy must not fail because a mirror is down.
+!tools/icon-fetch/.cache/
+!tools/icon-fetch/.cache/**
 coverage/
 .vitest/
 playwright-report/

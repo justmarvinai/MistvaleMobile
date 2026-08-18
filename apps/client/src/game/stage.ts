@@ -51,6 +51,17 @@ export function getStage(): Application | null {
   return app;
 }
 
+/**
+ * Whether a scene is attached.
+ *
+ * `initStage` is async, so the backdrop's "show the mist" runs a microtask after it
+ * resolves — and a screen that attached its own scene in the meantime would have it
+ * replaced by fog. Reachable on a reload straight into a battle.
+ */
+export function hasScene(): boolean {
+  return currentScene !== null;
+}
+
 /** Swaps in a new scene, destroying the previous one. */
 export function setScene(scene: Scene | null): void {
   if (!app) return;

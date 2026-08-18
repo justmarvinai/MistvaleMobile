@@ -62,12 +62,14 @@
   }
 }
 
+// Deliberately transparent: the fight is drawn on the shared Pixi canvas behind the
+// shell (ARCHITECTURE §4.1 — pixels in Pixi, text and hit targets in the DOM on top).
+// A background here would hide the battle it is supposed to frame.
 .stage {
   position: relative;
   flex: 1;
   min-height: 0;
   border: 1px solid $edge;
-  background: $ground-deep;
   overflow: hidden;
 }
 

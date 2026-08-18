@@ -14,6 +14,7 @@ import { RelicPicker } from './RelicPicker';
 import { StatTable } from './StatTable';
 import styles from './ChampionDetail.module.scss';
 import { highlightable } from '../../app/highlight';
+import { Icon } from '../../ui/Icon/Icon';
 
 /**
  * One champion, everything about it.
@@ -157,7 +158,7 @@ export function ChampionDetailModal({
               )
             }
           >
-            ⚿ {champion.locked ? 'Locked' : 'Lock'}
+            <Icon name="nav-locked" size={12} /> {champion.locked ? 'Locked' : 'Lock'}
           </button>
           <button
             type="button"

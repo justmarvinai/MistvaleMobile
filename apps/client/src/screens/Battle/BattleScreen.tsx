@@ -3,7 +3,6 @@ import type { SkillDef } from '@mistvale/shared';
 import type { UnitRef } from '@mistvale/engine';
 import { Button } from '../../ui/Button/Button';
 import { BattleScene } from '../../game/battleScene';
-import { PixiStage } from '../../game/PixiStage';
 import { setScene } from '../../game/stage';
 import { settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
 import { useBattleStore } from '../../state/battleStore';
@@ -193,9 +192,11 @@ export function BattleScreen(): JSX.Element {
         </div>
       </div>
 
-      <div className={styles.stage}>
-        <PixiStage />
-      </div>
+      {/* A window onto the shared Pixi canvas, which is behind the whole shell — not a
+          stage of its own. Mounting a second <PixiStage> here is what made this screen
+          render nothing at all: its wrapper is a fixed, opaque, full-viewport layer, and
+          being later in the DOM than the HUD it painted straight over it. */}
+      <div className={styles.stage} />
 
       <div className={styles.bar}>
         {watched ? (

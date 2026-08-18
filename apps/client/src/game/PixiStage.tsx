@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { createMistScene, destroyStage, initStage, resizeStage, setScene } from './stage';
+import { createMistScene, destroyStage, hasScene, initStage, resizeStage, setScene } from './stage';
 import styles from './PixiStage.module.scss';
 
 export interface PixiStageProps {
@@ -27,6 +27,10 @@ export function PixiStage({ scene = 'mist' }: PixiStageProps) {
     void initStage(canvas).then(() => {
       // The component may have unmounted while the WebGL context was initialising.
       if (cancelled) return;
+      // …and a screen may have attached its own scene while it was. This is a *default*,
+      // not a claim on the stage: replacing a battle that is already running with the
+      // ambient mist is exactly what a reload into a fight used to do.
+      if (hasScene()) return;
       setScene(scene === 'mist' ? createMistScene() : null);
     });
 
@@ -43,8 +47,13 @@ export function PixiStage({ scene = 'mist' }: PixiStageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Only when the caller actually changes what it is asking for; the shared stage's own
+  // `scene` prop never changes, so in practice this is the screens' business, not this
+  // component's.
+  const previousScene = useRef(scene);
   useEffect(() => {
-    if (!initialised.current) return;
+    if (!initialised.current || previousScene.current === scene) return;
+    previousScene.current = scene;
     setScene(scene === 'mist' ? createMistScene() : null);
   }, [scene]);
 

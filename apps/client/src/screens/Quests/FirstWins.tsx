@@ -2,6 +2,7 @@ import type { FirstWinBonus } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
 import { Rewards } from '../../ui/Rewards/Rewards';
 import styles from './QuestsScreen.module.scss';
+import { Icon } from '@/ui/Icon/Icon';
 
 /**
  * The day's first victory in each mode.
@@ -32,7 +33,13 @@ export function FirstWins({ bonuses }: { bonuses: readonly FirstWinBonus[] }): J
             <div className={styles.winHead}>
               <span className={styles.winName}>{bonus.label}</span>
               <span className={styles.winMark} aria-hidden>
-                {bonus.lockedReason ? '🔒' : bonus.claimed ? '✔' : '○'}
+                {bonus.lockedReason ? (
+                  <Icon name="nav-locked" size={12} />
+                ) : bonus.claimed ? (
+                  '✔'
+                ) : (
+                  '○'
+                )}
               </span>
             </div>
             {bonus.lockedReason ? (

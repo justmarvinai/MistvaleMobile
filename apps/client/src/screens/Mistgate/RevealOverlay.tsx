@@ -6,6 +6,7 @@ import { avatarPath } from '../../game/sprites';
 import { useContentStore } from '../../state/contentStore';
 import { useSummonStore } from '../../state/summonStore';
 import styles from './RevealOverlay.module.scss';
+import { Portrait } from '../../ui/Portrait/Portrait';
 
 /**
  * The reveal.
@@ -100,11 +101,11 @@ export function RevealOverlay(): JSX.Element {
                 <>
                   {result.isNew && <span className={styles.new}>NEW</span>}
                   <span className={styles.portrait}>
-                    {artFor(result.championKey) ? (
-                      <img src={artFor(result.championKey)!} alt="" />
-                    ) : (
-                      <span className={styles.fallback} />
-                    )}
+                    <Portrait
+                      src={artFor(result.championKey)}
+                      name={nameOf(result.championKey)}
+                      size={96}
+                    />
                   </span>
                   <span className={styles.name}>{nameOf(result.championKey)}</span>
                   <span className={styles.rarity}>{result.rarity}</span>

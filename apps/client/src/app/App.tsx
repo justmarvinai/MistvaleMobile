@@ -98,10 +98,16 @@ export function App() {
     }
   }, [status, refreshPlayer, resetPlayer]);
 
+  // The Pixi stage is mounted once, outside every branch below. It used to appear in
+  // each of them, so signing in unmounted one and mounted another — and `PixiStage`'s
+  // cleanup destroys the *shared* Application and removes its canvas from the DOM, so
+  // every auth transition threw away a WebGL context and built a new one.
+  const backdrop = <PixiStage scene="mist" />;
+
   if (status === 'unknown') {
     return (
       <>
-        <PixiStage scene="mist" />
+        {backdrop}
         <BootScreen error={bootError} onRetry={() => window.location.reload()} />
       </>
     );
@@ -110,7 +116,7 @@ export function App() {
   if (status === 'anonymous') {
     return (
       <>
-        <PixiStage scene="mist" />
+        {backdrop}
         <AuthScreen />
         <ToastHost />
       </>
@@ -121,7 +127,7 @@ export function App() {
   if (!player) {
     return (
       <>
-        <PixiStage scene="mist" />
+        {backdrop}
         <BootScreen
           message="Lighting the lanterns…"
           error={bootError}
@@ -134,7 +140,7 @@ export function App() {
 
   return (
     <>
-      <PixiStage scene="mist" />
+      {backdrop}
       {/* Keyed by account: signing in as someone else rebuilds the shell from scratch. */}
       <GameShell key={account?.id ?? 'session'} />
       <ToastHost />

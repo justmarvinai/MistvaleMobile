@@ -5,6 +5,7 @@ import { useProfileStore } from '@/state/profileStore';
 import { useSessionStore } from '@/state/sessionStore';
 import { Button } from '@/ui/Button/Button';
 import styles from './TopBar.module.scss';
+import { Icon, type IconName } from '@/ui/Icon/Icon';
 
 /**
  * The persistent resource bar.
@@ -63,8 +64,8 @@ export function TopBar({
 
       <div className={styles.resources}>
         <EnergyPill energy={energy} />
-        <ResourcePill label="Silver" value={player.silver} tone="silver" glyph="◎" />
-        <ResourcePill label="Crystals" value={player.crystals} tone="crystal" glyph="◆" />
+        <ResourcePill label="Silver" value={player.silver} tone="silver" icon="silver" />
+        <ResourcePill label="Crystals" value={player.crystals} tone="crystal" icon="crystals" />
       </div>
 
       <div className={styles.tools}>
@@ -72,7 +73,7 @@ export function TopBar({
             be waiting on the player rather than merely available to them. */}
         <span className={styles.tool}>
           <Button variant="ghost" size="sm" onClick={onOpenMail} aria-label="Mail">
-            ✉
+            <Icon name="nav-mail" size={16} />
           </Button>
           {waitingMail > 0 && (
             <span className={styles.pip} aria-hidden="true">
@@ -82,10 +83,10 @@ export function TopBar({
           {waitingMail > 0 && <span className="mv-sr-only">{waitingMail} waiting</span>}
         </span>
         <Button variant="ghost" size="sm" onClick={onOpenNews} aria-label="News">
-          ☰
+          <Icon name="nav-chronicle" size={16} />
         </Button>
         <Button variant="ghost" size="sm" onClick={onOpenSettings} aria-label="Settings">
-          ⚙
+          <Icon name="nav-settings" size={16} />
         </Button>
         <Button variant="ghost" size="sm" onClick={() => void logout()}>
           Sign out
@@ -102,7 +103,7 @@ function EnergyPill({ energy }: { energy: EnergyState }) {
   return (
     <div className={`${styles.pill} ${styles.energy}`} title={full ? 'Energy full' : undefined}>
       <span className={styles.pillGlyph} aria-hidden="true">
-        ⚡
+        <Icon name="energy" size={14} />
       </span>
       <span className={styles.pillBody}>
         <span className={styles.pillValue}>
@@ -124,17 +125,17 @@ function ResourcePill({
   label,
   value,
   tone,
-  glyph,
+  icon,
 }: {
   label: string;
   value: number;
   tone: 'silver' | 'crystal';
-  glyph: string;
+  icon: IconName;
 }) {
   return (
     <div className={`${styles.pill} ${styles[tone]}`}>
       <span className={styles.pillGlyph} aria-hidden="true">
-        {glyph}
+        <Icon name={icon} size={14} />
       </span>
       <span className={styles.pillValue}>{formatNumber(value)}</span>
       <span className="mv-sr-only">

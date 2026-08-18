@@ -1,0 +1,256 @@
+{
+  "source": "cache",
+  "ref": "master",
+  "generatedAt": "2026-08-16T08:28:30.012Z",
+  "icons": {
+    "two-coins": [
+      "delapouite"
+    ],
+    "cut-diamond": [
+      "lorc"
+    ],
+    "lightning-arc": [
+      "lorc"
+    ],
+    "laurels-trophy": [
+      "delapouite"
+    ],
+    "rune-stone": [
+      "lorc"
+    ],
+    "potion-ball": [
+      "lorc"
+    ],
+    "book-cover": [
+      "delapouite"
+    ],
+    "rank-3": [
+      "skoll"
+    ],
+    "health-normal": [
+      "sbed"
+    ],
+    "broadsword": [
+      "lorc"
+    ],
+    "shield": [
+      "sbed"
+    ],
+    "wingfoot": [
+      "lorc"
+    ],
+    "on-target": [
+      "lorc"
+    ],
+    "explosion-rays": [
+      "lorc"
+    ],
+    "magic-shield": [
+      "lorc"
+    ],
+    "bullseye": [
+      "skoll"
+    ],
+    "small-fire": [
+      "lorc"
+    ],
+    "waves": [
+      "lorc"
+    ],
+    "oak-leaf": [
+      "delapouite"
+    ],
+    "fog": [
+      "delapouite"
+    ],
+    "crossed-swords": [
+      "lorc"
+    ],
+    "visored-helm": [
+      "lorc"
+    ],
+    "round-shield": [
+      "willdabeast"
+    ],
+    "gauntlet": [
+      "delapouite"
+    ],
+    "breastplate": [
+      "lorc"
+    ],
+    "boots": [
+      "lorc"
+    ],
+    "ring": [
+      "delapouite"
+    ],
+    "gem-pendant": [
+      "lorc"
+    ],
+    "flying-flag": [
+      "lorc"
+    ],
+    "castle": [
+      "delapouite"
+    ],
+    "treasure-map": [
+      "lorc"
+    ],
+    "cave-entrance": [
+      "delapouite"
+    ],
+    "crossed-sabres": [
+      "lorc"
+    ],
+    "portal": [
+      "lorc"
+    ],
+    "shop": [
+      "delapouite"
+    ],
+    "scroll-quill": [
+      "delapouite"
+    ],
+    "stairs-goal": [
+      "delapouite"
+    ],
+    "party-popper": [
+      "delapouite"
+    ],
+    "envelope": [
+      "lorc"
+    ],
+    "cog": [
+      "lorc"
+    ],
+    "padlock": [
+      "lorc"
+    ],
+    "open-book": [
+      "lorc"
+    ],
+    "stone-stack": [
+      "delapouite"
+    ],
+    "sword-brandish": [
+      "delapouite"
+    ],
+    "armor-upgrade": [
+      "delapouite"
+    ],
+    "sprint": [
+      "lorc"
+    ],
+    "target-arrows": [
+      "lorc"
+    ],
+    "metal-scales": [
+      "lorc"
+    ],
+    "temporary-shield": [
+      "delapouite"
+    ],
+    "healing": [
+      "delapouite"
+    ],
+    "sword-clash": [
+      "lorc"
+    ],
+    "surrounded-shield": [
+      "lorc"
+    ],
+    "checked-shield": [
+      "lorc"
+    ],
+    "shield-reflect": [
+      "lorc"
+    ],
+    "life-tap": [
+      "lorc"
+    ],
+    "heart-shield": [
+      "delapouite"
+    ],
+    "sword-break": [
+      "lorc"
+    ],
+    "armor-downgrade": [
+      "delapouite"
+    ],
+    "snail": [
+      "lorc"
+    ],
+    "broken-arrow": [
+      "catsu"
+    ],
+    "sight-disabled": [
+      "skoll"
+    ],
+    "cracked-shield": [
+      "lorc"
+    ],
+    "poison": [
+      "sbed"
+    ],
+    "flame": [
+      "carl-olsen"
+    ],
+    "broken-heart": [
+      "lorc"
+    ],
+    "leeching-worm": [
+      "lorc"
+    ],
+    "knocked-out-stars": [
+      "delapouite"
+    ],
+    "frozen-block": [
+      "lorc"
+    ],
+    "night-sleep": [
+      "delapouite"
+    ],
+    "enrage": [
+      "delapouite"
+    ],
+    "slashed-shield": [
+      "lorc"
+    ],
+    "health-increase": [
+      "sbed"
+    ],
+    "fast-forward-button": [
+      "delapouite"
+    ],
+    "fast-backward-button": [
+      "delapouite"
+    ],
+    "sparkles": [
+      "delapouite"
+    ],
+    "magic-swirl": [
+      "lorc"
+    ],
+    "extra-time": [
+      "delapouite"
+    ],
+    "hourglass": [
+      "lorc"
+    ],
+    "holy-symbol": [
+      "lorc"
+    ],
+    "hood": [
+      "lorc"
+    ],
+    "rally-the-troops": [
+      "lorc"
+    ],
+    "gem-chain": [
+      "lorc"
+    ],
+    "calendar": [
+      "delapouite"
+    ]
+  }
+}

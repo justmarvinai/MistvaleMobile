@@ -1,6 +1,7 @@
 import type { GearInstance } from '@mistvale/shared';
 import { useContentStore } from '../../state/contentStore';
 import styles from './RelicCard.module.scss';
+import { Icon } from '../../ui/Icon/Icon';
 
 /**
  * One relic.
@@ -69,7 +70,7 @@ export function RelicCard({
 
       {relic.locked && (
         <span className={styles.lock} title="Locked — protected from a mass sell">
-          ⚿
+          <Icon name="nav-locked" size={12} />
         </span>
       )}
       {relic.equippedChampionId && !compact && <span className={styles.worn}>Worn</span>}

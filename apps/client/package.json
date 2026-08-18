@@ -5,11 +5,12 @@
   "type": "module",
   "description": "Mistvale game client \u2014 React shell with a PixiJS stage.",
   "scripts": {
-    "dev": "pnpm run sprites && vite",
-    "build": "pnpm run sprites && vite build",
+    "dev": "pnpm run icons && pnpm run sprites && vite",
+    "build": "pnpm run icons && pnpm run sprites && vite build",
     "preview": "vite preview",
     "sprites": "pnpm --filter @mistvale/asset-sync sync",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "icons": "pnpm --filter @mistvale/icon-fetch icons"
   },
   "dependencies": {
     "@mistvale/shared": "workspace:*",

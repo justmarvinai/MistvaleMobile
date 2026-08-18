@@ -1,3 +1,4 @@
+import type { IconName } from '@/ui/Icon/Icon';
 import type { UnlockFlags } from '@mistvale/shared';
 
 /**
@@ -30,8 +31,13 @@ export type ScreenId =
 export interface ScreenDefinition {
   id: ScreenId;
   label: string;
-  /** Short glyph used until the game-icons sprite sheet is wired in. */
-  glyph: string;
+  /**
+   * The game-icons symbol this screen is drawn with.
+   *
+   * Replaced a Unicode glyph per screen, which is what shipped from P0 to the QA pass —
+   * including a colour-emoji padlock for a locked one, in a hand-built pixel interface.
+   */
+  icon: IconName;
   /** Which unlock flag gates this screen; omitted means always available. */
   unlock?: keyof UnlockFlags;
   /** Shown on the locked-state tooltip. */
@@ -41,12 +47,12 @@ export interface ScreenDefinition {
 }
 
 export const SCREENS: readonly ScreenDefinition[] = [
-  { id: 'haven', label: 'Haven', glyph: '⌂', inDock: true },
-  { id: 'campaign', label: 'Campaign', glyph: '⚑', inDock: true },
+  { id: 'haven', label: 'Haven', icon: 'nav-haven', inDock: true },
+  { id: 'campaign', label: 'Campaign', icon: 'nav-campaign', inDock: true },
   {
     id: 'depths',
     label: 'The Depths',
-    glyph: '◈',
+    icon: 'nav-depths',
     unlock: 'springs',
     lockedHint: 'Opens at level 10',
     inDock: true,
@@ -54,22 +60,22 @@ export const SCREENS: readonly ScreenDefinition[] = [
   {
     id: 'arena',
     label: 'Arena',
-    glyph: '⚔',
+    icon: 'nav-arena',
     unlock: 'arena',
     lockedHint: 'Opens at level 8',
     inDock: true,
   },
-  { id: 'champions', label: 'Champions', glyph: '☗', inDock: true },
+  { id: 'champions', label: 'Champions', icon: 'nav-champions', inDock: true },
   // Deliberately ungated: relics start dropping from the first campaign clear, and a
   // player who cannot see what they just earned has no idea the system exists. The
   // `relicUpgrading` unlock gates the *forge* inside this screen, which is what the flag
   // actually names (docs/GAME_DESIGN.md §12).
-  { id: 'relics', label: 'Relics', glyph: '◆', inDock: true },
-  { id: 'mistgate', label: 'Mistgate', glyph: '◉', inDock: true },
+  { id: 'relics', label: 'Relics', icon: 'nav-relics', inDock: true },
+  { id: 'mistgate', label: 'Mistgate', icon: 'nav-mistgate', inDock: true },
   {
     id: 'chronicle',
     label: 'Chronicle',
-    glyph: '❋',
+    icon: 'nav-chronicle',
     unlock: 'chronicle',
     lockedHint: 'Opens at level 9',
     inDock: true,
@@ -77,7 +83,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
   {
     id: 'bazaar',
     label: 'Bazaar',
-    glyph: '⚖',
+    icon: 'nav-bazaar',
     unlock: 'bazaar',
     lockedHint: 'Opens at level 5',
     inDock: true,
@@ -85,7 +91,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
   {
     id: 'quests',
     label: 'Quests',
-    glyph: '✦',
+    icon: 'nav-quests',
     unlock: 'quests',
     lockedHint: 'Opens at level 4',
     inDock: true,
@@ -93,7 +99,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
   {
     id: 'missions',
     label: 'Missions',
-    glyph: '⇗',
+    icon: 'nav-missions',
     unlock: 'quests',
     lockedHint: 'Opens at level 4',
     inDock: true,
@@ -101,7 +107,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
   {
     id: 'events',
     label: 'Events',
-    glyph: '✧',
+    icon: 'nav-events',
     unlock: 'events',
     lockedHint: 'Opens at level 7',
     inDock: true,
@@ -109,16 +115,16 @@ export const SCREENS: readonly ScreenDefinition[] = [
   {
     id: 'calendar',
     label: 'Calendar',
-    glyph: '☾',
+    icon: 'nav-calendar',
     unlock: 'loginCalendar',
     lockedHint: 'Opens at level 2',
     inDock: true,
   },
   // Reached from the top bar, like Settings — mail is an errand, not a destination.
-  { id: 'mail', label: 'Mail', glyph: '✉', inDock: false },
-  { id: 'settings', label: 'Settings', glyph: '⚙', inDock: false },
+  { id: 'mail', label: 'Mail', icon: 'nav-mail', inDock: false },
+  { id: 'settings', label: 'Settings', icon: 'nav-settings', inDock: false },
   // A full-screen takeover reached from team select, never from the dock.
-  { id: 'battle', label: 'Battle', glyph: '⚔', inDock: false },
+  { id: 'battle', label: 'Battle', icon: 'nav-battle', inDock: false },
 ];
 
 export const DOCK_SCREENS = SCREENS.filter((screen) => screen.inDock);

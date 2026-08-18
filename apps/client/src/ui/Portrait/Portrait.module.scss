@@ -1,0 +1,23 @@
+.portrait {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(160deg, $ground 0%, $ground-deep 100%);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    @include pixelated;
+  }
+}
+
+// Dimmed on purpose: a placeholder should read as one rather than compete with the
+// champions whose art does exist.
+.unknown {
+  color: $parchment-dim;
+  opacity: 0.5;
+}

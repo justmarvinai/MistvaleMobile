@@ -2,6 +2,8 @@ import type { ChampionDef, RosterChampion } from '@mistvale/shared';
 import { avatarPath } from '../../game/sprites';
 import { useContentStore } from '../../state/contentStore';
 import styles from './ChampionCard.module.scss';
+import { Portrait } from '../../ui/Portrait/Portrait';
+import { Icon } from '../../ui/Icon/Icon';
 
 /**
  * One champion in the roster grid.
@@ -42,10 +44,10 @@ export function ChampionCard({
       title={def?.title || def?.name}
     >
       <span className={styles.portrait}>
-        {art ? <img src={art} alt="" loading="lazy" /> : <span className={styles.fallback} />}
+        <Portrait src={art} name={def?.name} size={112} className={styles.art} />
         {champion.locked && (
           <span className={styles.badge} title="Locked — cannot be fed away">
-            ⚿
+            <Icon name="nav-locked" size={12} />
           </span>
         )}
         {champion.favourite && !champion.locked && (

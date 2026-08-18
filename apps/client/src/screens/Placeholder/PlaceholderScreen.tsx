@@ -2,6 +2,7 @@ import { Panel } from '@/ui/Panel/Panel';
 import { useContentStore } from '@/state/contentStore';
 import type { ScreenDefinition } from '@/app/screens';
 import styles from './PlaceholderScreen.module.scss';
+import { Icon } from '@/ui/Icon/Icon';
 
 /**
  * The "coming in a later phase" screen.
@@ -63,7 +64,7 @@ export function PlaceholderScreen({ screen }: { screen: ScreenDefinition }) {
     <div className={styles.screen}>
       <Panel variant="hero" className={styles.card}>
         <div className={styles.glyph} aria-hidden="true">
-          {screen.glyph}
+          <Icon name={screen.icon} size={32} />
         </div>
         <h1 className={styles.title}>{screen.label}</h1>
         <p className={styles.blurb}>{note?.blurb ?? 'This part of the vale is still forming.'}</p>

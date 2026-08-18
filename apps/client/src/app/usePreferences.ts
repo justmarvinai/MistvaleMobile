@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { usePlayerStore } from '@/state/playerStore';
+import { mountIconSprite } from '@/ui/Icon/sprite';
 
 /**
  * Applies the preferences that are the document's business rather than a component's.
@@ -15,6 +16,12 @@ import { usePlayerStore } from '@/state/playerStore';
  */
 export function usePreferences(): void {
   const reducedMotion = usePlayerStore((state) => state.settings.reducedMotion);
+
+  // The icon sprite is one request for the whole set, inlined so `currentColor` reaches
+  // it. Mounted here rather than in a component because it belongs to the document.
+  useEffect(() => {
+    void mountIconSprite();
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;

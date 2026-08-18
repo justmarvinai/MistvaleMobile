@@ -1,8 +1,10 @@
 import { usePlayerStore } from '@/state/playerStore';
+import { useRosterStore } from '@/state/rosterStore';
 import { Panel } from '@/ui/Panel/Panel';
 import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from '@/app/screens';
 import { StarterChoice } from './StarterChoice';
 import styles from './HavenScreen.module.scss';
+import { Icon } from '@/ui/Icon/Icon';
 
 /**
  * The Haven — home base and the screen the player lands on.
@@ -13,6 +15,7 @@ import styles from './HavenScreen.module.scss';
  */
 export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
   const player = usePlayerStore((state) => state.player);
+  const champions = useRosterStore((state) => state.champions);
   const unlocks = usePlayerStore((state) => state.unlocks);
 
   // The camp's stations are the dock's destinations, minus the Haven itself — the same
@@ -48,7 +51,7 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
                 title={unlocked ? undefined : screen.lockedHint}
               >
                 <span className={styles.stationGlyph} aria-hidden="true">
-                  {unlocked ? screen.glyph : '🔒'}
+                  <Icon name={unlocked ? screen.icon : 'nav-locked'} size={28} />
                 </span>
                 <span className={styles.stationLabel}>{screen.label}</span>
                 {!unlocked && <span className={styles.stationHint}>{screen.lockedHint}</span>}
@@ -77,7 +80,11 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
               </div>
               <div className={styles.stat}>
                 <dt>Roster</dt>
-                <dd>0 / {player?.rosterCapacity ?? '—'}</dd>
+                {/* Was a hardcoded `0`. The home screen told every warden they owned no
+                    champions while the roster screen counted them correctly. */}
+                <dd>
+                  {champions.length} / {player?.rosterCapacity ?? '—'}
+                </dd>
               </div>
               <div className={styles.stat}>
                 <dt>Silver</dt>

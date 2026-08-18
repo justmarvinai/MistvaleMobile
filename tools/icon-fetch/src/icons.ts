@@ -17,7 +17,7 @@
 
 /** Which part of the UI an icon belongs to. Drives grouping in the manifest and Credits screen. */
 export type IconGroup =
-  'currency' | 'stat' | 'element' | 'gear' | 'nav' | 'buff' | 'debuff' | 'instant';
+  'currency' | 'stat' | 'element' | 'gear' | 'nav' | 'buff' | 'debuff' | 'instant' | 'portrait';
 
 export interface IconSpec {
   /** Section of the UI this icon serves. */
@@ -42,6 +42,7 @@ export const ICON_GROUP_LABELS: Readonly<Record<IconGroup, string>> = {
   buff: 'Buffs',
   debuff: 'Debuffs',
   instant: 'Instants',
+  portrait: 'Portraits & placeholders',
 };
 
 export const ICONS = {
@@ -95,6 +96,43 @@ export const ICONS = {
   'nav-mail': { group: 'nav', name: 'envelope', use: 'Mail' },
   'nav-settings': { group: 'nav', name: 'cog', use: 'Settings', author: 'lorc' },
   'nav-locked': { group: 'nav', name: 'padlock', use: 'Locked feature / locked champion' },
+  // The five the dock needed and the set did not have. Every screen in `app/screens.ts`
+  // now names an icon rather than a Unicode glyph — the file's own comment had said
+  // "until the game-icons sprite sheet is wired in" since P0.
+  'nav-champions': {
+    group: 'nav',
+    name: 'rally-the-troops',
+    use: 'Champions (roster)',
+    author: 'lorc',
+  },
+  'nav-relics': { group: 'nav', name: 'gem-chain', use: 'Relics (gear vault)', author: 'lorc' },
+  'nav-chronicle': {
+    group: 'nav',
+    name: 'book-cover',
+    use: 'Chronicle (summon history)',
+    author: 'lorc',
+  },
+  'nav-calendar': { group: 'nav', name: 'calendar', use: 'Login calendar', author: 'delapouite' },
+  'nav-battle': {
+    group: 'nav',
+    name: 'crossed-swords',
+    use: 'Battle (in progress)',
+    author: 'lorc',
+  },
+
+  // ── Portraits — stand-ins for art that does not exist yet ─────────────────────────────
+  //
+  // Thirty of the thirty-seven champions are art-pending and share one placeholder asset,
+  // and that asset has no avatar file. Until P11 every one of them drew the browser's
+  // broken-image glyph on the roster, in the Chronicle and — worst of all — on the card a
+  // Mistgate pull turns over. A hooded silhouette says "a warden you have not met yet",
+  // which is the truth, and it is the same shape whether the art lands next week or never.
+  'portrait-unknown': {
+    group: 'portrait',
+    name: 'hood',
+    use: 'Champion whose portrait has not been drawn yet',
+    author: 'lorc',
+  },
   'nav-chronicle': { group: 'nav', name: 'open-book', use: 'Chronicle (collection)' },
   'nav-valor': { group: 'nav', name: 'stone-stack', use: 'Hall of Valor' },
 

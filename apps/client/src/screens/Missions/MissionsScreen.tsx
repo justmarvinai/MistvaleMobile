@@ -7,6 +7,7 @@ import { useContentStore } from '../../state/contentStore';
 import { toast } from '../../state/uiStore';
 import { MissionRow } from './MissionRow';
 import styles from './MissionsScreen.module.scss';
+import { Icon } from '@/ui/Icon/Icon';
 
 /**
  * The Valewarden's Path.
@@ -87,7 +88,7 @@ export function MissionsScreen(): JSX.Element {
                   aria-current={arc.arc === shown?.arc}
                 >
                   <span className={styles.arcMark} aria-hidden>
-                    {arc.finished ? '✔' : arc.open ? '▸' : '🔒'}
+                    {arc.finished ? '✔' : arc.open ? '▸' : <Icon name="nav-locked" size={12} />}
                   </span>
                   <span className={styles.arcName}>{arc.name}</span>
                   <span className={styles.arcCount}>

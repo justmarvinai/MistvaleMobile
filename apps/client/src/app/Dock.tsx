@@ -2,6 +2,7 @@ import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from './screens';
 import { usePlayerStore, type DockBadges } from '@/state/playerStore';
 import { highlightable } from './highlight';
 import styles from './Dock.module.scss';
+import { Icon } from '@/ui/Icon/Icon';
 
 /**
  * The bottom navigation dock.
@@ -44,7 +45,7 @@ export function Dock({
             title={unlocked ? screen.label : (screen.lockedHint ?? 'Still locked')}
           >
             <span className={styles.glyph} aria-hidden="true">
-              {unlocked ? screen.glyph : '🔒'}
+              <Icon name={unlocked ? screen.icon : 'nav-locked'} size={20} />
             </span>
             <span className={styles.label}>{screen.label}</span>
             {waiting > 0 && (
