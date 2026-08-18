@@ -16,6 +16,16 @@ function unique(prefix: string): string {
   return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
 }
 
+/**
+ * One retry, for one honestly random step.
+ *
+ * The farm below waits for a relic to drop, and 1-1 parts with one 42% of the time against
+ * an energy budget that buys about six runs — so roughly one run in twenty ends dry
+ * through bad luck rather than a broken drop table. A retry costs a minute in that case
+ * and nothing otherwise; a drop table that is actually broken still fails both attempts.
+ */
+test.describe.configure({ retries: 1 });
+
 test.describe('the management loop', () => {
   test('a warden farms a relic, equips it, and grows stronger for it', async ({ page }) => {
     test.slow();

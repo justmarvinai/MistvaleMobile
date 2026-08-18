@@ -29,6 +29,12 @@ export function unique(prefix: string): string {
  * scripted navigation — the Haven, an empty roster, and the starter choice waiting.
  */
 export async function leaveTutorial(page: Page): Promise<void> {
+  // Wait for the session to actually exist before posting anything with it. Registration
+  // is a form submit followed by a navigation into the shell, and firing the skip into
+  // that gap leaves the reload below with no cookie and the suite staring at the login
+  // screen — which is what one unexplained failure in a fifty-test run looked like.
+  await page.getByRole('button', { name: 'Sign out' }).waitFor({ timeout: 30_000 });
+
   await page.waitForFunction(
     async () => {
       const response = await fetch('/api/tutorial/skip', {
