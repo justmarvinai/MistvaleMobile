@@ -29,6 +29,8 @@ export function RelicsScreen(): JSX.Element {
   const load = useInventoryStore((state) => state.load);
   const refresh = useInventoryStore((state) => state.refresh);
   const setLocked = useInventoryStore((state) => state.setLocked);
+  const vault = useInventoryStore((state) => state.vault);
+  const buyVaultSlots = useInventoryStore((state) => state.buyVaultSlots);
   const bundle = useContentStore((state) => state.bundle);
   const refreshPlayer = usePlayerStore((state) => state.refresh);
   // The vault is always open; the forge is what account level 3 unlocks.
@@ -67,6 +69,21 @@ export function RelicsScreen(): JSX.Element {
     setSelection((current) =>
       current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id],
     );
+
+  /** Busy, notice and error handled once, so a second action does not grow a third copy. */
+  const run = async (action: () => Promise<void>, said: string): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await action();
+      setNotice(said);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'That could not be done.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const sell = async (): Promise<void> => {
     setBusy(true);
@@ -178,14 +195,46 @@ export function RelicsScreen(): JSX.Element {
           {!canForge && <p className={styles.warn}>The forge opens at account level 3.</p>}
           <dl className={styles.stats}>
             <div>
-              <dt>Held</dt>
-              <dd>{gear.length}</dd>
+              {/* Loose, not held: a relic on a champion is not taking up a slot, which is
+                  what makes equipping a way to clear space rather than only spending it. */}
+              <dt>In the vault</dt>
+              <dd className={vault && vault.used >= vault.capacity ? styles.full : undefined}>
+                {vault ? `${vault.used} / ${vault.capacity}` : gear.length}
+              </dd>
             </div>
             <div>
               <dt>Worn</dt>
               <dd>{gear.filter((piece) => piece.equippedChampionId).length}</dd>
             </div>
           </dl>
+
+          {vault && vault.used >= vault.capacity && (
+            <p className={styles.warn}>
+              The vault is full. Relics you win are sold on the road for silver until there is room
+              again.
+            </p>
+          )}
+
+          {vault &&
+            (vault.nextSlots > 0 ? (
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={() => {
+                  void run(async () => {
+                    await buyVaultSlots();
+                    await refreshPlayer();
+                  }, `Room for ${vault.nextSlots} more.`);
+                }}
+              >
+                {`Buy ${vault.nextSlots} slots — ${vault.nextCost.toLocaleString()} silver`}
+              </Button>
+            ) : (
+              <p className={styles.note}>
+                The vault is as large as it goes ({vault.max.toLocaleString()} slots).
+              </p>
+            ))}
+
           <Button variant="ghost" onClick={selectFodder}>
             Select unupgraded fodder
           </Button>

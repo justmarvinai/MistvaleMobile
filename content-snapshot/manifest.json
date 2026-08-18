@@ -1,6 +1,6 @@
 {
-  "rev": 29,
-  "total": 1049,
+  "rev": 30,
+  "total": 1054,
   "types": [
     {
       "count": 8,
@@ -95,7 +95,7 @@
       "type": "soundCue"
     },
     {
-      "count": 88,
+      "count": 93,
       "type": "gameConfig"
     }
   ]

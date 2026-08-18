@@ -117,6 +117,14 @@ export interface RewardSummary {
    * absence of one.
    */
   arena: ArenaResult | null;
+  /**
+   * Relics the vault had no room for, and the silver paid instead (Q5).
+   *
+   * Zeroed on every payout that did not overflow, which is nearly all of them. Present so
+   * the results screen can say what happened rather than a player quietly wondering where
+   * a drop went.
+   */
+  vaultOverflow: gear.VaultOverflow;
 }
 
 /** The payout of a fight that pays nothing but is still a result. */
@@ -133,6 +141,7 @@ const NO_REWARDS: RewardSummary = {
   chestTiers: [],
   firstWin: {},
   arena: null,
+  vaultOverflow: gear.NO_OVERFLOW,
 };
 
 const MAX_TEAM = 4;
@@ -1071,6 +1080,7 @@ async function settle(
     levelsGained: granted.levelsGained,
     gear: drops.gear,
     items: drops.items,
+    vaultOverflow: drops.vaultOverflow,
     firstClear: cleared.firstClear,
     bonus: cleared.bonus,
     chestTiers: cleared.chestTiers,
@@ -1134,11 +1144,16 @@ async function rollDrops(
   stage: StageDef,
   playerId: string,
   lootRng: ReturnType<typeof createRng>,
-): Promise<{ gear: GearInstance[]; items: Record<string, number> }> {
+): Promise<{
+  gear: GearInstance[];
+  items: Record<string, number>;
+  vaultOverflow: gear.VaultOverflow;
+}> {
   const snapshot = ctx.content.current();
   const band = stage.rewards.drops;
   const dropped: GearInstance[] = [];
   const items: Record<string, number> = {};
+  let vaultOverflow = gear.NO_OVERFLOW;
 
   if (band && band.gearChance > 0 && lootRng.chance(band.gearChance)) {
     const gearContext = gear.gearContextFrom(snapshot.bundle);
@@ -1160,14 +1175,18 @@ async function rollDrops(
       gearContext,
     );
     if (request) {
-      const created = await gear.createGear(
+      // Through the capped path, not `createGear`: a full vault must not fail the whole
+      // settlement of a fight the player has already won. What does not fit is paid as
+      // silver and reported, so the results screen can say so in a line.
+      const { created, overflow } = await gear.createGearBatchCapped(
         tx,
         playerId,
-        { ...request, source: `stage:${row.stageKey}` },
+        [{ ...request, source: `stage:${row.stageKey}` }],
         lootRng,
         gearContext,
       );
-      dropped.push(gear.toDto(created, gearContext));
+      for (const row of created) dropped.push(gear.toDto(row, gearContext));
+      vaultOverflow = overflow;
     }
   }
 
@@ -1180,7 +1199,16 @@ async function rollDrops(
     await rewards.grantItems(tx, playerId, items, rewards.battleSource('drop', row.stageKey));
   }
 
-  return { gear: dropped, items };
+  if (vaultOverflow.silver > 0) {
+    await rewards.grant(
+      tx,
+      playerId,
+      { silver: vaultOverflow.silver },
+      `gear:vaultFull:${row.stageKey}`,
+    );
+  }
+
+  return { gear: dropped, items, vaultOverflow };
 }
 
 /**

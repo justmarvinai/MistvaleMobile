@@ -312,6 +312,51 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Multi-battle unlock level',
     'Account level at which farming without watching becomes available — late enough that a new player has fought a stage by hand first.',
   ),
+  // ── The relic vault (Q5, answered 2026-08-18) ─────────────────────────────
+  //
+  // A cap is what makes selling and dismantling matter: without one a player keeps
+  // everything, the sell button is never pressed, and the read that lists the vault grows
+  // for the life of the account. Bought in slabs with silver, up to a ceiling, so the sink
+  // is real without ever becoming a wall a player cannot get past.
+  //
+  // Only *loose* relics count. Equipping is a legitimate way to make room, which keeps the
+  // pressure on hoarding rather than on collecting.
+  entry(
+    'economy.vaultBaseCapacity',
+    250,
+    'economy',
+    'Vault slots to start with',
+    'Loose relics a new account may hold. Equipped relics are not counted — they live on a champion, not in the vault.',
+  ),
+  entry(
+    'economy.vaultMaxCapacity',
+    1_000,
+    'economy',
+    'Vault slots at most',
+    'The ceiling purchases cannot pass. Also the hard bound on how large the vault read can ever get, which is why it exists as well as the cost curve.',
+  ),
+  entry(
+    'economy.vaultSlotsPerUpgrade',
+    50,
+    'economy',
+    'Slots per purchase',
+    'How many slots one purchase adds. Fifty takes the base of 250 to the ceiling of 1,000 in fifteen purchases — few enough that each one is a decision, large enough that nobody is pressing the button thirty times.',
+  ),
+  entry(
+    'economy.vaultUpgradeCost',
+    25_000,
+    'economy',
+    'First vault upgrade cost (silver)',
+    'What the first slab of slots costs — an evening or two of farming, so the first one is never a wall. Each subsequent slab is multiplied by the growth below.',
+  ),
+  entry(
+    'economy.vaultUpgradeCostGrowth',
+    1.3,
+    'economy',
+    'Vault upgrade cost growth',
+    'Multiplier per purchase already made. At 25,000 and 1.3 the fifteenth and last slab costs about 984,000 and the whole ceiling costs about 4.2M — expensive on purpose, since the alternative to buying room is pressing sell.',
+  ),
+
   entry(
     'economy.gearRemovalFree',
     true,

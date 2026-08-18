@@ -146,3 +146,8 @@
   color: $danger;
   font-size: 0.8rem;
 }
+
+/* A full vault is not an error, but it is worth reading before the next fight. */
+.full {
+  color: $warning;
+}

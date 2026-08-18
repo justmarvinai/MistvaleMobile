@@ -17,6 +17,8 @@ import type {
   ShopPurchaseResult,
   ShopStock,
   SkillUpgradeRequest,
+  VaultOverflow,
+  VaultState,
   Chronicle,
   Depths,
   MultiBattleRequest,
@@ -108,6 +110,8 @@ export interface BattleRewards {
   firstWin: Record<string, number>;
   /** What an Arena fight moved, on both ratings. Null for every other mode. */
   arena: ArenaResult | null;
+  /** Relics the vault had no room for, and the silver paid in their place (Q5). */
+  vaultOverflow: VaultOverflow;
 }
 
 export interface BattleView {
@@ -199,7 +203,12 @@ export const gameApi = {
     }),
 
   // ── Relics ───────────────────────────────────────────────────────────────
-  gear: () => api.get<{ gear: GearInstance[] }>(ROUTES.gear.list).then((data) => data.gear),
+  gear: () => api.get<{ gear: GearInstance[]; vault: VaultState }>(ROUTES.gear.list),
+
+  buyVaultSlots: (actionId: string) =>
+    api
+      .post<{ vault: VaultState }>(ROUTES.gear.buyVaultSlots, { actionId })
+      .then((data) => data.vault),
 
   items: () =>
     api.get<{ items: InventoryItem[] }>(ROUTES.inventory.items).then((data) => data.items),

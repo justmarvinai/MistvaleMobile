@@ -136,6 +136,19 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
                   <span className={styles.bonus}>{rewards.gear.length}</span>
                 </div>
               )}
+              {rewards.vaultOverflow.count > 0 && (
+                // Said out loud rather than left as a drop that quietly never arrived.
+                // A relic that will not fit is sold for its worth, which is the kindest
+                // reading of a full vault — but only if the player is told it happened.
+                <div className={styles.row}>
+                  <span className={styles.label}>
+                    Vault full — {rewards.vaultOverflow.count} sold on the road
+                  </span>
+                  <span className={styles.bonus}>
+                    +{rewards.vaultOverflow.silver.toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
 
             {Object.keys(rewards.firstWin).length > 0 && (

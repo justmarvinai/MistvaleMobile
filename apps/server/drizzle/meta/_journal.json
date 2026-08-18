@@ -169,6 +169,20 @@
       "when": 1787085680193,
       "tag": "0023_sound_cues",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1787085681193,
+      "tag": "0024_vault_slots",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1787085682193,
+      "tag": "0025_vault_action_id",
+      "breakpoints": true
     }
   ]
 }

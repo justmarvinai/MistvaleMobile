@@ -65,6 +65,18 @@ export interface GearEconomyConfig {
   defaultRarityWeights: Readonly<Record<Rarity, number>>;
   /** Stat weights for the informational power score. */
   powerWeights: Readonly<Record<Stat, number>>;
+
+  // ── The vault (Q5) ────────────────────────────────────────────────────────
+  /** Loose relics a player may hold before buying room. Equipped relics are not counted. */
+  vaultBaseCapacity: number;
+  /** The ceiling purchases cannot pass — and the hard bound on how large the read can get. */
+  vaultMaxCapacity: number;
+  /** Slots one purchase adds. */
+  vaultSlotsPerUpgrade: number;
+  /** Silver for the first purchase. */
+  vaultUpgradeCost: number;
+  /** Multiplied in once per purchase already made, so each slab costs more than the last. */
+  vaultUpgradeCostGrowth: number;
 }
 
 export const DEFAULT_GEAR_ECONOMY: GearEconomyConfig = Object.freeze({
@@ -124,6 +136,11 @@ export const DEFAULT_GEAR_ECONOMY: GearEconomyConfig = Object.freeze({
     res: 3,
     acc: 3,
   }),
+  vaultBaseCapacity: 250,
+  vaultMaxCapacity: 1_000,
+  vaultSlotsPerUpgrade: 50,
+  vaultUpgradeCost: 25_000,
+  vaultUpgradeCostGrowth: 1.3,
 });
 
 const CONFIG_KEYS = {
@@ -136,6 +153,11 @@ const CONFIG_KEYS = {
   substatsByRarity: 'economy.gearSubstatsByRarity',
   defaultRarityWeights: 'economy.gearDropRarityWeights',
   powerWeights: 'economy.powerWeights',
+  vaultBaseCapacity: 'economy.vaultBaseCapacity',
+  vaultMaxCapacity: 'economy.vaultMaxCapacity',
+  vaultSlotsPerUpgrade: 'economy.vaultSlotsPerUpgrade',
+  vaultUpgradeCost: 'economy.vaultUpgradeCost',
+  vaultUpgradeCostGrowth: 'economy.vaultUpgradeCostGrowth',
 } as const;
 
 /**
@@ -187,7 +209,68 @@ export function gearEconomyFrom(config: Readonly<Record<string, unknown>>): Gear
       DEFAULT_GEAR_ECONOMY.defaultRarityWeights,
     ),
     powerWeights: record(CONFIG_KEYS.powerWeights, DEFAULT_GEAR_ECONOMY.powerWeights),
+    vaultBaseCapacity: number(
+      CONFIG_KEYS.vaultBaseCapacity,
+      DEFAULT_GEAR_ECONOMY.vaultBaseCapacity,
+    ),
+    vaultMaxCapacity: number(CONFIG_KEYS.vaultMaxCapacity, DEFAULT_GEAR_ECONOMY.vaultMaxCapacity),
+    vaultSlotsPerUpgrade: number(
+      CONFIG_KEYS.vaultSlotsPerUpgrade,
+      DEFAULT_GEAR_ECONOMY.vaultSlotsPerUpgrade,
+    ),
+    vaultUpgradeCost: number(CONFIG_KEYS.vaultUpgradeCost, DEFAULT_GEAR_ECONOMY.vaultUpgradeCost),
+    vaultUpgradeCostGrowth: number(
+      CONFIG_KEYS.vaultUpgradeCostGrowth,
+      DEFAULT_GEAR_ECONOMY.vaultUpgradeCostGrowth,
+    ),
   });
+}
+
+// ── The vault (Q5) ──────────────────────────────────────────────────────────
+
+/**
+ * How many loose relics this account may hold.
+ *
+ * `bought` is what the player has paid for; the base and the ceiling are content, so an
+ * operator raising the base in Admin raises everybody's vault at once without touching a
+ * single player row. Clamped both ways: a ceiling lowered below what somebody already
+ * bought must not hand them a negative vault, and a base above the ceiling is an operator
+ * typo rather than a licence.
+ */
+export function vaultCapacity(economy: GearEconomyConfig, bought: number): number {
+  const base = Math.max(0, Math.floor(economy.vaultBaseCapacity));
+  const ceiling = Math.max(base, Math.floor(economy.vaultMaxCapacity));
+  return Math.min(base + Math.max(0, Math.floor(bought)), ceiling);
+}
+
+/** Slots the next purchase would add, or 0 when the vault is already at the ceiling. */
+export function vaultUpgradeSlots(economy: GearEconomyConfig, bought: number): number {
+  const capacity = vaultCapacity(economy, bought);
+  const ceiling = Math.max(
+    Math.floor(economy.vaultBaseCapacity),
+    Math.floor(economy.vaultMaxCapacity),
+  );
+  const room = ceiling - capacity;
+  if (room <= 0) return 0;
+  // A last purchase that would overshoot the ceiling buys the remainder rather than being
+  // refused: "24 slots for the same price" is a better last step than a button that never
+  // becomes pressable.
+  return Math.min(Math.max(1, Math.floor(economy.vaultSlotsPerUpgrade)), room);
+}
+
+/**
+ * What the next purchase costs, in silver.
+ *
+ * Geometric in the number of purchases *made*, not in the slots held, so the curve does
+ * not change shape when an operator retunes how many slots a purchase adds. Rounded to a
+ * hundred so the number in the Bazaar reads like a price rather than a calculation.
+ */
+export function vaultUpgradeCost(economy: GearEconomyConfig, bought: number): number {
+  const perUpgrade = Math.max(1, Math.floor(economy.vaultSlotsPerUpgrade));
+  const purchases = Math.max(0, Math.floor(bought / perUpgrade));
+  const growth = economy.vaultUpgradeCostGrowth > 0 ? economy.vaultUpgradeCostGrowth : 1;
+  const raw = Math.max(0, economy.vaultUpgradeCost) * growth ** purchases;
+  return Math.max(1, Math.round(raw / 100) * 100);
 }
 
 /** Indexes the published gear content for lookup. */

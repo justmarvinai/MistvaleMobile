@@ -115,6 +115,14 @@ export const players = pgTable(
     valorMedals: bigint('valor_medals', { mode: 'number' }).notNull().default(0),
 
     rosterCapacity: smallint('roster_capacity').notNull().default(60),
+    /**
+     * Vault slots *bought*, not the capacity.
+     *
+     * The capacity is `min(economy.vaultBaseCapacity + this, economy.vaultMaxCapacity)`,
+     * so an operator raising the base in Admin raises everybody's vault at once and never
+     * has to touch a player row (Q5).
+     */
+    vaultSlots: smallint('vault_slots').notNull().default(0),
     /** 0 = not started; the tutorial script advances this (docs/CONTENT_PLAN_EA01.md §7). */
     tutorialStep: smallint('tutorial_step').notNull().default(0),
     /**
@@ -151,6 +159,8 @@ export const players = pgTable(
      * because a dropped response could otherwise cost ten sigils twice.
      */
     lastSummonActionId: text('last_summon_action_id'),
+    /** Idempotency for buying vault slots — a double-tapped button buys one slab. */
+    lastVaultActionId: text('last_vault_action_id'),
 
     /**
      * The last multi-battle, kept whole: `{actionId, result}`.

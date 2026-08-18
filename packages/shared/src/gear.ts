@@ -149,3 +149,47 @@ export const gearPreviewSchema = z.object({
   replaces: gearInstanceSchema.nullable(),
 });
 export type GearPreview = z.infer<typeof gearPreviewSchema>;
+
+// ── The vault (Q5) ──────────────────────────────────────────────────────────
+
+/**
+ * How full the vault is, and what more room costs.
+ *
+ * A cap is what makes selling and dismantling matter — without one nothing is ever sold,
+ * and the read that lists the vault grows for the life of the account. Only *loose* relics
+ * count: a relic on a champion lives there rather than in the vault, so equipping is a way
+ * to make room and the pressure lands on hoarding rather than on collecting.
+ */
+export const vaultStateSchema = z.object({
+  /** Loose relics held. */
+  used: z.number().int(),
+  /** Loose relics allowed: the content base plus what has been bought, under the ceiling. */
+  capacity: z.number().int(),
+  /** Slots bought so far, over the content base. */
+  bought: z.number().int(),
+  /** The ceiling purchases cannot pass. */
+  max: z.number().int(),
+  /** Slots the next purchase adds — 0 once the ceiling is reached. */
+  nextSlots: z.number().int(),
+  /** Silver the next purchase costs — 0 once there is nothing left to buy. */
+  nextCost: z.number().int(),
+});
+export type VaultState = z.infer<typeof vaultStateSchema>;
+
+export const buyVaultSlotsRequestSchema = z.object({
+  actionId: z.string().min(8).max(64),
+});
+export type BuyVaultSlotsRequest = z.infer<typeof buyVaultSlotsRequestSchema>;
+
+/**
+ * Relics a payout could not fit, and the silver paid in their place.
+ *
+ * Losing the drop outright is the obvious alternative and the wrong one: farming ten runs
+ * is a single press, and a player who comes back to nine relics and no explanation has
+ * been punished for a cap they never saw themselves hit.
+ */
+export const vaultOverflowSchema = z.object({
+  count: z.number().int(),
+  silver: z.number().int(),
+});
+export type VaultOverflow = z.infer<typeof vaultOverflowSchema>;

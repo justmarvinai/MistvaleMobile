@@ -807,4 +807,186 @@ describe.skipIf(!dbUp)('the management loop', () => {
     });
     return registered.json().data.player.id as string;
   }
+
+  // ── The vault (Q5) ────────────────────────────────────────────────────────
+
+  describe('the vault', () => {
+    /** Fills the vault to its cap with loose relics, cheaply. */
+    async function fillVault(): Promise<number> {
+      const context = gear.gearContextFrom(app.content.current().bundle);
+      const { createRng } = await import('@mistvale/engine');
+      const state = await gear.vaultState(app.db, playerId, context);
+      const room = state.capacity - state.used;
+      await gear.createGearBatch(
+        app.db,
+        playerId,
+        Array.from({ length: room }, () => ({
+          setKey: 'ironroot',
+          slot: 'weapon' as const,
+          rank: 1,
+          rarity: 'common' as const,
+          source: 'test:fill',
+        })),
+        createRng(99),
+        context,
+      );
+      return state.capacity;
+    }
+
+    it('reports what is held, what fits, and what more room costs', async () => {
+      const listed = await as({ method: 'GET', url: apiPath(ROUTES.gear.list) });
+      expect(listed.statusCode, listed.body).toBe(200);
+      const vault = listed.json().data.vault as {
+        used: number;
+        capacity: number;
+        nextSlots: number;
+        nextCost: number;
+      };
+      expect(vault.used).toBe(0);
+      expect(vault.capacity).toBe(250);
+      expect(vault.nextSlots).toBeGreaterThan(0);
+      expect(vault.nextCost).toBeGreaterThan(0);
+    });
+
+    it('counts loose relics only, so equipping makes room', async () => {
+      const champion = await chooseStarter();
+      const piece = await giveGear();
+      const context = gear.gearContextFrom(app.content.current().bundle);
+
+      expect((await gear.vaultState(app.db, playerId, context)).used).toBe(1);
+      const equipped = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.gear.equip(piece.id)),
+        payload: { championId: champion.id },
+      });
+      expect(equipped.statusCode, equipped.body).toBe(200);
+      // On a champion is not in the vault — which is what makes equipping a way out of a
+      // full one rather than only a way to spend the space.
+      expect((await gear.vaultState(app.db, playerId, context)).used).toBe(0);
+    });
+
+    it('refuses to take a relic off when there is nowhere to put it', async () => {
+      const champion = await chooseStarter();
+      const piece = await giveGear();
+      await as({
+        method: 'POST',
+        url: apiPath(ROUTES.gear.equip(piece.id)),
+        payload: { championId: champion.id },
+      });
+      await fillVault();
+
+      const refused = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.gear.unequip(piece.id)),
+        payload: {},
+      });
+      expect(refused.statusCode).toBe(400);
+      expect(refused.json().error.message).toMatch(/vault is full/i);
+    });
+
+    it('pays silver for what a full vault cannot hold, rather than losing it', async () => {
+      const capacity = await fillVault();
+      const context = gear.gearContextFrom(app.content.current().bundle);
+      const { createRng } = await import('@mistvale/engine');
+
+      const { created, overflow } = await gear.createGearBatchCapped(
+        app.db,
+        playerId,
+        [
+          { setKey: 'ironroot', slot: 'weapon', rank: 6, rarity: 'legendary', source: 'test' },
+          { setKey: 'ironroot', slot: 'boots', rank: 6, rarity: 'legendary', source: 'test' },
+        ],
+        createRng(7),
+        context,
+      );
+      expect(created).toHaveLength(0);
+      expect(overflow.count).toBe(2);
+      expect(overflow.silver).toBeGreaterThan(0);
+      // And the vault is exactly as full as it was — no relic squeezed past the cap.
+      expect((await gear.vaultState(app.db, playerId, context)).used).toBe(capacity);
+    });
+
+    it('lets a bot be given a whole kit, because equipped relics are not in a vault', async () => {
+      await fillVault();
+      const champion = await chooseStarter();
+      const context = gear.gearContextFrom(app.content.current().bundle);
+      const { createRng } = await import('@mistvale/engine');
+
+      const { created, overflow } = await gear.createGearBatchCapped(
+        app.db,
+        playerId,
+        [
+          {
+            setKey: 'ironroot',
+            slot: 'helm',
+            rank: 6,
+            rarity: 'epic',
+            source: 'test:bot',
+            equippedChampionId: champion.id,
+          },
+        ],
+        createRng(8),
+        context,
+      );
+      expect(created).toHaveLength(1);
+      expect(overflow.count).toBe(0);
+    });
+
+    it('sells room for silver, once, and refuses at the ceiling', async () => {
+      await grantItems(app.db, playerId, {}, 'test');
+      await app.db.update(players).set({ silver: 10_000_000 }).where(eq(players.id, playerId));
+
+      const buy = (id: string) =>
+        as({
+          method: 'POST',
+          url: apiPath(ROUTES.gear.buyVaultSlots),
+          payload: { actionId: id },
+        });
+
+      const first = await buy('vault-buy-0001');
+      expect(first.statusCode, first.body).toBe(200);
+      const after = first.json().data.vault as { capacity: number; bought: number };
+      expect(after.capacity).toBe(300);
+      expect(after.bought).toBe(50);
+
+      // A retried press is the same purchase, not a second slab.
+      const retry = await buy('vault-buy-0001');
+      expect(retry.statusCode, retry.body).toBe(200);
+      expect((retry.json().data.vault as { bought: number }).bought).toBe(50);
+
+      // And the ceiling is real: buy until it stops, then be told why. Topped up each
+      // time because the curve is geometric and the last slabs cost millions — which is
+      // the point of it, and not what this case is measuring.
+      for (let guard = 0; guard < 60; guard += 1) {
+        await app.db.update(players).set({ silver: 100_000_000 }).where(eq(players.id, playerId));
+        const response = await buy(`vault-buy-${guard.toString().padStart(4, '0')}-more`);
+        if (response.statusCode !== 200) {
+          expect(response.json().error.message).toMatch(/as large as it goes/i);
+          break;
+        }
+        const state = response.json().data.vault as { capacity: number; nextSlots: number };
+        if (state.nextSlots === 0) {
+          expect(state.capacity).toBe(1_000);
+          break;
+        }
+      }
+      const [row] = await app.db
+        .select({ bought: players.vaultSlots })
+        .from(players)
+        .where(eq(players.id, playerId));
+      expect(row!.bought).toBe(750);
+    });
+
+    it('refuses a purchase nobody can pay for', async () => {
+      await app.db.update(players).set({ silver: 0 }).where(eq(players.id, playerId));
+      const refused = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.gear.buyVaultSlots),
+        payload: { actionId: 'vault-too-poor-001' },
+      });
+      // A conflict rather than a bad request: nothing about the ask was malformed.
+      expect(refused.statusCode).toBe(409);
+      expect(refused.json().error.code).toBe('INSUFFICIENT_FUNDS');
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { createRng, type Rng } from '@mistvale/engine';
 import {
   ACCESSORY_ASCENSION_REQUIREMENT,
@@ -31,6 +31,9 @@ import {
   statFormKey,
   upgradeChance,
   upgradeCost,
+  vaultCapacity,
+  vaultUpgradeCost,
+  vaultUpgradeSlots,
   type GearEconomyConfig,
   type GearPiece,
   type GearTables,
@@ -205,6 +208,75 @@ export interface GearRollRequest {
   source: string;
 }
 
+// ── The vault, and what happens when it is full (Q5) ─────────────────────────
+
+/**
+ * How many loose relics this player is holding.
+ *
+ * Loose is the operative word: a relic on a champion is not in the vault, so equipping is
+ * a way to make room and the cap presses on hoarding rather than on collecting.
+ */
+export async function vaultUsed(tx: Executor, playerId: string): Promise<number> {
+  const [row] = await tx
+    .select({ count: sql<number>`count(*)::int` })
+    .from(gearInstances)
+    .where(and(eq(gearInstances.playerId, playerId), isNull(gearInstances.equippedChampionId)));
+  return row?.count ?? 0;
+}
+
+/** The vault as a player and the Bazaar both need to read it. */
+export interface VaultState {
+  used: number;
+  capacity: number;
+  /** Slots bought so far, over the content base. */
+  bought: number;
+  /** The ceiling purchases cannot pass. */
+  max: number;
+  /** What the next purchase adds and costs — 0 slots once the ceiling is reached. */
+  nextSlots: number;
+  nextCost: number;
+}
+
+export async function vaultState(
+  tx: Executor,
+  playerId: string,
+  context: GearContext,
+): Promise<VaultState> {
+  const [player] = await tx
+    .select({ bought: players.vaultSlots })
+    .from(players)
+    .where(eq(players.id, playerId));
+  const bought = player?.bought ?? 0;
+  const nextSlots = vaultUpgradeSlots(context.economy, bought);
+  return {
+    used: await vaultUsed(tx, playerId),
+    capacity: vaultCapacity(context.economy, bought),
+    bought,
+    max: Math.max(context.economy.vaultBaseCapacity, context.economy.vaultMaxCapacity),
+    nextSlots,
+    nextCost: nextSlots > 0 ? vaultUpgradeCost(context.economy, bought) : 0,
+  };
+}
+
+/**
+ * What a batch of drops did when the vault could not hold all of it.
+ *
+ * Relics that do not fit are **not created, and their sell value is paid instead**. Losing
+ * a drop outright is the obvious alternative and the wrong one: farming ten runs of a
+ * stage is a single press, and a player who came back to nine relics and no explanation
+ * has been punished for a cap they were never shown hitting. Silver keeps the cap a
+ * question of convenience — you wanted the relic, not the money — which is the pressure it
+ * is there to create.
+ */
+export interface VaultOverflow {
+  /** Relics the vault had no room for. */
+  count: number;
+  /** Silver paid in their place. */
+  silver: number;
+}
+
+export const NO_OVERFLOW: VaultOverflow = Object.freeze({ count: 0, silver: 0 });
+
 /**
  * Rolls a relic and writes it.
  *
@@ -218,6 +290,16 @@ export async function createGear(
   rng: Rng,
   context: GearContext,
 ): Promise<GearInstanceRow> {
+  // The one door a relic enters the vault by, so the cap does not have to be remembered at
+  // six call sites. A purchase is refused rather than converted: buying a relic and being
+  // handed silver back is nonsense, and the Bazaar can say why before the player pays.
+  const room = await vaultRoom(tx, playerId, context);
+  if (room <= 0) {
+    throw new AppError(
+      'VALIDATION',
+      'Your vault is full. Sell or equip something, or buy more room.',
+    );
+  }
   const rolled = rollGear(rng, context.tables, context.economy, request);
   const [row] = await tx
     .insert(gearInstances)
@@ -259,9 +341,58 @@ export async function createGearBatch(
   rng: Rng,
   context: GearContext,
 ): Promise<GearInstanceRow[]> {
-  if (requests.length === 0) return [];
+  return (await createGearBatchCapped(tx, playerId, requests, rng, context)).created;
+}
 
-  const values = requests.map((request) => {
+/**
+ * `createGearBatch`, with the vault enforced and the overflow reported.
+ *
+ * Requests that arrive already equipped are never counted or refused — they go onto a
+ * champion rather than into the vault, which is what lets the Arena synthesise a bot's
+ * nine slots without a cap it has no business having.
+ */
+export async function createGearBatchCapped(
+  tx: Executor,
+  playerId: string,
+  requests: readonly GearGrant[],
+  rng: Rng,
+  context: GearContext,
+): Promise<{ created: GearInstanceRow[]; overflow: VaultOverflow }> {
+  if (requests.length === 0) return { created: [], overflow: NO_OVERFLOW };
+
+  const equipped = requests.filter((request) => request.equippedChampionId);
+  const loose = requests.filter((request) => !request.equippedChampionId);
+
+  const room = loose.length > 0 ? await vaultRoom(tx, playerId, context) : 0;
+  const kept = loose.slice(0, Math.max(0, room));
+  const spilled = loose.slice(kept.length);
+
+  // Paid at the value the relic would have sold for the moment it dropped: nothing is
+  // rolled for a piece nobody will own, so this is the rank and rarity alone.
+  const overflow: VaultOverflow = spilled.length
+    ? {
+        count: spilled.length,
+        silver: spilled.reduce(
+          (sum, request) =>
+            sum +
+            sellValue(context.economy, {
+              setKey: request.setKey,
+              slot: request.slot,
+              rank: request.rank,
+              rarity: request.rarity,
+              level: 0,
+              main: { stat: 'atk', value: 0, percent: false },
+              substats: [],
+            }),
+          0,
+        ),
+      }
+    : NO_OVERFLOW;
+
+  const accepted = [...equipped, ...kept];
+  if (accepted.length === 0) return { created: [], overflow };
+
+  const values = accepted.map((request) => {
     const rolled = rollGear(rng, context.tables, context.economy, request);
     return {
       playerId,
@@ -277,7 +408,13 @@ export async function createGearBatch(
     };
   });
 
-  return tx.insert(gearInstances).values(values).returning();
+  return { created: await tx.insert(gearInstances).values(values).returning(), overflow };
+}
+
+/** Free vault slots right now, floored at zero. */
+async function vaultRoom(tx: Executor, playerId: string, context: GearContext): Promise<number> {
+  const state = await vaultState(tx, playerId, context);
+  return Math.max(0, state.capacity - state.used);
 }
 
 /** The band a stage or shop offer rolls a relic from. */
@@ -377,9 +514,19 @@ export async function unequip(
   db: Database,
   playerId: string,
   gearId: string,
+  context: GearContext,
 ): Promise<GearInstanceRow> {
   return db.transaction(async (tx) => {
     await ownedGear(tx, playerId, gearId);
+    // Taking a relic off puts it back in the vault, and the vault can be full — the cap
+    // counts loose relics precisely so that equipping is a way to make room. Refused with
+    // the sentence that says what to do rather than silently leaving it equipped.
+    if ((await vaultRoom(tx, playerId, context)) <= 0) {
+      throw new AppError(
+        'VALIDATION',
+        'Your vault is full — there is nowhere to put it. Sell something, or buy more room.',
+      );
+    }
     const [row] = await tx
       .update(gearInstances)
       .set({ equippedChampionId: null, updatedAt: new Date() })
@@ -387,6 +534,58 @@ export async function unequip(
       .returning();
     if (!row) throw AppError.notFound('No such relic.');
     return row;
+  });
+}
+
+/**
+ * Buys the next slab of vault slots (Q5).
+ *
+ * The cost curve is geometric and the ceiling is content, so the operator decides both in
+ * Admin. Idempotent through `actionId` like every other spend: a double-tapped button on a
+ * slow connection must not buy two.
+ */
+export async function buyVaultSlots(
+  db: Database,
+  playerId: string,
+  actionId: string,
+  context: GearContext,
+): Promise<VaultState> {
+  return db.transaction(async (tx) => {
+    const [player] = await tx
+      .select({
+        bought: players.vaultSlots,
+        silver: players.silver,
+        lastActionId: players.lastVaultActionId,
+      })
+      .from(players)
+      .where(eq(players.id, playerId))
+      .for('update');
+    if (!player) throw AppError.notFound('No such player.');
+
+    // A retry gets the vault as the original purchase left it, not a second slab.
+    if (player.lastActionId === actionId) return vaultState(tx, playerId, context);
+
+    const slots = vaultUpgradeSlots(context.economy, player.bought);
+    if (slots <= 0) {
+      throw new AppError('VALIDATION', 'Your vault is already as large as it goes.');
+    }
+
+    const cost = vaultUpgradeCost(context.economy, player.bought);
+    if (player.silver < cost) {
+      throw new AppError('INSUFFICIENT_FUNDS', 'Not enough silver for more vault room.');
+    }
+
+    await grant(tx, playerId, { silver: -cost }, 'gear:vaultSlots');
+    await tx
+      .update(players)
+      .set({
+        vaultSlots: player.bought + slots,
+        lastVaultActionId: actionId,
+        updatedAt: new Date(),
+      })
+      .where(eq(players.id, playerId));
+
+    return vaultState(tx, playerId, context);
   });
 }
 

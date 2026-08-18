@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { GearInstance, InventoryItem } from '@mistvale/shared';
+import type { GearInstance, InventoryItem, VaultState } from '@mistvale/shared';
 import { gameApi } from '../api/game';
 
 /**
@@ -14,6 +14,8 @@ import { gameApi } from '../api/game';
 interface InventoryState {
   gear: GearInstance[];
   items: InventoryItem[];
+  /** How full the vault is and what more room costs — null until the first read (Q5). */
+  vault: VaultState | null;
   loading: boolean;
   error: string | null;
 
@@ -21,12 +23,15 @@ interface InventoryState {
   /** After an equip, sell or upgrade elsewhere. */
   refresh: () => Promise<void>;
   setLocked: (gearId: string, locked: boolean) => Promise<void>;
+  /** Buys the next slab of vault slots. Throws with the server's sentence on a refusal. */
+  buyVaultSlots: () => Promise<void>;
   reset: () => void;
 }
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
   gear: [],
   items: [],
+  vault: null,
   loading: false,
   error: null,
 
@@ -34,8 +39,8 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     if (get().loading) return;
     set({ loading: true, error: null });
     try {
-      const [gear, items] = await Promise.all([gameApi.gear(), gameApi.items()]);
-      set({ gear, items, loading: false });
+      const [vault, items] = await Promise.all([gameApi.gear(), gameApi.items()]);
+      set({ gear: vault.gear, vault: vault.vault, items, loading: false });
     } catch (cause) {
       set({
         loading: false,
@@ -46,8 +51,8 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
   async refresh() {
     try {
-      const [gear, items] = await Promise.all([gameApi.gear(), gameApi.items()]);
-      set({ gear, items });
+      const [vault, items] = await Promise.all([gameApi.gear(), gameApi.items()]);
+      set({ gear: vault.gear, vault: vault.vault, items });
     } catch {
       // A failed background refresh leaves the last good list on screen rather than
       // blanking it; the next deliberate action will surface the error properly.
@@ -59,8 +64,15 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     set({ gear: get().gear.map((piece) => (piece.id === gearId ? updated : piece)) });
   },
 
+  async buyVaultSlots() {
+    // The vault comes back from the purchase, but the relic list has not moved — only the
+    // room around it — so nothing else needs re-reading. The wallet does, and the caller
+    // owns that: it is the screen that knows whether a top bar is on it.
+    set({ vault: await gameApi.buyVaultSlots(crypto.randomUUID()) });
+  },
+
   reset() {
-    set({ gear: [], items: [], loading: false, error: null });
+    set({ gear: [], items: [], vault: null, loading: false, error: null });
   },
 }));
 

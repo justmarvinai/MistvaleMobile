@@ -70,6 +70,10 @@ export const ROUTES = {
     upgrade: (id: string) => `/player/gear/${encodeURIComponent(id)}/upgrade`,
     /** Sell relics for silver. Equipped or locked ones are refused. */
     sell: '/player/gear/sell',
+    /** How full the vault is, and what the next slab of slots costs (Q5). */
+    vault: '/player/gear/vault',
+    /** Buys the next slab of vault slots with silver. */
+    buyVaultSlots: '/player/gear/vault/buy',
     /** `/player/gear/:id/lock` — protect a relic from a mass sell. */
     lock: (id: string) => `/player/gear/${encodeURIComponent(id)}/lock`,
     /** `/player/gear/:id/preview` — what equipping it would do, server-computed. */

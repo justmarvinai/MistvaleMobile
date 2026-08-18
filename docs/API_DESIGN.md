@@ -16,7 +16,7 @@
 ### Content & player snapshot
 | GET `/content` | Full content bundle for current revision (ETag/If-None-Match; client caches in IndexedDB). |
 | GET `/player` | Full player snapshot: profile, resources, energy `{value,cap,nextTickAt}`, unlock flags, today's multi-battle allowance `{unlocked, lockedReason, runsLeftToday, dailyCap, maxPerCall}`, tutorial step, counters (quests badge, mail badge, event banners). Fetched on boot + screen re-entry, never polled. |
-| GET `/player/champions` · GET `/player/gear` · GET `/player/items` | Roster / gear inventory / stackables. Paged where sensible. |
+| GET `/player/champions` · GET `/player/gear` · GET `/player/items` | Roster / gear inventory / stackables. Paged where sensible. `/player/gear` returns the vault state alongside the list, because the screen that shows relics is the screen that shows how many more will fit and one round trip beats two. |
 | GET `/player/starters` | The champions flagged `starter` in content — what a new account chooses between. |
 | POST `/player/starter` | `{championKey}` → grants the chosen starter. Idempotent: a player who already owns champions is left alone. |
 | PATCH `/player/settings` | Audio/gfx/preferences jsonb (schema-validated). |
@@ -32,7 +32,8 @@
 | POST `/player/champions/release` | `{ids[], actionId}` release for silver by rarity × rank (locked, favourited and equipped champions refused — the whole selection, not silently part of it). |
 | POST `/player/champions/:id/flags` | `{locked?, favourite?}` toggles. |
 | POST `/player/gear/:id/equip` | `{championId}` — clears the slot and fills it in one transaction; a partial unique index makes a double occupancy impossible rather than merely unlikely. Accessory slots check the champion's ascension against the slot definition. |
-| POST `/player/gear/:id/unequip` | Free (the source game made gear removal permanently free in 2025 — we adopt that from day one). |
+| POST `/player/gear/:id/unequip` | Free (the source game made gear removal permanently free in 2025 — we adopt that from day one). Refused when the vault is full: taking a relic off puts it back, and the cap counts loose relics. |
+| GET `/player/gear/vault` · POST `/player/gear/vault/buy` | How full the vault is, what the next slab of slots adds and costs, and buying it with silver (`{actionId}`). All five numbers are `game_config`; the ceiling is real and the last purchase sells the remainder rather than being refused (Q5). |
 | POST `/player/gear/:id/lock` | `{locked}` — protects a relic from a mass sell. |
 | POST `/player/gear/:id/upgrade` | `{times, actionId}` — resolves the whole run server-side and returns every attempt in order, so the client animates them without deciding one. A run stops at the first success, at the cap, or when the silver runs out; a failure still charges. |
 | POST `/player/gear/sell` | `{ids[], actionId}` → silver. Refuses the whole selection if any of it is locked or worn, rather than quietly sparing some of it. |

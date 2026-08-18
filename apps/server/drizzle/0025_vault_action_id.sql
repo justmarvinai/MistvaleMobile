@@ -1,0 +1,1 @@
+ALTER TABLE "players" ADD COLUMN "last_vault_action_id" text;

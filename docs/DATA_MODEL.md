@@ -233,7 +233,7 @@ Single-row-per-key `key text pk, value jsonb, schema_key text`. Every balance co
 `id, account_id fk cascade, token_hash bytea unique, expires_at, created_at, last_seen_at, user_agent` — one session table for all ranks; Admin API endpoints additionally require `rank = 'admin'` on every request (checked server-side, never cached client-side).
 
 ### `players` (1:1 account)
-`id, account_id unique, profile_name citext unique, level, xp, energy, energy_updated_at, silver bigint, crystals, valor_medals, roster_capacity, tutorial_step, tutorial_progress, tutorial_action_id, tutorial_skipped, settings jsonb, summon_pity jsonb, last_summon_action_id, daily_counters jsonb, daily_counters_day, last_multi_battle jsonb, last_daily_reset_at, is_bot bool default false` — bots are players; every system (arena, leaderboards) works on them uniformly. Currencies as columns (hot, small); stackable items normalized below.
+`id, account_id unique, profile_name citext unique, level, xp, energy, energy_updated_at, silver bigint, crystals, valor_medals, roster_capacity, vault_slots, tutorial_step, tutorial_progress, tutorial_action_id, tutorial_skipped, settings jsonb, summon_pity jsonb, last_summon_action_id, last_vault_action_id, daily_counters jsonb, daily_counters_day, last_multi_battle jsonb, last_daily_reset_at, is_bot bool default false` — bots are players; every system (arena, leaderboards) works on them uniformly. Currencies as columns (hot, small); stackable items normalized below. `vault_slots` is what the player has *bought*, not the capacity — the base and the ceiling are `game_config`, so an operator raising the base raises everybody's vault without touching a single player row (Q5).
 
 Three of those are worth their own sentence:
 

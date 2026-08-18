@@ -5,6 +5,38 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the relic vault has a ceiling, and room is something you buy (Q5)
+
+Answered by the owner on 2026-08-18: *"yes there should be a cap which can gradually be
+increased (up until a maximum or something) with ingame currency."*
+
+Without a cap nothing is ever sold. Relics drop from nearly every fight and ~95% of them
+are designed as sell-fodder — that is the silver faucet — but a faucet with no drain means
+the sell button is never pressed, the forge is never fed, and the query that lists the
+vault grows for the life of the account.
+
+- **250 loose relics to start, 50 more per purchase, 1,000 at the ceiling.** The first slab
+  is 25,000 silver and each one after costs 1.3× the last, so buying all the way to the
+  top is about 4.2M — expensive on purpose, since the alternative to buying room is
+  pressing sell. All five numbers are `game_config`, retunable in Admin without a deploy,
+  and the last purchase sells the *remainder* rather than being refused: a button that can
+  never be pressed again is a worse last step than ten slots for the price of fifty.
+- **Only loose relics count.** A relic on a champion lives there, not in the vault — so
+  equipping is a legitimate way to make room, the pressure lands on hoarding rather than on
+  collecting, and the Arena can still synthesise a bot's nine slots without a cap it has no
+  business having.
+- **A drop that does not fit is sold on the road, not lost**, and the results screen says
+  so in a line. Losing it outright is the obvious alternative and the wrong one: farming
+  ten runs is a single press, and a player who comes back to nine relics and no explanation
+  has been punished for a cap they never watched themselves hit. Buying one in the Bazaar
+  is refused up front instead — being handed silver back for a relic you paid for is
+  nonsense.
+- **Taking a relic off is refused when there is nowhere to put it**, in the sentence that
+  says what to do about it.
+- One gate, inside the one function relics are created by, rather than a check remembered
+  at six call sites. Idempotent through `actionId` like every other spend.
+
+
 ### Fixed — a battle nobody could take a turn in, and a tutorial that greyed out the game
 
 Both reported by the owner against the running box, and the first one is the worst bug

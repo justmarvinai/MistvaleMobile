@@ -4,22 +4,7 @@
 
 ## Open questions
 
-**Q5. Should the relic vault have a cap?** Found in the QA pass, and the one remaining read in the
-game with no ceiling on it: `GET /player/gear` returns every relic an account has ever kept, and the
-Relics screen sorts and filters the whole vault client-side. Relics drop from nearly every fight, so
-a heavy farmer's vault grows for as long as they play — a thousand relics is roughly a third of a
-megabyte of JSON on every visit to the screen, on a box with one core. Nothing is wrong at EA (no
-account has more than a few dozen), and I have not capped it unilaterally because a cap is a
-*design* decision: it is what makes selling and dismantling relics matter, and Raid uses one for
-exactly that reason.
-
-**Recommended default: a vault cap of 500, held in `game_config` so it is retunable without a
-deploy, with the Bazaar's sell flow as the pressure valve and mail as the overflow.** Say the word
-and it goes in; say nothing and I will implement that default in P11 rather than at EA, since the
-alternative — server-side pagination of a screen built to sort the whole vault — is a bigger change
-to a screen that works.
-
-Q4 was answered on 2026-08-18 ("as you recommend") and is in the decision record below.
+**None.** Q4 and Q5 were both answered on 2026-08-18 and are in the decision record below.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
@@ -47,6 +32,7 @@ Each has a phase and a default, so none of them blocks anything. Listed here so 
 | # | Decision | Where it lives now |
 |---|---|---|
 | A1–A6 | Defaults confirmed by silence: 2D pixel-art (the "3D MMORPG" brief line was a leftover) · no payments in EA · English-only, i18n-ready · daily reset Europe/Berlin · CC0 audio placeholders · 9 fps idles + procedural animation fallbacks | GDD, ECONOMY, DEPLOYMENT, ASSET_GUIDE |
+| Q5 | **The relic vault is capped, and the cap is bought up with silver** (2026-08-18, "yes there should be a cap which can gradually be increased (up until a maximum or something) with ingame currency"). 250 loose relics to start, 50 more per purchase, 1,000 at the ceiling; the first slab is 25,000 silver and each one after costs 1.3× the last, so the whole ceiling is about 4.2M. **Only loose relics count** — a relic on a champion is not in the vault, which makes equipping a way to make room. A drop that will not fit is **not lost**: it is sold on the road for its value and the results screen says so, because farming ten runs is one press and a player who came back to nine relics and no explanation has been punished for a cap they never saw themselves hit. All five numbers are `game_config`, so an operator retunes the whole thing without a deploy. | ECONOMY_BALANCE §vault, DATA_MODEL `players.vault_slots`, API_DESIGN §gear, `db/seed/data/config.ts` |
 | Q4 | **Synthesised sound cues stay the voice of the game at EA** (2026-08-18, "as you recommend"). Each cue is a `soundCue` content entry naming a bus and either a recording or a handful of synth parameters; twenty-seven ship, none of them a file. A CC0 pack remains a drop-in whenever one is picked — one field per cue, no code. **Music is a bus with no track**, and the Settings slider says so rather than pretending. | ASSET_GUIDE §audio, UI_UX §1.2, `db/seed/data/sounds.ts` |
 | A7 | Champion identities approved, **except Anuria = archer/ranger** (kit + visuals reworked to ranged) | GDD §6, CONTENT_PLAN §1, ASSET_GUIDE |
 | A8 | World/system names approved | — |

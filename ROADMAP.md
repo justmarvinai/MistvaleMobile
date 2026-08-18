@@ -130,6 +130,35 @@ The security half found two real ones — and chasing a flaky browser test turne
 
 **One finding is deliberately not fixed:** the relic vault has no cap and `GET /player/gear` returns all of it. A cap is what makes selling and dismantling matter, which makes it a design decision rather than a bug — it is **Q5** in `USER_QUESTIONS.md` with a recommended default (500, in `game_config`), not a change made on the owner's behalf.
 
+**Delivered (the owner's box, second pass — and the worst bug of the whole QA sweep):** two
+reports against the running game, and the first one is that **manual play had never worked**.
+`createBattle` builds the board, emits `battleStart` and stops — no turn meter moved,
+`awaiting` null — and `start` handed exactly that to the client. The skill bar is keyed on
+`awaiting` naming an ally, so a fresh fight had *nobody to act with*: "Wave 1 · Turn 0" and
+"Waiting for the server…" for as long as anyone was willing to look at it, with only Auto
+and Retreat as ways out. Since P3. Nothing caught it because every test pressed Auto,
+pressed Skip, or posted an action straight to the API, where a supplied action goes to
+whoever acts first and `awaiting` is never consulted. A battle now opens by running the
+engine to the first real decision — meters filling, anything faster than the whole team
+taking its turn, then the bar — and the Arena, which opened fights the same way, with it.
+**And the tutorial dimmed the whole game**: the overlay is a signpost rather than a fence,
+but a step with nothing to circle fell back to one full-viewport pane at 72% black, so the
+game looked disabled while every click passed straight through. Steps 1 and 2 are both like
+that, so it was the first thing a new account saw — and step 1 is a fight, so it dimmed the
+battle it was asking them to win. No target now means no dim.
+
+**Delivered (Q5 — the relic vault has a ceiling):** answered by the owner on 2026-08-18, and
+the last of the QA findings to land. Without a cap nothing is ever sold: ~95% of drops are
+designed as sell-fodder and that is the silver faucet, but a faucet with no drain means the
+sell button is never pressed and the query that lists the vault grows for the life of the
+account. **250 loose relics, +50 a purchase, 1,000 at the ceiling**, first slab 25,000
+silver and ×1.3 thereafter — about 4.2M for the lot, all five numbers `game_config`. Only
+*loose* relics count, so equipping is a way to make room and a bot can still be handed nine
+slots. A drop that does not fit is **sold on the road rather than lost**, and the results
+screen says so: farming ten runs is one press, and coming back to nine relics with no
+explanation is a punishment for a cap nobody watched themselves hit. One gate, inside the
+one function relics are created by.
+
 **Not done, and deliberately: the `ea-0.1.0` tag and the VPS deploy.** A tag is a claim that a commit is what is running, and nothing is running yet — there is no VPS reachable from here, and the exit criterion is a live box with friends on it and backups proven. The checklist puts the tag after the deploy for that reason. Everything the tag would need is ready.
 
 ---

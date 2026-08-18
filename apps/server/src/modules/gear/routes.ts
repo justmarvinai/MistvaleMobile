@@ -5,6 +5,7 @@ import {
   apiSuccess,
   routePattern,
   ascendRequestSchema,
+  buyVaultSlotsRequestSchema,
   championFlagsRequestSchema,
   equipGearRequestSchema,
   levelUpRequestSchema,
@@ -59,8 +60,28 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.get(ROUTES.gear.list, async (request, reply) => {
     const playerId = requirePlayer(request);
-    const list = await gear.listGear(app.db, playerId, context().gear);
-    return reply.send(apiSuccess({ gear: list }, app.content.rev));
+    const ctx = context().gear;
+    // The vault comes with the list rather than from a second call: the screen that shows
+    // relics is the screen that shows how many more will fit, and one round trip on a
+    // one-core box is worth more than the tidiness of two endpoints.
+    const [list, vault] = await Promise.all([
+      gear.listGear(app.db, playerId, ctx),
+      gear.vaultState(app.db, playerId, ctx),
+    ]);
+    return reply.send(apiSuccess({ gear: list, vault }, app.content.rev));
+  });
+
+  app.get(ROUTES.gear.vault, async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const vault = await gear.vaultState(app.db, playerId, context().gear);
+    return reply.send(apiSuccess({ vault }, app.content.rev));
+  });
+
+  app.post(ROUTES.gear.buyVaultSlots, async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const body = buyVaultSlotsRequestSchema.parse(request.body ?? {});
+    const vault = await gear.buyVaultSlots(app.db, playerId, body.actionId, context().gear);
+    return reply.send(apiSuccess({ vault }, app.content.rev));
   });
 
   // ── Champions ────────────────────────────────────────────────────────────
@@ -230,7 +251,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const playerId = requirePlayer(request);
     const id = idParam(request);
 
-    const row = await gear.unequip(app.db, playerId, id);
+    const row = await gear.unequip(app.db, playerId, id, context().gear);
     return reply.send(apiSuccess({ gear: gear.toDto(row, context().gear) }, app.content.rev));
   });
 
