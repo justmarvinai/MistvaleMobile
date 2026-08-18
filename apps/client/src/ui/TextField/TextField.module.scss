@@ -8,34 +8,51 @@
   @include label-text;
 }
 
-.inputWrap {
-  @include inset-well;
+/* Painted rather than drawn in CSS since the design rework.
 
+   The field keeps React's own `<input>` — a controlled value, `aria-describedby`, a
+   forwarded ref and native form semantics are all things the game needs and a wrapped
+   component would have to re-earn — and takes the *art* from the library instead. The
+   9-slice is the same `--fui-btn-ghost-*` treatment `TextInput` paints its own well with,
+   read from the theme, so the two stay in step without this file knowing which pack is
+   loaded.
+
+   That is the rule for the whole rework, and it is worth stating once: **the library owns
+   chrome, React owns behaviour.** Where the library's component *is* the semantic element
+   and holds no state React must drive — a button, a panel, a card, a bar — the component
+   is used. Where React has to own the state, as here, the art is used and the element
+   stays ours. */
+.inputWrap {
+  position: relative;
   display: flex;
   align-items: center;
   gap: $space-2;
-  padding: 0 $space-3;
-  transition:
-    border-color $duration-fast $ease-out,
-    box-shadow $duration-fast $ease-out;
+  padding: $space-1 $space-3;
+  transition: filter $duration-fast $ease-out;
 
-  &:focus-within {
-    border-color: $mist;
-    box-shadow:
-      inset 0 2px 6px rgba(0, 0, 0, 0.5),
-      0 0 0 1px $mist-glow;
+  /* The art on its own layer, behind the input: a `border-image` on the wrapper itself
+     would shift every absolutely-positioned child inward by the border width, which is
+     the trap the library's own notes warn about. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-style: solid;
+    border-color: transparent;
+    border-width: var(--fui-btn-ghost-bw);
+    border-image-source: var(--fui-btn-ghost-src);
+    border-image-slice: var(--fui-btn-ghost-sl) fill;
+    border-image-repeat: stretch;
+  }
+
+  &:focus-within::before {
+    filter: brightness(1.35) saturate(1.15);
   }
 }
 
-.invalid {
-  border-color: $danger;
-
-  &:focus-within {
-    border-color: $danger;
-    box-shadow:
-      inset 0 2px 6px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(212, 80, 63, 0.4);
-  }
+.invalid::before {
+  filter: hue-rotate(-35deg) saturate(1.6) brightness(1.1);
 }
 
 .icon {

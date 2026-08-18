@@ -82,7 +82,7 @@
   span {
     display: block;
     height: 100%;
-    background: $mist-dim;
+    background: $accent-dim;
     transition: width $duration-base $ease-out;
   }
 }
@@ -99,7 +99,7 @@
   padding: 0;
   background: none;
   border: none;
-  color: $mist;
+  color: $accent;
   font: inherit;
   font-size: 0.75rem;
   text-decoration: underline;

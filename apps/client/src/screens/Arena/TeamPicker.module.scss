@@ -36,7 +36,7 @@
 
   &[data-filled='true'] {
     border-style: solid;
-    border-color: $mist-dim;
+    border-color: $accent-dim;
     color: $parchment;
   }
 }
@@ -75,11 +75,11 @@
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    border-color: $mist;
+    border-color: $accent;
   }
 
   &[aria-pressed='true'] {
-    border-color: $mist;
+    border-color: $accent;
     background: $panel-raised;
   }
 

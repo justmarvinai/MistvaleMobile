@@ -5,6 +5,59 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the game looks like the examples now (design rework, D1: the primitives)
+
+The owner looked at D0's result beside the library's own example screens and said it did
+not look like them. It did not, and the cause was a decision made in D0: the theme layer
+had pulled the accent to Mistvale's pale teal and cooled the grounds, on the theory that a
+game with "mist" in its name wants a cool light. That is backwards. The painted art is what
+makes the screens read as a game, and bronze filigree over a blue-grey panel reads as a
+texture pasted onto an app — which is exactly what the owner saw.
+
+- **One palette for the whole client, and it is the art pack's.** `fui/mistvale.css` no
+  longer overrides the palette at all, and `styles/_tokens.scss` was moved onto Dark
+  Ember's own values instead — warm near-black grounds, ember bronze, gold, the pack's
+  glossy red. The Sass variable that named the teal is renamed with it: `$mist` is
+  `$accent`, because a variable called mist holding bronze is a trap for the next reader.
+  The Pixi backdrop, the battle ground and the floating combat text moved too, so the
+  canvas layer and the DOM layer are lit by the same fire rather than arguing across the
+  seam. Affinity colours did not move — they name a champion's element and mean the same
+  thing on a card, in a log and on a threat line.
+- **`Button` and `TextField` are painted.** The button is the library's own `<button>`
+  element, so focus, tab order and form semantics are native; what Mistvale's wrapper still
+  owns is the press cue (which is how "every action acknowledges within 100 ms" stays a
+  property of the kit rather than of forty screens), the loading state, React children
+  through a portal, and attribute passthrough. The field keeps React's `<input>` — a
+  controlled value and a forwarded ref are things a wrapped component would have to
+  re-earn — and takes the well's 9-slice art. That is the rule for the whole rework:
+  **the library owns chrome, React owns behaviour.**
+- **`Heading`, Mistvale's own.** Sixteen screens each opened with a plain `<h1>` in a
+  screen-local module, which is how sixteen screens ended up with sixteen title
+  treatments and none of them looked like a game. There is one now, lifted from the
+  library's own title screen: large and widely letterspaced, lit from behind by the accent,
+  an italic tagline in soft gold, and the pack's painted vine under it.
+- **Five components added** where an existing feature already wanted one: `DialogueBox`
+  for the tutorial's Wardenmaster, `ActionBar` for the battle skill bar, `AchievementPopup`
+  for the unlock celebrations, `PatchNotes` for the News screen, `LoadingDots` for the
+  short waits. No component was vendored to invent a feature — the rework is a rework of
+  the design, and the game's content and mechanics are untouched.
+
+Two bugs fixed in the same pass, both found by looking at the screen rather than at a test:
+
+- **The ornament under every title was 40px of nothing, and every modal's close button was
+  a blank square.** Dark Ember reaches across packs: its divider, three icon buttons, two
+  bar fills and one panel are Stone & Vine files. D0 vendored art *by pack* and left Stone
+  & Vine out to save 3.4 MB, so those seven slots pointed at 404s — and a missing
+  `border-image` is not a broken image, it is an absent one, which is why nothing looked
+  wrong enough to chase. `pnpm fui:vendor` now resolves what the vendored themes actually
+  reference and copies that too: seven files, 0.3 MB, and a theme growing a reference comes
+  out right on the next run with nobody maintaining a list.
+- **A component with a required options bag could not be typed at all.** The bridge's
+  constructor type took an optional parameter, which every defaulted component satisfies
+  and `SegmentedControl` — whose `segments` is genuinely required — does not. The parameter
+  is required now and the constraint admits the `| undefined` that the defaulted shape
+  drags in; callers still see the real bag.
+
 ### Added — the game is dressed (design rework, D0: the foundation)
 
 Commissioned by the owner on 2026-08-18: *"I want you to FULLY rework the Design of the
@@ -31,10 +84,11 @@ answers came with it — **sans-serif only**, and **the Admin Panel is not touch
 - **A theme layer rather than a fork.** The library's indirection is assets → themes →
   components, and a component only ever reads a semantic slot — so making it look like
   Mistvale is a matter of rebinding slots, and no vendored file is touched.
-  `fui/mistvale.css` moves the palette off bronze toward the game's pale teal, and rebinds
-  the display and body faces: **Cinzel and Spectral are serif and the brief has forbidden
-  serif since P0**, so both point at Mistvale's own `--mv-font-*`, where the game's type has
-  always been decided.
+  `fui/mistvale.css` rebinds the display and body faces — **Cinzel and Spectral are serif
+  and the brief has forbidden serif since P0**, so both point at Mistvale's own
+  `--mv-font-*`, where the game's type has always been decided — and binds the rarity ramp
+  to the game's five tiers. It first also pulled the palette off bronze toward the game's
+  pale teal; D1 reversed that, for the reason recorded there.
 - **One React bridge for all of them.** The library is vanilla TypeScript by design and
   names "a React ref" as a host; `useFui`/`Fui`/`FuiSlotted` are that host. A component is
   constructed once and updated through its own `update()` — never rebuilt, which would

@@ -1,0 +1,171 @@
+/* PatchNotes — the changelog a live game shows on login. */
+
+.fui-patch {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: var(--fui-radius);
+  background: rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+}
+
+.fui-patch__head {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.fui-patch__title {
+  font-size: 10px;
+}
+
+.fui-patch__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.fui-patch__release {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.fui-patch__release:last-child {
+  border-bottom: 0;
+}
+
+.fui-patch__release-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--fui-gap-sm);
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-patch__release-head:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.fui-patch__version {
+  padding: 1px 7px;
+  border-radius: 3px;
+  background: var(--fui-accent-deep);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fui-accent-soft);
+}
+
+.fui-patch__release-title {
+  flex: 1;
+  font-family: var(--fui-font-display);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: var(--fui-ink);
+}
+
+.fui-patch__date {
+  font-size: 10.5px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-patch__caret {
+  width: 0;
+  height: 0;
+  align-self: center;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--fui-ink-faint);
+  transition: transform var(--fui-t) var(--fui-ease);
+}
+
+.fui-patch__release.is-open .fui-patch__caret {
+  transform: rotate(180deg);
+}
+
+/* Same 0fr → 1fr trick Accordion uses, so a release opens without anyone
+   measuring its content. */
+.fui-patch__wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--fui-t) var(--fui-ease);
+}
+
+.fui-patch__release.is-open .fui-patch__wrap {
+  grid-template-rows: 1fr;
+}
+
+.fui-patch__clip {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.fui-patch__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 10px 10px;
+}
+
+.fui-patch__line {
+  --fui-patch-ink: var(--fui-ink-faint);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fui-gap-sm);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--fui-ink-dim);
+}
+
+.fui-patch__line[data-kind='new'] { --fui-patch-ink: var(--fui-info); }
+.fui-patch__line[data-kind='buff'] { --fui-patch-ink: var(--fui-success); }
+.fui-patch__line[data-kind='nerf'] { --fui-patch-ink: var(--fui-danger); }
+.fui-patch__line[data-kind='fix'] { --fui-patch-ink: var(--fui-ink-faint); }
+.fui-patch__line[data-kind='balance'] { --fui-patch-ink: var(--fui-warn); }
+.fui-patch__line[data-kind='event'] { --fui-patch-ink: var(--fui-rarity-epic); }
+
+/* The tag is what a player actually scans for — fixed width so the column of
+   colours lines up down the release. */
+.fui-patch__tag {
+  flex: none;
+  width: 58px;
+  padding: 1px 0;
+  border: 1px solid color-mix(in srgb, var(--fui-patch-ink) 55%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--fui-patch-ink) 16%, transparent);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--fui-patch-ink);
+}
+
+.fui-patch__art {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4) center / cover no-repeat;
+}
+
+.fui-patch__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.fui-patch__subject {
+  margin-right: 5px;
+  font-weight: 700;
+  color: var(--fui-ink);
+}
+
+.fui-patch__foot {
+  padding: var(--fui-gap-sm) 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+}

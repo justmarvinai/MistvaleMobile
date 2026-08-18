@@ -31,7 +31,7 @@ export async function initStage(canvas: HTMLCanvasElement): Promise<Application>
   const application = new Application();
   await application.init({
     canvas,
-    background: 0x0b0e14,
+    background: 0x0c0a09,
     antialias: false, // Pixel art must never be smoothed.
     resolution: window.devicePixelRatio || 1,
     autoDensity: true,
@@ -106,9 +106,9 @@ export function createMistScene(): Scene {
 
   // Three depth layers, each drifting at its own rate.
   const configs = [
-    { color: 0x1a2433, alpha: 0.55, y: 0.65, speed: 0.006, amplitude: 14, blobs: 5 },
-    { color: 0x223047, alpha: 0.4, y: 0.78, speed: 0.011, amplitude: 22, blobs: 4 },
-    { color: 0x2c3d59, alpha: 0.28, y: 0.9, speed: 0.017, amplitude: 30, blobs: 3 },
+    { color: 0x1d1712, alpha: 0.55, y: 0.65, speed: 0.006, amplitude: 14, blobs: 5 },
+    { color: 0x2a2018, alpha: 0.4, y: 0.78, speed: 0.011, amplitude: 22, blobs: 4 },
+    { color: 0x3b2c1e, alpha: 0.28, y: 0.9, speed: 0.017, amplitude: 30, blobs: 3 },
   ];
 
   for (const config of configs) {
@@ -124,10 +124,10 @@ export function createMistScene(): Scene {
     layers.push({ graphic, speed: config.speed, offset: 0, amplitude: config.amplitude });
   }
 
-  // A faint teal glow near the horizon: the mist's ghost-light.
+  // A warm ember glow near the horizon: the light the vale is lit by.
   const glow = new Graphics()
     .ellipse(VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT * 0.6, VIRTUAL_WIDTH * 0.6, 90)
-    .fill({ color: 0x7fd4c1, alpha: 0.05 });
+    .fill({ color: 0xc2764a, alpha: 0.05 });
   root.addChildAt(glow, 0);
 
   // Without this the layers read as hard-edged ellipses rather than fog. Low quality is

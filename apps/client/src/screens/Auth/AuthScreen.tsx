@@ -6,7 +6,10 @@ import {
   PROFILE_NAME_MAX,
   PROFILE_NAME_MIN,
 } from '@mistvale/shared';
+import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
+import { Fui } from '@/fui/react';
 import { Button } from '@/ui/Button/Button';
+import { Heading } from '@/ui/Heading/Heading';
 import { Panel } from '@/ui/Panel/Panel';
 import { TextField } from '@/ui/TextField/TextField';
 import { useSessionStore } from '@/state/sessionStore';
@@ -14,7 +17,7 @@ import { ApiRequestError } from '@/api/client';
 import { toast } from '@/state/uiStore';
 import styles from './AuthScreen.module.scss';
 
-type Mode = 'login' | 'register';
+type AuthMode = 'login' | 'register';
 
 /**
  * Sign in / create account.
@@ -24,7 +27,7 @@ type Mode = 'login' | 'register';
  * states plainly so nobody waits for a reset mail that will never come.
  */
 export function AuthScreen() {
-  const [mode, setMode] = useState<Mode>('login');
+  const [mode, setMode] = useState<AuthMode>('login');
   const [accountName, setAccountName] = useState('');
   const [profileName, setProfileName] = useState('');
   const [password, setPassword] = useState('');
@@ -34,7 +37,7 @@ export function AuthScreen() {
   const login = useSessionStore((state) => state.login);
   const register = useSessionStore((state) => state.register);
 
-  function switchMode(next: Mode) {
+  function switchMode(next: AuthMode) {
     setMode(next);
     setFieldErrors({});
     setPassword('');
@@ -83,32 +86,23 @@ export function AuthScreen() {
 
   return (
     <div className={styles.screen}>
-      <div className={styles.brand}>
-        <h1 className={styles.logo}>Mistvale</h1>
-        <p className={styles.tagline}>The mist keeps what it takes. Call it back.</p>
-      </div>
+      <Heading tagline="The mist keeps what it takes. Call it back.">Mistvale</Heading>
 
       <Panel variant="hero" className={styles.card}>
-        <div className={styles.tabs} role="tablist" aria-label="Account">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={!isRegister}
-            className={`${styles.tab} ${!isRegister ? styles.tabActive : ''}`}
-            onClick={() => switchMode('login')}
-          >
-            Sign in
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isRegister}
-            className={`${styles.tab} ${isRegister ? styles.tabActive : ''}`}
-            onClick={() => switchMode('register')}
-          >
-            New warden
-          </button>
-        </div>
+        <Fui
+          of={SegmentedControl}
+          className={styles.tabs}
+          attrs={{ 'aria-label': 'Account' }}
+          options={{
+            block: true,
+            value: mode,
+            segments: [
+              { value: 'login', label: 'Sign in' },
+              { value: 'register', label: 'New warden' },
+            ],
+          }}
+          on={{ 'segment:change': (value) => switchMode(value as AuthMode) }}
+        />
 
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <TextField

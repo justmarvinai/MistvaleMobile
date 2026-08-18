@@ -28,7 +28,7 @@
  * is generated and gitignored there.
  */
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FUI_COMPONENTS, FUI_PACKS } from './components';
@@ -136,33 +136,55 @@ async function main(): Promise<void> {
   }
 
   // ── The art ────────────────────────────────────────────────────────────────
-  let artFiles = 0;
-  let artBytes = 0;
+  // Two sources, because a pack is not a closed set. `FUI_PACKS` names the packs Mistvale
+  // ships whole; on top of that, **a theme reaches across packs**. Dark Ember's own
+  // stylesheet points its divider, its three icon buttons, two bar fills and one panel at
+  // Stone & Vine files — seven images out of that pack's several hundred. Vendoring by
+  // pack alone left those seven slots pointing at 404s, which is not a broken image but
+  // an *absent* one: the ornament under every screen title was simply 40px of nothing,
+  // and the close button on every modal was a blank square.
+  //
+  // So the art set is the listed packs plus whatever the vendored themes actually
+  // reference, resolved through `assets.css`. Adding a pack, or a theme growing a
+  // reference, both come out right on the next run with nobody maintaining a list.
+  const artWanted = new Set<string>();
   for (const pack of FUI_PACKS) {
     const source = join(from, 'public/fui', pack);
     if (!existsSync(source)) fail(`no art pack "${pack}" in ${join(from, 'public/fui')}`);
-    const target = join(artOut, pack);
-    const names = (await readdir(source)).filter((name) => !name.startsWith('.'));
-    for (const name of names) {
-      const file = join(source, name);
-      if ((await stat(file)).isDirectory()) continue;
-      artBytes += (await stat(file)).size;
-      artFiles += 1;
-      if (check) {
-        if (!existsSync(join(target, name)))
-          mismatched.push(relative(repoRoot, join(target, name)));
-        continue;
-      }
-      await mkdir(target, { recursive: true });
-      await cp(file, join(target, name));
+    for (const name of await readdir(source)) {
+      if (name.startsWith('.')) continue;
+      if ((await stat(join(source, name))).isDirectory()) continue;
+      artWanted.add(`${pack}/${name}`);
     }
   }
+  for (const path of themeArtReferences(from)) artWanted.add(path);
 
-  // A pack dropped from the list must not leave its art behind: `public/` is served
-  // wholesale, so a stale pack is dead weight in every deploy.
+  let artFiles = 0;
+  let artBytes = 0;
+  for (const rel of [...artWanted].sort()) {
+    const file = join(from, 'public/fui', rel);
+    if (!existsSync(file)) fail(`theme references /fui/${rel}, which the library does not have`);
+    artBytes += (await stat(file)).size;
+    artFiles += 1;
+    const target = join(artOut, rel);
+    if (check) {
+      if (!existsSync(target)) mismatched.push(relative(repoRoot, target));
+      continue;
+    }
+    await mkdir(dirname(target), { recursive: true });
+    await cp(file, target);
+  }
+
+  // Art dropped from the set must not linger: `public/` is served wholesale, so a stale
+  // file is dead weight in every deploy.
   if (!check && existsSync(artOut)) {
-    for (const name of await readdir(artOut)) {
-      if (!FUI_PACKS.includes(name)) await rm(join(artOut, name), { recursive: true, force: true });
+    for (const pack of await readdir(artOut)) {
+      const dir = join(artOut, pack);
+      if (!(await stat(dir)).isDirectory()) continue;
+      for (const name of await readdir(dir)) {
+        if (!artWanted.has(`${pack}/${name}`)) await rm(join(dir, name), { force: true });
+      }
+      if ((await readdir(dir)).length === 0) await rm(dir, { recursive: true, force: true });
     }
   }
 
@@ -233,7 +255,8 @@ async function main(): Promise<void> {
       `- **${FUI_COMPONENTS.length} components**, ${wanted.size} files, resolved through the`,
       "  library's own `/r/<Name>.json` records (the `copy` field is the transitive closure",
       '  of real import statements).',
-      `- **${FUI_PACKS.length} art packs** — ${FUI_PACKS.join(', ')} — ${artFiles} files,`,
+      `- **${FUI_PACKS.length} art packs** — ${FUI_PACKS.join(', ')} — plus the individual`,
+      `  files Dark Ember reaches into other packs for. ${artFiles} files,`,
       `  ${(artBytes / 1024 / 1024).toFixed(1)} MB, in \`apps/client/public/fui/\`.`,
       '',
       'Re-vendor with `pnpm fui:vendor --from <path to a FantasyUIs checkout>`; CI runs',
@@ -249,3 +272,31 @@ async function main(): Promise<void> {
 }
 
 await main();
+
+/**
+ * Every `/fui/…` file the vendored stylesheets reference.
+ *
+ * `base.css` and the theme name art through `var(--fui-img-*)`; `assets.css` is the one
+ * place those slots become URLs. Resolving the two against each other is how a theme's
+ * cross-pack reference is discovered rather than remembered.
+ */
+function themeArtReferences(from: string): string[] {
+  const styles = join(from, 'src/lib/styles');
+  const declared = new Map<string, string>();
+  for (const match of readFileSync(join(styles, 'assets.css'), 'utf8').matchAll(
+    /(--fui-img-[\w-]+):\s*url\("\/fui\/([^"]+)"\)/g,
+  )) {
+    const [, slot, url] = match;
+    if (slot && url) declared.set(slot, url);
+  }
+  const referenced = new Set<string>();
+  for (const file of ['base.css', 'theme-dark-ember.css']) {
+    for (const match of readFileSync(join(styles, file), 'utf8').matchAll(
+      /var\((--fui-img-[\w-]+)\)/g,
+    )) {
+      const url = match[1] === undefined ? undefined : declared.get(match[1]);
+      if (url) referenced.add(url);
+    }
+  }
+  return [...referenced];
+}

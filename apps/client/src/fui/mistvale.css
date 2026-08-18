@@ -37,25 +37,29 @@
   --fui-font-mono: var(--mv-font-mono);
 
   /* ── Palette ───────────────────────────────────────────────────────────────
-     Dark Ember is bronze-on-black; Mistvale is that seen through mist. The
-     accent moves off pure bronze toward the game's own pale teal so the two art
-     languages — painted chrome and pixel sprites — share a light source, and
-     the grounds go a touch cooler and darker to sit under the Pixi backdrop
-     rather than compete with it. */
-  --fui-accent: #7fd4c1;
-  --fui-accent-soft: #b7ece0;
-  --fui-accent-deep: #1f4a44;
-  --fui-gold: #d9b45a;
-  --fui-gold-soft: #f0dda6;
+     **Not overridden, on purpose.**
 
-  --fui-ink: #e8e3d8;
-  --fui-ink-dim: #9aa0a2;
-  --fui-ink-faint: #5d6468;
+     The first cut of this file pulled the accent to Mistvale's pale teal and
+     cooled the grounds, on the theory that a game with "mist" in its name wants
+     a cool light. The owner looked at the result next to the library's own
+     example screens and said, correctly, that it no longer looked like them —
+     and the examples are the brief. Dark Ember is warm bronze and gold on a
+     near-black leather ground, and *that* is what makes the painted art, the
+     filigree and the glossy buttons read as one object rather than as textures
+     laid over a cool app.
 
-  --fui-stone: #2b3138;
-  --fui-stone-dark: #171b21;
-  --fui-slate: #0b0e14;
-  --fui-blood: #8a2b24;
+     So the palette is the pack's, unchanged, and it is Mistvale's own tokens in
+     `styles/_tokens.scss` that were moved onto it — one palette for the whole
+     client instead of two arguing across every seam.
+
+     What is bound below is only what the pack has no value for: the rarity
+     ramp, because rarity is Mistvale's content and the names have to match the
+     game's five tiers rather than the library's six. */
+  --fui-rarity-common: var(--mv-rarity-common);
+  --fui-rarity-uncommon: var(--mv-rarity-uncommon);
+  --fui-rarity-rare: var(--mv-rarity-rare);
+  --fui-rarity-epic: var(--mv-rarity-epic);
+  --fui-rarity-legendary: var(--mv-rarity-legendary);
 }
 
 /* ── The seam between the library and the game ────────────────────────────────

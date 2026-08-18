@@ -51,7 +51,7 @@
   cursor: pointer;
 
   &:hover .chapterName {
-    color: $mist;
+    color: $accent;
   }
 }
 
@@ -111,8 +111,8 @@
   cursor: pointer;
 
   &[aria-pressed='true'] {
-    border-color: $mist;
-    color: $mist;
+    border-color: $accent;
+    color: $accent;
   }
 
   &:disabled {
@@ -145,7 +145,7 @@
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    border-color: $mist;
+    border-color: $accent;
   }
 
   &:disabled {

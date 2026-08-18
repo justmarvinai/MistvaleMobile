@@ -47,8 +47,8 @@
   cursor: pointer;
 
   &[aria-pressed='true'] {
-    border-color: $mist;
-    color: $mist;
+    border-color: $accent;
+    color: $accent;
   }
 
   &:disabled {
@@ -103,7 +103,7 @@
 }
 
 .rolled {
-  color: $mist;
+  color: $accent;
 }
 
 .attemptCost {

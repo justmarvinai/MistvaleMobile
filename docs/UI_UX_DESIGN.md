@@ -6,24 +6,27 @@
 
 ## 1. Design language — "Forged in mist"
 
-**Mood:** weathered dark-fantasy warcamp seen through drifting mist — heavy iron, old wood, faint teal ghost-light. NOT clean/flat/rounded "app" design; NOT neon mobile-gacha plastic.
+**Mood:** weathered dark-fantasy warcamp seen through drifting mist — heavy iron, old wood, ember light in the dark. NOT clean/flat/rounded "app" design; NOT neon mobile-gacha plastic.
+
+> **Superseded in the 2026-08-18 design rework.** The client is built on **FantasyUIs** (Dark Ember) since D0, and the hand-built pixel kit below is retired. What survives verbatim is the *rules*: no serif, no generic rounded app design, every action acknowledged inside 100 ms, `prefers-reduced-motion` honoured. What changed is who draws the chrome. The palette section is rewritten below; §1.1's panel and button paragraphs are kept as the record of what was there before and are marked.
 
 ### 1.1 Foundations
-- **Palette (design tokens, `styles/tokens.scss`):**
-  - Ground: deep blue-black `#0b0e14`, panel wood/iron darks `#161b26`, `#1e2533`
-  - Mist accent: pale teal `#7fd4c1` (interactive glow, links, active states)
-  - Parchment text: `#e8ddc4` (primary), `#9aa3b5` (secondary)
-  - Element colors: Ember `#e5533d` · Tide `#3f8fd4` · Verdant `#57b35c` · Mist `#a06bd8`
-  - Rarity colors: Common `#9aa3b5` · Uncommon `#57b35c` · Rare `#3f8fd4` · Epic `#a06bd8` · Legendary `#e6a53c`
-  - Danger `#d4503f`, Success `#57b35c`, Gold/currency `#e6c35c`
+- **Palette (design tokens, `styles/_tokens.scss`) — Dark Ember, one palette for the whole client:**
+  - Ground: warm near-black `#0c0a09`, panels `#191612`, raised `#221d18`, wells `#0e0c0a`
+  - Accent: ember bronze `#c2764a` (interactive glow, links, active states), soft `#e5b184`
+  - Text: parchment `#e6dccb` (primary), `#9c9382` (secondary)
+  - Element colors: Ember `#e5533d` · Tide `#3f8fd4` · Verdant `#57b35c` · Mist `#a06bd8` — **unchanged**, because an affinity colour is content, not chrome
+  - Rarity colors: Common `#9d9d9d` · Uncommon `#38d13c` · Rare `#3b8ae0` · Epic `#a335ee` · Legendary `#ff8000` — the library's ramp, the one this genre's players already read without being taught
+  - Danger `#c8412f`, Success `#38d13c`, Gold/currency `#c9a227`, the pack's glossy red `#7d1f1a`
+  - **The values are `theme-dark-ember.css`'s own**, so a Sass module and a vendored component asked for "the accent" get the same colour to the byte. `fui/mistvale.css` overrides no colour at all — it binds the fonts and the rarity ramp and stops. The first cut of the rework did the opposite, bending the pack toward the old teal, and the result stopped looking like the library's own example screens; the direction is now art-first, and that is the rule.
   - Dark UI only at EA (games don't theme-flip); tokens make a later light/colorblind variant cheap.
 - **Typography (NO serif fonts anywhere, ever):**
   - Display/headers: a chunky pixel font — **"Jacquard"-style is serif-risky, so: `Pixelify Sans`** (Google, OFL) for headers/logo flavor
   - Body/UI: **`Inter`** (variable, self-hosted) — pixel fonts at body sizes destroy readability; Inter keeps menus crisp and modern
   - Numbers in battle floaters: pixel display font, outlined
   - All fonts self-hosted (no external requests), `font-display: swap`
-- **Panel system:** Kenney Fantasy UI Borders as 9-slice `border-image` (Default set for standard panels, Double set for modal/hero panels). We recolor/tint via CSS filters + our own overlay textures (subtle noise + vignette) so it reads "Mistvale", not "asset pack". Custom-drawn pixel corner ornaments added in P10 polish.
-- **Buttons:** 3 tiers — Primary (embossed iron + teal glow edge), Secondary (flat iron), Tertiary/text. Pressed = 1px downshift + darker bevel (pixel-authentic), disabled = desaturate + no glow. Focus ring (keyboard) = 2px teal dashed — accessibility is not optional.
+- **Panel system (superseded — see the note above; kept as the record of the pre-rework kit):** Kenney Fantasy UI Borders as 9-slice `border-image` (Default set for standard panels, Double set for modal/hero panels). We recolor/tint via CSS filters + our own overlay textures (subtle noise + vignette) so it reads "Mistvale", not "asset pack". Custom-drawn pixel corner ornaments added in P10 polish.
+- **Buttons (superseded — the library paints all four variants now):** 3 tiers — Primary (embossed iron + teal glow edge), Secondary (flat iron), Tertiary/text. Pressed = 1px downshift + darker bevel (pixel-authentic), disabled = desaturate + no glow. Focus ring (keyboard) = 2px teal dashed — accessibility is not optional.
 - **Iconography:** exclusively **game-icons.net** (CC BY 3.0) for EA — flat white SVGs tinted by token colors, on pixel-frame chips. Full icon map §6. Attribution page in Settings → Credits (license-compliant), plus `CREDITS.md`.
 
 ### 1.2 Motion principles ("highly animated, feeling alive")

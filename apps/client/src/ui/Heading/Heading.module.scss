@@ -1,0 +1,104 @@
+/* The treatment is the library's own title screen (`MainMenu.css`), restated in Mistvale's
+   type: large, widely letterspaced, lit from behind by the accent rather than filled with
+   it, italic gold tagline, painted vine under. */
+
+.heading {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: $space-3;
+  margin-bottom: $space-4;
+}
+
+.lines {
+  min-width: 0;
+}
+
+.title {
+  @include display-text(28px);
+  margin: 0;
+  color: $parchment;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.95),
+    0 0 40px $accent-glow;
+}
+
+.tagline {
+  margin: $space-2 0 0;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: $gold-soft;
+  text-shadow: 0 2px 6px #000;
+}
+
+/* The vine spans the full heading regardless of how the lines and actions divide it. */
+.rule {
+  grid-column: 1 / -1;
+  /* The library's own default is 0.34, sized for a component gallery. A screen title
+     wants the ornament as punctuation rather than as a second headline. */
+  --fui-divider-scale: 0.22;
+  margin-top: $space-2;
+  opacity: 0.85;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+/* ── Levels ───────────────────────────────────────────────────────────────────
+   One step down each time, and the glow goes with the size: a section label lit from
+   behind reads as a mistake rather than as emphasis. */
+
+.level1 .title {
+  font-size: clamp(26px, 3.4vw, 40px);
+}
+
+.level2 {
+  margin-bottom: $space-3;
+}
+
+.level2 .title {
+  font-size: 18px;
+  color: $accent-soft;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.level2 .tagline,
+.level3 .tagline {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.level3 {
+  margin-bottom: $space-2;
+}
+
+.level3 .title {
+  font-size: 13px;
+  color: $muted;
+  letter-spacing: 0.14em;
+  text-shadow: none;
+}
+
+/* ── Alignment ────────────────────────────────────────────────────────────────
+   Centred is the screen-opening shape from the examples; left is the shape a section
+   inside a panel wants, where a centred title would float away from its list. */
+
+.center {
+  justify-items: center;
+  text-align: center;
+}
+
+.center .lines {
+  grid-column: 1 / -1;
+}
+
+.left {
+  justify-items: stretch;
+  text-align: left;
+}

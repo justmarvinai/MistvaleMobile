@@ -130,7 +130,7 @@
 }
 
 .tileRelics {
-  color: $mist;
+  color: $accent;
   font-family: $font-mono;
   font-size: 0.625rem;
 }
@@ -164,7 +164,7 @@
   cursor: pointer;
 
   &:hover {
-    border-color: $mist;
+    border-color: $accent;
   }
 }
 

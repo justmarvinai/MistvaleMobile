@@ -33,8 +33,8 @@
   }
 
   &[aria-selected='true'] {
-    border-color: $mist;
-    color: $mist;
+    border-color: $accent;
+    color: $accent;
   }
 }
 
@@ -115,7 +115,7 @@
   }
 
   &:hover:not(:disabled) {
-    border-color: $mist;
+    border-color: $accent;
   }
 
   &:disabled {

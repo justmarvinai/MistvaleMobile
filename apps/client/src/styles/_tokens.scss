@@ -7,38 +7,58 @@
 // Hard rules encoded here: no serif fonts anywhere, no generic rounded "app" styling.
 
 // ── Palette ────────────────────────────────────────────────────────────────────
-$ground-deep: #0b0e14; // page background, deepest layer
-$ground: #11151d; // panels sitting on the page
-$panel: #161b26; // standard panel fill
-$panel-raised: #1e2533; // hovered/raised surfaces
-$panel-inset: #0d1119; // wells, inputs, inset areas
-$edge: #2a3345; // borders and dividers
-$edge-bright: #3a465e; // hovered borders
+// Warm near-black, bronze and gold — the Dark Ember palette the game's UI art is
+// painted in.
+//
+// This used to be a cool slate-and-teal palette of Mistvale's own, and the painted
+// components were being bent to match it. That was backwards: the art is the thing
+// that makes the game look like a game, and a bronze filigree corner over a blue-grey
+// panel reads as a texture pasted onto an app. So the direction is reversed — the
+// game's tokens sit on the art pack's palette, and there is one palette for the whole
+// client instead of two arguing across every seam.
+//
+// The values are `theme-dark-ember.css`'s own, so a Sass module and a vendored
+// component asked for "the accent" get the same colour to the byte.
+$ground-deep: #0c0a09; // page background, deepest layer
+$ground: #12100d; // panels sitting on the page
+$panel: #191612; // standard panel fill
+$panel-raised: #221d18; // hovered/raised surfaces
+$panel-inset: #0e0c0a; // wells, inputs, inset areas
+$edge: #332c24; // borders and dividers
+$edge-bright: #4a3f33; // hovered borders
 
-$mist: #7fd4c1; // primary interactive accent
-$mist-dim: #4a9c8c;
-$mist-glow: rgba(127, 212, 193, 0.35);
+$accent: #c2764a; // primary interactive accent — the pack's ember bronze
+$accent-soft: #e5b184; // lit edges, hovered text, headings
+$accent-deep: #5a3320; // accent fills that sit under text
+$accent-dim: #8a5433;
+$accent-glow: rgba(194, 118, 74, 0.35);
 
-$parchment: #e8ddc4; // primary text
-$parchment-dim: #b9b096;
-$muted: #9aa3b5; // secondary text
-$muted-deep: #6b7488;
+$parchment: #e6dccb; // primary text
+$parchment-dim: #b6ab97;
+$muted: #9c9382; // secondary text
+$muted-deep: #635c4f;
 
-$ember: #e5533d;
-$tide: #3f8fd4;
-$verdant: #57b35c;
-$mist-element: #a06bd8;
+// Affinity colours are content, not chrome — they name a champion's element and mean
+// the same thing on a card, in a battle log and on a stage's threat line. Left alone.
+$affinity-ember: #e5533d;
+$affinity-tide: #3f8fd4;
+$affinity-verdant: #57b35c;
+$affinity-mist: #a06bd8;
 
-$rarity-common: #9aa3b5;
-$rarity-uncommon: #57b35c;
-$rarity-rare: #3f8fd4;
-$rarity-epic: #a06bd8;
-$rarity-legendary: #e6a53c;
+// Rarity is the library's ramp, which is the one every player of this genre already
+// reads without being taught.
+$rarity-common: #9d9d9d;
+$rarity-uncommon: #38d13c;
+$rarity-rare: #3b8ae0;
+$rarity-epic: #a335ee;
+$rarity-legendary: #ff8000;
 
-$danger: #d4503f;
-$success: #57b35c;
-$warning: #e6a53c;
-$gold: #e6c35c;
+$danger: #c8412f;
+$success: #38d13c;
+$warning: #e0a52e;
+$gold: #c9a227;
+$gold-soft: #e8d08a;
+$blood: #7d1f1a; // the pack's glossy red — refusals, danger buttons
 
 // ── Typography (no serif fonts, ever) ──────────────────────────────────────────
 $font-display: 'Pixelify Sans', 'Trebuchet MS', system-ui, sans-serif;
@@ -85,19 +105,21 @@ $z-toast: 2000;
   --mv-edge: #{$edge};
   --mv-edge-bright: #{$edge-bright};
 
-  --mv-mist: #{$mist};
-  --mv-mist-dim: #{$mist-dim};
-  --mv-mist-glow: #{$mist-glow};
+  --mv-accent: #{$accent};
+  --mv-accent-soft: #{$accent-soft};
+  --mv-accent-deep: #{$accent-deep};
+  --mv-accent-dim: #{$accent-dim};
+  --mv-accent-glow: #{$accent-glow};
 
   --mv-parchment: #{$parchment};
   --mv-parchment-dim: #{$parchment-dim};
   --mv-muted: #{$muted};
   --mv-muted-deep: #{$muted-deep};
 
-  --mv-ember: #{$ember};
-  --mv-tide: #{$tide};
-  --mv-verdant: #{$verdant};
-  --mv-mist-element: #{$mist-element};
+  --mv-affinity-ember: #{$affinity-ember};
+  --mv-affinity-tide: #{$affinity-tide};
+  --mv-affinity-verdant: #{$affinity-verdant};
+  --mv-affinity-mist: #{$affinity-mist};
 
   --mv-rarity-common: #{$rarity-common};
   --mv-rarity-uncommon: #{$rarity-uncommon};
@@ -109,6 +131,8 @@ $z-toast: 2000;
   --mv-success: #{$success};
   --mv-warning: #{$warning};
   --mv-gold: #{$gold};
+  --mv-gold-soft: #{$gold-soft};
+  --mv-blood: #{$blood};
 
   --mv-font-display: #{$font-display};
   --mv-font-body: #{$font-body};

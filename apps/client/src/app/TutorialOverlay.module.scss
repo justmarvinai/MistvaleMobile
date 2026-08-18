@@ -22,10 +22,10 @@
 /* The lantern-light edge around whatever is being pointed at. */
 .ring {
   position: fixed;
-  border: 2px solid $mist;
+  border: 2px solid $accent;
   box-shadow:
     0 0 0 1px rgba(4, 6, 10, 0.9),
-    0 0 18px 2px $mist-glow;
+    0 0 18px 2px $accent-glow;
   animation: breathe 2.4s $ease-in-out infinite;
 }
 
@@ -34,12 +34,12 @@
   100% {
     box-shadow:
       0 0 0 1px rgba(4, 6, 10, 0.9),
-      0 0 12px 1px $mist-glow;
+      0 0 12px 1px $accent-glow;
   }
   50% {
     box-shadow:
       0 0 0 1px rgba(4, 6, 10, 0.9),
-      0 0 26px 4px $mist-glow;
+      0 0 26px 4px $accent-glow;
   }
 }
 
@@ -101,7 +101,7 @@
   font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: $mist-dim;
+  color: $accent-dim;
 }
 
 .lantern {
@@ -142,7 +142,7 @@
   margin: 0;
   padding: $space-2 $space-3;
   background: $panel-inset;
-  border-left: 3px solid $mist-dim;
+  border-left: 3px solid $accent-dim;
   font-size: 13px;
   color: $muted;
 }

@@ -31,11 +31,11 @@ const ELEMENT_TINT: Record<string, number> = {
 };
 
 const FLOATER_COLOUR: Record<Floater['kind'], number> = {
-  damage: 0xe8ddc4,
+  damage: 0xe6dccb,
   heal: 0x57b35c,
-  resist: 0x9aa3b5,
-  shield: 0x7fd4c1,
-  status: 0xe6a53c,
+  resist: 0x9c9382,
+  shield: 0xc2764a,
+  status: 0xe0a52e,
 };
 
 /** Where a slot sits, staggered so the back rank reads behind the front. */
@@ -97,9 +97,9 @@ export class BattleScene implements Scene {
   private drawBackdrop(): void {
     const ground = new Graphics();
     // A horizon band and a ground plate: enough depth to sit units in, cheap to draw.
-    ground.rect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT).fill(0x0b0e14);
-    ground.rect(0, 230, VIRTUAL_WIDTH, VIRTUAL_HEIGHT - 230).fill(0x131a24);
-    ground.rect(0, 228, VIRTUAL_WIDTH, 2).fill(0x1e2533);
+    ground.rect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT).fill(0x0c0a09);
+    ground.rect(0, 230, VIRTUAL_WIDTH, VIRTUAL_HEIGHT - 230).fill(0x171310);
+    ground.rect(0, 228, VIRTUAL_WIDTH, 2).fill(0x2a2018);
     this.backdrop.addChildAt(ground, 0);
   }
 
@@ -191,24 +191,24 @@ export class BattleScene implements Scene {
     if (visual.sprite) {
       visual.sprite.alpha = unit.alive ? 1 : 0.25;
       // A fallen unit dims and desaturates rather than vanishing, so the slot still reads.
-      visual.sprite.tint = unit.alive ? 0xffffff : 0x53585f;
+      visual.sprite.tint = unit.alive ? 0xffffff : 0x4a443c;
     }
 
     // Health bar.
     const width = 52;
     const ratio = unit.maxHp > 0 ? Math.max(0, Math.min(1, unit.hp / unit.maxHp)) : 0;
     visual.hpBar.clear();
-    visual.hpBar.rect(-width / 2, 10, width, 6).fill(0x0b0e14);
+    visual.hpBar.rect(-width / 2, 10, width, 6).fill(0x0c0a09);
     visual.hpBar
       .rect(-width / 2 + 1, 11, (width - 2) * ratio, 4)
-      .fill(unit.ref.side === 'ally' ? 0x57b35c : 0xd4503f);
+      .fill(unit.ref.side === 'ally' ? 0x57b35c : 0xc8412f);
 
     // Active-turn ring.
     visual.ring.clear();
     if (acting && unit.alive) {
       visual.ring
         .ellipse(0, 4, 30, 10)
-        .stroke({ width: 2, color: ELEMENT_TINT[unit.element] ?? 0x7fd4c1, alpha: 0.9 });
+        .stroke({ width: 2, color: ELEMENT_TINT[unit.element] ?? 0xc2764a, alpha: 0.9 });
     }
 
     // Status chips: a coloured pip per effect, count above three.
@@ -216,7 +216,7 @@ export class BattleScene implements Scene {
     const chips = [...unit.buffs, ...unit.debuffs].slice(0, 6);
     chips.forEach((chip, index) => {
       const pip = new Graphics();
-      pip.rect(index * 9, 0, 7, 7).fill(chip.kind === 'buff' ? 0x7fd4c1 : 0xd4503f);
+      pip.rect(index * 9, 0, 7, 7).fill(chip.kind === 'buff' ? 0xc2764a : 0xc8412f);
       visual.chips.addChild(pip);
     });
 
@@ -232,7 +232,7 @@ export class BattleScene implements Scene {
         fontSize: floater.crit ? 20 : 15,
         fontWeight: 'bold',
         fill: FLOATER_COLOUR[floater.kind],
-        stroke: { color: 0x0b0e14, width: 3 },
+        stroke: { color: 0x0c0a09, width: 3 },
       });
       const text = new Text({ text: floater.text, style });
       text.anchor.set(0.5, 1);
@@ -255,8 +255,8 @@ export class BattleScene implements Scene {
       fontFamily: 'monospace',
       fontSize: 34,
       fontWeight: 'bold',
-      fill: view.banner.tone === 'defeat' ? 0xd4503f : 0xe8ddc4,
-      stroke: { color: 0x0b0e14, width: 5 },
+      fill: view.banner.tone === 'defeat' ? 0xc8412f : 0xe6dccb,
+      stroke: { color: 0x0c0a09, width: 5 },
     });
     const text = new Text({ text: view.banner.text, style });
     text.anchor.set(0.5);
@@ -274,7 +274,7 @@ export class BattleScene implements Scene {
     for (let band = 0; band < 3; band += 1) {
       const y = 250 + band * 70;
       const x = ((this.mistOffset + band * 190) % (VIRTUAL_WIDTH + 200)) - 100;
-      this.mist.ellipse(x, y, 150, 16).fill({ color: 0x7fd4c1, alpha: 0.035 });
+      this.mist.ellipse(x, y, 150, 16).fill({ color: 0xc2764a, alpha: 0.035 });
     }
 
     for (const visual of this.units.values()) {

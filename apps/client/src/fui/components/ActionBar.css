@@ -1,0 +1,41 @@
+/* ActionBar — hotbar with keybinds, cooldowns, charges and cost shading. */
+
+.fui-actionbar {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.fui-actionbar[data-orientation='vertical'] {
+  flex-direction: column;
+}
+
+.fui-actionbar__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Resource cost pip under the slot. */
+.fui-actionbar__cost {
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fui-mana);
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Too expensive right now — the slot dims and the cost turns red. */
+.fui-actionbar__cell.is-unaffordable .fui-slot__icon {
+  filter: grayscale(0.7) brightness(0.55);
+}
+
+.fui-actionbar__cell.is-unaffordable .fui-actionbar__cost {
+  color: var(--fui-danger);
+}
+
+.fui-actionbar__cell.is-denied {
+  animation: fui-shake 300ms var(--fui-ease);
+}

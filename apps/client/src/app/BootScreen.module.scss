@@ -13,7 +13,7 @@
 .logo {
   @include display-text(46px);
   letter-spacing: 0.06em;
-  text-shadow: 0 0 24px $mist-glow;
+  text-shadow: 0 0 24px $accent-glow;
 }
 
 .track {
@@ -27,7 +27,7 @@
 .fill {
   width: 40%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, $mist, transparent);
+  background: linear-gradient(90deg, transparent, $accent, transparent);
 
   @include motion-safe {
     animation: sweep 1.2s $ease-in-out infinite;

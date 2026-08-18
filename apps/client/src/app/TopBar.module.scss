@@ -38,13 +38,13 @@
   width: 36px;
   height: 36px;
   flex-shrink: 0;
-  background: linear-gradient(160deg, $mist-dim, color.adjust($mist-dim, $lightness: -22%));
-  border: 1px solid $mist;
+  background: linear-gradient(160deg, $accent-dim, color.adjust($accent-dim, $lightness: -22%));
+  border: 1px solid $accent;
   border-radius: 2px;
   color: $ground-deep;
   font-family: $font-display;
   font-size: 18px;
-  box-shadow: 0 0 10px $mist-glow;
+  box-shadow: 0 0 10px $accent-glow;
 }
 
 .profileText {
@@ -81,7 +81,7 @@
 .xpFill {
   display: block;
   height: 100%;
-  background: $mist;
+  background: $accent;
   transition: width $duration-slow $ease-out;
 }
 
@@ -125,7 +125,7 @@
 }
 
 .energy .pillGlyph {
-  color: $mist;
+  color: $accent;
 }
 
 .energyTrack {
@@ -138,7 +138,7 @@
 .energyFill {
   display: block;
   height: 100%;
-  background: $mist;
+  background: $accent;
   transition: width $duration-base $ease-out;
 }
 
@@ -147,7 +147,7 @@
 }
 
 .crystal .pillGlyph {
-  color: $mist-element;
+  color: $affinity-mist;
 }
 
 .tools {

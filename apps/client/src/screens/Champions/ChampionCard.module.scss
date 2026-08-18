@@ -15,11 +15,11 @@
   cursor: pointer;
 
   &:hover {
-    border-color: $mist;
+    border-color: $accent;
   }
 
   &[data-selected='true'] {
-    border-color: $mist-glow;
+    border-color: $accent-glow;
     background: $panel-raised;
   }
 
@@ -91,11 +91,11 @@
 }
 
 .asc {
-  color: $mist;
+  color: $accent;
 }
 
 .power {
-  color: $mist;
+  color: $accent;
   font-family: $font-mono;
   font-size: 0.75rem;
 }
@@ -110,7 +110,7 @@
     background: $ground;
 
     &[data-filled='true'] {
-      background: $mist-dim;
+      background: $accent-dim;
     }
   }
 }

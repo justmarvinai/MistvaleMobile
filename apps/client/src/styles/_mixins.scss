@@ -27,7 +27,7 @@
 }
 
 /// Keyboard focus ring. Always visible — accessibility is not optional.
-@mixin focus-ring($color: $mist) {
+@mixin focus-ring($color: $accent) {
   outline: 2px dashed $color;
   outline-offset: 2px;
 }
@@ -100,7 +100,7 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(ellipse at 20% 0%, rgba(127, 212, 193, $opacity), transparent 55%),
+      radial-gradient(ellipse at 20% 0%, rgba(194, 118, 74, $opacity), transparent 55%),
       radial-gradient(ellipse at 85% 100%, rgba(160, 107, 216, $opacity * 0.8), transparent 60%);
   }
 }
@@ -124,7 +124,7 @@
     border: 2px solid $panel-inset;
 
     &:hover {
-      background: $mist-dim;
+      background: $accent-dim;
     }
   }
 }

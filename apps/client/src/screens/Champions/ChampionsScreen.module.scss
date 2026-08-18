@@ -31,8 +31,8 @@
   cursor: pointer;
 
   &[aria-pressed='true'] {
-    border-color: $mist;
-    color: $mist;
+    border-color: $accent;
+    color: $accent;
   }
 }
 

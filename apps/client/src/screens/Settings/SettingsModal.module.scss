@@ -73,7 +73,7 @@
 
 .slider {
   width: 140px;
-  accent-color: $mist;
+  accent-color: $accent;
   cursor: pointer;
 }
 
@@ -88,7 +88,7 @@
 .checkbox {
   width: 18px;
   height: 18px;
-  accent-color: $mist;
+  accent-color: $accent;
   cursor: pointer;
   flex-shrink: 0;
 }

@@ -78,8 +78,8 @@
   border: 1px solid $edge;
 
   &[data-on='true'] {
-    background: $mist-dim;
-    border-color: $mist;
+    background: $accent-dim;
+    border-color: $accent;
   }
 }
 

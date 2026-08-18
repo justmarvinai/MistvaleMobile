@@ -65,16 +65,16 @@
   // The element wheel is colour-coded everywhere else in the game; the selected tab
   // borrows the same colour so the two never have to be learned separately.
   &[data-element='ember'][aria-selected='true'] {
-    border-color: $ember;
+    border-color: $affinity-ember;
   }
   &[data-element='tide'][aria-selected='true'] {
-    border-color: $tide;
+    border-color: $affinity-tide;
   }
   &[data-element='verdant'][aria-selected='true'] {
-    border-color: $verdant;
+    border-color: $affinity-verdant;
   }
   &[data-element='mist'][aria-selected='true'] {
-    border-color: $mist-element;
+    border-color: $affinity-mist;
   }
 }
 
@@ -123,8 +123,8 @@
   border: 1px solid $edge;
 
   &[data-on='true'] {
-    background: $mist-dim;
-    border-color: $mist;
+    background: $accent-dim;
+    border-color: $accent;
   }
 }
 
@@ -142,7 +142,7 @@
 }
 
 .trackNext {
-  color: $mist;
+  color: $accent;
 }
 
 .empty {

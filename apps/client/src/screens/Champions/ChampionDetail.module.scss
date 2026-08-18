@@ -35,7 +35,7 @@
 }
 
 .powerValue {
-  color: $mist;
+  color: $accent;
   font-family: $font-mono;
   font-size: 1.3rem;
 }
@@ -84,7 +84,7 @@
   cursor: pointer;
 
   &[aria-selected='true'] {
-    border-bottom-color: $mist;
+    border-bottom-color: $accent;
     color: $parchment;
   }
 }
@@ -110,7 +110,7 @@
 
   &[data-filled='true'] {
     border-style: solid;
-    border-color: $mist-dim;
+    border-color: $accent-dim;
     color: $parchment;
   }
 
@@ -132,7 +132,7 @@
 }
 
 .slotLevel {
-  color: $mist;
+  color: $accent;
   font-family: $font-mono;
   font-size: 0.75rem;
 }
@@ -153,7 +153,7 @@
   font-size: 0.8rem;
 
   strong {
-    color: $mist;
+    color: $accent;
     font-weight: normal;
   }
 }
@@ -191,7 +191,7 @@
 }
 
 .skillLevel {
-  color: $mist;
+  color: $accent;
   font-size: 0.75rem;
 }
 

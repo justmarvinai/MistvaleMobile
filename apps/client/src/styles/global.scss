@@ -67,7 +67,7 @@ button {
 }
 
 a {
-  color: $mist;
+  color: $accent;
   text-decoration: none;
 
   &:hover {
@@ -80,7 +80,7 @@ a {
 }
 
 ::selection {
-  background: $mist-glow;
+  background: $accent-glow;
   color: $parchment;
 }
 

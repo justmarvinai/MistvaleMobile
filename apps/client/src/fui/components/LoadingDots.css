@@ -1,0 +1,81 @@
+/* LoadingDots — inline busy indicator for short waits. */
+
+.fui-dots {
+  --fui-dot-size: 9px;
+  --fui-dot-color: var(--fui-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fui-gap-sm);
+}
+
+.fui-dots__label {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--fui-ink-dim);
+}
+
+.fui-dots__ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--fui-dot-size) * 0.55);
+}
+
+.fui-dots__dot {
+  width: var(--fui-dot-size);
+  height: var(--fui-dot-size);
+  border-radius: 50%;
+  background: var(--fui-dot-color);
+  box-shadow: 0 0 calc(var(--fui-dot-size) * 0.8) var(--fui-dot-color);
+}
+
+.fui-dots[data-variant='wave'] .fui-dots__dot {
+  animation: fui-dot-wave 0.9s var(--fui-ease) infinite;
+  animation-delay: calc(var(--fui-dot-i) / var(--fui-dot-n) * 0.9s);
+}
+
+.fui-dots[data-variant='pulse'] .fui-dots__dot {
+  animation: fui-pulse 0.9s var(--fui-ease) infinite;
+  animation-delay: calc(var(--fui-dot-i) / var(--fui-dot-n) * 0.9s);
+}
+
+/* Orbit lays the dots on top of each other and spins each one out on its own
+   radius, so the group reads as a single revolving ring. */
+.fui-dots[data-variant='orbit'] .fui-dots__ring {
+  width: calc(var(--fui-dot-size) * 4);
+  height: calc(var(--fui-dot-size) * 4);
+  gap: 0;
+}
+
+.fui-dots[data-variant='orbit'] .fui-dots__dot {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  animation: fui-dot-orbit 1.1s linear infinite;
+  /* Negative delay so the dots start already spread around the circle rather
+     than launching one at a time from the same point. */
+  animation-delay: calc(var(--fui-dot-i) / var(--fui-dot-n) * -1.1s);
+  transform-origin: 50% 50%;
+}
+
+@keyframes fui-dot-wave {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  30% {
+    transform: translateY(calc(var(--fui-dot-size) * -0.75));
+    opacity: 1;
+  }
+}
+
+@keyframes fui-dot-orbit {
+  from {
+    transform: rotate(0deg) translateX(calc(var(--fui-dot-size) * 1.5)) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(calc(var(--fui-dot-size) * 1.5)) rotate(-360deg);
+  }
+}

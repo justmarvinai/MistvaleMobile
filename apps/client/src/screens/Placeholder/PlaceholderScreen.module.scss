@@ -22,8 +22,8 @@
 .glyph {
   font-size: 44px;
   line-height: 1;
-  color: $mist;
-  text-shadow: 0 0 22px $mist-glow;
+  color: $accent;
+  text-shadow: 0 0 22px $accent-glow;
 }
 
 .title {
@@ -42,7 +42,7 @@
   border: 1px solid $edge;
   border-radius: 2px;
   background: $panel-inset;
-  color: $mist-dim;
+  color: $accent-dim;
 }
 
 .readiness {
@@ -53,14 +53,14 @@
   width: 100%;
   padding: $space-3;
   border: 1px solid $edge;
-  border-left: 3px solid $mist;
+  border-left: 3px solid $accent;
   border-radius: 0 2px 2px 0;
   background: $panel-inset;
 }
 
 .readinessLabel {
   @include label-text;
-  color: $mist;
+  color: $accent;
 }
 
 .readinessText {

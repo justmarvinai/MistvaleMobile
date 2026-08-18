@@ -11,31 +11,6 @@
   overflow-y: auto;
 }
 
-.brand {
-  text-align: center;
-
-  @include motion-safe {
-    animation: settle $duration-slow $ease-out;
-  }
-}
-
-.logo {
-  @include display-text(56px);
-  letter-spacing: 0.06em;
-  color: $parchment;
-  text-shadow:
-    0 0 24px $mist-glow,
-    0 3px 0 rgba(0, 0, 0, 0.5);
-}
-
-.tagline {
-  margin-top: $space-2;
-  color: $muted;
-  font-size: 13px;
-  font-style: normal;
-  letter-spacing: 0.04em;
-}
-
 .card {
   width: 100%;
   max-width: 420px;
@@ -45,34 +20,9 @@
   }
 }
 
+/* The library's segmented control paints itself; all this adds is the gap to the form. */
 .tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $space-1;
   margin-bottom: $space-4;
-  padding: $space-1;
-  background: $panel-inset;
-  border: 1px solid $edge;
-  border-radius: 2px;
-}
-
-.tab {
-  @include interactive;
-  padding: $space-2 $space-3;
-  font-size: 13px;
-  font-weight: 600;
-  color: $muted;
-  border-radius: 2px;
-
-  &:hover {
-    color: $parchment;
-  }
-}
-
-.tabActive {
-  background: $panel-raised;
-  color: $parchment;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .form {

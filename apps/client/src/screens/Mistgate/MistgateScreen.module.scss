@@ -34,7 +34,7 @@
   cursor: pointer;
 
   &[aria-selected='true'] {
-    border-color: $mist;
+    border-color: $accent;
     color: $parchment;
     background: $panel;
   }
@@ -58,7 +58,7 @@
 }
 
 .sigilCount {
-  color: $mist;
+  color: $accent;
   font-family: $font-mono;
   font-size: 0.9rem;
 }
@@ -88,7 +88,7 @@
 .portalRing {
   position: absolute;
   inset: 0;
-  border: 2px solid $mist-dim;
+  border: 2px solid $accent-dim;
   border-radius: 50%;
   animation: spin 14s linear infinite;
   clip-path: polygon(0 0, 100% 0, 100% 62%, 0 62%);
@@ -98,7 +98,7 @@
   width: 55%;
   height: 55%;
   border-radius: 50%;
-  background: radial-gradient(circle, $mist-glow 0%, transparent 70%);
+  background: radial-gradient(circle, $accent-glow 0%, transparent 70%);
   animation: pulse 3.2s ease-in-out infinite;
 }
 

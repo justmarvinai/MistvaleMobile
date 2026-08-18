@@ -32,11 +32,11 @@
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    border-color: $mist;
+    border-color: $accent;
   }
 
   &[aria-pressed='true'] {
-    border-color: $mist;
+    border-color: $accent;
     background: $panel-raised;
   }
 }

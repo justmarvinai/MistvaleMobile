@@ -40,10 +40,10 @@
 .active {
   color: $parchment;
   background: linear-gradient(180deg, $panel-raised, $panel);
-  border-color: $mist-dim;
+  border-color: $accent-dim;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 12px rgba(127, 212, 193, 0.15);
+    0 0 12px rgba(194, 118, 74, 0.15);
 
   // The lit underline that marks the current destination.
   &::after {
@@ -53,8 +53,8 @@
     right: 20%;
     bottom: -1px;
     height: 2px;
-    background: $mist;
-    box-shadow: 0 0 8px $mist-glow;
+    background: $accent;
+    box-shadow: 0 0 8px $accent-glow;
   }
 }
 

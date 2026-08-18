@@ -25,8 +25,8 @@
   cursor: pointer;
 
   &[aria-pressed='true'] {
-    border-color: $mist;
-    color: $mist;
+    border-color: $accent;
+    color: $accent;
   }
 }
 
@@ -62,8 +62,8 @@
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    border-color: $mist;
-    color: $mist;
+    border-color: $accent;
+    color: $accent;
   }
 
   &[aria-pressed='true'] {

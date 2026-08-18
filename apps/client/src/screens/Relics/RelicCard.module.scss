@@ -18,11 +18,11 @@ button.card {
   cursor: pointer;
 
   &:hover {
-    border-color: $mist;
+    border-color: $accent;
   }
 
   &[data-selected='true'] {
-    border-color: $mist-glow;
+    border-color: $accent-glow;
     background: $panel-raised;
   }
 }
@@ -41,7 +41,7 @@ button.card {
 }
 
 .level {
-  color: $mist;
+  color: $accent;
   font-family: $font-mono;
   font-size: 0.8rem;
 }
@@ -95,7 +95,7 @@ button.card {
 }
 
 .rolls {
-  color: $mist-dim;
+  color: $accent-dim;
 }
 
 .none {
@@ -113,7 +113,7 @@ button.card {
 
 .worn {
   margin-top: 2px;
-  color: $mist-dim;
+  color: $accent-dim;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 1px;

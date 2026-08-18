@@ -1,0 +1,147 @@
+/* DialogueBox — portrait, nameplate, typewriter body and branching choices. */
+
+.fui-dialogue {
+  position: relative;
+  display: flex;
+  gap: 18px;
+  padding: 20px 26px 22px;
+  cursor: pointer;
+}
+
+.fui-dialogue__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--fui-panel-fill-bw);
+  border-image-source: var(--fui-panel-fill-src);
+  border-image-slice: var(--fui-panel-fill-sl) fill;
+  border-image-repeat: stretch;
+}
+
+.fui-dialogue__portrait {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+}
+
+.fui-dialogue--noportrait .fui-dialogue__portrait {
+  display: none;
+}
+
+.fui-dialogue__main {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.fui-dialogue__speaker {
+  margin-bottom: 7px;
+  font-size: 16px;
+  color: var(--fui-gold-soft);
+}
+
+.fui-dialogue__text {
+  min-height: 3.2em;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--fui-ink);
+}
+
+/* Blinking caret while the typewriter runs. */
+.fui-dialogue.is-typing .fui-dialogue__text::after {
+  content: '▌';
+  margin-left: 1px;
+  color: var(--fui-accent);
+  animation: fui-pulse 700ms steps(1) infinite;
+}
+
+/* ── Choices ──────────────────────────────────────────────────────────────── */
+.fui-dialogue__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 14px;
+}
+
+.fui-dialogue__choices:empty {
+  margin-top: 0;
+}
+
+.fui-dialogue__choice {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 12px;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 3px;
+  background: none;
+  font-family: var(--fui-font-body);
+  font-size: 14px;
+  color: var(--fui-accent-soft);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--fui-t-fast) var(--fui-ease),
+    border-color var(--fui-t-fast) var(--fui-ease),
+    color var(--fui-t-fast) var(--fui-ease);
+}
+
+.fui-dialogue__choice:hover:not(:disabled) {
+  border-left-color: var(--fui-accent);
+  background: color-mix(in srgb, var(--fui-accent) 16%, transparent);
+  color: var(--fui-ink);
+}
+
+.fui-dialogue__choice:disabled {
+  cursor: not-allowed;
+  color: var(--fui-ink-faint);
+  text-decoration: line-through;
+}
+
+/* Already-picked lines dim, the way conversation logs usually mark them. */
+.fui-dialogue__choice.is-seen {
+  color: color-mix(in srgb, var(--fui-accent-soft) 55%, var(--fui-ink-faint));
+}
+
+.fui-dialogue__num {
+  flex: none;
+  font-size: 12px;
+  color: var(--fui-ink-faint);
+}
+
+.fui-dialogue__choice-text {
+  flex: 1 1 auto;
+}
+
+.fui-dialogue__tag {
+  flex: none;
+  font-family: var(--fui-font-ui);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--fui-gold);
+}
+
+/* ── Continue chevron ─────────────────────────────────────────────────────── */
+.fui-dialogue__more {
+  position: absolute;
+  right: 20px;
+  bottom: 14px;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid var(--fui-accent);
+  animation: fui-pulse 1.1s ease-in-out infinite;
+}
+
+.fui-dialogue.is-typing .fui-dialogue__more,
+.fui-dialogue.has-choices .fui-dialogue__more {
+  display: none;
+}

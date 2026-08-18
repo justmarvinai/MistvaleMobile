@@ -5,6 +5,8 @@
 @import './styles/theme-dark-ember.css';
 @import './components/Accordion.css';
 @import './components/AchievementList.css';
+@import './components/AchievementPopup.css';
+@import './components/ActionBar.css';
 @import './components/AffinityBadge.css';
 @import './components/ArenaMatchup.css';
 @import './components/ArtifactCard.css';
@@ -29,6 +31,7 @@
 @import './components/CountdownTimer.css';
 @import './components/CurrencyBar.css';
 @import './components/DailyRewards.css';
+@import './components/DialogueBox.css';
 @import './components/Divider.css';
 @import './components/EmptyState.css';
 @import './components/EnergyBar.css';
@@ -45,6 +48,7 @@
 @import './components/Leaderboard.css';
 @import './components/LeaderboardPodium.css';
 @import './components/LevelUpModal.css';
+@import './components/LoadingDots.css';
 @import './components/LoadingScreen.css';
 @import './components/LootWindow.css';
 @import './components/MailInbox.css';
@@ -57,6 +61,7 @@
 @import './components/Panel.css';
 @import './components/Paperdoll.css';
 @import './components/PartyFrame.css';
+@import './components/PatchNotes.css';
 @import './components/PityCounter.css';
 @import './components/Portrait.css';
 @import './components/PowerRating.css';

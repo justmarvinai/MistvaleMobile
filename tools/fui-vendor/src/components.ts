@@ -51,6 +51,7 @@ export const FUI_COMPONENTS: readonly string[] = [
   'NumberStepper',
   'Accordion',
   'LoadingScreen',
+  'LoadingDots',
   'MainMenu',
   'SettingsScreen',
 
@@ -78,6 +79,7 @@ export const FUI_COMPONENTS: readonly string[] = [
   'FormationGrid',
   'TurnMeter',
   'BattleControls',
+  'ActionBar',
   'BattleLog',
   'BuffBar',
   'FloatingText',
@@ -117,6 +119,8 @@ export const FUI_COMPONENTS: readonly string[] = [
   'CountdownTimer',
   'MailInbox',
   'AchievementList',
+  'AchievementPopup',
+  'PatchNotes',
   'Ticker',
 
   // ── The Arena ─────────────────────────────────────────────────────────────
@@ -128,6 +132,7 @@ export const FUI_COMPONENTS: readonly string[] = [
 
   // ── The tutorial, and the things that say no ──────────────────────────────
   'TutorialTip',
+  'DialogueBox',
   'ConfirmSlider',
   'ContextMenu',
 ];

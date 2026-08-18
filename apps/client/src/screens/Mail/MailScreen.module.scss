@@ -82,7 +82,7 @@
   cursor: pointer;
 
   &:hover {
-    border-color: $mist;
+    border-color: $accent;
   }
 }
 
@@ -94,7 +94,7 @@
 // An unread message carries a bar down its leading edge rather than bold text: it survives
 // being read at a glance, and it does not shift the row's metrics when it clears.
 .itemUnread {
-  box-shadow: inset 3px 0 0 0 $mist;
+  box-shadow: inset 3px 0 0 0 $accent;
 }
 
 .itemTitle {
