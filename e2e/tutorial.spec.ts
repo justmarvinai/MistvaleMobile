@@ -38,6 +38,35 @@ test.describe('the tutorial', () => {
     await expect(overlay.getByRole('button', { name: /not yet|go and do it/i })).toBeDisabled();
   });
 
+  test('points without greying the game out, and never dims all of it', async ({ page }) => {
+    test.slow();
+    // The overlay is a signpost, not a fence — it has `pointer-events: none` and the
+    // server is what enforces order. But a step with nothing to point at fell back to a
+    // single full-viewport pane at 72% black, which reads as exactly the modal it is not:
+    // the whole game greyed out and apparently untouchable, while every click went
+    // straight through. Steps 1 and 2 are both like that, so it was the first thing a new
+    // player saw — and step 1 is a fight, so it dimmed the battle it was asking them to
+    // win.
+    await arrive(page, 'e2dim');
+    await expect(page.getByRole('region', { name: 'Tutorial' })).toBeVisible({ timeout: 20_000 });
+
+    const covering = async (): Promise<number> =>
+      page.evaluate(
+        () =>
+          Array.from(document.querySelectorAll('[class*="scrim"]')).filter((el) => {
+            const box = el.getBoundingClientRect();
+            return box.width >= window.innerWidth && box.height >= window.innerHeight;
+          }).length,
+      );
+
+    expect(await covering(), 'a pane over the whole viewport').toBe(0);
+
+    // …and the fight it points at is not behind one either.
+    await page.getByRole('button', { name: /meet them on the road/i }).click();
+    await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 25_000 });
+    expect(await covering(), 'a pane over the whole fight').toBe(0);
+  });
+
   test('walks the cold open and lets the player move on afterwards', async ({ page }) => {
     test.slow();
     test.setTimeout(180_000);

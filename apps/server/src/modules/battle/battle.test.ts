@@ -239,6 +239,43 @@ describe.skipIf(!dbUp)('the game loop', () => {
       expect(second.json().error.code).toBe('ALREADY_EXISTS');
     });
 
+    it('hands over a fight the player can actually take a turn in', async () => {
+      // The bug this pins: `createBattle` builds the board, emits `battleStart` and stops
+      // with `awaiting` null and no meter moved. The client's skill bar is keyed on
+      // `awaiting` naming an ally, so a battle handed over in that state had nobody to act
+      // with — the bar read "Waiting for the server…" until the player pressed Auto or
+      // Retreat, and manual play had never worked since P3. Nothing caught it because
+      // every test either pressed Auto or posted an action straight to the API, where a
+      // supplied action goes to whoever acts first and `awaiting` is never read.
+      const champions = await chooseStarter();
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [champions[0]!.id],
+          actionId: 'somebody-has-to-act',
+        },
+      });
+      expect(response.statusCode, response.body).toBe(200);
+
+      const view = response.json().data;
+      expect(view.status).toBe('active');
+      expect(view.state.awaiting, 'somebody is due to act').not.toBeNull();
+      expect(view.state.awaiting.side).toBe('ally');
+      // And the ally named is one the client can find in the team it was handed.
+      expect(
+        (view.state.allies as { ref: { slot: number } }[]).some(
+          (unit) => unit.ref.slot === view.state.awaiting.slot,
+        ),
+        'the acting unit is in the ally list',
+      ).toBe(true);
+      // The opening is a recording, not an empty board: turn meters moved, and anything
+      // faster than the whole team has already had its go.
+      expect(view.events.length).toBeGreaterThan(1);
+    });
+
     it('gives a retried start the fight it already opened', async () => {
       // The other half of the rule above, and the reason it needs an actionId at all: a
       // dropped response used to leave a player holding "you are already in a battle"

@@ -52,6 +52,59 @@ test.describe('what a player can actually see', () => {
     expect(await page.locator('canvas').count(), 'exactly one Pixi canvas').toBe(1);
   });
 
+  test('a fight hands the player a turn to take', async ({ page }) => {
+    test.slow();
+    // Manual play had never worked. `createBattle` builds the board and stops with
+    // `awaiting` null and no turn meter moved, and the skill bar is keyed on `awaiting`
+    // naming an ally — so a fresh battle had nobody to act with and the bar read
+    // "Waiting for the server…" for as long as the player was willing to look at it. The
+    // only ways forward were Auto and Retreat, and every test in this suite pressed one
+    // of them, which is why nothing caught it in seven phases.
+    await registerRaw(page, 'e2eturn', 'Actor');
+
+    const starter = page.getByRole('dialog', { name: /choose your first champion/i });
+    await expect(starter).toBeVisible({ timeout: 20_000 });
+    await starter
+      .getByRole('button', { name: /^choose /i })
+      .first()
+      .click();
+    await starter.getByRole('button', { name: /stand together/i }).click();
+    await expect(starter).toBeHidden({ timeout: 15_000 });
+
+    await page
+      .getByRole('button', { name: /^campaign$/i })
+      .first()
+      .click();
+    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
+    await teamDialog
+      .getByRole('button', { name: /lv \d+/i })
+      .first()
+      .click();
+    await teamDialog.getByRole('button', { name: /into the mist/i }).click();
+
+    // The bar names whoever is up, with their health and their skills — and the player
+    // presses one of them, rather than the two buttons that skip the game.
+    await expect(page.getByText(/waiting for the server/i)).toHaveCount(0, { timeout: 25_000 });
+    const skills = page.locator('[class*="skills"] button');
+    await expect(skills.first()).toBeVisible({ timeout: 25_000 });
+    const before = await page.getByText(/turn \d+/i).innerText();
+
+    await skills.first().click();
+    // A turn was taken: the fight moved, whether that is the counter or the fight ending.
+    await expect
+      .poll(
+        async () => {
+          const over = await page.getByText(/the fight is over/i).count();
+          if (over > 0) return 'moved';
+          const now = await page.getByText(/turn \d+/i).innerText();
+          return now === before ? 'stuck' : 'moved';
+        },
+        { timeout: 25_000 },
+      )
+      .toBe('moved');
+  });
+
   test('the dock and the top bar are on top of the screen they frame', async ({ page }) => {
     await registerRaw(page, 'e2evis2', 'Framed');
     const starter = page.getByRole('dialog', { name: /choose your first champion/i });

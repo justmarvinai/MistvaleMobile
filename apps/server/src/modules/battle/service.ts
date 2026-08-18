@@ -406,6 +406,24 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       config,
     );
 
+    // …and then run it to the first decision the player actually has to make.
+    //
+    // `createBattle` builds the board and emits `battleStart`, and that is all: no turn
+    // meter has moved and `awaiting` is null. A battle handed over in that state is one
+    // the client cannot drive — the skill bar is keyed on `awaiting` naming an ally, so
+    // there was nobody to act with and the bar read "Waiting for the server…" until the
+    // player pressed Auto or Retreat. **Manual play has never worked**, since P3; every
+    // test that touched a fight either pressed Auto, pressed Skip, or posted an action
+    // straight to the API, where a supplied action is applied to whoever acts first and
+    // `awaiting` is never consulted.
+    //
+    // `auto: false` stops the moment an ally is ready to choose, so what the player gets
+    // is the opening as it happened: meters filling, any enemy faster than the whole team
+    // acting first, and then the bar.
+    const first = advance(opened.state, rules, config, { auto: false });
+    const openingState = first.state;
+    const openingEvents = [...opened.events, ...first.events];
+
     // Everything that took the field counts as met, which is what makes the Chronicle a
     // record of the world rather than a list of receipts (GAME_DESIGN §10).
     await chronicle.see(tx, options.playerId, [
@@ -422,26 +440,49 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         contentRev: snapshot.rev,
         teamIds: owned.map((member) => member.id),
         seed,
-        state: opened.state,
-        events: opened.events,
+        state: openingState,
+        events: openingEvents,
         energySpent: cost,
         // The id of the request that opened it, so a retry of *this* request finds the
         // fight rather than an error. Each turn then overwrites it with its own, which is
         // right: by the time an action has been taken, a replayed start is not a retry.
         lastActionId: options.actionId,
+        status: openingState.finished ? 'finished' : 'active',
+        outcome: openingState.outcome,
+        ...(openingState.finished ? { finishedAt: now } : {}),
       })
-      .returning({ id: battleSessions.id });
+      .returning();
     if (!row) throw new AppError('INTERNAL', 'Could not start that battle.');
+
+    // Vanishingly rare and guarded rather than assumed away: the opening runs enemy turns,
+    // and a team that loses every champion before one of them is ready to act has already
+    // lost. Settled here rather than left `active` with `finished` state, which is a fight
+    // the player could neither act in nor be paid for.
+    const summary = openingState.finished
+      ? await settle(
+          tx,
+          ctx,
+          { ...row, teamIds: (row.teamIds as string[]) ?? [] },
+          openingState,
+          options.playerId,
+        )
+      : null;
+    if (summary) {
+      await tx
+        .update(battleSessions)
+        .set({ rewards: summary, updatedAt: now })
+        .where(eq(battleSessions.id, row.id));
+    }
 
     return {
       id: row.id,
       mode: options.mode,
       stageKey: options.stageKey,
-      status: 'active',
-      outcome: null,
-      state: opened.state,
-      events: opened.events,
-      rewards: null,
+      status: openingState.finished ? 'finished' : 'active',
+      outcome: openingState.outcome,
+      state: openingState,
+      events: openingEvents,
+      rewards: summary,
     };
   });
 }
@@ -1046,7 +1087,11 @@ async function settle(
  * attacker gives up. Anything short of victory is a loss for the attacker, including the
  * turn limit: an attack that could not finish inside the clock did not take the fight.
  */
-async function settleArena(
+/**
+ * Exported for the Arena, which opens battles of its own and — very rarely — has one
+ * already decided by the time the attacker would first act.
+ */
+export async function settleArena(
   tx: Tx,
   ctx: BattleContext,
   // In Arena the stage key *is* the opponent: there is no stage, only somebody's defence.

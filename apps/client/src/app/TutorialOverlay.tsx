@@ -88,7 +88,16 @@ export function TutorialOverlay() {
     <div className={styles.overlay} role="region" aria-label="Tutorial">
       {/* The dim, cut around whatever is being pointed at. Four panes rather than a
           box-shadow so the hole is genuinely transparent and the target's own colours
-          come through unaltered. */}
+          come through unaltered.
+          
+          **Only when there is something to point at.** A step with no target — the cold
+          open and the welcome, and any step whose element is not on the screen the player
+          wandered to — used to fall back to a single full-viewport pane, which is the one
+          thing this overlay is not: it read as a modal, greying the whole game out and
+          telling the player they could not touch anything, while being click-through the
+          entire time. Worst of all over a fight, where it dimmed the battle the step was
+          asking them to win. With nothing to circle, the parchment says the line on its
+          own and the game stays lit. */}
       {rect ? (
         <>
           <div className={styles.scrim} style={{ inset: `0 0 auto 0`, height: rect.top }} />
@@ -120,9 +129,7 @@ export function TutorialOverlay() {
             aria-hidden="true"
           />
         </>
-      ) : (
-        <div className={styles.scrim} style={{ inset: 0 }} />
-      )}
+      ) : null}
 
       <div
         className={[styles.card, rect && rect.top > window.innerHeight / 2 ? styles.high : '']

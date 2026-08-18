@@ -5,6 +5,38 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a battle nobody could take a turn in, and a tutorial that greyed out the game
+
+Both reported by the owner against the running box, and the first one is the worst bug
+found in this pass.
+
+- **Manual play had never worked.** `createBattle` builds the board, emits `battleStart`
+  and stops: no turn meter has moved and `awaiting` is null. `start` handed that straight
+  to the client — and the skill bar is keyed on `awaiting` naming an ally, so there was
+  nobody to act with. The battle screen showed "Wave 1 · Turn 0" and **"Waiting for the
+  server…"** for as long as the player was willing to look at it. The only ways forward
+  were Auto and Retreat. It has been like that since P3, and nothing caught it because
+  every test either pressed Auto, pressed Skip, or posted an action straight to the API —
+  where a supplied action is applied to whoever acts first and `awaiting` is never read.
+  A battle now opens by running the engine to the first decision the player actually has:
+  meters filling, anything faster than the whole team taking its turn, and then the bar.
+  The Arena opened fights the same way and is fixed with it; both guard the vanishing case
+  where the opening itself ends the fight, rather than leaving a session marked active
+  whose state says finished — one nobody could act in or be paid for.
+- **The tutorial dimmed the entire game.** The overlay is a signpost rather than a fence —
+  `pointer-events: none`, with the server enforcing order — and when it has something to
+  circle it cuts a hole in the dim, which is the design. When it has *nothing* to circle it
+  fell back to a single full-viewport pane at 72% black: the whole game greyed out and
+  apparently untouchable, while every click went straight through it. Steps 1 and 2 are
+  both like that, so it was the first thing a new account saw, and step 1 is a fight — so
+  it dimmed the battle it was asking the player to win. With nothing to point at there is
+  now no dim at all; the parchment says the line and the game stays lit.
+
+Covered by two browser cases that fail without the fixes: a fight must hand the player a
+turn and take it (pressing a *skill*, not the two buttons that skip the game), and no pane
+may ever cover the whole viewport while the Wardenmaster is talking.
+
+
 ### Fixed — signing out left the last account behind, and four more from the QA pass
 
 The rest of the ranked list, and the first one is the one worth reading twice.

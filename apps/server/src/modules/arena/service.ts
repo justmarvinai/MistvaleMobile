@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { and, desc, eq, gte, lte, ne, sql } from 'drizzle-orm';
 import {
+  advance,
   buildRules,
   buildTeam,
   championScalingFrom,
@@ -504,6 +505,14 @@ export async function attack(
       combat,
     );
 
+    // The board is built; now run it to the first decision the attacker has to make.
+    // `createBattle` emits `battleStart` and stops with `awaiting` null, and a battle
+    // handed over in that state is one the client cannot drive — see the note in
+    // `battle.start`, which had the same hole.
+    const first = advance(opened.state, rules, combat, { auto: false });
+    const openingState = first.state;
+    const openingEvents = [...opened.events, ...first.events];
+
     await tx
       .update(arenaState)
       .set({ tokens: tokens.value - 1, tokensUpdatedAt: now, updatedAt: now })
@@ -519,23 +528,46 @@ export async function attack(
         contentRev: snapshot.rev,
         teamIds: attackers.map((member) => member.id),
         seed,
-        state: opened.state,
-        events: opened.events,
+        state: openingState,
+        events: openingEvents,
         energySpent: 0,
         lastActionId: options.actionId,
+        status: openingState.finished ? 'finished' : 'active',
+        outcome: openingState.outcome,
+        ...(openingState.finished ? { finishedAt: now } : {}),
       })
       .returning({ id: battleSessions.id });
     if (!session) throw AppError.internal('Could not start that battle.');
+
+    // Guarded rather than assumed away: an attacker can pick an opponent far above them,
+    // and the opening runs the defence's turns. A fight already lost before the attacker
+    // acts is settled here — the token is spent either way, and an `active` battle whose
+    // state says `finished` is one nobody can act in or be paid for.
+    const rewards = openingState.finished
+      ? await battle.settleArena(
+          tx,
+          battleCtx,
+          { id: session.id, stageKey: offer.defenderId },
+          openingState.outcome,
+          options.playerId,
+        )
+      : null;
+    if (rewards) {
+      await tx
+        .update(battleSessions)
+        .set({ rewards, updatedAt: now })
+        .where(eq(battleSessions.id, session.id));
+    }
 
     return {
       id: session.id,
       mode: 'arena',
       stageKey: offer.defenderId,
-      status: 'active',
-      outcome: null,
-      state: opened.state,
-      events: opened.events,
-      rewards: null,
+      status: openingState.finished ? 'finished' : 'active',
+      outcome: openingState.outcome,
+      state: openingState,
+      events: openingEvents,
+      rewards,
     };
   });
 }
