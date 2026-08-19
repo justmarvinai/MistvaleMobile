@@ -5,6 +5,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a gate that was a coin toss
+
+`bots.test.ts` — "can be fought and settled like anybody else" — failed **five times in
+twenty**, and had done since P7. Not flakiness to be re-run away: the test was asserting
+something untrue about the game.
+
+An arena attack can be decided before the attacker ever acts. `attack` runs the opening
+advance so the board is handed over on a real decision rather than with `awaiting` null, and
+that advance runs the *defence's* turns — a lone starter against a full bot band does not
+always survive them. The service has always handled it, and handled it carefully: the
+session is written `finished`, the arena rewards are settled there, and the view comes back
+with the rating on it, because "an `active` battle whose state says `finished` is one nobody
+can act in or be paid for". The 400 the test tripped over — "That battle is already over" —
+was the right answer.
+
+So the test now covers both endings, including the branch the service's own comment
+describes and nothing had ever exercised: when the fight settles at the opening, the rating
+is read off the view and a late action is checked to be refused; when it does not, it is
+played out as before. Twelve consecutive runs green, against a 25% failure rate.
+
 ### Added — three things only Mistvale can say (design rework, D8)
 
 Seven phases of dressing the game in the library, and what was left over is the part the

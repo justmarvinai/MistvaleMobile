@@ -581,15 +581,37 @@ describe.skipIf(!dbUp)('the bot ladder', () => {
         team,
         actionId: 'bots-test-0001-idem',
       });
-      const played = await app.inject({
-        method: 'POST',
-        url: apiPath(ROUTES.battle.action(view.id)),
-        cookies: { mv_session: human.cookie },
-        payload: { actionId: `bot-fight-${view.id}`, auto: true },
-      });
-      expect(played.statusCode, played.body).toBe(200);
+      // **Both endings, because both are real.** The opening advance runs the defence's
+      // turns before handing the board over, and a lone starter against a full bot band
+      // does not always survive them — about one attack in four, on the CSPRNG seeds the
+      // service uses on purpose. `attack` settles that case itself rather than leaving an
+      // `active` session nobody can act in, which is the branch its own comment describes
+      // and which nothing had ever exercised: this test used to assume the fight was
+      // always still going and failed a quarter of the time it was not.
+      let result: { ratingDelta: number };
+      if (view.status === 'finished') {
+        expect(view.rewards, 'a fight settled at the opening is still paid').toBeTruthy();
+        result = (view.rewards as { arena: { ratingDelta: number } }).arena;
 
-      const result = played.json().data.rewards.arena as { ratingDelta: number };
+        // And there is nothing left to play, which is what the client is told.
+        const late = await app.inject({
+          method: 'POST',
+          url: apiPath(ROUTES.battle.action(view.id)),
+          cookies: { mv_session: human.cookie },
+          payload: { actionId: `bot-fight-${view.id}`, auto: true },
+        });
+        expect(late.statusCode, late.body).toBe(400);
+      } else {
+        const played = await app.inject({
+          method: 'POST',
+          url: apiPath(ROUTES.battle.action(view.id)),
+          cookies: { mv_session: human.cookie },
+          payload: { actionId: `bot-fight-${view.id}`, auto: true },
+        });
+        expect(played.statusCode, played.body).toBe(200);
+        result = played.json().data.rewards.arena as { ratingDelta: number };
+      }
+
       expect(result.ratingDelta).not.toBe(0);
       // The bot's own rating moved too — it defended, whether or not anybody was home.
       const [defender] = await app.db
