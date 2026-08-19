@@ -1,29 +1,24 @@
 import type { GearInstance } from '@mistvale/shared';
+import { ArtifactCard } from '@/fui/components/ArtifactCard.ts';
+import { Fui } from '@/fui/react';
 import { useContentStore } from '../../state/contentStore';
+import { relicArt, relicGlyph } from '../../ui/relicArt';
+import { statLabel } from '../../ui/statLabels';
 import styles from './RelicCard.module.scss';
-import { Icon } from '../../ui/Icon/Icon';
 
 /**
  * One relic.
  *
- * The genre's card: set, slot, rank, upgrade level, main stat, substats. Substats are the
- * thing a player actually reads, so they get the room — a relic's whole value is usually
- * one lucky line among four.
+ * Painted by the library since the design rework — the rarity frame, the set tag, the
+ * upgrade level and the roll pips on each substat are `ArtifactCard`, which is the card a
+ * squad-RPG's equipment screen is made of.
+ *
+ * Substats are still the thing a player actually reads: a relic's whole value is usually
+ * one lucky line among four, and the roll pips are how that becomes visible rather than
+ * arithmetic.
  */
 
-const statLabel: Record<string, string> = {
-  hp: 'HP',
-  atk: 'ATK',
-  def: 'DEF',
-  spd: 'SPD',
-  critRate: 'C.RATE',
-  critDmg: 'C.DMG',
-  res: 'RES',
-  acc: 'ACC',
-};
-
-const line = (stat: string, value: number, percent: boolean): string =>
-  `${statLabel[stat] ?? stat.toUpperCase()} +${value}${percent ? '%' : ''}`;
+const amount = (value: number, percent: boolean): string => `+${value}${percent ? '%' : ''}`;
 
 export function RelicCard({
   relic,
@@ -34,60 +29,61 @@ export function RelicCard({
   relic: GearInstance;
   selected?: boolean;
   onSelect?: () => void;
+  /** Hides the substats — for a picker row where the set and the main stat are the choice. */
   compact?: boolean;
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
   const set = bundle?.gearSets.find((entry) => entry.key === relic.setKey);
   const slot = bundle?.gearSlots.find((entry) => entry.key === relic.slot);
 
-  const content = (
-    <>
-      <div className={styles.head}>
-        <span className={styles.slot}>{slot?.name ?? relic.slot}</span>
-        <span className={styles.level}>+{relic.level}</span>
-      </div>
-
-      <div className={styles.set} data-rarity={relic.rarity}>
-        {set?.name ?? relic.setKey}
-        <span className={styles.rank}>{'★'.repeat(relic.rank)}</span>
-      </div>
-
-      <div className={styles.main}>
-        {line(relic.main.stat, relic.main.value, relic.main.percent)}
-      </div>
-
-      {!compact && (
-        <ul className={styles.subs}>
-          {relic.substats.map((sub, index) => (
-            <li key={`${sub.stat}-${sub.percent}-${index}`}>
-              {line(sub.stat, sub.value, sub.percent)}
-              {(sub.rolls ?? 1) > 1 && <span className={styles.rolls}>×{sub.rolls}</span>}
-            </li>
-          ))}
-          {relic.substats.length === 0 && <li className={styles.none}>No substats</li>}
-        </ul>
-      )}
-
-      {relic.locked && (
-        <span className={styles.lock} title="Locked — protected from a mass sell">
-          <Icon name="nav-locked" size={12} />
-        </span>
-      )}
-      {relic.equippedChampionId && !compact && <span className={styles.worn}>Worn</span>}
-    </>
-  );
-
-  if (!onSelect) return <div className={styles.card}>{content}</div>;
-
   return (
-    <button
-      type="button"
+    <Fui
+      of={ArtifactCard}
       className={styles.card}
-      data-selected={selected ? 'true' : undefined}
-      aria-pressed={Boolean(selected)}
-      onClick={onSelect}
-    >
-      {content}
-    </button>
+      options={{
+        // The set is what a player calls the piece; the slot is where it goes. A relic has
+        // no name of its own in Mistvale, and inventing one would be content.
+        name: set?.name ?? relic.setKey,
+        art: relicArt(relic.slot),
+        rarity: relic.rarity,
+        slot: slot?.name ?? relic.slot,
+        slotGlyph: relicGlyph(relic.slot),
+        ...(set ? { set: set.name, setSize: set.pieces } : {}),
+        level: relic.level,
+        maxLevel: 16,
+        mainStat: {
+          label: statLabel(relic.main.stat),
+          value: amount(relic.main.value, relic.main.percent),
+        },
+        ...(compact
+          ? {}
+          : {
+              subStats: relic.substats.map((sub) => ({
+                label: statLabel(sub.stat),
+                value: amount(sub.value, sub.percent),
+                ...((sub.rolls ?? 1) > 1 ? { rolls: sub.rolls } : {}),
+              })),
+            }),
+        ...(relic.locked ? { locked: true } : {}),
+        ...(relic.equippedChampionId && !compact ? { equippedBy: 'Worn' } : {}),
+        ...(onSelect ? { selectable: true, selected: Boolean(selected) } : {}),
+      }}
+      on={onSelect ? { 'artifact:select': () => onSelect() } : undefined}
+      attrs={{
+        // The card's own text is a stack of fragments. Composed here into the line a
+        // player would say, which is also the one stable name a test can ask for.
+        'aria-label': [
+          set?.name ?? relic.setKey,
+          slot?.name ?? relic.slot,
+          `${relic.rank} star`,
+          `+${relic.level}`,
+          `${statLabel(relic.main.stat)} ${amount(relic.main.value, relic.main.percent)}`,
+          relic.locked ? 'locked' : '',
+          relic.equippedChampionId ? 'worn' : '',
+        ]
+          .filter(Boolean)
+          .join(', '),
+      }}
+    />
   );
 }

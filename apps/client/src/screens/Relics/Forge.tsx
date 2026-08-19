@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { GearInstance, GearUpgradeAttempt } from '@mistvale/shared';
+import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
+import { Fui } from '@/fui/react';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';
@@ -7,6 +9,7 @@ import { usePlayerStore } from '../../state/playerStore';
 import { RelicCard } from './RelicCard';
 import styles from './Forge.module.scss';
 import { highlightable } from '../../app/highlight';
+import { statLabel } from '../../ui/statLabels';
 
 /**
  * The upgrade forge.
@@ -97,19 +100,20 @@ export function Forge({
         </div>
 
         {!atMax && (
-          <div className={styles.times} role="group" aria-label="Attempts">
-            {[1, 5, 10].map((count) => (
-              <button
-                key={count}
-                type="button"
-                className={styles.timesOption}
-                aria-pressed={times === count}
-                disabled={playing || busy}
-                onClick={() => setTimes(count)}
-              >
-                ×{count}
-              </button>
-            ))}
+          <div className={styles.times}>
+            <Fui
+              of={SegmentedControl}
+              attrs={{ 'aria-label': 'Attempts' }}
+              options={{
+                value: String(times),
+                segments: [1, 5, 10].map((count) => ({
+                  value: String(count),
+                  label: `×${count}`,
+                  disabled: playing || busy,
+                })),
+              }}
+              on={{ 'segment:change': (value) => setTimes(Number(value)) }}
+            />
             <span className={styles.hint}>
               A run stops at the first success, or when the silver runs out.
             </span>
@@ -128,7 +132,7 @@ export function Forge({
                   {attempt.rolled && (
                     <span className={styles.rolled}>
                       {' '}
-                      {attempt.rolled.stat.toUpperCase()} +{attempt.rolled.value}
+                      {statLabel(attempt.rolled.stat)} +{attempt.rolled.value}
                       {attempt.rolled.percent ? '%' : ''}
                     </span>
                   )}

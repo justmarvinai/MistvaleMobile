@@ -1,120 +1,18 @@
 @use '../../styles/tokens' as *;
 
+/* Two rules, because the card is painted by the library now.
+
+   `width: 100%` is the one that matters: `.fui-artifact` is a fixed 236px, which is right
+   for a component gallery and wrong for a grid — a card wider than its column overflows
+   into the next one, which is how the vault briefly showed two relics stacked on top of
+   each other. The grid's column minimum is sized from the same figure, in the screens
+   that lay them out.
+
+   `flex: 1` is for the vault, where each card sits above its own Forge/Lock row: a set tag
+   wraps to a second line on a long slot name and not on a short one, so without it the
+   buttons under the cards stagger by a line. Ignored wherever the parent is a grid. */
+
 .card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: $space-2;
-  background: $panel;
-  border: 1px solid $edge;
-  color: $parchment;
-  font: inherit;
-  text-align: left;
-  cursor: default;
-}
-
-button.card {
-  cursor: pointer;
-
-  &:hover {
-    border-color: $accent;
-  }
-
-  &[data-selected='true'] {
-    border-color: $accent-glow;
-    background: $panel-raised;
-  }
-}
-
-.head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.slot {
-  color: $muted;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.level {
-  color: $accent;
-  font-family: $font-mono;
-  font-size: 0.8rem;
-}
-
-.set {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: $space-2;
-  font-size: 0.85rem;
-
-  &[data-rarity='common'] {
-    color: $rarity-common;
-  }
-  &[data-rarity='uncommon'] {
-    color: $rarity-uncommon;
-  }
-  &[data-rarity='rare'] {
-    color: $rarity-rare;
-  }
-  &[data-rarity='epic'] {
-    color: $rarity-epic;
-  }
-  &[data-rarity='legendary'] {
-    color: $rarity-legendary;
-  }
-}
-
-.rank {
-  color: $gold;
-  font-size: 0.65rem;
-  letter-spacing: 1px;
-}
-
-.main {
-  color: $parchment;
-  font-family: $font-mono;
-  font-size: 0.85rem;
-}
-
-.subs {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin: 2px 0 0;
-  padding: 0;
-  list-style: none;
-  color: $muted;
-  font-family: $font-mono;
-  font-size: 0.72rem;
-}
-
-.rolls {
-  color: $accent-dim;
-}
-
-.none {
-  color: $muted-deep;
-  font-style: normal;
-}
-
-.lock {
-  position: absolute;
-  top: 3px;
-  right: 4px;
-  color: $gold;
-  font-size: 0.7rem;
-}
-
-.worn {
-  margin-top: 2px;
-  color: $accent-dim;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  flex: 1 1 auto;
+  width: 100%;
 }

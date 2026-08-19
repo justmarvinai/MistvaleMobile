@@ -5,6 +5,71 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the relics look like relics (design rework, D5)
+
+The vault was a grid of bordered `<div>`s with the substats as a definition list, the
+paperdoll was six dashed rectangles, and a ×10 pull turned over ten cards with nothing on
+them. Relics and the economy around them are the library's now.
+
+- **A relic is an `ArtifactCard`** — rarity frame, slot pip, upgrade level and roll pips on
+  each substat, which is the card an equipment screen in this genre is made of. The roll
+  pips matter more than they look: a relic's whole value is usually one lucky line among
+  four, and pips are how that becomes visible instead of arithmetic. A relic has no name of
+  its own in Mistvale, so the card is titled by its set and subtitled by its slot — inventing
+  a name would be content.
+- **Every slot has a face.** `relicArt` maps the nine slots to a painted icon and a line
+  glyph, kept in one place so the vault, the paperdoll, the picker and the Bazaar all draw a
+  boot the same way. Typed on `GearSlot`, so a tenth slot cannot be added without somebody
+  drawing it.
+- **The paperdoll is nine painted sockets**, filled ones wearing their piece's rarity and
+  empty ones the slot's silhouette, with the accessories dimmed until the ascension that
+  opens them.
+- **What the pieces add up to** is on the sheet at last, as `ArtifactSet`'s bonus list:
+  every set with a piece on this champion, complete ones first, incomplete ones greyed and
+  counted so a player can see they are one boot from a bonus rather than working it out. A
+  set that is *paying* says so in the server's own words, because bonuses stack in complete
+  copies — six pieces of a two-piece set is the bonus three times, and no client-side count
+  is allowed to claim otherwise.
+- **The forge's ×1/×5/×10 strip** is the library's segmented control, and the Bazaar's
+  non-relic stalls are painted sockets with a quantity badge rather than a line of body text.
+- **Champion art has one answer everywhere.** `championArt` returns a drawn avatar when the
+  champion's asset declares one and a painted stand-in when it does not — by faction first,
+  role second, so thirty-six art-pending champions read as eight recognisable houses rather
+  than one anonymous crowd. The gate is the asset's `avatarPath`, which is content an
+  operator fills in through the Admin Suite; the *existence* of an asset record answers
+  nothing, since nearly every champion points at the shared art-pending model.
+- **One stat vocabulary.** `statLabel` replaces three private copies of the same map and two
+  raw `toUpperCase()` calls, so a relic never rolls `CRITRATE` in one place and `C.RATE` in
+  another.
+- **Screen padding moved to the shell.** Three of seventeen screens remembered to set it,
+  which is why the vault's first column sat against the window edge.
+
+Three defects fixed. **A ×10 pull turned over ten empty frames**: the library's
+`ChampionCard` draws nothing at all when the image it is handed fails to load, and the
+portrait URL was being built for any champion with an asset record — which is all of them,
+because the art-pending ones share one model that has no face. **The set-bonus list
+under-counted every stacked set**: it now reads the server's copy-aware description rather
+than restating the set's content definition. **And `pnpm assets` silently broke every
+sprite in the running dev server**, which is what made the first of those so hard to see.
+It rebuilt the published tree from scratch on every run — including the one that runs
+before `pnpm dev` and `pnpm build` — and Vite indexes its public directory once at start-up
+and maintains it from the watcher, so the wipe took all 89 paths out of that index and the
+re-adds did not put them back. Every `/sprites/**` request then answered **200 with the
+game's own HTML**: no error in the console, no failure in the network tab, just cards with
+nothing on them. It publishes in place now, writing only files whose bytes changed and
+pruning what it did not write, so a deleted unit still disappears.
+
+The coverage that would have caught it, because a fix without one is a promise: `every
+champion has a face` swept `document.images`, and since the design rework a champion's face
+is a **CSS background** on the library's card — so the sweep reported a clean page while
+every card on it was empty. It now reads each card's computed background, and loads it.
+
+The owner's avatar art for the four remaining Epics landed in the same pass, so Darius,
+Khazgor, Rattledagger and Sethlurias have faces; the asset records now declare them. The
+seed only ever fills in what is *missing*, so a database that already holds those four rows
+keeps its old ones — on an existing box the four `avatarPath` fields are an Admin edit, which
+is the same path any other art upload takes.
+
 ### Changed — the collection is a collection (design rework, D4)
 
 The roster was a grid of flat rectangles with a portrait in each and the champion sheet

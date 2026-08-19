@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, rmdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,30 +65,69 @@ async function readUnit(kind: string, folder: string): Promise<UnitManifestEntry
   };
 }
 
+/**
+ * Copies one file, and only if it would change anything.
+ *
+ * Rewriting a file that is already correct is not free here: the Vite dev server keeps an
+ * index of the public directory built at start-up and maintained from the watcher, so
+ * every needless write is a watcher event, and — before this was written in place —
+ * every *delete* took a path out of that index for good. Returns the published path so
+ * the caller knows what to keep.
+ */
+async function publishFile(from: string, to: string): Promise<string> {
+  const source = await readFile(from);
+  const existing = await readFile(to).catch(() => null);
+  if (!existing || !existing.equals(source)) await writeFile(to, source);
+  return to;
+}
+
 /** Copies one unit's sprites, normalising the names the client will ask for. */
-async function publishUnit(entry: UnitManifestEntry): Promise<void> {
+async function publishUnit(entry: UnitManifestEntry): Promise<string[]> {
   const source = join(sourceRoot, entry.basePath);
   const target = join(targetRoot, entry.basePath);
   await mkdir(join(target, 'idle'), { recursive: true });
+  const written: string[] = [];
 
   const frames = (await readdir(join(source, 'idle'))).filter(isFrame).sort();
   for (const [index, frame] of frames.entries()) {
     // Renumbered from zero so the client can build a URL from an index rather than
     // needing to know how the artist happened to number the export.
     const name = `frame_${String(index).padStart(3, '0')}.png`;
-    await cp(join(source, 'idle', frame), join(target, 'idle', name));
+    written.push(await publishFile(join(source, 'idle', frame), join(target, 'idle', name)));
   }
 
   if (entry.hasStill) {
     const stills = (await readdir(join(source, 'still'))).filter(isPng).sort();
-    await cp(join(source, 'still', stills[0]!), join(target, 'still.png'));
+    written.push(await publishFile(join(source, 'still', stills[0]!), join(target, 'still.png')));
   }
   if (entry.hasAvatar) {
     const avatars = (await readdir(source)).filter(
       (name) => isPng(name) && name.toLowerCase().includes('avatar'),
     );
-    await cp(join(source, avatars[0]!), join(target, 'avatar.png'));
+    written.push(await publishFile(join(source, avatars[0]!), join(target, 'avatar.png')));
   }
+  return written;
+}
+
+/**
+ * Deletes everything under the published tree that this run did not write, then any
+ * directory left empty — so a unit removed from `assets/` disappears from the client
+ * without the whole tree being rebuilt.
+ */
+async function prune(dir: string, keep: ReadonlySet<string>): Promise<boolean> {
+  let empty = true;
+  for (const item of await readdir(dir, { withFileTypes: true })) {
+    const path = join(dir, item.name);
+    if (item.isDirectory()) {
+      if (await prune(path, keep)) await rmdir(path);
+      else empty = false;
+    } else if (keep.has(path)) {
+      empty = false;
+    } else {
+      await rm(path);
+    }
+  }
+  return empty;
 }
 
 async function collect(): Promise<UnitManifestEntry[]> {
@@ -131,12 +170,20 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Rebuild from scratch so a unit deleted from assets/ disappears from the client too.
-  await rm(targetRoot, { recursive: true, force: true });
+  // Published in place rather than rebuilt from scratch. Wiping the directory first is the
+  // obvious way to make a deleted unit disappear, and it also silently breaks every sprite
+  // in the running dev server: Vite indexes the public directory once at start-up and keeps
+  // it from the watcher, so a wipe takes every path out of that index and the re-adds do not
+  // reliably put them back. The symptom is `/sprites/**` answering with the SPA's HTML — an
+  // empty champion card and no error anywhere. Deletions are handled by pruning instead.
   await mkdir(targetRoot, { recursive: true });
 
-  for (const unit of units) await publishUnit(unit);
-  await writeFile(manifestPath, json, 'utf8');
+  const keep = new Set<string>([manifestPath]);
+  for (const unit of units) for (const file of await publishUnit(unit)) keep.add(file);
+  if ((await readFile(manifestPath, 'utf8').catch(() => null)) !== json) {
+    await writeFile(manifestPath, json, 'utf8');
+  }
+  await prune(targetRoot, keep);
 
   const frames = units.reduce((sum, unit) => sum + unit.idleFrames, 0);
   console.log(`assets: published ${units.length} units (${frames} idle frames) → ${targetRoot}`);

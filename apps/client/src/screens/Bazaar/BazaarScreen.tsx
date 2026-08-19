@@ -9,7 +9,10 @@ import { useShopStore } from '../../state/shopStore';
 import { RelicCard } from '../Relics/RelicCard';
 import styles from './BazaarScreen.module.scss';
 import { highlightable } from '../../app/highlight';
+import { Slot } from '@/fui/components/Slot.ts';
+import { Fui } from '@/fui/react';
 import { Heading } from '@/ui/Heading/Heading';
+import { rewardArt } from '../../ui/Rewards/art';
 
 /**
  * The Bazaar.
@@ -128,9 +131,35 @@ export function BazaarScreen(): JSX.Element {
                 {slot.gear ? (
                   <RelicCard relic={slot.gear} />
                 ) : (
-                  <p className={styles.slotBody}>
-                    {slot.kind === 'item' ? itemName(slot.refKey) : slot.name}
-                  </p>
+                  // A painted socket rather than a sentence: a stall selling three tomes
+                  // and a champion should look like a stall, and "Epic Tome" as body text
+                  // is the thing that made this screen read as a list.
+                  <div className={styles.slotBody}>
+                    <Fui
+                      of={Slot}
+                      className={styles.slotArt}
+                      options={{
+                        size: 'lg',
+                        item: {
+                          icon: slot.kind === 'champion' ? 'hero-vanguard' : rewardArt(slot.refKey),
+                          name:
+                            slot.kind === 'champion'
+                              ? championName(slot.refKey)
+                              : itemName(slot.refKey),
+                          ...(slot.quantity > 1 ? { qty: slot.quantity } : {}),
+                        },
+                      }}
+                      attrs={{
+                        role: 'presentation',
+                        tabindex: undefined,
+                        'aria-label': undefined,
+                        title: undefined,
+                      }}
+                    />
+                    <span className={styles.slotWhat}>
+                      {slot.kind === 'item' ? itemName(slot.refKey) : slot.name}
+                    </span>
+                  </div>
                 )}
 
                 <footer className={styles.slotFoot}>

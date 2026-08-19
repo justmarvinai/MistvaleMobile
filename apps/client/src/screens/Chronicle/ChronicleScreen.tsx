@@ -103,7 +103,10 @@ export function ChronicleScreen(): JSX.Element {
           {visible.map((entry) => {
             const def = defs.get(entry.championKey);
             const asset = bundle?.assets.find((item) => item.key === def?.assetKey);
-            const art = asset ? avatarPath(asset.basePath) : null;
+            // `avatarPath` and not the asset itself: every art-pending champion points at
+            // the shared model, which has no face. Falling through to `Portrait`'s
+            // placeholder is the answer, and asking for a URL that is not there first is not.
+            const art = asset?.avatarPath ? avatarPath(asset.basePath) : null;
             const state = entry.owned ? 'owned' : entry.seen ? 'seen' : 'unknown';
 
             return (

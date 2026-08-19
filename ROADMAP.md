@@ -19,6 +19,7 @@
 | P8 ✅ | Meta & retention | Quests, missions, events, login, mail, news, settings | ▓▓▓ |
 | P9 ✅ | Onboarding | Scripted tutorial, feature gating, FTUE polish | ▓▓ |
 | P10 | Release hardening | Full content seed, audio/animation polish, perf/security audit, EA-0.1 live | ▓▓▓ |
+| **D** | Design rework | The whole game dressed in FantasyUIs — commissioned mid-P10, runs alongside it | ▓▓▓▓ |
 
 ---
 
@@ -160,6 +161,39 @@ explanation is a punishment for a cap nobody watched themselves hit. One gate, i
 one function relics are created by.
 
 **Not done, and deliberately: the `ea-0.1.0` tag and the VPS deploy.** A tag is a claim that a commit is what is running, and nothing is running yet — there is no VPS reachable from here, and the exit criterion is a live box with friends on it and backups proven. The checklist puts the tag after the deploy for that reason. Everything the tag would need is ready.
+
+---
+
+### D — The design rework (in progress, commissioned 2026-08-18)
+
+*"I want you to FULLY rework the Design of the whole Game."* The game is dressed in
+**FantasyUIs** — the owner's own vanilla-TS component library — vendored into
+`apps/client/src/fui/` rather than depended on. This supersedes the hand-built pixel kit and
+the "no component library" rule; everything else in the brief stands. **Gameplay and content
+are untouched by all of it**: this pass changes what the game looks like and nothing about
+what it does.
+
+The rule the phases are decided by, arrived at in D4 and applied since: **the library owns
+chrome, React owns behaviour.** Where the library's component *is* the semantic element and
+holds no state React must drive, the component is used. Where React owns the state, the art
+is used and the element stays ours — which is why the mastery board and the four-column stat
+table deliberately did not move.
+
+| | Theme | State |
+|---|---|---|
+| **D0** | Vendoring, theme layer, React bridge | ✅ |
+| **D1** | Palette correction, `Button` / `TextField` / `Heading` | ✅ |
+| **D2** | The shell — top bar, dock, Haven, backdrop | ✅ |
+| **D3** | The fight — battle HUD, result screen, dialog layer | ✅ |
+| **D4** | The collection — champion cards, skills, progress | ✅ |
+| **D5** | Relics and the economy — artifact cards, paperdoll, forge, Bazaar | ✅ |
+| **D6** | World and progression — campaign map, Depths, quests, calendar, mail | |
+| **D7** | Competition — Arena, Hall of Valor, the profile card | |
+| **D8** | Mistvale's own components, in the library's language | |
+| **D9** | The screenshot pass — every screen, extended `visible.spec.ts`, §9 budgets re-measured | |
+
+**Exit:** every screen in the game is drawn in one visual language, `pnpm verify` and
+`pnpm sim` green, and ARCHITECTURE §9 budgets still met with the art in the bundle.
 
 ---
 

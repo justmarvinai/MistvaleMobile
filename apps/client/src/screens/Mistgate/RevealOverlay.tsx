@@ -1,12 +1,13 @@
 import { useEffect, useId, type CSSProperties } from 'react';
+import { ChampionCard } from '@/fui/components/ChampionCard.ts';
+import { Fui } from '@/fui/react';
 import { Button } from '../../ui/Button/Button';
 import { playCue, summonCue } from '../../audio';
 import { useLayer } from '../../ui/Modal/stack';
-import { avatarPath } from '../../game/sprites';
 import { useContentStore } from '../../state/contentStore';
+import { championArt } from '../../ui/championArt';
 import { useSummonStore } from '../../state/summonStore';
 import styles from './RevealOverlay.module.scss';
-import { Portrait } from '../../ui/Portrait/Portrait';
 
 /**
  * The reveal.
@@ -16,6 +17,14 @@ import { Portrait } from '../../ui/Portrait/Portrait';
  * it, and one on their first should not be rushed. Everything shown was decided by the
  * server before the first frame; this is choreography, not a lottery running in the
  * browser (CLAUDE.md — the client renders server numbers).
+ *
+ * **Not the library's `SummonResult`, and for the same reason the mastery board is not
+ * its `MasteryGrid`.** That component runs its own reveal — a fixed stagger, or one card
+ * per tap — where this one has a *per-rarity beat* and a cue for every card that turns,
+ * because the gap between the three chimes is what the pull's drama is made of and the
+ * owner tuned it. So the choreography stays and the *cards* are the library's, which is
+ * also what makes a Legendary here look like a Legendary in the roster: the same
+ * `ChampionCard`, the same frame, the same gold.
  */
 
 /** How long each rarity holds the screen before the next card turns. */
@@ -65,11 +74,9 @@ export function RevealOverlay(): JSX.Element {
   const nameOf = (key: string): string =>
     bundle?.champions.find((champion) => champion.key === key)?.name ?? key;
 
-  const artFor = (key: string): string | null => {
-    const champion = bundle?.champions.find((entry) => entry.key === key);
-    const asset = bundle?.assets.find((entry) => entry.key === champion?.assetKey);
-    return asset ? avatarPath(asset.basePath) : null;
-  };
+  const defOf = (key: string) => bundle?.champions.find((champion) => champion.key === key);
+
+  const artFor = (key: string) => championArt(defOf(key), bundle?.assets);
 
   const best = results.reduce<string>((carry, result) => {
     const order = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
@@ -99,16 +106,29 @@ export function RevealOverlay(): JSX.Element {
             >
               {shown ? (
                 <>
-                  {result.isNew && <span className={styles.new}>NEW</span>}
-                  <span className={styles.portrait}>
-                    <Portrait
-                      src={artFor(result.championKey)}
-                      name={nameOf(result.championKey)}
-                      size={96}
-                    />
-                  </span>
-                  <span className={styles.name}>{nameOf(result.championKey)}</span>
-                  <span className={styles.rarity}>{result.rarity}</span>
+                  <Fui
+                    of={ChampionCard}
+                    className={styles.pull}
+                    options={{
+                      name: nameOf(result.championKey),
+                      ...artFor(result.championKey),
+                      rarity: result.rarity,
+                      // A pull arrives at its base rank; what it becomes is the roster's
+                      // business, and showing a level here would be a number nobody asked
+                      // about at the moment they are looking at a face.
+                      ...(result.champion ? { stars: result.champion.rank, maxStars: 6 } : {}),
+                      ...(defOf(result.championKey)?.element
+                        ? { affinity: defOf(result.championKey)!.element }
+                        : {}),
+                      // The ribbon the library already draws for a freshly pulled unit.
+                      ...(result.isNew ? { isNew: true } : {}),
+                    }}
+                    // The card is a `<button>`, because in a roster it opens a champion.
+                    // Here it opens nothing, and ten tab stops that do nothing in front of
+                    // the one button that does is worse than not being able to reach them.
+                    // Out of the tab order, still readable — the card names itself.
+                    attrs={{ tabindex: -1 }}
+                  />
                   {result.fromMercy && <span className={styles.mercy}>mercy</span>}
                   {result.champion === null && (
                     <span className={styles.full} title="Your roster is full">

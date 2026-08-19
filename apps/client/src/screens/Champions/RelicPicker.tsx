@@ -6,6 +6,7 @@ import { gameApi } from '../../api/game';
 import { useInventoryStore } from '../../state/inventoryStore';
 import { RelicCard } from '../Relics/RelicCard';
 import styles from './RelicPicker.module.scss';
+import { statLabel } from '../../ui/statLabels';
 
 /**
  * Choosing a relic for one slot.
@@ -127,7 +128,7 @@ export function RelicPicker({
                 if (delta === 0) return null;
                 return (
                   <li key={stat} data-sign={delta > 0 ? 'up' : 'down'}>
-                    {stat.toUpperCase()} {delta > 0 ? '+' : ''}
+                    {statLabel(stat)} {delta > 0 ? '+' : ''}
                     {delta.toLocaleString()}
                   </li>
                 );

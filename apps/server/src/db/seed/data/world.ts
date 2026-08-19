@@ -96,10 +96,10 @@ export const ASSETS: AssetDefInput[] = [
   unitAsset('champ_anuria', 'champions/epic_anuria', { avatar: true }),
   unitAsset('champ_thordakk', 'champions/epic_thordakk', { avatar: true }),
   unitAsset('champ_maruan', 'champions/epic_maruan', { avatar: true }),
-  unitAsset('champ_darius', 'champions/epic_darius'),
-  unitAsset('champ_khazgor', 'champions/epic_khazgor'),
-  unitAsset('champ_rattledagger', 'champions/epic_rattledagger'),
-  unitAsset('champ_sethlurias', 'champions/epic_sethlurias'),
+  unitAsset('champ_darius', 'champions/epic_darius', { avatar: true }),
+  unitAsset('champ_khazgor', 'champions/epic_khazgor', { avatar: true }),
+  unitAsset('champ_rattledagger', 'champions/epic_rattledagger', { avatar: true }),
+  unitAsset('champ_sethlurias', 'champions/epic_sethlurias', { avatar: true }),
   // The one enemy model, which every art-pending unit borrows.
   unitAsset('enemy_lizard', 'enemies/teritorial_lizard'),
 ];

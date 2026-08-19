@@ -1,8 +1,8 @@
 import type { ChampionDef, RosterChampion } from '@mistvale/shared';
 import { ChampionCard as FuiChampionCard } from '@/fui/components/ChampionCard.ts';
 import { FuiSlotted } from '@/fui/react';
-import { avatarPath } from '../../game/sprites';
 import { useContentStore } from '../../state/contentStore';
+import { championArt } from '../../ui/championArt';
 import styles from './ChampionCard.module.scss';
 
 /**
@@ -41,8 +41,7 @@ export function ChampionCard({
   selected?: boolean;
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
-  const asset = bundle?.assets.find((entry) => entry.key === def?.assetKey);
-  const art = asset ? avatarPath(asset.basePath) : null;
+  const art = championArt(def, bundle?.assets);
 
   const gearWorn = champion.equippedGearIds.length;
 
@@ -52,7 +51,7 @@ export function ChampionCard({
       className={styles.card}
       options={{
         name: def?.name ?? champion.championKey,
-        ...(art ? { portrait: art } : {}),
+        ...art,
         rarity: def?.rarity ?? 'common',
         stars: champion.rank,
         maxStars: 6,

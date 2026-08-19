@@ -34,7 +34,9 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  /* Sized from the library's own card width (236px) rather than guessed: a column
+     narrower than the card it holds overflows into the next one. */
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: $space-2;
   align-content: start;
   max-height: calc(100% - 3rem);

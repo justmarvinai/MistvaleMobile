@@ -151,6 +151,35 @@ test.describe('what a player can actually see', () => {
         Array.from(document.images).filter((img) => img.complete && img.naturalWidth === 0).length,
     );
     expect(broken, 'images that failed to load').toBe(0);
+
+    // And the cards, which `document.images` cannot see: since the design rework a
+    // champion's face is a CSS background on the library's card, so an `<img>` sweep
+    // reports a clean page while every card on it is an empty frame — which is exactly
+    // what a ×10 pull of art-pending champions was. Every card must name a picture, and
+    // the picture must load.
+    const cards = page.locator('.fui-champ__art');
+    expect(await cards.count(), 'champion cards on the roster').toBeGreaterThan(0);
+
+    const artless = await page.evaluate(async () => {
+      const urls = Array.from(document.querySelectorAll('.fui-champ__art'), (el) => {
+        const image = getComputedStyle(el).backgroundImage;
+        return /url\(["']?(.+?)["']?\)/.exec(image)?.[1] ?? null;
+      });
+      const loads = await Promise.all(
+        Array.from(new Set(urls)).map(
+          (url) =>
+            new Promise<string | null>((resolve) => {
+              if (!url) return resolve('(no background image)');
+              const probe = new Image();
+              probe.onload = () => resolve(null);
+              probe.onerror = () => resolve(url);
+              probe.src = url;
+            }),
+        ),
+      );
+      return loads.filter((entry): entry is string => entry !== null);
+    });
+    expect(artless, 'champion cards with no picture').toEqual([]);
   });
 
   test('the icon sprite is inlined, so icons take the colour around them', async ({ page }) => {

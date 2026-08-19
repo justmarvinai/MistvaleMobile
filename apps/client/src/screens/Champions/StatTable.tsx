@@ -1,4 +1,5 @@
 import type { ChampionStats, Stat } from '@mistvale/shared';
+import { STAT_ORDER, statLabel } from '../../ui/statLabels';
 import styles from './StatTable.module.scss';
 
 /**
@@ -12,21 +13,8 @@ import styles from './StatTable.module.scss';
  * are a *different decision* — relics are farmed and swapped, masteries are committed to.
  */
 
-const LABELS: Record<Stat, string> = {
-  hp: 'HP',
-  atk: 'ATK',
-  def: 'DEF',
-  spd: 'SPD',
-  critRate: 'C.RATE',
-  critDmg: 'C.DMG',
-  res: 'RES',
-  acc: 'ACC',
-};
-
 /** Stats measured in percentage points get a % suffix; the rest are magnitudes. */
 const PERCENT: ReadonlySet<Stat> = new Set<Stat>(['critRate', 'critDmg']);
-
-const ORDER: readonly Stat[] = ['hp', 'atk', 'def', 'spd', 'critRate', 'critDmg', 'res', 'acc'];
 
 export function StatTable({ stats }: { stats: ChampionStats }): JSX.Element {
   return (
@@ -41,12 +29,12 @@ export function StatTable({ stats }: { stats: ChampionStats }): JSX.Element {
         </tr>
       </thead>
       <tbody>
-        {ORDER.map((stat) => {
+        {STAT_ORDER.map((stat) => {
           const bonus = Math.round(stats.gear[stat]);
           const learned = Math.round(stats.mastery?.[stat] ?? 0);
           return (
             <tr key={stat}>
-              <th scope="row">{LABELS[stat]}</th>
+              <th scope="row">{statLabel(stat)}</th>
               <td>{Math.round(stats.base[stat]).toLocaleString()}</td>
               <td className={bonus > 0 ? styles.bonus : styles.zero}>
                 {bonus > 0 ? `+${bonus.toLocaleString()}` : '—'}

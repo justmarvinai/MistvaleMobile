@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ChampionDetail, GearSlot, Stat } from '@mistvale/shared';
+import type { ChampionDetail, GearSetDef, GearSlot, Stat } from '@mistvale/shared';
 import { GEAR_SLOTS } from '@mistvale/shared';
+import { ArtifactSet } from '@/fui/components/ArtifactSet.ts';
 import { SkillCard } from '@/fui/components/SkillCard.ts';
+import { Slot } from '@/fui/components/Slot.ts';
 import { Fui } from '@/fui/react';
+import { relicArt, relicGlyph } from '../../ui/relicArt';
 import { skillArt } from '../../ui/skillArt';
+import { statLabel } from '../../ui/statLabels';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';
@@ -18,6 +22,17 @@ import { StatTable } from './StatTable';
 import styles from './ChampionDetail.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Icon } from '../../ui/Icon/Icon';
+
+/** A set's bonus as one readable line — the same numbers the engine applies. */
+function setEffect(set: GearSetDef): string {
+  const { stat, pct, flat, chance, turns } = set.bonus;
+  const magnitude = pct != null ? `+${pct}%` : flat != null ? `+${flat}` : '';
+  const target = stat ? statLabel(stat) : '';
+  const odds = chance != null ? ` (${Math.round(chance * 100)}% chance)` : '';
+  const duration = turns != null ? ` for ${turns} turns` : '';
+  const head = [target, magnitude].filter(Boolean).join(' ');
+  return `${head || set.bonusType}${duration}${odds}`.trim();
+}
 
 /**
  * One champion, everything about it.
@@ -124,6 +139,37 @@ export function ChampionDetailModal({
     Object.entries(ascendCost).every(([key, amount]) => itemCount(items, key) >= amount);
 
   const skills = (bundle?.skills ?? []).filter((skill) => def.skills.includes(skill.key));
+
+  /**
+   * Which sets the worn relics are working towards.
+   *
+   * Only sets with a piece on this champion appear: listing all sixteen would be a
+   * catalogue rather than a status, and the catalogue lives in the vault.
+   */
+  const setProgress = (() => {
+    const counts = new Map<string, number>();
+    for (const relic of detail.gear) counts.set(relic.setKey, (counts.get(relic.setKey) ?? 0) + 1);
+    const active = new Map(stats.setBonuses.map((bonus) => [bonus.setKey, bonus]));
+    return [...counts.entries()]
+      .flatMap(([key, have]) => {
+        const set = bundle?.gearSets.find((entry) => entry.key === key);
+        if (!set) return [];
+        // A set that is *paying* says so in the server's own words, because bonuses stack
+        // in complete copies — six pieces of a two-piece set is the bonus three times, and
+        // no client-side count is allowed to claim otherwise. A set that is not yet paying
+        // says what it *would* pay, which is the only reason to list it at all.
+        const paying = active.get(key);
+        return [
+          {
+            name: set.name,
+            need: set.pieces as number,
+            have,
+            effect: paying ? paying.description : setEffect(set),
+          },
+        ];
+      })
+      .sort((a, b) => b.have / b.need - a.have / a.need);
+  })();
   // The heaviest active this champion actually has, so a three-skill champion's a3 gets
   // the gold and a four-skill champion's a4 does.
   const ultimateSlot = skills
@@ -228,53 +274,81 @@ export function ChampionDetailModal({
         )}
 
         {tab === 'gear' && (
-          <div className={styles.slots}>
-            {GEAR_SLOTS.map((slot) => {
-              const worn = wornBySlot.get(slot);
-              const slotDef = bundle?.gearSlots.find((entry) => entry.key === slot);
-              const locked = (slotDef?.ascensionRequired ?? 0) > champion.ascension;
-              return (
-                <button
-                  key={slot}
-                  type="button"
-                  className={styles.slot}
-                  data-filled={worn ? 'true' : undefined}
-                  disabled={locked || busy}
-                  onClick={() => setSlotPicking(slot)}
-                  title={
-                    locked
-                      ? `Needs ascension ${slotDef?.ascensionRequired}`
-                      : worn
-                        ? `${worn.setKey} · +${worn.level}`
-                        : `Empty ${SLOT_LABEL[slot]}`
-                  }
-                >
-                  <span className={styles.slotName}>{SLOT_LABEL[slot]}</span>
-                  {worn ? (
-                    <>
+          <>
+            <div className={styles.slots}>
+              {GEAR_SLOTS.map((slot) => {
+                const worn = wornBySlot.get(slot);
+                const slotDef = bundle?.gearSlots.find((entry) => entry.key === slot);
+                const locked = (slotDef?.ascensionRequired ?? 0) > champion.ascension;
+                const setName = worn
+                  ? (bundle?.gearSets.find((entry) => entry.key === worn.setKey)?.name ??
+                    worn.setKey)
+                  : null;
+                return (
+                  <button
+                    key={slot}
+                    type="button"
+                    className={styles.slot}
+                    disabled={locked || busy}
+                    onClick={() => setSlotPicking(slot)}
+                    title={
+                      locked
+                        ? `Needs ascension ${slotDef?.ascensionRequired}`
+                        : worn
+                          ? `${setName} · +${worn.level}`
+                          : `Empty ${SLOT_LABEL[slot]}`
+                    }
+                  >
+                    {/* The socket is the slot's picture, not a second control — see the
+                        Haven's stations for the same reasoning. */}
+                    <Fui
+                      of={Slot}
+                      className={styles.slotSocket}
+                      options={{
+                        size: 'lg',
+                        locked,
+                        item: worn
+                          ? {
+                              icon: relicArt(slot),
+                              name: setName ?? slot,
+                              rarity: worn.rarity,
+                            }
+                          : null,
+                        placeholder: relicGlyph(slot),
+                      }}
+                      attrs={{
+                        role: 'presentation',
+                        tabindex: undefined,
+                        'aria-label': undefined,
+                        title: undefined,
+                      }}
+                    />
+                    <span className={styles.slotName}>{SLOT_LABEL[slot]}</span>
+                    {worn ? (
                       <span className={styles.slotMain}>
-                        {worn.main.stat.toUpperCase()} +{worn.main.value}
-                        {worn.main.percent ? '%' : ''}
+                        {statLabel(worn.main.stat)} +{worn.main.value}
+                        {worn.main.percent ? '%' : ''} · +{worn.level}
                       </span>
-                      <span className={styles.slotLevel}>+{worn.level}</span>
-                    </>
-                  ) : (
-                    <span className={styles.slotEmpty}>{locked ? 'Locked' : 'Empty'}</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
+                    ) : (
+                      <span className={styles.slotEmpty}>{locked ? 'Locked' : 'Empty'}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
 
-        {tab === 'gear' && stats.setBonuses.length > 0 && (
-          <ul className={styles.setBonuses}>
-            {stats.setBonuses.map((bonus) => (
-              <li key={bonus.setKey}>
-                <strong>{bonus.name}</strong> ({bonus.equipped} worn) — {bonus.description}
-              </li>
-            ))}
-          </ul>
+            {/* What the pieces add up to — which is the whole reason relic *sets* exist and
+                the one thing this sheet never said. Counted from what is worn, with the
+                incomplete ones greyed, so a player can see they are one boot from a
+                bonus rather than working it out. */}
+            {setProgress.length > 0 && (
+              <Fui
+                of={ArtifactSet}
+                className={styles.setBonuses}
+                options={{ title: 'Set bonuses', slots: [], bonuses: setProgress }}
+              />
+            )}
+          </>
         )}
 
         {tab === 'skills' && (

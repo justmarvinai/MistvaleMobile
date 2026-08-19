@@ -37,26 +37,6 @@
   gap: $space-1;
 }
 
-.timesOption {
-  padding: $space-1 $space-2;
-  background: $panel-inset;
-  border: 1px solid transparent;
-  color: $muted;
-  font: inherit;
-  font-size: 0.8rem;
-  cursor: pointer;
-
-  &[aria-pressed='true'] {
-    border-color: $accent;
-    color: $accent;
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
 .hint {
   margin-left: $space-2;
   color: $muted-deep;

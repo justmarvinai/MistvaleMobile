@@ -7,8 +7,16 @@
   min-height: 0;
 }
 
+/* Every screen sits this far inside the frame.
+
+   It used to be each screen's own business, and three of seventeen remembered — which
+   nobody could see while a card was a flat rectangle on a flat ground and everybody could
+   see the moment cards got borders: the vault's first column was clipped against the left
+   edge of the window. One rule, so a screen added next year is inside the frame without
+   its author having to know. */
 .content {
   flex: 1;
   min-height: 0;
   position: relative;
+  padding: $space-4 $space-5;
 }
