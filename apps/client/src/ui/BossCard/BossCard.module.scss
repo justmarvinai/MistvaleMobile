@@ -1,0 +1,54 @@
+@use '../../styles/tokens' as *;
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-3;
+  background: $panel-inset;
+  /* The one place in the game that borrows the blood colour for a border: what this panel
+     says is "this fight has a rule you will lose to if you do not read it". */
+  border: 1px solid color-mix(in srgb, $blood 60%, transparent);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: $space-2;
+}
+
+.name {
+  color: $parchment;
+  font-size: 0.95rem;
+}
+
+.where {
+  color: $muted;
+  font-size: 0.75rem;
+}
+
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rule {
+  display: flex;
+  align-items: baseline;
+  gap: $space-2;
+  min-width: 0;
+}
+
+.chip {
+  flex: none;
+}
+
+.detail {
+  color: $muted;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}

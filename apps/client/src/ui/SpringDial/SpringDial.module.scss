@@ -1,0 +1,48 @@
+@use '../../styles/tokens' as *;
+
+.dial {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day {
+  display: flex;
+  align-items: baseline;
+  gap: $space-2;
+  padding: 3px $space-2;
+  background: $panel-inset;
+
+  &[data-today='true'] {
+    background: color-mix(in srgb, $accent 14%, $panel-inset);
+    box-shadow: inset 2px 0 0 $accent;
+  }
+}
+
+.name {
+  flex: none;
+  width: 2.2rem;
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+
+  .day[data-today='true'] & {
+    color: $accent-soft;
+  }
+}
+
+.springs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  min-width: 0;
+}
+
+.spring {
+  color: $parchment-dim;
+  font-size: 0.72rem;
+}

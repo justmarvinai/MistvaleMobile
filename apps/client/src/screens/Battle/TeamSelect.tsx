@@ -10,6 +10,8 @@ import { useBattleStore } from '../../state/battleStore';
 import { useNavStore } from '../../state/navStore';
 import { MultiSummary } from './MultiSummary';
 import styles from './TeamSelect.module.scss';
+import { BossCard } from '../../ui/BossCard/BossCard';
+import { stageBoss } from '../../ui/BossCard/bossRules';
 
 /**
  * Picking a team before a fight.
@@ -70,6 +72,8 @@ export function TeamSelect({
   );
 
   const affordable = energy >= stage.energyCost;
+  /** Whoever stands in the last wave, if it is somebody worth warning about. */
+  const boss = stageBoss(stage, bundle?.enemies);
   const picked = team.length > 0;
   const canStart = picked && affordable && !busy;
 
@@ -143,6 +147,18 @@ export function TeamSelect({
           {stage.waves.length} waves · {stage.energyCost} energy · {stage.rewards.silverMin}–
           {stage.rewards.silverMax} silver
         </p>
+
+        {/* What is waiting, and what it does about being fought. Content has carried a
+            boss's mechanics since P6 and no screen had ever said what was in them — so a
+            keep that is meant to be a puzzle was a wall you lost to before guessing. It is
+            here rather than in the fight because this is where the team is chosen. */}
+        {boss && (
+          <BossCard
+            name={boss.name}
+            where={boss.archetype === 'warlord' ? 'Warlord' : 'Keeper of the deep'}
+            mechanics={boss.bossMechanics}
+          />
+        )}
 
         <div className={styles.slots}>
           {Array.from({ length: MAX_SLOTS }, (_, index) => {

@@ -5,6 +5,38 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — three things only Mistvale can say (design rework, D8)
+
+Seven phases of dressing the game in the library, and what was left over is the part the
+library has no component for and no reason to: rules that belong to this game. Each of the
+three is backed by data the server has been sending all along and no screen had ever shown.
+
+- **`ui/BossCard` — who waits at the end, and what it does about being fought.** Every boss
+  in the game carries `bossMechanics` in content and **not one screen had ever said what was
+  in it**. The Depths are described as puzzles; a puzzle whose rules are secret is a wall you
+  lose to twice before guessing. The card turns the flags into the sentences that change what
+  a player does — "Stun, freeze and sleep do not land. Bring damage, not control." — and it
+  sits in the team chooser, where the energy is about to be spent. `bossRules` is separate
+  from the component so the wording is testable, and `stageBoss` finds the boss in a stage's
+  last wave so a stage re-cut in Admin points at its new one with no client change.
+- **`ui/VaultMeter` — how much room is left, and what happens when there is none.** The
+  vault has been a real economy since Q5 and was showing as "218 / 250" in a definition list.
+  Three states now, each of which changes what to do next, and the rule that makes equipping
+  a way to clear space said out loud rather than left to be discovered.
+- **`ui/SpringDial` — which spring runs on which day.** Five springs each announced their own
+  hours on their own tile, which answers "is this open now" and never answers the question a
+  player actually has: *when do I come back for Verdant essence*. The week, once, with the
+  springs on it and today marked from the server's clock rather than the browser's.
+
+And **the campaign names its warlord**. The screen's tagline has promised "a warlord waiting
+at the end of each" chapter since P6 and never said who — while content has known all along,
+in the last wave of the last stage.
+
+Two of the six components the roadmap sketched are deliberately not built. `DepthsKeep` was
+answered in D6 by the library's own `EventBanner`, and `MistScene` would be decoration over a
+backdrop that already exists — neither would have said anything the game does not already
+say.
+
 ### Changed — the ladder looks like a ladder (design rework, D7)
 
 The Arena, the Hall of Valor and the public profile card, dressed. The rung a player holds

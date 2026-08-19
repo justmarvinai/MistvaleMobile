@@ -14,6 +14,7 @@ import { TeamSelect } from '../Battle/TeamSelect';
 import styles from './CampaignScreen.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
+import { stageBoss } from '../../ui/BossCard/bossRules';
 
 /**
  * The campaign map, and since the design rework it is one.
@@ -242,6 +243,15 @@ export function CampaignScreen(): JSX.Element {
    */
   const shut = stages.find((stage) => standings.get(stage.key)?.open === false);
   const shutReason = shut ? (standings.get(shut.key)?.lockedReason ?? null) : null;
+  /**
+   * The warlord at the end of the chapter, named.
+   *
+   * The screen's own tagline has promised "a warlord waiting at the end of each" since P6
+   * and never said who — while content has known all along, in the last wave of the last
+   * stage. What it does is said in the team chooser, where the energy is about to be spent.
+   */
+  const warlord = stages.length > 0 ? stageBoss(stages[stages.length - 1]!, bundle.enemies) : null;
+
   const chest = chapter ? nextChest(chapter, parentStars[chapter.key] ?? 0, claimedChests) : null;
 
   return (
@@ -299,6 +309,9 @@ export function CampaignScreen(): JSX.Element {
               <section className={styles.chapter} {...highlightable('panel:chapter')}>
                 <p className={styles.lore}>
                   {chapter.lore}
+                  {warlord && (
+                    <span className={styles.warlord}> {warlord.name} holds the last stage.</span>
+                  )}
                   {shutReason && <span className={styles.shut}> {shutReason}</span>}
                   {chest && (
                     <span className={styles.chest}>

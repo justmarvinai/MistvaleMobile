@@ -14,6 +14,7 @@ import { TeamSelect } from '../Battle/TeamSelect';
 import { FloorPicker } from './FloorPicker';
 import styles from './DepthsScreen.module.scss';
 import { Heading } from '@/ui/Heading/Heading';
+import { SpringDial } from '../../ui/SpringDial/SpringDial';
 
 /**
  * The Depths hub.
@@ -74,6 +75,9 @@ export function DepthsScreen(): JSX.Element {
     for (const list of map.values()) list.sort((a, b) => a.sortOrder - b.sortOrder);
     return map;
   }, [bundle]);
+
+  /** The springs, for the dial: the one group whose whole character is taking turns. */
+  const springs = useMemo(() => byKind.get('springs') ?? [], [byKind]);
 
   if (!bundle) {
     return (
@@ -163,6 +167,14 @@ export function DepthsScreen(): JSX.Element {
             four of them, mastery emblems out of the pit, and ascension essence out of the springs.
           </p>
         </Panel>
+
+        {/* The week, once, with the springs on it — five tiles each saying their own hours
+            answers "is this open now" and never answers "when do I come back for Verdant". */}
+        {springs.length > 0 && (
+          <Panel title="The springs&rsquo; week">
+            <SpringDial springs={springs} today={weekday} />
+          </Panel>
+        )}
 
         {graceUntil && (
           <Panel title="Newcomer&rsquo;s welcome">

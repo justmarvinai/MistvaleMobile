@@ -12,6 +12,7 @@ import { Forge } from './Forge';
 import styles from './RelicsScreen.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
+import { VaultMeter } from '../../ui/VaultMeter/VaultMeter';
 
 /**
  * The relic vault.
@@ -198,27 +199,25 @@ export function RelicsScreen(): JSX.Element {
             anything you mean to keep.
           </p>
           {!canForge && <p className={styles.warn}>The forge opens at account level 3.</p>}
+          {/* The meter says the fraction, how tight it is and what happens when it runs
+              out — which is three things the definition list said in two places. */}
+          {vault ? (
+            <VaultMeter vault={vault} />
+          ) : (
+            <dl className={styles.stats}>
+              <div>
+                <dt>In the vault</dt>
+                <dd>{gear.length}</dd>
+              </div>
+            </dl>
+          )}
+
           <dl className={styles.stats}>
-            <div>
-              {/* Loose, not held: a relic on a champion is not taking up a slot, which is
-                  what makes equipping a way to clear space rather than only spending it. */}
-              <dt>In the vault</dt>
-              <dd className={vault && vault.used >= vault.capacity ? styles.full : undefined}>
-                {vault ? `${vault.used} / ${vault.capacity}` : gear.length}
-              </dd>
-            </div>
             <div>
               <dt>Worn</dt>
               <dd>{gear.filter((piece) => piece.equippedChampionId).length}</dd>
             </div>
           </dl>
-
-          {vault && vault.used >= vault.capacity && (
-            <p className={styles.warn}>
-              The vault is full. Relics you win are sold on the road for silver until there is room
-              again.
-            </p>
-          )}
 
           {vault &&
             (vault.nextSlots > 0 ? (
