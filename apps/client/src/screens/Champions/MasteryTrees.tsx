@@ -8,6 +8,8 @@ import {
   type MasteryDef,
   type MasteryTree,
 } from '@mistvale/shared';
+import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
+import { Fui } from '@/fui/react';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
 import { useInventoryStore } from '../../state/inventoryStore';
@@ -20,6 +22,15 @@ import styles from './MasteryTrees.module.scss';
  * are: a tier opens when enough has been spent below it in the *same* tree, and a champion
  * may only ever open two of the three. Both rules are evaluated with the shared helper the
  * server enforces with, so a node this screen shows as takeable is one the server takes.
+ *
+ * **Not the library's `MasteryGrid`, and deliberately.** That component gates a node on one
+ * rule — every id in `requires` has a rank — where Mistvale has three, and it takes its
+ * nodes once at construction with no setter to change them afterwards. Bending it would
+ * mean either re-deriving the rules in its vocabulary or rebuilding the board on every
+ * learn. So the board keeps its own structure, which is the part that encodes the rules,
+ * and takes the *paint*: each node is a socket from the library's kit and the tree strip
+ * is its segmented control. The rule for the whole rework holds — the library owns chrome,
+ * React owns behaviour — it just falls the other way here.
  */
 
 const TREE_LABEL: Record<MasteryTree, string> = {
@@ -93,21 +104,22 @@ export function MasteryTrees({
   return (
     <div className={styles.body}>
       <header className={styles.head}>
-        <div className={styles.trees} role="tablist" aria-label="Mastery trees">
-          {MASTERY_TREES.map((entry) => (
-            <button
-              key={entry}
-              type="button"
-              role="tab"
-              aria-selected={tree === entry}
-              className={styles.tree}
-              data-open={state.openTrees.includes(entry) ? 'true' : undefined}
-              onClick={() => setTree(entry)}
-            >
-              {TREE_LABEL[entry]}
-            </button>
-          ))}
-        </div>
+        <Fui
+          of={SegmentedControl}
+          className={styles.trees}
+          attrs={{ 'aria-label': 'Mastery trees' }}
+          options={{
+            value: tree,
+            segments: MASTERY_TREES.map((entry) => ({
+              value: entry,
+              label: TREE_LABEL[entry],
+              // A tree already open is where this champion's points live; the badge saves
+              // the player switching tabs to find out.
+              ...(state.openTrees.includes(entry) ? { badge: '◈' } : {}),
+            })),
+          }}
+          on={{ 'segment:change': (value) => setTree(value as MasteryTree) }}
+        />
 
         <div className={styles.summary}>
           <span className={styles.spent}>

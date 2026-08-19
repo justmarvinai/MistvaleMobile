@@ -1,116 +1,52 @@
-@use '../../styles/tokens' as *;
+/* Two marks over a painted card, and nothing else.
+
+   The frame, the rarity colour, the star track, the affinity badge, the role pip, the
+   level line and the power figure are all painted by the FantasyUIs `ChampionCard` since
+   the design rework. What this module positions is the pair of things Mistvale's own card
+   carried and the library has no notion of. */
 
 .card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: $space-2;
-  background: $panel;
-  border: 1px solid $edge;
-  border-top-width: 3px;
-  color: $parchment;
-  font: inherit;
-  cursor: pointer;
-
-  &:hover {
-    border-color: $accent;
-  }
-
-  &[data-selected='true'] {
-    border-color: $accent-glow;
-    background: $panel-raised;
-  }
-
-  &[data-rarity='common'] {
-    border-top-color: $rarity-common;
-  }
-  &[data-rarity='uncommon'] {
-    border-top-color: $rarity-uncommon;
-  }
-  &[data-rarity='rare'] {
-    border-top-color: $rarity-rare;
-  }
-  &[data-rarity='epic'] {
-    border-top-color: $rarity-epic;
-  }
-  &[data-rarity='legendary'] {
-    border-top-color: $rarity-legendary;
-  }
 }
 
-.portrait {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  aspect-ratio: 1;
-  background: $panel-inset;
-  overflow: hidden;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    // Pixel art must never be smoothed.
-    image-rendering: pixelated;
-  }
-}
-
-.fallback {
-  width: 60%;
-  height: 60%;
-  background: $ground;
-}
-
-.badge {
+/* Top-left, opposite the library's own affinity badge. */
+.marks {
   position: absolute;
-  top: 2px;
-  right: 3px;
-  color: $gold;
-  font-size: 0.7rem;
+  top: 6px;
+  left: 6px;
+  z-index: 3;
+  display: flex;
+  gap: 3px;
+  pointer-events: none;
 }
 
-.name {
-  font-size: 0.8rem;
-  text-align: center;
-  line-height: 1.2;
+.favourite {
+  font-size: 13px;
+  line-height: 1;
+  color: $gold-soft;
+  text-shadow: 0 1px 3px #000;
 }
 
-.stars {
-  color: $gold;
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-}
-
-.meta {
-  color: $muted;
-  font-size: 0.7rem;
-}
-
-.asc {
-  color: $accent;
-}
-
-.power {
-  color: $accent;
-  font-family: $font-mono;
-  font-size: 0.75rem;
-}
-
+/* Across the bottom edge: six pips, one per relic slot, filled for what is worn. Read at
+   a glance rather than counted, which is why they are pips and not a number. */
 .gearPips {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  z-index: 3;
   display: flex;
   gap: 2px;
+  pointer-events: none;
 
   span {
-    width: 6px;
-    height: 3px;
-    background: $ground;
+    width: 5px;
+    height: 5px;
+    background: rgba(0, 0, 0, 0.55);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 
     &[data-filled='true'] {
-      background: $accent-dim;
+      background: $accent-soft;
+      box-shadow: 0 0 4px $accent-glow;
     }
   }
 }

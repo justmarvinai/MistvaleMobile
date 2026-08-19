@@ -4,7 +4,11 @@
   display: flex;
   flex-direction: column;
   gap: $space-3;
-  width: min(46rem, 88vw);
+  /* The *modal* owns the width — see the `width` prop at the call site. Setting it here
+     as well is what put the stat table and the skill rows out through the painted frame:
+     the dialog stayed at its 480px default while its content insisted on 736. */
+  width: 100%;
+  min-width: 0;
   max-height: 76vh;
   overflow-y: auto;
 }
@@ -167,39 +171,22 @@
   list-style: none;
 }
 
+/* A painted skill card and the one control the library has no notion of — spending a
+   tome, which is a transaction the server settles.
+
+   `min-width: 0` on both is the rule that matters: a flex item's default minimum is its
+   content, so a card whose description is one long sentence pushes the row wider than the
+   sheet and the button goes out through the frame. */
 .skill {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
   gap: $space-3;
-  padding: $space-2;
-  background: $panel-inset;
+  min-width: 0;
 }
 
-.skillName {
-  display: flex;
-  align-items: baseline;
-  gap: $space-2;
-  color: $parchment;
-  font-size: 0.9rem;
-}
-
-.skillSlot {
-  color: $muted;
-  font-family: $font-mono;
-  font-size: 0.7rem;
-}
-
-.skillLevel {
-  color: $accent;
-  font-size: 0.75rem;
-}
-
-.skillText {
-  margin: 2px 0 0;
-  color: $muted;
-  font-size: 0.8rem;
-  line-height: 1.5;
+.skillCard {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .lore {

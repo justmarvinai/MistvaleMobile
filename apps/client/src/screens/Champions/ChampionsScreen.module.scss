@@ -18,35 +18,6 @@
   margin-bottom: $space-3;
 }
 
-.sorts {
-  display: flex;
-  gap: $space-1;
-}
-
-.sort {
-  padding: $space-1 $space-3;
-  background: $panel-inset;
-  border: 1px solid transparent;
-  color: $muted;
-  font: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &[aria-pressed='true'] {
-    border-color: $accent;
-    color: $accent;
-  }
-}
-
-.toggle {
-  display: flex;
-  align-items: center;
-  gap: $space-1;
-  color: $muted;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
@@ -55,6 +26,19 @@
   max-height: 100%;
   overflow-y: auto;
   padding-right: $space-2;
+}
+
+/* The library paints both controls; this only says how they sit in the row. */
+.sorts {
+  flex: none;
+}
+
+.toggle {
+  flex: none;
+}
+
+.collection {
+  width: 100%;
 }
 
 .sidebar {

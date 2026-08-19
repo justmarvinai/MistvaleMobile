@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { RosterChampion } from '@mistvale/shared';
+import { RARITIES, type RosterChampion } from '@mistvale/shared';
+import { CollectionProgress } from '@/fui/components/CollectionProgress.ts';
+import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
+import { Toggle } from '@/fui/components/Toggle.ts';
+import { Fui } from '@/fui/react';
 import { Panel } from '../../ui/Panel/Panel';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
@@ -74,6 +78,23 @@ export function ChampionsScreen(): JSX.Element {
 
   const foodCount = champions.filter((c) => defs.get(c.championKey)?.isFood).length;
 
+  /** Owned against published, by rarity — food left out of both sides. */
+  const tiers = useMemo(() => {
+    const owned = new Map<string, Set<string>>();
+    for (const champion of champions) {
+      const def = defs.get(champion.championKey);
+      if (!def || def.isFood) continue;
+      const set = owned.get(def.rarity) ?? new Set<string>();
+      set.add(def.key);
+      owned.set(def.rarity, set);
+    }
+    return RARITIES.map((rarity) => ({
+      rarity,
+      owned: owned.get(rarity)?.size ?? 0,
+      total: (bundle?.champions ?? []).filter((def) => !def.isFood && def.rarity === rarity).length,
+    })).filter((tier) => tier.total > 0);
+  }, [bundle, champions, defs]);
+
   return (
     <div className={styles.screen}>
       <Heading tagline="Who stands with you, and how far each of them has come.">
@@ -82,28 +103,26 @@ export function ChampionsScreen(): JSX.Element {
 
       <div>
         <div className={styles.controls}>
-          <div className={styles.sorts} role="group" aria-label="Sort by">
-            {SORTS.map((entry) => (
-              <button
-                key={entry.key}
-                type="button"
-                className={styles.sort}
-                aria-pressed={sort === entry.key}
-                onClick={() => setSort(entry.key)}
-              >
-                {entry.label}
-              </button>
-            ))}
-          </div>
+          <Fui
+            of={SegmentedControl}
+            className={styles.sorts}
+            attrs={{ 'aria-label': 'Sort by' }}
+            options={{
+              value: sort,
+              segments: SORTS.map((entry) => ({ value: entry.key, label: entry.label })),
+            }}
+            on={{ 'segment:change': (value) => setSort(value as SortKey) }}
+          />
 
-          <label className={styles.toggle}>
-            <input
-              type="checkbox"
-              checked={hideFood}
-              onChange={(event) => setHideFood(event.target.checked)}
-            />
-            Hide food ({foodCount})
-          </label>
+          <Fui
+            of={Toggle}
+            className={styles.toggle}
+            options={{
+              checked: hideFood,
+              label: `Hide food (${foodCount})`,
+            }}
+            on={{ 'toggle:change': (checked) => setHideFood(Boolean(checked)) }}
+          />
         </div>
 
         {loading && champions.length === 0 ? (
@@ -129,16 +148,23 @@ export function ChampionsScreen(): JSX.Element {
       </div>
 
       <aside className={styles.sidebar}>
+        {/* What is left to chase, split by rarity — the only breakdown that answers the
+            question a collection screen exists to raise. Food is excluded from both sides
+            of every count: it is a consumable that happens to be a champion, and folding
+            it in would tell a player they had collected eleven Commons when they had
+            farmed eleven meals. */}
+        <Fui
+          of={CollectionProgress}
+          className={styles.collection}
+          options={{ title: 'The roll', unit: 'champions', showTotal: true, tiers }}
+        />
+
         <Panel title="How they grow">
           <p className={styles.note}>
             Every champion climbs four ladders: levels from food, star rank from same-rank
             champions, ascension from essences, and skills from tomes or duplicates.
           </p>
           <dl className={styles.stats}>
-            <div>
-              <dt>Owned</dt>
-              <dd>{champions.length}</dd>
-            </div>
             <div>
               <dt>Food on hand</dt>
               <dd>{foodCount}</dd>

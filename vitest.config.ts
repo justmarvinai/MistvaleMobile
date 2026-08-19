@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 /**
@@ -6,6 +7,15 @@ import { defineConfig } from 'vitest/config';
  * skip themselves when it is absent (see apps/server/src/test/db.ts).
  */
 export default defineConfig({
+  resolve: {
+    alias: {
+      // The client's own alias, mirrored here. Vitest reads this file rather than the
+      // client's Vite config, so without it a test that imports `@/fui/...` — the way
+      // every client *source* file does since the design rework — fails to resolve while
+      // the same import builds fine.
+      '@': fileURLToPath(new URL('./apps/client/src', import.meta.url)),
+    },
+  },
   test: {
     globals: false,
     environment: 'node',

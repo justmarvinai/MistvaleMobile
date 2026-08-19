@@ -5,6 +5,63 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the collection is a collection (design rework, D4)
+
+The roster was a grid of flat rectangles with a portrait in each and the champion sheet
+listed its skills as bullet points. Both are the library's now, and the owner's new
+avatar art landed in the same pass — so a card finally shows a face rather than a
+silhouette.
+
+- **The champion card is `ChampionCard`** — the rarity frame, the star track, the affinity
+  badge, the role pip and the power line in one tap target, which is the shape this genre
+  has used since the first squad RPG and the reason a Legendary reads as one from across
+  the screen. Ascension rides the second, hotter star track it already draws for exactly
+  that. The two things Mistvale's own card carried and the library has no notion of — the
+  favourite mark and the six relic pips — are portalled onto it rather than lost.
+- **Mistvale's four elements are registered with the library.** Its components take an
+  affinity by *key* and draw nothing for one they do not know, and ember, tide, verdant
+  and mist are not among its nine. `AFFINITIES` is an exported record and the library's own
+  docs offer a custom `def`, so this is the intended extension rather than a workaround —
+  done once at startup so every card, badge and battle frame agrees.
+- **Skills are `SkillCard`s** — art, frame, level track and cooldown line, with the gold
+  treatment on the champion's heaviest active. Which one that is comes from the skills the
+  champion actually has, so a three-skill champion's a3 gets it and a four-skill
+  champion's a4 does.
+- **The roster says what is left to chase.** `CollectionProgress` replaces an owned count
+  with owned-against-published split by rarity, which is the only breakdown that answers
+  the question a collection screen exists to raise. Food is excluded from both sides: it
+  is a consumable that happens to be a champion, and folding it in would tell a player
+  they had collected eleven Commons when they had farmed eleven meals.
+- **The sort strip and the food filter** are the library's segmented control and toggle.
+- **The mastery board keeps its own structure, deliberately.** `MasteryGrid` gates a node
+  on one rule — every id in `requires` has a rank — where Mistvale has three, and it takes
+  its nodes once at construction with no setter. Bending it would mean re-deriving the
+  rules in its vocabulary or rebuilding the board on every learn. So the board keeps the
+  part that encodes the rules and takes the paint. The rework's rule still holds — the
+  library owns chrome, React owns behaviour — it just falls the other way here.
+- **The stat table stays too**, for the same reason: four columns showing base, relics,
+  masteries and total teach the first real piece of build literacy this genre has, and
+  `StatsPanel`'s label-value-bonus cannot say it.
+
+One defect fixed: **the champion sheet spilled out through its own frame.** `Modal` takes
+a `width` and defaults to 480; the sheet set 736 on its *body* instead, so the dialog
+stayed narrow while its content insisted otherwise and the stat table's last column and
+every skill row's button rendered outside the painted panel. The width belongs to the
+modal, and the sheet asks for it there now.
+
+And a flaky server test, root-caused rather than re-run: `pauses for input in manual mode`
+assumed the fight would survive the single advance that pause performs. A battle's seed
+comes from the process CSPRNG on purpose — a player must not be able to predict the roll —
+so one starter against 1-1 sometimes clears the whole stage in that advance and leaves no
+turn to take. Not a defect, just a fight going well; the test starts fights until one is
+still standing, which is the same shape `practice.spec.ts` already uses for the same
+reason. Five consecutive runs green.
+
+And a gap in the test setup, found by the first client test that needed it: Vitest reads
+the root config rather than the client's Vite config, so a test importing `@/fui/...` —
+the way every client *source* file has since the design rework — could not resolve it
+while the same import built fine. The alias is mirrored into `vitest.config.ts`.
+
 ### Changed — the fight looks like a fight (design rework, D3)
 
 The battle screen carried the whole game's weight and showed a line of text for the wave,

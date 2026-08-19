@@ -9,12 +9,15 @@ import './styles/global.scss';
 import './fui/styles.css';
 import './fui/mistvale.css';
 import { setAssetBase } from './fui/core/assets.ts';
+import { registerAffinities } from './ui/affinity';
 
 // Art is served from this origin, never from the library's CDN: nginx sends
 // `img-src 'self' data: blob:`, so a component reaching for a third-party host renders
 // nothing in production — and a game must not depend on somebody else's uptime to draw
 // its own buttons. `tools/fui-vendor` is what puts the files under `public/fui/`.
 setAssetBase('/fui');
+// Mistvale's four elements, so every card and badge in the game can draw one.
+registerAffinities();
 
 const container = document.getElementById('root');
 if (!container) {

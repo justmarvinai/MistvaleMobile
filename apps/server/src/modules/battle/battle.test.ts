@@ -432,15 +432,30 @@ describe.skipIf(!dbUp)('the game loop', () => {
     });
 
     it('pauses for input in manual mode, then acts on the chosen skill', async () => {
-      const battleId = await startFight();
-
-      const paused = await as({
-        method: 'POST',
-        url: apiPath(ROUTES.battle.action(battleId)),
-        payload: { actionId: 'manual-0001' },
-      });
-      expect(paused.statusCode, paused.body).toBe(200);
-      expect(paused.json().data.state.awaiting).not.toBeNull();
+      // A fight is a fight, and this one is *random*: the seed comes from the process
+      // CSPRNG on purpose, so a player cannot predict the roll. One starter against 1-1
+      // sometimes clears the whole stage inside the single advance this pause performs,
+      // and then there is no turn left to take — which is a fight going well, not a
+      // defect, but it is not what this test is about. So: start fights until one is
+      // still standing after the pause. Three is generous; a starter that ends 1-1 in one
+      // advance three times running is a balance question, not a flake.
+      let battleId = '';
+      let paused: Awaited<ReturnType<typeof as>> | null = null;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        battleId = await startFight();
+        paused = await as({
+          method: 'POST',
+          url: apiPath(ROUTES.battle.action(battleId)),
+          payload: { actionId: `manual-000${attempt}` },
+        });
+        expect(paused.statusCode, paused.body).toBe(200);
+        if (paused.json().data.state.awaiting !== null) break;
+        // It ended. Clear the finished fight so the next `startFight` opens a new one.
+        await as({ method: 'GET', url: apiPath(ROUTES.battle.active) });
+        paused = null;
+      }
+      expect(paused, 'the starter ended 1-1 in one advance three times running').not.toBeNull();
+      expect(paused!.json().data.state.awaiting).not.toBeNull();
 
       const roster = await as({ method: 'GET', url: apiPath(ROUTES.roster.list) });
       const key = (roster.json().data.champions as { championKey: string }[])[0]!.championKey;
@@ -449,7 +464,7 @@ describe.skipIf(!dbUp)('the game loop', () => {
       const acted = await as({
         method: 'POST',
         url: apiPath(ROUTES.battle.action(battleId)),
-        payload: { actionId: 'manual-0002', skill: champion.skills[0] },
+        payload: { actionId: 'manual-act-0001', skill: champion.skills[0] },
       });
       expect(acted.statusCode, acted.body).toBe(200);
       const used = (acted.json().data.events as { type: string; skill?: string }[]).filter(

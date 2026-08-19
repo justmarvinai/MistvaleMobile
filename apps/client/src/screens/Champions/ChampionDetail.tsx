@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ChampionDetail, GearSlot, Stat } from '@mistvale/shared';
 import { GEAR_SLOTS } from '@mistvale/shared';
+import { SkillCard } from '@/fui/components/SkillCard.ts';
+import { Fui } from '@/fui/react';
+import { skillArt } from '../../ui/skillArt';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';
@@ -121,6 +124,13 @@ export function ChampionDetailModal({
     Object.entries(ascendCost).every(([key, amount]) => itemCount(items, key) >= amount);
 
   const skills = (bundle?.skills ?? []).filter((skill) => def.skills.includes(skill.key));
+  // The heaviest active this champion actually has, so a three-skill champion's a3 gets
+  // the gold and a four-skill champion's a4 does.
+  const ultimateSlot = skills
+    .filter((skill) => skill.slot !== 'passive')
+    .map((skill) => skill.slot)
+    .sort()
+    .at(-1);
   const tomeKey =
     def.rarity === 'legendary'
       ? 'tome_legendary'
@@ -129,7 +139,9 @@ export function ChampionDetailModal({
         : 'tome_rare';
 
   return (
-    <Modal open title={def.name} onClose={onClose}>
+    // Four ladders, nine relic slots and a stat table with four columns need the room;
+    // the default 480 is for a confirmation, not for a champion sheet.
+    <Modal open title={def.name} onClose={onClose} width={736}>
       <div className={styles.body}>
         <header className={styles.head}>
           <div>
@@ -273,14 +285,27 @@ export function ChampionDetailModal({
               const haveTome = itemCount(items, tomeKey) > 0;
               return (
                 <li key={skill.key} className={styles.skill}>
-                  <div>
-                    <div className={styles.skillName}>
-                      {skill.name}
-                      <span className={styles.skillSlot}>{skill.slot.toUpperCase()}</span>
-                      {level > 0 && <span className={styles.skillLevel}>+{level}</span>}
-                    </div>
-                    <p className={styles.skillText}>{skill.description}</p>
-                  </div>
+                  {/* Painted by the library since the design rework: the art, the frame,
+                      the cooldown ring and the level track are `SkillCard`. The upgrade
+                      button stays Mistvale's — it spends a tome, which is a transaction
+                      the server settles and the library has no notion of. */}
+                  <Fui
+                    of={SkillCard}
+                    className={styles.skillCard}
+                    options={{
+                      name: skill.name,
+                      art: skillArt(skill.key),
+                      description: skill.description,
+                      ...(skill.cooldown ? { cooldown: skill.cooldown } : {}),
+                      level: level + 1,
+                      maxLevel: 6,
+                      passive: skill.slot === 'passive',
+                      // The gold treatment goes to the champion's *last* active slot,
+                      // which is the ultimate by construction — a1 is always the basic
+                      // and a champion with four actives keeps its heaviest at a4.
+                      ultimate: skill.slot === ultimateSlot,
+                    }}
+                  />
                   {skill.slot !== 'passive' && (
                     <Button
                       variant="ghost"

@@ -324,6 +324,7 @@ export function FuiSlotted<T extends Instance, O extends FuiOptionsOf>({
   on,
   slot,
   className,
+  attrs,
   children,
   ...rest
 }: {
@@ -338,9 +339,12 @@ export function FuiSlotted<T extends Instance, O extends FuiOptionsOf>({
    */
   slot?: string;
   className?: string;
+  /** Written to the component's own element — see `useFuiAttrs`. */
+  attrs?: FuiAttrs;
   children?: ReactNode;
 } & Omit<JSX.IntrinsicElements['div'], 'className' | 'children'>): JSX.Element {
   const { ref, instance } = useFui(of, withClass(options, className), on);
+  useFuiAttrs(instance?.el, attrs);
   // Null until the component is constructed, which is one render. Rendering the children
   // into nothing for that render is correct rather than a flash: the chrome is already on
   // screen, and the body fills in the same frame the portal target appears.

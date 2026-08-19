@@ -162,13 +162,17 @@ test.describe('what a player can actually see', () => {
     const symbols = await page.locator('#mv-icon-sprite symbol').count();
     expect(symbols, 'symbols in the sprite').toBeGreaterThan(50);
 
-    // And something is actually using it. Asked on a champion card rather than on the
-    // Haven since the design rework: the shell's icons are the library's painted art and
-    // its glyph masks now, and the sprite's remaining job is the game's own symbols —
-    // affinity, role, stat — which live on the cards.
+    // And something is actually using it. Asked on the champion *sheet* since the design
+    // rework: the shell's icons are the library's painted art and its glyph masks now, and
+    // the card's are too, so the sprite's remaining job is the symbols inside a sheet — the
+    // lock, the favourite mark, a relic slot's silhouette.
     await page
       .getByRole('navigation')
       .getByRole('button', { name: /Champions/ })
+      .click();
+    await page
+      .getByRole('button', { name: /lv \d+/i })
+      .first()
       .click();
     await expect(page.locator('svg use').first()).toBeVisible({ timeout: 15_000 });
   });
