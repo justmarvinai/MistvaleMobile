@@ -6,6 +6,7 @@ import { Rewards, describeRewards, useRewardName } from '../../ui/Rewards/Reward
 import { useEventStore } from '../../state/eventStore';
 import { toast } from '../../state/uiStore';
 import styles from './EventsScreen.module.scss';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * What is running right now.
@@ -42,6 +43,8 @@ export function EventsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="What is running now, what it pays, and how long it lasts.">Events</Heading>
+
       {error && <p className={styles.error}>{error}</p>}
 
       {loading && !events ? (

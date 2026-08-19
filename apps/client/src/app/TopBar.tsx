@@ -1,18 +1,23 @@
 import { useSyncExternalStore } from 'react';
 import type { EnergyState } from '@mistvale/shared';
+import { TopBar as FuiTopBar } from '@/fui/components/TopBar.ts';
+import { useFui, useFuiAttrs } from '@/fui/react';
 import { usePlayerStore } from '@/state/playerStore';
 import { useProfileStore } from '@/state/profileStore';
 import { useSessionStore } from '@/state/sessionStore';
-import { Button } from '@/ui/Button/Button';
 import styles from './TopBar.module.scss';
-import { Icon, type IconName } from '@/ui/Icon/Icon';
 
 /**
  * The persistent resource bar.
  *
+ * Painted by the library since the design rework — the avatar with its level ring, the
+ * currency rail, the tool buttons and their badges are all its `TopBar`. What stays
+ * Mistvale's is everything that moves:
+ *
  * Energy counts up locally between server responses: the server sends the value and the
  * timestamp of the next tick, and this component animates towards it. It never credits
  * energy on its own — any action re-syncs from the server (docs/ARCHITECTURE.md §4.4).
+ * The projection is unchanged; only where the number is drawn moved.
  */
 export function TopBar({
   onOpenSettings,
@@ -29,120 +34,105 @@ export function TopBar({
   const logout = useSessionStore((state) => state.logout);
   const showProfile = useProfileStore((state) => state.show);
 
-  const energy = useLiveEnergy(player?.energy ?? null, clockSkewMs);
+  // One clock for both readings. The projection and the countdown have to agree about
+  // "now" — reading the wall clock a second time would let the bar say 3 and the counter
+  // say 4 in the same frame — and reading it during render at all is impure, which is
+  // exactly what `subscribeToClock` exists to avoid.
+  const now = useSyncExternalStore(subscribeToClock, clockSnapshot, () => 0);
+  const energy = projectEnergy(player?.energy ?? EMPTY_ENERGY, now + clockSkewMs);
+
+  // Hooks first, always: an early return above `useFui` would change the hook order
+  // between a signed-out render and a signed-in one.
+  const secondsToTick = energy.nextTickAt
+    ? Math.max(0, Math.round((new Date(energy.nextTickAt).getTime() - now - clockSkewMs) / 1000))
+    : 0;
+
+  const { ref, instance } = useFui(
+    FuiTopBar,
+    {
+      class: styles.bar,
+      style: { '--mv-avatar-initial': `"${(player?.profileName ?? '?').charAt(0).toUpperCase()}"` },
+      name: player?.profileName ?? '',
+      level: player?.level ?? 1,
+      levelProgress:
+        player && player.xpToNextLevel > 0 ? Math.min(1, player.xp / player.xpToNextLevel) : 1,
+      resources: [
+        // Energy first: it is the one number that decides whether the next thing the
+        // player wanted to do is possible at all.
+        {
+          id: 'energy',
+          art: 'fire-golden-flame',
+          label: 'Energy',
+          value: energy.value,
+          max: energy.cap,
+          refillIn: secondsToTick,
+        },
+        {
+          id: 'silver',
+          art: 'rune-jade-coin',
+          label: 'Silver',
+          value: player?.silver ?? 0,
+          color: 'var(--fui-gold-soft)',
+        },
+        {
+          id: 'crystals',
+          art: 'rune-radiant-gem',
+          label: 'Crystals',
+          value: player?.crystals ?? 0,
+          color: '#c58ce8',
+        },
+      ],
+      // Mail carries the one badge up here: it is the only thing in the top bar that can
+      // be *waiting on* the player rather than merely available to them.
+      actions: [
+        {
+          id: 'mail',
+          glyph: 'glyph-burning-scroll',
+          label: 'Mail',
+          ...(waitingMail > 0 ? { badge: waitingMail > 9 ? '9+' : waitingMail } : {}),
+        },
+        { id: 'news', glyph: 'glyph-spell-book', label: 'News' },
+        { id: 'settings', glyph: 'glyph-arcane-symbol', label: 'Settings' },
+        { id: 'logout', glyph: 'glyph-broken-shackle', label: 'Sign out' },
+      ],
+    },
+    {
+      // The chip is the way into your own card — the same one the ladder shows other
+      // people, which is what makes "choose your four" a decision rather than a form.
+      'top:profile': () => {
+        if (player) void showProfile(player.id);
+      },
+      'top:action': (id: string) => {
+        if (id === 'mail') onOpenMail();
+        else if (id === 'news') onOpenNews();
+        else if (id === 'settings') onOpenSettings();
+        else if (id === 'logout') void logout();
+      },
+    },
+    // Everything that ticks. Options are construction-time; a bar rebuilt once a second
+    // would restart the fill animation on every tick and lose focus mid-click.
+    (bar, next) => {
+      for (const res of next.resources) bar.setResource(res.id, res.value, res.max);
+      if (next.resources[0]?.refillIn != null) bar.setRefill('energy', next.resources[0].refillIn);
+    },
+  );
+
+  // The chip's accessible name, which has to carry two things the library's does not.
+  //
+  // It labels the chip with the player's name — that says *who*, not what pressing it
+  // does, and it opens the profile card the ladder shows other people. And the level is
+  // drawn as a bare numeral on the avatar ring, which is the genre's own shape and what
+  // the library's examples do, but "1" on its own is not something a screen reader can
+  // make sense of. Both go in the label instead.
+  useFuiAttrs(instance?.el.querySelector<HTMLElement>('.fui-topbar__player'), {
+    'aria-label': player
+      ? `Your profile card — ${player.profileName}, level ${player.level}`
+      : 'Your profile card',
+  });
 
   if (!player) return null;
 
-  const xpPercent =
-    player.xpToNextLevel > 0
-      ? Math.min(100, Math.round((player.xp / player.xpToNextLevel) * 100))
-      : 100;
-
-  return (
-    <header className={styles.bar}>
-      {/* The chip is the way into your own card — the same one the ladder shows other
-          people, which is what makes "choose your four" a decision rather than a form. */}
-      <button
-        type="button"
-        className={styles.profile}
-        aria-label="Your profile card"
-        onClick={() => void showProfile(player.id)}
-      >
-        <div className={styles.avatar} aria-hidden="true">
-          {player.profileName.charAt(0).toUpperCase()}
-        </div>
-        <div className={styles.profileText}>
-          <span className={styles.name}>{player.profileName}</span>
-          <span className={styles.level}>
-            Level {player.level}
-            <span className={styles.xpTrack} aria-hidden="true">
-              <span className={styles.xpFill} style={{ width: `${xpPercent}%` }} />
-            </span>
-          </span>
-        </div>
-      </button>
-
-      <div className={styles.resources}>
-        <EnergyPill energy={energy} />
-        <ResourcePill label="Silver" value={player.silver} tone="silver" icon="silver" />
-        <ResourcePill label="Crystals" value={player.crystals} tone="crystal" icon="crystals" />
-      </div>
-
-      <div className={styles.tools}>
-        {/* Mail carries the one pip up here: it is the only thing in the top bar that can
-            be waiting on the player rather than merely available to them. */}
-        <span className={styles.tool}>
-          <Button variant="ghost" size="sm" onClick={onOpenMail} aria-label="Mail">
-            <Icon name="nav-mail" size={16} />
-          </Button>
-          {waitingMail > 0 && (
-            <span className={styles.pip} aria-hidden="true">
-              {waitingMail > 9 ? '9+' : waitingMail}
-            </span>
-          )}
-          {waitingMail > 0 && <span className="mv-sr-only">{waitingMail} waiting</span>}
-        </span>
-        <Button variant="ghost" size="sm" onClick={onOpenNews} aria-label="News">
-          <Icon name="nav-chronicle" size={16} />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={onOpenSettings} aria-label="Settings">
-          <Icon name="nav-settings" size={16} />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => void logout()}>
-          Sign out
-        </Button>
-      </div>
-    </header>
-  );
-}
-
-function EnergyPill({ energy }: { energy: EnergyState }) {
-  const percent = Math.min(100, Math.round((energy.value / energy.cap) * 100));
-  const full = energy.value >= energy.cap;
-
-  return (
-    <div className={`${styles.pill} ${styles.energy}`} title={full ? 'Energy full' : undefined}>
-      <span className={styles.pillGlyph} aria-hidden="true">
-        <Icon name="energy" size={14} />
-      </span>
-      <span className={styles.pillBody}>
-        <span className={styles.pillValue}>
-          {energy.value}
-          <span className={styles.pillCap}>/{energy.cap}</span>
-        </span>
-        <span className={styles.energyTrack} aria-hidden="true">
-          <span className={styles.energyFill} style={{ width: `${percent}%` }} />
-        </span>
-      </span>
-      <span className="mv-sr-only">
-        {energy.value} of {energy.cap} energy
-      </span>
-    </div>
-  );
-}
-
-function ResourcePill({
-  label,
-  value,
-  tone,
-  icon,
-}: {
-  label: string;
-  value: number;
-  tone: 'silver' | 'crystal';
-  icon: IconName;
-}) {
-  return (
-    <div className={`${styles.pill} ${styles[tone]}`}>
-      <span className={styles.pillGlyph} aria-hidden="true">
-        <Icon name={icon} size={14} />
-      </span>
-      <span className={styles.pillValue}>{formatNumber(value)}</span>
-      <span className="mv-sr-only">
-        {label}: {value}
-      </span>
-    </div>
-  );
+  return <div ref={ref} style={{ display: 'contents' }} />;
 }
 
 const EMPTY_ENERGY: EnergyState = {
@@ -193,20 +183,6 @@ function clockSnapshot(): number {
   return clockNow;
 }
 
-/**
- * Shows energy ticking up between server refreshes.
- *
- * The displayed value is *derived* from the server's snapshot plus the current time
- * rather than copied into local state, so it can never drift from what the server said.
- * Any action re-syncs the snapshot; this only animates the gap.
- */
-function useLiveEnergy(source: EnergyState | null, clockSkewMs: number): EnergyState {
-  const now = useSyncExternalStore(subscribeToClock, clockSnapshot, () => 0);
-
-  if (!source) return EMPTY_ENERGY;
-  return projectEnergy(source, now + clockSkewMs);
-}
-
 /** Advances a server energy snapshot to `now` without ever exceeding the cap. */
 function projectEnergy(source: EnergyState, now: number): EnergyState {
   if (!source.nextTickAt || source.value >= source.cap) return source;
@@ -228,10 +204,4 @@ function projectEnergy(source: EnergyState, now: number): EnergyState {
     value,
     nextTickAt: new Date(now + (tickMs - (sinceTick % tickMs))).toISOString(),
   };
-}
-
-function formatNumber(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 10_000) return `${(value / 1000).toFixed(1)}k`;
-  return value.toLocaleString('en-US');
 }

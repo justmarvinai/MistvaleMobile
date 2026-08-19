@@ -75,6 +75,31 @@
   image-rendering: auto;
 }
 
+/* Panels have to lift off *this* ground.
+
+   The library's own example pages sit on a mid-dark page, where Dark Ember's leather
+   panel art reads on its own. Mistvale's ground is near-black with a drifting Pixi
+   backdrop behind it, and on that the same panel is very nearly the same value as what
+   is around it — the sidebar's two panels shipped for an afternoon with one visible and
+   one apparently absent, which is what sent us looking.
+
+   This is not a palette override: the art is untouched and the colours are the pack's.
+   It is the one thing a game's own ground makes necessary — a shadow under the panel and
+   a hairline at its edge, so the object has a place to sit. */
+.fui-panel {
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
+}
+
+.fui-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--fui-accent) 16%, transparent);
+  border-radius: 2px;
+}
+
 /* A component dropped into a Mistvale layout should inherit the layout's
    sizing, not impose its own document box. */
 .fui:where(:not(dialog)) {

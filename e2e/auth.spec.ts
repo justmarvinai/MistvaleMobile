@@ -66,7 +66,11 @@ test.describe('account lifecycle', () => {
     // We land in the Haven with the shell around us.
     await expect(page.getByRole('heading', { name: 'The Haven' })).toBeVisible();
     await expect(page.getByText(profileName).first()).toBeVisible();
-    await expect(page.getByText('Level 1', { exact: true })).toBeVisible();
+    // The level is a numeral on the avatar ring since the design rework — the genre's own
+    // shape — so it is the chip's accessible name that has to say what the numeral means.
+    await expect(page.getByRole('button', { name: /your profile card/i })).toHaveAccessibleName(
+      /level 1/i,
+    );
 
     // Energy starts at the level-1 cap.
     await expect(page.getByText('/20')).toBeVisible();

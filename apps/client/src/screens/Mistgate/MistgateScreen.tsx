@@ -10,6 +10,7 @@ import { OddsPanel } from './OddsPanel';
 import { RevealOverlay } from './RevealOverlay';
 import styles from './MistgateScreen.module.scss';
 import { highlightable } from '../../app/highlight';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The Mistgate.
@@ -77,6 +78,8 @@ export function MistgateScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="Call into the mist and see what answers.">The Mistgate</Heading>
+
       <div className={styles.main}>
         <div className={styles.sigils} role="tablist" aria-label="Sigils">
           {banners.map((entry) => (

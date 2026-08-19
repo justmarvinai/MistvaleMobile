@@ -106,9 +106,9 @@ export function createMistScene(): Scene {
 
   // Three depth layers, each drifting at its own rate.
   const configs = [
-    { color: 0x1d1712, alpha: 0.55, y: 0.65, speed: 0.006, amplitude: 14, blobs: 5 },
-    { color: 0x2a2018, alpha: 0.4, y: 0.78, speed: 0.011, amplitude: 22, blobs: 4 },
-    { color: 0x3b2c1e, alpha: 0.28, y: 0.9, speed: 0.017, amplitude: 30, blobs: 3 },
+    { color: 0x2b211a, alpha: 0.9, y: 0.62, speed: 0.006, amplitude: 14, blobs: 5 },
+    { color: 0x3d2d1f, alpha: 0.7, y: 0.78, speed: 0.011, amplitude: 22, blobs: 4 },
+    { color: 0x55381f, alpha: 0.45, y: 0.94, speed: 0.017, amplitude: 30, blobs: 3 },
   ];
 
   for (const config of configs) {
@@ -126,8 +126,8 @@ export function createMistScene(): Scene {
 
   // A warm ember glow near the horizon: the light the vale is lit by.
   const glow = new Graphics()
-    .ellipse(VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT * 0.6, VIRTUAL_WIDTH * 0.6, 90)
-    .fill({ color: 0xc2764a, alpha: 0.05 });
+    .ellipse(VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT * 0.58, VIRTUAL_WIDTH * 0.62, 130)
+    .fill({ color: 0xc2764a, alpha: 0.16 });
   root.addChildAt(glow, 0);
 
   // Without this the layers read as hard-edged ellipses rather than fog. Low quality is
@@ -146,7 +146,7 @@ export function createMistScene(): Scene {
         layer.graphic.x = -((layer.offset * 60) % (VIRTUAL_WIDTH * 0.4));
         layer.graphic.y = Math.sin(elapsed * layer.speed * 8) * layer.amplitude * 0.15;
       }
-      glow.alpha = 0.04 + Math.sin(elapsed * 0.4) * 0.015;
+      glow.alpha = 0.9 + Math.sin(elapsed * 0.4) * 0.12;
     },
     resize(width, height) {
       // Fit the virtual canvas while filling the viewport, keeping pixels square.

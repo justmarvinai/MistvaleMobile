@@ -8,6 +8,7 @@ import { toast } from '../../state/uiStore';
 import { MissionRow } from './MissionRow';
 import styles from './MissionsScreen.module.scss';
 import { Icon } from '@/ui/Icon/Icon';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The Valewarden's Path.
@@ -64,6 +65,10 @@ export function MissionsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="Eighty steps from the first lantern to the last.">
+        The Valewarden's Path
+      </Heading>
+
       <aside className={styles.rail}>
         <Panel title="The Path">
           {missions && (

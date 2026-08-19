@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectOnTop, registerRaw } from './support';
+import { chooseStarter, expectOnTop, registerRaw } from './support';
 
 /**
  * The screens a player looks at, checked for being *lookable at*.
@@ -150,12 +150,21 @@ test.describe('what a player can actually see', () => {
 
   test('the icon sprite is inlined, so icons take the colour around them', async ({ page }) => {
     await registerRaw(page, 'e2evis4', 'Iconoclast');
+    await chooseStarter(page);
     // Injected into the document rather than referenced externally: `currentColor` does not
     // cross into an external SVG in every browser.
     await expect(page.locator('#mv-icon-sprite')).toHaveCount(1, { timeout: 15_000 });
     const symbols = await page.locator('#mv-icon-sprite symbol').count();
     expect(symbols, 'symbols in the sprite').toBeGreaterThan(50);
-    // And something is actually using it.
-    expect(await page.locator('svg use').count()).toBeGreaterThan(0);
+
+    // And something is actually using it. Asked on a champion card rather than on the
+    // Haven since the design rework: the shell's icons are the library's painted art and
+    // its glyph masks now, and the sprite's remaining job is the game's own symbols —
+    // affinity, role, stat — which live on the cards.
+    await page
+      .getByRole('navigation')
+      .getByRole('button', { name: /Champions/ })
+      .click();
+    await expect(page.locator('svg use').first()).toBeVisible({ timeout: 15_000 });
   });
 });

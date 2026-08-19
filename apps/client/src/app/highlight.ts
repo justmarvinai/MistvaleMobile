@@ -22,7 +22,15 @@ import { useEffect, useState } from 'react';
  * dialogue rather than fail to publish.
  */
 
-const ATTRIBUTE = 'data-mv-highlight';
+/**
+ * The attribute a step's `highlight` key is looked up by.
+ *
+ * Exported because not every highlightable element is one React renders: the dock's
+ * buttons belong to a vendored component and are marked imperatively, and they still have
+ * to answer to the same key.
+ */
+export const HIGHLIGHT_ATTR = 'data-mv-highlight';
+const ATTRIBUTE = HIGHLIGHT_ATTR;
 
 /** Marks a node as the thing `key` names. Spread onto any element. */
 export function highlightable(key: string): { [ATTRIBUTE]: string } {

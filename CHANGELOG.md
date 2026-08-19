@@ -5,6 +5,59 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the shell is a game's shell (design rework, D2)
+
+The top bar, the dock and the home screen are the three things a player sees on every
+screen, and all three were flat rectangles on a black field. They are painted now, and
+the whole game gained a sense of place with them.
+
+- **The top bar is the library's `TopBar`.** The avatar with its level ring, the currency
+  rail's engraved cells and the tool buttons with their badges are all its work; what
+  stays Mistvale's is what moves. Energy still counts up locally between server responses
+  — the server sends the value and the next tick, the client animates towards it and never
+  credits energy on its own — and the projection is unchanged. Mistvale has no avatar art
+  (an account is a name and a password), so the profile's initial goes into the ring.
+- **The dock is the library's `BottomNav`.** The three things it has no notion of are
+  written onto its own buttons afterwards: the tutorial's highlight hook, the tooltip that
+  says when a locked destination opens, and the 1-9 hotkey hint. Locked entries keep their
+  place behind the shroud — seeing what is coming is part of the pull forward.
+- **The Haven's stations are painted sockets**, each with its place's own icon in it — a
+  war banner for the campaign, a gate down for the Depths, a crown for the Arena, a
+  swirling void for the Mistgate. A locked one keeps its socket and takes the mist. This
+  is what a home screen is supposed to look like: a camp you can see, not a list of
+  destinations you can read.
+- **Every screen opens with a `Heading` now** — thirteen of them had no title at all, which
+  is a large part of why the game read as values on a page rather than as places. Each one
+  says where you are and what happens there, over the pack's painted vine.
+- **The backdrop is visible.** The drifting mist was three near-black layers on a
+  near-black ground, which is to say invisible; it is warm and lit now, and the ember glow
+  near the horizon actually reaches the screen.
+- **Panels lift off the ground.** The library's example pages sit on a mid-dark page where
+  Dark Ember's leather panel reads on its own; Mistvale's ground is near-black, and on that
+  a panel is very nearly the value of what surrounds it — the Haven's two sidebar panels
+  shipped for an afternoon with one visible and one apparently absent. A shadow and a
+  hairline, in the theme layer, and no art touched.
+
+Four defects fixed on the way, three of them things the browser suite caught because the
+suite asks what a *player* can reach rather than what the markup says:
+
+- **The energy countdown read `Date.now()` during render** — impure, and it would have let
+  the bar and the counter disagree about *when* inside a single frame. Caught by lint. The
+  file already had the answer: a cached clock behind `useSyncExternalStore`, added in P0
+  for exactly this, so both readings come off it now.
+- **Locked dock entries stopped being reachable.** The library's `disabled` sets the HTML
+  attribute, which takes a button out of the tab order — and a locked destination whose
+  entire job is to say "opens at level 8" is then a thing a keyboard user cannot reach to
+  be told. It is `aria-disabled` and a refusal in the handler instead.
+- **Each Haven station was a button inside a button.** `Slot` is built to be a control —
+  an inventory cell you click — so used as a picture it brought a focusable
+  `role="button"` into the middle of the station's own button: two controls announced for
+  one place, and one of them does nothing. The socket is presentational now.
+- **The profile chip stopped saying what it does, and the level stopped being announced.**
+  The library labels the chip with the player's name, and draws the level as a bare
+  numeral on the avatar ring — the right shape visually, and meaningless to a screen
+  reader. Both go into the chip's accessible name.
+
 ### Changed — the game looks like the examples now (design rework, D1: the primitives)
 
 The owner looked at D0's result beside the library's own example screens and said it did

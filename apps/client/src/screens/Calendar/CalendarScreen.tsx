@@ -8,6 +8,7 @@ import { useContentStore } from '../../state/contentStore';
 import { useLoginStore } from '../../state/loginStore';
 import { toast } from '../../state/uiStore';
 import styles from './CalendarScreen.module.scss';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The login calendar.
@@ -82,6 +83,10 @@ export function CalendarScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="Thirty days of the vale's gratitude, one lantern at a time.">
+        The Lantern Calendar
+      </Heading>
+
       {error && <p className={styles.error}>{error}</p>}
 
       {loading && !login ? (

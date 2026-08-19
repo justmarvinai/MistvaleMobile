@@ -68,6 +68,24 @@ export async function registerRaw(page: Page, account: string, profile: string):
 }
 
 /**
+ * Takes the first starter on offer, and waits for the dialog to close.
+ *
+ * `registerRaw` deliberately stops before the choice, but a spec that wants the *shell*
+ * rather than the choice still has to get past it — the dialog is modal and its backdrop
+ * eats every click meant for the dock behind it.
+ */
+export async function chooseStarter(page: Page): Promise<void> {
+  const dialog = page.getByRole('dialog', { name: /choose your first champion/i });
+  await dialog.waitFor({ state: 'visible', timeout: 20_000 });
+  await dialog
+    .getByRole('button', { name: /^choose /i })
+    .first()
+    .click();
+  await dialog.getByRole('button', { name: /stand together/i }).click();
+  await dialog.waitFor({ state: 'hidden', timeout: 20_000 });
+}
+
+/**
  * Dismisses an unlock celebration if one is showing.
  *
  * Winning a fight levels an account, and a level can open a feature — so any spec that

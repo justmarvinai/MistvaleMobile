@@ -9,6 +9,7 @@ import { useProgressStore } from '../../state/progressStore';
 import { TeamSelect } from '../Battle/TeamSelect';
 import { FloorPicker } from './FloorPicker';
 import styles from './DepthsScreen.module.scss';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The Depths hub.
@@ -80,6 +81,10 @@ export function DepthsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="Four keeps under the vale, and every floor gives up one kind of relic.">
+        The Depths
+      </Heading>
+
       <div className={styles.list}>
         {(bundle.dungeons ?? []).length === 0 && (
           <p className={styles.empty}>Nothing has been opened down here yet.</p>

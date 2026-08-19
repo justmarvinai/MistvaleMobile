@@ -12,6 +12,7 @@ import { TeamPicker } from './TeamPicker';
 import { Leaderboard } from './Leaderboard';
 import { HallOfValor } from './HallOfValor';
 import styles from './ArenaScreen.module.scss';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The Arena hub.
@@ -91,6 +92,10 @@ export function ArenaScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="Four of yours against four of theirs. The ladder keeps score while you sleep.">
+        The Arena
+      </Heading>
+
       <div className={styles.main}>
         <section className={styles.standing}>
           <div className={styles.rank}>

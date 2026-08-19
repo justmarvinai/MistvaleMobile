@@ -1,181 +1,29 @@
-@use 'sass:color';
+/* Layout, and the one thing Mistvale's avatar is that the library's is not: a letter.
+
+   The bar itself — the leather ground, the avatar's level ring, the currency rail's
+   engraved cells, the tool buttons and their badges — is painted by the FantasyUIs
+   `TopBar` since the design rework. */
 
 .bar {
   position: relative;
   z-index: $z-chrome;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $space-4;
-  padding: $space-2 $space-4;
-  background: linear-gradient(180deg, $panel 0%, $ground 100%);
-  border-bottom: 1px solid $edge;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  flex: none;
 }
 
-.profile {
-  display: flex;
-  align-items: center;
-  gap: $space-3;
-  min-width: 0;
-  // A button that has to look like the chip it replaced: no chrome of its own, just the
-  // hover that says it can be pressed.
-  padding: 0;
-  background: none;
-  border: 0;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-
-  &:hover .name {
-    color: $gold;
-  }
-}
-
-.avatar {
+/* Mistvale has no avatar art: an account is a name and a password, and there is no
+   portrait to draw. The library's avatar is a background image, so an unset one is an
+   empty ring — which is what shipped for an afternoon. The profile's initial goes in
+   instead, written by `TopBar.tsx` as a custom property so the letter travels with the
+   name rather than being a second element to keep in step. */
+.bar :global(.fui-topbar__avatar)::after {
+  content: var(--mv-avatar-initial, '');
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  background: linear-gradient(160deg, $accent-dim, color.adjust($accent-dim, $lightness: -22%));
-  border: 1px solid $accent;
-  border-radius: 2px;
-  color: $ground-deep;
   font-family: $font-display;
-  font-size: 18px;
-  box-shadow: 0 0 10px $accent-glow;
-}
-
-.profileText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.name {
-  font-size: 13px;
-  font-weight: 600;
-  color: $parchment;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.level {
-  display: flex;
-  align-items: center;
-  gap: $space-2;
-  font-size: 11px;
-  color: $muted;
-}
-
-.xpTrack {
-  display: block;
-  width: 72px;
-  height: 3px;
-  background: $panel-inset;
-  border: 1px solid $edge;
-}
-
-.xpFill {
-  display: block;
-  height: 100%;
-  background: $accent;
-  transition: width $duration-slow $ease-out;
-}
-
-.resources {
-  display: flex;
-  align-items: center;
-  gap: $space-2;
-}
-
-.pill {
-  @include inset-well;
-  display: flex;
-  align-items: center;
-  gap: $space-2;
-  padding: $space-2 $space-3;
-  min-height: 36px;
-}
-
-.pillGlyph {
-  font-size: 13px;
+  font-size: 17px;
   line-height: 1;
-}
-
-.pillBody {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.pillValue {
-  font-family: $font-mono;
-  font-size: 13px;
-  font-weight: 600;
-  color: $parchment;
-  line-height: 1;
-}
-
-.pillCap {
-  color: $muted-deep;
-  font-size: 11px;
-}
-
-.energy .pillGlyph {
-  color: $accent;
-}
-
-.energyTrack {
-  display: block;
-  width: 60px;
-  height: 3px;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.energyFill {
-  display: block;
-  height: 100%;
-  background: $accent;
-  transition: width $duration-base $ease-out;
-}
-
-.silver .pillGlyph {
-  color: $muted;
-}
-
-.crystal .pillGlyph {
-  color: $affinity-mist;
-}
-
-.tools {
-  display: flex;
-  align-items: center;
-  gap: $space-1;
-}
-
-.tool {
-  position: relative;
-  display: inline-flex;
-}
-
-/** The waiting-mail pip. Same shape as the dock's, so a pip means one thing everywhere. */
-.pip {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0.875rem;
-  height: 0.875rem;
-  padding: 0 3px;
-  background: $danger;
-  color: $parchment;
-  font-family: $font-mono;
-  font-size: 0.5625rem;
-  line-height: 1;
-  pointer-events: none;
+  color: $accent-soft;
+  text-shadow: 0 1px 3px #000;
 }

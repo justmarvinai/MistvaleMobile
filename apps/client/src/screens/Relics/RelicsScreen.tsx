@@ -11,6 +11,7 @@ import { RelicCard } from './RelicCard';
 import { Forge } from './Forge';
 import styles from './RelicsScreen.module.scss';
 import { highlightable } from '../../app/highlight';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The relic vault.
@@ -118,6 +119,10 @@ export function RelicsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="What the vale gave up. Wear it, feed it to something better, or sell it on.">
+        The Vault
+      </Heading>
+
       <div>
         <div className={styles.filters} role="group" aria-label="Filter relics">
           {(['unequipped', 'all'] as Filter[]).map((entry) => (

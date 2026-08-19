@@ -6,6 +6,7 @@ import { avatarPath } from '../../game/sprites';
 import { useContentStore } from '../../state/contentStore';
 import styles from './ChronicleScreen.module.scss';
 import { Portrait } from '../../ui/Portrait/Portrait';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The Chronicle.
@@ -71,6 +72,8 @@ export function ChronicleScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="Every champion the vale has shown you, kept or not.">The Chronicle</Heading>
+
       <div>
         <div className={styles.controls}>
           <div className={styles.filters} role="group" aria-label="Filter">

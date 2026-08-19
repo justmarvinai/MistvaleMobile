@@ -9,6 +9,7 @@ import { useShopStore } from '../../state/shopStore';
 import { RelicCard } from '../Relics/RelicCard';
 import styles from './BazaarScreen.module.scss';
 import { highlightable } from '../../app/highlight';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The Bazaar.
@@ -93,6 +94,10 @@ export function BazaarScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="What the traders brought this time, and how long they mean to stay.">
+        The Bazaar
+      </Heading>
+
       <div>
         <header className={styles.head}>
           <div>

@@ -2,6 +2,8 @@
 
 .screen {
   display: grid;
+  /* The title is a row of its own; the content row takes the slack. */
+  grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 16rem minmax(0, 1fr);
   gap: $space-4;
   height: 100%;

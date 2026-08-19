@@ -1,15 +1,23 @@
+import { useLayoutEffect } from 'react';
+import { BottomNav } from '@/fui/components/BottomNav.ts';
+import { useFui } from '@/fui/react';
 import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from './screens';
 import { usePlayerStore, type DockBadges } from '@/state/playerStore';
-import { highlightable } from './highlight';
+import { HIGHLIGHT_ATTR } from './highlight';
 import styles from './Dock.module.scss';
-import { Icon } from '@/ui/Icon/Icon';
 
 /**
  * The bottom navigation dock.
  *
+ * Painted by the library since the design rework — the rail, the active lift, the tinted
+ * glyphs and the badge bubbles are its `BottomNav`. Everything Mistvale asks of it beyond
+ * that is written onto the buttons afterwards, because they are things the library has no
+ * reason to know about:
+ *
  * Locked destinations stay visible behind a mist shroud rather than disappearing —
- * seeing what is coming is part of the pull forward (docs/UI_UX_DESIGN.md §2).
- * Number keys 1-9 jump straight to a slot.
+ * seeing what is coming is part of the pull forward (docs/UI_UX_DESIGN.md §2) — and each
+ * one keeps the tooltip that says when it opens. Number keys 1-9 jump straight to a slot,
+ * and the hint sits in the corner of the first nine.
  *
  * Pips come off the player snapshot rather than a poll: the shell re-fetches it after
  * every action, which is exactly when something becomes claimable (UI_UX §1.3).
@@ -24,43 +32,64 @@ export function Dock({
   const unlocks = usePlayerStore((state) => state.unlocks);
   const badges = usePlayerStore((state) => state.badges);
 
-  return (
-    <nav className={styles.dock} aria-label="Main navigation">
-      {DOCK_SCREENS.map((screen, index) => {
-        const unlocked = isScreenUnlocked(screen, unlocks);
-        const active = current === screen.id;
-        const waiting = unlocked ? (badges[screen.id as keyof DockBadges] ?? 0) : 0;
+  const items = DOCK_SCREENS.map((screen) => {
+    const unlocked = isScreenUnlocked(screen, unlocks);
+    const waiting = unlocked ? (badges[screen.id as keyof DockBadges] ?? 0) : 0;
+    return {
+      id: screen.id,
+      label: screen.label,
+      glyph: screen.glyph,
+      // **Not the library's `disabled`.** That sets the HTML attribute, which takes the
+      // button out of the tab order — and a locked destination whose whole job is to say
+      // "opens at level 8" is then a thing a keyboard user cannot reach to be told. It
+      // stays focusable and is refused below instead.
+      unlocked,
+      ...(waiting > 0 ? { badge: waiting } : {}),
+    };
+  });
 
-        return (
-          <button
-            key={screen.id}
-            type="button"
-            {...highlightable(`dock:${screen.id}`)}
-            className={[styles.item, active ? styles.active : '', unlocked ? '' : styles.locked]
-              .filter(Boolean)
-              .join(' ')}
-            onClick={() => unlocked && onNavigate(screen.id)}
-            aria-current={active ? 'page' : undefined}
-            aria-disabled={!unlocked}
-            title={unlocked ? screen.label : (screen.lockedHint ?? 'Still locked')}
-          >
-            <span className={styles.glyph} aria-hidden="true">
-              <Icon name={unlocked ? screen.icon : 'nav-locked'} size={20} />
-            </span>
-            <span className={styles.label}>{screen.label}</span>
-            {waiting > 0 && (
-              <span className={styles.pip} aria-label={`${waiting} waiting`}>
-                {waiting}
-              </span>
-            )}
-            {index < 9 && (
-              <span className={styles.hotkey} aria-hidden="true">
-                {index + 1}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </nav>
+  const { ref, instance } = useFui(
+    BottomNav,
+    { class: styles.dock, active: current, items },
+    {
+      // The library selects locally on click and tells us; the router is still the one
+      // that decides what is on screen, and `apply` below puts the selection back in step
+      // if navigation was refused or came from somewhere else.
+      'nav:change': ({ id }: { id: string }) => {
+        const screen = DOCK_SCREENS.find((entry) => entry.id === id);
+        // A locked entry is focusable and clickable, so the refusal lives here. `apply`
+        // puts the library's own selection back where the router says it is.
+        if (screen && isScreenUnlocked(screen, unlocks)) onNavigate(id as ScreenId);
+      },
+    },
+    (nav, next) => {
+      if (next.active && nav.active !== next.active) nav.select(next.active, { silent: true });
+      for (const item of next.items) nav.setBadge(item.id, item.badge ?? 0);
+    },
   );
+
+  // The three things the library has no option for, written onto its own buttons: the
+  // tutorial's highlight hook (which measures a box, so it has to be on the real
+  // element), the locked tooltip, and the hotkey hint.
+  useLayoutEffect(() => {
+    const root = instance?.el;
+    if (!root) return;
+    DOCK_SCREENS.forEach((screen, index) => {
+      const button = root.querySelector<HTMLElement>(`[data-id="${screen.id}"]`);
+      if (!button) return;
+      button.setAttribute(HIGHLIGHT_ATTR, `dock:${screen.id}`);
+      const unlocked = isScreenUnlocked(screen, unlocks);
+      button.title = unlocked ? screen.label : (screen.lockedHint ?? 'Still locked');
+      button.setAttribute('aria-disabled', String(!unlocked));
+      if (index < 9 && !button.querySelector(`.${styles.hotkey}`)) {
+        const hint = document.createElement('span');
+        hint.className = styles.hotkey ?? '';
+        hint.setAttribute('aria-hidden', 'true');
+        hint.textContent = String(index + 1);
+        button.appendChild(hint);
+      }
+    });
+  });
+
+  return <div ref={ref} style={{ display: 'contents' }} />;
 }

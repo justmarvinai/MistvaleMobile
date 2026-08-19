@@ -8,6 +8,10 @@
   align-items: end;
   gap: $space-3;
   margin-bottom: $space-4;
+  /* Screens lay themselves out in every direction — a flex column, a two-column grid, a
+     three-column one. A title is the one element that is never a column, so it claims the
+     whole row wherever it lands. Inert outside a grid. */
+  grid-column: 1 / -1;
 }
 
 .lines {

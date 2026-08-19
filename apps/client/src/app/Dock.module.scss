@@ -1,105 +1,41 @@
+/* Layout and the hotkey hint only.
+
+   The rail, the item's lift when active, the glyph tinting, the shroud on a locked
+   destination and the badge bubble are all painted by the FantasyUIs `BottomNav`
+   underneath since the design rework. Anything here declaring a background or a border
+   would sit on top of that and flatten it. */
+
 .dock {
   position: relative;
   z-index: $z-chrome;
-  display: flex;
-  align-items: stretch;
-  gap: $space-1;
-  padding: $space-2;
-  background: linear-gradient(0deg, $panel 0%, $ground 100%);
-  border-top: 1px solid $edge;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
+  flex: none;
 }
 
-.item {
-  @include interactive;
+/* The shroud on a destination that is not open yet.
 
-  position: relative;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-height: 52px;
-  padding: $space-2 $space-1;
-  border: 1px solid transparent;
-  border-radius: 2px;
-  color: $muted;
-
-  &:hover:not(.locked) {
-    color: $parchment;
-    background: rgba(255, 255, 255, 0.04);
-    border-color: $edge;
-  }
-
-  &:active:not(.locked) {
-    @include press-down;
-  }
-}
-
-.active {
-  color: $parchment;
-  background: linear-gradient(180deg, $panel-raised, $panel);
-  border-color: $accent-dim;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 12px rgba(194, 118, 74, 0.15);
-
-  // The lit underline that marks the current destination.
-  &::after {
-    content: '';
-    position: absolute;
-    left: 20%;
-    right: 20%;
-    bottom: -1px;
-    height: 2px;
-    background: $accent;
-    box-shadow: 0 0 8px $accent-glow;
-  }
-}
-
-.locked {
-  color: $muted-deep;
+   The library dims its own `:disabled` items, and Mistvale deliberately does not use that
+   attribute: a locked entry has to stay in the tab order, because "opens at level 8" is
+   the whole reason it is still on screen and a keyboard user has to be able to reach it to
+   be told. So the state is `aria-disabled`, and the dimming follows it. */
+.dock :global(.fui-bottomnav__item[aria-disabled='true']) {
+  opacity: 0.35;
   cursor: not-allowed;
-  filter: grayscale(0.7);
-  opacity: 0.55;
 }
 
-.glyph {
-  font-size: 16px;
-  line-height: 1;
+.dock :global(.fui-bottomnav__item[aria-disabled='true']:hover) {
+  color: inherit;
 }
 
-.label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
+/* The one thing the library has no notion of: a keyboard shortcut. Written into the
+   library's own button by `Dock.tsx`, so it is positioned against that button's box. */
 .hotkey {
   position: absolute;
   top: 3px;
   right: 5px;
   font-family: $font-mono;
   font-size: 9px;
-  color: $muted-deep;
-}
-
-/** The claimable-count pip. Top-left so it never sits under the hotkey number. */
-.pip {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1rem;
-  height: 1rem;
-  padding: 0 3px;
-  background: $danger;
-  color: $parchment;
-  font-family: $font-mono;
-  font-size: 0.5625rem;
   line-height: 1;
+  color: $muted-deep;
+  opacity: 0.7;
+  pointer-events: none;
 }

@@ -6,6 +6,7 @@ import { useRosterStore } from '../../state/rosterStore';
 import { ChampionDetailModal } from './ChampionDetail';
 import { ChampionCard } from './ChampionCard';
 import styles from './ChampionsScreen.module.scss';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The roster.
@@ -75,6 +76,10 @@ export function ChampionsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="Who stands with you, and how far each of them has come.">
+        Your Champions
+      </Heading>
+
       <div>
         <div className={styles.controls}>
           <div className={styles.sorts} role="group" aria-label="Sort by">
@@ -124,7 +129,7 @@ export function ChampionsScreen(): JSX.Element {
       </div>
 
       <aside className={styles.sidebar}>
-        <Panel title="Your champions">
+        <Panel title="How they grow">
           <p className={styles.note}>
             Every champion climbs four ladders: levels from food, star rank from same-rank
             champions, ascension from essences, and skills from tomes or duplicates.

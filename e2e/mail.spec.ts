@@ -21,7 +21,7 @@ test.describe('mail and news', () => {
     test.slow();
     await register(page, 'e2eml', 'Postless');
 
-    await page.getByRole('button', { name: 'Mail' }).click();
+    await page.getByRole('button', { name: 'Mail', exact: true }).click();
     await expect(page.getByText(/nothing has arrived/i)).toBeVisible({ timeout: 15_000 });
     // Nothing waiting, so nothing shouting about it either.
     await expect(page.getByText(/collect all/i)).toHaveCount(0);
@@ -31,7 +31,9 @@ test.describe('mail and news', () => {
     test.slow();
     await register(page, 'e2enw', 'Newsy');
 
-    await page.getByRole('button', { name: 'News' }).click();
+    // Exact: the profile chip carries the warden's name in its accessible label since the
+    // design rework, and this spec's warden is called "Newsy".
+    await page.getByRole('button', { name: 'News', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: /news/i });
     await expect(dialog).toBeVisible({ timeout: 15_000 });
     await expect(dialog.getByText(/welcome to the vale/i)).toBeVisible();

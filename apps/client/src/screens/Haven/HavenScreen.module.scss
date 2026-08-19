@@ -8,23 +8,6 @@
   @include pixel-scrollbar;
 }
 
-.welcome {
-  @include motion-safe {
-    animation: settle $duration-base $ease-out;
-  }
-}
-
-.heading {
-  @include display-text(30px);
-  text-shadow: 0 0 18px rgba(194, 118, 74, 0.2);
-}
-
-.subheading {
-  margin-top: $space-1;
-  color: $muted;
-  font-size: 13px;
-}
-
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
@@ -38,22 +21,24 @@
 
 .stations {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: $space-3;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: $space-2;
 }
 
+/* A station is a painted socket with its place's icon in it, a name under, and — when it
+   is not yours yet — the shroud and the line that says when it opens. The socket's frame,
+   its fill and its padlock are the library's `Slot`; this only arranges them and says what
+   hovering does. */
 .station {
-  @include panel;
   @include interactive;
 
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: $space-2;
-  min-height: 118px;
-  padding: $space-4;
+  padding: $space-2 $space-1 $space-3;
   color: $parchment;
+  text-align: center;
 
   @include motion-safe {
     animation: settle $duration-base $ease-out backwards;
@@ -65,43 +50,47 @@
     }
   }
 
-  &:hover:not(.shrouded) {
-    border-color: $accent-dim;
-    transform: translateY(-2px);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 6px 18px rgba(0, 0, 0, 0.5),
-      0 0 16px rgba(194, 118, 74, 0.12);
+  /* The lift and the ember bloom belong to the socket, not to the whole card — a card
+     that grows a box shadow reads as a button, and a socket that catches the light reads
+     as an object on a table. */
+  &:hover:not(.shrouded) .stationSocket {
+    transform: translateY(-3px);
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)) brightness(1.12);
   }
 
-  &:active:not(.shrouded) {
+  &:hover:not(.shrouded) .stationLabel {
+    color: $accent-soft;
+  }
+
+  &:active:not(.shrouded) .stationSocket {
     transform: translateY(0);
   }
+}
+
+.stationSocket {
+  transition:
+    transform $duration-fast $ease-out,
+    filter $duration-fast $ease-out;
 }
 
 .shrouded {
   cursor: not-allowed;
   color: $muted-deep;
-  filter: grayscale(0.8);
-  opacity: 0.5;
-  // The mist that hides what is not yours yet.
-  background: linear-gradient(180deg, rgba(194, 118, 74, 0.04), transparent), $panel;
 }
 
-.stationGlyph {
-  font-size: 26px;
-  line-height: 1;
-  color: $accent;
-
-  .shrouded & {
-    color: $muted-deep;
-  }
+.shrouded .stationSocket {
+  /* The mist that hides what is not yours yet. The library's own `locked` already dims
+     and padlocks the socket; this takes the colour out of the icon behind it so a place
+     you cannot go does not compete with one you can. */
+  filter: grayscale(0.85);
+  opacity: 0.75;
 }
 
 .stationLabel {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.03em;
+  transition: color $duration-fast $ease-out;
 }
 
 .stationHint {

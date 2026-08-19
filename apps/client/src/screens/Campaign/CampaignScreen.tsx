@@ -7,6 +7,7 @@ import { useProgressStore } from '../../state/progressStore';
 import { TeamSelect } from '../Battle/TeamSelect';
 import styles from './CampaignScreen.module.scss';
 import { highlightable } from '../../app/highlight';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The campaign map.
@@ -112,6 +113,10 @@ export function CampaignScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="Twelve chapters, three difficulties, and a warlord waiting at the end of each.">
+        The Campaign
+      </Heading>
+
       <div className={styles.column}>
         <div className={styles.difficulties} role="group" aria-label="Difficulty">
           {DIFFICULTIES.map((entry) => (

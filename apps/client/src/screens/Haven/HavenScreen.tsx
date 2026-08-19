@@ -1,17 +1,20 @@
+import { Slot } from '@/fui/components/Slot.ts';
+import { Fui } from '@/fui/react';
 import { usePlayerStore } from '@/state/playerStore';
 import { useRosterStore } from '@/state/rosterStore';
+import { Heading } from '@/ui/Heading/Heading';
 import { Panel } from '@/ui/Panel/Panel';
 import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from '@/app/screens';
 import { StarterChoice } from './StarterChoice';
 import styles from './HavenScreen.module.scss';
-import { Icon } from '@/ui/Icon/Icon';
 
 /**
  * The Haven — home base and the screen the player lands on.
  *
- * At P0 it shows the camp's stations (each a route into a system) with locked ones
- * shrouded, plus the news panel. The animated backdrop comes from the Pixi stage
- * behind it; the illustrated camp art arrives in the P10 art pass.
+ * Each station is a route into a system, drawn as a painted socket with the place's own
+ * icon in it — a shrine, a gate, a crown — and a locked one keeps its socket and takes
+ * the shroud, because seeing what is coming is part of the pull forward (UI_UX §2). The
+ * drifting mist behind it comes from the Pixi stage.
  */
 export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
   const player = usePlayerStore((state) => state.player);
@@ -28,14 +31,15 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
     <div className={styles.screen}>
       <StarterChoice />
 
-      <div className={styles.welcome}>
-        <h1 className={styles.heading}>The Haven</h1>
-        <p className={styles.subheading}>
-          {player
+      <Heading
+        tagline={
+          player
             ? `The lanterns are lit, Warden ${player.profileName}. The vale waits.`
-            : 'The lanterns are lit.'}
-        </p>
-      </div>
+            : 'The lanterns are lit.'
+        }
+      >
+        The Haven
+      </Heading>
 
       <div className={styles.layout}>
         <section className={styles.stations} aria-label="Locations">
@@ -50,9 +54,27 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
                 aria-disabled={!unlocked}
                 title={unlocked ? undefined : screen.lockedHint}
               >
-                <span className={styles.stationGlyph} aria-hidden="true">
-                  <Icon name={unlocked ? screen.icon : 'nav-locked'} size={28} />
-                </span>
+                <Fui
+                  of={Slot}
+                  className={styles.stationSocket}
+                  options={{
+                    size: 'lg',
+                    locked: !unlocked,
+                    item: { icon: screen.art, name: screen.label },
+                  }}
+                  // The socket is the station's *picture*, not a second control. `Slot` is
+                  // built to be one — an inventory cell you click — so left alone it
+                  // renders a focusable `role="button"` inside this button, which is a
+                  // control a screen reader announces and a keyboard lands on with nothing
+                  // to do. The station around it already carries the name, the tooltip and
+                  // the click.
+                  attrs={{
+                    role: 'presentation',
+                    tabindex: undefined,
+                    'aria-label': undefined,
+                    title: undefined,
+                  }}
+                />
                 <span className={styles.stationLabel}>{screen.label}</span>
                 {!unlocked && <span className={styles.stationHint}>{screen.lockedHint}</span>}
               </button>

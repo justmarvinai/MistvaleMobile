@@ -10,6 +10,7 @@ import { QuestRow } from './QuestRow';
 import { FirstWins } from './FirstWins';
 import styles from './QuestsScreen.module.scss';
 import { highlightable } from '../../app/highlight';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The checklist.
@@ -82,6 +83,8 @@ export function QuestsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="The day's work, the week's, and the month's.">Errands</Heading>
+
       <div className={styles.main}>
         <header className={styles.head}>
           <nav className={styles.tabs} aria-label="Quest periods">

@@ -7,6 +7,7 @@ import { Rewards, describeRewards, useRewardName } from '../../ui/Rewards/Reward
 import { useMailStore } from '../../state/mailStore';
 import { toast } from '../../state/uiStore';
 import styles from './MailScreen.module.scss';
+import { Heading } from '@/ui/Heading/Heading';
 
 /**
  * The mailbox.
@@ -59,6 +60,8 @@ export function MailScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      <Heading tagline="What was sent to you, and what came with it.">The Mailbox</Heading>
+
       {error && <p className={styles.error}>{error}</p>}
 
       {loading && !mail ? (
