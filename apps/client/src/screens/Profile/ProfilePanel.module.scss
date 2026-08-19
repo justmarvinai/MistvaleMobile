@@ -138,7 +138,9 @@
   list-style: none;
 }
 
-.tile,
+/* The picker's rows still stretch; a showcase tile must not. `width: 100%` on both is what
+   put the four painted cards in a column one per row — a flex item at full width takes the
+   whole line, so `flex-wrap` never had anything to wrap. */
 .pickerItem {
   display: flex;
   flex-direction: column;
@@ -219,4 +221,12 @@
   margin-left: auto;
   color: $muted;
   font-size: 0.8rem;
+}
+
+.tile {
+  display: flex;
+  width: $card-champion;
+  padding: 0;
+  background: none;
+  border: none;
 }

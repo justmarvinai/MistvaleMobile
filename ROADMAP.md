@@ -190,7 +190,7 @@ table deliberately did not move.
 | **D6** | World and progression — campaign map, Depths, quests, calendar, mail | ✅ |
 | **D7** | Competition — Arena, Hall of Valor, the profile card | ✅ |
 | **D8** | Mistvale's own components, in the library's language | ✅ |
-| **D9** | The screenshot pass — every screen, extended `visible.spec.ts`, §9 budgets re-measured | |
+| **D9** | The screenshot pass — every screen, extended `visible.spec.ts`, §9 budgets re-measured | ✅ |
 
 **Exit:** every screen in the game is drawn in one visual language, `pnpm verify` and
 `pnpm sim` green, and ARCHITECTURE §9 budgets still met with the art in the bundle.

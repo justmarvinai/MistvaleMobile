@@ -5,6 +5,44 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the design rework's last pass (D9)
+
+Two layout bugs the owner found, and they were the same bug wearing two faces. The library's
+`ArtifactCard` is a fixed 236px and its `ChampionCard` a fixed 150px — everything inside them,
+down to the font sizes, is derived from that number, so neither can be stretched to fill a
+column.
+
+- **The Forge and Lock buttons under a relic were wider than the relic.** The entry holding
+  the card filled its grid cell while the card sat at 236px inside it, so the buttons —
+  laid out beside the card, not inside it — took the cell's width instead.
+- **The four champions on a profile card stacked one per row.** The tile around each card
+  was `width: 100%`, and a full-width flex item never wraps, so `flex-wrap` had nothing to do.
+
+Both are now sized from `$card-artifact` and `$card-champion` in the tokens, which is where a
+number the layout depends on belongs.
+
+**And the guard, which took four attempts to make honest.** A test that measures overflow
+found neither bug — both are a card *narrower* than its neighbours, which overflows nothing.
+The first version measured the React bridge, which is `display: contents` and has no box, so
+it passed against the very bug it was written for. The second flagged every grid in the game,
+because a grid of cards is legitimately wider than one card. What survives is narrow and
+true: a holder that lays out a card **and something else** must be the card's width. It fails
+on the relic bug and passes with it fixed, and it refuses to pass at all if it measured no
+cards — a green run that measured nothing is not a green run.
+
+### Changed — the §9 budgets, re-measured with the art in
+
+The design rework's whole component layer, its theme and the twenty-odd Mistvale primitives
+built on it cost **20 KB gzipped**: 302 KB → 322 KB of JS against a 1.5 MB budget. The
+library's painted art is 1.2 MB on the login screen and 1.9 MB after four screens, which is
+reasonable and now written down.
+
+The champion avatars are not. Eight of them are **14 MB published** — 1.3–2.2 MB each, at
+1254×1254, drawn at 150px — so opening the roster pulls about 9 MB. `pnpm assets` copies them
+from `assets/` byte-for-byte and there is no image library in the toolchain to downscale with.
+Raised as **Q6** with a recommended default rather than fixed quietly, because the fix means
+adding a native module to the build on the box the budget is about.
+
 ### Fixed — a gate that was a coin toss
 
 `bots.test.ts` — "can be fought and settled like anybody else" — failed **five times in

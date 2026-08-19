@@ -55,3 +55,27 @@ Each has a phase and a default, so none of them blocks anything. Listed here so 
 | Q1 | Where a new account enters the Arena ladder | **Recommendation taken: leave `arena.startingRating` at 900.** A level-8 account arrives having had the welcome grant, thirteen sigils and thirty-odd clears, so mid-Bronze is a fair fight rather than a gift — and the Bronze loss floor means a bad run cannot strand anybody. It stays a Game-config edit if real accounts say otherwise, and G7's `pnpm sim` arena gate is what would settle it with numbers instead of guesses. | ECONOMY_BALANCE §12, `arena.startingRating` |
 | Q2 | Whether the Summon Surge ladder is sized right | **Recommendation taken: leave the point weights as seeded.** One Radiant pull tops the ladder outright, and that is the point — "the Radiant I finally pulled finished the event" is a good evening, and sizing the top rung to a Radiant instead would put it out of reach of everyone who never sees one, which at EA is most people. | `db/seed/data/events.ts`, ECONOMY_BALANCE §11 |
 | Q3 | How much the cold-open battle should borrow | **Recommendation taken: a `tutorial`-mode stage carrying a preset team.** The battle mode already existed in the enum and nothing used it; a stage now carries the roster it is fought with, so the opening fight is content like every other fight. No energy, no rewards, no stage progress, and nothing minted into the roster to be taken back afterwards. | GAME_DESIGN §9.4, CONTENT_PLAN §7, DATA_MODEL §stage |
+
+## Q6 — Champion avatars ship at full resolution (raised 2026-08-19, D9)
+
+**The measurement.** The eight published avatars are 1.3–2.2 MB each, 1254×1254, and the
+game draws them at 150px on a champion card and 44px on an arena portrait. `pnpm assets`
+copies them from `assets/` byte-for-byte, so opening the roster pulls roughly **9 MB**. On
+the 1-core/4 GB target box that is the largest single thing a player downloads, by an order
+of magnitude, and it grows with every champion that gets art.
+
+**Why it is not already fixed.** Downscaling at publish time needs an image library, and
+there is none in the toolchain — no `sharp`, no ImageMagick, no PIL. Adding `sharp` means a
+native module that has to build on the VPS, which is a locked-stack decision rather than
+mine to take quietly.
+
+**Recommended default:** add `sharp` to `tools/asset-sync` and have `pnpm assets` publish
+each avatar at 320px (2× the largest place it is drawn), leaving `assets/` untouched as the
+master. That is ~40 KB per avatar instead of ~2 MB, needs no change to any screen, and the
+source art stays exactly as delivered.
+
+**Alternatives if a native dep is unwelcome:** downscale once by hand and commit the smaller
+files to `assets/` (simple, but the master is then the display size); or serve them through
+nginx's `image_filter` (no build dep, but it costs CPU on the box the budget is about).
+
+Nothing is blocked either way — the game works today, it is only heavier than it should be.

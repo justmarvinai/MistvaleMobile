@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, expectOnTop, registerRaw } from './support';
+import { chooseStarter, dismissUnlocks, expectOnTop, registerRaw, resolveBattle } from './support';
 
 /**
  * The screens a player looks at, checked for being *lookable at*.
@@ -108,6 +108,122 @@ test.describe('what a player can actually see', () => {
         { timeout: 25_000 },
       )
       .toBe('moved');
+  });
+
+  test('nothing is drawn outside the box that holds it', async ({ page }) => {
+    test.slow();
+    // Two bugs the owner found on the same day, and they are the same bug: the library's
+    // `ArtifactCard` is a fixed 236px and its `ChampionCard` a fixed 150px — everything
+    // inside them, down to the font sizes, is derived from that number, so neither can be
+    // stretched to a column. A grid cell wider than the card leaves anything laid out
+    // *beside* it — the Forge and Lock buttons under a relic — visibly wider than the card
+    // it belongs to; a holder at `width: 100%` puts four painted champion cards in a
+    // column, one per row, because a full-width flex item never wraps.
+    //
+    // Neither shows up as an error, a failed assertion or a broken image. Only measurement
+    // finds them, so this measures.
+    await registerRaw(page, 'e2efit', 'Measurer');
+    await chooseStarter(page);
+
+    // Relics, because the vault is where the mismatch showed and an empty vault proves
+    // nothing. A stage does not always drop one, so it is farmed until it does.
+    for (let run = 0; run < 4; run += 1) {
+      await page
+        .getByRole('button', { name: /^campaign$/i })
+        .first()
+        .click();
+      await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+      const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
+      await teamDialog
+        .getByRole('button', { name: /lv \d+/i })
+        .first()
+        .click();
+      await teamDialog.getByRole('button', { name: /into the mist/i }).click();
+      await resolveBattle(page);
+      // Back out of the result, or the dock is not on screen to navigate with.
+      await page
+        .getByRole('button', { name: /back to the campaign/i })
+        .click()
+        .catch(() => undefined);
+      await dismissUnlocks(page);
+
+      const held = await page.evaluate(async () => {
+        const response = await fetch('/api/player/gear', { credentials: 'include' });
+        const body = (await response.json()) as { data?: { gear?: unknown[] } };
+        return body.data?.gear?.length ?? 0;
+      });
+      if (held > 0) break;
+    }
+
+    let measured = 0;
+    for (const screen of ['Campaign', 'Champions', 'Relics']) {
+      const nav = page
+        .getByRole('navigation')
+        .getByRole('button', { name: new RegExp(`^${screen}`, 'i') })
+        .first();
+      // A screen still shrouded for a young account is not a screen to measure.
+      if ((await nav.getAttribute('aria-disabled')) === 'true') continue;
+      await nav.click();
+      await page.waitForTimeout(1200);
+
+      // The page itself never scrolls sideways.
+      const spill = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(spill, `${screen} scrolls sideways`).toBeLessThanOrEqual(0);
+
+      // And every painted card fits the box laid out around it.
+      const found = await page.evaluate(() => {
+        const misfits: { card: string; holder: string; diff: number }[] = [];
+        const cards = document.querySelectorAll('.fui-artifact, .fui-champ');
+        for (const card of cards) {
+          // Walk past the React bridge, which is `display: contents` on purpose so the
+          // library's element becomes the flex or grid item its parent expects. It has no
+          // box, so measuring it measures nothing — which is how the first draft of this
+          // test passed against the very bug it was written for.
+          let holder = card.parentElement;
+          while (holder && getComputedStyle(holder).display === 'contents') {
+            holder = holder.parentElement;
+          }
+          if (!holder || holder === card) continue;
+          const diff = Math.round(
+            holder.getBoundingClientRect().width - card.getBoundingClientRect().width,
+          );
+          // Three shapes, and only two of them are wrong.
+          //
+          // A *grid of cards* is wider than any one card and that is what a grid is — every
+          // child is a card, each sits at its own size, nothing disagrees.
+          // A *wrapper holding a card and something else* — the Forge and Lock buttons under
+          // a relic — must be the card's width, or the something else draws wider than the
+          // card it belongs to.
+          //
+          // Only the second is measurable from here. A one-card grid and a stretched list
+          // item are the same shape to a measurement, so widening the rule to catch the
+          // third flagged every grid in the game. The second is the class that recurs
+          // anyway: every screen that puts a control beside a card has it to get wrong.
+          const kin = Array.from(holder.children).filter(
+            (child) =>
+              child.matches('.fui-artifact, .fui-champ') ||
+              child.querySelector('.fui-artifact, .fui-champ'),
+          ).length;
+          const others = holder.childElementCount - kin;
+          if (diff > 8 && others > 0) {
+            misfits.push({
+              card: card.className.split(' ')[1] ?? '',
+              holder: (holder.className || holder.tagName).toString().slice(0, 60),
+              diff,
+            });
+          }
+        }
+        return { measured: cards.length, misfits: misfits.slice(0, 4) };
+      });
+      expect(found.misfits, `${screen}: a painted card is adrift in its holder`).toEqual([]);
+      measured += found.measured;
+    }
+
+    // A green run that measured nothing is not a green run. Both card types have to have
+    // been on screen for this test to have said anything at all.
+    expect(measured, 'painted cards actually measured').toBeGreaterThan(0);
   });
 
   test('the dock and the top bar are on top of the screen they frame', async ({ page }) => {

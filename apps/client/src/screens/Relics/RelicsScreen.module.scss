@@ -36,7 +36,7 @@
   display: grid;
   /* Sized from the library's own card width (236px) rather than guessed: a column
      narrower than the card it holds overflows into the next one. */
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax($card-artifact, 1fr));
   gap: $space-2;
   align-content: start;
   max-height: calc(100% - 3rem);
@@ -44,7 +44,11 @@
   padding-right: $space-2;
 }
 
+/* The card is a fixed 236px and cannot stretch, so the entry holding it is that wide too
+   — otherwise the Forge and Lock buttons underneath spread to the full grid cell and draw
+   visibly wider than the relic they belong to. */
 .entry {
+  width: $card-artifact;
   display: flex;
   flex-direction: column;
   gap: $space-1;

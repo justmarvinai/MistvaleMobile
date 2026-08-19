@@ -60,6 +60,15 @@ $gold: #c9a227;
 $gold-soft: #e8d08a;
 $blood: #7d1f1a; // the pack's glossy red — refusals, danger buttons
 
+/* ── The library's fixed card widths ─────────────────────────────────────────
+   Two FantasyUIs components size themselves in pixels and scale everything inside from
+   that number — an `ArtifactCard` is 236px and a `ChampionCard` 150px, right down to their
+   font sizes, so neither can be stretched to a column. Every grid that holds one sizes its
+   tracks from these, and anything sitting *beside* one — a row of buttons under a relic —
+   matches it, or it draws wider than the card it belongs to. */
+$card-artifact: 236px;
+$card-champion: 150px;
+
 // ── Typography (no serif fonts, ever) ──────────────────────────────────────────
 $font-display: 'Pixelify Sans', 'Trebuchet MS', system-ui, sans-serif;
 $font-body:
