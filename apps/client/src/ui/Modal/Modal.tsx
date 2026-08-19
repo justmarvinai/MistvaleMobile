@@ -1,9 +1,8 @@
-import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useRef, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Panel } from '../Panel/Panel';
 import { Button } from '../Button/Button';
-import { CUE, playCue } from '../../audio';
-import { useLayer } from './stack';
+import { useDialogLayer } from './dialog';
 import styles from './Modal.module.scss';
 
 export interface ModalProps {
@@ -38,73 +37,9 @@ export function Modal({
   width = 480,
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const previouslyFocused = useRef<HTMLElement | null>(null);
-  const { top, depth } = useLayer(useId(), open);
-
-  // Focus follows the *dialog*, not the stack. Opening one over another captures the
-  // element inside the lower one and gives it back on close, so a picker dismissed over a
-  // champion sheet returns the caret to the slot it was opened from.
-  //
-  // The open and close cues ride the same effect, which is what keeps them honest: they
-  // are tied to the dialog actually appearing rather than to whatever button was pressed,
-  // so a modal opened by a keystroke or by the tutorial sounds the same as one clicked.
-  useEffect(() => {
-    if (!open) return;
-    playCue(CUE.open);
-
-    previouslyFocused.current = document.activeElement as HTMLElement | null;
-    // Move focus into the dialog so keyboard users are not left behind it.
-    const firstFocusable = dialogRef.current?.querySelector<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
-    (firstFocusable ?? dialogRef.current)?.focus();
-
-    return () => {
-      playCue(CUE.close);
-      previouslyFocused.current?.focus();
-    };
-  }, [open]);
-
-  // Keys belong to the top dialog alone. Installed unconditionally, this is the listener
-  // that used to close two modals with one Escape and let Tab wander into the dialog
-  // underneath.
-  useEffect(() => {
-    if (!open || !top) return;
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && dismissible) {
-        event.stopPropagation();
-        onClose();
-        return;
-      }
-
-      if (event.key !== 'Tab' || !dialogRef.current) return;
-
-      const focusable = Array.from(
-        dialogRef.current.querySelectorAll<HTMLElement>(
-          'button:not(:disabled), [href], input:not(:disabled), select, textarea, [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((element) => element.offsetParent !== null);
-
-      if (focusable.length === 0) return;
-
-      const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener('keydown', onKeyDown, true);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown, true);
-    };
-  }, [open, top, dismissible, onClose]);
+  // The stack, the focus trap and the cues — see `dialog.ts`. Shared with the results
+  // screen, which is a full-screen overlay of the same kind and used to be a `Modal`.
+  const { depth } = useDialogLayer(dialogRef, { open, dismissible, onClose });
 
   if (!open) return null;
 

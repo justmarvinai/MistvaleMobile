@@ -10,7 +10,7 @@ Source: [justmarvinai/FantasyUIs](https://github.com/justmarvinai/FantasyUIs) �
   library's own `/r/<Name>.json` records (the `copy` field is the transitive closure
   of real import statements).
 - **4 art packs** — dark-ember, deco-frames, line-glyphs, spell-icons — plus the individual
-  files Dark Ember reaches into other packs for. 464 files,
+  files Dark Ember reaches into other packs for. 466 files,
   5.4 MB, in `apps/client/public/fui/`.
 
 Re-vendor with `pnpm fui:vendor --from <path to a FantasyUIs checkout>`; CI runs

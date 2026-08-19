@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { SkillDef } from '@mistvale/shared';
 import type { UnitRef } from '@mistvale/engine';
+import { ActionBar } from '@/fui/components/ActionBar.ts';
+import { BattleControls } from '@/fui/components/BattleControls.ts';
+import { PartyFrame } from '@/fui/components/PartyFrame.ts';
+import { TurnMeter } from '@/fui/components/TurnMeter.ts';
+import { UnitFrame } from '@/fui/components/UnitFrame.ts';
+import { WaveTracker } from '@/fui/components/WaveTracker.ts';
+import { Fui } from '@/fui/react';
 import { Button } from '../../ui/Button/Button';
 import { BattleScene } from '../../game/battleScene';
+import { stillPath } from '../../game/sprites';
 import { setScene } from '../../game/stage';
 import { settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
 import { useBattleStore } from '../../state/battleStore';
@@ -16,9 +24,15 @@ import styles from './BattleScreen.module.scss';
 /**
  * The battle screen.
  *
- * A Pixi stage rendering the playback view, with the HUD and skill bar as DOM on top —
- * the split the architecture calls for: pixels in Pixi, text and hit targets in the DOM
- * where they stay crisp and accessible (docs/ARCHITECTURE.md §4.1).
+ * A Pixi stage rendering the playback view, with the HUD as DOM on top — the split the
+ * architecture calls for: pixels in Pixi, text and hit targets in the DOM where they stay
+ * crisp and accessible (docs/ARCHITECTURE.md §4.1).
+ *
+ * Since the design rework the HUD is the library's own battle widgets, arranged the way
+ * this genre arranges them: the wave pips top-left, the turn queue across the top, the
+ * controls at the right, the party down the left, whoever is under consideration in the
+ * middle, and the acting champion with their skills along the bottom. The frame itself
+ * never takes a click — only the widgets do — so the stage underneath stays reachable.
  *
  * It decides nothing about the fight. It shows what has been played back, and sends the
  * player's choices to the server.
@@ -124,14 +138,81 @@ export function BattleScreen(): JSX.Element {
       .filter((skill): skill is SkillDef => skill !== undefined && skill.slot !== 'passive');
   }, [actingUnit, skillsByKey]);
 
-  /** Upcoming turn order, straight off the state the server sent. */
-  const turnOrder = useMemo(() => {
+  /**
+   * Upcoming turn order, straight off the state the server sent.
+   *
+   * The meter is shown as-is rather than animated: the server moves turn meters, and a
+   * queue filling on its own would be the client guessing at the fight.
+   */
+  const queue = useMemo(() => {
     if (!battle) return [];
     return [...battle.state.allies, ...battle.state.enemies]
       .filter((unit) => unit.alive)
       .sort((a, b) => b.tm - a.tm || a.ref.slot - b.ref.slot)
-      .slice(0, 6);
-  }, [battle]);
+      .slice(0, 6)
+      .map((unit) => ({
+        id: unitId(unit.ref),
+        name: unit.name,
+        portrait: stillPath(artFor(unit.defKey)),
+        meter: Math.min(1, unit.tm / 100),
+        enemy: unit.ref.side === 'enemy',
+      }));
+  }, [battle, artFor]);
+
+  /** The four who came, with what is left of them. */
+  const party = useMemo(() => {
+    if (!battle) return [];
+    return battle.state.allies.map((unit) => ({
+      id: unitId(unit.ref),
+      name: unit.name,
+      portrait: stillPath(artFor(unit.defKey)),
+      level: unit.level,
+      health: unit.hp,
+      healthMax: unit.maxHp,
+      inactive: !unit.alive,
+    }));
+  }, [battle, artFor]);
+
+  /**
+   * How many waves this stage has.
+   *
+   * Read off the stage rather than off the fight: a wave the player has not reached yet
+   * is exactly what the tracker is for, and the battle state only ever holds the current
+   * one. Falls back to the wave in progress so a stage the bundle has not got answers
+   * for still shows an honest pip.
+   */
+  const waveCount = useMemo(() => {
+    const stage = bundle?.stages.find((entry) => entry.key === battle?.stageKey);
+    return Math.max(stage?.waves?.length ?? 0, view.wave + 1);
+  }, [bundle, battle?.stageKey, view.wave]);
+
+  /**
+   * Whoever is under consideration: the ally the player picked as a target, or else the
+   * first enemy still standing. A fight with nobody in the middle of the screen reads as
+   * a fight against nothing.
+   */
+  const focus = useMemo(() => {
+    if (!battle) return null;
+    const units = [...battle.state.allies, ...battle.state.enemies];
+    const picked = target ? units.find((unit) => sameRef(unit.ref, target)) : undefined;
+    return picked ?? battle.state.enemies.find((unit) => unit.alive) ?? null;
+  }, [battle, target]);
+
+  /** The acting champion's skills as action slots, with their cooldowns. */
+  const slots = useMemo(
+    () =>
+      skills.map((skill) => ({
+        icon: skillArt(skill.key),
+        name: skill.name,
+        ...(actingUnit && (actingUnit.cooldowns[skill.key] ?? 0) > 0
+          ? { cooldown: actingUnit.cooldowns[skill.key] ?? 0, disabled: true }
+          : {}),
+        ...(busy ? { disabled: true } : {}),
+      })),
+    [skills, actingUnit, busy],
+  );
+
+  const actingId = actingUnit ? unitId(actingUnit.ref) : null;
 
   const leave = (): void => {
     resetBattle();
@@ -150,120 +231,185 @@ export function BattleScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <div className={styles.hud}>
-        <span className={styles.wave}>
-          Wave {view.wave + 1} · Turn {view.turn}
-        </span>
-
-        <div className={styles.order} aria-label="Turn order">
-          {turnOrder.map((unit) => (
-            <span
-              key={`${unit.ref.side}-${unit.ref.slot}`}
-              className={styles.orderPip}
-              data-side={unit.ref.side}
-              title={`${unit.name} — turn meter ${Math.round(unit.tm)}`}
-            >
-              {unit.name.split(' ')[0]}
-            </span>
-          ))}
-        </div>
-
-        <div className={styles.controls}>
-          <button
-            type="button"
-            className={styles.toggle}
-            aria-pressed={speed === 2}
-            onClick={() => setSpeed(speed === 2 ? 1 : 2)}
-            title="Playback speed"
-          >
-            ×{speed}
-          </button>
-          {playing && (
-            <button type="button" className={styles.toggle} onClick={skipToLatest}>
-              Skip
-            </button>
-          )}
-          <button
-            type="button"
-            className={styles.toggle}
-            aria-pressed={auto}
-            disabled={busy || settled}
-            onClick={() => void runAuto()}
-          >
-            Auto
-          </button>
-          <button
-            type="button"
-            className={styles.toggle}
-            disabled={settled}
-            onClick={() => void retreat()}
-          >
-            Retreat
-          </button>
-        </div>
-      </div>
-
       {/* A window onto the shared Pixi canvas, which is behind the whole shell — not a
           stage of its own. Mounting a second <PixiStage> here is what made this screen
           render nothing at all: its wrapper is a fixed, opaque, full-viewport layer, and
           being later in the DOM than the HUD it painted straight over it. */}
       <div className={styles.stage} />
 
-      <div className={styles.bar}>
-        {watched ? (
-          <span className={styles.hint}>The fight is over.</span>
-        ) : playing ? (
-          // Two different waits wear the same spinner otherwise. Before the server
-          // answers there is genuinely nothing to see; after it has, the fight on screen
-          // is a recording, and the player who would rather not sit through it deserves
-          // to be told where the button is.
-          <span className={styles.hint}>
-            {settled ? 'Playing out — Skip to jump to the end.' : 'Resolving…'}
-          </span>
-        ) : awaitingInput && actingUnit ? (
-          <>
-            <div className={styles.actor}>
-              <div>{actingUnit.name}</div>
-              <div className={styles.actorMeta}>
-                {actingUnit.hp} / {actingUnit.maxHp} HP
-              </div>
-            </div>
+      <div className={styles.hud}>
+        <div className={styles.topLeft}>
+          <Fui
+            of={WaveTracker}
+            options={{ waves: waveCount, current: view.wave + 1, label: 'Wave', size: 'sm' }}
+          />
+          <span className={styles.turnCount}>Turn {view.turn}</span>
+        </div>
 
-            <div className={styles.skills}>
-              {skills.map((skill) => {
-                const cooldown = actingUnit.cooldowns[skill.key] ?? 0;
-                return (
-                  <button
-                    key={skill.key}
-                    type="button"
-                    className={styles.skill}
-                    disabled={cooldown > 0 || busy}
-                    title={skill.description}
-                    onClick={() =>
-                      void act({ skill: skill.key, ...(target ? { target } : {}) }).then(() =>
-                        setTarget(null),
-                      )
-                    }
-                  >
-                    <span>{skill.name}</span>
-                    <span className={styles.skillMeta}>
-                      {cooldown > 0 ? `Cooldown ${cooldown}` : skill.slot.toUpperCase()}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <span className={styles.hint}>Waiting for the server…</span>
+        <Fui
+          of={TurnMeter}
+          className={styles.order}
+          options={{ units: queue, running: false, showBars: true, size: 44 }}
+        />
+
+        <div className={styles.controls}>
+          <Fui
+            of={BattleControls}
+            options={{
+              auto,
+              speed,
+              speeds: [1, 2],
+              pausable: false,
+              retreatable: true,
+            }}
+            on={{
+              'battle:auto': () => void runAuto(),
+              // The store's speed is a two-value union; the library's is any number in
+              // `speeds`, so the narrowing happens here rather than being asserted.
+              'battle:speed': ({ speed: next }: { speed: number }) => setSpeed(next === 2 ? 2 : 1),
+              'battle:retreat': () => void retreat(),
+            }}
+          />
+          {/* Skip is Mistvale's, not the library's: it belongs to the *playback* clock
+              rather than to the fight, and it only exists while there is a recording left
+              to jump over (P10a). */}
+          {playing && settled && (
+            <Button size="sm" variant="ghost" onClick={skipToLatest}>
+              Skip
+            </Button>
+          )}
+        </div>
+
+        {/* Clicking a party member is how a targeted skill picks its ally — the same
+            gesture as clicking an enemy on the stage. */}
+        <Fui
+          of={PartyFrame}
+          className={styles.party}
+          options={{ members: party, ...(actingId ? { selected: actingId } : {}) }}
+          on={{ 'party:select': ({ id }: { id: string }) => setTarget(refFrom(id)) }}
+        />
+
+        {focus && (
+          <Fui
+            of={UnitFrame}
+            className={styles.focus}
+            options={{
+              kind: focus.ref.side === 'enemy' ? ('target' as const) : ('player' as const),
+              name: focus.name,
+              portrait: stillPath(artFor(focus.defKey)),
+              level: focus.level,
+              health: focus.hp,
+              healthMax: focus.maxHp,
+              ...(focus.isBoss ? { elite: 'Boss' } : {}),
+            }}
+          />
         )}
 
-        {error && <span className={styles.error}>{error}</span>}
+        <div className={styles.bottom}>
+          {watched ? (
+            <span className={styles.hint}>The fight is over.</span>
+          ) : playing ? (
+            // Two different waits wear the same spinner otherwise. Before the server
+            // answers there is genuinely nothing to see; after it has, the fight on screen
+            // is a recording, and the player who would rather not sit through it deserves
+            // to be told where the button is.
+            <span className={styles.hint}>
+              {settled ? 'Playing out — Skip to jump to the end.' : 'Resolving…'}
+            </span>
+          ) : awaitingInput && actingUnit ? (
+            <>
+              <Fui
+                of={UnitFrame}
+                className={styles.actor}
+                options={{
+                  kind: 'player' as const,
+                  name: actingUnit.name,
+                  portrait: stillPath(artFor(actingUnit.defKey)),
+                  level: actingUnit.level,
+                  health: actingUnit.hp,
+                  healthMax: actingUnit.maxHp,
+                }}
+              />
+              {/* `bindKeys` is off: the dock already owns 1-9 for navigation, and a number
+                  key that fires a skill on one screen and moves you off it on another is
+                  worse than no shortcut at all. */}
+              <Fui
+                of={ActionBar}
+                className={styles.skills}
+                options={{ actions: slots, bindKeys: false, slotSize: 'lg' }}
+                on={{
+                  'action:trigger': ({ index }: { index: number }) => {
+                    const skill = skills[index];
+                    if (!skill || busy) return;
+                    void act({ skill: skill.key, ...(target ? { target } : {}) }).then(() =>
+                      setTarget(null),
+                    );
+                  },
+                }}
+              />
+            </>
+          ) : (
+            <span className={styles.hint}>Waiting for the server…</span>
+          )}
+
+          {error && <span className={styles.error}>{error}</span>}
+        </div>
       </div>
 
       {watched && <Results onLeave={leave} />}
     </div>
   );
+}
+
+/**
+ * A stable string id for a unit, and the way back.
+ *
+ * The library's list widgets key their rows by string id and hand that id back on a click;
+ * the engine identifies a unit by `{side, slot}`. Side and slot are the whole of a
+ * `UnitRef`, so the pair round-trips exactly — which matters because the id that comes
+ * back from a party click becomes the *target* of the next skill, and a target the client
+ * guessed wrong at is an action the server would refuse.
+ */
+function unitId(ref: UnitRef): string {
+  return `${ref.side}:${ref.slot}`;
+}
+
+function refFrom(id: string): UnitRef | null {
+  const [side, slot] = id.split(':');
+  if ((side !== 'ally' && side !== 'enemy') || slot === undefined) return null;
+  const index = Number(slot);
+  return Number.isInteger(index) ? { side, slot: index } : null;
+}
+
+function sameRef(a: UnitRef, b: UnitRef): boolean {
+  return a.side === b.side && a.slot === b.slot;
+}
+
+/**
+ * The painted icon a skill is drawn with.
+ *
+ * Skills are content and carry no art field — adding one is a server change, and this
+ * rework does not touch the game. So the icon is derived from the key, deterministically:
+ * the same skill always gets the same icon, different skills on the same champion get
+ * different ones, and a skill added in Admin tomorrow gets one without anybody choosing
+ * it. A real icon per skill is a content job for later; this is the honest stand-in and
+ * it is stable, which is what a player actually needs from a hotbar.
+ */
+const SKILL_ART: readonly string[] = [
+  'fire-flame-lance',
+  'weapon-broadsword',
+  'rune-astral-burst',
+  'blood-sanguine-blade',
+  'earth-stone-blade',
+  'fire-flame-burst',
+  'rune-radiance',
+  'orb-emberstorm',
+];
+
+function skillArt(key: string): string {
+  let hash = 0;
+  for (let i = 0; i < key.length; i += 1) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  return SKILL_ART[hash % SKILL_ART.length] ?? SKILL_ART[0]!;
 }
 
 /**

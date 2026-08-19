@@ -1,169 +1,152 @@
-@use '../../styles/tokens' as *;
+/* The battle screen is a stage with a frame drawn over it.
+
+   Everything that *looks* like something — the wave pips, the turn queue, the party's
+   frames, the enemy plate, the hotbar — is a FantasyUIs component since the design
+   rework. This module places them, and nothing else. */
 
 .screen {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: $space-2;
   height: 100%;
   min-height: 0;
 }
 
-.hud {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $space-3;
+/* A window onto the shared Pixi canvas behind the shell. It has no content of its own:
+   `PixiStage` is mounted once, at the root, and this reserves the space it shows through. */
+.stage {
+  position: absolute;
+  inset: 0;
 }
 
-.wave {
-  color: $parchment;
-  font-size: 0.9rem;
+/* The frame.
+
+   **`pointer-events: none` is load-bearing.** The HUD covers the whole stage, and the
+   stage is where a player clicks an enemy to target it. Every widget below turns pointer
+   events back on for itself; the empty space between them does not, so a click aimed at a
+   sprite reaches the sprite. */
+.hud {
+  position: relative;
+  z-index: $z-content;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: $space-3;
+  height: 100%;
+  min-height: 0;
+  padding: $space-3;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.topLeft {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $space-1;
+}
+
+.turnCount {
+  @include label-text;
+  color: $muted;
 }
 
 .order {
-  display: flex;
-  gap: $space-1;
-  flex: 1;
-  justify-content: center;
-}
-
-.orderPip {
-  min-width: 2.4rem;
-  padding: 2px $space-1;
-  background: $panel-inset;
-  border: 1px solid $edge;
-  color: $muted;
-  font-size: 0.68rem;
-  text-align: center;
-
-  &[data-side='ally'] {
-    border-color: $accent-dim;
-    color: $accent;
-  }
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
 }
 
 .controls {
+  grid-column: 3;
+  grid-row: 1;
   display: flex;
-  gap: $space-1;
-}
-
-.toggle {
-  padding: $space-1 $space-2;
-  background: $panel-inset;
-  border: 1px solid $edge;
-  color: $muted;
-  font: inherit;
-  font-size: 0.75rem;
-  cursor: pointer;
-
-  &[aria-pressed='true'] {
-    border-color: $accent;
-    color: $accent;
-  }
-}
-
-// Deliberately transparent: the fight is drawn on the shared Pixi canvas behind the
-// shell (ARCHITECTURE §4.1 — pixels in Pixi, text and hit targets in the DOM on top).
-// A background here would hide the battle it is supposed to frame.
-.stage {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  border: 1px solid $edge;
-  overflow: hidden;
-}
-
-.bar {
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: $space-2;
-  min-height: 4.5rem;
-  padding: $space-2;
-  background: $panel;
-  border: 1px solid $edge;
+}
+
+/* Down the left, under the wave pips — where every game in this genre puts the party,
+   because it is the thing a player checks between every decision. */
+.party {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: start;
+  width: 210px;
+}
+
+/* Whoever is under consideration, at the top of the middle: an enemy's plate mirrors, so
+   it reads inward toward the fight rather than off the edge of the screen. */
+.focus {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  justify-self: center;
+}
+
+/* The acting champion and their hotbar, along the bottom across the full width. */
+.bottom {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: $space-4;
+  min-height: 96px;
 }
 
 .actor {
-  min-width: 8rem;
-  color: $parchment;
-  font-size: 0.85rem;
-}
-
-.actorMeta {
-  color: $muted;
-  font-size: 0.72rem;
+  flex: none;
+  width: 210px;
 }
 
 .skills {
-  display: flex;
-  gap: $space-2;
-  flex: 1;
-}
-
-.skill {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 7rem;
-  padding: $space-2;
-  background: $panel-inset;
-  border: 1px solid $edge;
-  color: $parchment;
-  font: inherit;
-  font-size: 0.78rem;
-  text-align: left;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    border-color: $accent;
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-.skillMeta {
-  color: $muted;
-  font-size: 0.68rem;
+  flex: none;
 }
 
 .hint {
+  @include label-text;
+  align-self: center;
   color: $muted;
-  font-size: 0.8rem;
 }
 
 .error {
+  align-self: center;
+  font-size: 12px;
   color: $danger;
-  font-size: 0.8rem;
 }
 
-/* The cold open's front door — the only battle that starts from the battle screen. */
+/* ── The cold open ──────────────────────────────────────────────────────────────
+   The one battle in the game with no map behind it, so the empty screen offers it. */
+
 .coldOpen {
+  position: relative;
+  z-index: $z-content;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: $space-3;
-  max-width: 460px;
-  margin: 0 auto $space-5;
+  margin: auto;
+  max-width: 420px;
   padding: $space-5;
-  background: linear-gradient(180deg, $panel-raised 0%, $panel 100%);
-  border: 2px solid $edge-bright;
-  box-shadow: 0 0 0 2px $ground-deep;
   text-align: center;
 }
 
 .coldOpenTitle {
+  @include display-text(20px);
   margin: 0;
-  font-family: $font-display;
-  font-size: 22px;
-  color: $parchment;
+  color: $accent-soft;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .coldOpenNote {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.6;
   color: $muted;
 }

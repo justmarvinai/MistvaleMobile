@@ -1,79 +1,11 @@
-@use '../../styles/tokens' as *;
+/* Where the result sits in the stack, and nothing else.
 
-.body {
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
-  min-width: 22rem;
-}
+   The gold headline, the rays, the stars, the stat table and the reward chips are painted
+   by the FantasyUIs `ResultScreen` since the design rework. What this file owns is the one
+   thing the library cannot know: that Mistvale has an overlay stack (P10b), and a result
+   has to sit at its own depth in it so an unlock celebration opening on top of a victory
+   lands on top rather than behind. */
 
-.outcome {
-  font-size: 1.4rem;
-  color: $parchment;
-}
-
-.victory {
-  color: $accent;
-}
-
-.defeat {
-  color: $danger;
-}
-
-.stars {
-  color: $gold;
-  font-size: 1.6rem;
-  letter-spacing: 4px;
-}
-
-.rewards {
-  display: flex;
-  flex-direction: column;
-  gap: $space-1;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  color: $parchment;
-  font-size: 0.9rem;
-}
-
-.label {
-  color: $muted;
-}
-
-.actions {
-  display: flex;
-  gap: $space-2;
-  justify-content: flex-end;
-}
-
-.note {
-  color: $muted;
-  font-size: 0.82rem;
-  line-height: 1.6;
-}
-
-.bonus {
-  color: $success;
-}
-
-.chest {
-  margin: 0;
-  color: $gold;
-  font-size: 0.82rem;
-  text-align: center;
-}
-
-/** The day's first win, set apart from the fight's own payout — it is a daily reward that
-    happened to land on this battle, not part of what the battle paid. */
-.firstWin {
-  display: flex;
-  flex-direction: column;
-  gap: $space-1;
-  margin-top: $space-3;
-  padding: $space-2 $space-3;
-  background: rgba(212, 175, 96, 0.08);
-  border: 1px solid $gold;
+.result {
+  z-index: calc(#{$z-modal} + var(--mv-layer-depth, 0));
 }

@@ -42,9 +42,12 @@ test.describe('what a player can actually see', () => {
     await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 20_000 });
 
     // The three things that were covered: the wave readout, the controls, the skill bar.
-    await expectOnTop(page, '[class*="wave"]', 'the wave/turn readout');
-    await expectOnTop(page, '[class*="controls"]', 'the battle controls');
-    await expectOnTop(page, '[class*="bar"]', 'the skill bar');
+    // Named by the library's own classes since the design rework, which is the more honest
+    // question anyway — these assert that the widget a player looks at is the topmost
+    // thing at its own centre, not that a wrapper of ours exists.
+    await expectOnTop(page, '.fui-waves', 'the wave pips');
+    await expectOnTop(page, '.fui-battlectl', 'the battle controls');
+    await expectOnTop(page, '.fui-actionbar', 'the skill bar');
 
     // And the canvas the fight is drawn on must be the only one on the page. Two of them
     // is the bug itself: `initStage` binds to the first and the second is dead weight
@@ -86,7 +89,9 @@ test.describe('what a player can actually see', () => {
     // The bar names whoever is up, with their health and their skills — and the player
     // presses one of them, rather than the two buttons that skip the game.
     await expect(page.getByText(/waiting for the server/i)).toHaveCount(0, { timeout: 25_000 });
-    const skills = page.locator('[class*="skills"] button');
+    // An action slot is the library's `Slot`: a `role="button"` cell rather than a
+    // `<button>`, because a hotbar slot also takes a drag and a right-click.
+    const skills = page.locator('.fui-actionbar [role="button"]');
     await expect(skills.first()).toBeVisible({ timeout: 25_000 });
     const before = await page.getByText(/turn \d+/i).innerText();
 

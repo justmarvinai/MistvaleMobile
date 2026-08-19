@@ -154,7 +154,9 @@ async function winFirstStage(page: Page): Promise<void> {
 
   await resolveBattle(page);
 
-  const results = page.getByRole('dialog', { name: /results/i });
+  // The result screen names itself by its outcome since the design rework — a screen
+  // reader saying "Victory" is worth more than one saying "Results".
+  const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn|practice/i });
   await expect(results).toBeVisible({ timeout: 60_000 });
   await results.getByRole('button', { name: /back to the campaign/i }).click();
   // A first win can be a first level, and a first level can open something.

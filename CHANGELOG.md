@@ -5,6 +5,63 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the fight looks like a fight (design rework, D3)
+
+The battle screen carried the whole game's weight and showed a line of text for the wave,
+five word-pips for the turn order, four plain buttons for the controls and a row of
+labelled rectangles for the skills. It is the library's own battle widgets now, arranged
+the way this genre arranges them.
+
+- **The HUD is a frame over the stage.** Wave pips top-left, the turn queue across the top
+  with each unit's portrait and meter, the controls at the right, the party down the left,
+  whoever is under consideration in the middle, and the acting champion with their hotbar
+  along the bottom. `pointer-events: none` on the frame and `auto` on each widget is
+  load-bearing: the HUD covers the whole stage, and the stage is where a player clicks an
+  enemy to target it.
+- **Every frame carries its portrait.** The turn queue, the party, the enemy plate and the
+  acting champion all draw the unit's own sprite still — the same art the fight itself is
+  drawn with, so the frame and the figure on the field are recognisably the same creature.
+- **The turn queue does not animate.** The library will fill meters on its own at a rate
+  set by each unit's speed; that is off, because the server moves turn meters and a queue
+  filling by itself would be the client guessing at the fight.
+- **The results screen is `ResultScreen`** — the gold headline with its rays, the three
+  stars, the ornament, the right-aligned stat table and the reward chips. All five outcomes
+  read through it: a victory with its stars and its stage, a defeat, a withdrawal that says
+  the energy stays spent, a practice run that pays nothing on purpose, and an Arena result
+  that pays in rating and medals and pays on a loss too. It is no longer a `Modal` but it
+  joins the same overlay stack (P10b), so an unlock celebration still opens correctly on
+  top of it.
+- **A reward key knows what it looks like.** `ui/Rewards/art.ts` maps a payout key to a
+  painted icon — the wallet keys by name, everything else by family prefix, with a real
+  fallback rather than a blank. An operator adding `sigil_umbral` in Admin tomorrow gets an
+  icon without anybody touching the client, which is what content-as-data has to mean.
+- **The stage says where it was.** "Veilwood Fringe 1-1" under the headline, built from the
+  chapter and the stage's place in it, read off the content bundle the client already
+  holds — no server change, because this rework does not touch the game.
+
+Three defects fixed on the way, all three found by the browser suite asking what a player
+can actually reach:
+
+- **The tutorial's parchment swallowed the victory screen's only button.** A `z-index`
+  only competes inside its own stacking context, and the battle screen is one — so a
+  result rendered in place sat underneath the tutorial overlay however high its z-index
+  went. It is portalled to the body now, like every other overlay in the game.
+- **The result stopped being a dialog.** `ResultScreen` is a plain `<div>`; a full-screen
+  overlay that covers the game and holds the only way forward has to announce itself as a
+  dialog, take focus, keep Tab inside itself and answer Escape. `Modal` owned all of that
+  privately, which was right while it was the only such overlay; it is `ui/Modal/dialog.ts`
+  now and both use it. The result names itself by its outcome, so a screen reader says
+  "Victory" rather than "Results".
+- **A ref was written during render** — twice, caught by lint. Both moved into layout
+  effects.
+
+And the third instance of one bug, now fixed at the root: **every victory in the game showed
+no stars at all.** `ResultScreen.css` draws its three clear-stars from a Stone & Vine file,
+and the vendor step only followed the *theme's* art references — so the file was never
+copied and an unset `background-image` is not a broken image, it is nothing. `pnpm
+fui:vendor` now scans each vendored component's own stylesheet as well as the theme. Two
+more files, and the class of bug is closed rather than patched a third time.
+
 ### Changed — the shell is a game's shell (design rework, D2)
 
 The top bar, the dock and the home screen are the three things a player sees on every

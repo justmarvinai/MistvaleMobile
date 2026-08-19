@@ -107,7 +107,7 @@ test.describe('the management loop', () => {
 
       await resolveBattle(page);
 
-      const results = page.getByRole('dialog', { name: /results/i });
+      const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn/i });
       await expect(results).toBeVisible({ timeout: 60_000 });
       await results.getByRole('button', { name: /back to the campaign/i }).click();
       // Farming levels an account; the celebration is part of what that looks like.

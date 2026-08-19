@@ -63,14 +63,16 @@ test.describe('the campaign loop', () => {
 
     // ── The fight ─────────────────────────────────────────────────────────
     await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText(/wave 1/i)).toBeVisible();
+    // The wave readout is the library's pips since the design rework — a lit pip and
+    // "1 / 3" rather than the sentence "Wave 1 · Turn 0".
+    await expect(page.locator('.fui-waves')).toContainText(/1\s*\/\s*\d/);
 
     // Auto hands the fight to the server; Skip jumps the playback to the end of what came
     // back. The results modal waits for the *playback*, not the response — so both presses
     // are needed, and this spec is about the loop rather than the animation.
     await resolveBattle(page);
 
-    const results = page.getByRole('dialog', { name: /results/i });
+    const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn/i });
     await expect(results).toBeVisible({ timeout: 60_000 });
     await expect(results.getByText(/victory|defeat|withdrawn|the mist closed in/i)).toBeVisible();
 

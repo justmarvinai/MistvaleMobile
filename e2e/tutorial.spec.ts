@@ -94,8 +94,10 @@ test.describe('the tutorial', () => {
     // Every battle in the game gave its outcome away before it was watched, and the cold
     // open's tuned near-death beat was never once seen. So: the fight must be visibly
     // under way with the outcome still hidden.
-    const results = page.getByRole('dialog', { name: 'Results' });
-    await expect(page.getByText(/^Wave \d+ · Turn [1-9]/)).toBeVisible({ timeout: 30_000 });
+    const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn/i });
+    // The wave and the turn are separate readouts since the design rework — pips for the
+    // one, a count for the other — so the turn is asked for on its own.
+    await expect(page.getByText(/^Turn [1-9]/)).toBeVisible({ timeout: 30_000 });
     await expect(results).toBeHidden();
 
     // And Skip is the deliberate way past the rest of it — the battle's own Skip, not the
@@ -106,7 +108,7 @@ test.describe('the tutorial', () => {
 
     // The results sit *over* the parchment — the overlay is deliberately below modals so
     // the starter choice can land on top of it — so they are read and dismissed first.
-    await results.getByRole('button', { name: /^close$/i }).click();
+    await results.getByRole('button', { name: /back to the campaign/i }).click();
     await expect(results).toBeHidden({ timeout: 20_000 });
 
     // The step it was waiting on is finished, so Continue lights up.
@@ -149,9 +151,9 @@ test.describe('the tutorial', () => {
     // Step 1: the cold open. It pays nothing — the account is still level 1 after it.
     await page.getByRole('button', { name: /meet them on the road/i }).click();
     await resolveBattle(page);
-    const results = page.getByRole('dialog', { name: 'Results' });
+    const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn/i });
     await expect(results).toBeVisible({ timeout: 60_000 });
-    await results.getByRole('button', { name: /^close$/i }).click();
+    await results.getByRole('button', { name: /back to the campaign/i }).click();
     await advance(page);
 
     // Step 2: the Wardenmaster's greeting, and the first XP of the game.

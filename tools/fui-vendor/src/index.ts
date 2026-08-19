@@ -157,7 +157,10 @@ async function main(): Promise<void> {
       artWanted.add(`${pack}/${name}`);
     }
   }
-  for (const path of themeArtReferences(from)) artWanted.add(path);
+  // `wanted` is the resolved source list, so the component stylesheets it names are
+  // exactly the ones this build ships — a component dropped from the list stops dragging
+  // its art along on the next run.
+  for (const path of themeArtReferences(from, [...wanted])) artWanted.add(path);
 
   let artFiles = 0;
   let artBytes = 0;
@@ -276,11 +279,17 @@ await main();
 /**
  * Every `/fui/…` file the vendored stylesheets reference.
  *
- * `base.css` and the theme name art through `var(--fui-img-*)`; `assets.css` is the one
- * place those slots become URLs. Resolving the two against each other is how a theme's
- * cross-pack reference is discovered rather than remembered.
+ * `base.css`, the theme and **each component's own stylesheet** name art through
+ * `var(--fui-img-*)`; `assets.css` is the one place those slots become URLs. Resolving
+ * them against each other is how a cross-pack reference is discovered rather than
+ * remembered.
+ *
+ * Components are scanned as well as the theme because they reach across packs too, and
+ * one layer deeper: `ResultScreen.css` draws its three clear-stars from a Stone & Vine
+ * file, and with that file absent every victory in the game showed no stars at all —
+ * not broken ones, none, because an unset `background-image` is simply nothing.
  */
-function themeArtReferences(from: string): string[] {
+function themeArtReferences(from: string, components: readonly string[]): string[] {
   const styles = join(from, 'src/lib/styles');
   const declared = new Map<string, string>();
   for (const match of readFileSync(join(styles, 'assets.css'), 'utf8').matchAll(
@@ -289,11 +298,15 @@ function themeArtReferences(from: string): string[] {
     const [, slot, url] = match;
     if (slot && url) declared.set(slot, url);
   }
+  const sheets = [
+    join(styles, 'base.css'),
+    join(styles, 'theme-dark-ember.css'),
+    ...components.filter((file) => file.endsWith('.css')).map((file) => join(from, file)),
+  ];
   const referenced = new Set<string>();
-  for (const file of ['base.css', 'theme-dark-ember.css']) {
-    for (const match of readFileSync(join(styles, file), 'utf8').matchAll(
-      /var\((--fui-img-[\w-]+)\)/g,
-    )) {
+  for (const file of sheets) {
+    if (!existsSync(file)) continue;
+    for (const match of readFileSync(file, 'utf8').matchAll(/var\((--fui-img-[\w-]+)/g)) {
       const url = match[1] === undefined ? undefined : declared.get(match[1]);
       if (url) referenced.add(url);
     }

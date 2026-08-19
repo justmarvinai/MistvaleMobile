@@ -71,7 +71,7 @@ test.describe('the practice sandbox', () => {
 
       await resolveBattle(page);
 
-      const results = page.getByRole('dialog', { name: /^results$/i });
+      const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn/i });
       await expect(results).toBeVisible({ timeout: 60_000 });
       won = await results.getByText(/victory/i).isVisible();
       await results.getByRole('button', { name: /back to the campaign/i }).click();
