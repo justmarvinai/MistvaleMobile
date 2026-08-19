@@ -138,9 +138,11 @@ test.describe('the management loop', () => {
     await expect(page.getByRole('button', { name: /^forge$/i }).first()).toBeVisible({
       timeout: 15_000,
     });
-    // Scoped to the sidebar: "In the vault" is also the name of the list's default filter,
-    // and the panel is where the count and the way to buy more of it live.
-    await expect(page.locator('aside').getByText(/in the vault/i)).toBeVisible();
+    // The meter calls them *loose* relics, which is the rule rather than the place: a relic
+    // on a champion is not taking a slot, and that is what makes equipping a way to make
+    // room. Scoped to the sidebar either way, since the list's default filter is "In the
+    // vault" and would match a laxer name here.
+    await expect(page.locator('aside').getByText(/loose relics/i)).toBeVisible();
     await expect(page.locator('aside').getByText(/^\d+ \/ \d+$/)).toBeVisible();
 
     // ── Equip it from the champion screen ─────────────────────────────────
