@@ -69,7 +69,20 @@ export function ChampionCard({
         ...(champion.locked ? { locked: true } : {}),
         ...(selectable ? { selectable: true, selected: Boolean(selected) } : {}),
       }}
-      on={{ 'champion:click': () => onOpen(), 'champion:select': () => onOpen() }}
+      // **One event, not both.** A selectable card emits `champion:select` *and*
+      // `champion:click` for a single press, so wiring both ran the handler twice — which
+      // in the food picker meant every card selected itself and immediately deselected
+      // itself, the count stayed at "0 selected", and the Feed button never enabled. It
+      // held up the tutorial at the step that asks a player to feed a champion.
+      on={selectable ? { 'champion:select': () => onOpen() } : { 'champion:click': () => onOpen() }}
+      // The library toggles its own selection ring on click, before React has decided
+      // anything. `setSelected` puts it back where the state says — which matters when the
+      // press is *refused*, as it is once a rank-up has its full count of food.
+      apply={(card, next) => {
+        card.setSelected(Boolean(next.selected));
+        card.setLevel(champion.level, champion.levelCap);
+        card.setPower(champion.power);
+      }}
       attrs={{
         title: def?.title || def?.name || champion.championKey,
         // The card's own text is fragments — a name, "1/10", a power figure — and read in

@@ -1,10 +1,16 @@
 @use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
 
+/* The *modal* owns the width — see the `width` prop at the call site. Setting it here as
+   well is what put the card grid out through the painted frame: the dialog stayed at its
+   480px default while its content insisted on 704, so the cards drew over the ornament and
+   the picker grew a horizontal scrollbar. Same mistake the champion sheet made in D5. */
 .body {
   display: flex;
   flex-direction: column;
   gap: $space-3;
-  width: min(44rem, 88vw);
+  width: 100%;
+  min-width: 0;
 }
 
 .rule {
@@ -16,11 +22,18 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  /* 150px is the painted card's own width. At 8rem the track was 22px narrower than the
+     thing in it, which is what made every row spill sideways. */
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: $space-2;
-  max-height: 44vh;
+  align-content: start;
+  /* Enough for two full rows of the painted card plus the top of a third, which is the
+     signal that there is more below. */
+  max-height: min(52vh, 30rem);
   overflow-y: auto;
+  overflow-x: hidden;
   padding-right: $space-2;
+  @include pixel-scrollbar;
 }
 
 .actions {

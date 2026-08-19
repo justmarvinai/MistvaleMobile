@@ -20,7 +20,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  /* 150px is the painted card's own width; a narrower track overflows it. */
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: $space-2;
   align-content: start;
   max-height: 100%;

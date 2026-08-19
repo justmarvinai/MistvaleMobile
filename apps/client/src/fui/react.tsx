@@ -187,6 +187,7 @@ export function Fui<T extends Instance, O extends FuiOptionsOf>({
   of,
   options,
   on,
+  apply,
   className,
   attrs,
   ...rest
@@ -200,11 +201,20 @@ export function Fui<T extends Instance, O extends FuiOptionsOf>({
    */
   options: NoInfer<NonNullable<O>>;
   on?: FuiHandlers;
+  /**
+   * Pushes changed props into the live component through its own setters.
+   *
+   * Without one, options are construction-time only — which is right for a variant and
+   * wrong for a value, and is why several call sites remount on a key digest instead.
+   * Where the component has a setter for what moved, use this: it keeps the element, its
+   * focus and its animations.
+   */
+  apply?: FuiApply<T, NoInfer<O>>;
   className?: string;
   /** Written to the component's own element — see `useFuiAttrs`. */
   attrs?: FuiAttrs;
 } & Omit<JSX.IntrinsicElements['div'], 'className' | 'children'>): JSX.Element {
-  const { ref, instance } = useFui(of, withClass(options, className), on);
+  const { ref, instance } = useFui(of, withClass(options, className), on, apply);
   useFuiAttrs(instance?.el, attrs);
   return <div {...rest} ref={ref} style={CONTENTS} />;
 }
@@ -322,6 +332,7 @@ export function FuiSlotted<T extends Instance, O extends FuiOptionsOf>({
   of,
   options,
   on,
+  apply,
   slot,
   className,
   attrs,
@@ -332,6 +343,8 @@ export function FuiSlotted<T extends Instance, O extends FuiOptionsOf>({
   /** See the note on `Fui` — the component decides `O`, never the literal. */
   options: NoInfer<NonNullable<O>>;
   on?: FuiHandlers;
+  /** See `Fui` — pushes changed props in through the component's own setters. */
+  apply?: FuiApply<T, NoInfer<O>>;
   /**
    * CSS selector for the element inside the component that receives the children.
    * Omit to render them into the component's own root — which is what a Button wants,
@@ -343,7 +356,7 @@ export function FuiSlotted<T extends Instance, O extends FuiOptionsOf>({
   attrs?: FuiAttrs;
   children?: ReactNode;
 } & Omit<JSX.IntrinsicElements['div'], 'className' | 'children'>): JSX.Element {
-  const { ref, instance } = useFui(of, withClass(options, className), on);
+  const { ref, instance } = useFui(of, withClass(options, className), on, apply);
   useFuiAttrs(instance?.el, attrs);
   // Null until the component is constructed, which is one render. Rendering the children
   // into nothing for that render is correct rather than a flash: the chrome is already on

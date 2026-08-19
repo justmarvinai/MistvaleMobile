@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — feeding a champion
+
+Reported from the owner's box: the food picker could not select anything. Every card left
+the count at "0 selected", the Feed button never enabled, and the tutorial stopped dead at
+step 11 of 15 — the step that asks a player to level a champion three times, which is the
+one thing feeding is for. Two separate defects, bisected against a cold server.
+
+- **One press was counted twice.** The library's `ChampionCard` emits `champion:select`
+  *and* `champion:click` for a single click on a selectable card, and the wrapper was wired
+  to both — so every card selected itself and immediately deselected itself. It now listens
+  to whichever event matches the mode it is in.
+- **The picker did not fit inside its own frame.** The painted card is a fixed 150px, and
+  the grid's tracks were 128px; the picker's body also set its own 44rem width inside a
+  dialog capped at 480. Every row drew out through the ornament, the dialog grew a
+  horizontal scrollbar, and the roster grid behind it had the same 6px-per-column overflow.
+  Tracks are sized from the card now, and the modal owns its width — the same mistake the
+  champion sheet made in D5, in the same shape.
+
+Two things came out of the fix and are worth having on their own. `Fui` and `FuiSlotted`
+now accept an **`apply`**, which `useFui` always had and neither element wrapper exposed —
+so a component with real setters can be updated in place instead of remounted on a key
+digest. The champion card uses it to put its selection ring back where the state says,
+which matters when a press is *refused* — the rank-up picker takes exactly N champions and
+the library had already drawn the ring before React could decline.
+
+And **`e2e/feeding.spec.ts`**, because none of the sixty-four browser tests had ever opened
+this picker. It fails on the old wiring and passes on the new one, and it checks the grid
+stays inside its dialog while it is there.
+
 ### Changed — the world is a world (design rework, D6)
 
 The campaign was an accordion of twelve fold-out rows. The Depths were a grid of bordered

@@ -5,6 +5,10 @@
    the design rework. What this module positions is the pair of things Mistvale's own card
    carried and the library has no notion of. */
 
+/* The painted card is a *fixed* 150px — everything inside it, including its font sizes,
+   is `calc(var(--fui-champ-w) * n)`, so it cannot be stretched to a column the way a
+   relic card can. The grids that hold it are sized from this figure instead, and it is
+   named here so there is one number rather than four guesses. */
 .card {
   position: relative;
 }

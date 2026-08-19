@@ -68,6 +68,7 @@ export function FoodPicker({
       open
       title={mode === 'level' ? 'Feed for experience' : `Rank up to ★${champion.champion.rank + 1}`}
       onClose={onClose}
+      width={720}
     >
       <div className={styles.body}>
         <p className={styles.rule}>
