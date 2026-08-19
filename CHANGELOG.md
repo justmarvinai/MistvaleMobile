@@ -5,6 +5,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the ladder looks like a ladder (design rework, D7)
+
+The Arena, the Hall of Valor and the public profile card, dressed. The rung a player holds
+was two words of text; the opponents were bordered boxes with their teams written out as a
+list of names; the ladder was a hand-built `<ol>`; and a warden's four chosen champions —
+the whole point of a profile card — were three lines of text each.
+
+- **A rung is an emblem.** `TierBadge` for the reader's own standing, for each opponent's,
+  and on a profile card. `ui/arenaTier` is the split that makes it possible: Mistvale's ten
+  rungs are a metal and a numeral (`bronze_2`), which is exactly what the badge is built
+  from — done once so the three places that draw a rung can never disagree.
+- **An opponent is four faces.** What a player is deciding is whether they can beat this
+  team, and five cards of written names side by side is the one shape that cannot be
+  compared at a glance. Portraits now, with each champion's level and star rank under them.
+- **The ladder is the library's `Leaderboard`** — the rank column, gold/silver/bronze on the
+  top three, and the highlight on your own row all come with it. Two tables rather than one,
+  because Mistvale's board is the summit *and* your neighbourhood, and merging them would
+  put rank 41 between rank 25 and rank 39 with nothing to say why.
+- **The Hall's four elements are a painted strip**, each wearing the same affinity glyph it
+  wears on a champion card and in a fight — which is what registering Mistvale's elements
+  into the library's own table in D4 was for.
+- **A showcase champion is a champion card.** The four a warden chose to be known by are
+  the same painted cards the roster draws, read-only.
+
+The defect the owner spotted is fixed with them: **the rating stake overlapped the Challenge
+button** on every opponent card. The footer was a two-item row with no minimum on either
+side, so the painted button — a 9-sliced asset with a width of its own — pushed the
+"+19 / −13" underneath itself. The stake is a stacked column now and the card is wide enough
+for the button it contains; the same narrowness had been clipping the fourth champion off
+every team.
+
 ### Fixed — feeding a champion
 
 Reported from the owner's box: the food picker could not select anything. Every card left

@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ARENA_TIER_LABELS, type ArenaOffer, type ArenaTeamMember } from '@mistvale/shared';
+import { TierBadge } from '@/fui/components/TierBadge.ts';
+import { Fui } from '@/fui/react';
+import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { useArenaStore } from '../../state/arenaStore';
@@ -8,6 +11,9 @@ import { useContentStore } from '../../state/contentStore';
 import { useNavStore } from '../../state/navStore';
 import { useBattleStore } from '../../state/battleStore';
 import { toast } from '../../state/uiStore';
+import { arenaTierEmblem } from '../../ui/arenaTier';
+import { championArt } from '../../ui/championArt';
+import { Portrait } from '../../ui/Portrait/Portrait';
 import { TeamPicker } from './TeamPicker';
 import { Leaderboard } from './Leaderboard';
 import { HallOfValor } from './HallOfValor';
@@ -50,6 +56,11 @@ export function ArenaScreen(): JSX.Element {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const defOf = useMemo(() => {
+    const defs = new Map((bundle?.champions ?? []).map((entry) => [entry.key, entry]));
+    return (key: string) => defs.get(key);
+  }, [bundle]);
 
   const championName = useMemo(() => {
     const names = new Map((bundle?.champions ?? []).map((entry) => [entry.key, entry.name]));
@@ -99,8 +110,19 @@ export function ArenaScreen(): JSX.Element {
       <div className={styles.main}>
         <section className={styles.standing}>
           <div className={styles.rank}>
-            <span className={styles.rankTier}>{ARENA_TIER_LABELS[arena.tier]}</span>
-            <span className={styles.rankRating}>{arena.rating}</span>
+            {/* The rung a player holds is the one thing on this screen they will describe
+                out loud, and every ladder game in the genre draws it as a metal emblem
+                rather than as two words. `arenaTierEmblem` is the split: `bronze_2` is a
+                metal and a numeral, which is exactly what the badge is built from. */}
+            <Fui
+              of={TierBadge}
+              className={styles.badge}
+              options={{
+                ...arenaTierEmblem(arena.tier),
+                points: arena.rating,
+                size: 84,
+              }}
+            />
             <span className={styles.rankNote}>
               Best this week {arena.weeklyHigh} · {arena.medalsPerWin} medals a win
             </span>
@@ -137,44 +159,66 @@ export function ArenaScreen(): JSX.Element {
         </header>
 
         {arena.offers.length === 0 ? (
-          <p className={styles.empty}>
-            Nobody is standing at your rating just now. Roll a new list, or come back after the
-            ladder has moved.
-          </p>
+          <Empty
+            size="sm"
+            glyph="glyph-sword-clash"
+            title="Nobody is standing at your rating"
+            message="Roll a new list, or come back after the ladder has moved."
+          />
         ) : (
           <div className={styles.offers}>
             {arena.offers.map((offer) => (
               <article key={offer.offerId} className={styles.offer}>
                 <header className={styles.offerHead}>
-                  <button
-                    type="button"
-                    className={styles.offerName}
-                    onClick={() => void showProfile(offer.playerId)}
-                  >
-                    {offer.profileName}
-                  </button>
-                  <span className={styles.offerTier}>{ARENA_TIER_LABELS[offer.tier]}</span>
+                  <Fui
+                    of={TierBadge}
+                    className={styles.offerBadge}
+                    options={{ ...arenaTierEmblem(offer.tier), size: 40, compact: true }}
+                    attrs={{ title: ARENA_TIER_LABELS[offer.tier] }}
+                  />
+                  <div className={styles.offerWho}>
+                    <button
+                      type="button"
+                      className={styles.offerName}
+                      onClick={() => void showProfile(offer.playerId)}
+                    >
+                      {offer.profileName}
+                    </button>
+                    <span className={styles.offerMeta}>
+                      Lv {offer.level} · {offer.rating} · {offer.power.toLocaleString()} power
+                    </span>
+                  </div>
                 </header>
 
-                <p className={styles.offerMeta}>
-                  Level {offer.level} · {offer.rating} rating · power {offer.power.toLocaleString()}
-                </p>
-
+                {/* Four faces rather than four names. What a player is deciding is whether
+                    they can beat this team, and a wall of text in five cards side by side
+                    is the one shape that cannot be compared at a glance. */}
                 <ul className={styles.team}>
-                  {offer.team.map((member, index) => (
-                    <li key={`${offer.offerId}-${index}`} className={styles.member}>
-                      <span className={styles.memberName}>{championName(member.championKey)}</span>
-                      <span className={styles.memberMeta}>
-                        Lv {member.level} · ★{member.rank}
-                      </span>
-                    </li>
-                  ))}
+                  {offer.team.map((member, index) => {
+                    const def = defOf(member.championKey);
+                    const art = championArt(def, bundle?.assets);
+                    return (
+                      <li key={`${offer.offerId}-${index}`} className={styles.member}>
+                        <Portrait
+                          src={art.portrait ?? null}
+                          name={championName(member.championKey)}
+                          size={44}
+                        />
+                        <span className={styles.memberMeta}>
+                          {member.level}
+                          <span className={styles.memberRank}>★{member.rank}</span>
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
 
                 <footer className={styles.offerFoot}>
+                  {/* The stake and the button were overlapping: the footer was a two-item
+                      row with no minimum on either, so a wide button pushed the numbers
+                      underneath itself. They are stacked columns now. */}
                   <span className={styles.stakes}>
                     <span className={styles.gain}>+{offer.ratingGain}</span>
-                    {' / '}
                     <span className={styles.loss}>{offer.ratingLoss}</span>
                   </span>
                   <Button

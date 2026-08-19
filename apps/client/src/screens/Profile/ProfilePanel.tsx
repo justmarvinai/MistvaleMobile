@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState, type JSX } from 'react';
 import { ARENA_TIER_LABELS, type PublicProfile, type ShowcaseChampion } from '@mistvale/shared';
+import { ChampionCard as FuiChampionCard } from '@/fui/components/ChampionCard.ts';
+import { TierBadge } from '@/fui/components/TierBadge.ts';
+import { Fui } from '@/fui/react';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useProfileStore } from '../../state/profileStore';
@@ -8,6 +11,8 @@ import { useRosterStore } from '../../state/rosterStore';
 import { useContentStore } from '../../state/contentStore';
 import { toast } from '../../state/uiStore';
 import styles from './ProfilePanel.module.scss';
+import { arenaTierEmblem } from '../../ui/arenaTier';
+import { championArt } from '../../ui/championArt';
 
 /** How many champions a card shows. Mirrors `SHOWCASE_MAX` on the server. */
 const SHOWCASE_MAX = 4;
@@ -125,19 +130,29 @@ function Card({ card }: { card: PublicProfile }): JSX.Element {
           {card.title && <span className={styles.title}>{card.title}</span>}
           <span className={styles.joined}>Warden since {joined}</span>
         </div>
+
+        {/* The rung, as an emblem rather than as a line in the facts list. It is the one
+            fact on this card that ranks its owner against everybody else, and the same
+            badge the Arena draws for the reader's own standing. */}
+        {card.arena ? (
+          <Fui
+            of={TierBadge}
+            className={styles.tier}
+            options={{
+              ...arenaTierEmblem(card.arena.tier),
+              points: card.arena.rating,
+              ...(card.arena.position ? { rank: card.arena.position } : {}),
+              size: 72,
+            }}
+            attrs={{ title: ARENA_TIER_LABELS[card.arena.tier] }}
+          />
+        ) : (
+          <span className={styles.unblooded}>Unblooded</span>
+        )}
       </div>
 
       <dl className={styles.facts}>
         <Fact label="Level" value={String(card.level)} />
-        <Fact
-          label="Arena"
-          value={
-            card.arena
-              ? `${ARENA_TIER_LABELS[card.arena.tier]} · ${card.arena.rating.toLocaleString()}`
-              : 'Unblooded'
-          }
-          note={card.arena?.position ? `#${card.arena.position}` : undefined}
-        />
         <Fact label="Champions" value={`${card.championsOwned} / ${card.championsTotal}`} />
         <Fact label="Furthest" value={card.furthestStage ?? '—'} note={`${card.stars}★`} />
       </dl>
@@ -176,15 +191,47 @@ function Fact({
   );
 }
 
+/**
+ * One of the four a warden chose to be known by.
+ *
+ * The same painted card the roster draws, which is the point of the showcase: a player
+ * picks four champions to *show*, and showing them as three lines of text was the one
+ * shape that could not do it. Read-only here — this is somebody else's card.
+ */
 function ShowcaseTile({ champion }: { champion: ShowcaseChampion }): JSX.Element {
+  const bundle = useContentStore((state) => state.bundle);
+  const def = bundle?.champions.find((entry) => entry.key === champion.championKey);
+  const art = championArt(def, bundle?.assets);
+
   return (
-    <li className={`${styles.tile} ${styles[champion.rarity] ?? ''}`}>
-      <span className={styles.tileName}>{champion.name}</span>
-      <span className={styles.tileMeta}>
-        {'★'.repeat(champion.rank)} · Lv {champion.level}
-        {champion.ascension > 0 && ` · A${champion.ascension}`}
-      </span>
-      <span className={styles.tilePower}>{champion.power.toLocaleString()}</span>
+    <li className={styles.tile}>
+      <Fui
+        of={FuiChampionCard}
+        options={{
+          name: champion.name,
+          ...art,
+          rarity: champion.rarity,
+          stars: champion.rank,
+          maxStars: 6,
+          ...(champion.ascension > 0 ? { awakened: champion.ascension } : {}),
+          level: champion.level,
+          affinity: champion.element,
+          power: champion.power,
+          size: 118,
+        }}
+        attrs={{
+          'aria-label': [
+            champion.name,
+            champion.rarity,
+            `${champion.rank} star`,
+            `Lv ${champion.level}`,
+            champion.ascension > 0 ? `ascension ${champion.ascension}` : '',
+            `power ${champion.power.toLocaleString()}`,
+          ]
+            .filter(Boolean)
+            .join(', '),
+        }}
+      />
     </li>
   );
 }

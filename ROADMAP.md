@@ -188,7 +188,7 @@ table deliberately did not move.
 | **D4** | The collection — champion cards, skills, progress | ✅ |
 | **D5** | Relics and the economy — artifact cards, paperdoll, forge, Bazaar | ✅ |
 | **D6** | World and progression — campaign map, Depths, quests, calendar, mail | ✅ |
-| **D7** | Competition — Arena, Hall of Valor, the profile card | |
+| **D7** | Competition — Arena, Hall of Valor, the profile card | ✅ |
 | **D8** | Mistvale's own components, in the library's language | |
 | **D9** | The screenshot pass — every screen, extended `visible.spec.ts`, §9 budgets re-measured | |
 

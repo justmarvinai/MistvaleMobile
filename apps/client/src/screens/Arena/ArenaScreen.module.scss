@@ -33,21 +33,9 @@
 
 .rank {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.rankTier {
-  color: $gold;
-  font-family: $font-display;
-  font-size: 1.25rem;
-}
-
-.rankRating {
-  color: $parchment;
-  font-family: $font-mono;
-  font-size: 1.6rem;
-  line-height: 1;
+  align-items: center;
+  gap: $space-3;
+  min-width: 0;
 }
 
 .rankNote {
@@ -112,66 +100,62 @@
 
 .offers {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  /* Wide enough for four faces in a row and for the painted Challenge button, which is a
+     9-sliced asset with a minimum of its own — at 16rem it hung out over the next card. */
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
   gap: $space-2;
 }
 
+/* The card grows to its content. It used to be a fixed run of rows, which clipped the
+   fourth champion of every team — the one a player most wanted to see. */
 .offer {
   display: flex;
   flex-direction: column;
   gap: $space-2;
-  padding: $space-2;
-  background: $panel;
+  padding: $space-3;
+  background: $panel-inset;
   border: 1px solid $edge;
-
-  &:hover {
-    border-color: $edge-bright;
-  }
 }
 
 .offerHead {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: $space-2;
+  min-width: 0;
+}
+
+.offerWho {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
 }
 
 .offerName {
   padding: 0;
   background: none;
-  border: 0;
+  border: none;
+  color: $parchment;
   font: inherit;
+  font-size: 0.95rem;
   text-align: left;
   cursor: pointer;
 
   &:hover {
-    color: $gold;
+    color: $accent;
   }
-
-  color: $parchment;
-  font-family: $font-display;
-  font-size: 0.95rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.offerTier {
-  color: $gold;
-  font-size: 0.72rem;
-  white-space: nowrap;
 }
 
 .offerMeta {
-  margin: 0;
   color: $muted;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
+/* Four faces in a row, and they fit: a fifth would wrap rather than overflow. */
 .team {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-wrap: wrap;
+  gap: $space-2;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -179,41 +163,40 @@
 
 .member {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: $space-2;
-  padding: 2px $space-1;
-  background: $panel-inset;
-  font-size: 0.76rem;
-}
-
-.memberName {
-  color: $parchment-dim;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
 .memberMeta {
-  color: $muted-deep;
+  display: flex;
+  gap: 4px;
+  color: $muted;
   font-family: $font-mono;
   font-size: 0.7rem;
-  white-space: nowrap;
 }
 
+/* Two columns with a real gap, and the stake stacked rather than strung out on one line.
+   As a single row with no minimum on either side, a wide Challenge button pushed the
+   "+19 / −13" underneath itself and the two drew on top of each other. */
 .offerFoot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: $space-2;
-  border-top: 1px solid $edge;
+  min-width: 0;
+  margin-top: auto;
   padding-top: $space-2;
+  border-top: 1px solid $edge;
 }
 
 .stakes {
-  color: $muted-deep;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  line-height: 1.25;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
 }
 
 .gain {
@@ -262,4 +245,12 @@
   margin: 0;
   color: $danger;
   font-size: 0.8rem;
+}
+
+.badge {
+  flex: none;
+}
+
+.offerBadge {
+  flex: none;
 }

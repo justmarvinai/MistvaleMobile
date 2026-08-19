@@ -35,3 +35,16 @@ export function registerAffinities(): void {
 export function affinityOf(element: string): AffinityDef | undefined {
   return MISTVALE_AFFINITIES[element as Element];
 }
+
+/**
+ * Each element's glyph, on its own.
+ *
+ * The affinity table is the library's and takes a whole `AffinityDef`; a segmented strip or
+ * a filter chip wants only the mark. Derived from the same record rather than written twice,
+ * so the Hall's element tabs and a champion card's badge can never disagree.
+ */
+export const AFFINITY_GLYPH: Readonly<Record<Element, string>> = Object.freeze(
+  Object.fromEntries(
+    ELEMENTS.map((element) => [element, MISTVALE_AFFINITIES[element].glyph]),
+  ) as Record<Element, string>,
+);

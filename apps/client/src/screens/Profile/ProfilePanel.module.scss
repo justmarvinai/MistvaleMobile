@@ -127,8 +127,15 @@
   list-style: none;
 }
 
+/* Four painted cards. They wrap rather than shrink — the card is a fixed width and a
+   narrower track would push it out through the dialog, which is what the food picker did. */
 .showcase {
-  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .tile,
@@ -145,39 +152,6 @@
 
 // The rarity band down the leading edge is the one place colour carries meaning here, so
 // it is a border rather than a fill — legible against the panel at any size.
-.common {
-  box-shadow: inset 3px 0 0 0 $rarity-common;
-}
-.uncommon {
-  box-shadow: inset 3px 0 0 0 $rarity-uncommon;
-}
-.rare {
-  box-shadow: inset 3px 0 0 0 $rarity-rare;
-}
-.epic {
-  box-shadow: inset 3px 0 0 0 $rarity-epic;
-}
-.legendary {
-  box-shadow: inset 3px 0 0 0 $rarity-legendary;
-}
-
-.tileName {
-  color: $parchment;
-  font-size: 0.8125rem;
-  line-height: 1.2;
-}
-
-.tileMeta {
-  color: $parchment-dim;
-  font-family: $font-mono;
-  font-size: 0.625rem;
-}
-
-.tilePower {
-  color: $gold;
-  font-family: $font-mono;
-  font-size: 0.75rem;
-}
 
 // ── Choosing them ───────────────────────────────────────────────────────────
 
@@ -234,4 +208,15 @@
   color: $ground-deep;
   font-family: $font-mono;
   font-size: 0.5625rem;
+}
+
+.tier {
+  flex: none;
+  margin-left: auto;
+}
+
+.unblooded {
+  margin-left: auto;
+  color: $muted;
+  font-size: 0.8rem;
 }

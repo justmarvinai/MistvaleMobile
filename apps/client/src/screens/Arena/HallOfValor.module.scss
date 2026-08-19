@@ -36,46 +36,10 @@
   font-size: 1.2rem;
 }
 
+/* The element strip is the library's segmented control now — its selection, its thumb and
+   its glyphs are all drawn by it. */
 .tabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: $space-1;
-}
-
-.tab {
-  padding: $space-2 $space-1;
-  background: $panel;
-  border: 1px solid $edge;
-  color: $muted;
-  font: inherit;
-  font-family: $font-display;
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:hover {
-    border-color: $edge-bright;
-    color: $parchment;
-  }
-
-  &[aria-selected='true'] {
-    background: $panel-raised;
-    color: $parchment;
-  }
-
-  // The element wheel is colour-coded everywhere else in the game; the selected tab
-  // borrows the same colour so the two never have to be learned separately.
-  &[data-element='ember'][aria-selected='true'] {
-    border-color: $affinity-ember;
-  }
-  &[data-element='tide'][aria-selected='true'] {
-    border-color: $affinity-tide;
-  }
-  &[data-element='verdant'][aria-selected='true'] {
-    border-color: $affinity-verdant;
-  }
-  &[data-element='mist'][aria-selected='true'] {
-    border-color: $affinity-mist;
-  }
+  width: 100%;
 }
 
 .tracks {

@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ELEMENTS, HALL_STATS, type Element, type HallStat } from '@mistvale/shared';
+import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
+import { Fui } from '@/fui/react';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useArenaStore } from '../../state/arenaStore';
+import { AFFINITY_GLYPH } from '../../ui/affinity';
 import styles from './HallOfValor.module.scss';
 
 /**
@@ -65,21 +68,24 @@ export function HallOfValor({ onClose }: { onClose: () => void }): JSX.Element {
           <span className={styles.medalsValue}>{hall?.medals ?? 0}</span>
         </div>
 
-        <div className={styles.tabs} role="tablist" aria-label="Element">
-          {ELEMENTS.map((entry) => (
-            <button
-              key={entry}
-              type="button"
-              role="tab"
-              aria-selected={entry === element}
-              className={styles.tab}
-              data-element={entry}
-              onClick={() => setElement(entry)}
-            >
-              {ELEMENT_LABELS[entry]}
-            </button>
-          ))}
-        </div>
+        {/* The four elements, each wearing the same glyph it wears on a champion card and
+            in a battle — which is the whole reason to register them into the library's own
+            affinity table rather than draw them twice. */}
+        <Fui
+          of={SegmentedControl}
+          className={styles.tabs}
+          attrs={{ 'aria-label': 'Element' }}
+          options={{
+            value: element,
+            block: true,
+            segments: ELEMENTS.map((entry) => ({
+              value: entry,
+              label: ELEMENT_LABELS[entry],
+              glyph: AFFINITY_GLYPH[entry],
+            })),
+          }}
+          on={{ 'segment:change': (value: string) => setElement(value as Element) }}
+        />
 
         {!hall ? (
           <p className={styles.empty}>Opening the Hall…</p>
