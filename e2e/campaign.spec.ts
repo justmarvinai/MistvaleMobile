@@ -46,7 +46,9 @@ test.describe('the campaign loop', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await expect(page.getByText(/veilwood fringe/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Chapter 1, stage 1.
     await page.getByRole('button', { name: '1-1', exact: false }).first().click();
@@ -80,7 +82,7 @@ test.describe('the campaign loop', () => {
     // A first win can be a first level, and a first level can open something.
     await dismissUnlocks(page);
     await expect(results).toBeHidden();
-    await expect(page.getByText(/veilwood fringe/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible();
   });
 
   test('shows twelve chapters and three difficulties, with the road ahead shut', async ({
@@ -110,25 +112,30 @@ test.describe('the campaign loop', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await expect(page.getByText(/veilwood fringe/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible({
+      timeout: 15_000,
+    });
 
-    // Twelve chapters, and only the one the warden is in is unfolded — 252 stages laid
-    // flat would be a wall rather than a map.
-    const headers = page.locator('button[aria-expanded]');
-    await expect(headers).toHaveCount(12);
-    await expect(page.locator('button[aria-expanded="true"]')).toHaveCount(1);
+    // Twelve markers on the map, and exactly one of them is where the warden is standing —
+    // 252 stages laid flat would be a wall rather than a map.
+    await expect(page.locator('.fui-map__node')).toHaveCount(12);
+    await expect(page.locator('.fui-map__node[data-state="current"]')).toHaveCount(1);
     await expect(page.getByText(/12\. The Coilmother’s Court/)).toBeVisible();
 
-    // Chapter 2 is there, shut, and says why once it is unfolded.
-    await page.getByRole('button', { name: /2\. The Drowned Road/ }).click();
-    const chapterTwoOpener = page.getByRole('button', { name: '2-1', exact: false }).first();
-    await expect(chapterTwoOpener).toBeDisabled();
-    await expect(page.getByText(/clear 1-7 first/i).first()).toBeVisible();
+    // Chapter 2 is on the map, shut, and says why on the marker itself — a locked chapter
+    // cannot be opened, so the reason has nowhere else to live.
+    const chapterTwo = page.locator('.fui-map__node[data-id="chapter_02"]');
+    await expect(chapterTwo).toHaveAttribute('data-state', 'locked');
+    await expect(chapterTwo).toBeDisabled();
+    await expect(chapterTwo).toContainText(/clear 1-7 first/i);
 
-    // Hard exists as a tab from the start — visible, not hidden — and 1-1 on it wants the
-    // whole vale cleared on Normal first.
-    await page.getByRole('button', { name: 'Hard', exact: true }).click();
-    await expect(page.getByRole('button', { expanded: true })).toHaveCount(1);
-    await expect(page.getByText(/clear 12-7 first/i).first()).toBeVisible();
+    // Hard is a segment from the start — visible, not hidden — and chapter 1 on it wants
+    // the whole vale cleared on Normal first. A segment is a `tab`, not a `button`: the
+    // library gives the strip `role="tablist"`, which is what it is.
+    await page.getByRole('tab', { name: 'Hard', exact: true }).click();
+    await expect(page.locator('.fui-map__node[data-id="chapter_01"]')).toContainText(
+      /clear 12-7 first/i,
+      { timeout: 15_000 },
+    );
   });
 });

@@ -1,6 +1,10 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
+/* The map is the screen now, so most of what used to be here — an accordion row, a chapter
+   head, a stage tile, a star strip — is drawn by the library and gone from this file.
+   What is left is the page's own frame and the two lines of prose the map cannot say. */
+
 .screen {
   display: grid;
   /* The title is a row of its own; the content row takes the slack. */
@@ -11,197 +15,67 @@
   min-height: 0;
 }
 
-.list {
+.column {
   display: flex;
   flex-direction: column;
   gap: $space-3;
   min-height: 0;
-  overflow-y: auto;
-  padding-right: $space-2;
 }
 
-.column {
+.difficulties {
+  align-self: start;
+}
+
+.scroller {
   display: flex;
   flex-direction: column;
+  gap: $space-4;
   min-height: 0;
+  overflow-y: auto;
+  padding-right: $space-2;
+  @include pixel-scrollbar;
+}
+
+.map {
+  flex: none;
 }
 
 .chapter {
   display: flex;
   flex-direction: column;
-  gap: $space-1;
-  padding-bottom: $space-2;
-  border-bottom: 1px solid $edge;
-
-  &[data-open='true'] {
-    padding-bottom: $space-3;
-  }
+  gap: $space-3;
 }
 
-.chapterHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: $space-2;
-  width: 100%;
-  padding: $space-1 0;
-  background: none;
-  border: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-
-  &:hover .chapterName {
-    color: $accent;
-  }
+.stages {
+  flex: none;
 }
 
-.caret {
-  display: inline-block;
-  width: 1rem;
+.lore {
   color: $muted;
-}
-
-.chapterName {
-  font-size: 1.05rem;
-  color: $parchment;
-}
-
-.chapterMeta {
-  display: flex;
-  align-items: baseline;
-  gap: $space-2;
-}
-
-.chapterRegion {
   font-size: 0.85rem;
-  color: $muted;
-}
-
-.chapterLocked {
-  color: $muted-deep;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.chapterLore {
-  margin: 0 0 $space-1 1rem;
-  color: $parchment-dim;
-  font-size: 0.8rem;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .chest {
   color: $gold;
 }
 
-.difficulties {
-  display: flex;
-  gap: $space-1;
-  margin-bottom: $space-2;
-}
-
-.difficulty {
-  padding: $space-1 $space-3;
-  background: $panel-inset;
-  border: 1px solid transparent;
-  color: $muted;
-  font: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &[aria-pressed='true'] {
-    border-color: $accent;
-    color: $accent;
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-.stages {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  gap: $space-2;
-  margin-left: 1rem;
-}
-
-.stage {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: $space-2;
-  background: $panel;
-  border: 1px solid $edge;
-
-  &[data-cleared='true'] {
-    border-left: 2px solid $gold;
-  }
-  color: $parchment;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    border-color: $accent;
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-}
-
-.stageHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: $space-2;
-}
-
-.stageName {
-  font-size: 0.85rem;
-}
-
-.stageStars {
-  color: $gold;
-  font-size: 0.65rem;
-  letter-spacing: 1px;
-}
-
-.stageLocked {
-  color: $muted-deep;
-  font-size: 0.72rem;
-  line-height: 1.4;
-}
-
-.chapterStars {
-  color: $gold;
-}
-
-.stageMeta {
-  font-size: 0.75rem;
-  color: $muted;
-}
-
-.stars {
-  color: $gold;
-  letter-spacing: 2px;
-}
-
 .sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
   min-height: 0;
+  overflow-y: auto;
 }
 
+.note,
 .empty {
   color: $muted;
   font-size: 0.85rem;
-  line-height: 1.6;
+  line-height: 1.7;
+}
+
+.note + .note {
+  margin-top: $space-2;
+}
+
+.shut {
+  color: $parchment;
 }

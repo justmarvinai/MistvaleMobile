@@ -75,65 +75,17 @@
 // ── The tracks ──────────────────────────────────────────────────────────────
 
 .grid,
-.strip {
-  display: grid;
-  gap: $space-2;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
 
 // Six across is the shape thirty days wants: five clean rows, and the sigil days land in
 // the same column every week so the rhythm is visible before it is read.
+/* The day tiles are the library's calendar since the design rework — their state, their
+   milestone treatment and their icons are all drawn by it. */
 .grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
-.strip {
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-}
-
-.tile {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-height: 5.5rem;
-  padding: $space-2;
-  background: $panel;
-  border: 1px solid $edge;
-}
-
-.tileDone {
-  opacity: 0.42;
+  width: 100%;
 }
 
 // The one tile that matters. A steady inner glow rather than a pulse: it has to hold the
 // eye for as long as the screen is open without becoming something to look away from.
-.tileNext {
-  border-color: $gold;
-  box-shadow:
-    inset 0 0 0 1px rgba(212, 175, 96, 0.28),
-    0 0 12px rgba(212, 175, 96, 0.14);
-}
-
-.tileDay {
-  color: $parchment;
-  font-family: $font-mono;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.tileChampion {
-  color: $gold;
-  font-size: 0.6875rem;
-  line-height: 1.2;
-}
-
-.tileRelics {
-  color: $accent;
-  font-family: $font-mono;
-  font-size: 0.625rem;
-}
 
 // ── The selector ────────────────────────────────────────────────────────────
 

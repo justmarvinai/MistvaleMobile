@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import type { DungeonDef, StageDef } from '@mistvale/shared';
+import { StageSelect } from '@/fui/components/StageSelect.ts';
+import { Fui } from '@/fui/react';
 import { Modal } from '../../ui/Modal/Modal';
 import { useContentStore } from '../../state/contentStore';
 import { usePlayerStore } from '../../state/playerStore';
@@ -39,8 +41,17 @@ export function FloorPicker({
     return dungeon.setKeys.map((key) => names.get(key) ?? key);
   }, [bundle, dungeon.setKeys]);
 
+  /**
+   * Why the ladder stops.
+   *
+   * A floor node is a numbered disc with nowhere to put a sentence, and only the first
+   * shut one is worth reading — so it is said once, under the grid.
+   */
+  const shut = floors.find((floor) => standings.get(floor.key)?.open === false);
+  const deepestShut = shut ? (standings.get(shut.key)?.lockedReason ?? null) : null;
+
   return (
-    <Modal open title={dungeon.name} onClose={onClose}>
+    <Modal open title={dungeon.name} onClose={onClose} width={640}>
       <div className={styles.body}>
         <p className={styles.lore}>{dungeon.lore}</p>
 
@@ -53,43 +64,45 @@ export function FloorPicker({
         {floors.length === 0 ? (
           <p className={styles.empty}>No floors are published for this keep yet.</p>
         ) : (
-          <div className={styles.floors}>
-            {floors.map((floor) => {
-              const standing = standings.get(floor.key);
-              const open = standing?.open ?? floor.number === 1;
-              const stars = standing?.stars ?? 0;
-              const affordable = energy >= floor.energyCost;
-
-              return (
-                <button
-                  key={floor.key}
-                  type="button"
-                  className={styles.floor}
-                  disabled={!open}
-                  data-cleared={stars > 0 ? 'true' : undefined}
-                  onClick={() => onPick(floor, `${dungeon.name} · Floor ${floor.number}`)}
-                  title={
-                    !open
-                      ? (standing?.lockedReason ?? 'Not open yet.')
-                      : affordable
-                        ? `${floor.energyCost} energy`
-                        : `Needs ${floor.energyCost} energy — you have ${energy}`
-                  }
-                >
-                  <span className={styles.floorHead}>
-                    <span className={styles.floorNumber}>Floor {floor.number}</span>
-                    <span className={styles.floorStars} aria-label={`${stars} of 3 stars`}>
-                      {'★'.repeat(stars)}
-                      {'☆'.repeat(3 - stars)}
-                    </span>
-                  </span>
-                  <span className={styles.floorMeta}>
-                    {open ? `${floor.energyCost} energy` : (standing?.lockedReason ?? 'Shut')}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <>
+            {/* A grid rather than the campaign's snaking path: fifteen floors of a keep
+                are a ladder to be scanned, not a road to be walked past, and a path that
+                long wraps into something nobody can follow. */}
+            <Fui
+              of={StageSelect}
+              className={styles.floors}
+              options={{
+                subtitle: `${floors.length} floors · you have ${energy} energy`,
+                layout: 'grid',
+                columns: 5,
+                stages: floors.map((floor, index) => {
+                  const standing = standings.get(floor.key);
+                  const open = standing?.open ?? floor.number === 1;
+                  const stars = standing?.stars ?? 0;
+                  return {
+                    id: floor.key,
+                    label: String(floor.number),
+                    stars,
+                    state: !open
+                      ? ('locked' as const)
+                      : stars > 0
+                        ? ('cleared' as const)
+                        : ('current' as const),
+                    cost: floor.energyCost,
+                    // The deepest floor is the one the keep is named for.
+                    ...(index === floors.length - 1 ? { boss: true } : {}),
+                  };
+                }),
+              }}
+              on={{
+                'stage:select': (node: { id: string }) => {
+                  const floor = floors.find((entry) => entry.key === node.id);
+                  if (floor) onPick(floor, `${dungeon.name} · Floor ${floor.number}`);
+                },
+              }}
+            />
+            {deepestShut && <p className={styles.shut}>{deepestShut}</p>}
+          </>
         )}
       </div>
     </Modal>

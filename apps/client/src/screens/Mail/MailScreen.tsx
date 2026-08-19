@@ -1,5 +1,6 @@
 import { useEffect, useState, type JSX } from 'react';
 import type { MailMessage } from '@mistvale/shared';
+import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { Prose } from '../../ui/Prose/Prose';
@@ -67,9 +68,11 @@ export function MailScreen(): JSX.Element {
       {loading && !mail ? (
         <p className={styles.empty}>Opening the satchel…</p>
       ) : messages.length === 0 ? (
-        <p className={styles.empty}>
-          Nothing has arrived. Gifts, apologies and the occasional word from the Vale land here.
-        </p>
+        <Empty
+          glyph="glyph-burning-scroll"
+          title="Nothing has arrived"
+          message="Gifts, apologies and the occasional word from the Vale land here."
+        />
       ) : (
         <div className={styles.layout}>
           <div className={styles.list}>

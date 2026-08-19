@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { LoginDayStanding, LoginTrackKind, LoginTrackStanding } from '@mistvale/shared';
+import type { LoginTrackKind, LoginTrackStanding } from '@mistvale/shared';
+import { DailyRewards } from '@/fui/components/DailyRewards.ts';
+import { Fui } from '@/fui/react';
+import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { Modal } from '../../ui/Modal/Modal';
-import { Rewards, describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
+import { describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
+import { rewardArt } from '../../ui/Rewards/art';
 import { useContentStore } from '../../state/contentStore';
 import { useLoginStore } from '../../state/loginStore';
 import { toast } from '../../state/uiStore';
@@ -92,9 +96,11 @@ export function CalendarScreen(): JSX.Element {
       {loading && !login ? (
         <p className={styles.empty}>Counting the nights…</p>
       ) : !login?.calendar && !login?.welcome ? (
-        <p className={styles.empty}>
-          No track is running just now. The Vale keeps its own hours — try again tomorrow.
-        </p>
+        <Empty
+          glyph="glyph-celestial-body"
+          title="No track is running"
+          message="The Vale keeps its own hours — try again tomorrow."
+        />
       ) : (
         <>
           {/* The dock shrouds this screen below the gate, so this line is for the rare
@@ -179,7 +185,46 @@ function TrackPanel({
   championName: (key: string) => string;
   onClaim: () => void;
 }): JSX.Element {
+  const rewardName = useRewardName();
   const next = track.days.find((day) => day.next);
+
+  /**
+   * The track's days, as the library's calendar draws them.
+   *
+   * A day that hands over a champion — or lets the player choose one — is a milestone: the
+   * component gives those a double-width tile with gold trim, which is exactly the weight
+   * day thirty deserves and exactly what the old flat grid could not give it.
+   */
+  const days = useMemo(
+    () =>
+      track.days.map((day) => {
+        const rewards = Object.entries(day.rewards).filter(([, amount]) => amount > 0);
+        const first = rewards[0];
+        const champions =
+          day.choices.length > 0 ? 'Your pick' : day.champions.map(championName).join(', ');
+        const label = [
+          champions,
+          day.relicCount > 0 ? `${day.relicCount} relics` : '',
+          describeRewards(day.rewards, rewardName),
+        ]
+          .filter(Boolean)
+          .join(' · ');
+        return {
+          icon:
+            champions !== ''
+              ? 'rune-nova-star'
+              : day.relicCount > 0
+                ? 'icon-chest'
+                : first
+                  ? rewardArt(first[0])
+                  : 'rune-bronze-disc',
+          ...(label ? { label } : {}),
+          ...(champions === '' && first && first[1] > 1 ? { qty: first[1] } : {}),
+          ...(champions !== '' ? { milestone: true } : {}),
+        };
+      }),
+    [track.days, championName, rewardName],
+  );
 
   return (
     <Panel
@@ -209,35 +254,27 @@ function TrackPanel({
         )}
       </div>
 
-      <ol className={track.track === 'calendar' ? styles.grid : styles.strip}>
-        {track.days.map((day) => (
-          <DayTile key={day.day} day={day} championName={championName} />
-        ))}
-      </ol>
+      {/* Keyed on what it draws *and* on whether a claim is in flight: the component ticks
+          today's tile the moment it is pressed, and the server is what settles a claim —
+          so a remount puts the tile back where the server has it until the server moves
+          it. Ten columns for the thirty-day cycle and seven for the welcome week, because
+          the default is one column per tile and thirty of those is a hairline. */}
+      <Fui
+        key={`${track.claimsMade}|${track.claimedToday}|${busy}`}
+        of={DailyRewards}
+        className={styles.grid}
+        options={{
+          rewards: days,
+          currentDay: next?.day ?? track.days.length + 1,
+          claimedToday: track.claimedToday,
+          columns: track.track === 'calendar' ? 10 : 7,
+        }}
+        on={{
+          'daily:claim': () => {
+            if (!disabled) onClaim();
+          },
+        }}
+      />
     </Panel>
-  );
-}
-
-function DayTile({
-  day,
-  championName,
-}: {
-  day: LoginDayStanding;
-  championName: (key: string) => string;
-}): JSX.Element {
-  const headline =
-    day.choices.length > 0 ? 'Your pick' : day.champions.map(championName).join(', ');
-
-  return (
-    <li
-      className={[styles.tile, day.claimed ? styles.tileDone : '', day.next ? styles.tileNext : '']
-        .filter(Boolean)
-        .join(' ')}
-    >
-      <span className={styles.tileDay}>{day.day}</span>
-      {headline && <span className={styles.tileChampion}>{headline}</span>}
-      {day.relicCount > 0 && <span className={styles.tileRelics}>{day.relicCount} relics</span>}
-      <Rewards rewards={day.rewards} />
-    </li>
   );
 }

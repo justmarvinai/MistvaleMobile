@@ -29,61 +29,16 @@
   margin-right: $space-1;
 }
 
+/* The ladder is `StageSelect` now — the floor tiles, their numbers, their stars and their
+   energy costs are the library's. */
 .floors {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-  gap: $space-1;
-  max-height: 22rem;
-  overflow-y: auto;
+  width: 100%;
 }
 
-.floor {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: $space-2;
-  background: $panel-inset;
-  border: 1px solid $edge;
-  color: $parchment;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-
-  &[data-cleared='true'] {
-    border-left: 2px solid $gold;
-  }
-
-  &:hover:not(:disabled) {
-    border-color: $accent;
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-.floorHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: $space-1;
-}
-
-.floorNumber {
-  font-size: 0.82rem;
-}
-
-.floorStars {
-  color: $gold;
-  font-size: 0.6rem;
-  letter-spacing: 1px;
-}
-
-.floorMeta {
+.shut {
   color: $muted;
-  font-size: 0.7rem;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  line-height: 1.5;
 }
 
 .empty {

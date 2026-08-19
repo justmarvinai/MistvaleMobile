@@ -48,7 +48,9 @@ test.describe('the practice sandbox', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await expect(page.getByText(/veilwood fringe/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible({
+      timeout: 15_000,
+    });
 
     const openStage = async () => {
       await page.getByRole('button', { name: '1-1', exact: false }).first().click();

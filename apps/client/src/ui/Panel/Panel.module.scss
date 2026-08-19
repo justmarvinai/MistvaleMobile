@@ -11,6 +11,16 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  /* Never squashed by a sibling.
+
+     The library's panel body carries `min-height: 0`, which is right for a panel that
+     scrolls inside itself and wrong for one stacked in a scrolling column: a flex item's
+     automatic minimum is its content, unless its content says it has none — so a tall
+     panel in a column of panels was compressed to its header and everything below it drew
+     *behind the next panel*. The events screen lost its whole reward ladder that way, and
+     the calendar lost the button that collects the day. A screen that wants a panel to
+     grow still says so; this only stops one from shrinking below what it holds. */
+  flex-shrink: 0;
 }
 
 /* The three variants are chosen in Panel.tsx, where they pick the library's art. Kept as

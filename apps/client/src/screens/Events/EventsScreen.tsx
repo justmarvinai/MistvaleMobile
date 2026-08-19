@@ -1,8 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { EventStanding } from '@mistvale/shared';
+import { CountdownTimer } from '@/fui/components/CountdownTimer.ts';
+import { RewardTrack } from '@/fui/components/RewardTrack.ts';
+import { Fui } from '@/fui/react';
+import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
-import { Button } from '../../ui/Button/Button';
-import { Rewards, describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
+import { describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
+import { rewardArt } from '../../ui/Rewards/art';
 import { useEventStore } from '../../state/eventStore';
 import { toast } from '../../state/uiStore';
 import styles from './EventsScreen.module.scss';
@@ -50,9 +54,11 @@ export function EventsScreen(): JSX.Element {
       {loading && !events ? (
         <p className={styles.empty}>Looking at what is running…</p>
       ) : (events?.events.length ?? 0) === 0 ? (
-        <p className={styles.empty}>
-          Nothing is running just now. Events come and go — the Vale will stir again.
-        </p>
+        <Empty
+          glyph="glyph-hourglass"
+          title="Nothing is running"
+          message="Events come and go — the Vale will stir again."
+        />
       ) : (
         events?.events.map((event) => (
           <EventPanel
@@ -79,17 +85,47 @@ function EventPanel({
   busy: string | null;
   onClaim: (milestone: number) => void;
 }): JSX.Element {
-  const top = event.milestones.at(-1)?.points ?? 1;
-  const filled = Math.min(100, (event.points / top) * 100);
+  const rewardName = useRewardName();
+
+  /** The ladder's rungs, as the library's rail draws them. */
+  const nodes = useMemo(
+    () =>
+      event.milestones.map((rung) => {
+        const rewards = Object.entries(rung.rewards).filter(([, amount]) => amount > 0);
+        const first = rewards[0];
+        return {
+          at: rung.points,
+          icon: first ? rewardArt(first[0]) : 'rune-bronze-disc',
+          label: describeRewards(rung.rewards, rewardName),
+          ...(first && first[1] > 1 ? { qty: first[1] } : {}),
+          ...(rung.claimed ? { claimed: true } : {}),
+        };
+      }),
+    [event.milestones, rewardName],
+  );
 
   return (
     <Panel
       variant="hero"
       title={event.name}
       actions={
-        <span className={event.live ? styles.live : styles.closed}>
-          {event.live ? `Until ${event.endsOn}` : `Closed — collect by ${event.claimsCloseOn}`}
-        </span>
+        event.live ? (
+          // The server's own end-of-day, anchored — a tab left open overnight stays right.
+          <Fui
+            key={event.endsOn}
+            of={CountdownTimer}
+            className={styles.live}
+            options={{
+              endsAt: new Date(`${event.endsOn}T23:59:59Z`).getTime(),
+              label: today === event.endsOn ? 'Last day' : 'Ends',
+              glyph: 'glyph-hourglass',
+              variant: 'chip',
+              doneText: 'Scoring closed',
+            }}
+          />
+        ) : (
+          <span className={styles.closed}>Closed — collect by {event.claimsCloseOn}</span>
+        )
       }
     >
       <p className={styles.blurb}>{event.description}</p>
@@ -103,54 +139,36 @@ function EventPanel({
         ))}
       </div>
 
-      <div className={styles.score}>
-        <span className={styles.scoreValue}>{event.points.toLocaleString()}</span>
-        <span className={styles.scoreLabel}>points</span>
-        {!event.live && <span className={styles.scoreNote}>Scoring closed on {event.endsOn}</span>}
-        {event.live && today === event.endsOn && <span className={styles.scoreNote}>Last day</span>}
-      </div>
+      {/* The ladder is the screen's spine, and the library's rail is exactly it: one line
+          with the rungs sitting on it at the score each is worth, so "how far to the next"
+          is a distance rather than a subtraction the player has to do.
 
-      {/* The track: one bar with the rungs sitting on it, so "how far to the next" is a
-          distance rather than a subtraction the player has to do. */}
-      <div className={styles.track}>
-        <div className={styles.trackBar}>
-          <span className={styles.trackFill} style={{ width: `${filled}%` }} />
-        </div>
-        <ol className={styles.rungs}>
-          {event.milestones.map((rung) => {
-            const ready = rung.reached && !rung.claimed;
-            return (
-              <li
-                key={rung.index}
-                className={[
-                  styles.rung,
-                  rung.claimed ? styles.rungDone : '',
-                  ready ? styles.rungReady : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                <span className={styles.rungPoints}>{rung.points.toLocaleString()}</span>
-                <Rewards rewards={rung.rewards} signed />
-                <Button
-                  size="sm"
-                  variant={ready ? 'primary' : 'ghost'}
-                  disabled={!ready || busy !== null}
-                  onClick={() => onClaim(rung.index)}
-                >
-                  {rung.claimed
-                    ? 'Claimed'
-                    : busy === `${event.eventKey}:${rung.index}`
-                      ? 'Claiming…'
-                      : ready
-                        ? 'Claim'
-                        : 'Locked'}
-                </Button>
-              </li>
-            );
-          })}
-        </ol>
-      </div>
+          Keyed on the milestones *and* on whether a claim is in flight. The rail ticks a
+          node the moment it is pressed, which is the one thing this game does not do —
+          the server settles a claim — and remounting on `busy` puts the node back where
+          the server has it until the server says otherwise. */}
+      <Fui
+        key={`${event.milestones.map((rung) => `${rung.claimed}`).join('')}|${busy ?? ''}`}
+        of={RewardTrack}
+        className={styles.track}
+        options={{
+          nodes,
+          progress: event.points,
+          unit: 'points',
+          subtitle: event.live
+            ? today === event.endsOn
+              ? 'Last day to score'
+              : `Scoring until ${event.endsOn}`
+            : `Scoring closed on ${event.endsOn}`,
+          title: 'The ladder',
+        }}
+        on={{
+          'track:claim': (node: { at: number }) => {
+            const rung = event.milestones.find((entry) => entry.points === node.at);
+            if (rung && rung.reached && !rung.claimed && busy === null) onClaim(rung.index);
+          },
+        }}
+      />
     </Panel>
   );
 }

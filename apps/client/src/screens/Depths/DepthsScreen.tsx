@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { DungeonDef, StageDef } from '@mistvale/shared';
 import { WEEKDAY_NAMES } from '@mistvale/shared';
+import { EventBanner } from '@/fui/components/EventBanner.ts';
+import { Fui } from '@/fui/react';
+import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
 import { useContentStore } from '../../state/contentStore';
 import { useDepthsStore } from '../../state/depthsStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { useProgressStore } from '../../state/progressStore';
+import { dungeonArt, dungeonInk } from '../../ui/dungeonArt';
 import { TeamSelect } from '../Battle/TeamSelect';
 import { FloorPicker } from './FloorPicker';
 import styles from './DepthsScreen.module.scss';
@@ -87,7 +91,11 @@ export function DepthsScreen(): JSX.Element {
 
       <div className={styles.list}>
         {(bundle.dungeons ?? []).length === 0 && (
-          <p className={styles.empty}>Nothing has been opened down here yet.</p>
+          <Empty
+            glyph="glyph-skull-wreath"
+            title="Nothing has been opened down here"
+            message="The keeps under the vale are published from the Admin Suite."
+          />
         )}
 
         {GROUPS.map((group) => {
@@ -110,33 +118,36 @@ export function DepthsScreen(): JSX.Element {
                   const depth = standing?.highestFloor ?? 0;
 
                   return (
-                    <button
-                      key={dungeon.key}
-                      type="button"
+                    // A keep is key art with a name, a state and a way in, which is what
+                    // `EventBanner` is — the same tile the events hub is made of, because
+                    // "here is a place, here is what it pays, here is whether it is open
+                    // today" is the same question in both. Keyed on what it draws, since
+                    // the banner takes its options at construction and the rotation and
+                    // the depth both arrive a request after the first paint.
+                    <Fui
+                      key={`${dungeon.key}|${open}|${depth}|${weekday ?? ''}`}
+                      of={EventBanner}
                       className={styles.keep}
-                      data-open={open}
-                      data-entered={depth > 0 ? 'true' : undefined}
-                      onClick={() => setOpenDungeon(dungeon)}
-                    >
-                      <span className={styles.keepHead}>
-                        <span className={styles.keepName}>{dungeon.name}</span>
-                        <span className={styles.keepDepth}>
-                          {depth > 0
-                            ? `Floor ${depth} / ${dungeon.floors}`
-                            : `${dungeon.floors} floors`}
-                        </span>
-                      </span>
-
-                      <span className={styles.keepTagline}>{dungeon.tagline}</span>
-
-                      <span className={styles.keepFooter}>
-                        {open ? (
-                          <span className={styles.keepOpen}>{rotationLine(dungeon, weekday)}</span>
-                        ) : (
-                          <span className={styles.keepShut}>{standing?.lockedReason}</span>
-                        )}
-                      </span>
-                    </button>
+                      options={{
+                        title: dungeon.name,
+                        subtitle: dungeon.tagline,
+                        art: dungeonArt(dungeon.key, dungeon.kind),
+                        // The ribbon is a corner of the tile and fits about six letters,
+                        // so it carries the state and the sentence goes underneath.
+                        tag: !open ? 'Shut' : dungeon.openDays.length === 0 ? 'Daily' : 'Today',
+                        progress: depth / Math.max(dungeon.floors, 1),
+                        progressLabel: !open
+                          ? (standing?.lockedReason ?? 'Not open today')
+                          : depth > 0
+                            ? `Floor ${depth} / ${dungeon.floors} · ${rotationLine(dungeon, weekday)}`
+                            : `${dungeon.floors} floors · ${rotationLine(dungeon, weekday)}`,
+                        // No button when it is shut: the tag says so, and a way in that
+                        // refuses is worse than no way in.
+                        ...(open ? { action: depth > 0 ? 'Go back down' : 'Go down' } : {}),
+                        ...(dungeonInk(dungeon.kind) ? { color: dungeonInk(dungeon.kind) } : {}),
+                      }}
+                      on={{ 'event:enter': () => setOpenDungeon(dungeon) }}
+                    />
                   );
                 })}
               </div>

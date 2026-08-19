@@ -50,69 +50,15 @@
 
 .keeps {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
   gap: $space-2;
 }
 
+/* The keep tile is `EventBanner` now, so its head, name, depth line, tagline and footer
+   are all drawn by the library and gone from this file. What is left is the one thing a
+   grid cell has to say: fill the column. */
 .keep {
-  display: flex;
-  flex-direction: column;
-  gap: $space-1;
-  padding: $space-2;
-  background: $panel;
-  border: 1px solid $edge;
-  color: $parchment;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-
-  &[data-entered='true'] {
-    border-left: 2px solid $gold;
-  }
-
-  &[data-open='false'] {
-    opacity: 0.62;
-  }
-
-  &:hover {
-    border-color: $accent;
-  }
-}
-
-.keepHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: $space-2;
-}
-
-.keepName {
-  font-size: 0.92rem;
-}
-
-.keepDepth {
-  color: $muted;
-  font-family: $font-mono;
-  font-size: 0.7rem;
-}
-
-.keepTagline {
-  color: $muted;
-  font-size: 0.76rem;
-  line-height: 1.5;
-}
-
-.keepFooter {
-  margin-top: auto;
-  font-size: 0.72rem;
-}
-
-.keepOpen {
-  color: $accent;
-}
-
-.keepShut {
-  color: $muted-deep;
+  width: 100%;
 }
 
 .sidebar {

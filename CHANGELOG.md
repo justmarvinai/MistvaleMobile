@@ -5,6 +5,63 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the world is a world (design rework, D6)
+
+The campaign was an accordion of twelve fold-out rows. The Depths were a grid of bordered
+`<div>`s. Quests, missions and events were three hand-built lists of the same thing that
+had already drifted apart — one drew a bar, one drew a tick, one drew neither. The whole of
+the game's world and progression is the library's now, and it is nine hundred fewer lines
+of Mistvale's own CSS.
+
+- **The campaign is a map.** `WorldMap` with the vale's twelve chapters on it — cleared,
+  current, open or shut, each wearing its region's mark, joined by the road between them —
+  and the chosen chapter's seven stages snaking below in `StageSelect`, warlord at the end.
+  Where a marker *sits* is derived from the chapter's own number rather than authored, so a
+  thirteenth chapter added in Admin lands somewhere sensible without anybody placing it.
+- **A keep is key art.** The Depths' ten places are `EventBanner`s — a picture, a name, how
+  deep this warden has been, and whether it is open today — and a floor ladder is a
+  `StageSelect` grid rather than fifteen bordered rectangles. `dungeonArt` gives each keep
+  its own face and each of the three groups its own colour.
+- **One ledger for every claimable thing.** `ui/Ledger` wraps `AchievementList`, and the
+  daily checklist, the eighty steps of the Valewarden's Path and — through the same helper —
+  every objective the game ever adds are drawn by it. `goalArt` gives each of the twenty-two
+  goal types its own mark, so "win seven battles" and "spend fifty energy" stop looking like
+  the same afternoon. Rewards become a line through the same `describeRewards` the toasts
+  use; a quest with two goals is summed with each goal's own count said out loud, so the
+  aggregate hides nothing.
+- **The event ladder is a rail.** `RewardTrack` puts each rung at the score it is worth, so
+  "how far to the next" is a distance rather than a subtraction. Both it and the login
+  calendar tick optimistically on click — the one thing this game does not do — so both are
+  remounted while a claim is in flight and the tile goes back where the server has it.
+- **The login calendar is a calendar.** `DailyRewards` for both tracks, with the days that
+  hand over a champion drawn as milestones, which is the weight day thirty has always
+  deserved.
+- **Two clocks came from the library.** The quests' daily reset and an event's last day are
+  `CountdownTimer`, anchored to the server's own end time rather than counting ticks, so a
+  tab left open overnight is not an hour out when it is looked at again.
+- **Empty states stopped being a sentence in the dark.** `ui/Empty` wraps `EmptyState`, and
+  an empty mailbox, a quiet news wall, a calendar between tracks and an unpublished campaign
+  all say what they are and what would fill them.
+- **Mail keeps its own shape, deliberately.** `MailInbox` is a single-column inbox with no
+  reading pane, and Mistvale's letters have bodies, an expiry and a way to throw one away.
+  Same call as the mastery board and the stat table: where the structure encodes something
+  the library's component cannot say, the structure stays and takes the paint.
+
+Two smaller things came out of the browser suite, and both are worth having. **A shut
+chapter now says why on its own marker** — it cannot be opened, so the prose under the map,
+which explains the chapter you *are* in, never gets the chance; the marker carries "Clear
+1-7 first." where an open one carries its region and its stars. And **a difficulty is a tab
+rather than a button**, because the library's segmented strip is a `tablist` and that is
+what a one-of-three switch is.
+
+One defect fixed, and it was not on any of these screens — it was under all of them.
+**A panel stacked in a scrolling column was squashed to its header**, and everything below
+drew *behind the next panel*. The library's panel body carries `min-height: 0`, which is
+right for a panel that scrolls inside itself and wrong for one in a stack: a flex item's
+automatic minimum is its content unless its content says it has none. The events screen was
+losing its entire reward ladder to it and the calendar was losing the button that collects
+the day — on nineteen scrolling columns across the game. One rule, in the panel.
+
 ### Changed — the relics look like relics (design rework, D5)
 
 The vault was a grid of bordered `<div>`s with the substats as a definition list, the

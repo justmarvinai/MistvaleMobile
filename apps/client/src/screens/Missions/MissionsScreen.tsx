@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { MissionArc } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
+import { Ledger, type LedgerEntry } from '../../ui/Ledger/Ledger';
 import { describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
 import { useMissionStore } from '../../state/missionStore';
 import { useContentStore } from '../../state/contentStore';
 import { toast } from '../../state/uiStore';
-import { MissionRow } from './MissionRow';
 import styles from './MissionsScreen.module.scss';
 import { Icon } from '@/ui/Icon/Icon';
 import { Heading } from '@/ui/Heading/Heading';
@@ -62,6 +62,38 @@ export function MissionsScreen(): JSX.Element {
     ? (missions.arcs.find((arc) => arc.arc === (viewing ?? missions.currentArc)) ??
       missions.arcs[0])
     : undefined;
+
+  /** The arc's steps, in the shape every claimable list in the game is drawn from. */
+  const entries = useMemo<LedgerEntry[]>(
+    () =>
+      (shown?.missions ?? []).map((standing) => {
+        const def = defOf(standing.missionKey);
+        const grants = [
+          ...standing.grantsChampions.map(
+            (key) => bundle?.champions.find((entry) => entry.key === key)?.name ?? key,
+          ),
+          ...(standing.grantsTitle ? [`“${standing.grantsTitle}”`] : []),
+        ].join(', ');
+        // Finished, uncollected, and its arc not open yet — a real state, and one worth
+        // showing rather than hiding, because it is evidence the Path noticed.
+        const waiting = standing.complete && !standing.claimed && !standing.claimable;
+        return {
+          id: standing.missionKey,
+          name: def?.name ?? standing.missionKey,
+          ...(def?.description ? { description: def.description } : {}),
+          goals: standing.goals.map((entry) => ({
+            type: entry.goal.type,
+            progress: entry.progress,
+            target: entry.goal.target,
+          })),
+          rewards: standing.rewards,
+          ...(grants ? { grants } : {}),
+          ...(standing.claimed ? { claimed: true } : {}),
+          ...(waiting ? { lockedReason: 'Walked — the arc is still shut' } : {}),
+        };
+      }),
+    [shown, defOf, bundle],
+  );
 
   return (
     <div className={styles.screen}>
@@ -132,21 +164,23 @@ export function MissionsScreen(): JSX.Element {
               </p>
             </header>
 
-            <ul className={styles.list}>
-              {shown.missions.map((standing) => (
-                <MissionRow
-                  key={standing.missionKey}
-                  standing={standing}
-                  def={defOf(standing.missionKey)}
-                  championName={(key) =>
-                    bundle?.champions.find((entry) => entry.key === key)?.name ?? key
-                  }
-                  busy={busy === standing.missionKey}
-                  disabled={busy !== null}
-                  onClaim={() => void claim(standing.missionKey)}
-                />
-              ))}
-            </ul>
+            <Ledger
+              className={styles.list}
+              entries={entries}
+              emptyText="No steps are laid in this arc yet."
+              claimableFirst={false}
+              onClaim={(key) => {
+                // A step of a later arc can be finished long before its arc opens, and the
+                // server refuses that claim. Saying so here costs a round trip nobody
+                // needs — and the row already carries the reason next to its reward.
+                const standing = shown.missions.find((entry) => entry.missionKey === key);
+                if (standing && !standing.claimable) {
+                  toast.info('That step is walked, but its arc is still shut.');
+                  return;
+                }
+                if (busy === null) void claim(key);
+              }}
+            />
           </>
         )}
       </div>

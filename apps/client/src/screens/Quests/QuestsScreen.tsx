@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { QUEST_PERIODS, type QuestPeriod, type QuestStanding } from '@mistvale/shared';
+import { CountdownTimer } from '@/fui/components/CountdownTimer.ts';
+import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
+import { Fui } from '@/fui/react';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { Rewards, describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
 import { useQuestStore } from '../../state/questStore';
 import { useContentStore } from '../../state/contentStore';
 import { toast } from '../../state/uiStore';
-import { QuestRow } from './QuestRow';
+import { Ledger, type LedgerEntry } from '../../ui/Ledger/Ledger';
 import { FirstWins } from './FirstWins';
 import styles from './QuestsScreen.module.scss';
 import { highlightable } from '../../app/highlight';
@@ -73,6 +76,27 @@ export function QuestsScreen(): JSX.Element {
   const visible = (quests?.quests ?? []).filter((standing) => periodOf(standing) === tab);
   const chest = quests?.chests.find((entry) => entry.period === tab);
 
+  /** The tab's quests, in the shape every claimable list in the game is drawn from. */
+  const entries = useMemo<LedgerEntry[]>(
+    () =>
+      visible.map((standing) => {
+        const def = defOf(standing.questKey);
+        return {
+          id: standing.questKey,
+          name: def?.name ?? standing.questKey,
+          ...(def?.description ? { description: def.description } : {}),
+          goals: standing.goals.map((entry) => ({
+            type: entry.goal.type,
+            progress: entry.progress,
+            target: entry.goal.target,
+          })),
+          rewards: standing.rewards,
+          ...(standing.claimed ? { claimed: true } : {}),
+        };
+      }),
+    [visible, defOf],
+  );
+
   const countFor = (period: QuestPeriod): number => {
     const ready = (quests?.quests ?? []).filter(
       (standing) => periodOf(standing) === period && standing.complete && !standing.claimed,
@@ -87,39 +111,50 @@ export function QuestsScreen(): JSX.Element {
 
       <div className={styles.main}>
         <header className={styles.head}>
-          <nav className={styles.tabs} aria-label="Quest periods">
-            {QUEST_PERIODS.map((period) => {
-              const waiting = countFor(period);
-              return (
-                <button
-                  key={period}
-                  type="button"
-                  className={[styles.tab, period === tab ? styles.tabActive : '']
-                    .filter(Boolean)
-                    .join(' ')}
-                  aria-current={period === tab}
-                  onClick={() => setTab(period)}
-                >
-                  {PERIOD_LABELS[period]}
-                  {waiting > 0 && (
-                    <span className={styles.pip} aria-label={`${waiting} ready to claim`}>
-                      {waiting}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
+          {/* Keyed on the counts, because the badges are what move: a claim empties one
+              and the control takes its segments at construction. */}
+          <Fui
+            key={QUEST_PERIODS.map(countFor).join(',')}
+            of={SegmentedControl}
+            className={styles.tabs}
+            attrs={{ 'aria-label': 'Quest periods' }}
+            options={{
+              value: tab,
+              segments: QUEST_PERIODS.map((period) => {
+                const waiting = countFor(period);
+                return {
+                  value: period,
+                  label: PERIOD_LABELS[period],
+                  ...(waiting > 0 ? { badge: waiting } : {}),
+                };
+              }),
+            }}
+            on={{ 'segment:change': (value: string) => setTab(value as QuestPeriod) }}
+          />
 
-          {quests && (
-            <p className={styles.resets}>
-              {tab === 'daily'
-                ? `Resets ${relative(quests.dailyResetAt)}`
-                : tab === 'weekly'
+          {quests &&
+            (tab === 'daily' ? (
+              // Anchored to the server's own reset time rather than counting ticks, so a
+              // tab left open overnight is not an hour out when it is looked at again.
+              <Fui
+                key={quests.dailyResetAt}
+                of={CountdownTimer}
+                className={styles.resets}
+                options={{
+                  endsAt: new Date(quests.dailyResetAt).getTime(),
+                  label: 'Resets',
+                  glyph: 'glyph-hourglass',
+                  variant: 'chip',
+                  doneText: 'Resetting…',
+                }}
+              />
+            ) : (
+              <p className={styles.resets}>
+                {tab === 'weekly'
                   ? `Week of ${quests.weekAnchor}`
                   : `Month of ${quests.monthAnchor.slice(0, 7)}`}
-            </p>
-          )}
+              </p>
+            ))}
         </header>
 
         {error && <p className={styles.error}>{error}</p>}
@@ -155,23 +190,18 @@ export function QuestsScreen(): JSX.Element {
 
         {loading && !quests ? (
           <p className={styles.empty}>Reading the ledger…</p>
-        ) : visible.length === 0 ? (
-          <p className={styles.empty}>
-            Nothing here yet — {PERIOD_LABELS[tab].toLowerCase()} quests open as your account grows.
-          </p>
         ) : (
-          <ul className={styles.list} {...highlightable(`panel:quest-${tab}`)}>
-            {visible.map((standing) => (
-              <QuestRow
-                key={standing.questKey}
-                standing={standing}
-                def={defOf(standing.questKey)}
-                busy={busy === standing.questKey}
-                disabled={busy !== null}
-                onClaim={() => void claim(standing.questKey)}
-              />
-            ))}
-          </ul>
+          <Ledger
+            className={styles.list}
+            attrs={highlightable(`panel:quest-${tab}`)}
+            entries={entries}
+            emptyText={`Nothing here yet — ${PERIOD_LABELS[
+              tab
+            ].toLowerCase()} quests open as your account grows.`}
+            onClaim={(key) => {
+              if (busy === null) void claim(key);
+            }}
+          />
         )}
       </div>
 
@@ -196,14 +226,4 @@ function Meter({ value, of }: { value: number; of: number }): JSX.Element {
       ))}
     </div>
   );
-}
-
-/** "in 4h 20m" — coarse on purpose, because the exact second is never the question. */
-function relative(iso: string): string {
-  const ms = new Date(iso).getTime() - Date.now();
-  if (!Number.isFinite(ms) || ms <= 0) return 'shortly';
-  const minutes = Math.floor(ms / 60_000);
-  const hours = Math.floor(minutes / 60);
-  if (hours >= 1) return `in ${hours}h ${minutes % 60}m`;
-  return `in ${minutes}m`;
 }

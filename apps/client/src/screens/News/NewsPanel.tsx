@@ -4,6 +4,7 @@ import { Button } from '../../ui/Button/Button';
 import { Prose } from '../../ui/Prose/Prose';
 import { useNewsStore } from '../../state/newsStore';
 import styles from './NewsPanel.module.scss';
+import { Empty } from '../../ui/Empty/Empty';
 
 /**
  * What the Vale is saying.
@@ -41,7 +42,12 @@ export function NewsPanel({ open, onClose }: { open: boolean; onClose: () => voi
       {loading && !news ? (
         <p className={styles.empty}>Listening…</p>
       ) : posts.length === 0 ? (
-        <p className={styles.empty}>Nothing announced. The Vale is quiet, which is rare.</p>
+        <Empty
+          size="sm"
+          glyph="glyph-spell-book"
+          title="Nothing announced"
+          message="The Vale is quiet, which is rare."
+        />
       ) : (
         <ol className={styles.posts}>
           {posts.map((post) => (
