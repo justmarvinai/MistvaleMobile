@@ -83,6 +83,20 @@ export function hasScene(): boolean {
   return currentScene !== null || pendingScene !== null;
 }
 
+/**
+ * Whether *this* scene is the one the stage is showing.
+ *
+ * A screen that owns a scene has to be able to ask, because it is not the only thing that
+ * attaches one. `PixiStage` re-initialising — a remount, a lost WebGL context — destroys
+ * the stage and then attaches the ambient mist, which is right when nothing else wants it
+ * and silently fatal when a battle is running: the fight plays on correctly with the HUD
+ * over an empty field, and nothing anywhere says so. Screens check and re-attach rather
+ * than assuming the last `setScene` still stands.
+ */
+export function isSceneAttached(scene: Scene): boolean {
+  return currentScene === scene || pendingScene === scene;
+}
+
 /** Swaps in a new scene, destroying the previous one. */
 export function setScene(scene: Scene | null): void {
   if (!app) {

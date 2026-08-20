@@ -5,6 +5,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the Auto button stopped looking engaged
+
+Auto worked; it just no longer showed it. `BattleControls` sets `aria-pressed` from its
+`auto` option at construction but adds the `is-on` class only inside its own `setAuto` — so
+a control *built* engaged is correct to a screen reader and looks identical to one that is
+off. That never mattered before, because Auto could only be turned on by clicking it. Now
+that it is a remembered choice, the control is often built already on, and the remount that
+follows a change wiped the class the click had added. Painted in Mistvale's own layer, not
+in `src/fui`, which the next vendor sync would overwrite.
+
+### Fixed — two more ways the battlefield could go blank
+
+Neither of these needed the art to be missing; both left a correct fight playing over an
+empty field, which is the failure with no symptom anywhere.
+
+- **The scene was rebuilt whenever the content bundle changed identity, and the effect that
+  fills it ran only when the playback view changed.** A bundle arriving on a commit where
+  the view did not move left a brand-new, empty scene that nothing ever drew into — and a
+  fight waiting on the player never moves the view. The art lookup is read through a ref
+  now, so new content is simply picked up by the next lookup and the scene is never thrown
+  away.
+- **Nothing re-attached the scene if something else took the stage.** `PixiStage`
+  re-initialising destroys the stage and then attaches the ambient mist, which is right
+  when nothing else wants it and silently fatal during a battle. The screen now checks
+  `isSceneAttached` after every commit and re-attaches — an identity comparison, so it
+  costs nothing.
+
+### Added — the battle screen says when it cannot draw
+
+Twice now the only signal that a fight was rendering nothing has been a screenshot from the
+owner: the HUD correct, the turn order moving, the field black. So the screen checks its own
+work — if the fight has units and the scene has drawn none of them a moment later, it says
+so under the hotbar instead of leaving somebody to guess, and says plainly that the fight
+itself is unaffected because the outcome is the server's. The decision lives in
+`blindStage.ts` with its own tests: a safety net nobody can test is not a safety net.
+
 ### Fixed — the champions were not on the battlefield (Batch 2)
 
 The owner's screenshots: a full HUD, a turn order, health bars moving, skills to press — and

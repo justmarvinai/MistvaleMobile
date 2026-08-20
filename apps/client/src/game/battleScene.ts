@@ -113,6 +113,17 @@ export class BattleScene implements Scene {
   private readonly bannerLayer = new Container();
 
   private readonly units = new Map<string, UnitVisual>();
+
+  /**
+   * How many bodies are standing on the field right now.
+   *
+   * Read by the screen so it can tell a player that the battlefield could not be drawn,
+   * rather than showing them a black rectangle and letting them work it out. Nothing about
+   * the fight depends on it — this is the scene reporting on itself.
+   */
+  get drawn(): number {
+    return this.units.size;
+  }
   private readonly floaters = new Map<number, FloaterVisual>();
   private banner: { text: Text; life: number } | null = null;
 

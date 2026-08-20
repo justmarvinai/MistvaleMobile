@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import type { SkillDef } from '@mistvale/shared';
 import type { UnitRef } from '@mistvale/engine';
 import { ActionBar } from '@/fui/components/ActionBar.ts';
@@ -12,7 +12,8 @@ import { Button } from '../../ui/Button/Button';
 import { BattleScene } from '../../game/battleScene';
 import { stillPath } from '../../game/sprites';
 import { skillArt } from '../../ui/skillArt';
-import { setScene } from '../../game/stage';
+import { getStage, isSceneAttached, setScene } from '../../game/stage';
+import { battlefieldIsBlind } from './blindStage';
 import { settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
 import { useBattleStore } from '../../state/battleStore';
 import { useLoadoutStore } from '../../state/loadoutStore';
@@ -78,6 +79,7 @@ export function BattleScreen(): JSX.Element {
   const [target, setTarget] = useState<UnitRef | null>(null);
   /** The battle Auto has already been engaged for, so it fires once per fight. */
   const autoEngaged = useRef<string | null>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
 
   /** Which sprite folder a unit's definition points at. */
   const artFor = useMemo(() => {
@@ -92,20 +94,99 @@ export function BattleScreen(): JSX.Element {
     return (defKey: string): string => byKey.get(defKey) ?? 'enemies/teritorial_lizard';
   }, [bundle]);
 
+  /**
+   * The art lookup, read through a ref.
+   *
+   * The scene used to be rebuilt whenever this changed identity — which is whenever the
+   * content bundle is replaced, for any reason, including a re-fetch that changed nothing.
+   * A rebuilt scene starts empty, and the effect that fills it ran only on `view`; so a
+   * bundle that arrived while the fight was waiting on the player left a correct battle
+   * playing over a blank field until something moved. Behind a ref, new content is simply
+   * picked up by the next lookup and the scene never has to be thrown away.
+   */
+  const artForRef = useRef(artFor);
+  useEffect(() => {
+    artForRef.current = artFor;
+  }, [artFor]);
+
   // One scene for the life of the screen; the store drives what it shows.
   useEffect(() => {
-    const scene = new BattleScene(artFor);
+    const scene = new BattleScene((defKey) => artForRef.current(defKey));
     sceneRef.current = scene;
     setScene(scene);
     return () => {
       sceneRef.current = null;
       setScene(null);
     };
-  }, [artFor]);
+  }, []);
 
+  /**
+   * Draws the current view — and makes sure it is still ours to draw on.
+   *
+   * No dependency array, deliberately. Two things have to be true after *every* commit,
+   * and neither is a function of `view` alone: the scene has to hold the latest view, and
+   * it has to still be the scene the stage is showing. `PixiStage` re-initialising will
+   * quietly replace it with the ambient mist (see `isSceneAttached`), and the result is
+   * the worst failure this screen has: a fight that plays perfectly over an empty field,
+   * with nothing on screen or in the console to say what happened. Re-attaching is an
+   * identity comparison, so paying it per commit costs nothing and closes the whole class.
+   */
   useEffect(() => {
-    void sceneRef.current?.sync(view);
-  }, [view]);
+    const scene = sceneRef.current;
+    if (!scene) return;
+    if (!isSceneAttached(scene)) setScene(scene);
+    void scene.sync(view);
+  });
+
+  /**
+   * Paints the Auto button as engaged.
+   *
+   * `BattleControls` sets `aria-pressed` from its `auto` option at construction but adds
+   * the `is-on` class only in its own `setAuto` — so a control *built* engaged is correct
+   * to a screen reader and looks exactly like a control that is off. That never showed up
+   * before, because Auto could only ever be turned on by clicking it; it does now, because
+   * a remembered Auto builds the control already on.
+   *
+   * Fixed here rather than in the component: `src/fui` is vendored and the next sync would
+   * overwrite it. No dependency array, so it survives the remount that changing either
+   * standing choice causes.
+   */
+  /**
+   * Whether the battlefield is actually being drawn.
+   *
+   * The worst thing this screen can do is show a correct fight over an empty rectangle: the
+   * HUD is right, the turn order moves, the health bars move, and there is nothing there.
+   * It happened, twice, for two unrelated reasons — and both times the only signal was a
+   * screenshot from the owner. So the screen checks its own work: if the fight has units in
+   * it and the scene has drawn none of them a moment later, it says so, in a line under the
+   * hotbar, instead of leaving somebody to guess.
+   *
+   * A beat of delay, because a scene is legitimately empty for the frame between the board
+   * arriving and the first sync.
+   */
+  const [blind, setBlind] = useState(false);
+  const unitCount = view.allies.length + view.enemies.length;
+  useEffect(() => {
+    if (unitCount === 0) return;
+    const timer = window.setTimeout(() => {
+      const scene = sceneRef.current;
+      setBlind(
+        battlefieldIsBlind({
+          units: unitCount,
+          hasStage: getStage() !== null,
+          attached: scene !== null && isSceneAttached(scene),
+          drawn: scene?.drawn ?? 0,
+        }),
+      );
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, [unitCount, view.wave]);
+
+  useLayoutEffect(() => {
+    controlsRef.current
+      ?.querySelector('.fui-battlectl__auto')
+      ?.classList.toggle('is-on', preferredAuto);
+  });
 
   /**
    * Speed is a standing choice, not a per-fight one.
@@ -290,7 +371,7 @@ export function BattleScreen(): JSX.Element {
           options={{ units: queue, running: false, showBars: true, size: 44 }}
         />
 
-        <div className={styles.controls}>
+        <div className={styles.controls} ref={controlsRef}>
           <Fui
             /* Remounted when either standing choice changes. `BattleControls` takes both
                at construction and its own `setAuto` *emits* `battle:auto`, so pushing the
@@ -406,6 +487,14 @@ export function BattleScreen(): JSX.Element {
             </>
           ) : (
             <span className={styles.hint}>Waiting for the server…</span>
+          )}
+
+          {/* Never a silent black rectangle. See `blind` above. */}
+          {blind && (
+            <span className={styles.error}>
+              The battlefield could not be drawn — the champions' art did not load. The fight itself
+              is fine: the numbers, the turn order and the result are all the server's.
+            </span>
           )}
 
           {error && <span className={styles.error}>{error}</span>}
