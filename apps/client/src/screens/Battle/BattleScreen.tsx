@@ -15,6 +15,7 @@ import { skillArt } from '../../ui/skillArt';
 import { setScene } from '../../game/stage';
 import { settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
 import { useBattleStore } from '../../state/battleStore';
+import { useLoadoutStore } from '../../state/loadoutStore';
 import { useContentStore } from '../../state/contentStore';
 import { useNavStore } from '../../state/navStore';
 import { usePlayerStore } from '../../state/playerStore';
@@ -44,14 +45,13 @@ export function BattleScreen(): JSX.Element {
   const view = useBattleStore((state) => state.view);
   const playing = useBattleStore((state) => state.playing);
   const awaitingInput = useBattleStore((state) => state.awaitingInput);
-  const speed = useBattleStore((state) => state.speed);
-  const auto = useBattleStore((state) => state.auto);
   const busy = useBattleStore((state) => state.busy);
   const error = useBattleStore((state) => state.error);
   const act = useBattleStore((state) => state.act);
   const runAuto = useBattleStore((state) => state.runAuto);
   const retreat = useBattleStore((state) => state.retreat);
   const setSpeed = useBattleStore((state) => state.setSpeed);
+  const setAuto = useBattleStore((state) => state.setAuto);
   const skipToLatest = useBattleStore((state) => state.skipToLatest);
   const resume = useBattleStore((state) => state.resume);
   const resetBattle = useBattleStore((state) => state.reset);
@@ -68,8 +68,16 @@ export function BattleScreen(): JSX.Element {
   const back = useNavStore((state) => state.back);
   const refreshPlayer = usePlayerStore((state) => state.refresh);
 
+  // How this player likes to watch a fight, remembered across fights and sign-ins.
+  const preferredSpeed = useLoadoutStore((state) => state.speed);
+  const preferredAuto = useLoadoutStore((state) => state.auto);
+  const rememberSpeed = useLoadoutStore((state) => state.setSpeed);
+  const rememberAuto = useLoadoutStore((state) => state.setAuto);
+
   const sceneRef = useRef<BattleScene | null>(null);
   const [target, setTarget] = useState<UnitRef | null>(null);
+  /** The battle Auto has already been engaged for, so it fires once per fight. */
+  const autoEngaged = useRef<string | null>(null);
 
   /** Which sprite folder a unit's definition points at. */
   const artFor = useMemo(() => {
@@ -98,6 +106,35 @@ export function BattleScreen(): JSX.Element {
   useEffect(() => {
     void sceneRef.current?.sync(view);
   }, [view]);
+
+  /**
+   * Speed is a standing choice, not a per-fight one.
+   *
+   * The store starts every session at ×1, so a player who set ×2 last night set it again
+   * this morning, and again after the next reload. The remembered value is pushed into the
+   * battle store rather than read from it, because the playback clock is the thing that
+   * has to know.
+   */
+  useEffect(() => {
+    setSpeed(preferredSpeed);
+  }, [preferredSpeed, setSpeed]);
+
+  /**
+   * And so is Auto.
+   *
+   * A player who turned it on meant "fight these for me", not "fight this one for me" —
+   * so it engages itself on the next fight too, once, at the first moment the fight is
+   * actually waiting on a command. Keyed on the battle id: a second fight re-arms, and
+   * re-renders inside one fight do not.
+   */
+  useEffect(() => {
+    const id = battle?.id ?? null;
+    if (!preferredAuto || !id || !awaitingInput || busy) return;
+    if (autoEngaged.current === id) return;
+    autoEngaged.current = id;
+    setAuto(true);
+    void runAuto();
+  }, [preferredAuto, battle?.id, awaitingInput, busy, runAuto, setAuto]);
 
   // The playback clock lives in the store and outlived this screen: nothing stopped it
   // when the screen went away, so a sign-out mid-fight left it ticking — health bars
@@ -255,19 +292,37 @@ export function BattleScreen(): JSX.Element {
 
         <div className={styles.controls}>
           <Fui
+            /* Remounted when either standing choice changes. `BattleControls` takes both
+               at construction and its own `setAuto` *emits* `battle:auto`, so pushing the
+               new value in through the setter would echo straight back into the handler
+               below. Four buttons with no animation state are cheap to rebuild. */
+            key={`${preferredAuto}|${preferredSpeed}`}
             of={BattleControls}
             options={{
-              auto,
-              speed,
+              // The remembered answer rather than the fight's, so a battle opened with Auto
+              // already engaged shows the button pressed instead of contradicting itself.
+              auto: preferredAuto,
+              speed: preferredSpeed,
               speeds: [1, 2],
               pausable: false,
               retreatable: true,
             }}
             on={{
-              'battle:auto': () => void runAuto(),
+              // The control is a real toggle and sends its new state; the old handler
+              // ignored the payload and ran the fight out whichever way it was pressed,
+              // so Auto could be turned on and never off. Both halves are remembered.
+              'battle:auto': (on: boolean) => {
+                rememberAuto(on);
+                setAuto(on);
+                if (on) void runAuto();
+              },
               // The store's speed is a two-value union; the library's is any number in
               // `speeds`, so the narrowing happens here rather than being asserted.
-              'battle:speed': ({ speed: next }: { speed: number }) => setSpeed(next === 2 ? 2 : 1),
+              'battle:speed': ({ speed: next }: { speed: number }) => {
+                const chosen = next === 2 ? 2 : 1;
+                rememberSpeed(chosen);
+                setSpeed(chosen);
+              },
               'battle:retreat': () => void retreat(),
             }}
           />

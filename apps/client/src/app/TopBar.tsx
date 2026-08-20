@@ -4,6 +4,7 @@ import type { EnergyState, PlayerSummary } from '@mistvale/shared';
 import { StatBar } from '@/fui/components/StatBar.ts';
 import { TopBar as FuiTopBar } from '@/fui/components/TopBar.ts';
 import { Fui, useFui, useFuiAttrs } from '@/fui/react';
+import { useTooltip } from '@/ui/Tooltip/useTooltip';
 import { usePlayerStore } from '@/state/playerStore';
 import { useProfileStore } from '@/state/profileStore';
 import { useSessionStore } from '@/state/sessionStore';
@@ -143,6 +144,55 @@ export function TopBar({
   // kept for the life of the bar (see `useFui`), so the target is stable.
   const chip = instance?.el.querySelector<HTMLElement>('.fui-topbar__player') ?? null;
 
+  // The rail's three cells, in the order they were declared above. There is no id in the
+  // library's markup to match on, but the order is the one this file chose, and the cells
+  // are built once — so a positional lookup is stable rather than lucky.
+  const cells = instance?.el.querySelectorAll<HTMLElement>('.fui-topbar__res');
+  const energyCell = cells?.[0] ?? null;
+  const silverCell = cells?.[1] ?? null;
+  const crystalCell = cells?.[2] ?? null;
+
+  useTooltip(energyCell, {
+    title: 'Energy',
+    subtitle: 'Spent to fight',
+    stats: [
+      { label: 'Now', value: `${energy.value} / ${energy.cap}`, tone: 'plain' },
+      {
+        label: energy.value >= energy.cap ? 'Full' : 'Next point',
+        value: energy.value >= energy.cap ? '—' : formatWait(secondsToTick),
+        tone: energy.value >= energy.cap ? 'good' : 'plain',
+      },
+      {
+        label: 'Full again',
+        value:
+          energy.value >= energy.cap
+            ? 'now'
+            : formatWait(secondsToTick + (energy.cap - energy.value - 1) * energy.regenSeconds),
+        tone: 'plain',
+      },
+    ],
+    flavor: 'Every stage, floor and keep costs energy. It comes back on its own, awake or not.',
+    hint: 'Levelling up refills the bar.',
+  });
+
+  useTooltip(silverCell, {
+    title: 'Silver',
+    subtitle: 'The working currency',
+    stats: [{ label: 'Held', value: (player?.silver ?? 0).toLocaleString('en-US'), tone: 'plain' }],
+    flavor:
+      'Levels champions, forges relics and buys room in the vault. Won from every fight, and from selling what you will never wear.',
+  });
+
+  useTooltip(crystalCell, {
+    title: 'Crystals',
+    subtitle: 'The rare currency',
+    stats: [
+      { label: 'Held', value: (player?.crystals ?? 0).toLocaleString('en-US'), tone: 'magic' },
+    ],
+    flavor:
+      'Sigils at the Mistgate, a fresh row of stalls at the Bazaar, another shelf on it. Earned from quests, the Path, events and the calendar.',
+  });
+
   if (!player) return null;
 
   return (
@@ -259,6 +309,16 @@ function subscribeToClock(onChange: () => void): () => void {
 /** The cached instant. Changes only when the tick fires. */
 function clockSnapshot(): number {
   return clockNow;
+}
+
+/** A wait in the words a player would use, from a count of seconds. */
+function formatWait(seconds: number): string {
+  if (seconds <= 0) return 'now';
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ${minutes % 60}m`;
 }
 
 /** Advances a server energy snapshot to `now` without ever exceeding the cap. */

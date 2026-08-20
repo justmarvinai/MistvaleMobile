@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 /**
  * Shared scaffolding for the browser suite.
@@ -123,7 +123,11 @@ export async function dismissUnlocks(page: Page): Promise<void> {
 export async function resolveBattle(page: Page): Promise<void> {
   const auto = page.getByRole('button', { name: /^auto$/i });
   await auto.waitFor({ timeout: 20_000 });
-  await auto.click();
+  // Only if it is not already engaged. Auto is a real toggle since B2c — and a standing
+  // preference, so a fight can *open* with it on — where it used to run the fight out
+  // whichever way it was pressed. A helper that clicks it blindly turns it off and then
+  // waits twenty seconds for a battle nobody is fighting.
+  if ((await auto.getAttribute('aria-pressed')) !== 'true') await auto.click();
 
   // Skip exists only while there is playback left to skip — a fight short enough to drain
   // first is a fight that needed no skipping. ("Skip tutorial" is a different button and
@@ -165,4 +169,23 @@ export async function expectOnTop(page: Page, selector: string, label = selector
   }, selector);
 
   if (!result.ok) throw new Error(`${label} is not visible to a player: ${result.why}`);
+}
+
+/**
+ * Makes sure a stage dialog has somebody in it, without assuming it started empty.
+ *
+ * Specs used to click the first roster card, which worked because the picker always opened
+ * with four blank slots. Since B2c it opens on the team you last sent — so on the second
+ * stage of a spec that fights twice, that click *removes* the only champion and leaves
+ * "Into the mist" disabled, which is a four-minute timeout and a mystery.
+ *
+ * Intent rather than mechanism: a spec that is about the loop around the fight wants "a
+ * team is chosen", not "this particular click happened".
+ */
+export async function pickTeam(dialog: Locator): Promise<void> {
+  if ((await dialog.locator('[data-filled="true"]').count()) > 0) return;
+  await dialog
+    .getByRole('button', { name: /lv \d+/i })
+    .first()
+    .click();
 }

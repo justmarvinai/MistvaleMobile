@@ -2,6 +2,7 @@ import {
   AnimatedSprite,
   Container,
   Graphics,
+  Sprite,
   Text,
   TextStyle,
   type Texture,
@@ -9,7 +10,7 @@ import {
 } from 'pixi.js';
 import type { UnitRef } from '@mistvale/engine';
 import type { Floater, PlaybackView, VisualUnit } from './playback';
-import { loadIdleFrames } from './sprites';
+import { loadIdleFrames, loadPlaceholderTexture } from './sprites';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH, type Scene } from './stage';
 
 /**
@@ -48,9 +49,26 @@ function slotPosition(side: 'ally' | 'enemy', slot: number): { x: number; y: num
   return { x: side === 'ally' ? inset : VIRTUAL_WIDTH - inset, y };
 }
 
+/**
+ * Whatever is standing in the slot.
+ *
+ * Three shapes, in descending order of how much art survived: the unit's own idle loop, the
+ * shared silhouette when its frames would not load, and a drawn figure when even that would
+ * not. All three carry `tint` and `alpha`, which is all `updateUnit` asks of them.
+ */
+type UnitBody = AnimatedSprite | Sprite | Graphics;
+
 interface UnitVisual {
   container: Container;
-  sprite: AnimatedSprite | null;
+  sprite: UnitBody | null;
+  /**
+   * The colour the body sits at while alive.
+   *
+   * White for real art, which must not be recoloured, and the unit's element for a
+   * silhouette, which has no colour of its own and is the only thing telling two sides of
+   * faceless stand-ins apart.
+   */
+  baseTint: number;
   hpBar: Graphics;
   ring: Graphics;
   chips: Container;
@@ -66,6 +84,25 @@ interface FloaterVisual {
 }
 
 const FLOATER_LIFE = 52;
+
+/** How tall a stand-in stands: a champion's 88px art at ×2, so the two are interchangeable. */
+const STAND_IN_HEIGHT = 176;
+
+/**
+ * The last resort — a figure drawn rather than loaded.
+ *
+ * Reached only when the theme's silhouette is unavailable too, which in practice means a
+ * page whose stylesheet never arrived. It is deliberately crude: the job is to occupy the
+ * slot so the fight has a shape, not to be looked at.
+ */
+function drawStandIn(): Graphics {
+  const figure = new Graphics();
+  const w = STAND_IN_HEIGHT * 0.42;
+  figure.roundRect(-w / 2, -STAND_IN_HEIGHT * 0.72, w, STAND_IN_HEIGHT * 0.72, 6).fill(0xffffff);
+  figure.circle(0, -STAND_IN_HEIGHT * 0.8, w * 0.32).fill(0xffffff);
+  figure.alpha = 0.55;
+  return figure;
+}
 
 export class BattleScene implements Scene {
   readonly root = new Container();
@@ -167,22 +204,65 @@ export class BattleScene implements Scene {
     chips.position.set(-26, 26);
 
     container.addChild(ring, hpBar, chips);
-    return { container, sprite: null, hpBar, ring, chips, shake: 0, home };
+    return { container, sprite: null, baseTint: 0xffffff, hpBar, ring, chips, shake: 0, home };
   }
 
+  /**
+   * Puts something in the slot — and it is always something.
+   *
+   * This used to return when no frame loaded, which is how a fight becomes a turn order and
+   * a set of health bars floating over an empty field. Any art problem at all reached the
+   * player as an invisible battle: a release built without `pnpm assets`, a path the web
+   * server does not hand out, a champion whose frames were never drawn. The fight itself was
+   * running correctly the whole time, which is what made it so hard to see.
+   *
+   * So the ladder goes: the unit's own idle loop, then the shared silhouette, then a shape
+   * drawn here. The last rung needs no network and no theme, so there is no state of the
+   * world in which a unit is not on the board.
+   */
   private async attachSprite(visual: UnitVisual, unit: VisualUnit): Promise<void> {
     const frames: Texture[] = await loadIdleFrames(this.artFor(unit.defKey));
-    if (frames.length === 0 || visual.container.destroyed) return;
+    if (visual.container.destroyed) return;
 
-    const sprite = new AnimatedSprite(frames);
-    sprite.anchor.set(0.5, 1);
-    sprite.animationSpeed = 9 / 60; // The 9 fps the art was drawn at.
-    sprite.play();
-    // Enemies face the player's side.
-    sprite.scale.x = unit.ref.side === 'enemy' ? -2 : 2;
-    sprite.scale.y = 2;
-    visual.sprite = sprite;
-    visual.container.addChildAt(sprite, 0);
+    if (frames.length > 0) {
+      const sprite = new AnimatedSprite(frames);
+      sprite.anchor.set(0.5, 1);
+      sprite.animationSpeed = 9 / 60; // The 9 fps the art was drawn at.
+      sprite.play();
+      // Enemies face the player's side.
+      sprite.scale.x = unit.ref.side === 'enemy' ? -2 : 2;
+      sprite.scale.y = 2;
+      this.setBody(visual, sprite, 0xffffff);
+      return;
+    }
+
+    const stand = await loadPlaceholderTexture();
+    if (visual.container.destroyed) return;
+
+    // The element rather than white: a silhouette has no colour of its own, and a field of
+    // identical black figures is only marginally better than an empty one.
+    const tint = ELEMENT_TINT[unit.element] ?? 0x9c9382;
+
+    if (stand) {
+      const sprite = new Sprite(stand);
+      sprite.anchor.set(0.5, 1);
+      // Matched to a real unit's drawn height (88px art at ×2) rather than to the
+      // silhouette's own 1400px, so a stand-in stands the same size as a champion.
+      const scale = STAND_IN_HEIGHT / (stand.height || STAND_IN_HEIGHT);
+      sprite.scale.set(unit.ref.side === 'enemy' ? -scale : scale, scale);
+      this.setBody(visual, sprite, tint);
+      return;
+    }
+
+    this.setBody(visual, drawStandIn(), tint);
+  }
+
+  /** Puts a body under the ring and the bars, and records the colour it lives at. */
+  private setBody(visual: UnitVisual, body: UnitBody, baseTint: number): void {
+    visual.sprite = body;
+    visual.baseTint = baseTint;
+    body.tint = baseTint;
+    visual.container.addChildAt(body, 0);
   }
 
   private updateUnit(visual: UnitVisual, unit: VisualUnit, view: PlaybackView): void {
@@ -191,7 +271,7 @@ export class BattleScene implements Scene {
     if (visual.sprite) {
       visual.sprite.alpha = unit.alive ? 1 : 0.25;
       // A fallen unit dims and desaturates rather than vanishing, so the slot still reads.
-      visual.sprite.tint = unit.alive ? 0xffffff : 0x4a443c;
+      visual.sprite.tint = unit.alive ? visual.baseTint : 0x4a443c;
     }
 
     // Health bar.

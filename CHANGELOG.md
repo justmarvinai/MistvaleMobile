@@ -5,6 +5,83 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the champions were not on the battlefield (Batch 2)
+
+The owner's screenshots: a full HUD, a turn order, health bars moving, skills to press — and
+an empty field. The fight was running correctly the whole time. What was missing was every
+sprite in it.
+
+Two independent faults, and both are fixed:
+
+- **`attachSprite` gave up when no frame loaded.** A unit whose art would not load got a
+  health bar and a turn ring hovering over nothing. Any art problem at all — a release
+  built without the sprite tree, a path the web server does not hand out, a champion whose
+  frames were never drawn — arrived as an *invisible battle* rather than a plain-looking
+  one. There is now a ladder: the unit's own idle loop, then the shared silhouette, then a
+  figure drawn in code. The last rung needs no network and no theme, so no state of the
+  world leaves a slot empty.
+- **Nothing in the deploy checked that the art shipped.** `UPDATE.sh` now refuses to cut a
+  release whose client carries no `sprites/manifest.json`, naming the fix; `STATUS.sh`
+  counts the units in the release that is actually running and flags the box as degraded
+  when there are none. Its absence was completely silent: the game boots, the HUD paints,
+  every fight resolves, and the battlefield is empty.
+
+**And the suite can see the battlefield now.** Everything else in the browser suite drives
+the game through roles and text, which is blind to a WebGL canvas — that is how a fight
+could render nothing at all with sixty-odd tests green. `e2e/pixels.ts` decodes a
+screenshot (zlib and the five PNG line filters, about eighty lines) so a test can ask how
+much of the field is not the ground it is drawn on. Two cases: with art, and with **every
+sprite request refused**, which is the broken box exactly. Both must have bodies on the
+field.
+
+### Fixed — the stage dialog drew outside its own frame
+
+`Modal` caps at 480px and the team chooser's body asked for a 30rem minimum — the same
+number — so the painted panel's border and padding had nowhere to go and the three action
+rows drew straight through the ornament. The dialog is 720 wide, the body no longer forces
+a width, and each action row is a sentence that yields (`min-width: 0`) beside a 9-sliced
+button that does not — the same shape of bug D9 fixed under the relic cards. An empty slot
+now draws as an empty slot rather than as a hooded figure.
+
+### Added — the game remembers your team, your speed and your Auto
+
+Every fight started from four blank slots, on every stage of every evening, while the four
+champions a player actually uses change about once a week. `state/loadoutStore.ts` keeps the
+last team **per battle mode** — a campaign squad and a Depths squad are different decisions;
+stage 4-3 and 4-4 are not — filtered on the way out to champions still owned, so it can
+suggest a stale team but never an impossible one. The Arena's challenge picker opens on it
+too; the *defence* is deliberately not remembered here, because that one is the server's.
+
+Speed and Auto are standing choices now rather than per-fight ones: ×2 survives the next
+fight and the next sign-in, and a player who turned Auto on gets the next fight fought for
+them without pressing it again. Auto also became a real toggle — the handler ignored the
+control's payload and ran the fight out whichever way the button was pressed, so it could
+be turned on and never off.
+
+Kept client-side on purpose. None of it is game state: the server still decides every
+outcome and re-checks the team on the way in. It is the shape of one player's habit, which
+belongs in the browser they play in rather than in a column and a write on the hot path of
+starting a battle.
+
+### Changed — one placeholder for every champion without a face
+
+`championArt` used to hand out a different painted library hero per faction — an emberknight
+for the Emberclan, a brute for the Sskarn. In practice it read as what it was: unrelated art
+borrowed from a component library, so a roster looked like eight different games. Every
+faceless champion now gets the same hooded silhouette, on its card and on the battlefield
+alike. A silhouette says *art pending*; a borrowed emberknight quietly claims to be a
+portrait.
+
+### Added — painted tooltips
+
+The top bar was three bare numbers. `19/63` beside a flame is an energy bar to somebody who
+already knows the game and a riddle to everybody else — it does not say what energy is spent
+on, that it returns on its own, or when the bar will be full. Hovering a currency now opens
+the library's own leather-and-bronze tooltip with the numbers and a line about what the
+thing is for. `ui/Tooltip/useTooltip` adds two things over the library's `attach`: focus and
+blur, so a keyboard reaches them, and it clears the native `title` while attached, so the
+browser's grey box does not land on top of the painted one a beat later.
+
 ### Fixed — one day claimed shows one day claimed
 
 Collecting a login reward ticked **all thirty** tiles of the calendar as collected. The

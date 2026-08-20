@@ -1,4 +1,5 @@
 import { Assets, type Texture } from 'pixi.js';
+import { CHAMPION_PLACEHOLDER } from '../ui/championArt';
 
 /**
  * Unit sprite loading.
@@ -118,4 +119,56 @@ export async function loadIdleFrames(basePath: string): Promise<Texture[]> {
   const loaded = textures.filter((texture): texture is Texture => texture !== null);
   if (loaded.length === 0) reportMissing(`${SPRITE_ROOT}/${basePath}`, 'no frame loaded');
   return loaded;
+}
+
+/**
+ * The stand-in every unit falls back to when its own art will not load.
+ *
+ * A champion that does not appear in a fight is the single worst thing this file can do —
+ * it is what the owner was looking at on 2026-08-20: a full HUD, a turn order, health bars
+ * moving, and an empty field. `attachSprite` used to give up when no frame loaded, which
+ * turns any art problem at all (a stale release, a path nginx does not serve, a champion
+ * whose frames were never drawn) into an invisible battle rather than a plain-looking one.
+ *
+ * So there is always a texture. The library's own hooded silhouette is the same figure
+ * `championArt` puts on the card, which is what makes an art-pending champion recognisable
+ * as the *same* art-pending champion in both places.
+ *
+ * The path is read from the theme's own CSS custom property rather than hard-coded: the art
+ * lives under whichever theme folder is vendored, and `--fui-img-<id>` is the indirection
+ * the library provides precisely so nothing downstream has to know that. If the property is
+ * missing — a test environment with no stylesheet, a theme that drops the asset — the caller
+ * draws its own shape instead, which is the one fallback that cannot itself fail.
+ */
+export async function loadPlaceholderTexture(): Promise<Texture | null> {
+  if (placeholder !== undefined) return placeholder;
+
+  const url = themeArtUrl(CHAMPION_PLACEHOLDER);
+  if (!url) {
+    placeholder = null;
+    return placeholder;
+  }
+
+  placeholder = await Assets.load<Texture>(url).catch((cause: unknown) =>
+    reportMissing(url, cause),
+  );
+  return placeholder;
+}
+
+/** Loaded once per session. `undefined` is "not tried yet"; `null` is "tried, no art". */
+let placeholder: Texture | null | undefined;
+
+/**
+ * The URL behind a FantasyUIs art id, resolved through the theme.
+ *
+ * `--fui-img-<id>` holds a CSS `url("…")`; this unwraps it. Returns null off the DOM, or
+ * when the theme does not declare the id.
+ */
+function themeArtUrl(id: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(`--fui-img-${id}`)
+    .trim();
+  const match = /^url\(\s*["']?(.+?)["']?\s*\)$/.exec(value);
+  return match?.[1] ?? null;
 }

@@ -1,5 +1,13 @@
-import { expect, test } from '@playwright/test';
-import { chooseStarter, dismissUnlocks, expectOnTop, registerRaw, resolveBattle } from './support';
+import { expect, test, type Page } from '@playwright/test';
+import {
+  chooseStarter,
+  dismissUnlocks,
+  expectOnTop,
+  pickTeam,
+  registerRaw,
+  resolveBattle,
+} from './support';
+import { decodePng, litFraction } from './pixels';
 
 /**
  * The screens a player looks at, checked for being *lookable at*.
@@ -12,6 +20,11 @@ import { chooseStarter, dismissUnlocks, expectOnTop, registerRaw, resolveBattle 
  * Deliberately thin. It checks that the things a player must be able to see are the
  * topmost elements at their own centres, and nothing about how they look; pixel
  * comparisons would fail on a font hint and teach everyone to ignore them.
+ *
+ * One test here does read pixels, and has to: the battlefield is a WebGL canvas and there
+ * is no element to point at. It counts how much of the field is not the ground it is drawn
+ * on, which is coarse enough to survive any amount of redrawing and exact enough to fail
+ * the day the champions stop appearing.
  */
 
 test.describe('what a player can actually see', () => {
@@ -34,10 +47,7 @@ test.describe('what a player can actually see', () => {
       .click();
     await page.getByRole('button', { name: '1-1', exact: false }).first().click();
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
-    await teamDialog
-      .getByRole('button', { name: /lv \d+/i })
-      .first()
-      .click();
+    await pickTeam(teamDialog);
     await teamDialog.getByRole('button', { name: /into the mist/i }).click();
     await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 20_000 });
 
@@ -80,10 +90,7 @@ test.describe('what a player can actually see', () => {
       .click();
     await page.getByRole('button', { name: '1-1', exact: false }).first().click();
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
-    await teamDialog
-      .getByRole('button', { name: /lv \d+/i })
-      .first()
-      .click();
+    await pickTeam(teamDialog);
     await teamDialog.getByRole('button', { name: /into the mist/i }).click();
 
     // The bar names whoever is up, with their health and their skills — and the player
@@ -134,10 +141,7 @@ test.describe('what a player can actually see', () => {
         .click();
       await page.getByRole('button', { name: '1-1', exact: false }).first().click();
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
-      await teamDialog
-        .getByRole('button', { name: /lv \d+/i })
-        .first()
-        .click();
+      await pickTeam(teamDialog);
       await teamDialog.getByRole('button', { name: /into the mist/i }).click();
       await resolveBattle(page);
       // Back out of the result, or the dock is not on screen to navigate with.
@@ -321,4 +325,70 @@ test.describe('what a player can actually see', () => {
       .click();
     await expect(page.locator('svg use').first()).toBeVisible({ timeout: 15_000 });
   });
+
+  /**
+   * The champions are on the board.
+   *
+   * This is the one thing in the game that no DOM assertion can reach, and it is the thing
+   * that broke: on the owner's box every fight rendered a turn order, a set of health bars
+   * and an empty field, because the unit art was not in the release and `attachSprite` gave
+   * up when no frame loaded. Every test here passed throughout.
+   *
+   * Two halves, and the second is the important one. With art, the field has champions on
+   * it. **Without** art — every sprite request refused, which is exactly the broken box —
+   * the field still has bodies on it, because a unit whose own art will not load now falls
+   * back to the shared silhouette. A fight is allowed to look plain. It is not allowed to
+   * be empty.
+   */
+  for (const art of ['published', 'missing'] as const) {
+    test(`the battlefield has bodies on it when the art is ${art}`, async ({ page }) => {
+      test.slow();
+      if (art === 'missing') {
+        await page.route('**/sprites/**', (route) => route.fulfill({ status: 404, body: '' }));
+      }
+
+      await registerRaw(page, `e2epx${art[0]}`, `Pix${art[0]}`);
+      await chooseStarter(page);
+
+      await page
+        .getByRole('button', { name: /^campaign$/i })
+        .first()
+        .click();
+      await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+      const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
+      await pickTeam(teamDialog);
+      await teamDialog.getByRole('button', { name: /into the mist/i }).click();
+
+      // The fight is up once the hotbar names somebody to act with.
+      await expect(page.locator('.fui-actionbar [role="button"]').first()).toBeVisible({
+        timeout: 30_000,
+      });
+      // Sprites are loaded and attached a frame or two after the board arrives.
+      await expect
+        .poll(async () => Math.round((await litOnTheField(page)) * 1000), { timeout: 20_000 })
+        .toBeGreaterThan(4);
+    });
+  }
 });
+
+/**
+ * How much of the battlefield is not the ground.
+ *
+ * Sampled from the middle band of the viewport — under the enemy plate and the turn order,
+ * above the hotbar — so the HUD's own paint cannot answer the question for the canvas. Two
+ * champions at this size cover a couple of percent of it, which is why the bar is set at
+ * four parts in a thousand: comfortably above the ground plate's own variation, and far
+ * below anything a drawn unit contributes.
+ */
+async function litOnTheField(page: Page): Promise<number> {
+  const box = page.viewportSize() ?? { width: 1280, height: 720 };
+  const shot = await page.screenshot({
+    clip: {
+      x: 0,
+      y: Math.round(box.height * 0.3),
+      width: box.width,
+      height: Math.round(box.height * 0.45),
+    },
+  });
+  return litFraction(decodePng(shot));
+}

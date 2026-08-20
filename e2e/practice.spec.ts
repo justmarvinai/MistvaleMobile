@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial, resolveBattle } from './support';
+import { dismissUnlocks, leaveTutorial, pickTeam, resolveBattle } from './support';
 
 /**
  * The sandbox, in a real browser.
@@ -56,10 +56,7 @@ test.describe('the practice sandbox', () => {
       await page.getByRole('button', { name: '1-1', exact: false }).first().click();
       const dialog = page.getByRole('dialog', { name: /stage 1/i });
       await expect(dialog).toBeVisible();
-      await dialog
-        .getByRole('button', { name: /lv \d+/i })
-        .first()
-        .click();
+      await pickTeam(dialog);
       return dialog;
     };
 

@@ -457,6 +457,19 @@ unset NODE_OPTIONS
 [[ -f "${REPO_DIR}/${SERVER_DIST_REL}/index.js" ]] || die "server bundle missing: ${SERVER_DIST_REL}/index.js"
 [[ -d "${REPO_DIR}/${CLIENT_DIST_REL}" ]] || die "client build output missing: ${REPO_DIR}/${CLIENT_DIST_REL}"
 
+# The unit art, which the client's own build publishes out of assets/ before Vite runs
+# (apps/client package.json → "sprites"). It is checked here rather than trusted because
+# its absence is completely silent: the game boots, the HUD paints, every fight resolves
+# correctly on the server — and the battlefield is empty, because every champion and every
+# enemy is a texture that 404s. That is what the owner was looking at on 2026-08-20, and
+# nothing in the deploy said a word about it. A release with no manifest is not a release.
+CLIENT_SPRITES="${REPO_DIR}/${CLIENT_DIST_REL}/sprites/manifest.json"
+[[ -f "${CLIENT_SPRITES}" ]] ||
+	die "client build carries no unit art (${CLIENT_DIST_REL}/sprites/manifest.json) — every battle would be an empty field. Run 'pnpm assets' in ${REPO_DIR} and update again"
+if command -v grep >/dev/null && ! grep -q '"basePath"' "${CLIENT_SPRITES}"; then
+	die "the sprite manifest lists no units — see ${CLIENT_SPRITES}"
+fi
+
 log "collecting build output"
 cp -a "${REPO_DIR}/${SERVER_DIST_REL}/." "${NEW_RELEASE}/server/dist/"
 cp -a "${REPO_DIR}/apps/server/package.json" "${NEW_RELEASE}/server/package.json"

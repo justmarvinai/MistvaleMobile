@@ -10,6 +10,8 @@ import { useProfileStore } from '../../state/profileStore';
 import { useContentStore } from '../../state/contentStore';
 import { useNavStore } from '../../state/navStore';
 import { useBattleStore } from '../../state/battleStore';
+import { useLoadoutStore } from '../../state/loadoutStore';
+import { useRosterStore } from '../../state/rosterStore';
 import { toast } from '../../state/uiStore';
 import { arenaTierEmblem } from '../../ui/arenaTier';
 import { championArt } from '../../ui/championArt';
@@ -47,6 +49,13 @@ export function ArenaScreen(): JSX.Element {
   const claimChest = useArenaStore((state) => state.claimChest);
 
   const startArena = useBattleStore((state) => state.startArena);
+  // The attack team, remembered the way the campaign's is — a ladder run is ten fights
+  // with the same four champions, and re-picking them ten times is the work the owner
+  // asked to be rid of. The *defence* is not remembered here: it is the server's, and
+  // `arena.defence` is what the gate actually stands with.
+  const rosterIds = useRosterStore((state) => state.champions);
+  const rememberedTeam = useLoadoutStore((state) => state.teamFor);
+  const rememberTeam = useLoadoutStore((state) => state.remember);
   const goTo = useNavStore((state) => state.setScreen);
   const bundle = useContentStore((state) => state.bundle);
 
@@ -76,6 +85,7 @@ export function ArenaScreen(): JSX.Element {
     if (!offer) return;
     try {
       await startArena({ offerId: offer.offerId, team });
+      rememberTeam('arena', team);
       setAttacking(null);
       goTo('battle');
     } catch {
@@ -322,6 +332,7 @@ export function ArenaScreen(): JSX.Element {
           title={`Challenge ${attacking.profileName}`}
           blurb={`Costs one attack token. Win and you take ${attacking.ratingGain} rating; lose and you give up ${Math.abs(attacking.ratingLoss)}. Either way the token is spent.`}
           confirmLabel="Onto the sand"
+          initial={rememberedTeam('arena', new Set(rosterIds.map((owned) => owned.id)))}
           busy={busy !== null}
           onConfirm={(team) => void attack(team)}
           onClose={() => setAttacking(null)}

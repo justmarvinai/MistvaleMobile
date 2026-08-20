@@ -206,6 +206,7 @@ criteria of its own, and it does not gate P9e or P10.
 | | Batch | State |
 |---|---|---|
 | **B1** | The calendar's one-claim bug · quiet headings, no divider · the right-hand columns become an info button on nine screens · the campaign map fullscreen · the profile chip's XP bar | ✅ |
+| **B2** | The empty battlefield (client fallback + the deploy guard that would have caught it) · the stage dialog drawing outside its frame · remembered teams, speed and Auto · one placeholder for every faceless champion · painted tooltips | ✅ |
 
 **Backlog carried out of a batch rather than done in it:** **Q6** — the eight 1254×1254
 champion avatars (14 MB published, drawn at 150px). Parked at the owner's instruction; the

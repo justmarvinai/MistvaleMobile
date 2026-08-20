@@ -1,10 +1,14 @@
 @use '../../styles/tokens' as *;
 
+/* `min-width: 30rem` used to live here, inside a modal whose default cap is 480px — the
+   same number — so the painted frame's border and padding had nowhere to go and every
+   action row drew straight through it. The width belongs to the dialog (see the `width`
+   prop at the call site); the body only has to promise not to force one. */
 .body {
   display: flex;
   flex-direction: column;
   gap: $space-3;
-  min-width: 30rem;
+  min-width: 0;
 }
 
 .summary {
@@ -22,8 +26,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  min-height: 5rem;
+  gap: $space-1;
+  min-width: 0;
+  min-height: 6.5rem;
   padding: $space-2;
   background: $panel-inset;
   border: 1px dashed $edge;
@@ -39,18 +44,42 @@
   }
 }
 
+/* The hole a champion goes in: the portrait's footprint, drawn as nothing. */
+.slotEmpty {
+  width: 40px;
+  height: 40px;
+  border: 1px dashed $edge;
+  opacity: 0.5;
+}
+
+.slotRole {
+  color: $muted;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.slotName {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .roster {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
   gap: $space-2;
   max-height: 16rem;
   overflow-y: auto;
+  padding-right: $space-1;
 }
 
 .card {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: $space-2;
+  min-width: 0;
   padding: $space-2;
   background: $panel;
   border: 1px solid $edge;
@@ -70,44 +99,65 @@
   }
 }
 
+/* Name over stats, beside the face. */
+.cardWho {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cardName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cardMeta {
   color: $muted;
   font-size: 0.72rem;
 }
 
-.actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: $space-3;
+/* A chosen champion is marked by the frame rather than by a glyph in the name, which used
+   to shift the whole label sideways on every click. */
+.card[aria-pressed='true'] {
+  border-color: $accent;
+  background: $panel-inset;
 }
 
-.cost {
-  color: $muted;
-  font-size: 0.85rem;
-}
-
+/* Every one of these is a sentence beside a 9-sliced button that has a minimum width of
+   its own. Without `min-width: 0` on the text and `flex: none` on the button, the label
+   wins the row and pushes the button out through the frame — the same shape of bug D9
+   fixed under the relic cards. */
+.actions,
 .farm,
 .practice {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: $space-2;
+  gap: $space-3;
+  flex-wrap: wrap;
+}
+
+.farm,
+.practice {
   padding-top: $space-2;
   border-top: 1px solid $edge;
 }
 
+.cost,
 .farmLabel,
 .practiceLabel {
+  flex: 1 1 12rem;
+  min-width: 0;
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
 
 .stepper {
   display: flex;
   align-items: center;
+  flex: none;
   gap: $space-2;
-  margin-left: auto;
 }
 
 .step {

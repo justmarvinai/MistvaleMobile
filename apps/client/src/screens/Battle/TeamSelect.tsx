@@ -7,11 +7,14 @@ import { usePlayerStore } from '../../state/playerStore';
 import { useProgressStore } from '../../state/progressStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { useBattleStore } from '../../state/battleStore';
+import { useLoadoutStore } from '../../state/loadoutStore';
 import { useNavStore } from '../../state/navStore';
 import { MultiSummary } from './MultiSummary';
 import styles from './TeamSelect.module.scss';
 import { BossCard } from '../../ui/BossCard/BossCard';
 import { stageBoss } from '../../ui/BossCard/bossRules';
+import { Portrait } from '../../ui/Portrait/Portrait';
+import { championArt } from '../../ui/championArt';
 
 /**
  * Picking a team before a fight.
@@ -29,6 +32,11 @@ import { stageBoss } from '../../ui/BossCard/bossRules';
  * those only appear once they apply — a stage nobody has cleared cannot be practised, and
  * farming is an account-level unlock — and both conditions are the server's answer, read
  * off progress and the player snapshot rather than re-derived here.
+ *
+ * **It opens on the team you last sent.** Four empty slots on every stage of every evening
+ * was the single most-repeated piece of work in the game (`state/loadoutStore.ts`). The
+ * memory is per battle mode and filtered to champions still owned, so it can suggest a
+ * stale squad but never an impossible one.
  */
 
 const MAX_SLOTS = 4;
@@ -57,7 +65,17 @@ export function TeamSelect({
   const busy = useBattleStore((state) => state.busy);
   const goTo = useNavStore((state) => state.setScreen);
 
-  const [team, setTeam] = useState<string[]>([]);
+  const rememberedTeam = useLoadoutStore((state) => state.teamFor);
+  const rememberTeam = useLoadoutStore((state) => state.remember);
+
+  /**
+   * The team the player has actually touched, or null while they have touched nothing.
+   *
+   * Derived rather than seeded into state by an effect: the roster arrives after the first
+   * paint, and copying it into state on arrival is a render cascade for a value that is a
+   * pure function of two things already in hand. (The Arena's picker does the same.)
+   */
+  const [edits, setEdits] = useState<string[] | null>(null);
   const [runs, setRuns] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<MultiBattleResult | null>(null);
@@ -65,6 +83,19 @@ export function TeamSelect({
   useEffect(() => {
     void loadRoster();
   }, [loadRoster]);
+
+  /**
+   * What the dialog opens on: the last team sent into this mode.
+   *
+   * Filtered against the roster, because a champion fed away since last night is an id the
+   * server would refuse and a slot the player cannot explain.
+   */
+  const suggested = useMemo(
+    () => rememberedTeam(stage.mode, new Set(roster.map((owned) => owned.id))),
+    [rememberedTeam, stage.mode, roster],
+  );
+
+  const team = edits ?? suggested;
 
   const championsByKey = useMemo(
     () => new Map((bundle?.champions ?? []).map((champion) => [champion.key, champion])),
@@ -91,12 +122,12 @@ export function TeamSelect({
   const canFarm = multi.unlocked && multi.runsLeftToday > 0 && picked && affordable && !busy;
 
   const toggle = (id: string): void => {
-    setTeam((current) =>
-      current.includes(id)
-        ? current.filter((entry) => entry !== id)
-        : current.length >= MAX_SLOTS
-          ? current
-          : [...current, id],
+    setEdits(
+      team.includes(id)
+        ? team.filter((entry) => entry !== id)
+        : team.length >= MAX_SLOTS
+          ? team
+          : [...team, id],
     );
   };
 
@@ -104,6 +135,9 @@ export function TeamSelect({
     setError(null);
     try {
       await startBattle({ mode, stageKey: stage.key, team });
+      // Remembered on the way in, not on the way out: a fight the player retreats from was
+      // still the team they meant to bring.
+      rememberTeam(stage.mode, team);
       goTo('battle');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not start that battle.');
@@ -119,6 +153,7 @@ export function TeamSelect({
         team,
         runs: Math.min(runs, maxRuns),
       });
+      rememberTeam(stage.mode, team);
       setSummary(result);
       // A batch moves silver, experience, energy and the allowance at once, so the shell
       // and the map are both stale the moment it returns.
@@ -141,7 +176,10 @@ export function TeamSelect({
   }
 
   return (
-    <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose}>
+    // 720 rather than the default 480. The body asked for a 30rem minimum inside a 480px
+    // panel, so the painted frame's own border and padding had nowhere to go and the
+    // action rows drew straight through it — which is the "bugged window" the owner saw.
+    <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose} width={720}>
       <div className={styles.body}>
         <p className={styles.summary}>
           {stage.waves.length} waves · {stage.energyCost} energy · {stage.rewards.silverMin}–
@@ -174,8 +212,23 @@ export function TeamSelect({
                 onClick={() => id && toggle(id)}
                 title={id ? 'Remove from the team' : 'Empty slot'}
               >
-                <span>{index === 0 ? 'Leader' : `Slot ${index + 1}`}</span>
-                <span>{def?.name ?? '—'}</span>
+                {/* A face only when somebody is standing there. `Portrait` draws its own
+                    stand-in for a missing image, which is right for an art-pending champion
+                    and wrong for an empty slot — four hooded figures under "Leader — Slot 2
+                    — Slot 3 —" reads as a team that has already been picked. */}
+                {def ? (
+                  <Portrait
+                    src={championArt(def, bundle?.assets).portrait ?? null}
+                    name={def.name}
+                    size={40}
+                  />
+                ) : (
+                  <span className={styles.slotEmpty} aria-hidden="true" />
+                )}
+                <span className={styles.slotRole}>
+                  {index === 0 ? 'Leader' : `Slot ${index + 1}`}
+                </span>
+                <span className={styles.slotName}>{def?.name ?? '—'}</span>
               </button>
             );
           })}
@@ -201,12 +254,16 @@ export function TeamSelect({
                   disabled={!chosen && team.length >= MAX_SLOTS}
                   onClick={() => toggle(owned.id)}
                 >
-                  <span>
-                    {chosen ? '▣ ' : ''}
-                    {def?.name ?? owned.championKey}
-                  </span>
-                  <span className={styles.cardMeta}>
-                    Lv {owned.level} · ★{owned.rank} · {def?.element ?? '—'}
+                  <Portrait
+                    src={championArt(def, bundle?.assets).portrait ?? null}
+                    name={def?.name ?? owned.championKey}
+                    size={34}
+                  />
+                  <span className={styles.cardWho}>
+                    <span className={styles.cardName}>{def?.name ?? owned.championKey}</span>
+                    <span className={styles.cardMeta}>
+                      Lv {owned.level} · ★{owned.rank} · {def?.element ?? '—'}
+                    </span>
                   </span>
                 </button>
               );

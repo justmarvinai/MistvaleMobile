@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial, resolveBattle } from './support';
+import { dismissUnlocks, leaveTutorial, pickTeam, resolveBattle } from './support';
 
 /**
  * The management loop, in a real browser.
@@ -101,10 +101,7 @@ test.describe('the management loop', () => {
       await page.getByRole('button', { name: '1-1', exact: false }).first().click();
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
       await expect(teamDialog).toBeVisible();
-      await teamDialog
-        .getByRole('button', { name: /lv \d+/i })
-        .first()
-        .click();
+      await pickTeam(teamDialog);
       await teamDialog.getByRole('button', { name: /into the mist/i }).click();
 
       await resolveBattle(page);

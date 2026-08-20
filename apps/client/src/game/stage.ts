@@ -25,6 +25,19 @@ export const VIRTUAL_HEIGHT = 540;
 let app: Application | null = null;
 let currentScene: Scene | null = null;
 
+/**
+ * A scene handed over before the stage existed.
+ *
+ * `initStage` is asynchronous — it waits on a WebGL context — and a screen that mounts in
+ * the same commit as the canvas calls `setScene` a tick or two before that resolves.
+ * `setScene` used to answer `if (!app) return;`, which drops the scene on the floor
+ * silently: the screen believes it attached one, the stage never had one, and the fight
+ * plays out over ambient fog for as long as the player stays on the screen.
+ *
+ * Held here instead, and attached the moment the stage is ready.
+ */
+let pendingScene: Scene | null = null;
+
 export async function initStage(canvas: HTMLCanvasElement): Promise<Application> {
   if (app) return app;
 
@@ -44,6 +57,14 @@ export async function initStage(canvas: HTMLCanvasElement): Promise<Application>
   });
 
   app = application;
+
+  // Anything a screen handed over while the context was coming up.
+  if (pendingScene) {
+    const scene = pendingScene;
+    pendingScene = null;
+    setScene(scene);
+  }
+
   return application;
 }
 
@@ -59,12 +80,19 @@ export function getStage(): Application | null {
  * replaced by fog. Reachable on a reload straight into a battle.
  */
 export function hasScene(): boolean {
-  return currentScene !== null;
+  return currentScene !== null || pendingScene !== null;
 }
 
 /** Swaps in a new scene, destroying the previous one. */
 export function setScene(scene: Scene | null): void {
-  if (!app) return;
+  if (!app) {
+    // Before the context exists there is nothing to attach to, but the caller's scene must
+    // not be lost — see `pendingScene`. A later `setScene(null)` on the way out clears it,
+    // so a screen that comes and goes during start-up leaves nothing behind.
+    pendingScene?.destroy();
+    pendingScene = scene;
+    return;
+  }
 
   if (currentScene) {
     app.stage.removeChild(currentScene.root);
@@ -87,6 +115,8 @@ export function resizeStage(): void {
 
 export function destroyStage(): void {
   setScene(null);
+  pendingScene?.destroy();
+  pendingScene = null;
   app?.destroy(true, { children: true });
   app = null;
 }

@@ -29,6 +29,7 @@ import { useContentStore } from '@/state/contentStore';
 import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screens';
 import { useNavStore } from '@/state/navStore';
 import { useTutorialStore } from '@/state/tutorialStore';
+import { useLoadoutStore } from '@/state/loadoutStore';
 import { useUnlockStore } from '@/state/unlockStore';
 import { resetAccountState } from '@/state/resetAccount';
 import { TopBar } from './TopBar';
@@ -156,6 +157,7 @@ function GameShell() {
   const account = useSessionStore((state) => state.account);
   const level = usePlayerStore((state) => state.player?.level ?? null);
   const observeUnlocks = useUnlockStore((state) => state.observe);
+  const adoptLoadout = useLoadoutStore((state) => state.adopt);
   const loadTutorial = useTutorialStore((state) => state.load);
   const refreshTutorial = useTutorialStore((state) => state.refresh);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -174,6 +176,12 @@ function GameShell() {
   useEffect(() => {
     if (account && level !== null) observeUnlocks(account.id, level);
   }, [account, level, observeUnlocks]);
+
+  // The team this account last sent, and how it likes to watch a fight. Read once per
+  // sign-in rather than per battle, so the first stage of the evening opens already filled.
+  useEffect(() => {
+    if (account) adoptLoadout(account.id);
+  }, [account, adoptLoadout]);
 
   // A step's goal is completed by *doing the thing*, and the module that did it reports to
   // the server rather than to the overlay. Re-reading on every screen change is what turns

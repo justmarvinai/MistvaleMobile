@@ -317,6 +317,26 @@ printf '  %-22s %s @ %s\n' "admin repo" "${ADMIN_BRANCH}" "${ADMIN_SHA}"
 printf '  %-22s %s\n' "client symlink" "$(link_target "${CLIENT_LINK}" || true)"
 printf '  %-22s %s\n' "admin symlink" "$(link_target "${ADMIN_LINK}" || true)"
 printf '  %-22s %s\n' "server symlink" "$(link_target "${SERVER_LINK}" || true)"
+
+# The unit art, counted off the live client root.
+#
+# Its absence is the quietest failure this box has: the game boots, the HUD paints, the
+# server resolves every fight correctly, and the battlefield is empty because every sprite
+# is a 404. Nothing else on this screen would move. UPDATE.sh refuses to cut a release
+# without it now; this says whether the release actually running has it.
+SPRITE_MANIFEST="$(link_target "${CLIENT_LINK}" 2>/dev/null || true)/sprites/manifest.json"
+if [[ -f "${SPRITE_MANIFEST}" ]]; then
+	SPRITE_UNITS="$(grep -c '"basePath"' "${SPRITE_MANIFEST}" 2>/dev/null || echo 0)"
+	if [[ "${SPRITE_UNITS}" -gt 0 ]]; then
+		printf '  %-22s %s unit(s)\n' "unit art" "${SPRITE_UNITS}"
+	else
+		warn "the sprite manifest lists no units — battles will draw an empty field"
+		DEGRADED=1
+	fi
+else
+	warn "no unit art in the running client (sprites/manifest.json) — battles will draw an empty field; re-run UPDATE.sh"
+	DEGRADED=1
+fi
 hr
 
 printf '%sOps%s\n' "${C_BOLD}" "${C_RESET}"
