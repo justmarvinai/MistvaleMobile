@@ -5,6 +5,45 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the empty battlefield, for real this time
+
+The owner's fights rendered a perfect HUD over a black rectangle: turn order moving, health
+bars moving, outcome correct, and not one champion, enemy, ground plate or wisp of fog on
+the field. It never reproduced in development. The on-screen notice added in the previous
+change is what finally pinned it — it fires only when the stage has nothing on it, and it
+fired, which ruled out the art and pointed straight at the stage.
+
+**`initStage` did not check which canvas an application belonged to.** It answered `if (app)
+return app;` — "there is an application, have it". `PixiStage` mounts a fresh `<canvas>`
+whenever it remounts and `Application.init` is asynchronous, so a remount that landed while
+a previous init was still coming up left the finished application bound to a node that had
+already left the document. Every frame after that was drawn into a canvas nobody could see,
+while the DOM half of the game carried on perfectly — which is exactly why it looked like an
+art problem. Whether it happened at all was a race between the graphics context starting and
+the session resolving, so one machine saw it every time and another never did.
+
+Four more faults in the same file, each able to blank the stage on its own:
+
+- **Concurrent calls built two applications** for one canvas.
+- **A teardown could not cancel an in-flight init**, leaving a zombie application to install
+  itself over the live one.
+- **`destroyStage` destroyed the application with `removeView: true`** — which takes React's
+  `<canvas>` out of the document. Found by doing it: the page filled with "WebGL context may
+  be lost" and went blank.
+- **An init failure was an unhandled rejection.** A browser with WebGL switched off got a
+  black rectangle, permanently, with nothing in the console. `initStage` now resolves to null
+  and records why (`stageFailure`), and the battle screen already says so on screen.
+
+And an unmount is no longer taken at face value: React unmounts and immediately remounts
+against the *same* canvas — every time under StrictMode — so the teardown is deferred by a
+task and cancelled if the canvas comes straight back. `destroyStage` also takes the canvas
+asking, so the old backdrop leaving cannot tear down the new one's stage.
+
+`game/stage.test.ts` covers all of it against a faked Pixi, because the rules being checked
+are this module's own: which canvas owns the stage, what happens to a scene handed over too
+early, who may tear it down, and that the view is never removed. Each fix was confirmed by
+putting the old line back and watching the suite go red.
+
 ### Fixed — the Auto button stopped looking engaged
 
 Auto worked; it just no longer showed it. `BattleControls` sets `aria-pressed` from its

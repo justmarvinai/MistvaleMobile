@@ -24,9 +24,10 @@ export function PixiStage({ scene = 'mist' }: PixiStageProps) {
 
     let cancelled = false;
 
-    void initStage(canvas).then(() => {
-      // The component may have unmounted while the WebGL context was initialising.
-      if (cancelled) return;
+    void initStage(canvas).then((application) => {
+      // The component may have unmounted while the graphics context was initialising — or
+      // there may be no context to be had, which `initStage` reports rather than throwing.
+      if (cancelled || !application) return;
       // …and a screen may have attached its own scene while it was. This is a *default*,
       // not a claim on the stage: replacing a battle that is already running with the
       // ambient mist is exactly what a reload into a fight used to do.
@@ -40,7 +41,9 @@ export function PixiStage({ scene = 'mist' }: PixiStageProps) {
     return () => {
       cancelled = true;
       observer.disconnect();
-      destroyStage();
+      // Named, so the stage is only torn down on behalf of the canvas that owns it — and
+      // deferred inside `destroyStage`, so an unmount that is really a remount keeps it.
+      destroyStage(canvas);
       initialised.current = false;
     };
     // Scene switching is handled by the effect below; this one owns the lifecycle.

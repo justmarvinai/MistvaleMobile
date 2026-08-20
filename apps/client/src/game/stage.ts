@@ -38,38 +38,165 @@ let currentScene: Scene | null = null;
  */
 let pendingScene: Scene | null = null;
 
-export async function initStage(canvas: HTMLCanvasElement): Promise<Application> {
-  if (app) return app;
+/**
+ * Which canvas the live application draws into.
+ *
+ * `initStage` used to answer `if (app) return app;` — "there is an application, have it" —
+ * without checking that it had been built for the canvas being asked about. `PixiStage`
+ * mounts a fresh `<canvas>` whenever it remounts, and `Application.init` is asynchronous,
+ * so a remount that landed while a previous init was still coming up left the finished
+ * application bound to a node that had already left the document. Every frame after that —
+ * the mist, the ground plate, the champions, the health bars — was rendered into a canvas
+ * nobody could see, while the DOM half of the game carried on perfectly.
+ *
+ * That is the empty battlefield, and why it never reproduced here: it is a race between the
+ * graphics context starting and the session resolving, and which one wins depends on the
+ * machine.
+ */
+let appCanvas: HTMLCanvasElement | null = null;
 
-  const application = new Application();
-  await application.init({
-    canvas,
-    background: 0x0c0a09,
-    antialias: false, // Pixel art must never be smoothed.
-    resolution: window.devicePixelRatio || 1,
-    autoDensity: true,
-    powerPreference: 'low-power', // Integrated graphics are the target.
-    resizeTo: canvas.parentElement ?? undefined,
-  });
+/** The in-flight init, so two callers cannot build two applications for one canvas. */
+let initInFlight: Promise<Application | null> | null = null;
+let initCanvas: HTMLCanvasElement | null = null;
 
-  application.ticker.add((ticker) => {
-    currentScene?.update?.(ticker);
-  });
+/**
+ * Bumped whenever the stage is torn down or re-pointed.
+ *
+ * An `Application.init` that resolves after its canvas has been abandoned must throw its own
+ * work away rather than install itself.
+ */
+let generation = 0;
 
-  app = application;
+/** Why the last attempt to build a stage failed, if it did. */
+let failure: string | null = null;
 
-  // Anything a screen handed over while the context was coming up.
-  if (pendingScene) {
-    const scene = pendingScene;
-    pendingScene = null;
-    setScene(scene);
+/**
+ * A teardown waiting to see whether the canvas is really going away.
+ *
+ * React unmounts and immediately remounts against the *same* canvas node — every time in
+ * development under StrictMode, and whenever a parent re-keys in production. Tearing the
+ * application down between the two halves kills the WebGL context on a canvas the
+ * replacement is already building against, which is a lost context and a page of shader
+ * errors. Deferred by a task, so a canvas that comes straight back keeps its stage.
+ */
+let teardownTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Builds — or returns — the application drawing into this canvas.
+ *
+ * Resolves to null rather than throwing when there is no graphics context to be had. A
+ * browser with WebGL switched off is a thing that happens, and the game is still playable
+ * without a battlefield: every number, every outcome and the whole HUD live elsewhere. What
+ * is not acceptable is what used to happen — an unhandled rejection, `app` null forever, and
+ * a black rectangle with no explanation anywhere.
+ */
+export async function initStage(canvas: HTMLCanvasElement): Promise<Application | null> {
+  // The canvas is back before its teardown ran: keep what we have.
+  if (teardownTimer !== null) {
+    clearTimeout(teardownTimer);
+    teardownTimer = null;
   }
 
-  return application;
+  if (app && appCanvas === canvas) return app;
+  if (initInFlight && initCanvas === canvas) return initInFlight;
+
+  // A different canvas: whatever exists now draws somewhere that no longer matters.
+  teardown();
+
+  const token = generation;
+  const application = new Application();
+  initCanvas = canvas;
+  initInFlight = (async () => {
+    try {
+      await application.init({
+        canvas,
+        background: 0x0c0a09,
+        antialias: false, // Pixel art must never be smoothed.
+        // Guarded rather than bare: this module is exercised outside a browser, and a
+        // `ReferenceError` here would be indistinguishable from "this machine has no WebGL".
+        resolution: (typeof window === 'undefined' ? 1 : window.devicePixelRatio) || 1,
+        autoDensity: true,
+        powerPreference: 'low-power', // Integrated graphics are the target.
+        resizeTo: canvas.parentElement ?? undefined,
+      });
+    } catch (cause) {
+      failure = cause instanceof Error ? cause.message : 'the graphics context could not start';
+      console.error('Mistvale: no graphics context —', cause);
+      if (token === generation) {
+        initInFlight = null;
+        initCanvas = null;
+      }
+      return null;
+    }
+
+    // Abandoned while the context was coming up. Destroying it here is the whole point:
+    // installing it would be the orphaned-canvas bug all over again.
+    if (token !== generation) {
+      destroyApplication(application);
+      return null;
+    }
+
+    app = application;
+    appCanvas = canvas;
+    failure = null;
+    initInFlight = null;
+    initCanvas = null;
+
+    application.ticker.add((ticker) => {
+      currentScene?.update?.(ticker);
+    });
+
+    // Anything a screen handed over while the context was coming up.
+    if (pendingScene) {
+      const scene = pendingScene;
+      pendingScene = null;
+      setScene(scene);
+    }
+
+    return application;
+  })();
+
+  return initInFlight;
+}
+
+/**
+ * Throws an application away without touching the page.
+ *
+ * `removeView: false`, emphatically. React owns every `<canvas>` this module is handed;
+ * tearing one out of the document detaches the node a replacement application may already
+ * be building against, and every frame after that goes to a lost context.
+ */
+function destroyApplication(application: Application): void {
+  application.destroy({ removeView: false }, { children: true });
+}
+
+/** Drops the live application, keeping any scene a screen is waiting to show. */
+function teardown(): void {
+  generation += 1;
+  initInFlight = null;
+  initCanvas = null;
+
+  if (currentScene) {
+    // Back to pending rather than destroyed: a screen that attached a scene still wants it,
+    // and the next stage should pick it up rather than open on fog.
+    app?.stage.removeChild(currentScene.root);
+    pendingScene?.destroy();
+    pendingScene = currentScene;
+    currentScene = null;
+  }
+
+  if (app) destroyApplication(app);
+  app = null;
+  appCanvas = null;
 }
 
 export function getStage(): Application | null {
   return app;
+}
+
+/** Why there is no stage, when there is none. Null while one exists or is still starting. */
+export function stageFailure(): string | null {
+  return failure;
 }
 
 /**
@@ -127,12 +254,25 @@ export function resizeStage(): void {
   currentScene?.resize?.(app.screen.width, app.screen.height);
 }
 
-export function destroyStage(): void {
-  setScene(null);
-  pendingScene?.destroy();
-  pendingScene = null;
-  app?.destroy(true, { children: true });
-  app = null;
+/**
+ * Tears the stage down — but only on behalf of the canvas that owns it, and only if that
+ * canvas does not come straight back.
+ *
+ * Neither guard is theoretical. A `PixiStage` unmounting is usually the *old* one leaving
+ * after a new one has already taken over, and tearing the stage down there took the live
+ * application with it; and React's unmount-then-remount against the same node would
+ * otherwise destroy the context the remount is building on.
+ */
+export function destroyStage(canvas?: HTMLCanvasElement): void {
+  if (canvas && appCanvas !== null && appCanvas !== canvas && initCanvas !== canvas) return;
+
+  if (teardownTimer !== null) clearTimeout(teardownTimer);
+  teardownTimer = setTimeout(() => {
+    teardownTimer = null;
+    teardown();
+    pendingScene?.destroy();
+    pendingScene = null;
+  }, 0);
 }
 
 /**
