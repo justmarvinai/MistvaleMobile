@@ -5,6 +5,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the empty battlefield was our own Content-Security-Policy
+
+Five rounds, and the answer was in Mistvale's nginx config the whole time. Pixi builds its
+shader programs with `new Function`; the site sends `script-src 'self'`, which refuses that.
+`Application.init` rejected with *"Current environment does not allow unsafe-eval"*, every
+scene was held pending forever, and the DOM half of the game carried on perfectly — a correct
+fight, a correct HUD, and a black rectangle where the champions should be. It never once
+reproduced in development because **the Vite dev server sends no CSP at all**, so the single
+environment nobody could test was the only one where it happened. Nothing to do with the
+owner's graphics card, browser or machine.
+
+`pixi.js/unsafe-eval` — Pixi's own CSP-safe shader system — is imported by `game/stage.ts`,
+the module that owns the only `Application` in the game, so it cannot be separated from the
+thing it makes work. Adding `unsafe-eval` to the policy instead would have traded a real
+security boundary for a one-line import; it was never on the table.
+
+**`e2e/csp.spec.ts` is the test that would have caught it on day one.** It serves the real
+production build over a throwaway static server with the policy read straight out of
+`scripts/deploy-assets/nginx-mistvale.conf` — the file that is actually deployed, so the test
+cannot drift from the header — and fights a stage under it. Removing the import turns it red.
+
+### Fixed — enemies were turned to face away from the fight
+
+The rule was "mirror everything on the enemy side", which is right only if every sprite in
+the game is drawn facing the same way. It is not: champion art is authored facing right, and
+the enemy art is authored facing *left*, already turned toward the party. Mirroring it on top
+of that spun the Sskarn round to face the back wall.
+
+`game/facing.ts` asks about the art instead of the side, and both renderers ask it — so a
+champion borrowed as an Arena defender is turned round, an enemy is left alone, and the Pixi
+scene and the DOM battlefield cannot drift apart on it again.
+
+### Changed — damage numbers use the library's `FloatingText`
+
+At the owner's suggestion, and it fixes the two things wrong with the first pass: numbers
+landed *inside* the champion who took the hit, and simultaneous hits stacked on one another.
+`FloatingText` manages a whole layer — jitter, rise, fade, and its own cleanup — which is
+what it was written for.
+
+### Changed — the simple battlefield idles
+
+"Highly animated — idle loops always play" is in the brief, and a still field reads as a
+broken one whichever half of the game drew it. The same nine frames at the same nine frames a
+second, on one clock for the whole field. It needed the sprite manifest, which nothing on
+that path had been asking for — which is why every unit had been holding on its still image.
+
 ### Added — a battlefield for the machines the graphics card fails on
 
 The battlefield is the one part of Mistvale that needs a graphics context, and a machine can

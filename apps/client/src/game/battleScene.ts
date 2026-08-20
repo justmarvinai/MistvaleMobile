@@ -11,6 +11,7 @@ import {
 import type { UnitRef } from '@mistvale/engine';
 import type { Floater, PlaybackView, VisualUnit } from './playback';
 import { loadIdleFrames, loadPlaceholderTexture } from './sprites';
+import { mirrored } from './facing';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH, type Scene } from './stage';
 
 /**
@@ -237,7 +238,9 @@ export class BattleScene implements Scene {
    * world in which a unit is not on the board.
    */
   private async attachSprite(visual: UnitVisual, unit: VisualUnit): Promise<void> {
-    const frames: Texture[] = await loadIdleFrames(this.artFor(unit.defKey));
+    const art = this.artFor(unit.defKey);
+    const flip = mirrored(art, unit.ref.side) ? -1 : 1;
+    const frames: Texture[] = await loadIdleFrames(art);
     if (visual.container.destroyed) return;
 
     if (frames.length > 0) {
@@ -245,8 +248,8 @@ export class BattleScene implements Scene {
       sprite.anchor.set(0.5, 1);
       sprite.animationSpeed = 9 / 60; // The 9 fps the art was drawn at.
       sprite.play();
-      // Enemies face the player's side.
-      sprite.scale.x = unit.ref.side === 'enemy' ? -2 : 2;
+      // Turned to face the fight, by what the art is rather than by which side it is on.
+      sprite.scale.x = 2 * flip;
       sprite.scale.y = 2;
       this.setBody(visual, sprite, 0xffffff);
       return;
@@ -265,7 +268,7 @@ export class BattleScene implements Scene {
       // Matched to a real unit's drawn height (88px art at ×2) rather than to the
       // silhouette's own 1400px, so a stand-in stands the same size as a champion.
       const scale = STAND_IN_HEIGHT / (stand.height || STAND_IN_HEIGHT);
-      sprite.scale.set(unit.ref.side === 'enemy' ? -scale : scale, scale);
+      sprite.scale.set(scale * flip, scale);
       this.setBody(visual, sprite, tint);
       return;
     }

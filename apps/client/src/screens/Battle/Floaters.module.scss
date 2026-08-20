@@ -1,0 +1,6 @@
+/* The layer `FloatingText` spawns into: the whole battlefield, taking no clicks. */
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}

@@ -1,3 +1,22 @@
+/**
+ * The CSP-safe shader system, installed before anything asks Pixi for a renderer.
+ *
+ * Pixi builds its shader programs with `new Function`, which a `script-src 'self'` policy
+ * refuses — and Mistvale's own nginx sends exactly that policy, deliberately. So on the
+ * deployed site `Application.init` rejected with "Current environment does not allow
+ * unsafe-eval", every scene was held pending forever, and every battle was a correct fight
+ * over a black rectangle. It never happened in development because the Vite dev server
+ * sends no CSP at all, which is why it took four rounds and a browser the owner could
+ * screenshot to find.
+ *
+ * This module swaps that generation for an implementation that does not evaluate strings.
+ * The alternative — adding `unsafe-eval` to the policy — would trade a real security
+ * boundary for a one-line import, and is not on the table.
+ *
+ * Imported for its side effect and imported *here*, in the module that owns the only
+ * `Application` in the game, so it cannot be separated from the thing it makes work.
+ */
+import 'pixi.js/unsafe-eval';
 import { Application, BlurFilter, Container, Graphics, type Ticker } from 'pixi.js';
 
 /**

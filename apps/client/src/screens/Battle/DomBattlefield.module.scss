@@ -59,8 +59,9 @@
   image-rendering: pixelated;
 }
 
-/* Enemies face the player's side, as they do in the scene. */
-.fighter[data-side='enemy'] .sprite {
+/* Turned to face the fight. Which units those are is `game/facing`'s answer, not this
+   file's — the art decides, not the side. */
+.fighter[data-mirrored='true'] .sprite {
   transform: scaleX(-1);
 }
 
@@ -99,34 +100,4 @@
   border: 2px solid $accent;
   border-radius: 50%;
   opacity: 0.9;
-}
-
-.floater {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  font-family: $font-display;
-  font-size: 15px;
-  color: $parchment;
-  text-shadow: 0 0 4px #0c0a09;
-  white-space: nowrap;
-}
-
-.damage {
-  color: $parchment;
-}
-
-.heal {
-  color: #57b35c;
-}
-
-.resist {
-  color: $muted;
-}
-
-.shield {
-  color: $accent;
-}
-
-.status {
-  color: #e0a52e;
 }

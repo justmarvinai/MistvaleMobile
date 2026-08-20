@@ -1,8 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '@/game/stage';
 import { slotPosition } from '@/game/battleScene';
-import { framePath, stillPath } from '@/game/sprites';
+import { framePath, loadSpriteManifest, spriteEntry, stillPath } from '@/game/sprites';
 import { CHAMPION_PLACEHOLDER } from '@/ui/championArt';
+import { mirrored } from '@/game/facing';
+import { Floaters } from './Floaters';
 import type { PlaybackView, VisualUnit } from '@/game/playback';
 import styles from './DomBattlefield.module.scss';
 
@@ -17,10 +19,15 @@ import styles from './DomBattlefield.module.scss';
  *
  * It is not a second battle system. It reads the same `PlaybackView` the scene does, stands
  * units in the same formation (`slotPosition`, shared deliberately), and shows the same
- * three things that make a fight legible: who is standing where, how much of them is left,
- * and who is acting. What it does not do is animate — no idle loops, no shake, no drifting
- * fog — because those are the parts that cost a GPU, and a still battlefield you can read
- * beats a moving one you cannot see.
+ * things that make a fight legible: who is standing where, which way they are facing, how
+ * much of them is left, and who is acting.
+ *
+ * **It idles.** "Highly animated — idle loops always play" is in the brief, and a still
+ * battlefield reads as a broken one whichever half of the game drew it. The loop is the same
+ * nine frames at the same nine frames a second the art was drawn at, on one timer for the
+ * whole field rather than one per champion; the browser has every frame in cache after the
+ * first pass round. What it does *not* do is shake, flash or drift fog — those want a
+ * compositor, which is the thing this exists because the machine does not have.
  *
  * Sized by aspect ratio rather than by script: the Pixi scene letterboxes a 960×540 design
  * canvas inside the viewport, and an `aspect-ratio` box centred in the same space puts every
@@ -36,6 +43,12 @@ export function DomBattlefield({
 }): JSX.Element {
   const units = useMemo(() => [...view.allies, ...view.enemies], [view.allies, view.enemies]);
   const actingKey = view.acting ? `${view.acting.side}:${view.acting.slot}` : null;
+  const frame = useIdleFrame();
+  // The manifest says how many frames each unit has. Nothing else on this path asks for it —
+  // the Pixi loader is what usually pulls it in, and it is not running — so the fallback
+  // fetches it itself. Without this every unit fell back to its still and stood there, which
+  // is exactly the "nothing is animated" the owner reported.
+  const framesReady = useSpriteManifest();
 
   return (
     <div className={styles.field} aria-hidden="true">
@@ -46,51 +59,82 @@ export function DomBattlefield({
             key={`${unit.ref.side}:${unit.ref.slot}`}
             unit={unit}
             art={artFor(unit.defKey)}
+            frame={frame}
+            framesReady={framesReady}
             acting={actingKey === `${unit.ref.side}:${unit.ref.slot}`}
           />
         ))}
-        {view.floaters.map((floater) => {
-          const at = slotPosition(floater.ref.side, floater.ref.slot);
-          return (
-            <span
-              key={floater.id}
-              className={`${styles.floater} ${styles[floater.kind] ?? ''}`}
-              style={{ left: pct(at.x, VIRTUAL_WIDTH), top: pct(at.y - 90, VIRTUAL_HEIGHT) }}
-            >
-              {floater.text}
-            </span>
-          );
-        })}
+        <Floaters floaters={view.floaters} />
       </div>
     </div>
   );
 }
 
+/**
+ * One clock for the whole field, at the nine frames a second the art was drawn at.
+ *
+ * A timer per champion would be eight timers doing the same arithmetic and eight loops
+ * drifting out of step with one another for no reason.
+ */
+function useIdleFrame(): number {
+  const [frame, setFrame] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setFrame((current) => current + 1), 1000 / 9);
+    return () => window.clearInterval(timer);
+  }, []);
+  return frame;
+}
+
+/** Resolves once, and re-renders the field when the frame counts are known. */
+function useSpriteManifest(): boolean {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void loadSpriteManifest()
+      .then(() => {
+        if (live) setReady(true);
+      })
+      // A missing manifest is not fatal here: every unit simply holds on its still image,
+      // which is what the `onError` ladder is for anyway.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
+  return ready;
+}
+
 function Fighter({
   unit,
   art,
+  frame,
+  framesReady,
   acting,
 }: {
   unit: VisualUnit;
   art: string;
+  frame: number;
+  framesReady: boolean;
   acting: boolean;
 }): JSX.Element {
   const at = slotPosition(unit.ref.side, unit.ref.slot);
   const ratio = unit.maxHp > 0 ? Math.max(0, Math.min(1, unit.hp / unit.maxHp)) : 0;
+  // A unit with no published frames holds on its still.
+  const frames = framesReady ? (spriteEntry(art)?.idleFrames ?? 0) : 0;
+  const source = frames > 0 ? framePath(art, frame % frames) : stillPath(art);
 
   return (
     <div
       className={styles.fighter}
       data-side={unit.ref.side}
+      data-mirrored={mirrored(art, unit.ref.side)}
       data-alive={unit.alive}
       data-acting={acting}
       style={{ left: pct(at.x, VIRTUAL_WIDTH), top: pct(at.y, VIRTUAL_HEIGHT) }}
     >
       <img
         className={styles.sprite}
-        // The first idle frame rather than the still, so a champion looks the same here as
-        // it does in the scene — the still is a separate, dimmer composite.
-        src={framePath(art, 0)}
+        src={source}
         alt=""
         draggable={false}
         // The same ladder the scene uses, walked one rung per failure: the unit's own art,
