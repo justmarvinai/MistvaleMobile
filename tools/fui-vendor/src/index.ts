@@ -32,6 +32,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FUI_COMPONENTS, FUI_PACKS } from './components';
+import { pruneAssetsCss } from './assets';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '../../..');
@@ -47,9 +48,10 @@ interface Record_ {
  * Files every component needs regardless of which ones are picked.
  *
  * `assets.css` declares `--fui-img-*` for every asset in the library, including packs
- * Mistvale does not vendor. That costs nothing: a custom property whose `url()` nothing
- * reads is never fetched, and keeping the file whole means a pack added to `FUI_PACKS`
- * later works without regenerating anything.
+ * Mistvale does not vendor — so it is pruned to the art that actually came across before it
+ * is written (`assets.ts`). Keeping it whole was thought to be free, on the reasoning that a
+ * custom property nothing reads is never fetched; that is true at runtime and false at build
+ * time, where Vite warns once per unresolvable `url()` and buried the build in noise.
  *
  * Only `dark-ember` comes across. Stone & Vine is the library's other theme and Mistvale
  * is not it.
@@ -114,7 +116,11 @@ async function main(): Promise<void> {
 
   const mismatched: string[] = [];
   let copied = 0;
+  // `assets.css` is written after the art, because what belongs in it depends on which art
+  // came across — see `pruneAssetsCss`.
+  const ASSETS_CSS = 'src/lib/styles/assets.css';
   for (const path of [...wanted].sort()) {
+    if (path === ASSETS_CSS) continue;
     const source = join(from, path);
     if (!existsSync(source)) fail(`the record names a file that does not exist: ${path}`);
     // `src/lib/components/X.ts` → `fui/components/X.ts`, `src/lib/core/…` → `fui/core/…`,
@@ -176,6 +182,25 @@ async function main(): Promise<void> {
     }
     await mkdir(dirname(target), { recursive: true });
     await cp(file, target);
+  }
+
+  // ── The art variables ─────────────────────────────────────────────────────
+  // Declarations for art this build does not ship are dropped. Left in, each one is a
+  // `url()` Vite cannot resolve and warns about on every production build, and a slot a
+  // component can point at to render nothing at all.
+  {
+    const source = join(from, ASSETS_CSS);
+    if (!existsSync(source)) fail(`the library has no ${ASSETS_CSS}`);
+    const pruned = pruneAssetsCss(await readFile(source, 'utf8'), (file) => artWanted.has(file));
+    const target = join(codeOut, ASSETS_CSS.replace(/^src\/lib\//, ''));
+    if (check) {
+      const current = existsSync(target) ? await readFile(target, 'utf8') : null;
+      if (current !== pruned) mismatched.push(relative(repoRoot, target));
+    } else {
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, pruned);
+      copied += 1;
+    }
   }
 
   // Art dropped from the set must not linger: `public/` is served wholesale, so a stale

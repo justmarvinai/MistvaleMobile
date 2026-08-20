@@ -327,6 +327,43 @@ test.describe('what a player can actually see', () => {
   });
 
   /**
+   * The wave counter counts.
+   *
+   * `WaveTracker` takes `current` at construction and paints from its own field after that,
+   * so the pips were built on wave one and stayed there for the entire fight — the owner's
+   * report was simply "it always only shows Wave 1". It is the same construction-time trap
+   * the whole `Fui` bridge exists to manage, and the reason `apply` exists.
+   *
+   * Asserted on the label rather than on the pips: a player reads "2 / 3".
+   */
+  test('the wave counter follows the fight', async ({ page }) => {
+    test.slow();
+    await registerRaw(page, 'e2ewave', 'Waver');
+    await chooseStarter(page);
+
+    await page
+      .getByRole('button', { name: /^campaign$/i })
+      .first()
+      .click();
+    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
+    await pickTeam(teamDialog);
+    await teamDialog.getByRole('button', { name: /into the mist/i }).click();
+
+    const wave = page.locator('.fui-waves');
+    await expect(wave).toBeVisible({ timeout: 30_000 });
+    await expect(wave, 'a three-wave stage opens on the first').toContainText('1 / 3');
+
+    // Let the server fight it, and watch the counter move off wave one.
+    await resolveBattle(page);
+    await expect
+      .poll(async () => (await wave.textContent())?.replace(/\s+/g, ' ') ?? '', {
+        timeout: 60_000,
+      })
+      .not.toContain('1 / 3');
+  });
+
+  /**
    * The champions are on the board.
    *
    * This is the one thing in the game that no DOM assertion can reach, and it is the thing

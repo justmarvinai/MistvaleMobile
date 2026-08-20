@@ -4,7 +4,6 @@ import type { UnitRef } from '@mistvale/engine';
 import { ActionBar } from '@/fui/components/ActionBar.ts';
 import { BattleControls } from '@/fui/components/BattleControls.ts';
 import { PartyFrame } from '@/fui/components/PartyFrame.ts';
-import { TurnMeter } from '@/fui/components/TurnMeter.ts';
 import { UnitFrame } from '@/fui/components/UnitFrame.ts';
 import { WaveTracker } from '@/fui/components/WaveTracker.ts';
 import { Fui } from '@/fui/react';
@@ -12,8 +11,8 @@ import { Button } from '../../ui/Button/Button';
 import { BattleScene } from '../../game/battleScene';
 import { stillPath } from '../../game/sprites';
 import { skillArt } from '../../ui/skillArt';
-import { getStage, isSceneAttached, setScene } from '../../game/stage';
-import { battlefieldIsBlind } from './blindStage';
+import { getStage, isSceneAttached, setScene, stageFailure } from '../../game/stage';
+import { blindMessage, blindReason } from './blindStage';
 import { settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
 import { useBattleStore } from '../../state/battleStore';
 import { useLoadoutStore } from '../../state/loadoutStore';
@@ -32,7 +31,7 @@ import styles from './BattleScreen.module.scss';
  * crisp and accessible (docs/ARCHITECTURE.md §4.1).
  *
  * Since the design rework the HUD is the library's own battle widgets, arranged the way
- * this genre arranges them: the wave pips top-left, the turn queue across the top, the
+ * this genre arranges them: the wave pips top-left, the
  * controls at the right, the party down the left, whoever is under consideration in the
  * middle, and the acting champion with their skills along the bottom. The frame itself
  * never takes a click — only the widgets do — so the stage underneath stays reachable.
@@ -131,11 +130,19 @@ export function BattleScreen(): JSX.Element {
    * with nothing on screen or in the console to say what happened. Re-attaching is an
    * identity comparison, so paying it per commit costs nothing and closes the whole class.
    */
+  /** Set when drawing the view threw — see `drawFailed` below. */
+  const drawError = useRef<string | null>(null);
+
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
     if (!isSceneAttached(scene)) setScene(scene);
-    void scene.sync(view);
+    // `sync` is async, and this used to be a bare `void`: anything it threw became an
+    // unhandled rejection, so a battlefield that failed to draw failed in complete silence.
+    void scene.sync(view).catch((cause: unknown) => {
+      drawError.current = cause instanceof Error ? cause.message : String(cause);
+      console.error('Mistvale: the battlefield could not be drawn —', cause);
+    });
   });
 
   /**
@@ -164,19 +171,23 @@ export function BattleScreen(): JSX.Element {
    * A beat of delay, because a scene is legitimately empty for the frame between the board
    * arriving and the first sync.
    */
-  const [blind, setBlind] = useState(false);
+  const [blind, setBlind] = useState<string | null>(null);
   const unitCount = view.allies.length + view.enemies.length;
   useEffect(() => {
     if (unitCount === 0) return;
     const timer = window.setTimeout(() => {
       const scene = sceneRef.current;
+      const reason = blindReason({
+        units: unitCount,
+        hasStage: getStage() !== null,
+        attached: scene !== null && isSceneAttached(scene),
+        drawn: scene?.drawn ?? 0,
+        drawError: drawError.current,
+      });
       setBlind(
-        battlefieldIsBlind({
-          units: unitCount,
-          hasStage: getStage() !== null,
-          attached: scene !== null && isSceneAttached(scene),
-          drawn: scene?.drawn ?? 0,
-        }),
+        reason === null
+          ? null
+          : blindMessage(reason, reason === 'no-context' ? stageFailure() : drawError.current),
       );
     }, 1500);
     return () => window.clearTimeout(timer);
@@ -256,27 +267,6 @@ export function BattleScreen(): JSX.Element {
       .map((key) => skillsByKey.get(key))
       .filter((skill): skill is SkillDef => skill !== undefined && skill.slot !== 'passive');
   }, [actingUnit, skillsByKey]);
-
-  /**
-   * Upcoming turn order, straight off the state the server sent.
-   *
-   * The meter is shown as-is rather than animated: the server moves turn meters, and a
-   * queue filling on its own would be the client guessing at the fight.
-   */
-  const queue = useMemo(() => {
-    if (!battle) return [];
-    return [...battle.state.allies, ...battle.state.enemies]
-      .filter((unit) => unit.alive)
-      .sort((a, b) => b.tm - a.tm || a.ref.slot - b.ref.slot)
-      .slice(0, 6)
-      .map((unit) => ({
-        id: unitId(unit.ref),
-        name: unit.name,
-        portrait: stillPath(artFor(unit.defKey)),
-        meter: Math.min(1, unit.tm / 100),
-        enemy: unit.ref.side === 'enemy',
-      }));
-  }, [battle, artFor]);
 
   /** The four who came, with what is left of them. */
   const party = useMemo(() => {
@@ -361,15 +351,15 @@ export function BattleScreen(): JSX.Element {
           <Fui
             of={WaveTracker}
             options={{ waves: waveCount, current: view.wave + 1, label: 'Wave', size: 'sm' }}
+            /* `WaveTracker` takes `current` at construction and paints from its own field
+               thereafter — so without this it was built on wave one and stayed there for
+               the whole fight, however many waves the stage had. Silent, because `set`
+               emits `wave:change` and `wave:clear` otherwise, and this is the fight telling
+               the pips where it got to rather than the pips announcing a decision. */
+            apply={(tracker, next) => tracker.set(next.current ?? 1, { silent: true })}
           />
           <span className={styles.turnCount}>Turn {view.turn}</span>
         </div>
-
-        <Fui
-          of={TurnMeter}
-          className={styles.order}
-          options={{ units: queue, running: false, showBars: true, size: 44 }}
-        />
 
         <div className={styles.controls} ref={controlsRef}>
           <Fui

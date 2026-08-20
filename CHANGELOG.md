@@ -5,6 +5,48 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the wave counter never left wave one
+
+`WaveTracker` takes `current` at construction and paints from its own field afterwards, and
+nothing was pushing the fight's wave into it — so a three-wave stage showed "1 / 3" from the
+first turn to the last. The same construction-time trap the `Fui` bridge's `apply` exists
+for. Pushed in silently, because `set` otherwise emits `wave:change` and `wave:clear`, and
+this is the fight telling the pips where it got to rather than the pips announcing a
+decision. `visible.spec.ts` fights a three-wave stage and watches the label move; removing
+the fix turns it red.
+
+### Removed — the turn-order strip
+
+The queue of upcoming portraits across the top of a battle, at the owner's request. The
+information it carried is in the fight itself.
+
+### Changed — the "battlefield could not be drawn" notice names its cause
+
+The first version said *that* the field was blank, which was enough to rule out the art and
+not enough to say what had gone wrong instead — and cost a round finding out. It now
+distinguishes four causes, each a different thing to go and fix: no graphics context (with
+the browser's own reason, and what to change), a scene that threw while drawing, a stage
+something else took over, and a field that is genuinely empty. A screenshot can tell them
+apart.
+
+`sync` is also no longer called with a bare `void`. It is async, so anything it threw became
+an unhandled rejection and the battlefield simply stayed empty in silence; a failure is now
+caught, logged, and named on screen.
+
+### Fixed — twenty-eight build warnings on every production build
+
+`UPDATE.sh` ended every client build with a wall of "`/fui/stone-vine/…png` didn't resolve at
+build time". The vendored `assets.css` declares `--fui-img-*` for every asset in the
+FantasyUIs library, including the packs Mistvale does not ship. That was thought to be free —
+a custom property nothing reads is never fetched — which is true at runtime and false at
+build time, where Vite resolves every `url()` it can see. Twenty-eight warnings on every
+build is the kind of standing noise that hides the warning that matters, and each one is also
+a slot a component can point at to render nothing at all.
+
+`tools/fui-vendor` now prunes the stylesheet to the art it actually vendored, companion
+declarations and all, matching on the asset id so `bar-track-stone` and `bar-track-stone-1`
+cannot be confused. The client build is warning-free.
+
 ### Fixed — the empty battlefield, for real this time
 
 The owner's fights rendered a perfect HUD over a black rectangle: turn order moving, health
