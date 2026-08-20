@@ -1,0 +1,29 @@
+@use '../../styles/tokens' as *;
+
+/* A single letter in a small painted button. It sits in the heading's action slot, so it
+   needs to be square rather than the wide shape a worded button takes. */
+.button {
+  flex: none;
+  min-width: 0;
+  font-family: $font-mono;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  color: $muted;
+  font-size: 0.875rem;
+  line-height: 1.7;
+
+  p {
+    margin: 0;
+  }
+
+  strong {
+    color: $parchment;
+    font-weight: normal;
+  }
+}

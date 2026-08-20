@@ -4,8 +4,7 @@
   display: grid;
   /* The title is a row of its own; the content row takes the slack. */
   grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr) 20rem;
-  gap: $space-4;
+  gap: $space-3;
   height: 100%;
   min-height: 0;
 }
@@ -65,10 +64,15 @@
   font-size: 0.9rem;
 }
 
+/* Centred both ways. Without the odds column beside it the gate has the whole window, and
+   a portal pinned to the top of a tall empty panel looks like a page that failed to load
+   the rest of itself. `safe` so a short window scrolls to the top rather than clipping the
+   sigil name off it. */
 .gate {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: safe center;
   gap: $space-2;
   flex: 1;
   min-height: 0;
@@ -173,14 +177,6 @@
 
 .floor {
   color: $muted-deep;
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .empty {

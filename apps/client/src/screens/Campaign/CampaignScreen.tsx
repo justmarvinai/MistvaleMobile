@@ -15,6 +15,7 @@ import styles from './CampaignScreen.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
 import { stageBoss } from '../../ui/BossCard/bossRules';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 
 /**
  * The campaign map, and since the design rework it is one.
@@ -53,16 +54,17 @@ const STARS_PER_CHAPTER_DIFFICULTY = 21;
 const MAP_COLUMNS = 4;
 
 /**
- * The map's height in pixels — one row, plus a step for each row after it.
+ * The map fills its pane.
  *
- * A number rather than a percentage: the map sits in a scroller whose own height is
- * indefinite, where a percentage resolves against nothing and collapses the map to a
- * strip.
+ * It used to be a pixel height computed from the row count — 200px, plus 110 for each row
+ * after the first — because it sat in a scroller whose own height was indefinite, where a
+ * percentage resolves against nothing and collapses the map to a strip. The pane is a
+ * definite box now (the screen's content row, minus the chapter dock), so `100%` resolves,
+ * and the map is as tall as the window instead of 420px with dead air underneath.
+ *
+ * `mapPosition` was always in percentages, so the serpentine simply spreads.
  */
-const MAP_ROW_HEIGHT = 200;
-const MAP_ROW_STEP = 110;
-
-const mapRows = (chapters: number): number => Math.max(1, Math.ceil(chapters / MAP_COLUMNS));
+const MAP_HEIGHT = '100%';
 
 /**
  * Where a chapter sits on the map.
@@ -256,31 +258,56 @@ export function CampaignScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="Twelve chapters, three difficulties, and a warlord waiting at the end of each.">
+      <Heading
+        tagline="Twelve chapters, three difficulties, and a warlord waiting at the end of each."
+        actions={
+          <>
+            {/* In the title bar rather than over the map: difficulty is a mode the whole
+                screen is in, the row is already there, and a strip of its own would cost
+                the map thirty pixels on every visit. */}
+            <Fui
+              of={SegmentedControl}
+              className={styles.difficulties}
+              attrs={{ 'aria-label': 'Difficulty' }}
+              options={{
+                value: difficulty,
+                segments: DIFFICULTIES.map((entry) => ({
+                  value: entry,
+                  label: DIFFICULTY_LABEL[entry],
+                  disabled: !available.has(entry),
+                })),
+              }}
+              on={{
+                'segment:change': (value: string) => {
+                  setDifficulty(value as Difficulty);
+                  setOpened(null);
+                },
+              }}
+            />
+            <ScreenInfo title="The Campaign">
+              <Panel title="The Campaign">
+                <p className={styles.note}>
+                  Push through the Sskarn invasion chapter by chapter. Clearing a stage pays silver
+                  and experience; energy comes back on its own over time. You have {energy}.
+                </p>
+                <p className={styles.note}>
+                  Each chapter drops one relic set, and each stage number drops one slot — so a
+                  chapter is a farm for something specific rather than a lottery.
+                </p>
+                <p className={styles.note}>
+                  Hard opens once the whole vale has fallen on Normal, and Brutal once it has fallen
+                  on Hard. Stars carry across all three, and the chapter chests count every one of
+                  them.
+                </p>
+              </Panel>
+            </ScreenInfo>
+          </>
+        }
+      >
         The Campaign
       </Heading>
 
       <div className={styles.column}>
-        <Fui
-          of={SegmentedControl}
-          className={styles.difficulties}
-          attrs={{ 'aria-label': 'Difficulty' }}
-          options={{
-            value: difficulty,
-            segments: DIFFICULTIES.map((entry) => ({
-              value: entry,
-              label: DIFFICULTY_LABEL[entry],
-              disabled: !available.has(entry),
-            })),
-          }}
-          on={{
-            'segment:change': (value: string) => {
-              setDifficulty(value as Difficulty);
-              setOpened(null);
-            },
-          }}
-        />
-
         {chapters.length === 0 ? (
           <Empty
             glyph="glyph-crossed-swords"
@@ -288,22 +315,26 @@ export function CampaignScreen(): JSX.Element {
             message="The road through the vale is content — it is laid in the Admin Suite."
           />
         ) : (
-          <div className={styles.scroller}>
-            {/* Remounted whenever a marker would change — see `mapKey`. */}
-            <Fui
-              key={mapKey}
-              of={WorldMap}
-              className={styles.map}
-              options={{
-                nodes,
-                art: 'bg-wide',
-                title: 'The Vale',
-                progress: walked,
-                height: MAP_ROW_HEIGHT + (mapRows(chapters.length) - 1) * MAP_ROW_STEP,
-                interactive: true,
-              }}
-              on={{ 'map:enter': (key: string) => setOpened(key) }}
-            />
+          <>
+            {/* The map is the screen: it takes every pixel the chapter dock underneath it
+                does not, rather than a fixed 420px with the rest of the window empty.
+                Remounted whenever a marker would change — see `mapKey`. */}
+            <div className={styles.mapPane}>
+              <Fui
+                key={mapKey}
+                of={WorldMap}
+                className={styles.map}
+                options={{
+                  nodes,
+                  art: 'bg-wide',
+                  title: 'The Vale',
+                  progress: walked,
+                  height: MAP_HEIGHT,
+                  interactive: true,
+                }}
+                on={{ 'map:enter': (key: string) => setOpened(key) }}
+              />
+            </div>
 
             {chapter && (
               <section className={styles.chapter} {...highlightable('panel:chapter')}>
@@ -377,26 +408,9 @@ export function CampaignScreen(): JSX.Element {
                 )}
               </section>
             )}
-          </div>
+          </>
         )}
       </div>
-
-      <aside className={styles.sidebar}>
-        <Panel title="The Campaign">
-          <p className={styles.note}>
-            Push through the Sskarn invasion chapter by chapter. Clearing a stage pays silver and
-            experience; energy comes back on its own over time. You have {energy}.
-          </p>
-          <p className={styles.note}>
-            Each chapter drops one relic set, and each stage number drops one slot — so a chapter is
-            a farm for something specific rather than a lottery.
-          </p>
-          <p className={styles.note}>
-            Hard opens once the whole vale has fallen on Normal, and Brutal once it has fallen on
-            Hard. Stars carry across all three, and the chapter chests count every one of them.
-          </p>
-        </Panel>
-      </aside>
 
       {chosen && <TeamSelect stage={chosen} onClose={() => setChosen(null)} />}
     </div>

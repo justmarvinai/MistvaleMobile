@@ -7,6 +7,7 @@ import { useContentStore } from '../../state/contentStore';
 import styles from './ChronicleScreen.module.scss';
 import { Portrait } from '../../ui/Portrait/Portrait';
 import { Heading } from '@/ui/Heading/Heading';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 
 /**
  * The Chronicle.
@@ -72,7 +73,36 @@ export function ChronicleScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="Every champion the vale has shown you, kept or not.">The Chronicle</Heading>
+      <Heading
+        tagline="Every champion the vale has shown you, kept or not."
+        actions={
+          <ScreenInfo title="The Chronicle">
+            <Panel title="The Chronicle">
+              <p className={styles.progress}>
+                <span className={styles.progressValue}>
+                  {chronicle.owned} / {chronicle.total}
+                </span>
+                <span className={styles.progressLabel}>champions gathered</span>
+              </p>
+              <div
+                className={styles.bar}
+                role="meter"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={pct}
+              >
+                <span style={{ width: `${pct}%` }} />
+              </div>
+              <p className={styles.note}>
+                Champions you have fought are recorded even if you never owned them. Brood-kin are
+                listed but do not count toward the total.
+              </p>
+            </Panel>
+          </ScreenInfo>
+        }
+      >
+        The Chronicle
+      </Heading>
 
       <div>
         <div className={styles.controls}>
@@ -141,30 +171,6 @@ export function ChronicleScreen(): JSX.Element {
           })}
         </div>
       </div>
-
-      <aside className={styles.sidebar}>
-        <Panel title="The Chronicle">
-          <p className={styles.progress}>
-            <span className={styles.progressValue}>
-              {chronicle.owned} / {chronicle.total}
-            </span>
-            <span className={styles.progressLabel}>champions gathered</span>
-          </p>
-          <div
-            className={styles.bar}
-            role="meter"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={pct}
-          >
-            <span style={{ width: `${pct}%` }} />
-          </div>
-          <p className={styles.note}>
-            Champions you have fought are recorded even if you never owned them. Brood-kin are
-            listed but do not count toward the total.
-          </p>
-        </Panel>
-      </aside>
     </div>
   );
 }

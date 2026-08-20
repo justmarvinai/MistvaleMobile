@@ -2,19 +2,49 @@
 
 .screen {
   display: grid;
-  /* The title is a row of its own; the content row takes the slack. */
-  grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr) 18rem;
-  gap: $space-4;
+  /* Title, then the vault, then the sell bar when there is a selection. */
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: $space-2;
   height: 100%;
   min-height: 0;
+}
+
+/* The relics scroll; the toolbar, the notices and the filters do not. */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-height: 0;
+}
+
+/* One row: how full the vault is, how much is worn, and the two things that change it. */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-wrap: wrap;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.toolActions {
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.count {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.78rem;
 }
 
 .filters {
   display: flex;
   flex-wrap: wrap;
   gap: $space-1;
-  margin-bottom: $space-3;
 }
 
 .filter {
@@ -39,7 +69,7 @@
   grid-template-columns: repeat(auto-fill, minmax($card-artifact, 1fr));
   gap: $space-2;
   align-content: start;
-  max-height: calc(100% - 3rem);
+  min-height: 0;
   overflow-y: auto;
   padding-right: $space-2;
 }
@@ -85,43 +115,36 @@
   }
 }
 
-.sidebar {
+/* ── The sell bar ─────────────────────────────────────────────────────────────
+   Appears with the selection and lies across the foot of the screen. It is the one thing
+   here that must not scroll away: a player mid-cull needs the total and the Sell button
+   wherever they are in the grid. */
+
+.sellBar {
+  flex: 0 0 auto;
+}
+
+.sellBody {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: $space-3;
-  min-height: 0;
+  flex-wrap: wrap;
 }
 
-.note {
-  color: $muted;
-  font-size: 0.8rem;
-  line-height: 1.6;
-}
-
-.stats {
+.sellWhat {
   display: flex;
-  flex-direction: column;
-  gap: $space-1;
-  margin: $space-3 0;
+  align-items: baseline;
+  gap: $space-2;
+}
 
-  div {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-  }
-
-  dt {
-    color: $muted;
-  }
-
-  dd {
-    margin: 0;
-    color: $parchment;
-  }
+.sellCount {
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 0.9rem;
 }
 
 .sellValue {
-  margin: 0 0 $space-2;
+  margin: 0;
   color: $gold;
   font-family: $font-mono;
   font-size: 1.1rem;
@@ -130,10 +153,11 @@
 .sellActions {
   display: flex;
   gap: $space-2;
+  margin-left: auto;
 }
 
 .warn {
-  margin: 0 0 $space-2;
+  margin: 0;
   color: $warning;
   font-size: 0.78rem;
   line-height: 1.5;

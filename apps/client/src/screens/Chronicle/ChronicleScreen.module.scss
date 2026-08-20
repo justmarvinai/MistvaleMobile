@@ -4,7 +4,7 @@
   display: grid;
   /* The title is a row of its own; the content row takes the slack. */
   grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr) 18rem;
+  grid-template-columns: minmax(0, 1fr);
   gap: $space-4;
   height: 100%;
   min-height: 0;
@@ -136,13 +136,6 @@
   color: $accent;
   font-family: $font-mono;
   font-size: 0.65rem;
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
-  min-height: 0;
 }
 
 .progress {

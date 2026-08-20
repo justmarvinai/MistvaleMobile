@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from 'react';
-import type { EnergyState } from '@mistvale/shared';
+import { createPortal } from 'react-dom';
+import type { EnergyState, PlayerSummary } from '@mistvale/shared';
+import { StatBar } from '@/fui/components/StatBar.ts';
 import { TopBar as FuiTopBar } from '@/fui/components/TopBar.ts';
-import { useFui, useFuiAttrs } from '@/fui/react';
+import { Fui, useFui, useFuiAttrs } from '@/fui/react';
 import { usePlayerStore } from '@/state/playerStore';
 import { useProfileStore } from '@/state/profileStore';
 import { useSessionStore } from '@/state/sessionStore';
@@ -10,14 +12,20 @@ import styles from './TopBar.module.scss';
 /**
  * The persistent resource bar.
  *
- * Painted by the library since the design rework — the avatar with its level ring, the
- * currency rail, the tool buttons and their badges are all its `TopBar`. What stays
- * Mistvale's is everything that moves:
+ * Painted by the library since the design rework — the avatar, the currency rail, the tool
+ * buttons and their badges are all its `TopBar`. What stays Mistvale's is everything that
+ * moves:
  *
  * Energy counts up locally between server responses: the server sends the value and the
  * timestamp of the next tick, and this component animates towards it. It never credits
  * energy on its own — any action re-syncs from the server (docs/ARCHITECTURE.md §4.4).
  * The projection is unchanged; only where the number is drawn moved.
+ *
+ * And the account's own progress, which used to be a thin arc drawn around the avatar. A
+ * ring is a shape that can say "some of the way" and nothing else — it has no room for the
+ * two numbers a player actually wants, which are how much experience they have and how
+ * much is left. So the ring is off and there is a real bar under the name instead, with
+ * both numbers beside it (see `LevelProgress`).
  */
 export function TopBar({
   onOpenSettings,
@@ -54,8 +62,8 @@ export function TopBar({
       style: { '--mv-avatar-initial': `"${(player?.profileName ?? '?').charAt(0).toUpperCase()}"` },
       name: player?.profileName ?? '',
       level: player?.level ?? 1,
-      levelProgress:
-        player && player.xpToNextLevel > 0 ? Math.min(1, player.xp / player.xpToNextLevel) : 1,
+      // Deliberately not passed: the ring it drives is off (see TopBar.module.scss), and
+      // the same fraction is drawn as a bar under the name where it can carry its numbers.
       resources: [
         // Energy first: it is the one number that decides whether the next thing the
         // player wanted to do is possible at all.
@@ -121,18 +129,88 @@ export function TopBar({
   //
   // It labels the chip with the player's name — that says *who*, not what pressing it
   // does, and it opens the profile card the ladder shows other people. And the level is
-  // drawn as a bare numeral on the avatar ring, which is the genre's own shape and what
-  // the library's examples do, but "1" on its own is not something a screen reader can
-  // make sense of. Both go in the label instead.
+  // drawn as a bare numeral on the avatar's corner, which is the genre's own shape and
+  // what the library's examples do, but "1" on its own is not something a screen reader
+  // can make sense of. Both go in the label instead.
   useFuiAttrs(instance?.el.querySelector<HTMLElement>('.fui-topbar__player'), {
     'aria-label': player
       ? `Your profile card — ${player.profileName}, level ${player.level}`
       : 'Your profile card',
   });
 
+  // The chip is the library's, and the progress under the name is Mistvale's — so it is
+  // portalled into the chip rather than passed to it. The chip element is built once and
+  // kept for the life of the bar (see `useFui`), so the target is stable.
+  const chip = instance?.el.querySelector<HTMLElement>('.fui-topbar__player') ?? null;
+
   if (!player) return null;
 
-  return <div ref={ref} style={{ display: 'contents' }} />;
+  return (
+    <>
+      <div ref={ref} style={{ display: 'contents' }} />
+      {chip && createPortal(<LevelProgress player={player} />, chip)}
+    </>
+  );
+}
+
+/**
+ * How far into the level, in the two numbers that answer it.
+ *
+ * `xpToNextLevel` is the span of the *current* level rather than a running total, so the
+ * fraction is `xp / xpToNextLevel` and the remainder is the subtraction — no cumulative
+ * table, and nothing here that the server has not already worked out.
+ *
+ * The bar is the library's `StatBar` on its `xp` artwork, kept live through its own
+ * `set`/`setMax` rather than rebuilt: a bar that is reconstructed when the number changes
+ * restarts its fill animation from empty, which is the one thing a progress bar must not
+ * do at the moment it advances.
+ *
+ * At the level cap there is no next level and no span to divide by. The bar reads full and
+ * the caption says so, which is a better answer than a bar stuck at zero.
+ */
+function LevelProgress({ player }: { player: PlayerSummary }): JSX.Element {
+  const capped = player.xpToNextLevel <= 0;
+  const value = capped ? 1 : Math.min(player.xp, player.xpToNextLevel);
+  const max = capped ? 1 : player.xpToNextLevel;
+  const left = Math.max(0, player.xpToNextLevel - player.xp);
+
+  return (
+    <span className={styles.progress}>
+      <Fui
+        of={StatBar}
+        className={styles.xpBar}
+        options={{
+          kind: 'xp',
+          value,
+          max,
+          // No `label` and no `readout`: both draw *inside* the bar, and the two numbers
+          // are already beside it where they have room to be read. The name the bar needs
+          // is the one a screen reader asks for, which goes on the element instead.
+          readout: 'none',
+          width: '100%',
+          trail: false,
+        }}
+        attrs={{ 'aria-label': 'Experience toward the next level' }}
+        apply={(bar, next) => {
+          bar.setMax(next.max ?? 1);
+          bar.set(next.value ?? 0);
+        }}
+      />
+      <span className={styles.xpNumbers}>
+        {capped ? (
+          'Level cap'
+        ) : (
+          <>
+            {player.xp.toLocaleString('en-US')} / {player.xpToNextLevel.toLocaleString('en-US')}
+            <span className={styles.xpLeft}>
+              {' '}
+              · {left.toLocaleString('en-US')} to Lv {player.level + 1}
+            </span>
+          </>
+        )}
+      </span>
+    </span>
+  );
 }
 
 const EMPTY_ENERGY: EnergyState = {

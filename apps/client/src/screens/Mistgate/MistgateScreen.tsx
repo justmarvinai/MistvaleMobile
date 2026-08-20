@@ -11,12 +11,13 @@ import { RevealOverlay } from './RevealOverlay';
 import styles from './MistgateScreen.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
+import { Modal } from '@/ui/Modal/Modal';
 
 /**
  * The Mistgate.
  *
- * Four sigils, ×1 and ×10, and an odds panel that is not buried. Showing the real rates
- * and the live mercy counters on the same screen as the button is a deliberate choice:
+ * Four sigils, ×1 and ×10, and an odds panel one worded button away. Showing the real rates
+ * and the live mercy counters within reach of the button is a deliberate choice:
  * the numbers are honest, so there is nothing to gain by hiding them, and a player who
  * can see the pity clock ticking trusts the one they cannot see.
  */
@@ -36,6 +37,8 @@ export function MistgateScreen(): JSX.Element {
 
   const [selected, setSelected] = useState<string | null>(null);
   const [oddsOpen, setOddsOpen] = useState(false);
+  /** Separate from `oddsOpen`: one is "is the dialog up", the other "is the full pool listed". */
+  const [oddsExpanded, setOddsExpanded] = useState(false);
 
   useEffect(() => {
     void load();
@@ -78,7 +81,16 @@ export function MistgateScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="Call into the mist and see what answers.">The Mistgate</Heading>
+      <Heading
+        tagline="Call into the mist and see what answers."
+        actions={
+          <Button size="sm" variant="ghost" onClick={() => setOddsOpen(true)}>
+            Odds &amp; mercy
+          </Button>
+        }
+      >
+        The Mistgate
+      </Heading>
 
       <div className={styles.main}>
         <div className={styles.sigils} role="tablist" aria-label="Sigils">
@@ -146,9 +158,22 @@ export function MistgateScreen(): JSX.Element {
         </section>
       </div>
 
-      <aside className={styles.sidebar}>
-        <OddsPanel banner={banner} expanded={oddsOpen} onToggle={() => setOddsOpen(!oddsOpen)} />
-      </aside>
+      {/* The rates are a dialog rather than a column, but the way to them is a worded
+          button and not a lowercase "i": these are published odds, and a player must be
+          able to find them without guessing what an icon means. The panel reads the same
+          store the screen does, so an open dialog tracks a mercy counter as it moves. */}
+      <Modal
+        open={oddsOpen}
+        title={`${banner.name} — odds & mercy`}
+        onClose={() => setOddsOpen(false)}
+        width={560}
+      >
+        <OddsPanel
+          banner={banner}
+          expanded={oddsExpanded}
+          onToggle={() => setOddsExpanded(!oddsExpanded)}
+        />
+      </Modal>
 
       {revealing.length > 0 && <RevealOverlay />}
     </div>

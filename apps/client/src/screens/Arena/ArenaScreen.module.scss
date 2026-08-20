@@ -4,8 +4,7 @@
   display: grid;
   /* The title is a row of its own; the content row takes the slack. */
   grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr) 20rem;
-  gap: $space-4;
+  gap: $space-3;
   height: 100%;
   min-height: 0;
 }
@@ -21,11 +20,14 @@
 
 // ── Standing ────────────────────────────────────────────────────────────────
 
+/* Everything true of *you* on this ladder, in one strip: the rung, the tokens, the gate you
+   left standing and the chest it is building toward. Four blocks that wrap to two on a
+   narrow window rather than a fixed two-up beside a fixed column. */
 .standing {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: $space-4;
-  align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: $space-3 $space-4;
+  align-items: start;
   padding: $space-3;
   background: $panel;
   border: 1px solid $edge;
@@ -36,6 +38,29 @@
   align-items: center;
   gap: $space-3;
   min-width: 0;
+}
+
+/* A block of the standing strip: a label, what it says, and the one button that changes it. */
+.aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $space-1;
+  min-width: 0;
+}
+
+.asideLabel {
+  color: $muted;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.asideNote {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.75rem;
+  line-height: 1.5;
 }
 
 .rankNote {
@@ -207,30 +232,31 @@
   color: $danger;
 }
 
-// ── Sidebar ─────────────────────────────────────────────────────────────────
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
-  min-height: 0;
-  overflow-y: auto;
-}
+// ── Your defence ────────────────────────────────────────────────────────────
 
 .defence {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin: 0 0 $space-2;
+  gap: 1px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.sideNote {
-  margin: 0 0 $space-2;
-  color: $muted;
+.defender {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+  min-width: 0;
+}
+
+.memberName {
+  color: $parchment;
   font-size: 0.78rem;
-  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .empty {

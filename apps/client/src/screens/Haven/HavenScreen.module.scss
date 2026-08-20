@@ -7,21 +7,32 @@
   @include pixel-scrollbar;
 }
 
+/* One column, and it takes the rest of the screen.
+   The dispatches and the standing that used to sit beside the stations are behind the
+   heading's info button now — neither was something a player came to the Haven to read,
+   and both were charging the stations 300px for the privilege. With them gone the camp is
+   the only thing here, so it sits in the middle of the window rather than pinned to the
+   top of it with half a screen of nothing underneath. */
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr);
   gap: $space-5;
-  align-items: start;
-
-  @media (max-width: 1000px) {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  flex: 1;
+  align-content: center;
 }
 
+/* Bigger tiles and a ceiling on the run.
+   Without the sidebar the row grew to twelve across a wide window, which left the
+   thirteenth station alone on a line of its own and made the camp read as a toolbar. A
+   capped, centred grid keeps the rows even and the sockets at a size worth looking at —
+   this is the screen a player lands on. */
 .stations {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  gap: $space-2;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: $space-3 $space-2;
+  width: 100%;
+  max-width: 66rem;
+  margin: 0 auto;
 }
 
 /* A station is a painted socket with its place's icon in it, a name under, and — when it
@@ -95,12 +106,6 @@
 .stationHint {
   font-size: 11px;
   color: $muted-deep;
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: $space-4;
 }
 
 .news,

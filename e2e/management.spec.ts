@@ -140,10 +140,11 @@ test.describe('the management loop', () => {
     });
     // The meter calls them *loose* relics, which is the rule rather than the place: a relic
     // on a champion is not taking a slot, and that is what makes equipping a way to make
-    // room. Scoped to the sidebar either way, since the list's default filter is "In the
-    // vault" and would match a laxer name here.
-    await expect(page.locator('aside').getByText(/loose relics/i)).toBeVisible();
-    await expect(page.locator('aside').getByText(/^\d+ \/ \d+$/)).toBeVisible();
+    // room. Scoped to the capacity group either way, since the list's default filter is
+    // "In the vault" and would match a laxer name here.
+    const capacity = page.getByRole('group', { name: /vault capacity/i });
+    await expect(capacity.getByText(/loose relics/i)).toBeVisible();
+    await expect(capacity.getByText(/^\d+ \/ \d+$/)).toBeVisible();
 
     // ── Equip it from the champion screen ─────────────────────────────────
     await page

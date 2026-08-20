@@ -11,6 +11,7 @@ import { ChampionDetailModal } from './ChampionDetail';
 import { ChampionCard } from './ChampionCard';
 import styles from './ChampionsScreen.module.scss';
 import { Heading } from '@/ui/Heading/Heading';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 
 /**
  * The roster.
@@ -97,7 +98,36 @@ export function ChampionsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="Who stands with you, and how far each of them has come.">
+      <Heading
+        tagline="Who stands with you, and how far each of them has come."
+        actions={
+          <ScreenInfo title="Your champions">
+            {/* What is left to chase, split by rarity — the only breakdown that answers the
+            question a collection screen exists to raise. Food is excluded from both sides
+            of every count: it is a consumable that happens to be a champion, and folding
+            it in would tell a player they had collected eleven Commons when they had
+            farmed eleven meals. */}
+            <Fui
+              of={CollectionProgress}
+              className={styles.collection}
+              options={{ title: 'The roll', unit: 'champions', showTotal: true, tiers }}
+            />
+
+            <Panel title="How they grow">
+              <p className={styles.note}>
+                Every champion climbs four ladders: levels from food, star rank from same-rank
+                champions, ascension from essences, and skills from tomes or duplicates.
+              </p>
+              <dl className={styles.stats}>
+                <div>
+                  <dt>Food on hand</dt>
+                  <dd>{foodCount}</dd>
+                </div>
+              </dl>
+            </Panel>
+          </ScreenInfo>
+        }
+      >
         Your Champions
       </Heading>
 
@@ -146,32 +176,6 @@ export function ChampionsScreen(): JSX.Element {
           </div>
         )}
       </div>
-
-      <aside className={styles.sidebar}>
-        {/* What is left to chase, split by rarity — the only breakdown that answers the
-            question a collection screen exists to raise. Food is excluded from both sides
-            of every count: it is a consumable that happens to be a champion, and folding
-            it in would tell a player they had collected eleven Commons when they had
-            farmed eleven meals. */}
-        <Fui
-          of={CollectionProgress}
-          className={styles.collection}
-          options={{ title: 'The roll', unit: 'champions', showTotal: true, tiers }}
-        />
-
-        <Panel title="How they grow">
-          <p className={styles.note}>
-            Every champion climbs four ladders: levels from food, star rank from same-rank
-            champions, ascension from essences, and skills from tomes or duplicates.
-          </p>
-          <dl className={styles.stats}>
-            <div>
-              <dt>Food on hand</dt>
-              <dd>{foodCount}</dd>
-            </div>
-          </dl>
-        </Panel>
-      </aside>
 
       {selected && <ChampionDetailModal championId={selected} onClose={() => setSelected(null)} />}
     </div>

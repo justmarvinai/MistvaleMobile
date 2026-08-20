@@ -12,6 +12,7 @@ import { highlightable } from '../../app/highlight';
 import { Slot } from '@/fui/components/Slot.ts';
 import { Fui } from '@/fui/react';
 import { Heading } from '@/ui/Heading/Heading';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 import { rewardArt } from '../../ui/Rewards/art';
 
 /**
@@ -97,21 +98,64 @@ export function BazaarScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="What the traders brought this time, and how long they mean to stay.">
+      <Heading
+        tagline="What the traders brought this time, and how long they mean to stay."
+        actions={
+          <ScreenInfo title="The Bazaar" label="About the Bazaar">
+            <p>
+              Stock rotates every hour. Relics here are the exact pieces you see — main stat and
+              substats already rolled — so unlike a summon there is nothing left to chance.
+            </p>
+            <p>
+              <strong>Refresh</strong> buys a new set of stalls before the hour is up, and{' '}
+              <strong>open a shelf</strong> adds a slot to every rotation from now on. Both are paid
+              in crystals; everything on the shelves is paid in silver or crystals as marked.
+            </p>
+            <p>A stall is gone once bought, and an unbought stall is gone at the restock.</p>
+          </ScreenInfo>
+        }
+      >
         The Bazaar
       </Heading>
 
-      <div>
+      <div className={styles.body}>
         <header className={styles.head}>
-          <div>
+          <div className={styles.headWho}>
             <h2 className={styles.title}>{stock.name}</h2>
             <p className={styles.blurb}>{stock.description}</p>
           </div>
-          <div className={styles.timer}>
-            <span className={styles.timerValue}>{remaining}</span>
-            <span className={styles.timerLabel}>until new stock</span>
+
+          {/* The two crystal actions used to live in a panel down the right-hand side, in a
+              column that cost the stalls a fifth of the screen to hold two buttons. They
+              belong to the rotation, so they sit with the clock that runs it. */}
+          <div className={styles.headActions}>
+            <div className={styles.timer}>
+              <span className={styles.timerValue}>{remaining}</span>
+              <span className={styles.timerLabel}>until new stock</span>
+            </div>
+            <div className={styles.crystalActions}>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={busy || crystals < stock.refreshCost}
+                onClick={() => void act('New stock.', () => refreshStock(SHOP_KEY))}
+              >
+                Refresh — {stock.refreshCost} crystals
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={busy || crystals < stock.crystalSlotCost}
+                onClick={() => void act('Another shelf opened.', () => unlockSlot(SHOP_KEY))}
+              >
+                Open a shelf — {stock.crystalSlotCost} crystals
+              </Button>
+            </div>
           </div>
         </header>
+
+        {notice && <p className={styles.notice}>{notice}</p>}
+        {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.slots} {...highlightable('panel:bazaar-offers')}>
           {stock.slots.map((slot) => {
@@ -190,34 +234,6 @@ export function BazaarScreen(): JSX.Element {
           })}
         </div>
       </div>
-
-      <aside className={styles.sidebar}>
-        <Panel title="The traders">
-          <p className={styles.note}>
-            Stock rotates every hour. Relics here are the exact pieces you see — main stat and
-            substats already rolled.
-          </p>
-          <div className={styles.crystalActions}>
-            <Button
-              variant="ghost"
-              disabled={busy || crystals < stock.refreshCost}
-              onClick={() => void act('New stock.', () => refreshStock(SHOP_KEY))}
-            >
-              Refresh — {stock.refreshCost} crystals
-            </Button>
-            <Button
-              variant="ghost"
-              disabled={busy || crystals < stock.crystalSlotCost}
-              onClick={() => void act('Another shelf opened.', () => unlockSlot(SHOP_KEY))}
-            >
-              Open a shelf — {stock.crystalSlotCost} crystals
-            </Button>
-          </div>
-        </Panel>
-
-        {notice && <p className={styles.notice}>{notice}</p>}
-        {error && <p className={styles.error}>{error}</p>}
-      </aside>
     </div>
   );
 }

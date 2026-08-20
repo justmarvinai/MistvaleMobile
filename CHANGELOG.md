@@ -5,6 +5,57 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — one day claimed shows one day claimed
+
+Collecting a login reward ticked **all thirty** tiles of the calendar as collected. The
+library's grid draws each tile from `currentDay` and `claimedToday`, where `currentDay` is
+the tile's position in the grid — and the screen was handing it `next?.day ?? days.length + 1`.
+Once today's claim is spent the server marks *no* day `next`, so the fallback fired,
+`currentDay` became 31, and every tile read as "before the current one". A walked-out welcome
+track had the same shape of bug from the other end: no `next` there either, so its last tile
+sat glowing as though it were still claimable.
+
+Both fall out once the two states are named separately, which is what `trackTiles` does — the
+tile the cycle stands on, and whether that tile is already spent — derived from the server's
+own per-day flags rather than from arithmetic on `claimsMade`, so the grid cannot disagree
+with the list it was drawn from. Six unit tests cover every state `standingOf` produces;
+four of them fail against the old expression.
+
+### Changed — screens are the screen (Batch 1)
+
+Every screen in the game was giving about a fifth of its width to a column of prose, and a
+sixth of its height to a title with a painted vine under it, before the feature it exists for
+drew a pixel. The owner's note was that the features need the space. So:
+
+- **Headings are quiet.** One line, left, at reading size, with the tagline beside it rather
+  than beneath and the divider gone. A screen's name should say which screen you are on, not
+  announce itself.
+- **The right-hand columns are an info button.** Eight screens — the Haven, the Campaign,
+  Champions, the Chronicle, the Depths, Errands, the Bazaar, the Vault and the Arena — keep
+  every word they had, now behind an **i** beside the title. The Mistgate's odds are the one
+  exception to the icon: published rates get a worded **Odds & mercy** button, because nobody
+  should have to guess which icon hides the numbers.
+- **What was actually a control moved rather than hid.** The Bazaar's refresh and shelf
+  buttons sit with the restock clock; the Vault's meter, worn count and two actions are a
+  toolbar over the grid, and its selection is a bar across the foot; the Arena's defence and
+  weekly chest joined the standing strip, with the Hall of Valor and the ladder in the title
+  bar; the first-win rail runs across the top of Errands; the springs' week sits with the
+  springs, and each group's own footnote sits over the tiles it is about.
+- **The campaign map is the campaign screen.** It was 420px of map computed from a row count,
+  with the rest of the window empty under it. It now fills the pane — the chapter's path docks
+  beneath it and takes only what it needs — and the difficulty control moved into the title
+  bar. The Haven's stations grew and centred; the Mistgate's portal sits in the middle of its
+  panel rather than at the top of an empty one.
+
+### Changed — the profile chip says how far, in numbers
+
+The account's level progress was a thin arc drawn around the avatar: a shape that can say
+"some of the way" and nothing else. It is a real bar under the name now, with the two numbers
+a player is actually counting — `151 / 2,443 · 2,292 to Lv 25` — and the ring is a plain rim.
+The bar is the library's own `StatBar` on its `xp` artwork, kept live through its setters
+rather than rebuilt, so it animates forward instead of restarting from empty at the moment it
+advances.
+
 ### Fixed — the design rework's last pass (D9)
 
 Two layout bugs the owner found, and they were the same bug wearing two faces. The library's

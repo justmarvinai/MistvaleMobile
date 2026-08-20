@@ -4,8 +4,7 @@
   display: grid;
   /* The title is a row of its own; the content row takes the slack. */
   grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr) 18rem;
-  gap: $space-4;
+  gap: $space-3;
   height: 100%;
   min-height: 0;
 }
@@ -17,11 +16,6 @@
   min-height: 0;
   overflow-y: auto;
   padding-right: $space-2;
-}
-
-.side {
-  min-height: 0;
-  overflow-y: auto;
 }
 
 // ── Tabs ────────────────────────────────────────────────────────────────────
@@ -68,6 +62,11 @@
 // ── The chest ───────────────────────────────────────────────────────────────
 
 .chest {
+  flex: 0 0 auto;
+}
+
+/* The first-win rail is a fact about today, not part of the scrolling list. */
+.firstWins {
   flex: 0 0 auto;
 }
 
@@ -124,15 +123,19 @@
 
 // ── First wins ──────────────────────────────────────────────────────────────
 
+/* A rail across the top rather than a column down the side. There are four or five modes
+   and each says one short thing, so they read faster side by side than stacked — and the
+   checklist below gets the whole width back. */
+
 .sideNote {
-  margin: 0 0 $space-3;
+  margin: 0 0 $space-2;
   color: $muted;
   font-size: 0.75rem;
 }
 
 .wins {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: $space-2;
   margin: 0;
   padding: 0;
@@ -140,6 +143,8 @@
 }
 
 .win {
+  flex: 1 1 11rem;
+  min-width: 0;
   padding: $space-2;
   background: $panel-inset;
   border: 1px solid $edge;

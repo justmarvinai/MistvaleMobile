@@ -9,8 +9,7 @@
   display: grid;
   /* The title is a row of its own; the content row takes the slack. */
   grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr) 20rem;
-  gap: $space-4;
+  gap: $space-2;
   height: 100%;
   min-height: 0;
 }
@@ -18,32 +17,44 @@
 .column {
   display: flex;
   flex-direction: column;
-  gap: $space-3;
+  gap: $space-2;
   min-height: 0;
 }
 
+/* In the title bar now — it only has to stop itself from stretching to the row's height. */
 .difficulties {
-  align-self: start;
+  align-self: center;
 }
 
-.scroller {
+/* The map's box. It takes the slack, which is what makes the map fullscreen: the chapter
+   dock under it is the only other thing in the column, and it is as tall as its own
+   content. A floor, because a very short window should scroll the map rather than crush
+   it into a strip. */
+.mapPane {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 16rem;
+}
+
+/* Out of flow inside the pane, so the map cannot grow the box it is measuring itself
+   against — which is what lets its own `height: 100%` resolve. */
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+/* The chapter under the map: one line of prose and the seven-stage path. It keeps its own
+   height and never takes more than half the screen, so the map is always the larger half. */
+.chapter {
   display: flex;
   flex-direction: column;
-  gap: $space-4;
+  gap: $space-2;
+  flex: 0 1 auto;
+  max-height: 45%;
   min-height: 0;
   overflow-y: auto;
   padding-right: $space-2;
   @include pixel-scrollbar;
-}
-
-.map {
-  flex: none;
-}
-
-.chapter {
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
 }
 
 .stages {
@@ -58,11 +69,6 @@
 
 .chest {
   color: $gold;
-}
-
-.sidebar {
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .note,

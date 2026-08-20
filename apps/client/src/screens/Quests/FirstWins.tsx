@@ -11,12 +11,18 @@ import { Icon } from '@/ui/Icon/Icon';
  * lands with the win. What this panel is for is *before* the fights — an at-a-glance answer
  * to "what have I not done today", which is the question that gets somebody to open the
  * Depths on a Tuesday (GAME_DESIGN §15.6).
+ *
+ * It reads as a rail across the top of the errands screen rather than a column down its
+ * side: four short lines compare faster in a row, and the checklist under it wants the
+ * width more than this does.
  */
 export function FirstWins({ bonuses }: { bonuses: readonly FirstWinBonus[] }): JSX.Element | null {
   if (bonuses.length === 0) return null;
 
   return (
-    <Panel title="First win today">
+    // `inset` rather than the painted default: a full-width panel with corner filigree
+    // reads as the screen's main event, and the checklist under it is. This is a note.
+    <Panel variant="inset" title="First win today" className={styles.firstWins}>
       <p className={styles.sideNote}>Paid automatically on the day’s first victory.</p>
       <ul className={styles.wins}>
         {bonuses.map((bonus) => (

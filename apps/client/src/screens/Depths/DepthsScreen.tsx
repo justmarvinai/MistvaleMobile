@@ -14,6 +14,7 @@ import { TeamSelect } from '../Battle/TeamSelect';
 import { FloorPicker } from './FloorPicker';
 import styles from './DepthsScreen.module.scss';
 import { Heading } from '@/ui/Heading/Heading';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 import { SpringDial } from '../../ui/SpringDial/SpringDial';
 
 /**
@@ -89,7 +90,27 @@ export function DepthsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="Four keeps under the vale, and every floor gives up one kind of relic.">
+      <Heading
+        tagline="Four keeps under the vale, and every floor gives up one kind of relic."
+        actions={
+          <ScreenInfo title="The Depths" label="About the Depths">
+            <p>
+              Below the vale are keeps the Sskarn moved into rather than built. Relics come out of
+              four of them, mastery emblems out of the pit, and ascension essence out of the
+              springs.
+            </p>
+            <p>
+              A keep is a ladder of floors: each one clears harder and pays better, and the deepest
+              floor you have reached is the only progress a keep keeps. The relic keeps open at
+              account level 12 and the Proving Grounds at 14.
+            </p>
+            <p>
+              The springs keep their own hours — most are shut most of the week, which is what the
+              week strip above them is for.
+            </p>
+          </ScreenInfo>
+        }
+      >
         The Depths
       </Heading>
 
@@ -112,6 +133,32 @@ export function DepthsScreen(): JSX.Element {
                 <h2 className={styles.groupTitle}>{group.title}</h2>
                 <p className={styles.groupBlurb}>{group.blurb}</p>
               </header>
+
+              {/* The two things the sidebar used to say about a group, said by the group
+                  itself. Both are conditional and both are about *these* keeps, so they
+                  belong over these tiles rather than in a column that outlives them. */}
+              {group.kind === 'relic' && unlocks && !unlocks.dungeons && (
+                <p className={styles.notice}>
+                  The relic keeps open at account level 12, and the Proving Grounds at 14.
+                </p>
+              )}
+
+              {group.kind === 'springs' && (
+                <>
+                  {graceUntil && (
+                    <p className={styles.notice}>
+                      Every spring stands open to you until {formatDay(graceUntil)}, whatever the
+                      day. After that they keep their own hours.
+                    </p>
+                  )}
+                  {/* The week, once, with the springs on it — five tiles each saying their
+                      own hours answers "is this open now" and never answers "when do I come
+                      back for Verdant". */}
+                  <div className={styles.week}>
+                    <SpringDial springs={springs} today={weekday} />
+                  </div>
+                </>
+              )}
 
               <div className={styles.keeps}>
                 {dungeons.map((dungeon) => {
@@ -159,40 +206,6 @@ export function DepthsScreen(): JSX.Element {
           );
         })}
       </div>
-
-      <aside className={styles.sidebar}>
-        <Panel title="The Depths">
-          <p className={styles.empty}>
-            Below the vale are keeps the Sskarn moved into rather than built. Relics come out of
-            four of them, mastery emblems out of the pit, and ascension essence out of the springs.
-          </p>
-        </Panel>
-
-        {/* The week, once, with the springs on it — five tiles each saying their own hours
-            answers "is this open now" and never answers "when do I come back for Verdant". */}
-        {springs.length > 0 && (
-          <Panel title="The springs&rsquo; week">
-            <SpringDial springs={springs} today={weekday} />
-          </Panel>
-        )}
-
-        {graceUntil && (
-          <Panel title="Newcomer&rsquo;s welcome">
-            <p className={styles.empty}>
-              Every spring stands open to you until {formatDay(graceUntil)}, whatever the day. After
-              that they keep their own hours.
-            </p>
-          </Panel>
-        )}
-
-        {unlocks && !unlocks.dungeons && (
-          <Panel title="Still shut">
-            <p className={styles.empty}>
-              The relic keeps open at account level 12, and the Proving Grounds at 14.
-            </p>
-          </Panel>
-        )}
-      </aside>
 
       {openDungeon && (
         <FloorPicker

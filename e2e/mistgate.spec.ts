@@ -7,8 +7,9 @@ import { leaveTutorial } from './support';
  * The pull itself is covered exhaustively at the API level (`summon.test.ts`, against a
  * real database) and the maths in `roll.test.ts`. What only a browser can prove is that
  * the *screen* is honest: that the odds panel shows the published table rather than a
- * placeholder, that full disclosure is one click away, that a player with no sigils is
- * stopped here rather than at the server, and that the Chronicle records what they met.
+ * placeholder, that it is one worded click from the gate rather than buried, that full
+ * disclosure is one click beyond that, that a player with no sigils is stopped here rather
+ * than at the server, and that the Chronicle records what they met.
  *
  * The sigils come from the welcome grant a real account receives — no test-only endpoint,
  * because a back door on the production server is exactly the sort of "temporary" hack
@@ -36,25 +37,31 @@ test.describe('the Mistgate', () => {
     await expect(gleaming).toBeVisible({ timeout: 15_000 });
     await gleaming.click();
 
-    // The published rates, on the same screen as the button.
-    await expect(page.getByText('Odds & Mercy')).toBeVisible();
-    await expect(page.getByRole('row', { name: /epic\s+8\.00%\s+8\.00%/i })).toBeVisible();
-    await expect(page.getByRole('row', { name: /legendary\s+0\.50%/i })).toBeVisible();
-
-    // Mercy is shown before it matters, not only once it has accrued.
-    await expect(page.getByText(/20 more without one/i)).toBeVisible();
-
-    // Full disclosure is one click, not buried in a menu.
-    await page.getByRole('button', { name: /show every champion in this pool/i }).click();
-    await expect(page.getByRole('button', { name: /hide the full list/i })).toBeVisible();
-    await expect(page.getByText(/split evenly/i).first()).toBeVisible();
-
-    // A ×10's guarantee is stated up front.
+    // A ×10's guarantee is stated up front, on the gate itself.
     await expect(page.getByText(/guarantees at least one rare/i)).toBeVisible();
 
     // Three Gleaming Sigils came with the welcome grant — enough for ×1, not for ×10.
     await expect(page.getByText(/3 gleaming sigils held/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /summon ×10/i })).toBeDisabled();
+
+    // ── The published rates ───────────────────────────────────────────────
+    // One click from the gate, and the way to them is *worded*: the odds moved out of a
+    // permanent right-hand column so the gate could have the screen, and a lowercase "i"
+    // would have been the wrong door for numbers a player is entitled to find.
+    await page.getByRole('button', { name: /odds & mercy/i }).click();
+    const odds = page.getByRole('dialog', { name: /odds & mercy/i });
+    await expect(odds).toBeVisible();
+
+    await expect(odds.getByRole('row', { name: /epic\s+8\.00%\s+8\.00%/i })).toBeVisible();
+    await expect(odds.getByRole('row', { name: /legendary\s+0\.50%/i })).toBeVisible();
+
+    // Mercy is shown before it matters, not only once it has accrued.
+    await expect(odds.getByText(/20 more without one/i)).toBeVisible();
+
+    // Full disclosure is one more click, not buried in a menu.
+    await odds.getByRole('button', { name: /show every champion in this pool/i }).click();
+    await expect(odds.getByRole('button', { name: /hide the full list/i })).toBeVisible();
+    await expect(odds.getByText(/split evenly/i).first()).toBeVisible();
   });
 
   test('a warden pulls ten from the brood banner and keeps them', async ({ page }) => {

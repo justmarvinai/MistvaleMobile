@@ -164,7 +164,7 @@ one function relics are created by.
 
 ---
 
-### D — The design rework (in progress, commissioned 2026-08-18)
+### D — The design rework ✅ **complete** (commissioned 2026-08-18)
 
 *"I want you to FULLY rework the Design of the whole Game."* The game is dressed in
 **FantasyUIs** — the owner's own vanilla-TS component library — vendored into
@@ -193,7 +193,23 @@ table deliberately did not move.
 | **D9** | The screenshot pass — every screen, extended `visible.spec.ts`, §9 budgets re-measured | ✅ |
 
 **Exit:** every screen in the game is drawn in one visual language, `pnpm verify` and
-`pnpm sim` green, and ARCHITECTURE §9 budgets still met with the art in the bundle.
+`pnpm sim` green, and ARCHITECTURE §9 budgets still met with the art in the bundle. **Met.**
+
+---
+
+### B — Owner's change batches (in progress, opened 2026-08-19)
+
+The design rework's own follow-up: the owner plays the game and sends a batch of changes,
+each batch landing as one pass with the whole gate green behind it. Not a phase — no exit
+criteria of its own, and it does not gate P9e or P10.
+
+| | Batch | State |
+|---|---|---|
+| **B1** | The calendar's one-claim bug · quiet headings, no divider · the right-hand columns become an info button on nine screens · the campaign map fullscreen · the profile chip's XP bar | ✅ |
+
+**Backlog carried out of a batch rather than done in it:** **Q6** — the eight 1254×1254
+champion avatars (14 MB published, drawn at 150px). Parked at the owner's instruction; the
+fix means adding a native image module to the build on the box the budget is about.
 
 ---
 

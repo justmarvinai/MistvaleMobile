@@ -19,6 +19,7 @@ import { Leaderboard } from './Leaderboard';
 import { HallOfValor } from './HallOfValor';
 import styles from './ArenaScreen.module.scss';
 import { Heading } from '@/ui/Heading/Heading';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 
 /**
  * The Arena hub.
@@ -26,10 +27,13 @@ import { Heading } from '@/ui/Heading/Heading';
  * One read of `/arena` draws the whole thing, because every panel here is a view of the
  * same standing and two requests would eventually disagree about it.
  *
- * The shape of the screen follows the shape of the decision: on the left, five opponents
- * and what beating each is worth — the choice a player actually makes. On the right, the
- * things that make that choice better: the defence that earns while they are away, the
- * chest, and the Hall the medals go into (docs/UI_UX_DESIGN.md §3, screen 16).
+ * The shape of the screen follows the shape of the decision: a strip of standing across the
+ * top — the rung, the tokens, the defence that earns while they are away and the chest it is
+ * building toward — and under it the five opponents and what beating each is worth, which is
+ * the choice a player actually makes (docs/UI_UX_DESIGN.md §3, screen 16).
+ *
+ * The Hall of Valor and the ladder are in the title bar rather than the body: both are places
+ * you go rather than things you read, and neither belongs in the way of the offers.
  */
 export function ArenaScreen(): JSX.Element {
   const arena = useArenaStore((state) => state.arena);
@@ -103,7 +107,38 @@ export function ArenaScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="Four of yours against four of theirs. The ladder keeps score while you sleep.">
+      <Heading
+        tagline="Four of yours against four of theirs. The ladder keeps score while you sleep."
+        actions={
+          <>
+            <Button size="sm" variant="ghost" onClick={() => setShowHall(true)}>
+              The Hall of Valor
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setShowLadder(true)}>
+              The ladder
+            </Button>
+            <ScreenInfo title="The Arena" label="About the Arena">
+              <p>
+                Every challenge costs one <strong>attack token</strong>. Tokens come back on the
+                clock whether you are here or not, so an account that never opens the Arena is
+                simply not spending them.
+              </p>
+              <p>
+                You fight a snapshot of somebody&rsquo;s defence team, not the player — nobody is
+                waiting on you, and nobody is inconvenienced when you win. Your own defence is a
+                snapshot in the same way: it earns while you are away, and it cannot be attacked
+                until you set one.
+              </p>
+              <p>
+                <strong>Medals</strong> buy permanent bonuses in the Hall of Valor for every
+                champion of an element you own. It is the only thing they buy, and it takes a
+                season. The <strong>weekly chest</strong> seals on Monday, against the best rating
+                you held that week.
+              </p>
+            </ScreenInfo>
+          </>
+        }
+      >
         The Arena
       </Heading>
 
@@ -139,6 +174,50 @@ export function ArenaScreen(): JSX.Element {
               {tokens.value} / {tokens.cap}
               {tokens.nextTickAt ? ` · next in ${countdown(tokens.nextTickAt)}` : ' · full'}
             </span>
+          </div>
+
+          {/* The two things that earn while nobody is looking. They used to be panels in a
+              right-hand column, where they cost the offers a fifth of the width all the
+              time to say two sentences that change once a week. They belong with the rest
+              of the standing, because that is what they are. */}
+          <div className={styles.aside}>
+            <span className={styles.asideLabel}>Your defence</span>
+            {arena.defenceTeam.length === 0 ? (
+              <p className={styles.asideNote}>
+                Nobody is holding your gate — you cannot be attacked, and you cannot gain rating
+                while you are away.
+              </p>
+            ) : (
+              <ul className={styles.defence}>
+                {arena.defenceTeam.map((member: ArenaTeamMember, index) => (
+                  <li key={index} className={styles.defender}>
+                    <span className={styles.memberName}>{championName(member.championKey)}</span>
+                    <span className={styles.memberMeta}>
+                      {member.level} ★{member.rank}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Button size="sm" variant="ghost" onClick={() => setEditingDefence(true)}>
+              {arena.defenceTeam.length === 0 ? 'Set a defence' : 'Change it'}
+            </Button>
+          </div>
+
+          <div className={styles.aside}>
+            <span className={styles.asideLabel}>Weekly chest</span>
+            <p className={styles.asideNote}>
+              {arena.weeklyChest.claimable
+                ? `A ${ARENA_TIER_LABELS[arena.weeklyChest.tier]} chest is waiting.`
+                : `On course for a ${ARENA_TIER_LABELS[arena.weeklyChest.tier]} chest — it seals on Monday, against the best rating you hold this week.`}
+            </p>
+            <Button
+              size="sm"
+              disabled={!arena.weeklyChest.claimable || busy !== null}
+              onClick={() => void claim()}
+            >
+              {busy === 'chest' ? 'Opening…' : 'Open it'}
+            </Button>
           </div>
         </section>
 
@@ -237,59 +316,6 @@ export function ArenaScreen(): JSX.Element {
 
         {error && <p className={styles.error}>{error}</p>}
       </div>
-
-      <aside className={styles.sidebar}>
-        <Panel title="Your defence">
-          {arena.defenceTeam.length === 0 ? (
-            <p className={styles.sideNote}>
-              Nobody is holding your gate. Until you set a team, you cannot be attacked — and you
-              cannot gain rating while you are away either.
-            </p>
-          ) : (
-            <ul className={styles.defence}>
-              {arena.defenceTeam.map((member: ArenaTeamMember, index) => (
-                <li key={index} className={styles.member}>
-                  <span className={styles.memberName}>{championName(member.championKey)}</span>
-                  <span className={styles.memberMeta}>
-                    Lv {member.level} · ★{member.rank}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Button fullWidth variant="ghost" onClick={() => setEditingDefence(true)}>
-            {arena.defenceTeam.length === 0 ? 'Set a defence' : 'Change it'}
-          </Button>
-        </Panel>
-
-        <Panel title="Weekly chest">
-          <p className={styles.sideNote}>
-            {arena.weeklyChest.claimable
-              ? `A ${ARENA_TIER_LABELS[arena.weeklyChest.tier]} chest is waiting.`
-              : `On course for a ${ARENA_TIER_LABELS[arena.weeklyChest.tier]} chest — it seals on Monday, against the best rating you hold this week.`}
-          </p>
-          <Button
-            fullWidth
-            disabled={!arena.weeklyChest.claimable || busy !== null}
-            onClick={() => void claim()}
-          >
-            {busy === 'chest' ? 'Opening…' : 'Open it'}
-          </Button>
-        </Panel>
-
-        <Panel title="Valor">
-          <p className={styles.sideNote}>
-            Medals buy permanent bonuses for every champion of an element you own. It is the only
-            thing they buy, and it takes a season.
-          </p>
-          <Button fullWidth variant="ghost" onClick={() => setShowHall(true)}>
-            The Hall of Valor
-          </Button>
-          <Button fullWidth variant="ghost" onClick={() => setShowLadder(true)}>
-            The ladder
-          </Button>
-        </Panel>
-      </aside>
 
       {attacking && (
         <TeamPicker

@@ -11,6 +11,7 @@ import { rewardArt } from '../../ui/Rewards/art';
 import { useContentStore } from '../../state/contentStore';
 import { useLoginStore } from '../../state/loginStore';
 import { toast } from '../../state/uiStore';
+import { trackTiles } from './trackTiles';
 import styles from './CalendarScreen.module.scss';
 import { Heading } from '@/ui/Heading/Heading';
 
@@ -187,6 +188,7 @@ function TrackPanel({
 }): JSX.Element {
   const rewardName = useRewardName();
   const next = track.days.find((day) => day.next);
+  const tiles = trackTiles(track);
 
   /**
    * The track's days, as the library's calendar draws them.
@@ -260,13 +262,15 @@ function TrackPanel({
           it. Ten columns for the thirty-day cycle and seven for the welcome week, because
           the default is one column per tile and thirty of those is a hairline. */}
       <Fui
-        key={`${track.claimsMade}|${track.claimedToday}|${busy}`}
+        key={`${tiles.currentDay}|${tiles.spent}|${busy}`}
         of={DailyRewards}
         className={styles.grid}
         options={{
           rewards: days,
-          currentDay: next?.day ?? track.days.length + 1,
-          claimedToday: track.claimedToday,
+          // See `trackTiles`: the grid counts tiles, the track counts days, and the two
+          // are only the same number while nothing has been claimed today.
+          currentDay: tiles.currentDay,
+          claimedToday: tiles.spent,
           columns: track.track === 'calendar' ? 10 : 7,
         }}
         on={{

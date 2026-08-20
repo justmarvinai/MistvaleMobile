@@ -12,6 +12,7 @@ import { Forge } from './Forge';
 import styles from './RelicsScreen.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 import { VaultMeter } from '../../ui/VaultMeter/VaultMeter';
 
 /**
@@ -120,11 +121,79 @@ export function RelicsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="What the vale gave up. Wear it, feed it to something better, or sell it on.">
+      <Heading
+        tagline="What the vale gave up. Wear it, feed it to something better, or sell it on."
+        actions={
+          <ScreenInfo title="The Vault" label="About the vault">
+            <p>
+              Most relics are meant to be sold — that is where the silver for the forge comes from.
+              Lock anything you mean to keep, and it cannot be sold by accident.
+            </p>
+            <p>
+              A piece&rsquo;s slot is decided by the stage that dropped it, its main stat by the
+              slot, and its substats by the roll. <strong>Forge</strong> levels a piece and rolls a
+              new substat every four levels; the forge opens at account level 3.
+            </p>
+            <p>
+              The vault holds a fixed number of pieces. When it is full, drops stop being kept — buy
+              more room in silver, or sell what you were never going to wear.
+            </p>
+          </ScreenInfo>
+        }
+      >
         The Vault
       </Heading>
 
-      <div>
+      <div className={styles.body}>
+        {/* The vault's own numbers and the two actions that move them. This was a column
+            down the right-hand side; a fifth of the screen is a lot to pay for a meter and
+            two buttons, and the relics are what the screen is for.
+
+            Labelled, because it is a real group rather than a row of unrelated controls —
+            how full the vault is and the two things that change that. It also gives the
+            screen a name to scope by, which the `<aside>` used to be: "In the vault" is the
+            list's default *filter* as well, and an unscoped search finds both. */}
+        <div className={styles.toolbar} role="group" aria-label="Vault capacity">
+          {vault ? (
+            <VaultMeter vault={vault} />
+          ) : (
+            <span className={styles.count}>{gear.length} relics</span>
+          )}
+
+          <span className={styles.count}>
+            {gear.filter((piece) => piece.equippedChampionId).length} worn
+          </span>
+
+          <div className={styles.toolActions}>
+            {vault &&
+              (vault.nextSlots > 0 ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => {
+                    void run(async () => {
+                      await buyVaultSlots();
+                      await refreshPlayer();
+                    }, `Room for ${vault.nextSlots} more.`);
+                  }}
+                >
+                  {`Buy ${vault.nextSlots} slots — ${vault.nextCost.toLocaleString()} silver`}
+                </Button>
+              ) : (
+                <span className={styles.count}>Full size ({vault.max.toLocaleString()})</span>
+              ))}
+
+            <Button size="sm" variant="ghost" onClick={selectFodder}>
+              Select unupgraded fodder
+            </Button>
+          </div>
+        </div>
+
+        {!canForge && <p className={styles.warn}>The forge opens at account level 3.</p>}
+        {notice && <p className={styles.notice}>{notice}</p>}
+        {error && <p className={styles.error}>{error}</p>}
+
         <div className={styles.filters} role="group" aria-label="Filter relics">
           {(['unequipped', 'all'] as Filter[]).map((entry) => (
             <button
@@ -192,61 +261,16 @@ export function RelicsScreen(): JSX.Element {
         )}
       </div>
 
-      <aside className={styles.sidebar}>
-        <Panel title="The vault">
-          <p className={styles.note}>
-            Most relics are meant to be sold — that is where silver for the forge comes from. Lock
-            anything you mean to keep.
-          </p>
-          {!canForge && <p className={styles.warn}>The forge opens at account level 3.</p>}
-          {/* The meter says the fraction, how tight it is and what happens when it runs
-              out — which is three things the definition list said in two places. */}
-          {vault ? (
-            <VaultMeter vault={vault} />
-          ) : (
-            <dl className={styles.stats}>
-              <div>
-                <dt>In the vault</dt>
-                <dd>{gear.length}</dd>
-              </div>
-            </dl>
-          )}
-
-          <dl className={styles.stats}>
-            <div>
-              <dt>Worn</dt>
-              <dd>{gear.filter((piece) => piece.equippedChampionId).length}</dd>
+      {selection.length > 0 && (
+        // A bar across the foot of the screen, where every game in the genre puts a
+        // multi-select: it appears with the selection, it says what the selection is worth,
+        // and it is the same width as the grid it is talking about.
+        <Panel variant="hero" className={styles.sellBar}>
+          <div className={styles.sellBody}>
+            <div className={styles.sellWhat}>
+              <span className={styles.sellCount}>{selection.length} selected</span>
+              <span className={styles.sellValue}>{sellTotal.toLocaleString()} silver</span>
             </div>
-          </dl>
-
-          {vault &&
-            (vault.nextSlots > 0 ? (
-              <Button
-                variant="ghost"
-                disabled={busy}
-                onClick={() => {
-                  void run(async () => {
-                    await buyVaultSlots();
-                    await refreshPlayer();
-                  }, `Room for ${vault.nextSlots} more.`);
-                }}
-              >
-                {`Buy ${vault.nextSlots} slots — ${vault.nextCost.toLocaleString()} silver`}
-              </Button>
-            ) : (
-              <p className={styles.note}>
-                The vault is as large as it goes ({vault.max.toLocaleString()} slots).
-              </p>
-            ))}
-
-          <Button variant="ghost" onClick={selectFodder}>
-            Select unupgraded fodder
-          </Button>
-        </Panel>
-
-        {selection.length > 0 && (
-          <Panel title={`${selection.length} selected`}>
-            <p className={styles.sellValue}>{sellTotal.toLocaleString()} silver</p>
             {blocked.length > 0 && (
               <p className={styles.warn}>
                 {blocked.length} of those are locked or worn. Selling will be refused until you
@@ -261,12 +285,9 @@ export function RelicsScreen(): JSX.Element {
                 Sell
               </Button>
             </div>
-          </Panel>
-        )}
-
-        {notice && <p className={styles.notice}>{notice}</p>}
-        {error && <p className={styles.error}>{error}</p>}
-      </aside>
+          </div>
+        </Panel>
+      )}
 
       {forging && (
         <Forge

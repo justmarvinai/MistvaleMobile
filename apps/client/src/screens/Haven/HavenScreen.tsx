@@ -4,6 +4,7 @@ import { usePlayerStore } from '@/state/playerStore';
 import { useRosterStore } from '@/state/rosterStore';
 import { Heading } from '@/ui/Heading/Heading';
 import { Panel } from '@/ui/Panel/Panel';
+import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
 import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from '@/app/screens';
 import { StarterChoice } from './StarterChoice';
 import styles from './HavenScreen.module.scss';
@@ -36,6 +37,45 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
           player
             ? `The lanterns are lit, Warden ${player.profileName}. The vale waits.`
             : 'The lanterns are lit.'
+        }
+        actions={
+          <ScreenInfo title="The Haven" label="News and your standing">
+            <Panel title="Dispatches" className={styles.news}>
+              <article className={styles.newsItem}>
+                <h3 className={styles.newsTitle}>The Sskarn are moving</h3>
+                <p className={styles.newsBody}>
+                  Scouts report serpentfolk columns pushing out of the Sunken Marches. The campaign
+                  trail opens soon — gather your warband.
+                </p>
+                <span className={styles.newsTag}>Early Access · Phase 0</span>
+              </article>
+            </Panel>
+
+            <Panel title="Your standing" variant="inset" className={styles.standing}>
+              <dl className={styles.stats}>
+                <div className={styles.stat}>
+                  <dt>Level</dt>
+                  <dd>{player?.level ?? '—'}</dd>
+                </div>
+                <div className={styles.stat}>
+                  <dt>Roster</dt>
+                  {/* Was a hardcoded `0`. The home screen told every warden they owned no
+                      champions while the roster screen counted them correctly. */}
+                  <dd>
+                    {champions.length} / {player?.rosterCapacity ?? '—'}
+                  </dd>
+                </div>
+                <div className={styles.stat}>
+                  <dt>Silver</dt>
+                  <dd>{player?.silver.toLocaleString('en-US') ?? '—'}</dd>
+                </div>
+                <div className={styles.stat}>
+                  <dt>Crystals</dt>
+                  <dd>{player?.crystals.toLocaleString('en-US') ?? '—'}</dd>
+                </div>
+              </dl>
+            </Panel>
+          </ScreenInfo>
         }
       >
         The Haven
@@ -81,44 +121,6 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
             );
           })}
         </section>
-
-        <aside className={styles.sidebar}>
-          <Panel title="Dispatches" className={styles.news}>
-            <article className={styles.newsItem}>
-              <h3 className={styles.newsTitle}>The Sskarn are moving</h3>
-              <p className={styles.newsBody}>
-                Scouts report serpentfolk columns pushing out of the Sunken Marches. The campaign
-                trail opens soon — gather your warband.
-              </p>
-              <span className={styles.newsTag}>Early Access · Phase 0</span>
-            </article>
-          </Panel>
-
-          <Panel title="Your standing" variant="inset" className={styles.standing}>
-            <dl className={styles.stats}>
-              <div className={styles.stat}>
-                <dt>Level</dt>
-                <dd>{player?.level ?? '—'}</dd>
-              </div>
-              <div className={styles.stat}>
-                <dt>Roster</dt>
-                {/* Was a hardcoded `0`. The home screen told every warden they owned no
-                    champions while the roster screen counted them correctly. */}
-                <dd>
-                  {champions.length} / {player?.rosterCapacity ?? '—'}
-                </dd>
-              </div>
-              <div className={styles.stat}>
-                <dt>Silver</dt>
-                <dd>{player?.silver.toLocaleString('en-US') ?? '—'}</dd>
-              </div>
-              <div className={styles.stat}>
-                <dt>Crystals</dt>
-                <dd>{player?.crystals.toLocaleString('en-US') ?? '—'}</dd>
-              </div>
-            </dl>
-          </Panel>
-        </aside>
       </div>
     </div>
   );

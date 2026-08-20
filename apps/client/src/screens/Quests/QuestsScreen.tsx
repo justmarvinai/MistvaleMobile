@@ -14,6 +14,7 @@ import { FirstWins } from './FirstWins';
 import styles from './QuestsScreen.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 
 /**
  * The checklist.
@@ -107,7 +108,30 @@ export function QuestsScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="The day's work, the week's, and the month's.">Errands</Heading>
+      <Heading
+        tagline="The day's work, the week's, and the month's."
+        actions={
+          <ScreenInfo title="Errands" label="About errands">
+            <p>
+              Three cadences, three different decisions: what to do before bed, what to plan a week
+              around, and what to keep an eye on across a month. Each tab keeps its own list and its
+              own reset.
+            </p>
+            <p>
+              Every quest pays on its own, and the tab&rsquo;s <strong>chest</strong> pays again for
+              claiming enough of them — which is what makes the eighth quest worth doing when the
+              first seven have already paid.
+            </p>
+            <p>
+              The <strong>first win</strong> strip is not a quest list: there is nothing to claim,
+              because the bonus lands with the victory. It is there to answer &ldquo;what have I not
+              done today&rdquo; before you go and fight.
+            </p>
+          </ScreenInfo>
+        }
+      >
+        Errands
+      </Heading>
 
       <div className={styles.main}>
         <header className={styles.head}>
@@ -157,6 +181,8 @@ export function QuestsScreen(): JSX.Element {
             ))}
         </header>
 
+        <FirstWins bonuses={quests?.firstWins ?? []} />
+
         {error && <p className={styles.error}>{error}</p>}
 
         {chest && (
@@ -204,10 +230,6 @@ export function QuestsScreen(): JSX.Element {
           />
         )}
       </div>
-
-      <aside className={styles.side}>
-        <FirstWins bonuses={quests?.firstWins ?? []} />
-      </aside>
     </div>
   );
 }

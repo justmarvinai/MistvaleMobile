@@ -4,9 +4,16 @@
   display: grid;
   /* The title is a row of its own; the content row takes the slack. */
   grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr) 18rem;
-  gap: $space-4;
+  gap: $space-3;
   height: 100%;
+  min-height: 0;
+}
+
+/* The stalls scroll; the header and the notices do not. */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
   min-height: 0;
 }
 
@@ -15,7 +22,18 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: $space-3;
-  margin-bottom: $space-3;
+  flex-wrap: wrap;
+}
+
+.headWho {
+  min-width: 0;
+}
+
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-wrap: wrap;
 }
 
 .title {
@@ -58,7 +76,7 @@
   grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
   gap: $space-2;
   align-content: start;
-  max-height: calc(100% - 5rem);
+  min-height: 0;
   overflow-y: auto;
   padding-right: $space-2;
 }
@@ -138,24 +156,12 @@
   font-size: 0.72rem;
 }
 
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
-  min-height: 0;
-}
-
-.note {
-  color: $muted;
-  font-size: 0.8rem;
-  line-height: 1.6;
-}
-
+/* Side by side in the header rather than stacked in a column: two buttons of the same
+   weight, both about the rotation, both next to the clock that runs it. */
 .crystalActions {
   display: flex;
-  flex-direction: column;
   gap: $space-2;
-  margin-top: $space-3;
+  flex-wrap: wrap;
 }
 
 .empty {

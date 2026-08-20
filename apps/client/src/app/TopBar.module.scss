@@ -27,3 +27,78 @@
   color: $accent-soft;
   text-shadow: 0 1px 3px #000;
 }
+
+/* ── The chip ─────────────────────────────────────────────────────────────────
+   The library lays the chip out as a row — avatar, then name — and there is nowhere in it
+   for a second line. A two-row grid gives one: the avatar spans both rows on the left, the
+   name takes the top of the right column and the progress takes the bottom. The bar itself
+   is portalled in from `TopBar.tsx`; this is only where it lands. */
+
+.bar :global(.fui-topbar__player) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: $space-2;
+  row-gap: 2px;
+  text-align: left;
+}
+
+.bar :global(.fui-topbar__avatar) {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+.bar :global(.fui-topbar__name) {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+}
+
+/* The level ring, off.
+   `levelProgress` is no longer passed, so the arc would sit at zero — a permanently empty
+   ring around every avatar in the game, which reads as a defect rather than as nothing.
+   The pseudo-element stays and becomes what it should always have been on an account with
+   no portrait: a plain rim. The progress it used to carry is the bar underneath. */
+.bar :global(.fui-topbar__avatar)::before {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.progress {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  min-width: 0;
+}
+
+/* A floor and a ceiling: narrower than this and the fill is a smear, wider and the chip
+   starts pushing the currency rail off a small window.
+
+   `--fui-bar-h` is the library's own knob for bar height, and the theme sets it to 32px —
+   right for a boss's health, four times too tall for a line under a name. Overriding the
+   property rather than the height keeps the track art, the well inset and the fill all in
+   proportion, which setting `height` directly would not. */
+.xpBar {
+  --fui-bar-h: 12px;
+
+  flex: 1 1 9rem;
+  min-width: 5.5rem;
+  max-width: 12rem;
+}
+
+.xpNumbers {
+  flex: none;
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* The half a player is actually counting down. */
+.xpLeft {
+  color: $accent-soft;
+}

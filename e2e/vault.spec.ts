@@ -33,13 +33,13 @@ test.describe('the vault', () => {
 
     // The count is loose relics over the cap, not everything owned — equipped relics live
     // on a champion, which is what makes equipping a way to make room. The meter says so in
-    // its own label. Scoped to the sidebar, because "In the vault" is also the name of the
-    // list's default filter.
-    const panel = page.locator('aside');
+    // its own label. Scoped to the capacity group — the meter and the two controls that
+    // move it — because "In the vault" is also the name of the list's default filter.
+    const panel = page.getByRole('group', { name: /vault capacity/i });
     await expect(panel.getByText('0 / 250')).toBeVisible({ timeout: 15_000 });
     await expect(panel.getByText(/loose relics/i)).toBeVisible();
 
-    // …and the way to more of it, priced, in the same panel as the number it fixes.
+    // …and the way to more of it, priced, in the same group as the number it fixes.
     await expect(page.getByRole('button', { name: /buy 50 slots — 25,000 silver/i })).toBeVisible();
   });
 
