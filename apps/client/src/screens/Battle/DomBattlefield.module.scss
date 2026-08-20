@@ -1,0 +1,132 @@
+@use '../../styles/tokens' as *;
+
+/* The battlefield without a GPU. See DomBattlefield.tsx.
+
+   Everything here is positioned against a 960×540 box, because that is the canvas the Pixi
+   scene composes in — `aspect-ratio` puts the same percentages in the same places, so a
+   fight looks like the same fight whichever half of the game drew it. */
+
+.field {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.canvas {
+  position: relative;
+  aspect-ratio: 960 / 540;
+  width: 100%;
+  max-width: calc(100vh * (960 / 540));
+  max-height: 100%;
+}
+
+/* The horizon band and the ground plate the scene draws, in the same two colours at the
+   same height, so the field has a floor to stand on rather than being a void. */
+.ground {
+  position: absolute;
+  inset: calc(100% * 230 / 540) 0 0;
+  background: #171310;
+  border-top: 2px solid #2a2018;
+}
+
+/* A champion's art is 88px drawn at ×2, so 176 of the scene's 540 virtual rows. The height
+   lives here rather than on the image because a percentage height resolves against the
+   parent's *definite* height — and an absolutely positioned box with no height of its own
+   gives an image nothing to be a percentage of, which is how the first version shipped at
+   half size. `.canvas` has a definite height; this does now too. */
+.fighter {
+  position: absolute;
+  height: calc(100% * 176 / 540);
+  /* The anchor is the feet, as it is for the sprite in the scene. */
+  transform: translate(-50%, -100%);
+}
+
+.fighter[data-alive='false'] {
+  opacity: 0.25;
+  filter: grayscale(0.8);
+}
+
+/* Fills the slot the fighter reserves, keeping its own proportions — which is what lets one
+   rule serve both a square 88×88 champion and the tall, narrow silhouette. */
+.sprite {
+  display: block;
+  height: 100%;
+  width: auto;
+  image-rendering: pixelated;
+}
+
+/* Enemies face the player's side, as they do in the scene. */
+.fighter[data-side='enemy'] .sprite {
+  transform: scaleX(-1);
+}
+
+/* Under the feet, not over the head: the scene puts the bar below the anchor. Clear of the
+   acting ring, which sits in the same place. */
+.bar {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 14px);
+  width: 56px;
+  height: 7px;
+  transform: translateX(-50%);
+  background: #0c0a09;
+  border: 1px solid #2a2018;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: $danger;
+}
+
+.fighter[data-side='ally'] .fill {
+  background: #57b35c;
+}
+
+/* Whose turn it is. A ring in the scene; here the cheapest thing that reads as one. */
+.fighter[data-acting='true']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 2px);
+  width: 62px;
+  height: 16px;
+  transform: translateX(-50%);
+  border: 2px solid $accent;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+
+.floater {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: $font-display;
+  font-size: 15px;
+  color: $parchment;
+  text-shadow: 0 0 4px #0c0a09;
+  white-space: nowrap;
+}
+
+.damage {
+  color: $parchment;
+}
+
+.heal {
+  color: #57b35c;
+}
+
+.resist {
+  color: $muted;
+}
+
+.shield {
+  color: $accent;
+}
+
+.status {
+  color: #e0a52e;
+}

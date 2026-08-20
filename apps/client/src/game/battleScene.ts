@@ -39,8 +39,13 @@ const FLOATER_COLOUR: Record<Floater['kind'], number> = {
   status: 0xe0a52e,
 };
 
-/** Where a slot sits, staggered so the back rank reads behind the front. */
-function slotPosition(side: 'ally' | 'enemy', slot: number): { x: number; y: number } {
+/**
+ * Where a slot sits, staggered so the back rank reads behind the front.
+ *
+ * Exported because the DOM battlefield draws the same formation — a fight must look like the
+ * same fight whether it is painted by WebGL or by the browser.
+ */
+export function slotPosition(side: 'ally' | 'enemy', slot: number): { x: number; y: number } {
   const baseY = 300;
   const step = 46;
   const depth = 34;

@@ -86,6 +86,12 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             onChange={(colorblindGlyphs) => void patch({ colorblindGlyphs })}
           />
           <ToggleRow
+            label="Simple battlefield"
+            description="Draws battles without the graphics card. Turn this on if a fight looks empty or half-drawn."
+            checked={settings.simpleBattlefield}
+            onChange={(simpleBattlefield) => void patch({ simpleBattlefield })}
+          />
+          <ToggleRow
             label="Skip result flourishes"
             description="Jumps straight to battle results."
             checked={settings.fastResults}

@@ -17,6 +17,22 @@ export const playerSettingsSchema = z.object({
   colorblindGlyphs: z.boolean(),
   /** Skip battle intro/outro flourishes. */
   fastResults: z.boolean(),
+  /**
+   * Draw the battlefield with the browser instead of with the graphics card.
+   *
+   * The battlefield is the one part of Mistvale that needs a graphics context, and a
+   * machine can fail to give it a working one in more ways than "it has none": hardware
+   * acceleration switched off, a driver the browser has blocklisted, a software renderer
+   * that draws half the field and not the other half. All of those arrive as the same
+   * thing — a correct fight over a black rectangle — and none of them can be told apart
+   * from inside the page.
+   *
+   * So this is a switch rather than a detection. On, the fight is drawn as ordinary DOM:
+   * no idle loops and no fog, every champion where they stand and every health bar where
+   * it belongs. The client turns it on by itself when there is provably no context at
+   * all; this is for the machines where there is one and it does not work.
+   */
+  simpleBattlefield: z.boolean(),
 });
 export type PlayerSettings = z.infer<typeof playerSettingsSchema>;
 
@@ -27,6 +43,7 @@ export const DEFAULT_PLAYER_SETTINGS: PlayerSettings = Object.freeze({
   reducedMotion: false,
   colorblindGlyphs: false,
   fastResults: false,
+  simpleBattlefield: false,
 });
 
 export const updateSettingsRequestSchema = playerSettingsSchema.partial();

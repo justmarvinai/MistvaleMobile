@@ -12,7 +12,8 @@ import { BattleScene } from '../../game/battleScene';
 import { stillPath } from '../../game/sprites';
 import { skillArt } from '../../ui/skillArt';
 import { getStage, isSceneAttached, setScene, stageFailure } from '../../game/stage';
-import { blindMessage, blindReason } from './blindStage';
+import { blindMessage, blindReason, type BlindReason } from './blindStage';
+import { DomBattlefield } from './DomBattlefield';
 import { settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
 import { useBattleStore } from '../../state/battleStore';
 import { useLoadoutStore } from '../../state/loadoutStore';
@@ -68,6 +69,19 @@ export function BattleScreen(): JSX.Element {
   const back = useNavStore((state) => state.back);
   const refreshPlayer = usePlayerStore((state) => state.refresh);
 
+  /**
+   * Whether to draw the fight with the browser rather than with the graphics card.
+   *
+   * Two ways in. The player's own switch, for the machines where a graphics context exists
+   * and does not work — a blocklisted driver, a software renderer that draws the allies and
+   * not the enemies, acceleration turned off somewhere upstream. None of those can be told
+   * apart from inside the page, which is why it is a switch and not a detection.
+   *
+   * And automatically when there is provably no context at all, because a player who cannot
+   * see the fight cannot find the setting that would let them.
+   */
+  const simpleBattlefield = usePlayerStore((state) => state.settings.simpleBattlefield);
+
   // How this player likes to watch a fight, remembered across fights and sign-ins.
   const preferredSpeed = useLoadoutStore((state) => state.speed);
   const preferredAuto = useLoadoutStore((state) => state.auto);
@@ -108,8 +122,11 @@ export function BattleScreen(): JSX.Element {
     artForRef.current = artFor;
   }, [artFor]);
 
-  // One scene for the life of the screen; the store drives what it shows.
+  // One scene for the life of the screen; the store drives what it shows. Not built at all
+  // when the player has asked for the simple battlefield — there is no sense spending a
+  // graphics context on a scene nobody is going to look at.
   useEffect(() => {
+    if (simpleBattlefield) return;
     const scene = new BattleScene((defKey) => artForRef.current(defKey));
     sceneRef.current = scene;
     setScene(scene);
@@ -117,7 +134,7 @@ export function BattleScreen(): JSX.Element {
       sceneRef.current = null;
       setScene(null);
     };
-  }, []);
+  }, [simpleBattlefield]);
 
   /**
    * Draws the current view — and makes sure it is still ours to draw on.
@@ -171,10 +188,11 @@ export function BattleScreen(): JSX.Element {
    * A beat of delay, because a scene is legitimately empty for the frame between the board
    * arriving and the first sync.
    */
-  const [blind, setBlind] = useState<string | null>(null);
+  const [blind, setBlind] = useState<{ reason: BlindReason; message: string } | null>(null);
   const unitCount = view.allies.length + view.enemies.length;
   useEffect(() => {
-    if (unitCount === 0) return;
+    // Nothing to warn about when the browser is drawing the fight on purpose.
+    if (unitCount === 0 || simpleBattlefield) return;
     const timer = window.setTimeout(() => {
       const scene = sceneRef.current;
       const reason = blindReason({
@@ -187,11 +205,17 @@ export function BattleScreen(): JSX.Element {
       setBlind(
         reason === null
           ? null
-          : blindMessage(reason, reason === 'no-context' ? stageFailure() : drawError.current),
+          : {
+              reason,
+              message: blindMessage(
+                reason,
+                reason === 'no-context' ? stageFailure() : drawError.current,
+              ),
+            },
       );
     }, 1500);
     return () => window.clearTimeout(timer);
-  }, [unitCount, view.wave]);
+  }, [unitCount, view.wave, simpleBattlefield]);
 
   useLayoutEffect(() => {
     controlsRef.current
@@ -328,6 +352,10 @@ export function BattleScreen(): JSX.Element {
     back();
   };
 
+  // The notice is stale the moment the browser takes over the drawing.
+  const simpleField = simpleBattlefield || blind?.reason === 'no-context';
+  const notice = simpleBattlefield ? null : blind;
+
   if (!battle) {
     return (
       <div className={styles.screen}>
@@ -343,8 +371,15 @@ export function BattleScreen(): JSX.Element {
       {/* A window onto the shared Pixi canvas, which is behind the whole shell — not a
           stage of its own. Mounting a second <PixiStage> here is what made this screen
           render nothing at all: its wrapper is a fixed, opaque, full-viewport layer, and
-          being later in the DOM than the HUD it painted straight over it. */}
-      <div className={styles.stage} />
+          being later in the DOM than the HUD it painted straight over it.
+
+          When there is no graphics context to be had, the same space is filled by a
+          battlefield the browser draws (`DomBattlefield`). Only for that one cause: a stage
+          that exists but is empty is a bug to fix, not a machine to work around, and
+          quietly papering over it is how the last one survived four rounds. */}
+      <div className={styles.stage}>
+        {simpleField && <DomBattlefield view={view} artFor={artFor} />}
+      </div>
 
       <div className={styles.hud}>
         <div className={styles.topLeft}>
@@ -479,13 +514,9 @@ export function BattleScreen(): JSX.Element {
             <span className={styles.hint}>Waiting for the server…</span>
           )}
 
-          {/* Never a silent black rectangle. See `blind` above. */}
-          {blind && (
-            <span className={styles.error}>
-              The battlefield could not be drawn — the champions' art did not load. The fight itself
-              is fine: the numbers, the turn order and the result are all the server's.
-            </span>
-          )}
+          {/* Never a silent black rectangle, and never a vague one: the sentence names which
+              of four things went wrong, because each is a different thing to fix. */}
+          {notice && <span className={styles.error}>{notice.message}</span>}
 
           {error && <span className={styles.error}>{error}</span>}
         </div>

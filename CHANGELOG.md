@@ -5,6 +5,31 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — a battlefield for the machines the graphics card fails on
+
+The battlefield is the one part of Mistvale that needs a graphics context, and a machine can
+fail to give it a working one in more ways than "it has none". Running the game against a
+browser with 3D disabled shows the shape of it: the allies draw, the enemies come out as
+near-invisible ghosts, and their health bars go black. Acceleration switched off, a
+blocklisted driver, a software renderer that gets half the frame right — all of them arrive
+as the same thing, a correct fight over a black rectangle, and none of them can be told apart
+from inside the page.
+
+So there is a switch: **Settings → Simple battlefield**. On, the fight is drawn as ordinary
+DOM — every champion where they stand, mirrored to face each other, health bars under their
+feet, a ring on whoever is acting, damage numbers where they land — reading the same
+`PlaybackView` and standing in the same formation as the Pixi scene, and building no scene at
+all. No idle loops and no fog, because those are the parts that cost a GPU. The client turns
+it on by itself when there is provably no context; the switch is for when there is one and it
+does not work.
+
+### Fixed — the blank-field notice showed the wrong sentence
+
+The message that names *which* of four things went wrong shipped computed but not rendered:
+the JSX still held the old hardcoded line, so every cause read as "the champions' art did not
+load" — which was the one thing it demonstrably was not. A find-and-replace that was written
+without an assertion and silently matched nothing.
+
 ### Fixed — the wave counter never left wave one
 
 `WaveTracker` takes `current` at construction and paints from its own field afterwards, and

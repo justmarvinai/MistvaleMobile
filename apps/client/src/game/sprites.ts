@@ -57,7 +57,7 @@ export function spriteEntry(basePath: string): SpriteManifestEntry | undefined {
   return manifest?.get(basePath);
 }
 
-const framePath = (basePath: string, index: number): string =>
+export const framePath = (basePath: string, index: number): string =>
   `/${SPRITE_ROOT}/${basePath}/idle/frame_${String(index).padStart(3, '0')}.png`;
 
 export const stillPath = (basePath: string): string => `/${SPRITE_ROOT}/${basePath}/still.png`;

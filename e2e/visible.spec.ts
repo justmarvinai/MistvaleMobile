@@ -327,6 +327,61 @@ test.describe('what a player can actually see', () => {
   });
 
   /**
+   * A battlefield for the machines the graphics card fails on.
+   *
+   * Mistvale's battlefield is the one part of the game that needs a graphics context, and a
+   * machine can fail to give it a working one in more ways than "it has none": acceleration
+   * switched off, a driver the browser has blocklisted, a software renderer that draws the
+   * allies and leaves the enemies as ghosts. All of them arrive as the same thing — a
+   * correct fight over a black rectangle — and none can be told apart from inside the page.
+   *
+   * So there is a switch, and this is it working: every champion and every enemy standing on
+   * the field as ordinary DOM, with no Pixi scene built at all.
+   */
+  test('the simple battlefield draws the fight without a graphics context', async ({ page }) => {
+    test.slow();
+    await registerRaw(page, 'e2esimple', 'Plain');
+    await chooseStarter(page);
+
+    // The switch, set the way the settings panel sets it.
+    await page.waitForFunction(
+      async () => {
+        const response = await fetch('/api/player/settings', {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ simpleBattlefield: true }),
+          credentials: 'include',
+        });
+        return response.ok;
+      },
+      undefined,
+      { timeout: 20_000 },
+    );
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible({ timeout: 30_000 });
+    await dismissUnlocks(page);
+
+    await page
+      .getByRole('button', { name: /^campaign$/i })
+      .first()
+      .click();
+    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
+    await pickTeam(teamDialog);
+    await teamDialog.getByRole('button', { name: /into the mist/i }).click();
+
+    // Both sides are on the field, in the DOM, where no canvas is involved.
+    const fighters = page.locator('[data-side][data-alive]');
+    await expect(fighters.first()).toBeVisible({ timeout: 30_000 });
+    await expect.poll(async () => await fighters.count(), { timeout: 20_000 }).toBeGreaterThan(1);
+    await expect(page.locator('[data-side="ally"][data-alive]')).not.toHaveCount(0);
+    await expect(page.locator('[data-side="enemy"][data-alive]')).not.toHaveCount(0);
+
+    // And the screen does not also complain: the browser is drawing on purpose.
+    await expect(page.getByText(/battlefield|graphics acceleration/i)).toHaveCount(0);
+  });
+
+  /**
    * The wave counter counts.
    *
    * `WaveTracker` takes `current` at construction and paints from its own field after that,
