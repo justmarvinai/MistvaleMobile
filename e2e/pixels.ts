@@ -130,3 +130,24 @@ export function litFraction(bitmap: Bitmap, threshold = 42): number {
   }
   return lit / (bitmap.width * bitmap.height);
 }
+
+/**
+ * The average colour of a bitmap, as `[r, g, b]`.
+ *
+ * For flat fills this is the fill: the battlefield's ground plate and the void outside it
+ * are two solid, deliberately close colours (`#171310` against `#0c0a09`), and averaging a
+ * patch of one is how a test tells which of them it is looking at without depending on
+ * exactly where a champion happens to be standing.
+ */
+export function meanColour(bitmap: Bitmap): [number, number, number] {
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  for (let at = 0; at < bitmap.data.length; at += 4) {
+    r += bitmap.data[at] ?? 0;
+    g += bitmap.data[at + 1] ?? 0;
+    b += bitmap.data[at + 2] ?? 0;
+  }
+  const pixels = bitmap.width * bitmap.height;
+  return [r / pixels, g / pixels, b / pixels];
+}

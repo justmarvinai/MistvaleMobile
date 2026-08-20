@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 /**
  * Shared scaffolding for the browser suite.
@@ -207,4 +207,48 @@ export async function pickTeam(dialog: Locator): Promise<void> {
     .getByRole('button', { name: /lv \d+/i })
     .first()
     .click();
+}
+
+/**
+ * Turns the player's **Simple battlefield** on, the way the settings panel does.
+ *
+ * A reload follows because the switch decides which renderer the battle screen builds, and
+ * that decision is made when the screen mounts.
+ */
+export async function setSimpleBattlefield(page: Page): Promise<void> {
+  await page.waitForFunction(
+    async () => {
+      const response = await fetch('/api/player/settings', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ simpleBattlefield: true }),
+        credentials: 'include',
+      });
+      return response.ok;
+    },
+    undefined,
+    { timeout: 20_000 },
+  );
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible({ timeout: 30_000 });
+}
+
+/**
+ * Walks a fresh account from the Haven into campaign stage 1-1, on the default team.
+ *
+ * Returns once the hotbar names somebody to act with, which is the point at which the
+ * board, the units and the HUD are all up.
+ */
+export async function enterStageOneOne(page: Page): Promise<void> {
+  await page
+    .getByRole('button', { name: /^campaign$/i })
+    .first()
+    .click();
+  await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+  const dialog = page.getByRole('dialog', { name: /stage 1/i });
+  await pickTeam(dialog);
+  await dialog.getByRole('button', { name: /into the mist/i }).click();
+  await expect(page.locator('.fui-actionbar [role="button"]').first()).toBeVisible({
+    timeout: 30_000,
+  });
 }

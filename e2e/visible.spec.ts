@@ -2,12 +2,14 @@ import { expect, test, type Page } from '@playwright/test';
 import {
   chooseStarter,
   dismissUnlocks,
+  enterStageOneOne,
   expectOnTop,
   pickTeam,
   registerRaw,
   resolveBattle,
+  setSimpleBattlefield,
 } from './support';
-import { decodePng, litFraction } from './pixels';
+import { decodePng, litFraction, meanColour } from './pixels';
 
 /**
  * The screens a player looks at, checked for being *lookable at*.
@@ -344,21 +346,7 @@ test.describe('what a player can actually see', () => {
     await chooseStarter(page);
 
     // The switch, set the way the settings panel sets it.
-    await page.waitForFunction(
-      async () => {
-        const response = await fetch('/api/player/settings', {
-          method: 'PATCH',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ simpleBattlefield: true }),
-          credentials: 'include',
-        });
-        return response.ok;
-      },
-      undefined,
-      { timeout: 20_000 },
-    );
-    await page.reload();
-    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible({ timeout: 30_000 });
+    await setSimpleBattlefield(page);
     await dismissUnlocks(page);
 
     await page
@@ -461,6 +449,77 @@ test.describe('what a player can actually see', () => {
         .toBeGreaterThan(4);
     });
   }
+
+  /**
+   * The ground reaches the sides of the window.
+   *
+   * The scene *contains* its 960×540 design canvas rather than cropping it, which is the
+   * right call for a composition with a side at each edge — but the floor was drawn exactly
+   * as wide as that canvas, so in any window wider than 16:9 it stopped in the middle of the
+   * screen with black either side. That is what the owner sent a screenshot of, and it is
+   * invisible at the suite's usual viewport because 1440×900 fits the field exactly.
+   *
+   * Both renderers, because the fix is two fixes — a bled rectangle in the scene, a negative
+   * inset in the stylesheet — and either can regress on its own. They are asked in different
+   * ways on purpose. The painted floor is pixels and nothing else, so it is read as pixels.
+   * The browser's floor is an element, and reading *it* as pixels would be dishonest: with
+   * the simple battlefield on, no battle scene is built, so what shows through the gaps is
+   * the ambient mist — bright enough to answer the question for it and pass either way.
+   */
+  test('the painted ground reaches the sides of a wide window', async ({ page }) => {
+    test.slow();
+    // 32:14. Wide enough that the field is letterboxed by about 180px at each side, which
+    // is where the black bars were.
+    await page.setViewportSize({ width: 1600, height: 700 });
+
+    await registerRaw(page, 'e2egp', 'GrndP');
+    await chooseStarter(page);
+    await enterStageOneOne(page);
+
+    // Asked as the horizon step at the edge itself, at one x, rather than by comparing an
+    // edge against the middle of the screen: the field is lit with a lateral falloff, so the
+    // floor is genuinely darker at the sides than in the centre and an equality there would
+    // fail on a fix that works. Two patches 70px apart in the same column are on the same
+    // part of that gradient, and the only thing between them is the horizon.
+    //
+    // With the floor reaching the edge that step is about seven points — the void behind the
+    // letterbox against the ground plate, `#0c0a09` against `#171310`. Without it there is no
+    // step at all, because both patches are the void.
+    const patch = async (x: number, y: number): Promise<number> =>
+      meanColour(decodePng(await page.screenshot({ clip: { x, y, width: 30, height: 30 } })))[0];
+
+    for (const [edge, x] of [
+      ['right', 1570],
+      ['left', 0],
+    ] as const) {
+      const sky = await patch(x, 250);
+      const floor = await patch(x, 320);
+      expect(floor - sky, `the floor reaches the ${edge} edge`).toBeGreaterThan(3);
+    }
+  });
+
+  test('the browser-drawn ground reaches the sides of a wide window', async ({ page }) => {
+    test.slow();
+    await page.setViewportSize({ width: 1600, height: 700 });
+
+    await registerRaw(page, 'e2egs', 'GrndS');
+    await chooseStarter(page);
+    await setSimpleBattlefield(page);
+    await dismissUnlocks(page);
+    await enterStageOneOne(page);
+
+    const field = page.locator('[data-battlefield="simple"]');
+    const ground = page.locator('[data-ground]');
+    await expect(ground).toHaveCount(1);
+
+    const fieldBox = await field.boundingBox();
+    const groundBox = await ground.boundingBox();
+    expect(fieldBox, 'the field is laid out').not.toBeNull();
+    expect(groundBox, 'the ground is laid out').not.toBeNull();
+    // The floor is clipped by the field, so it can be wider but never narrower: the
+    // 960×540 canvas it lives in is 356px narrower than this window.
+    expect(groundBox?.width ?? 0).toBeGreaterThanOrEqual(fieldBox?.width ?? Infinity);
+  });
 });
 
 /**

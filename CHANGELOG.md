@@ -51,6 +51,13 @@ composition with a side at each edge — which left the floor ending at the lett
 black either side. Scenery does not have to obey the composition: the ground bleeds past the
 canvas in both renderers and reaches the edge of any window the fight is watched in.
 
+Guarded in `e2e/visible.spec.ts`, in a deliberately wide window because at the suite's usual
+1440×900 the field fits exactly and there is nothing to see. The painted floor is read as
+pixels — the horizon step at the edge itself, since the field is lit with a lateral falloff
+and an edge-against-centre comparison would fail on a fix that works — and the browser-drawn
+one is measured as the element it is, because with the simple battlefield on there is no
+battle scene behind it and the ambient mist would answer the question for it.
+
 ### Fixed — the empty battlefield was our own Content-Security-Policy
 
 Five rounds, and the answer was in Mistvale's nginx config the whole time. Pixi builds its

@@ -51,9 +51,11 @@ export function DomBattlefield({
   const framesReady = useSpriteManifest();
 
   return (
-    <div className={styles.field} aria-hidden="true">
+    <div className={styles.field} data-battlefield="simple" aria-hidden="true">
       <div className={styles.canvas}>
-        <div className={styles.ground} />
+        {/* Named so the suite can measure it: the floor has to reach the edges of the
+            window, and a class name a bundler hashed is not something a test can ask for. */}
+        <div className={styles.ground} data-ground="" />
         {units.map((unit) => (
           <Fighter
             key={`${unit.ref.side}:${unit.ref.slot}`}
