@@ -151,9 +151,18 @@ export class BattleScene implements Scene {
   private drawBackdrop(): void {
     const ground = new Graphics();
     // A horizon band and a ground plate: enough depth to sit units in, cheap to draw.
-    ground.rect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT).fill(0x0c0a09);
-    ground.rect(0, 230, VIRTUAL_WIDTH, VIRTUAL_HEIGHT - 230).fill(0x171310);
-    ground.rect(0, 228, VIRTUAL_WIDTH, 2).fill(0x2a2018);
+    //
+    // Drawn far wider than the design canvas on purpose. `resize` *contains* 960×540 inside
+    // the viewport — the right choice for the composition, since cropping the flanks would
+    // push the outer slots off a wide monitor — but it means the canvas is narrower than the
+    // window, and a ground exactly 960 wide ended at the letterbox with black either side.
+    // The floor is scenery, not composition: it runs past the edge in both directions so it
+    // reaches the sides of any window the fight is watched in.
+    const bleed = VIRTUAL_WIDTH;
+    const wide = VIRTUAL_WIDTH + bleed * 2;
+    ground.rect(-bleed, 0, wide, VIRTUAL_HEIGHT).fill(0x0c0a09);
+    ground.rect(-bleed, 230, wide, VIRTUAL_HEIGHT - 230).fill(0x171310);
+    ground.rect(-bleed, 228, wide, 2).fill(0x2a2018);
     this.backdrop.addChildAt(ground, 0);
   }
 

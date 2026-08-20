@@ -129,13 +129,32 @@ export async function resolveBattle(page: Page): Promise<void> {
   // waits twenty seconds for a battle nobody is fighting.
   if ((await auto.getAttribute('aria-pressed')) !== 'true') await auto.click();
 
-  // Skip exists only while there is playback left to skip — a fight short enough to drain
-  // first is a fight that needed no skipping. ("Skip tutorial" is a different button and
-  // deliberately does not match.)
-  await page
-    .getByRole('button', { name: /^skip$/i })
-    .click({ timeout: 20_000 })
-    .catch(() => undefined);
+  // One press is no longer one fight. Since B3 the button asks the server for a few turns
+  // at a time and the screen re-asks while it stays engaged — which is what makes it a
+  // toggle rather than a commitment, and what stops this helper from being able to press
+  // once and walk away. So it waits for the fight to actually end, pressing Skip whenever
+  // there is playback in the way. ("Skip tutorial" is a different button and deliberately
+  // does not match.)
+  // Every way a fight can end, including the sandbox's — the practice modal is titled
+  // "Practice" rather than by an outcome, because it deliberately has none.
+  const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn|practice/i });
+  const skip = page.getByRole('button', { name: /^skip$/i });
+
+  const deadline = Date.now() + 120_000;
+  while (Date.now() < deadline) {
+    if (await results.isVisible().catch(() => false)) return;
+    if (await skip.isVisible().catch(() => false)) {
+      await skip.click({ timeout: 5_000 }).catch(() => undefined);
+      continue;
+    }
+    // Auto can be knocked off by a wave transition rebuilding the controls; re-engage it
+    // rather than sitting on a fight that is waiting for a command nobody will give.
+    if ((await auto.getAttribute('aria-pressed').catch(() => null)) === 'false') {
+      await auto.click({ timeout: 5_000 }).catch(() => undefined);
+    }
+    await page.waitForTimeout(250);
+  }
+  throw new Error('resolveBattle: the fight never reached its results');
 }
 
 /**

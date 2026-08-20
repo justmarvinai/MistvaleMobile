@@ -55,3 +55,32 @@ export function settledOnServer(state: BattleClocks): boolean {
 export function watchedToTheEnd(state: BattleClocks): boolean {
   return state.view.finished || (settledOnServer(state) && state.pending.length === 0);
 }
+
+/**
+ * How far ahead of the animation auto-battle is allowed to get, in queued events.
+ *
+ * This number is the whole compromise, and both extremes are bugs the owner has already
+ * reported. Pace auto to the playback and it is exactly as slow as watching — forty turns
+ * in ninety seconds, when the button exists to avoid that. Let it run unbounded and it
+ * resolves the entire fight in a second, which is what "Auto could be switched on and never
+ * off" *was*: by the time the button was pressed again there was nothing left to cancel.
+ *
+ * Forty events is a few turns: enough that the playback never starves and Skip is there for
+ * anyone who does not want to watch, few enough that switching Auto off gives the fight back
+ * within a couple of seconds.
+ */
+const AUTO_LOOKAHEAD = 40;
+
+/**
+ * Whether auto-battle should ask the server for more turns.
+ *
+ * Its own question, deliberately separate from `awaitingInput`. That one answers "may the
+ * *player* act now" and is gated on the playback having caught up, because a hotbar that
+ * lights up over a fight three seconds behind is a hotbar that lies. Auto is not a player:
+ * it reads the server's clock, bounded by how far ahead it already is.
+ */
+export function autoShouldAsk(state: BattleClocks): boolean {
+  if (state.battle === null || state.battle.status !== 'active') return false;
+  if (state.view.finished) return false;
+  return state.pending.length < AUTO_LOOKAHEAD;
+}

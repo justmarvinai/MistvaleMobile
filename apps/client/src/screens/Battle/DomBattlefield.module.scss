@@ -25,10 +25,14 @@
 }
 
 /* The horizon band and the ground plate the scene draws, in the same two colours at the
-   same height, so the field has a floor to stand on rather than being a void. */
+   same height, so the field has a floor to stand on rather than being a void.
+
+   Bled past the sides for the same reason the scene bleeds its own: the canvas is a
+   contained 960×540 box and the window is wider, so a floor that stops at the box stops in
+   the middle of the screen. Scenery reaches the edges; the composition does not have to. */
 .ground {
   position: absolute;
-  inset: calc(100% * 230 / 540) 0 0;
+  inset: calc(100% * 230 / 540) -100% 0;
   background: #171310;
   border-top: 2px solid #2a2018;
 }

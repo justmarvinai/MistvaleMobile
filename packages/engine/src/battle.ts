@@ -1192,7 +1192,20 @@ function beginTurn(ctx: Ctx, unit: BattleUnit): 'dead' | 'skipped' | 'ready' {
 }
 
 /** The acting half: choose a skill, resolve it, then close the turn. */
-function actAndEndTurn(ctx: Ctx, unit: BattleUnit, action?: BattleAction): void {
+function actAndEndTurn(
+  ctx: Ctx,
+  unit: BattleUnit,
+  action?: BattleAction,
+  /**
+   * The enemy the player asked auto-battle to concentrate on.
+   *
+   * Only ever a *preference*: it is handed to `resolveTargets` as the explicit target,
+   * which uses it when the skill leaves a choice and ignores it otherwise. A focus cannot
+   * make a heal hit an enemy, cannot override an all-target skill, and cannot reach
+   * something already dead.
+   */
+  focus?: UnitRef,
+): void {
   const { own, foes } = sides(ctx, unit);
   const allies = unit.ref.side === 'ally' ? own : foes;
   const enemies = unit.ref.side === 'ally' ? foes : own;
@@ -1220,6 +1233,13 @@ function actAndEndTurn(ctx: Ctx, unit: BattleUnit, action?: BattleAction): void 
       ctx.rng,
     );
     skill = choice?.skill;
+    // The AI picked the skill; the player picked who it lands on, where there is a choice.
+    if (focus && skill?.targeting.side === 'enemy' && skill.targeting.mode === 'single') {
+      const wanted = enemies.find(
+        (foe) => foe.ref.side === focus.side && foe.ref.slot === focus.slot,
+      );
+      if (wanted?.alive) explicit = focus;
+    }
   }
 
   if (!skill) {
@@ -1402,11 +1422,30 @@ export function createBattle(
  * simulation stops as soon as a player unit is due to act and records that unit in
  * `awaiting`, so the client can present the skill bar.
  */
+export interface AdvanceOptions {
+  /** Let the AI take the player's turns instead of pausing for them. */
+  auto: boolean;
+  /** A manual action for whoever the battle was waiting on. */
+  action?: BattleAction;
+  /**
+   * How many of the player's turns auto may take before pausing again.
+   *
+   * Omitted means "the rest of the fight", which is what multi-battle and the Arena want
+   * and what `auto` has always meant. A number is what makes the Auto *button* a real
+   * toggle: the client asks for a few turns at a time, so switching it off gives control
+   * back at the next decision instead of after an already-decided battle finishes playing
+   * out. The engine is authoritative either way — this only says where to stop.
+   */
+  autoTurns?: number;
+  /** The enemy auto-battle should concentrate on, where the skill leaves a choice. */
+  focus?: UnitRef;
+}
+
 export function advance(
   state: BattleState,
   rules: BattleRules,
   config: CombatConfig,
-  options: { auto: boolean; action?: BattleAction } = { auto: true },
+  options: AdvanceOptions = { auto: true },
 ): StepResult {
   const rng = createRngFromState(state.rngState);
   const ctx: Ctx = { state, rules, config, rng, events: [] };
@@ -1416,13 +1455,17 @@ export function advance(
   // A pending manual action belongs to whoever the battle was waiting on.
   let pendingAction = options.action;
 
+  // How many player turns auto is still allowed to take. `Infinity` is the old behaviour.
+  let autoLeft = options.auto ? (options.autoTurns ?? Number.POSITIVE_INFINITY) : 0;
+
   // Resume a turn that was already opened before the battle paused. Its meter is spent
   // and its start-of-turn ticks have run, so it only has left to act.
   if (state.awaiting) {
     const resuming = unitAt(state.allies, state.enemies, state.awaiting);
     state.awaiting = null;
     if (resuming?.alive) {
-      actAndEndTurn(ctx, resuming, pendingAction);
+      if (!pendingAction && resuming.ref.side === 'ally' && autoLeft > 0) autoLeft -= 1;
+      actAndEndTurn(ctx, resuming, pendingAction, options.focus);
       pendingAction = undefined;
     }
   }
@@ -1445,15 +1488,18 @@ export function advance(
 
     // Only pause once the unit has genuinely reached the point of choosing an action.
     const isPlayerUnit = next.unit.ref.side === 'ally';
-    if (isPlayerUnit && !options.auto && !pendingAction) {
-      state.awaiting = next.unit.ref;
-      break;
+    if (isPlayerUnit && !pendingAction) {
+      if (autoLeft <= 0) {
+        state.awaiting = next.unit.ref;
+        break;
+      }
+      autoLeft -= 1;
     }
 
     const action = isPlayerUnit ? pendingAction : undefined;
     pendingAction = undefined;
 
-    actAndEndTurn(ctx, next.unit, action);
+    actAndEndTurn(ctx, next.unit, action, options.focus);
 
     if (checkOutcome(ctx)) break;
   }

@@ -595,6 +595,79 @@ describe('manual play', () => {
 
 // ── Properties ──────────────────────────────────────────────────────────────
 
+describe('auto-battle the player can take back', () => {
+  /**
+   * `auto: true` used to mean "resolve the whole fight", full stop — which is right for
+   * multi-battle and the Arena, and is why the Auto *button* could be turned on and never
+   * off: by the time the player pressed it again the battle was already decided on the
+   * server and only the playback was left. `autoTurns` is what makes it a real toggle.
+   */
+  it('stops after the number of player turns it was given', () => {
+    const { state, rules } = battle({
+      allies: [unit('ally', 0, { stats: { spd: 200, atk: 1 } })],
+      waves: [[unit('enemy', 0, { stats: { spd: 1, hp: 500_000 } })]],
+    });
+
+    advance(state, rules, config, { auto: true, autoTurns: 1 });
+
+    expect(state.finished, 'the fight is still going').toBe(false);
+    expect(state.awaiting, 'and it is the player who is waited on').toEqual({
+      side: 'ally',
+      slot: 0,
+    });
+  });
+
+  it('still runs the fight out when it is not told where to stop', () => {
+    // Multi-battle and the Arena, unchanged.
+    const { state, rules } = battle({
+      allies: [unit('ally', 0, { stats: { spd: 200, atk: 5_000 } })],
+      waves: [[unit('enemy', 0, { stats: { spd: 1, hp: 100 } })]],
+    });
+
+    advance(state, rules, config, { auto: true });
+
+    expect(state.finished).toBe(true);
+  });
+
+  it('concentrates on the enemy the player picked', () => {
+    // Two identical foes, and a fight the AI would otherwise spread across them.
+    const { state, rules } = battle({
+      allies: [unit('ally', 0, { stats: { spd: 200, atk: 100 } })],
+      waves: [
+        [
+          unit('enemy', 0, { stats: { hp: 500_000, spd: 1 } }),
+          unit('enemy', 1, { stats: { hp: 500_000, spd: 1 } }),
+        ],
+      ],
+    });
+
+    const focus = { side: 'enemy', slot: 1 } as const;
+    const { events } = advance(state, rules, config, { auto: true, autoTurns: 4, focus });
+
+    const hit = eventsOf(events, 'skillUsed').flatMap((event) => event.targets);
+    expect(hit.length, 'the ally took its turns').toBeGreaterThan(0);
+    for (const target of hit) expect(target).toEqual(focus);
+  });
+
+  it('treats a focus as a preference, never as an order', () => {
+    // A focus that is already dead must not wedge the fight or retarget anything.
+    const { state, rules } = battle({
+      allies: [unit('ally', 0, { stats: { spd: 200, atk: 100 } })],
+      waves: [[unit('enemy', 0, { stats: { hp: 500_000, spd: 1 } })]],
+    });
+
+    const { events } = advance(state, rules, config, {
+      auto: true,
+      autoTurns: 2,
+      focus: { side: 'enemy', slot: 3 },
+    });
+
+    const hit = eventsOf(events, 'skillUsed').flatMap((event) => event.targets);
+    expect(hit.length).toBeGreaterThan(0);
+    for (const target of hit) expect(target).toEqual({ side: 'enemy', slot: 0 });
+  });
+});
+
 describe('invariants', () => {
   const randomTeam = (side: 'ally' | 'enemy', seed: number, size: number): BattleUnit[] =>
     Array.from({ length: size }, (_, slot) =>

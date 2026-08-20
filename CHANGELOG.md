@@ -5,6 +5,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — a fight you can make decisions in
+
+Everything here has been in the engine's contract since P3 and none of it had ever reached
+the screen: `BattleAction.target`, every skill's `targeting` and `cooldown`, every status's
+`kind` and `description`. A hotbar slot was an icon, a status was a four-pixel pip, and who a
+skill landed on was the AI's business.
+
+- **Skills say what they do.** Hovering a slot opens a painted tooltip with who it lands on
+  (one enemy, all enemies, the lowest-health ally, three at random), what it costs in turns,
+  when it comes back if it is cooling down, whether the target is the player's to choose, and
+  the skill's own description.
+- **Buffs and debuffs are chips.** Blue for a buff, red for a debuff, each carrying its turn
+  count, each hoverable for what it actually does. They live in a DOM layer over the
+  battlefield so both renderers get them and a keyboard can reach them.
+- **The player picks the target.** Clicking an enemy chooses who this turn's skill lands on;
+  clicking the same one again gives the choice back to the AI.
+- **And the same click tells auto-battle where to concentrate.** The focus is a preference,
+  not an order: the engine honours it when the skill leaves a choice and ignores it for
+  everything else, so it can never make a heal hit an enemy or reach something already dead.
+
+### Fixed — Auto could be switched on and never off
+
+`auto: true` meant "resolve the whole fight", so by the time the button was pressed again the
+battle was already decided on the server and only the playback was left — the control said
+off and the fight carried on. The engine takes an `autoTurns` bound now, the button asks for
+eight turns at a time, and the screen re-asks only while Auto is still engaged. Switch it off
+and control comes back at the very next decision. Multi-battle and the Arena still resolve in
+one call; they are not this button.
+
+Both extremes of the re-asking are bugs, and the middle is the fix. Pace the requests to the
+animation and Auto is exactly as slow as watching; let them run unbounded and the fight is
+decided before the button can be pressed a second time, which is the original bug in a new
+coat. So Auto asks for more only while the playback queue is short — forty events, a few
+turns — which keeps the animation fed without ever getting far enough ahead to be
+uncancellable. And **Skip now means the fight is over**: it is offered for the whole of an
+auto-battle rather than only once the server has finished, and pressing it asks for whatever
+is left of the battle in one call rather than jumping two seconds forward and leaving the
+same button sitting there. Auto is the reversible one; Skip is the commitment.
+
+### Fixed — the ground stopped in the middle of the screen
+
+The scene *contains* its 960×540 design canvas rather than cropping it — the right call for a
+composition with a side at each edge — which left the floor ending at the letterbox with
+black either side. Scenery does not have to obey the composition: the ground bleeds past the
+canvas in both renderers and reaches the edge of any window the fight is watched in.
+
 ### Fixed — the empty battlefield was our own Content-Security-Policy
 
 Five rounds, and the answer was in Mistvale's nginx config the whole time. Pixi builds its

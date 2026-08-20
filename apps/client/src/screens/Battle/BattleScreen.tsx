@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { SkillDef } from '@mistvale/shared';
 import type { UnitRef } from '@mistvale/engine';
 import { ActionBar } from '@/fui/components/ActionBar.ts';
@@ -14,7 +14,9 @@ import { skillArt } from '../../ui/skillArt';
 import { getStage, isSceneAttached, setScene, stageFailure } from '../../game/stage';
 import { blindMessage, blindReason, type BlindReason } from './blindStage';
 import { DomBattlefield } from './DomBattlefield';
-import { settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
+import { UnitOverlay } from './UnitOverlay';
+import { SkillTips } from './SkillTips';
+import { autoShouldAsk, settledOnServer, watchedToTheEnd } from '../../state/battleClocks';
 import { useBattleStore } from '../../state/battleStore';
 import { useLoadoutStore } from '../../state/loadoutStore';
 import { useContentStore } from '../../state/contentStore';
@@ -52,6 +54,8 @@ export function BattleScreen(): JSX.Element {
   const runAuto = useBattleStore((state) => state.runAuto);
   const retreat = useBattleStore((state) => state.retreat);
   const setSpeed = useBattleStore((state) => state.setSpeed);
+  const autoFocus = useBattleStore((state) => state.focus);
+  const setAutoFocus = useBattleStore((state) => state.setFocus);
   const setAuto = useBattleStore((state) => state.setAuto);
   const skipToLatest = useBattleStore((state) => state.skipToLatest);
   const resume = useBattleStore((state) => state.resume);
@@ -63,6 +67,9 @@ export function BattleScreen(): JSX.Element {
   // answer and gates the buttons that talk to it; `watched` is the playback's and gates
   // everything that gives the outcome away.
   const settled = useBattleStore(settledOnServer);
+  // Auto's own clock: the server's, bounded by how far ahead it already is — see
+  // `autoShouldAsk`.
+  const autoWants = useBattleStore(autoShouldAsk);
   const watched = useBattleStore(watchedToTheEnd);
 
   const bundle = useContentStore((state) => state.bundle);
@@ -90,8 +97,25 @@ export function BattleScreen(): JSX.Element {
 
   const sceneRef = useRef<BattleScene | null>(null);
   const [target, setTarget] = useState<UnitRef | null>(null);
-  /** The battle Auto has already been engaged for, so it fires once per fight. */
-  const autoEngaged = useRef<string | null>(null);
+  const [barHost, setBarHost] = useState<HTMLDivElement | null>(null);
+
+  /**
+   * Picking somebody on the field.
+   *
+   * One gesture, two meanings, and which one it carries is whatever the player is doing at
+   * the time: while a champion is waiting for a command it is *this turn's target*, and it
+   * is also remembered as the enemy auto-battle should concentrate on. Picking the same
+   * unit again clears both, which is how a player says "no, choose for me".
+   */
+  const pick = useCallback(
+    (ref: UnitRef) => {
+      setTarget((current) => (current && sameRef(current, ref) ? null : ref));
+      if (ref.side === 'enemy') {
+        setAutoFocus(autoFocus && sameRef(autoFocus, ref) ? null : ref);
+      }
+    },
+    [autoFocus, setAutoFocus],
+  );
   const controlsRef = useRef<HTMLDivElement>(null);
 
   /** Which sprite folder a unit's definition points at. */
@@ -236,21 +260,29 @@ export function BattleScreen(): JSX.Element {
   }, [preferredSpeed, setSpeed]);
 
   /**
-   * And so is Auto.
+   * And so is Auto — as a loop rather than a single shot.
    *
-   * A player who turned it on meant "fight these for me", not "fight this one for me" —
-   * so it engages itself on the next fight too, once, at the first moment the fight is
-   * actually waiting on a command. Keyed on the battle id: a second fight re-arms, and
-   * re-renders inside one fight do not.
+   * A player who turned it on meant "fight these for me", not "fight this one for me", so
+   * it engages itself on the next fight too. But it asks for a handful of turns at a time
+   * (`runAuto`) and this effect re-asks for as long as it is still engaged, which is what
+   * makes the button a real toggle: switch it off and the asking stops, and control comes
+   * back at the very next decision.
+   *
+   * It used to fire once per battle and ask the server to resolve the *whole* fight, which
+   * is why it could be turned on and never off — pressing it again had nothing left to
+   * cancel. Multi-battle and the Arena still resolve in one call; they are not this button.
+   *
+   * Gated on `autoShouldAsk` — the server's clock, bounded by how far ahead of the
+   * animation it already is. Pacing to the playback made Auto as slow as watching; letting
+   * it run unbounded resolved the fight before the button could be pressed again, which is
+   * the original bug wearing a different hat. The engine advances at least one turn per
+   * call, so this cannot spin.
    */
   useEffect(() => {
-    const id = battle?.id ?? null;
-    if (!preferredAuto || !id || !awaitingInput || busy) return;
-    if (autoEngaged.current === id) return;
-    autoEngaged.current = id;
+    if (!preferredAuto || !battle || !autoWants || busy) return;
     setAuto(true);
     void runAuto();
-  }, [preferredAuto, battle?.id, awaitingInput, busy, runAuto, setAuto]);
+  }, [preferredAuto, battle, autoWants, busy, runAuto, setAuto]);
 
   // The playback clock lives in the store and outlived this screen: nothing stopped it
   // when the screen went away, so a sign-out mid-fight left it ticking — health bars
@@ -379,6 +411,14 @@ export function BattleScreen(): JSX.Element {
           quietly papering over it is how the last one survived four rounds. */}
       <div className={styles.stage}>
         {simpleField && <DomBattlefield view={view} artFor={artFor} />}
+        {/* Over whichever renderer is running: the part of the field a pointer can reach. */}
+        <UnitOverlay
+          view={view}
+          target={target}
+          focus={autoFocus}
+          pickable={awaitingInput && !busy}
+          onPick={pick}
+        />
       </div>
 
       <div className={styles.hud}>
@@ -434,9 +474,19 @@ export function BattleScreen(): JSX.Element {
           />
           {/* Skip is Mistvale's, not the library's: it belongs to the *playback* clock
               rather than to the fight, and it only exists while there is a recording left
-              to jump over (P10a). */}
-          {playing && settled && (
-            <Button size="sm" variant="ghost" onClick={skipToLatest}>
+              to jump over (P10a).
+
+              It used to appear only once the *server* had finished, which was the same
+              thing back when one Auto press resolved the whole fight. Since B3 it does
+              not: auto takes a few turns at a time, so `settled` stays false until the
+              last chunk and the button that exists to skip an auto-battle was missing for
+              all of it. Auto is the other way in — while it is engaged there is always a
+              recording ahead of the player, and skipping it is the whole point. */}
+          {/* `!watched` rather than `playing`: auto drains its buffer between requests, and
+              gating on the queue made the button blink out and back several times a fight.
+              Pressing it with nothing queued is a no-op. */}
+          {!watched && (settled || preferredAuto) && (
+            <Button size="sm" variant="ghost" onClick={() => void skipToLatest()}>
               Skip
             </Button>
           )}
@@ -476,7 +526,7 @@ export function BattleScreen(): JSX.Element {
             // is a recording, and the player who would rather not sit through it deserves
             // to be told where the button is.
             <span className={styles.hint}>
-              {settled ? 'Playing out — Skip to jump to the end.' : 'Resolving…'}
+              {settled || preferredAuto ? 'Playing out — Skip to jump ahead.' : 'Resolving…'}
             </span>
           ) : awaitingInput && actingUnit ? (
             <>
@@ -495,20 +545,25 @@ export function BattleScreen(): JSX.Element {
               {/* `bindKeys` is off: the dock already owns 1-9 for navigation, and a number
                   key that fires a skill on one screen and moves you off it on another is
                   worse than no shortcut at all. */}
-              <Fui
-                of={ActionBar}
-                className={styles.skills}
-                options={{ actions: slots, bindKeys: false, slotSize: 'lg' }}
-                on={{
-                  'action:trigger': ({ index }: { index: number }) => {
-                    const skill = skills[index];
-                    if (!skill || busy) return;
-                    void act({ skill: skill.key, ...(target ? { target } : {}) }).then(() =>
-                      setTarget(null),
-                    );
-                  },
-                }}
-              />
+              <div className={styles.skills} ref={setBarHost}>
+                <Fui
+                  of={ActionBar}
+                  options={{ actions: slots, bindKeys: false, slotSize: 'lg' }}
+                  on={{
+                    'action:trigger': ({ index }: { index: number }) => {
+                      const skill = skills[index];
+                      if (!skill || busy) return;
+                      void act({ skill: skill.key, ...(target ? { target } : {}) }).then(() =>
+                        setTarget(null),
+                      );
+                    },
+                  }}
+                />
+                {/* What each slot actually does, in the game's own words: who it lands on,
+                    what it costs in turns, and when it comes back. All of it has been in
+                    the content bundle since P1 and no screen had ever said it. */}
+                <SkillTips host={barHost} skills={skills} cooldowns={actingUnit.cooldowns ?? {}} />
+              </div>
             </>
           ) : (
             <span className={styles.hint}>Waiting for the server…</span>

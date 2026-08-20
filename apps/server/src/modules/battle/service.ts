@@ -11,6 +11,7 @@ import {
   deriveStats,
   retreat as retreatBattle,
   type BattleAction,
+  type UnitRef,
   type BattleEvent,
   type BattleState,
   type ChampionEntry,
@@ -553,8 +554,12 @@ export interface StepOptions {
   actionId: string;
   /** Absent means "let the AI take this turn". */
   action?: BattleAction;
-  /** Play the rest of the fight without stopping for input. */
+  /** Play the fight without stopping for input. */
   auto?: boolean;
+  /** How many player turns auto may take before pausing again; omitted means all of them. */
+  autoTurns?: number;
+  /** The enemy auto-battle should concentrate on, where the skill leaves a choice. */
+  focus?: UnitRef;
 }
 
 /**
@@ -587,6 +592,8 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
     const state = row.state as BattleState;
     const result = advance(state, rules, config, {
       auto: options.auto ?? false,
+      ...(options.autoTurns === undefined ? {} : { autoTurns: options.autoTurns }),
+      ...(options.focus ? { focus: options.focus } : {}),
       ...(options.action ? { action: options.action } : {}),
     });
 

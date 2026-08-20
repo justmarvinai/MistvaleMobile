@@ -59,8 +59,20 @@ const actionSchema = z.object({
   actionId: z.string().min(8).max(64),
   skill: z.string().min(2).max(64).optional(),
   target: unitRefSchema.optional(),
-  /** Run the rest of the fight without stopping for input. */
+  /** Run the fight without stopping for input. */
   auto: z.boolean().default(false),
+  /**
+   * How many of the player's turns auto may take before handing control back.
+   *
+   * Omitted is the old meaning — the rest of the fight — which is what multi-battle and the
+   * Arena ask for. The Auto *button* asks for a few at a time, so switching it off returns
+   * control at the next decision rather than after an already-decided battle finishes
+   * playing out. Capped, because the client naming a huge number would be asking the box
+   * to resolve a whole fight it could have asked for with `auto` alone.
+   */
+  autoTurns: z.number().int().min(1).max(20).optional(),
+  /** The enemy auto-battle should concentrate on, where the skill leaves a choice. */
+  focus: unitRefSchema.optional(),
 });
 
 const starterSchema = z.object({ championKey: z.string().min(2).max(64) });
@@ -167,6 +179,8 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
       battleId: id,
       actionId: input.actionId,
       auto: input.auto,
+      ...(input.autoTurns === undefined ? {} : { autoTurns: input.autoTurns }),
+      ...(input.focus ? { focus: input.focus } : {}),
       ...(input.skill
         ? { action: { skill: input.skill, ...(input.target ? { target: input.target } : {}) } }
         : {}),

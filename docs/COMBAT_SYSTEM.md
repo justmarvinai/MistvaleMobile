@@ -19,6 +19,42 @@
 
 **Power score** (informational only): `HP/30 + ATK×2 + DEF×2 + SPD×8 + C.RATE×6 + C.DMG×3 + RES×2 + ACC×2 + Σ gearLevel×15` ⚙.
 
+## Auto-battle, and taking it back
+
+`advance(state, rules, config, { auto })` has always meant "run the fight out": the AI takes
+every player turn until somebody wins. That is exactly right for multi-battle and for an
+Arena defence, and it is wrong for the **Auto button**, because a fight resolved in one
+request cannot be un-resolved — pressing the button again had nothing left to cancel, so it
+read as off while the battle carried on.
+
+`autoTurns` bounds it. Omitted it means the whole fight, unchanged. Given a number, the AI
+takes that many player turns and then pauses on the next decision exactly as manual play
+does. The client asks for a few at a time and keeps asking only while Auto is engaged, which
+is what makes it a toggle rather than a commitment.
+
+`focus` rides along with it: the enemy the player asked auto-battle to concentrate on. It is
+handed to target resolution as the explicit target, which means it applies **only where the
+skill leaves a choice** — a single-target enemy skill. An all-target skill, a heal, a
+lowest-health pick and a focus that is already dead all ignore it. It is a preference the
+engine may decline, never an instruction it must obey.
+
+The client side of it is one number, `AUTO_LOOKAHEAD` in `state/battleClocks.ts`, and both
+of its extremes are bugs the owner has already reported. Ask for the next batch only when
+the animation has caught up and Auto is exactly as slow as watching. Ask without a bound and
+the fight is over on the server a second after the button is pressed, which is
+"switched on and never off" again. So Auto asks while the playback queue is **short** — forty
+events, a few turns — which keeps the animation fed and keeps the fight cancellable.
+
+Skip is the other half of the same change, and it is the button that is **not** reversible.
+It used to be offered only once the server had already decided the fight, so draining the
+playback queue *was* jumping to the end. Now the queue is a couple of turns, so Skip does
+what it says instead: it asks for the rest of the battle in one unbounded `auto` call and
+plays none of it. Auto is the toggle; Skip is the commitment. The two share one wire —
+`state/oneAtATime.ts` — because a Skip landing on top of an in-flight auto request would
+slice the event log at a length the other had already moved past, and that reaches the
+player as the same hit landing twice.
+
+
 ## 2. Battle structure & waves
 - Teams: player 1–4 units (left), enemies 1–4 per wave (right); campaign/dungeon stages have 1–3 waves (boss floors: 2 trash waves + boss); arena is single-wave 4v4.
 - **Between waves (source-faithful):** all buffs AND debuffs are **cleared**, every skill cooldown ticks down by 1, each surviving unit heals 10% MaxHP ⚙, turn meters reset and the new wave starts fastest-first. Players therefore time *cooldowns*, not buffs, for boss waves. HP and death states persist.

@@ -11,7 +11,16 @@ import {
   type PlaybackView,
 } from '../game/playback';
 import { CUE, playCue, type CueName } from '../audio';
+import { oneAtATime } from './oneAtATime';
 import { useContentStore } from './contentStore';
+
+/**
+ * How many player turns one Auto request takes.
+ *
+ * Few enough that switching Auto off feels immediate; many enough that a forty-turn fight
+ * is five requests rather than forty on a one-core box.
+ */
+const AUTO_TURNS = 8;
 
 /**
  * The battle screen's state.
@@ -58,12 +67,15 @@ interface BattleStoreState {
   runMulti: (input: Omit<MultiBattleRequest, 'actionId'>) => Promise<MultiBattleResult>;
   resume: () => Promise<void>;
   act: (input: { skill?: string; target?: UnitRef }) => Promise<void>;
+  /** Which enemy auto-battle should concentrate on. Null is "let the AI choose". */
+  focus: UnitRef | null;
+  setFocus: (focus: UnitRef | null) => void;
   runAuto: () => Promise<void>;
   retreat: () => Promise<void>;
   setSpeed: (speed: 1 | 2) => void;
   setAuto: (auto: boolean) => void;
   /** Jumps to the end of what has already resolved. */
-  skipToLatest: () => void;
+  skipToLatest: () => Promise<void>;
   /**
    * Stops the playback clock without touching the fight.
    *
@@ -93,6 +105,16 @@ function stopTimer(): void {
   if (timer) clearTimeout(timer);
   timer = null;
 }
+
+/**
+ * The one request on the wire.
+ *
+ * Skip is the reason it exists: it has to resolve the rest of the fight, and auto-battle is
+ * asking for turns every couple of seconds, so a Skip pressed during one of those windows
+ * would otherwise either race it or quietly do half its job — drain the buffer, leave the
+ * battle running, and hand the player the same button again.
+ */
+const only = oneAtATime();
 
 /**
  * The id the *next* attempt at opening a fight will carry.
@@ -205,6 +227,7 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
     playing: false,
     speed: 1,
     auto: false,
+    focus: null,
     busy: false,
     error: null,
     awaitingInput: false,
@@ -275,31 +298,58 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
     },
 
     async act(input) {
-      const battle = get().battle;
-      if (!battle || get().busy) return;
-      const playedThrough = battle.events.length;
-      set({ busy: true, error: null });
-      try {
-        const updated = await gameApi.act(battle.id, { actionId: newActionId(), ...input });
-        set({ busy: false });
-        adopt(updated, playedThrough);
-      } catch (cause) {
-        set({ busy: false, error: messageOf(cause) });
-      }
+      if (!get().battle || get().busy) return;
+      await only(async () => {
+        const battle = get().battle;
+        if (!battle) return;
+        const playedThrough = battle.events.length;
+        set({ busy: true, error: null });
+        try {
+          const updated = await gameApi.act(battle.id, { actionId: newActionId(), ...input });
+          set({ busy: false });
+          adopt(updated, playedThrough);
+        } catch (cause) {
+          set({ busy: false, error: messageOf(cause) });
+        }
+      });
     },
 
+    /**
+     * Lets the AI take the next few turns.
+     *
+     * A **few**, not the rest of the fight. `auto: true` on its own resolves the whole
+     * battle server-side, which is right for multi-battle and is why the Auto button could
+     * be switched on and never off: pressing it again had nothing left to cancel, because
+     * the fight was already decided and only the playback remained. Asking for a handful of
+     * turns at a time makes the button mean what it says — the screen re-asks while Auto is
+     * engaged, and stops asking the moment it is not.
+     *
+     * Eight is the compromise: few enough that turning Auto off feels immediate, many
+     * enough that a forty-turn fight is five requests rather than forty on a one-core box.
+     */
     async runAuto() {
-      const battle = get().battle;
-      if (!battle || get().busy) return;
-      const playedThrough = battle.events.length;
-      set({ busy: true, error: null, auto: true });
-      try {
-        const updated = await gameApi.act(battle.id, { actionId: newActionId(), auto: true });
-        set({ busy: false });
-        adopt(updated, playedThrough);
-      } catch (cause) {
-        set({ busy: false, error: messageOf(cause) });
-      }
+      if (!get().battle || get().busy) return;
+      await only(async () => {
+        const battle = get().battle;
+        // Skip may have run while this was queued behind it, in which case the fight is
+        // already resolved and there is nothing to ask for.
+        if (!battle || battle.status !== 'active') return;
+        const playedThrough = battle.events.length;
+        const focus = get().focus;
+        set({ busy: true, error: null, auto: true });
+        try {
+          const updated = await gameApi.act(battle.id, {
+            actionId: newActionId(),
+            auto: true,
+            autoTurns: AUTO_TURNS,
+            ...(focus ? { focus } : {}),
+          });
+          set({ busy: false });
+          adopt(updated, playedThrough);
+        } catch (cause) {
+          set({ busy: false, error: messageOf(cause) });
+        }
+      });
     },
 
     async retreat() {
@@ -330,10 +380,62 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
       set({ auto });
     },
 
-    skipToLatest() {
+    setFocus(focus) {
+      set({ focus });
+    },
+
+    /**
+     * Ends the fight on screen and shows the player where it got to.
+     *
+     * Skip means "I am not watching this one", and it used to be able to mean that by
+     * draining the queue alone: it was only ever offered once the server had already
+     * decided the battle, so the queue *was* the rest of the fight. Auto takes a few turns
+     * at a time now (see `AUTO_TURNS`), so the queue is a couple of turns — and a Skip that
+     * jumped two seconds forward and left the same button sitting there is not a skip.
+     *
+     * So it finishes the job: whatever the server has not resolved yet, it asks for in one
+     * unbounded `auto` call — the same one multi-battle and the Arena use — and then plays
+     * none of it. This is deliberately not cancellable. Auto is the reversible one; Skip is
+     * the button whose whole meaning is that the fight is over.
+     */
+    async skipToLatest() {
       stopTimer();
+      set({ playing: false });
+
+      const battle = get().battle;
+      if (battle && battle.status === 'active') {
+        const focus = get().focus;
+        await only(async () => {
+          // Re-read: an auto request this one waited out has moved the log on, and
+          // slicing at a stale length would replay turns the player has already seen.
+          const current = get().battle;
+          if (!current || current.status !== 'active') return;
+          const playedThrough = current.events.length;
+          set({ busy: true, error: null });
+          try {
+            const updated = await gameApi.act(current.id, {
+              actionId: newActionId(),
+              auto: true,
+              ...(focus ? { focus } : {}),
+            });
+            set({
+              busy: false,
+              battle: updated,
+              pending: [...get().pending, ...updated.events.slice(playedThrough)],
+              error: null,
+            });
+          } catch (cause) {
+            set({ busy: false, error: messageOf(cause) });
+          }
+        });
+        stopTimer();
+      }
+
       const { pending } = get();
-      if (pending.length === 0) return;
+      if (pending.length === 0) {
+        set({ awaitingInput: computeAwaiting(get()) });
+        return;
+      }
       const view = structuredClone(get().view);
       applyAll(view, pending, statusKind);
       set({ view, pending: [], playing: false });

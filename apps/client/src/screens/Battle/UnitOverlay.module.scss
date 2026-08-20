@@ -1,0 +1,107 @@
+@use '../../styles/tokens' as *;
+
+/* The pointable half of the battlefield. See UnitOverlay.tsx.
+
+   Positioned against the same 960×540 box both renderers compose in, so a mark lands on the
+   champion whichever one is drawing. `pointer-events` is off for the layer and back on for
+   the marks themselves, so the empty field between units is not a wall. */
+
+.layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.canvas {
+  position: relative;
+  aspect-ratio: 960 / 540;
+  width: 100%;
+  max-width: calc(100vh * (960 / 540));
+  max-height: 100%;
+}
+
+/* Anchored at the feet, like the sprite. */
+.unit {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  width: 96px;
+  height: calc(100% * 176 / 540);
+}
+
+/* The champion's own footprint, invisible until it matters. */
+.hit {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  pointer-events: auto;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    border-color: rgba($accent, 0.7);
+    background: rgba($accent, 0.08);
+    outline: none;
+  }
+}
+
+/* Chosen for this turn's skill. */
+.unit[data-selected='true'] .hit {
+  border-color: $accent;
+  background: rgba($accent, 0.12);
+}
+
+/* Auto-battle's standing preference — a quieter mark, because it outlives the turn. */
+.unit[data-focused='true'] .hit {
+  border-color: $danger;
+  border-style: dashed;
+}
+
+/* Above the head: the field below the feet already carries the health bar and the ring. */
+.chips {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  display: flex;
+  gap: 3px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.chip {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  border-radius: 3px;
+  color: $ground-deep;
+  font-family: $font-display;
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
+  cursor: help;
+
+  &:focus-visible {
+    outline: 1px solid $parchment;
+  }
+}
+
+/* Blue helps, red hurts — the owner's own shorthand, and the one every game in the genre
+   uses, so it needs no legend. */
+.chip[data-kind='buff'] {
+  background: #4f8fd4;
+}
+
+.chip[data-kind='debuff'] {
+  background: #c8412f;
+}

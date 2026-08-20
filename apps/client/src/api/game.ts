@@ -160,7 +160,16 @@ export const gameApi = {
    */
   act: (
     battleId: string,
-    input: { actionId: string; skill?: string; target?: UnitRef; auto?: boolean },
+    input: {
+      actionId: string;
+      skill?: string;
+      target?: UnitRef;
+      auto?: boolean;
+      /** How many player turns auto may take before handing control back. */
+      autoTurns?: number;
+      /** The enemy auto-battle should concentrate on. */
+      focus?: UnitRef;
+    },
   ) => api.post<BattleView>(ROUTES.battle.action(battleId), input),
 
   retreat: (battleId: string) => api.post<BattleView>(ROUTES.battle.retreat(battleId), {}),
