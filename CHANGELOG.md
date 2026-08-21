@@ -5,6 +5,29 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the Haven is a rail of painted places, not a grid of icons
+
+Thirteen 64px sockets in a wrapped grid is a toolbar: every place in the game the same
+size as every other, none of them worth looking at, and the whole camp readable in one
+glance that told you nothing. The owner's call is a row of tall boards you drag along
+(2026-08-21), and that is what it is now — each with its own artwork, its name, and the
+one line saying what a player goes there **for**, which used to live only on a hover and
+so was unreachable on a phone.
+
+The row runs off the side of the window on purpose. Dragging is the gesture: a finger on a
+phone, a mouse anywhere, plus two arrows, the wheel and the arrow keys for a player who
+never thinks to drag. **Touch is the browser's job and the mouse is ours** — the track is
+an ordinary scroller, so a finger gets the platform's own inertia and snap rather than a
+hand-rolled imitation that would have to fight it.
+
+A shrouded place keeps its board and takes a seal, greyed art and the line saying when it
+opens, because seeing what is coming is part of the pull forward.
+
+The rail itself is `ui/Rail`, kept general: the next row that outgrows its window gets the
+drag, the arrows, the wheel, the keys, the flick and the snap without writing any of them
+again.
+
+
 ### Changed — the Chronicle is a faction index, and it hides nothing
 
 Two hundred faces in one flat grid could not answer the question a collector actually

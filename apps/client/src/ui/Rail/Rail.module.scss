@@ -1,0 +1,127 @@
+/* The rail: a scroller with an arrow either side and the ends faded out.
+
+   The fades are the affordance. A row that simply stops at the window edge reads as a row
+   that ends there; one whose last panel dissolves into the dark reads as a row that keeps
+   going, which is the whole message a draggable rail has to send before anybody touches
+   it. The arrows say the same thing louder, for a player who never thinks to drag. */
+
+.rail {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+}
+
+.track {
+  /* `relative` so a panel's `offsetLeft` is measured against this box — which is what the
+     component reads to find its snap points. No horizontal padding, for the same reason:
+     with none, that offset is exactly the scroll position that puts the panel at the edge. */
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: $space-4;
+  flex: 1;
+  min-width: 0;
+  padding: $space-3 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  /* The browser owns the finger and we own the mouse (see Rail.tsx). `pan-x` is that
+     sentence in CSS: a horizontal drag scrolls natively, a vertical one is the page's. */
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  cursor: grab;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &[data-dragging='true'] {
+    cursor: grabbing;
+    /* Snapping and a drag pull in opposite directions — the browser tries to land on a
+       panel while the hand is still moving. The component snaps on release instead. */
+    scroll-snap-type: none;
+    /* A drag across a row of panels would otherwise select every label it crosses. */
+    user-select: none;
+  }
+
+  > * {
+    scroll-snap-align: start;
+    flex: none;
+  }
+}
+
+/* The ends dissolve, rather than being cut off. Only when there is something out there:
+   a rail that fits its window has no "more this way" to promise. */
+.rail[data-overflows='true'] .track {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 3rem,
+    #000 calc(100% - 3rem),
+    transparent 100%
+  );
+}
+
+.arrow {
+  @include interactive;
+
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  transform: translateY(-50%);
+  border: 1px solid $edge;
+  background: rgba(12, 10, 9, 0.82);
+  color: $accent-soft;
+  transition:
+    opacity $duration-fast $ease-out,
+    border-color $duration-fast $ease-out,
+    background-color $duration-fast $ease-out;
+
+  &[data-side='start'] {
+    left: 0;
+  }
+
+  &[data-side='end'] {
+    right: 0;
+  }
+
+  /* The chevron, drawn rather than typed: no glyph in the kit is a bare arrowhead, and a
+     Unicode one would pick up whatever font the browser felt like. */
+  > span {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-top: 2px solid currentcolor;
+    border-right: 2px solid currentcolor;
+  }
+
+  &[data-side='start'] > span {
+    transform: rotate(-135deg) translate(-1px, -1px);
+  }
+
+  &[data-side='end'] > span {
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $accent-dim;
+    background: rgba(28, 22, 17, 0.92);
+  }
+
+  &:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* No overflow, no arrows — and no dead furniture around a row that fits. */
+.rail[data-overflows='false'] .arrow {
+  display: none;
+}

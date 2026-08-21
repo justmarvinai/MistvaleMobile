@@ -1,112 +1,270 @@
+/* The Haven: a heading, a rail of painted places, and one line telling you it moves.
+
+   The stations used to be a wrapped grid of 64px sockets. What replaced them is a row of
+   tall boards, each with its own art, its name and its purpose on it — and the row is
+   wider than the window on purpose, because a camp you walk along reads as somewhere you
+   are rather than a list of somewheres you could be. The dragging is `ui/Rail`. */
+
 .screen {
   display: flex;
   flex-direction: column;
-  gap: $space-5;
+  gap: $space-3;
   height: 100%;
-  overflow-y: auto;
-  @include pixel-scrollbar;
+  min-height: 0;
 }
 
-/* One column, and it takes the rest of the screen.
-   The dispatches and the standing that used to sit beside the stations are behind the
-   heading's info button now — neither was something a player came to the Haven to read,
-   and both were charging the stations 300px for the privilege. With them gone the camp is
-   the only thing here, so it sits in the middle of the window rather than pinned to the
-   top of it with half a screen of nothing underneath. */
-.layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: $space-5;
-  flex: 1;
-  align-content: center;
+/* The rail takes every pixel the heading and the hint do not. `min-height: 0` because a
+   flex child's automatic minimum is its content, and without it a 20rem panel would push
+   the column past the window instead of letting the rail scroll. */
+.rail {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-/* Bigger tiles and a ceiling on the run.
-   Without the sidebar the row grew to twelve across a wide window, which left the
-   thirteenth station alone on a line of its own and made the camp read as a toolbar. A
-   capped, centred grid keeps the rows even and the sockets at a size worth looking at —
-   this is the screen a player lands on. */
-.stations {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: $space-3 $space-2;
-  width: 100%;
-  max-width: 66rem;
-  margin: 0 auto;
+.hint {
+  flex: none;
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $muted-deep;
 }
 
-/* A station is a painted socket with its place's icon in it, a name under, and — when it
-   is not yours yet — the shroud and the line that says when it opens. The socket's frame,
-   its fill and its padlock are the library's `Slot`; this only arranges them and says what
-   hovering does. */
+/* ── A station ─────────────────────────────────────────────────────────────
+
+   Four painted layers and the text on top: the theme's tall backdrop, the place's own
+   artwork, a gloom that darkens the bottom so a name is readable over anything, and the
+   library's tall frame laid over the lot. Every one of them is a FantasyUIs asset
+   addressed by id, so the whole camp re-skins with the theme. */
+
 .station {
   @include interactive;
 
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: $space-2;
-  padding: $space-2 $space-1 $space-3;
+  /* Art at the top, plate at the bottom, the slack between them. */
+  justify-content: space-between;
+  gap: $space-3;
+  align-self: center;
+  width: clamp(10.5rem, 20vw, 14.5rem);
+  /* As tall as the rail, up to a ceiling. Without the ceiling a 900px window drew a
+     640px board with two hundred pixels of nothing between the art and the name; without
+     the `height` a short one clipped the name off the bottom, since the track hides its
+     vertical overflow. Both ends of that are now the panel's problem rather than the
+     window's. */
+  height: 100%;
+  min-height: 12rem;
+  max-height: 27rem;
+  /* Clears the frame's painted edge: the tall frame's slice is 25px, and text laid at
+     16px ran straight through the corner filigree. */
+  padding: $space-5;
+  overflow: hidden;
   color: $parchment;
-  text-align: center;
+  text-align: left;
+  transition:
+    transform $duration-base $ease-out,
+    filter $duration-base $ease-out;
 
   @include motion-safe {
     animation: settle $duration-base $ease-out backwards;
 
     @for $i from 1 through 8 {
       &:nth-child(#{$i}) {
-        animation-delay: #{$i * 30}ms;
+        animation-delay: #{$i * 40}ms;
       }
     }
   }
 
-  /* The lift and the ember bloom belong to the socket, not to the whole card — a card
-     that grows a box shadow reads as a button, and a socket that catches the light reads
-     as an object on a table. */
-  &:hover:not(.shrouded) .stationSocket {
-    transform: translateY(-3px);
-    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)) brightness(1.12);
+  /* The backdrop, 9-sliced so a taller window stretches the middle and not the corners. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-style: solid;
+    border-width: var(--fui-bw-bg-tall);
+    border-image-source: var(--fui-img-bg-tall);
+    border-image-slice: var(--fui-slice-bg-tall) fill;
+    border-image-repeat: stretch;
+    pointer-events: none;
   }
 
-  &:hover:not(.shrouded) .stationLabel {
+  /* The frame, over everything the panel holds. No `fill`, so it is an edge and not a
+     surface — which is exactly why the artwork underneath is still visible. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-style: solid;
+    border-width: var(--fui-bw-frame-tall);
+    border-image-source: var(--fui-img-frame-tall);
+    border-image-slice: var(--fui-slice-frame-tall);
+    border-image-repeat: stretch;
+    pointer-events: none;
+  }
+
+  &:hover:not([data-locked='true']) {
+    transform: translateY(-6px);
+    filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
+  }
+
+  &:hover:not([data-locked='true']) .art {
+    transform: scale(1.06);
+    filter: brightness(1.12) saturate(1.05);
+  }
+
+  &:hover:not([data-locked='true']) .name {
     color: $accent-soft;
   }
 
-  &:active:not(.shrouded) .stationSocket {
-    transform: translateY(0);
+  &:hover:not([data-locked='true']) .cta {
+    color: $accent-soft;
+    border-color: $accent-dim;
+  }
+
+  &:active:not([data-locked='true']) {
+    transform: translateY(-2px);
   }
 }
 
-.stationSocket {
+/* The place's own artwork, sitting inside the frame's painted edge rather than under it —
+   a 25px border with art drawn to the very corner reads as a picture that has slipped. */
+.art {
+  /* In flow and square, rather than absolutely placed: the artwork is the panel's biggest
+     element and the one that should give way when the window is short. A flex item with
+     an aspect ratio does exactly that — as wide as the board allows, as tall as it is
+     wide, and the first thing to shrink when there is not room for all three parts. */
+  position: relative;
+  flex: 0 1 auto;
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 0;
+  z-index: 1;
+  background-image: var(--mv-station-art);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform-origin: center 40%;
   transition:
-    transform $duration-fast $ease-out,
-    filter $duration-fast $ease-out;
+    transform $duration-slow $ease-out,
+    filter $duration-slow $ease-out;
+  pointer-events: none;
 }
 
-.shrouded {
-  cursor: not-allowed;
-  color: $muted-deep;
+/* Darkens the bottom half so the plate's text is legible over any artwork, and takes the
+   top edge down a little so the frame's own highlight has something to sit against. */
+.gloom {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    rgba(12, 10, 9, 0.45) 0%,
+    rgba(12, 10, 9, 0) 26%,
+    rgba(12, 10, 9, 0.62) 58%,
+    rgba(12, 10, 9, 0.92) 100%
+  );
+  pointer-events: none;
 }
 
-.shrouded .stationSocket {
-  /* The mist that hides what is not yours yet. The library's own `locked` already dims
-     and padlocks the socket; this takes the colour out of the icon behind it so a place
-     you cannot go does not compete with one you can. */
-  filter: grayscale(0.85);
-  opacity: 0.75;
+.plate {
+  position: relative;
+  z-index: 4;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
 }
 
-.stationLabel {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+.name {
+  @include display-text(17px);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: $parchment;
   transition: color $duration-fast $ease-out;
 }
 
-.stationHint {
-  font-size: 11px;
-  color: $muted-deep;
+.blurb {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: $parchment-dim;
+  /* Three lines and then an ellipsis: the registry's blurbs run to two sentences for the
+     places that need it, and a panel that grows to fit the longest one makes every other
+     panel that tall as well. The hover carries the whole line. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+
+/* Not a nested button — the panel is the button. A bordered word that says what pressing
+   does, or when it will start doing it. */
+.cta {
+  align-self: flex-start;
+  margin-top: $space-1;
+  padding: 3px $space-2;
+  border: 1px solid $edge-bright;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $accent;
+  transition:
+    color $duration-fast $ease-out,
+    border-color $duration-fast $ease-out;
+}
+
+/* The seal on a place that is not yours yet. */
+.seal {
+  position: absolute;
+  top: $space-4;
+  right: $space-4;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid rgba(194, 118, 74, 0.28);
+  background: rgba(12, 10, 9, 0.72);
+  color: $muted;
+}
+
+.station[data-locked='true'] {
+  cursor: not-allowed;
+  color: $muted-deep;
+
+  .art {
+    filter: grayscale(0.9) brightness(0.55);
+  }
+
+  .name {
+    color: $muted;
+  }
+
+  .blurb {
+    color: $muted-deep;
+  }
+
+  .cta {
+    color: $muted;
+    border-color: $edge;
+  }
+}
+
+/* A short window has to give something up, and the blurb is it: the name, the artwork and
+   the line saying when a place opens are what a player needs, and the hover still carries
+   the description. Landscape phones live here. */
+@media (max-height: 560px) {
+  .blurb {
+    display: none;
+  }
+}
+
+/* ── The info popover ─────────────────────────────────────────────────────── */
 
 .news,
 .standing {

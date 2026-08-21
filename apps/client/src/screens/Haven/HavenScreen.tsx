@@ -1,9 +1,9 @@
-import { Slot } from '@/fui/components/Slot.ts';
-import { Fui } from '@/fui/react';
 import { usePlayerStore } from '@/state/playerStore';
 import { useRosterStore } from '@/state/rosterStore';
 import { Heading } from '@/ui/Heading/Heading';
+import { Icon } from '@/ui/Icon/Icon';
 import { Panel } from '@/ui/Panel/Panel';
+import { Rail } from '@/ui/Rail/Rail';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
 import {
   DOCK_SCREENS,
@@ -18,10 +18,16 @@ import styles from './HavenScreen.module.scss';
 /**
  * The Haven — home base and the screen the player lands on.
  *
- * Each station is a route into a system, drawn as a painted socket with the place's own
- * icon in it — a shrine, a gate, a crown — and a locked one keeps its socket and takes
- * the shroud, because seeing what is coming is part of the pull forward (UI_UX §2). The
- * drifting mist behind it comes from the Pixi stage.
+ * **A rail of painted places, not a grid of icons** (the owner's call, 2026-08-21). It used
+ * to be thirteen 64px sockets in a wrapped grid, which is a toolbar: every place in the game
+ * the same size as every other, none of them worth looking at, and the whole camp readable
+ * in one glance that told you nothing. Now each is a tall painted panel with its own art, its
+ * name and what you go there *for*, and they run off the side of the window — so the camp is
+ * a place you move through rather than a menu you scan. Dragging is the gesture: a finger on
+ * a phone, a mouse anywhere, the two arrows, the wheel or the arrow keys (`ui/Rail`).
+ *
+ * A locked station keeps its panel and takes the shroud, because seeing what is coming is
+ * part of the pull forward (UI_UX §2). The drifting mist behind it comes from the Pixi stage.
  */
 export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
   const player = usePlayerStore((state) => state.player);
@@ -87,21 +93,18 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
         The Haven
       </Heading>
 
-      <div className={styles.layout}>
-        <section className={styles.stations} aria-label="Locations">
-          {stations.map((screen) => {
-            const unlocked = isScreenUnlocked(screen, unlocks);
-            return (
-              <Station
-                key={screen.id}
-                screen={screen}
-                unlocked={unlocked}
-                onNavigate={() => onNavigate(screen.id)}
-              />
-            );
-          })}
-        </section>
-      </div>
+      <Rail label="Locations" className={styles.rail}>
+        {stations.map((screen) => (
+          <Station
+            key={screen.id}
+            screen={screen}
+            unlocked={isScreenUnlocked(screen, unlocks)}
+            onNavigate={() => onNavigate(screen.id)}
+          />
+        ))}
+      </Rail>
+
+      <p className={styles.hint}>Drag the camp sideways to see every place in the vale.</p>
     </div>
   );
 }
@@ -109,11 +112,14 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
 /**
  * One place in the Haven.
  *
- * Its own component so it can carry a painted tooltip — a hook, and there are nine of them
- * in a map. What the tooltip adds is what the card cannot: what you go there *for*. A
- * shrouded station said "Reach level 8" in a native `title` and an open one said nothing
- * at all, so the Haven's whole job — showing a player what the game has and what is still
- * ahead of them — was carried by nine icons and nine words.
+ * A painted board: the place's art filling the top of it, its name on a plate at the
+ * bottom, and one line saying what a player goes there for. The line used to live only on
+ * the hover, which is a place a phone cannot reach — a camp that explains itself only to a
+ * mouse explains itself to nobody on the platform this game is going to (`docs/UI_UX`).
+ *
+ * Still its own component, and still for the same reason: a tooltip is a hook and there are
+ * thirteen of these in a map. The hover now carries what the panel cannot hold — the
+ * unlock's exact wording, and the "click to go there" that a locked one must not say.
  */
 function Station({
   screen,
@@ -139,32 +145,32 @@ function Station({
     <button
       ref={ref}
       type="button"
-      className={`${styles.station} ${unlocked ? '' : styles.shrouded}`}
+      className={styles.station}
+      data-locked={!unlocked}
       onClick={() => unlocked && onNavigate()}
       aria-disabled={!unlocked}
     >
-      <Fui
-        of={Slot}
-        className={styles.stationSocket}
-        options={{
-          size: 'lg',
-          locked: !unlocked,
-          item: { icon: screen.art, name: screen.label },
-        }}
-        // The socket is the station's *picture*, not a second control. `Slot` is built to
-        // be one — an inventory cell you click — so left alone it renders a focusable
-        // `role="button"` inside this button, which is a control a screen reader announces
-        // and a keyboard lands on with nothing to do. The station around it already
-        // carries the name, the tooltip and the click.
-        attrs={{
-          role: 'presentation',
-          tabindex: undefined,
-          'aria-label': undefined,
-          title: undefined,
-        }}
+      {/* The art, as a background rather than an `<img>`: FantasyUIs addresses its
+          artwork by id through a custom property, so a station drawn with a different
+          piece is a one-word change in the screen registry and no new import. */}
+      <span
+        className={styles.art}
+        style={{ '--mv-station-art': `var(--fui-img-${screen.art})` } as React.CSSProperties}
+        aria-hidden="true"
       />
-      <span className={styles.stationLabel}>{screen.label}</span>
-      {!unlocked && <span className={styles.stationHint}>{screen.lockedHint}</span>}
+      <span className={styles.gloom} aria-hidden="true" />
+
+      {!unlocked && (
+        <span className={styles.seal} aria-hidden="true">
+          <Icon name="nav-locked" size={28} />
+        </span>
+      )}
+
+      <span className={styles.plate}>
+        <span className={styles.name}>{screen.label}</span>
+        {screen.blurb && <span className={styles.blurb}>{screen.blurb}</span>}
+        <span className={styles.cta}>{unlocked ? 'Enter' : (screen.lockedHint ?? 'Shrouded')}</span>
+      </span>
     </button>
   );
 }
