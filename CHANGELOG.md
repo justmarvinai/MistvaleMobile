@@ -5,6 +5,53 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the Mistgate is worth going to, and the pull is worth watching
+
+The gate was a 9rem circle above two buttons, and the reveal was ten cards turning over
+on a timer. Both are the best moment the game has and neither looked like it.
+
+**The gate.** The portal is 16rem with two counter-rotating rings, the rate-up champions
+are faces rather than a line of names that asks a player to already know who those are,
+and the epic and legendary mercy clocks run on the gate itself. A pity counter is
+anticipation you can read, and it was behind a click.
+
+**The pull** is six beats, and each one exists because the one before it earned it.
+
+*Charge* — the gate winds up the instant the button is pressed, which is also what the
+network round trip now happens under: the wait is the show rather than a disabled button
+and a spinner.
+
+*The climb* — the mist takes a colour, then a better one, then a better one. It climbs to
+**rare on every pull however bad**, so the wind-up never leaks the answer early; a ladder
+that stopped where the pull stopped would be a tell, and a player who has learned to read
+it is watching a countdown to a disappointment they have already had. Above rare the climb
+*is* the news, and a mist that does not stop at blue is the moment the whole system is
+built around.
+
+*The break* — a flash in the colour it reached, a shockwave, the gate collapses.
+
+*The cards* — turned one at a time, **the best held to last**. Ten cards that end on a grey
+one is a pull that felt worse than it was: the same ten champions, told backwards.
+
+*The herald* — an epic or better gets the champion themself, full height and breathing, in
+a wheel of light with their name under it, before their card lands. Once per pull, on the
+best card, because four heralds in a ten-pull would be four interruptions and no drama.
+
+*Again* — the one press a player wants at the end of a pull is the same press. It is on the
+cinematic rather than three clicks behind it, still a real pull through the same endpoint
+spending the same sigils, and it goes quiet rather than lying when there is nothing left.
+
+Everything shown was decided by the server before the first frame; the only thing the
+client chooses is the order (`screens/Mistgate/drama.ts`, whose two load-bearing claims —
+"the best card is last" and "the wind-up never leaks a bad pull" — are tested). Skippable
+from the first frame, and under reduced motion the whole wind-up is skipped rather than
+played invisibly: the setting is now asked in JavaScript as well as honoured in CSS.
+
+Four new sound cues come with it — `summon_charge`, `summon_tease`, `summon_burst`, and an
+`summon_epic` of its own, because the moment a player learns to want is the one where a
+purple turns gold and that is only legible if purple already sounded different. All four
+are ordinary content: seeded with synth voices and retunable in Admin like every other cue.
+
 ### Changed — every champion picker draws the same card
 
 Choosing who to send used to look nothing like choosing who to level. The campaign

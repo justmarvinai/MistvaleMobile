@@ -343,8 +343,64 @@ export const SOUND_CUES: SoundCueDef[] = [
     },
     0,
   ),
-  // The Mistgate, by rarity. The gap between these three *is* the pull's drama, so they
-  // are deliberately far apart rather than three shades of the same chime.
+  // ── The Mistgate ──────────────────────────────────────────────────────────
+  // Three sounds for the wind-up and four for the landing. The gap between the landings
+  // *is* the pull's drama, so they are deliberately far apart rather than four shades of
+  // one chime — and the wind-up is what makes the gap mean anything, because a player who
+  // has heard the mist climb is a player who knows it could have gone further.
+
+  // The wind-up: a long rising tone under the charge. Slow attack, so it swells rather
+  // than starts, and the decay outlasts the animation it plays under.
+  cue(
+    'summon_charge',
+    330,
+    'sfx',
+    {
+      wave: 'sine',
+      startHz: 120,
+      endHz: 460,
+      attack: 0.25,
+      decay: 1.6,
+      gain: 0.24,
+      filterHz: 2200,
+      overtones: [12],
+    },
+    0,
+  ),
+  // One step up the ladder. Short and bright — this fires two or three times in a second
+  // and a half, and anything with a tail would smear into the next one.
+  cue(
+    'summon_tease',
+    332,
+    'sfx',
+    {
+      wave: 'triangle',
+      startHz: 660,
+      endHz: 990,
+      attack: 0.005,
+      decay: 0.22,
+      gain: 0.2,
+      filterHz: 7000,
+      overtones: [7],
+    },
+    0,
+  ),
+  // The break. Noise rather than a tone: this is an impact, not a note.
+  cue(
+    'summon_burst',
+    334,
+    'sfx',
+    {
+      source: 'noise',
+      startHz: 900,
+      endHz: 180,
+      attack: 0.002,
+      decay: 0.7,
+      gain: 0.32,
+      filterHz: 5200,
+    },
+    0,
+  ),
   cue(
     'summon_common',
     340,
@@ -383,6 +439,25 @@ export const SOUND_CUES: SoundCueDef[] = [
   // `voice` is left at its defaults and never reached, because `sample` wins.
   track(MUSIC.field, 900, 'audio/music/background_music_outside_combat.mp3'),
   track(MUSIC.combat, 910, 'audio/music/combat_campaign_depths_arena.mp3'),
+  // Purple. Between rare and legendary on purpose and audibly nearer the top: an epic is
+  // a good night, and the whole reason a legendary lands as hard as it does is that a
+  // player has heard this one and knows the difference.
+  cue(
+    'summon_epic',
+    355,
+    'sfx',
+    {
+      wave: 'square',
+      startHz: 660,
+      endHz: 1320,
+      attack: 0.015,
+      decay: 0.9,
+      gain: 0.3,
+      filterHz: 7500,
+      overtones: [7, 12],
+    },
+    0,
+  ),
   cue(
     'summon_legendary',
     360,

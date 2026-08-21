@@ -44,6 +44,11 @@ test.describe('the Mistgate', () => {
     await expect(page.getByText(/3 gleaming sigils held/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /summon ×10/i })).toBeDisabled();
 
+    // Mercy is on the gate itself, not only behind a click. A player who can watch the
+    // clock tick is a player who can decide whether to spend, which is the whole argument
+    // for publishing it at all.
+    await expect(page.getByText(/20 more without one/i).first()).toBeVisible();
+
     // ── The published rates ───────────────────────────────────────────────
     // One click from the gate, and the way to them is *worded*: the odds moved out of a
     // permanent right-hand column so the gate could have the screen, and a lowercase "i"
@@ -85,8 +90,15 @@ test.describe('the Mistgate', () => {
     await expect(reveal).toBeVisible({ timeout: 20_000 });
 
     // Skippable, per the design: nobody should sit through their ninth ×10 of the night.
+    // Skip works during the wind-up as well as during the cards, which is the case that
+    // matters — the cinematic opens the moment the button is pressed, over the round trip.
     await reveal.getByRole('button', { name: /^skip$/i }).click();
     await expect(reveal.getByText(/10 summoned/i)).toBeVisible({ timeout: 15_000 });
+
+    // Another pull is one press away rather than three, and it goes quiet rather than
+    // lying when there is nothing left to spend: ten sigils bought exactly one ×10.
+    await expect(reveal.getByRole('button', { name: /no sigils left/i })).toBeDisabled();
+
     await reveal.getByRole('button', { name: /take them in/i }).click();
     await expect(reveal).toBeHidden();
 

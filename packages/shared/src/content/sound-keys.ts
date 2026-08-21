@@ -37,8 +37,21 @@ export const CUE = {
   defeat: 'defeat',
   levelUp: 'level_up',
   unlock: 'unlock',
+  /**
+   * The Mistgate, in the order a pull hears them.
+   *
+   * `charge` under the wind-up, `tease` on each step the mist climbs, `burst` when it
+   * breaks, then one of the four landing chimes per card that turns. The gap between the
+   * landings is the pull's drama, which is why epic has its own rather than borrowing
+   * rare's: the moment a player learns to want is the one where a purple turns gold, and
+   * that is only legible if purple already sounded different.
+   */
+  summonCharge: 'summon_charge',
+  summonTease: 'summon_tease',
+  summonBurst: 'summon_burst',
   summonCommon: 'summon_common',
   summonRare: 'summon_rare',
+  summonEpic: 'summon_epic',
   summonLegendary: 'summon_legendary',
 } as const;
 
@@ -74,6 +87,7 @@ export const MUSIC_KEYS: readonly MusicName[] = Object.values(MUSIC);
 /** Which reveal chime a pulled champion earns. */
 export function summonCue(rarity: string): CueName {
   if (rarity === 'legendary') return CUE.summonLegendary;
-  if (rarity === 'epic' || rarity === 'rare') return CUE.summonRare;
+  if (rarity === 'epic') return CUE.summonEpic;
+  if (rarity === 'rare') return CUE.summonRare;
   return CUE.summonCommon;
 }

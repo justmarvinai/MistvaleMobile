@@ -83,10 +83,13 @@
   overflow-y: auto;
 }
 
+/* The largest single thing in the client, and deliberately: this is the screen a player
+   comes to when they want the game's best moment, and a 9rem circle at the top of an empty
+   panel was a decoration rather than an invitation. */
 .portal {
   position: relative;
-  width: 9rem;
-  height: 9rem;
+  width: 16rem;
+  height: 16rem;
   display: grid;
   place-items: center;
 }
@@ -98,6 +101,18 @@
   border-radius: 50%;
   animation: spin 14s linear infinite;
   clip-path: polygon(0 0, 100% 0, 100% 62%, 0 62%);
+}
+
+/* A second, slower ring the other way. Two rings out of phase read as a mechanism; one
+   reads as a spinner. */
+.portalRingInner {
+  position: absolute;
+  inset: 18%;
+  border: 1px solid $accent-dim;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: spin 9s linear infinite reverse;
+  clip-path: polygon(0 34%, 100% 34%, 100% 100%, 0 100%);
 }
 
 .portalCore {
@@ -136,6 +151,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .portalRing,
+  .portalRingInner,
   .portalCore {
     animation: none;
   }
@@ -157,16 +173,59 @@
   line-height: 1.7;
 }
 
+/* The rate-up champions, as faces. */
 .featured {
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  margin-top: $space-2;
+}
+
+.featuredLabel {
   color: $gold;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.featuredList {
+  display: flex;
+  gap: $space-3;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.featuredOne {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+
+  &[data-rarity='epic'] {
+    border-color: $rarity-epic;
+    box-shadow: 0 0 16px rgba(160, 110, 220, 0.28);
+  }
+
+  &[data-rarity='legendary'] {
+    border-color: $rarity-legendary;
+    box-shadow: 0 0 20px rgba(255, 196, 92, 0.32);
+  }
+}
+
+.featuredName {
+  color: $parchment-dim;
+  font-size: 0.72rem;
 }
 
 .actions {
   display: flex;
-  gap: $space-2;
-  margin-top: $space-2;
+  gap: $space-3;
+  margin-top: $space-3;
 }
 
 .held {
@@ -177,6 +236,55 @@
 
 .floor {
   color: $muted-deep;
+}
+
+/* The two mercy clocks, on the gate itself. Anticipation a player can read is the best
+   argument the screen has for one more pull, and it was behind a click. */
+.clocks {
+  display: flex;
+  gap: $space-4;
+  margin: $space-2 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clock {
+  display: grid;
+  grid-template-columns: auto minmax(6rem, 10rem) auto;
+  align-items: center;
+  gap: $space-2;
+  font-size: 0.72rem;
+
+  &[data-rarity='epic'] .clockFill {
+    background: $rarity-epic;
+  }
+
+  &[data-rarity='legendary'] .clockFill {
+    background: $rarity-legendary;
+  }
+}
+
+.clockLabel {
+  color: $muted;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.clockTrack {
+  height: 6px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.clockFill {
+  display: block;
+  height: 100%;
+  transition: width $duration-base $ease-out;
+}
+
+.clockText {
+  color: $muted-deep;
+  font-family: $font-mono;
 }
 
 .empty {

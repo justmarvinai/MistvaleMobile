@@ -7,11 +7,13 @@ import { useInventoryStore } from '../../state/inventoryStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { useSummonStore } from '../../state/summonStore';
 import { OddsPanel } from './OddsPanel';
-import { RevealOverlay } from './RevealOverlay';
+import { SummonCinematic } from './SummonCinematic';
 import styles from './MistgateScreen.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
 import { Modal } from '@/ui/Modal/Modal';
+import { Portrait } from '../../ui/Portrait/Portrait';
+import { championArt } from '../../ui/championArt';
 
 /**
  * The Mistgate.
@@ -20,6 +22,13 @@ import { Modal } from '@/ui/Modal/Modal';
  * and the live mercy counters within reach of the button is a deliberate choice:
  * the numbers are honest, so there is nothing to gain by hiding them, and a player who
  * can see the pity clock ticking trusts the one they cannot see.
+ *
+ * The gate is the best moment the game has, so the screen is built to make a player want
+ * to press the button: the portal is the largest single thing in the client, the rate-up
+ * champions are *faces* rather than a line of names, and the two mercy clocks that matter
+ * — epic and legendary — run on the gate itself rather than only inside the odds dialog.
+ * A pity counter is anticipation you can read, and hiding it behind a click was leaving
+ * the best argument for one more pull in a drawer.
  */
 
 export function MistgateScreen(): JSX.Element {
@@ -30,6 +39,8 @@ export function MistgateScreen(): JSX.Element {
   const load = useSummonStore((state) => state.load);
   const pull = useSummonStore((state) => state.pull);
   const revealing = useSummonStore((state) => state.revealing);
+  const pullSeq = useSummonStore((state) => state.pullSeq);
+  const lastPull = useSummonStore((state) => state.lastPull);
 
   const refreshInventory = useInventoryStore((state) => state.refresh);
   const refreshRoster = useRosterStore((state) => state.load);
@@ -76,6 +87,14 @@ export function MistgateScreen(): JSX.Element {
 
   const sigilName =
     bundle?.items.find((item) => item.key === banner.sigilKey)?.name ?? banner.sigilKey;
+  const featured = banner.featured
+    .map((key) => bundle?.champions.find((champion) => champion.key === key))
+    .filter((champion): champion is NonNullable<typeof champion> => Boolean(champion));
+  // Only the two a player is actually counting. Common and uncommon mercy is arithmetic
+  // nobody waits on, and four bars would make the two that matter harder to find.
+  const clocks = banner.pity.filter(
+    (state) => state.rarity === 'epic' || state.rarity === 'legendary',
+  );
   const canPullOne = banner.sigilsHeld >= 1;
   const canPullTen = banner.sigilsHeld >= 10;
 
@@ -113,21 +132,36 @@ export function MistgateScreen(): JSX.Element {
         <section className={styles.gate}>
           <div className={styles.portal} aria-hidden="true" data-pool={banner.key}>
             <span className={styles.portalRing} />
+            <span className={styles.portalRingInner} />
             <span className={styles.portalCore} />
           </div>
 
           <h2 className={styles.title}>{banner.name}</h2>
           <p className={styles.blurb}>{banner.description}</p>
 
-          {banner.featured.length > 0 && (
-            <p className={styles.featured}>
-              Rate up:{' '}
-              {banner.featured
-                .map(
-                  (key) => bundle?.champions.find((champion) => champion.key === key)?.name ?? key,
-                )
-                .join(' · ')}
-            </p>
+          {/* The rate-up champions, as faces. A line reading "Rate up: Aureleth · Vharn"
+              asks a player to already know who those are; a portrait with a gold frame
+              round it is the argument itself. */}
+          {featured.length > 0 && (
+            <div className={styles.featured}>
+              <span className={styles.featuredLabel}>Rate up</span>
+              <ul className={styles.featuredList}>
+                {featured.map((champion) => (
+                  <li
+                    key={champion.key}
+                    className={styles.featuredOne}
+                    data-rarity={champion.rarity}
+                  >
+                    <Portrait
+                      src={championArt(champion, bundle?.assets).portrait ?? null}
+                      name={champion.name}
+                      size={56}
+                    />
+                    <span className={styles.featuredName}>{champion.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
 
           <div className={styles.actions}>
@@ -154,6 +188,32 @@ export function MistgateScreen(): JSX.Element {
             )}
           </p>
 
+          {/* The two clocks worth watching, on the gate rather than only in the dialog.
+              `since` past `after` is mercy already paying — the bar fills and stays full,
+              because the bonus keeps growing after the threshold rather than resetting. */}
+          {clocks.length > 0 && (
+            <ul className={styles.clocks}>
+              {clocks.map((clock) => (
+                <li key={clock.rarity} className={styles.clock} data-rarity={clock.rarity}>
+                  <span className={styles.clockLabel}>{clock.rarity}</span>
+                  <span className={styles.clockTrack}>
+                    <span
+                      className={styles.clockFill}
+                      style={{
+                        width: `${Math.min(100, clock.after > 0 ? (clock.since / clock.after) * 100 : 100)}%`,
+                      }}
+                    />
+                  </span>
+                  <span className={styles.clockText}>
+                    {clock.since >= clock.after
+                      ? `mercy rising — ${(clock.effectiveChance * 100).toFixed(2)}%`
+                      : `${clock.after - clock.since} more without one`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
           {error && <p className={styles.error}>{error}</p>}
         </section>
       </div>
@@ -175,7 +235,13 @@ export function MistgateScreen(): JSX.Element {
         />
       </Modal>
 
-      {revealing.length > 0 && <RevealOverlay />}
+      {/* Mounted the moment the button is pressed rather than when the answer comes back,
+          so the wind-up plays *over* the round trip instead of after a disabled button.
+          Keyed on the pull count: the cinematic is a state machine with six timers in it,
+          and starting one over is building a new one. */}
+      {(pulling || revealing.length > 0) && (
+        <SummonCinematic key={pullSeq} onAgain={() => void summon(lastPull?.count ?? 1)} />
+      )}
     </div>
   );
 }

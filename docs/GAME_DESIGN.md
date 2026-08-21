@@ -134,6 +134,7 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 
 - **Mercy/pity (visible in-game, source-faithful):** Gleaming/Mistwoven — Epic chance +2%/pull after 20 pulls without an Epic+; Legendary chance +5%/pull after 200 without a Legendary; Radiant — Legendary +2%/pull after 12. Counters are per sigil type, additive, reset on hit, and shown on the "Odds & Mercy" panel. Exact tuning in ECONOMY_BALANCE.md.
 - x1/x10 pulls, reveal cinematics by rarity (skippable), NEW badge + Chronicle registration, dupes flow to rank-up stock with a "reserved as food?" affordance (locked champions never auto-foddered).
+- **The reveal is theatre over an outcome already settled.** The server decides every card before the first frame; what the client chooses is the order they are turned in — the best one last, always, because a reveal that opens on the legendary has nothing left to give. The wind-up climbs to rare on every pull so it cannot be read as a tell, and only tells above that, where the telling is the reward. None of it can change what was received (UI_UX §1.2).
 - All rarities pull **real champions** from the 37-champion roster (owner-approved); art-pending champions show their placeholder sprite + tinted avatar frame until real art is uploaded via Admin.
 
 ## 11. Meta & retention systems
