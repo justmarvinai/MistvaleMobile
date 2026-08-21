@@ -68,9 +68,19 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           />
           <SliderRow
             label="Sound effects"
-            description="Interface, battle, rewards, and the Wardenmaster's voice."
+            description="Interface, battle and rewards."
             value={settings.sfxVolume}
             onChange={(sfxVolume) => void patch({ sfxVolume })}
+          />
+          {/* Its own fader rather than a share of the effects one: a click wants to be
+              barely there, a voice telling you what to press wants to be heard over the
+              music, and it is the control somebody reaches for the moment a narrator starts
+              talking. Under "sound effects" it is the control they never find. */}
+          <SliderRow
+            label="Voice"
+            description="The Wardenmaster, and anyone who speaks after him."
+            value={settings.voiceVolume}
+            onChange={(voiceVolume) => void patch({ voiceVolume })}
           />
 
           <ToggleRow

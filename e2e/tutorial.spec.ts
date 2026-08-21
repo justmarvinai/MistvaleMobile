@@ -78,6 +78,45 @@ test.describe('the tutorial', () => {
     expect(await dimming(), 'the overlay dims part of the fight').toBe(0);
   });
 
+  test('is heard as well as read, and the Vale has a soundtrack', async ({ page }) => {
+    test.slow();
+    // The owner's bug, and the reason the fill learned to backfill. `portrait` and `sound`
+    // were new *fields* on the fifteen tutorial steps that already existed, and a plain seed
+    // only ever added new *entities* — so on his install every step carried an empty string
+    // for both. It failed in total silence: the schema defaults a missing key to '', so the
+    // content parsed, the client asked for nothing, and nothing anywhere said why.
+    //
+    // Asserted at the network, because that is the only place the whole chain is visible:
+    // the field is populated, the channel unlocked on a real gesture, the fader above zero,
+    // and the published file actually served. An `Audio` element is never in the DOM, so
+    // there is nothing to query for.
+    const asked: string[] = [];
+    page.on('request', (request) => asked.push(new URL(request.url()).pathname));
+
+    await arrive(page, 'e2snd');
+    await expect(page.getByRole('region', { name: 'Tutorial' })).toBeVisible({ timeout: 25_000 });
+
+    await expect
+      .poll(() => asked.filter((path) => path.startsWith('/audio/')), { timeout: 20_000 })
+      .toEqual(
+        expect.arrayContaining([
+          '/audio/tutorial/tutorial_step_1.mp3',
+          '/audio/music/combat_campaign_depths_arena.mp3',
+        ]),
+      );
+
+    // And they are real files rather than the SPA's index.html, which is what an unpublished
+    // path answers with and which an <audio> element reports as an ordinary decode failure.
+    for (const path of [
+      '/audio/tutorial/tutorial_step_1.mp3',
+      '/portraits/wardenmaster_avatar.jpg',
+    ]) {
+      const response = await page.request.get(path);
+      expect(response.status(), path).toBe(200);
+      expect(response.headers()['content-type'], path).not.toContain('text/html');
+    }
+  });
+
   test('speaks with a face, and lets the player shove it out of the way', async ({ page }) => {
     test.slow();
     // The card sits over the game and points at things, so sooner or later it points at

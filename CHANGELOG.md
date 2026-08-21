@@ -5,6 +5,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a release could add a content *field* and never deliver it
+
+The Wardenmaster had no face and no voice on the owner's install, and the two music
+tracks were fine. One cause: a plain seed adds missing **entities** and never touches
+existing ones, so the two new music cues arrived (new entities) while `portrait` and
+`sound` — new **fields** on the fifteen tutorial steps that were already there — stayed
+empty forever.
+
+It failed in complete silence, which is the part worth fixing. The schema defaults a
+missing key to `''`, so every step parsed cleanly, the client asked for nothing, and
+nothing anywhere said why. The seeder backfills now: for an entity that is already live,
+any key the seed has and the stored row does not. Safe for the same reason the insert is
+— a key that is *absent* has never been authored, because everything written through
+Admin comes back with every key the schema knows. Top level only, so a `rewards: {}` an
+operator deliberately emptied stays empty. The run log names the keys and the count, and
+the revision records it as a modification rather than an addition.
+
+`e2e/tutorial.spec.ts` now asserts at the network that the browser actually asks for
+`tutorial_step_1.mp3` and gets audio rather than the SPA's HTML — the only place the whole
+chain is visible at once, since an `Audio` element is never in the DOM to query.
+
+### Added — a Voice fader, and a quieter opening
+
+- **Voice** is its own slider in Settings. It rode the effects fader, which is wrong in
+  both directions: turning the interface down should not silence the narrator, and turning
+  the narrator up should not make every button click shout. It is also the control somebody
+  reaches for the moment a narrator starts talking, and under "sound effects" it is the one
+  they never find.
+- **A new warden starts with music at 5%** and voice at 50%. A soundtrack that starts on
+  its own at half volume is the fastest way to make somebody mute the tab; 5% is audible
+  enough to be discovered and turned up. Existing accounts keep the levels they have.
+- `UPDATE.sh` reports how much audio and how many portraits a release is carrying. Counted
+  rather than required — a track still being mixed should not block a deploy — but said out
+  loud, because the whole lesson of the empty battlefield is that a silent absence is the
+  kind nobody finds.
+
 ### Added — the game has a soundtrack, and the Wardenmaster has a voice
 
 The owner's audio pack: two music tracks and twelve of the tutorial's fifteen lines,

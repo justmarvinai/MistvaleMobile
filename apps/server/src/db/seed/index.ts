@@ -5,7 +5,7 @@ import * as contentRepo from '../../content/repo';
 import { loadConfig } from '../../lib/config';
 import * as schema from '../schema/index';
 import { buildSeedContent, parseSeedContent } from './seeders';
-import { applyFill, planFill } from './fill';
+import { applyFill, fieldsIn, planFill } from './fill';
 import type { ContentSet } from '../../content/validate';
 import type { ContentType } from '@mistvale/shared';
 
@@ -108,7 +108,7 @@ async function main(): Promise<void> {
 
       const fill = planFill(seeds, existing, normalised);
 
-      if (fill.added.length === 0) {
+      if (fill.added.length === 0 && fill.patched.length === 0) {
         console.log(
           'Nothing missing. Use --force-content to replace what is there (player data is never touched).',
         );
@@ -117,9 +117,17 @@ async function main(): Promise<void> {
 
       const rev = await applyFill(db, fill);
       for (const [contentType, count] of fill.perType) console.log(`  + ${contentType}: ${count}`);
-      console.log(
-        `Filled in ${fill.added.length} missing entities at revision ${rev}. Nothing existing was changed.`,
-      );
+      if (fill.added.length > 0) {
+        console.log(`Filled in ${fill.added.length} missing entities at revision ${rev}.`);
+      }
+      if (fill.patched.length > 0) {
+        // Named rather than counted: a backfill writes to rows an operator may have edited,
+        // and "which keys, on how many" is the sentence that makes that reviewable.
+        console.log(
+          `  ~ backfilled ${fieldsIn(fill).join(', ')} on ${fill.patched.length} existing entities at revision ${rev}`,
+        );
+      }
+      console.log('No value that was already stored was changed.');
       console.log('Restart the server (or publish from Admin) to load it into the cache.');
       return;
     }

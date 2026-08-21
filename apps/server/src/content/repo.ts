@@ -157,6 +157,34 @@ export async function addLiveContent(
   }
 }
 
+/**
+ * Rewrites the data of live entries that already exist.
+ *
+ * The narrow counterpart to `addLiveContent`, and the only write in this file that can
+ * change something an operator is holding — so the *caller* is what keeps it safe. The one
+ * caller is the seeder's field backfill, which composes each `data` as "what is stored,
+ * plus the keys that are not in it": nothing already written is read, compared or replaced.
+ * Anything else wanting this function almost certainly wants `upsertEntry` and the
+ * draft → publish path instead.
+ */
+export async function patchLiveContent(
+  db: Database,
+  entries: { contentType: ContentType; key: string; data: unknown }[],
+): Promise<void> {
+  for (const entry of entries) {
+    await db
+      .update(contentEntries)
+      .set({ data: entry.data })
+      .where(
+        and(
+          eq(contentEntries.state, 'live'),
+          eq(contentEntries.contentType, entry.contentType),
+          eq(contentEntries.key, entry.key),
+        ),
+      );
+  }
+}
+
 export async function latestRevision(db: Database): Promise<number> {
   const rows = await db
     .select({ rev: sql<number>`coalesce(max(${contentRevisions.rev}), 0)::int` })

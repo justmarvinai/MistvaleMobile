@@ -23,6 +23,7 @@ export function useAudio(): void {
   const cues = useContentStore((state) => state.bundle?.soundCues);
   const musicVolume = usePlayerStore((state) => state.settings.musicVolume);
   const sfxVolume = usePlayerStore((state) => state.settings.sfxVolume);
+  const voiceVolume = usePlayerStore((state) => state.settings.voiceVolume);
 
   useEffect(() => {
     mixer.setCues(cues ?? []);
@@ -31,10 +32,11 @@ export function useAudio(): void {
   useEffect(() => {
     mixer.setLevels({ musicVolume, sfxVolume });
     music.setLevel(musicVolume);
-    // The Wardenmaster is an effect, not a soundtrack: somebody who turned the music down to
-    // put their own on still wants to be told what to do.
-    narration.setLevel(sfxVolume);
-  }, [musicVolume, sfxVolume]);
+    // A spoken line answers to its own fader. It rode the effects one at first, which is
+    // wrong in both directions: turning the interface down should not silence the narrator,
+    // and turning the narrator up should not make every button click shout.
+    narration.setLevel(voiceVolume);
+  }, [musicVolume, sfxVolume, voiceVolume]);
 
   /**
    * Which track is playing, decided by one question: is the player in a fight?

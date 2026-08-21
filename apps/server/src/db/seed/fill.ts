@@ -20,6 +20,22 @@ import type { Database } from '../client';
  * The one thing this trades away is deletion: content an operator deleted comes back on
  * the next seed. Retiring content is what the `active` flag is for, and a flag survives a
  * seed where a deletion cannot.
+ *
+ * **The same argument, one level down.** A release that adds a *field* could not deliver it
+ * either, and that failed just as quietly: the tutorial gained `portrait` and `sound`, the
+ * two new music cues arrived because they were new *entities*, and the fifteen steps that
+ * already existed kept a stored shape with neither key in it. Every one parsed cleanly — the
+ * schema defaults a missing key to `''` — so nothing complained anywhere, and on the one
+ * install that mattered the Wardenmaster had no face and no voice.
+ *
+ * So the fill also backfills: for an entity that is already live, any key the seed has and
+ * the stored row does not. Safe for the same reason the insert is — a key that is *absent*
+ * has never been authored, because everything written through Admin goes through the schema
+ * and comes back with every key the schema knows. **Top level only.** A nested map like
+ * `rewards` is a single authored value: an operator who emptied it meant to empty it, and
+ * merging the seed's keys back in would be the overwrite this file exists to prevent. A new
+ * field *inside* a nested object needs no help anyway — it is defaulted at read time like
+ * every other missing key.
  */
 
 export interface SeedGroup {
@@ -32,7 +48,13 @@ export interface FillReport {
   added: { contentType: ContentType; key: string; data: unknown }[];
   /** How many were added per content type, for the run log. */
   perType: Map<ContentType, number>;
+  /** Live entities rewritten with the keys they were missing, and which keys those were. */
+  patched: { contentType: ContentType; key: string; data: unknown; fields: string[] }[];
 }
+
+/** True for a plain `{}` — the only shape whose top-level keys are worth comparing. */
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * Works out what is missing. Pure — the caller writes it, so a dry run costs no
@@ -40,16 +62,36 @@ export interface FillReport {
  */
 export function planFill(
   seeds: readonly SeedGroup[],
-  live: readonly { contentType: string; key: string }[],
+  live: readonly { contentType: string; key: string; data?: unknown }[],
   normalised?: Map<ContentType, Map<string, unknown>>,
 ): FillReport {
-  const held = new Set(live.map((entry) => `${entry.contentType}:${entry.key}`));
+  const held = new Map(live.map((entry) => [`${entry.contentType}:${entry.key}`, entry]));
   const added: FillReport['added'] = [];
+  const patched: FillReport['patched'] = [];
   const perType = new Map<ContentType, number>();
 
   for (const seed of seeds) {
     for (const entity of seed.entities) {
-      if (held.has(`${seed.contentType}:${entity.key}`)) continue;
+      const existing = held.get(`${seed.contentType}:${entity.key}`);
+      if (existing) {
+        const wanted = normalised?.get(seed.contentType)?.get(entity.key) ?? entity.data;
+        const stored = existing.data;
+        if (!isRecord(wanted) || !isRecord(stored)) continue;
+        const fields = Object.keys(wanted).filter((field) => !(field in stored));
+        if (fields.length === 0) continue;
+        patched.push({
+          contentType: seed.contentType,
+          key: entity.key,
+          // The new keys first and the stored row spread over them, so a key that *is*
+          // present wins even if this were ever rewritten carelessly.
+          data: {
+            ...Object.fromEntries(fields.map((field) => [field, wanted[field]])),
+            ...stored,
+          },
+          fields,
+        });
+        continue;
+      }
       added.push({
         contentType: seed.contentType,
         key: entity.key,
@@ -61,7 +103,7 @@ export function planFill(
     }
   }
 
-  return { added, perType };
+  return { added, perType, patched };
 }
 
 /** The whole live set as a revision snapshot: `{ [contentType]: { [key]: data } }`. */
@@ -85,13 +127,33 @@ export async function applyFill(db: Database, report: FillReport): Promise<numbe
   const rev = (await contentRepo.latestRevision(db)) + 1;
   await db.transaction(async (tx) => {
     await contentRepo.addLiveContent(tx, report.added);
+    await contentRepo.patchLiveContent(tx, report.patched);
     await contentRepo.insertRevision(tx, {
       rev,
       publishedBy: 'seed',
-      note: `Filled in ${report.added.length} missing entities: ${[...report.perType.keys()].join(', ')}`,
-      summary: { added: report.added.length, modified: 0, removed: 0 },
+      note: fillNote(report),
+      summary: { added: report.added.length, modified: report.patched.length, removed: 0 },
       snapshot: await snapshotOf(tx),
     });
   });
   return rev;
+}
+
+/** What the revision list says this run did — a backfill is not an addition. */
+export function fillNote(report: FillReport): string {
+  const parts: string[] = [];
+  if (report.added.length > 0) {
+    parts.push(
+      `Filled in ${report.added.length} missing entities: ${[...report.perType.keys()].join(', ')}`,
+    );
+  }
+  if (report.patched.length > 0) {
+    parts.push(`Backfilled ${fieldsIn(report).join(', ')} on ${report.patched.length} existing`);
+  }
+  return parts.join('. ') || 'Nothing to fill';
+}
+
+/** Every key the backfill added, deduplicated — what the run log and the revision name. */
+export function fieldsIn(report: FillReport): string[] {
+  return [...new Set(report.patched.flatMap((entry) => entry.fields))].sort();
 }

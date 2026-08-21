@@ -9,6 +9,16 @@ import { z } from 'zod';
 export const playerSettingsSchema = z.object({
   musicVolume: z.number().min(0).max(1),
   sfxVolume: z.number().min(0).max(1),
+  /**
+   * The Wardenmaster, and any spoken line after him.
+   *
+   * Its own fader rather than a share of the effects one, because the two are wanted at
+   * different levels by the same person: an interface click wants to be barely there, and a
+   * voice explaining what to press wants to be heard over the music. It is also the fader
+   * somebody reaches for the moment a narrator starts talking, and hunting for it under
+   * "sound effects" is how a player ends up muting the whole game instead.
+   */
+  voiceVolume: z.number().min(0).max(1),
   /** Preferred battle playback speed. */
   battleSpeed: z.union([z.literal(1), z.literal(2)]),
   /** Honour the OS "reduce motion" preference, or force it on. */
@@ -36,9 +46,23 @@ export const playerSettingsSchema = z.object({
 });
 export type PlayerSettings = z.infer<typeof playerSettingsSchema>;
 
+/**
+ * What a new warden starts with.
+ *
+ * Music opens **quiet** — the owner's call, and the right one for a track that starts
+ * playing on its own the moment somebody arrives. A soundtrack nobody asked for is the
+ * fastest way to make a player mute the tab, and 5% is audible enough to be discovered and
+ * turned up rather than discovered and killed. The voice sits in the middle: loud enough to
+ * follow, quiet enough to talk over.
+ *
+ * These apply to accounts created from here on. An existing player's stored settings are
+ * theirs — the snapshot merges these in only for keys their row has never had, which is how
+ * `voiceVolume` reaches somebody who registered before it existed.
+ */
 export const DEFAULT_PLAYER_SETTINGS: PlayerSettings = Object.freeze({
-  musicVolume: 0.5,
+  musicVolume: 0.05,
   sfxVolume: 0.8,
+  voiceVolume: 0.5,
   battleSpeed: 1,
   reducedMotion: false,
   colorblindGlyphs: false,

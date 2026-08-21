@@ -470,6 +470,20 @@ if command -v grep >/dev/null && ! grep -q '"basePath"' "${CLIENT_SPRITES}"; the
 	die "the sprite manifest lists no units — see ${CLIENT_SPRITES}"
 fi
 
+# The owner's music, the Wardenmaster's lines and his portrait, published out of assets/ by
+# the same step. Counted rather than required: unlike unit art, whose absence is an empty
+# battlefield, a release with no audio is a quieter game and not a broken one — a track the
+# owner is still mixing should not block a deploy. But it is *reported*, because the whole
+# lesson of the empty battlefield is that a silent absence is the kind nobody finds.
+count_files() { [[ -d "$1" ]] && find "$1" -maxdepth 1 -type f | wc -l | tr -d ' ' || echo 0; }
+MUSIC_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/audio/music")"
+VOICE_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/audio/tutorial")"
+PORTRAIT_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/portraits")"
+log "media: ${MUSIC_COUNT} music, ${VOICE_COUNT} spoken lines, ${PORTRAIT_COUNT} portraits"
+if [[ "${MUSIC_COUNT}" == "0" && "${VOICE_COUNT}" == "0" && "${PORTRAIT_COUNT}" == "0" ]]; then
+	warn "this release carries no audio or portraits at all — if that is a surprise, run 'pnpm assets' in ${REPO_DIR}"
+fi
+
 log "collecting build output"
 cp -a "${REPO_DIR}/${SERVER_DIST_REL}/." "${NEW_RELEASE}/server/dist/"
 cp -a "${REPO_DIR}/apps/server/package.json" "${NEW_RELEASE}/server/package.json"
