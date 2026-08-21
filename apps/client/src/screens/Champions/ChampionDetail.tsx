@@ -219,9 +219,7 @@ export function ChampionDetailModal({
                 <span className={styles.powerLabel}>Power</span>
               </div>
             </div>
-          </aside>
 
-          <div className={styles.main}>
             <div className={styles.flags}>
               <button
                 type="button"
@@ -251,7 +249,101 @@ export function ChampionDetailModal({
               </button>
             </div>
 
-            <StatTable stats={stats} />
+            {/* The three ladders, beside the champion they raise rather than under a relic
+                grid the player has to scroll past to reach them. They are what this sheet is
+                *for* — everything in the right column is inspection, these are the actions —
+                and the column is sticky, so they are in view the whole way down. */}
+            <div className={styles.ladders}>
+              <Button
+                {...highlightable('button:champion-level')}
+                variant="secondary"
+                disabled={busy || champion.level >= champion.levelCap}
+                onClick={() => setPicking('level')}
+              >
+                {champion.level >= champion.levelCap ? 'At level cap' : 'Feed for experience'}
+              </Button>
+
+              <Button
+                variant="secondary"
+                disabled={busy || !costs.rankUp || !costs.rankUp.atLevelCap}
+                onClick={() => setPicking('rank')}
+                title={
+                  costs.rankUp
+                    ? `${costs.rankUp.foodCount} × ★${costs.rankUp.foodRank} champions + ${costs.rankUp.silver.toLocaleString()} silver`
+                    : 'Already ★6'
+                }
+              >
+                {costs.rankUp ? `Rank up to ★${champion.rank + 1}` : 'Fully ranked'}
+              </Button>
+
+              <Button
+                variant="secondary"
+                disabled={busy || !canAffordAscend}
+                title={
+                  costs.ascend?.allowedByRank === false
+                    ? 'Rank this champion up first'
+                    : Object.entries(ascendCost)
+                        .map(
+                          ([key, amount]) => `${amount} × ${key} (have ${itemCount(items, key)})`,
+                        )
+                        .join(' · ')
+                }
+                onClick={() =>
+                  void run('Ascended.', () => gameApi.ascend(championId, newActionId()))
+                }
+              >
+                {costs.ascend ? `Ascend to ${champion.ascension + 1}` : 'Fully ascended'}
+              </Button>
+            </div>
+
+            {/* Beside the buttons that raise them. They used to sit at the very bottom of the
+                right column, so "Experience granted." appeared a relic grid away from the
+                press that earned it. */}
+            {notice && <p className={styles.notice}>{notice}</p>}
+            {error && <p className={styles.error}>{error}</p>}
+          </aside>
+
+          <div className={styles.main}>
+            {/* Numbers and set bonuses in one row, above the tabs.
+
+                The stat table alone at this width was five columns of figures spread across
+                1,200px with the eye travelling a hand's breadth from "SPD" to its total —
+                wider is not always more readable. And the set bonuses were inside the Relics
+                tab, which made them look like a property of that tab rather than of the
+                champion: what a player's relics add up to is exactly as true while they are
+                reading skills. */}
+            <div className={styles.summary}>
+              <StatTable stats={stats} />
+
+              {/* What the pieces add up to — the whole reason relic *sets* exist, and the one
+                  thing this sheet never said. Counted from what is worn, with the incomplete
+                  ones greyed, so a player can see they are one boot from a bonus rather than
+                  working it out.
+
+                  Drawn even when there is nothing to count, because a champion wearing
+                  nothing is exactly who needs telling that matching relics do something. */}
+              {setProgress.length > 0 ? (
+                <Fui
+                  // Construction-time like the artifact card, and this one moves every time a
+                  // relic goes on or comes off — which is precisely when a player is looking
+                  // at it. Keyed on the progress it draws.
+                  key={setProgress
+                    .map((bonus) => `${bonus.name}${bonus.have}/${bonus.need}`)
+                    .join('|')}
+                  of={ArtifactSet}
+                  className={styles.setBonuses}
+                  options={{ title: 'Set bonuses', slots: [], bonuses: setProgress }}
+                />
+              ) : (
+                <div className={styles.noSets}>
+                  <h3 className={styles.noSetsHeading}>Set bonuses</h3>
+                  <p>
+                    None yet. Relics of the same set worn together grant a bonus on top of their own
+                    numbers — two pieces for most sets, four for the heavier ones.
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className={styles.tabs} role="tablist">
               {(['gear', 'skills', 'masteries', 'lore'] as Tab[]).map((entry) => (
@@ -292,93 +384,73 @@ export function ChampionDetailModal({
             )}
 
             {tab === 'gear' && (
-              <>
-                <div className={styles.slots}>
-                  {GEAR_SLOTS.map((slot) => {
-                    const worn = wornBySlot.get(slot);
-                    const slotDef = bundle?.gearSlots.find((entry) => entry.key === slot);
-                    const locked = (slotDef?.ascensionRequired ?? 0) > champion.ascension;
-                    const setName = worn
-                      ? (bundle?.gearSets.find((entry) => entry.key === worn.setKey)?.name ??
-                        worn.setKey)
-                      : null;
-                    return (
-                      <button
-                        key={slot}
-                        type="button"
-                        className={styles.slot}
-                        disabled={locked || busy}
-                        onClick={() => setSlotPicking(slot)}
-                        title={
-                          locked
-                            ? `Needs ascension ${slotDef?.ascensionRequired}`
-                            : worn
-                              ? `${setName} · +${worn.level}`
-                              : `Empty ${SLOT_LABEL[slot]}`
-                        }
-                      >
-                        {/* The socket is the slot's picture, not a second control — see the
+              <div className={styles.slots}>
+                {GEAR_SLOTS.map((slot) => {
+                  const worn = wornBySlot.get(slot);
+                  const slotDef = bundle?.gearSlots.find((entry) => entry.key === slot);
+                  const locked = (slotDef?.ascensionRequired ?? 0) > champion.ascension;
+                  const setName = worn
+                    ? (bundle?.gearSets.find((entry) => entry.key === worn.setKey)?.name ??
+                      worn.setKey)
+                    : null;
+                  return (
+                    <button
+                      key={slot}
+                      type="button"
+                      className={styles.slot}
+                      disabled={locked || busy}
+                      onClick={() => setSlotPicking(slot)}
+                      title={
+                        locked
+                          ? `Needs ascension ${slotDef?.ascensionRequired}`
+                          : worn
+                            ? `${setName} · +${worn.level}`
+                            : `Empty ${SLOT_LABEL[slot]}`
+                      }
+                    >
+                      {/* The socket is the slot's picture, not a second control — see the
                         Haven's stations for the same reasoning. */}
-                        <Fui
-                          of={Slot}
-                          className={styles.slotSocket}
-                          options={{
-                            size: 'lg',
-                            locked,
-                            item: worn
-                              ? {
-                                  icon: relicArt(slot),
-                                  name: setName ?? slot,
-                                  rarity: worn.rarity,
-                                }
-                              : null,
-                            placeholder: relicGlyph(slot),
-                          }}
-                          attrs={{
-                            role: 'presentation',
-                            tabindex: undefined,
-                            'aria-label': undefined,
-                            title: undefined,
-                          }}
-                          // Options are construction-time. Without this the socket kept
-                          // whatever it was built holding: equip a relic and the slot stayed
-                          // empty, take one off and it stayed full, until the sheet was closed
-                          // and re-opened. The numbers above it were right the whole time,
-                          // which is what made it read as the game losing the change.
-                          apply={(socket, next) => socket.setItem(next.item ?? null)}
-                        />
-                        <span className={styles.slotName}>{SLOT_LABEL[slot]}</span>
-                        {worn ? (
-                          <span className={styles.slotMain}>
-                            {statLabel(worn.main.stat)} +{worn.main.value}
-                            {worn.main.percent ? '%' : ''} · +{worn.level}
-                          </span>
-                        ) : (
-                          <span className={styles.slotEmpty}>{locked ? 'Locked' : 'Empty'}</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* What the pieces add up to — which is the whole reason relic *sets* exist and
-                the one thing this sheet never said. Counted from what is worn, with the
-                incomplete ones greyed, so a player can see they are one boot from a
-                bonus rather than working it out. */}
-                {setProgress.length > 0 && (
-                  <Fui
-                    // Construction-time like the artifact card, and this one moves every time a
-                    // relic goes on or comes off — which is precisely when a player is looking
-                    // at it. Keyed on the progress it draws.
-                    key={setProgress
-                      .map((bonus) => `${bonus.name}${bonus.have}/${bonus.need}`)
-                      .join('|')}
-                    of={ArtifactSet}
-                    className={styles.setBonuses}
-                    options={{ title: 'Set bonuses', slots: [], bonuses: setProgress }}
-                  />
-                )}
-              </>
+                      <Fui
+                        of={Slot}
+                        className={styles.slotSocket}
+                        options={{
+                          size: 'lg',
+                          locked,
+                          item: worn
+                            ? {
+                                icon: relicArt(slot),
+                                name: setName ?? slot,
+                                rarity: worn.rarity,
+                              }
+                            : null,
+                          placeholder: relicGlyph(slot),
+                        }}
+                        attrs={{
+                          role: 'presentation',
+                          tabindex: undefined,
+                          'aria-label': undefined,
+                          title: undefined,
+                        }}
+                        // Options are construction-time. Without this the socket kept
+                        // whatever it was built holding: equip a relic and the slot stayed
+                        // empty, take one off and it stayed full, until the sheet was closed
+                        // and re-opened. The numbers above it were right the whole time,
+                        // which is what made it read as the game losing the change.
+                        apply={(socket, next) => socket.setItem(next.item ?? null)}
+                      />
+                      <span className={styles.slotName}>{SLOT_LABEL[slot]}</span>
+                      {worn ? (
+                        <span className={styles.slotMain}>
+                          {statLabel(worn.main.stat)} +{worn.main.value}
+                          {worn.main.percent ? '%' : ''} · +{worn.level}
+                        </span>
+                      ) : (
+                        <span className={styles.slotEmpty}>{locked ? 'Locked' : 'Empty'}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             )}
 
             {tab === 'skills' && (
@@ -436,52 +508,6 @@ export function ChampionDetailModal({
             {tab === 'lore' && (
               <p className={styles.lore}>{def.lore || 'Nothing is written down.'}</p>
             )}
-
-            <div className={styles.ladders}>
-              <Button
-                {...highlightable('button:champion-level')}
-                variant="secondary"
-                disabled={busy || champion.level >= champion.levelCap}
-                onClick={() => setPicking('level')}
-              >
-                {champion.level >= champion.levelCap ? 'At level cap' : 'Feed for experience'}
-              </Button>
-
-              <Button
-                variant="secondary"
-                disabled={busy || !costs.rankUp || !costs.rankUp.atLevelCap}
-                onClick={() => setPicking('rank')}
-                title={
-                  costs.rankUp
-                    ? `${costs.rankUp.foodCount} × ★${costs.rankUp.foodRank} champions + ${costs.rankUp.silver.toLocaleString()} silver`
-                    : 'Already ★6'
-                }
-              >
-                {costs.rankUp ? `Rank up to ★${champion.rank + 1}` : 'Fully ranked'}
-              </Button>
-
-              <Button
-                variant="secondary"
-                disabled={busy || !canAffordAscend}
-                title={
-                  costs.ascend?.allowedByRank === false
-                    ? 'Rank this champion up first'
-                    : Object.entries(ascendCost)
-                        .map(
-                          ([key, amount]) => `${amount} × ${key} (have ${itemCount(items, key)})`,
-                        )
-                        .join(' · ')
-                }
-                onClick={() =>
-                  void run('Ascended.', () => gameApi.ascend(championId, newActionId()))
-                }
-              >
-                {costs.ascend ? `Ascend to ${champion.ascension + 1}` : 'Fully ascended'}
-              </Button>
-            </div>
-
-            {notice && <p className={styles.notice}>{notice}</p>}
-            {error && <p className={styles.error}>{error}</p>}
           </div>
         </div>
       </div>

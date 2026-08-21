@@ -25,7 +25,9 @@
    min-content — and a stat table would push the whole layout wider than the dialog. */
 .layout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  /* 340 rather than 300: the column carries the champion, their facts, and now the three
+     ladders as well, and "Feed for experience" is a long label to fit on one line. */
+  grid-template-columns: 340px minmax(0, 1fr);
   gap: $space-4;
   align-items: start;
 }
@@ -47,8 +49,13 @@
   border: 1px solid $edge;
   position: sticky;
   /* Follows the reader down a long sheet — the relics and masteries tabs are tall — so who
-     you are editing never scrolls away from what you are editing. */
+     you are editing never scrolls away from what you are editing, and the three ladders
+     stay in reach the whole way down. */
   top: 0;
+  /* …but never taller than the window: a sticky element that overflows the viewport stops
+     sticking, and the ladders are the bottom of this column. */
+  max-height: calc(76vh - #{$space-2});
+  overflow-y: auto;
 }
 
 @media (max-width: 900px) {
@@ -60,7 +67,7 @@
 }
 
 .idle {
-  height: 320px;
+  height: 400px;
 }
 
 @media (max-width: 900px) {
@@ -138,6 +145,13 @@
 .flags {
   display: flex;
   gap: $space-2;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .flags {
+    justify-content: flex-start;
+  }
 }
 
 .flag {
@@ -177,16 +191,21 @@
   }
 }
 
+/* Nine sockets, three abreast — the grouping the slots come in. Each cell reads left to
+   right at this width rather than as a stack: the socket, then what is in it. A column
+   layout put a 64px icon at the top of a 400px-wide cell and left the rest of it blank. */
 .slots {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: $space-2;
 }
 
 .slot {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 2px $space-3;
   min-height: 4.4rem;
   padding: $space-2;
   background: $panel-inset;
@@ -208,13 +227,22 @@
   }
 }
 
+/* The socket spans both rows on the left; the label and its line stack in the second
+   column beside it. */
+.slotSocket {
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
 .slotName {
+  align-self: end;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .slotMain {
+  align-self: start;
   color: $parchment;
   font-size: 0.8rem;
 }
@@ -226,13 +254,40 @@
 }
 
 .slotEmpty {
+  align-self: start;
   font-size: 0.75rem;
+}
+
+/* The empty state of the panel beside the stat table. It keeps the row two columns wide on
+   a champion wearing nothing — which is also the champion who has never been told what a
+   set is. */
+.noSets {
+  min-width: 0;
+  padding: $space-2 $space-3;
+  background: $panel-inset;
+  color: $muted;
+  font-size: 0.8rem;
+  line-height: 1.6;
+
+  p {
+    margin: 0;
+  }
+}
+
+.noSetsHeading {
+  margin: 0 0 $space-1;
+  color: $parchment-dim;
+  font-size: 0.7rem;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .setBonuses {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
   margin: 0;
   padding: $space-2;
   background: $panel-inset;
@@ -246,9 +301,11 @@
   }
 }
 
+/* Two skills abreast where the sheet is wide. A champion has three or four, and one per
+   row turned the tab into a scroll for information that fits. */
 .skills {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
   gap: $space-2;
   margin: 0;
   padding: 0;
@@ -279,12 +336,47 @@
   line-height: 1.7;
 }
 
+/* The three ladders, stacked in the champion's own column. A row of three wrapped buttons
+   under the relic grid was the shape when they lived on the right; here they are the
+   column's width each, which is also the order a champion is raised in: level, rank,
+   ascend. */
 .ladders {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: $space-2;
-  padding-top: $space-2;
+  padding-top: $space-3;
   border-top: 1px solid $edge;
+
+  button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .ladders {
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    button {
+      width: auto;
+    }
+  }
+}
+
+/* Stats and set bonuses in one row above the tabs. `minmax(0, …)` on the first track
+   because a table is happy to be min-content and would leave the bonuses holding half the
+   sheet on a champion wearing nothing. */
+.summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: $space-3;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .note,

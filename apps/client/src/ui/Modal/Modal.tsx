@@ -22,6 +22,8 @@ import styles from './Modal.module.scss';
  *   ones that were worst: eight champion cards wrapped two-per-row inside 720px while
  *   fourteen hundred pixels of backdrop sat around them.
  * - `full` — a screen that happens to be a dialog. The champion sheet, the summon reveal.
+ *   Wide enough that the sheet's two columns are both full-size rather than one of them
+ *   being the leftovers.
  */
 export type ModalSize = 'info' | 'work' | 'wide' | 'full';
 
@@ -30,7 +32,7 @@ const SIZE: Readonly<Record<ModalSize, number>> = Object.freeze({
   info: 560,
   work: 900,
   wide: 1240,
-  full: 1480,
+  full: 1680,
 });
 
 export interface ModalProps {

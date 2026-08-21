@@ -87,11 +87,26 @@ player is already looking at the piece.
 ### Changed — the champion sheet has room in it, and the champion in it
 
 736px for four ladders, nine relic sockets and a four-column stat table meant every
-row wrapped and the sheet read as a stack of squeezed fragments. It is 1160 and two
+row wrapped and the sheet read as a stack of squeezed fragments. It is 1680 and two
 columns now: the champion down the left — **their own idle animation**, at the size
 the genre draws it, sticky so it does not scroll away from the work — and everything
 you can do to them on the right. One column again under 900px, where the instructions
 matter more than the illustration.
+
+The left column carries the three ladders as well. Levelling, ranking and ascending are
+what the sheet is *for* — everything on the right is inspection — and they used to sit
+under the relic grid, which meant scrolling past nine sockets to reach "Feed for
+experience". They stand under the champion they raise now, in the order a champion is
+raised in, and the column is sticky, so they are in reach the whole way down. The
+result line follows them, instead of appearing a relic grid away from the press that
+earned it.
+
+The width bought two more things. Set bonuses moved out of the Relics tab and up beside
+the stat table: what a player's relics add up to is exactly as true while they are
+reading skills, and a champion wearing nothing now gets told what a set *is* rather than
+an empty panel. And each relic socket reads left to right — the socket, then what is in
+it — because a column layout put a 64px icon at the top of a 400px cell and left the
+rest blank.
 
 `ui/ChampionIdle` is the third place in the game that plays an idle loop and the first
 outside a fight. DOM rather than a third Pixi surface: a sheet is a modal over the
