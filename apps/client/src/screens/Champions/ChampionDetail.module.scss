@@ -13,11 +13,88 @@
   overflow-y: auto;
 }
 
-.head {
+/* Two columns: the champion, and everything you can do to them.
+
+   The sheet used to be one 736px column with the portrait nowhere in it, and it read as a
+   stack of squeezed fragments — the stat table wrapped, the nine relic sockets wrapped, the
+   spend buttons wrapped. The owner asked for the room and for the champion to be in their
+   own sheet, which is the same fix: give the numbers a column wide enough not to wrap, and
+   spend the width that frees on the thing the player actually came to look at.
+
+   `minmax(0, 1fr)` on the right, because a grid track defaults to `auto` — which is
+   min-content — and a stat table would push the whole layout wider than the dialog. */
+.layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: $space-4;
+  align-items: start;
+}
+
+/* One column under about a tablet: the instructions matter more than the illustration, and
+   a 300px portrait beside a 300px column is two things that both need more. */
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.portrait {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  flex-direction: column;
   gap: $space-3;
+  padding: $space-3;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.5));
+  border: 1px solid $edge;
+  position: sticky;
+  /* Follows the reader down a long sheet — the relics and masteries tabs are tall — so who
+     you are editing never scrolls away from what you are editing. */
+  top: 0;
+}
+
+@media (max-width: 900px) {
+  .portrait {
+    position: static;
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+.idle {
+  height: 320px;
+}
+
+@media (max-width: 900px) {
+  .idle {
+    height: 180px;
+    flex: 0 0 40%;
+  }
+}
+
+.portraitFacts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .portraitFacts {
+    text-align: left;
+    flex: 1;
+  }
+}
+
+.levelLine {
+  color: $parchment-dim;
+  font-size: 0.85rem;
+}
+
+/* The right-hand column owns its own scrolling: the portrait stays put, the work moves. */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 0;
 }
 
 .title {
@@ -28,14 +105,21 @@
 .tier {
   margin-top: 2px;
   color: $gold;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
+  font-size: 1rem;
+  letter-spacing: 2px;
 }
 
 .power {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  margin-top: $space-2;
+}
+
+@media (max-width: 900px) {
+  .power {
+    align-items: flex-start;
+  }
 }
 
 .powerValue {

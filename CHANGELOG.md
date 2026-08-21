@@ -5,6 +5,61 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a fight the browser left no longer bricks the account
+
+Closing or reloading the tab mid-battle made an account unplayable until an operator
+reset it. The guard is right — one fight at a time — but nothing could clear the
+fight: which screen you are on is a value in a store rather than a URL, so a reload
+always lands on the Haven, and the battle screen is the only thing that asks to
+resume. After a reload it never mounted, so nothing ever asked.
+
+The shell asks once per sign-in now and takes the player back into the fight —
+resuming rather than discarding, because the energy is spent and the board is stored.
+A start refused with `ALREADY_EXISTS` also resumes and walks into the fight rather
+than reporting a dead end.
+
+### Fixed — the screen shows what changed, without a reload
+
+Two reports, one defect in the React bridge and a family of call sites that never
+pushed their changes through.
+
+`liveCallbacks` wraps every function in a component's options so it calls whatever is
+current rather than whatever it was built with — but the ref behind that was only
+refreshed when a *shallow key* changed, and that key deliberately skips functions. A
+render that changed only a closure never refreshed it. That is the feed bug exactly:
+the Feed button's one other moving prop is `disabled`, which flips on the first pick,
+so every later pick left the handler behind and pressing Feed spent whatever had been
+chosen when the button stopped being disabled. Always exactly one champion.
+
+With it, the call sites that never pushed a change: the top bar's level numeral (the
+XP bar had one, the numeral beside it did not), the champion sheet's relic sockets,
+and — for the whole of a fight — the party's health bars, the unit plates and the
+hotbar's cooldowns. Three components the library gives no setters at all now rebuild
+on exactly what moves: a forged relic's level, the set bonuses a relic completes, and
+the collection tally a summon changes.
+
+### Added — forge a relic without taking it off
+
+The server never cared whether a relic was worn; the only Forge button in the game
+lived in the vault, whose default filter excludes everything a champion is wearing.
+Levelling the piece you actually use meant unequipping it, finding it among the loose
+ones, forging it and putting it back. The slot's own panel offers it now, where the
+player is already looking at the piece.
+
+### Changed — the champion sheet has room in it, and the champion in it
+
+736px for four ladders, nine relic sockets and a four-column stat table meant every
+row wrapped and the sheet read as a stack of squeezed fragments. It is 1160 and two
+columns now: the champion down the left — **their own idle animation**, at the size
+the genre draws it, sticky so it does not scroll away from the work — and everything
+you can do to them on the right. One column again under 900px, where the instructions
+matter more than the illustration.
+
+`ui/ChampionIdle` is the third place in the game that plays an idle loop and the first
+outside a fight. DOM rather than a third Pixi surface: a sheet is a modal over the
+shell, and standing up a graphics context inside one costs a context the battlefield
+may want back.
+
 ### Fixed — a release could add a content *field* and never deliver it
 
 The Wardenmaster had no face and no voice on the owner's install, and the two music
