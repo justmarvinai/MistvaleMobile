@@ -499,6 +499,17 @@ export function BattleScreen(): JSX.Element {
           className={styles.party}
           options={{ members: party, ...(actingId ? { selected: actingId } : {}) }}
           on={{ 'party:select': ({ id }: { id: string }) => setTarget(refFrom(id)) }}
+          // Options are construction-time, so without this the party's health bars were
+          // painted once — at full — and stayed there for the whole fight. `setMembers`
+          // rather than a rebuild, because rebuilding restarts every bar's fill animation
+          // and drops the selection ring on whoever is acting.
+          apply={(frame, next) => {
+            frame.setMembers(next.members);
+            for (const member of next.members) {
+              frame.setHealth(member.id, member.health ?? 0, member.healthMax ?? 0);
+              frame.setInactive(member.id, (member.health ?? 0) <= 0);
+            }
+          }}
         />
 
         {focus && (
@@ -513,6 +524,13 @@ export function BattleScreen(): JSX.Element {
               health: focus.hp,
               healthMax: focus.maxHp,
               ...(focus.isBoss ? { elite: 'Boss' } : {}),
+            }}
+            // The plate follows whoever is under consideration, and the health on it is the
+            // number the player is watching while they decide. Without a push it showed the
+            // health that unit had when the plate first appeared.
+            apply={(plate, next) => {
+              plate.setName(next.name ?? '');
+              plate.setHealth(next.health ?? 0, next.healthMax ?? 0);
             }}
           />
         )}
@@ -541,6 +559,10 @@ export function BattleScreen(): JSX.Element {
                   health: actingUnit.hp,
                   healthMax: actingUnit.maxHp,
                 }}
+                apply={(plate, next) => {
+                  plate.setName(next.name ?? '');
+                  plate.setHealth(next.health ?? 0, next.healthMax ?? 0);
+                }}
               />
               {/* `bindKeys` is off: the dock already owns 1-9 for navigation, and a number
                   key that fires a skill on one screen and moves you off it on another is
@@ -549,6 +571,11 @@ export function BattleScreen(): JSX.Element {
                 <Fui
                   of={ActionBar}
                   options={{ actions: slots, bindKeys: false, slotSize: 'lg' }}
+                  // Cooldowns move every turn, and a hotbar that keeps the ones it was
+                  // built with tells the player a spent ultimate is ready.
+                  apply={(bar, next) => {
+                    (next.actions ?? []).forEach((action, index) => bar.setAction(index, action));
+                  }}
                   on={{
                     'action:trigger': ({ index }: { index: number }) => {
                       const skill = skills[index];

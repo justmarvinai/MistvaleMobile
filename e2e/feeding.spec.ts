@@ -104,9 +104,25 @@ test.describe('feeding a champion', () => {
     expect(spill!.outside, 'card grid drawn past the dialog edge').toBeLessThanOrEqual(0);
     expect(spill!.sideways, 'card grid scrolls sideways').toBe(0);
 
-    // ── And the food is really eaten ──────────────────────────────────────
+    // ── And *all* the food is really eaten ────────────────────────────────
+    //
+    // This used to feed one, which is the half of it that worked. Selecting three and
+    // spending three is the owner's report and a much older bug underneath it: the React
+    // bridge kept `optionsRef` in an effect keyed on a shallow comparison that skips
+    // functions, so a render changing only a closure never refreshed it. The Feed button's
+    // one other moving prop is `disabled`, which flips on the *first* pick — so every pick
+    // after that left the handler behind, and pressing Feed sent whatever had been chosen
+    // when the button stopped being disabled. Exactly one champion, every time.
+    //
+    // It looked like a broken feed and was a broken bridge, under every painted control in
+    // the game. Asserted here because this is the screen where a stale handler is visible
+    // as a wrong *number* rather than as nothing happening.
+    await food.nth(1).click();
+    await food.nth(2).click();
+    await expect(picker.getByText(/^3 selected$/)).toBeVisible({ timeout: 5_000 });
+
     await feed.click();
     await expect(picker).toBeHidden({ timeout: 20_000 });
-    await expect.poll(async () => roster().count(), { timeout: 20_000 }).toBe(before - 1);
+    await expect.poll(async () => roster().count(), { timeout: 20_000 }).toBe(before - 3);
   });
 });

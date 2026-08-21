@@ -322,6 +322,12 @@ export function ChampionDetailModal({
                         'aria-label': undefined,
                         title: undefined,
                       }}
+                      // Options are construction-time. Without this the socket kept
+                      // whatever it was built holding: equip a relic and the slot stayed
+                      // empty, take one off and it stayed full, until the sheet was closed
+                      // and re-opened. The numbers above it were right the whole time,
+                      // which is what made it read as the game losing the change.
+                      apply={(socket, next) => socket.setItem(next.item ?? null)}
                     />
                     <span className={styles.slotName}>{SLOT_LABEL[slot]}</span>
                     {worn ? (
@@ -343,6 +349,12 @@ export function ChampionDetailModal({
                 bonus rather than working it out. */}
             {setProgress.length > 0 && (
               <Fui
+                // Construction-time like the artifact card, and this one moves every time a
+                // relic goes on or comes off — which is precisely when a player is looking
+                // at it. Keyed on the progress it draws.
+                key={setProgress
+                  .map((bonus) => `${bonus.name}${bonus.have}/${bonus.need}`)
+                  .join('|')}
                 of={ArtifactSet}
                 className={styles.setBonuses}
                 options={{ title: 'Set bonuses', slots: [], bonuses: setProgress }}

@@ -109,6 +109,23 @@ export function useFui<T extends Instance, O extends FuiOptionsOf>(
   useLayoutEffect(() => {
     handlersRef.current = handlers;
     applyRef.current = apply;
+    // **Every render, unconditionally**, and that is the whole point of this line.
+    //
+    // `liveCallbacks` wraps every function in `options` so the component calls whatever is
+    // in this ref *now* rather than whatever was here when it was built — which is what
+    // makes an `onClick` closing over React state work at all. That only holds if the ref
+    // actually tracks the renders.
+    //
+    // It used to be assigned in the effect below, which is keyed on `shallowKey(options)`
+    // — and `shallowKey` deliberately skips functions. So a render that changed *only* a
+    // closure never reached this line, and the component kept calling a handler from an
+    // older render with older state. The food picker is where it surfaced: the Feed
+    // button's `onClick` closes over the selection and its only other prop is `disabled`,
+    // which moves once, on the *first* pick. Every later pick left the handler behind, so
+    // choosing four champions and pressing Feed sent one — the one that had been chosen
+    // when the button stopped being disabled. It looked like a broken feed and was a
+    // broken bridge, under every painted control in the game.
+    optionsRef.current = options;
   });
   // The instance is *also* state, not only a ref: a caller reading it during render must
   // read a value React knows about, and must be re-rendered when it appears. The ref is
@@ -158,10 +175,12 @@ export function useFui<T extends Instance, O extends FuiOptionsOf>(
   // whenever anything in `options` differs. Each Mistvale primitive knows which setter its
   // props map to; nothing here has to guess.
   useLayoutEffect(() => {
-    optionsRef.current = options;
     const instance = instanceRef.current;
     if (instance) applyRef.current?.(instance, options);
-    // Every field is compared, not the object identity — callers pass literals.
+    // Every field is compared, not the object identity — callers pass literals. Handlers
+    // are *not* part of that comparison and must not be: `apply` pushes visible state in
+    // through setters, and a new arrow function per render is not a change to any of it.
+    // Keeping them live is the effect above's job.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shallowKey(options as unknown as Record<string, unknown>)]);
 

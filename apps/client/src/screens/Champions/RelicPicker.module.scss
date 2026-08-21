@@ -81,3 +81,12 @@
   color: $danger;
   font-size: 0.8rem;
 }
+
+/* The two things you can do to the piece that is on: level it where it is, or take it off.
+   Side by side because they are alternatives, not a primary and its escape hatch. */
+.wornActions {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  flex-wrap: wrap;
+}

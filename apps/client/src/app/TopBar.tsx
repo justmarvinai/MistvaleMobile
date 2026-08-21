@@ -123,6 +123,16 @@ export function TopBar({
     (bar, next) => {
       for (const res of next.resources) bar.setResource(res.id, res.value, res.max);
       if (next.resources[0]?.refillIn != null) bar.setRefill('energy', next.resources[0].refillIn);
+
+      // The level numeral and the name have no setter in the library, and both change
+      // while the bar is on screen — a level-up is the single most visible thing that can
+      // happen to an account, and it sat at whatever it had been when the page loaded
+      // until the player reloaded. Written into the library's own nodes rather than
+      // rebuilt beside them: the chrome is the library's, the value is ours.
+      const numeral = bar.el.querySelector<HTMLElement>('.fui-topbar__level');
+      if (numeral) numeral.textContent = String(next.level ?? 1);
+      const named = bar.el.querySelector<HTMLElement>('.fui-topbar__name');
+      if (named && next.name) named.textContent = next.name;
     },
   );
 

@@ -107,7 +107,10 @@ export function ChampionsScreen(): JSX.Element {
             of every count: it is a consumable that happens to be a champion, and folding
             it in would tell a player they had collected eleven Commons when they had
             farmed eleven meals. */}
+            {/* No setters on this one either: it draws its bars at construction. Keyed on
+                the counts so a summon is visible in the tally that exists to track it. */}
             <Fui
+              key={tiers.map((tier) => `${tier.rarity}${tier.owned}/${tier.total}`).join('|')}
               of={CollectionProgress}
               className={styles.collection}
               options={{ title: 'The roll', unit: 'champions', showTotal: true, tiers }}

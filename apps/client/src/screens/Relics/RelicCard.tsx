@@ -38,6 +38,11 @@ export function RelicCard({
 
   return (
     <Fui
+      // `ArtifactCard` has no setters — it paints its stats once, at construction — so a
+      // change is a rebuild. Keyed on exactly what a forge run moves: the level, and the
+      // substats it rolls on the way. Without it a relic upgraded to +4 still read +0 on
+      // every card in the vault until the page was reloaded.
+      key={`${relic.level}:${relic.substats.map((sub) => `${sub.stat}${sub.value}${sub.rolls ?? 1}`).join(',')}`}
       of={ArtifactCard}
       className={styles.card}
       options={{

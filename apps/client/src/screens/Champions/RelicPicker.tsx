@@ -5,6 +5,8 @@ import { Button } from '../../ui/Button/Button';
 import { gameApi } from '../../api/game';
 import { useInventoryStore } from '../../state/inventoryStore';
 import { RelicCard } from '../Relics/RelicCard';
+import { Forge } from '../Relics/Forge';
+import { usePlayerStore } from '../../state/playerStore';
 import styles from './RelicPicker.module.scss';
 import { statLabel } from '../../ui/statLabels';
 
@@ -33,6 +35,22 @@ export function RelicPicker({
 }): JSX.Element {
   const gear = useInventoryStore((state) => state.gear);
   const loadInventory = useInventoryStore((state) => state.load);
+
+  /**
+   * Forging the piece that is already on.
+   *
+   * The server never cared whether a relic was worn — `upgrade` only asks who owns it — so
+   * this was a hole in the *client*: the only Forge button in the game lived in the vault,
+   * whose default filter is "In the vault", which by definition excludes everything a
+   * champion is wearing. Levelling the piece you are actually using meant taking it off,
+   * finding it among the loose ones, forging it, and putting it back.
+   *
+   * Offered here because this is where the worn piece is: the player opened the slot to
+   * look at it. The stat table behind the modal re-reads on `onChanged`, so the champion's
+   * numbers move as the relic does.
+   */
+  const [forging, setForging] = useState(false);
+  const canForge = usePlayerStore((state) => state.unlocks?.relicUpgrading ?? false);
 
   const [selected, setSelected] = useState<string | null>(null);
   const [preview, setPreview] = useState<GearPreview | null>(null);
@@ -88,13 +106,28 @@ export function RelicPicker({
           <section className={styles.current}>
             <h3 className={styles.heading}>Worn now</h3>
             <RelicCard relic={worn} />
-            <Button
-              variant="ghost"
-              disabled={busy}
-              onClick={() => void act(() => gameApi.unequip(worn.id))}
-            >
-              Take it off
-            </Button>
+            <div className={styles.wornActions}>
+              <Button
+                disabled={busy || !canForge || worn.level >= 16}
+                title={
+                  canForge
+                    ? worn.level >= 16
+                      ? 'Already fully upgraded'
+                      : undefined
+                    : 'The forge opens at account level 3'
+                }
+                onClick={() => setForging(true)}
+              >
+                {worn.level >= 16 ? 'Maxed' : 'Forge'}
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={() => void act(() => gameApi.unequip(worn.id))}
+              >
+                Take it off
+              </Button>
+            </div>
           </section>
         )}
 
@@ -155,6 +188,19 @@ export function RelicPicker({
           </Button>
         </div>
       </div>
+
+      {forging && worn && (
+        <Forge
+          relic={worn}
+          onClose={() => setForging(false)}
+          onChanged={async () => {
+            // The vault list and the champion behind this modal both moved: the relic gained
+            // a level and the stats it grants went up with it.
+            await loadInventory();
+            await onChanged();
+          }}
+        />
+      )}
     </Modal>
   );
 }
