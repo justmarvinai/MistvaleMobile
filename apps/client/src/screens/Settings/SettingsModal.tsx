@@ -33,7 +33,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   }
 
   return (
-    <Modal open={open} title="Settings" onClose={onClose} width={520}>
+    <Modal open={open} title="Settings" onClose={onClose} size="info">
       <div className={styles.tabs} role="tablist" aria-label="Settings sections">
         <button
           type="button"

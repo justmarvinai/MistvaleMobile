@@ -5,6 +5,34 @@ import { Button } from '../Button/Button';
 import { useDialogLayer } from './dialog';
 import styles from './Modal.module.scss';
 
+/**
+ * How much room a dialog needs, said as what it is for rather than as a number.
+ *
+ * Every dialog in the game used to name its own width, and the numbers drifted the way
+ * hand-picked numbers do: 480, 520, 560, 600, 640, 720, 1160 — seven widths for four jobs,
+ * none of them related to each other, and most of them chosen when the content was smaller
+ * than it is now. The owner's note was that the game leaves a screen's worth of empty space
+ * around a dialog it has squeezed the content inside; naming the job is what stops that
+ * happening again the next time a dialog grows.
+ *
+ * - `info` — words, and a way out. Nothing to do but read it. Deliberately still narrow:
+ *   a paragraph stretched to 1400px is harder to read, not easier.
+ * - `work` — a decision with a short list behind it: a floor, a reward, a run summary.
+ * - `wide` — a *grid* of cards. Team select, the relic slot, the food picker. These are the
+ *   ones that were worst: eight champion cards wrapped two-per-row inside 720px while
+ *   fourteen hundred pixels of backdrop sat around them.
+ * - `full` — a screen that happens to be a dialog. The champion sheet, the summon reveal.
+ */
+export type ModalSize = 'info' | 'work' | 'wide' | 'full';
+
+/** The four numbers, in one place, where the relationship between them is visible. */
+const SIZE: Readonly<Record<ModalSize, number>> = Object.freeze({
+  info: 560,
+  work: 900,
+  wide: 1240,
+  full: 1480,
+});
+
 export interface ModalProps {
   open: boolean;
   title: ReactNode;
@@ -13,7 +41,8 @@ export interface ModalProps {
   footer?: ReactNode;
   /** Blocks backdrop and Escape dismissal for decisions that must be answered. */
   dismissible?: boolean;
-  width?: number;
+  /** What this dialog is for. Defaults to `info`, which is the safest thing to be wrong about. */
+  size?: ModalSize;
 }
 
 /**
@@ -34,7 +63,7 @@ export function Modal({
   children,
   footer,
   dismissible = true,
-  width = 480,
+  size = 'info',
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   // The stack, the focus trap and the cues — see `dialog.ts`. Shared with the results
@@ -56,7 +85,7 @@ export function Modal({
       <div
         ref={dialogRef}
         className={styles.dialog}
-        style={{ maxWidth: width }}
+        style={{ maxWidth: SIZE[size] }}
         role="dialog"
         aria-modal="true"
         aria-label={typeof title === 'string' ? title : undefined}

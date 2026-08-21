@@ -46,3 +46,23 @@ export function relicGlyph(slot: string): string {
 
 /** Every slot, in the order the game lays them out. Re-exported so callers need one import. */
 export const RELIC_SLOTS = GEAR_SLOTS;
+
+/**
+ * What each slot is called in a sentence.
+ *
+ * Lived in `ChampionDetail` and was needed in a second place the moment the relic dialog
+ * got a real title — it had been interpolating the raw key, so the header read "weapon
+ * relic" in lower case beside a title bar that shouts. One map, beside the icons and the
+ * glyphs, because a slot's name is the same kind of fact as its picture.
+ */
+export const RELIC_SLOT_LABEL: Readonly<Record<GearSlot, string>> = Object.freeze({
+  weapon: 'Weapon',
+  helm: 'Helm',
+  shield: 'Shield',
+  gauntlets: 'Gauntlets',
+  cuirass: 'Cuirass',
+  boots: 'Boots',
+  ring: 'Ring',
+  amulet: 'Amulet',
+  banner: 'Banner',
+});

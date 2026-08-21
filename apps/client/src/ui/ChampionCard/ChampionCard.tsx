@@ -2,11 +2,17 @@ import type { ChampionDef, RosterChampion } from '@mistvale/shared';
 import { ChampionCard as FuiChampionCard } from '@/fui/components/ChampionCard.ts';
 import { FuiSlotted } from '@/fui/react';
 import { useContentStore } from '../../state/contentStore';
-import { championArt } from '../../ui/championArt';
+import { championArt } from '../championArt';
 import styles from './ChampionCard.module.scss';
 
 /**
- * One champion in the roster grid.
+ * One champion, as a card — everywhere a champion is chosen.
+ *
+ * Promoted out of the roster screen because it stopped being a roster detail: the owner's
+ * note was that picking a team for a stage, an Arena attack or a Depths floor showed a name
+ * and a level in a plain row, so *which* champion you were choosing — its rarity, its
+ * affinity, how far along it is, how strong that has made it — was invisible at exactly the
+ * moment it decides the fight. One card, one look, in all six places.
  *
  * Painted by the library since the design rework — the rarity frame, the star track, the
  * affinity badge, the role pip and the power line are `ChampionCard`, which is the shape

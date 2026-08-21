@@ -43,7 +43,7 @@ export function ScreenInfo({ title, children, label }: ScreenInfoProps): JSX.Ele
         </Button>
       </span>
 
-      <Modal open={open} title={title} onClose={() => setOpen(false)} width={520}>
+      <Modal open={open} title={title} onClose={() => setOpen(false)} size="info">
         <div className={styles.body}>{children}</div>
       </Modal>
     </>

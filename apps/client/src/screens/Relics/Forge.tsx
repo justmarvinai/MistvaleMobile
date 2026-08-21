@@ -77,7 +77,7 @@ export function Forge({
   };
 
   return (
-    <Modal open title="The forge" onClose={playing ? () => undefined : onClose}>
+    <Modal open title="The forge" onClose={playing ? () => undefined : onClose} size="work">
       <div className={styles.body}>
         <RelicCard relic={current} />
 

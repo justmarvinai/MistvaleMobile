@@ -126,7 +126,7 @@ export function ChampionDetailModal({
 
   if (!detail || !def) {
     return (
-      <Modal open title="Champion" onClose={onClose}>
+      <Modal open title="Champion" onClose={onClose} size="info">
         <p className={styles.note}>{error ?? 'Reading the roll…'}</p>
       </Modal>
     );
@@ -196,7 +196,7 @@ export function ChampionDetailModal({
     // beside all of it. 736 was already tight for the numbers alone — every row wrapped and
     // the sheet read as a column of squeezed fragments — and the owner asked for the room.
     // Capped against the viewport by the modal itself, so a small laptop gets what it has.
-    <Modal open title={def.name} onClose={onClose} width={1160}>
+    <Modal open title={def.name} onClose={onClose} size="full">
       <div className={styles.body}>
         {/* Two columns: who they are on the left, everything you can do to them on the
             right. The split is the genre's own — this is the shape the reference game uses

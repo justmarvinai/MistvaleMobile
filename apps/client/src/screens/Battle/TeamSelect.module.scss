@@ -67,10 +67,15 @@
 }
 
 .roster {
+  /* Tracks the painted card's own width. `auto-fill` on a *fixed* track rather than a
+     `minmax(…, 1fr)` one: `ChampionCard` is 9-sliced art at a fixed size, and a stretched
+     track draws the frame wider than the picture inside it — the same bug D9 closed on the
+     Forge and profile grids. */
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  gap: $space-2;
-  max-height: 16rem;
+  grid-template-columns: repeat(auto-fill, $card-champion);
+  gap: $space-3;
+  /* Four rows of cards before it scrolls, now that a card is a card. */
+  max-height: 44vh;
   overflow-y: auto;
   padding-right: $space-1;
 }

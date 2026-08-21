@@ -73,7 +73,7 @@ export function StarterChoice(): JSX.Element | null {
   };
 
   return (
-    <Modal open title="Choose your first champion" onClose={() => undefined}>
+    <Modal open title="Choose your first champion" onClose={() => undefined} size="wide">
       <div className={styles.body} {...highlightable('modal:starter-choice')}>
         <p className={styles.intro}>
           One of them steps out of the mist to stand with you. This choice is permanent — the other

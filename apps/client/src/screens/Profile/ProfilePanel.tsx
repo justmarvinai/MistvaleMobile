@@ -72,7 +72,7 @@ export function ProfilePanel(): JSX.Element {
       open={openId !== null}
       title={card ? card.profileName : 'Warden'}
       onClose={close}
-      width={560}
+      size="work"
       footer={
         isSelf && card ? (
           editing ? (

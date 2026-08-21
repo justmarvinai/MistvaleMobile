@@ -56,7 +56,7 @@ export function HallOfValor({ onClose }: { onClose: () => void }): JSX.Element {
     hall?.tracks.find((track) => track.element === element && track.stat === stat);
 
   return (
-    <Modal open title="The Hall of Valor" onClose={onClose} width={640}>
+    <Modal open title="The Hall of Valor" onClose={onClose} size="work">
       <div className={styles.body}>
         <p className={styles.blurb}>
           Valor Medals buy permanent bonuses for every champion of an element you own — now and for

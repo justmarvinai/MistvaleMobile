@@ -30,7 +30,7 @@ export function NewsPanel({ open, onClose }: { open: boolean; onClose: () => voi
       open={open}
       title="News"
       onClose={onClose}
-      width={640}
+      size="work"
       footer={
         <Button variant="primary" onClick={onClose}>
           Back to it

@@ -1,12 +1,41 @@
 @use '../../styles/tokens' as *;
 
+/* No width here. The *modal* owns it — a body that names its own is how the stage dialog
+   drew through its own ornament, and this one was doing it again at 44rem inside a 480px
+   frame. The modal caps the height too, so this scrolls without a second opinion. */
 .body {
   display: flex;
   flex-direction: column;
   gap: $space-3;
-  width: min(44rem, 88vw);
-  max-height: 76vh;
-  overflow-y: auto;
+}
+
+/* The worn piece beside the vault rather than above it. `minmax(0, …)` on both, because an
+   auto track is min-content and a relic card has a fixed width that would push the grid
+   wider than the dialog. */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  gap: $space-4;
+  align-items: start;
+  /* A floor, so the dialog is the same shape whether the slot is full or bare. Without it
+     an empty slot with an empty vault drew a 1240px-wide, 290px-tall letterbox with two
+     sentences in it. */
+  min-height: 22rem;
+}
+
+@media (max-width: 860px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.vault {
+  min-width: 0;
+  /* Fills its track so the empty message centres in the space it owns rather than sitting
+     in the top-left corner of it. */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .heading {
@@ -29,6 +58,11 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: $space-2;
+  /* The vault can hold hundreds; the dialog cannot. Its own scroll rather than the body's,
+     so the worn piece and its two buttons stay put while the candidates move. */
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: $space-1;
 }
 
 .preview {
@@ -71,10 +105,44 @@
   gap: $space-2;
 }
 
+/* The bare slot: its own glyph, at the size the paperdoll draws it, and one sentence about
+   what to do next. The picture is the point — an empty column with a line of grey text in
+   it reads as a screen that failed to load. */
+.socket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-4 $space-3;
+  background: $panel-inset;
+  border: 1px solid $edge;
+}
+
+.socketArt {
+  opacity: 0.75;
+}
+
+.socketNote {
+  margin: 0;
+  color: $muted;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: $space-4;
+  background: $panel-inset;
+  border: 1px dashed $edge;
   color: $muted;
   font-size: 0.85rem;
   line-height: 1.6;
+  text-align: center;
 }
 
 .error {

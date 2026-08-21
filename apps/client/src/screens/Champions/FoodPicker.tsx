@@ -4,7 +4,7 @@ import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
-import { ChampionCard } from './ChampionCard';
+import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 import styles from './FoodPicker.module.scss';
 
 /**
@@ -68,7 +68,7 @@ export function FoodPicker({
       open
       title={mode === 'level' ? 'Feed for experience' : `Rank up to ★${champion.champion.rank + 1}`}
       onClose={onClose}
-      width={720}
+      size="wide"
     >
       <div className={styles.body}>
         <p className={styles.rule}>

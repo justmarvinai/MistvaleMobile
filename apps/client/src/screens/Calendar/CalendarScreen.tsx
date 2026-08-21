@@ -137,6 +137,7 @@ export function CalendarScreen(): JSX.Element {
         open={choosing !== null}
         title="Choose your reward"
         onClose={() => setChoosing(null)}
+        size="wide"
         footer={
           <>
             <Button variant="ghost" onClick={() => setChoosing(null)}>

@@ -166,7 +166,7 @@ export function MistgateScreen(): JSX.Element {
         open={oddsOpen}
         title={`${banner.name} — odds & mercy`}
         onClose={() => setOddsOpen(false)}
-        width={560}
+        size="info"
       >
         <OddsPanel
           banner={banner}

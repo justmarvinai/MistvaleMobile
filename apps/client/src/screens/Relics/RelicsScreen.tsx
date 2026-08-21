@@ -5,6 +5,7 @@ import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';
 import { useContentStore } from '../../state/contentStore';
+import { useRosterStore } from '../../state/rosterStore';
 import { useInventoryStore } from '../../state/inventoryStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { RelicCard } from './RelicCard';
@@ -35,6 +36,26 @@ export function RelicsScreen(): JSX.Element {
   const vault = useInventoryStore((state) => state.vault);
   const buyVaultSlots = useInventoryStore((state) => state.buyVaultSlots);
   const bundle = useContentStore((state) => state.bundle);
+  const roster = useRosterStore((state) => state.champions);
+
+  /**
+   * Who is wearing a relic, by name.
+   *
+   * The card used to say "Equipped by Worn" — the literal word, on every worn piece, which
+   * is a sentence about nobody. The vault is the one screen where the answer is genuinely
+   * useful: it is how a player finds the piece they meant to move.
+   */
+  const wornBy = useMemo(() => {
+    const names = new Map(
+      roster.map((champion) => [
+        champion.id,
+        bundle?.champions.find((def) => def.key === champion.championKey)?.name ??
+          champion.championKey,
+      ]),
+    );
+    return (championId: string | null): string | undefined =>
+      championId ? names.get(championId) : undefined;
+  }, [roster, bundle]);
   const refreshPlayer = usePlayerStore((state) => state.refresh);
   // The vault is always open; the forge is what account level 3 unlocks.
   const canForge = usePlayerStore((state) => state.unlocks?.relicUpgrading ?? false);
@@ -233,6 +254,9 @@ export function RelicsScreen(): JSX.Element {
               <div key={piece.id} className={styles.entry}>
                 <RelicCard
                   relic={piece}
+                  {...(wornBy(piece.equippedChampionId)
+                    ? { wornBy: wornBy(piece.equippedChampionId)! }
+                    : {})}
                   selected={selection.includes(piece.id)}
                   onSelect={() => toggle(piece.id)}
                 />

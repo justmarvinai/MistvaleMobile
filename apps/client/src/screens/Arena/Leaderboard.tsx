@@ -31,7 +31,6 @@ import styles from './Leaderboard.module.scss';
  * One number, used by both.
  */
 const BOARD_WIDTH = 512;
-const DIALOG_WIDTH = 600;
 
 export function Leaderboard({ onClose }: { onClose: () => void }): JSX.Element {
   const board = useArenaStore((state) => state.leaderboard);
@@ -62,7 +61,7 @@ export function Leaderboard({ onClose }: { onClose: () => void }): JSX.Element {
   };
 
   return (
-    <Modal open title="The ladder" onClose={onClose} width={DIALOG_WIDTH}>
+    <Modal open title="The ladder" onClose={onClose} size="work">
       <div className={styles.body}>
         {!board ? (
           <p className={styles.empty}>Reading the standings…</p>

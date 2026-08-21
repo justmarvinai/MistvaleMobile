@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
@@ -78,7 +79,7 @@ export function TeamPicker({
   };
 
   return (
-    <Modal open title={title} onClose={onClose} width={720}>
+    <Modal open title={title} onClose={onClose} size="wide">
       <div className={styles.body}>
         <p className={styles.blurb}>{blurb}</p>
 
@@ -110,29 +111,20 @@ export function TeamPicker({
         ) : roster.length === 0 ? (
           <p className={styles.empty}>You have no champions yet.</p>
         ) : (
+          // The roster's own card. This picker was the worst of them — no portrait at all,
+          // just a name and a line of text — and it is the one where the choice matters
+          // most, since an Arena defence is what other people fight while you are away.
           <div className={styles.roster}>
-            {roster.map((owned) => {
-              const def = championsByKey.get(owned.championKey);
-              const chosen = team.includes(owned.id);
-              return (
-                <button
-                  key={owned.id}
-                  type="button"
-                  className={styles.card}
-                  aria-pressed={chosen}
-                  disabled={!chosen && team.length >= MAX_SLOTS}
-                  onClick={() => toggle(owned.id)}
-                >
-                  <span className={styles.cardName}>
-                    {chosen ? '▣ ' : ''}
-                    {def?.name ?? owned.championKey}
-                  </span>
-                  <span className={styles.cardMeta}>
-                    Lv {owned.level} · ★{owned.rank} · {def?.element ?? '—'}
-                  </span>
-                </button>
-              );
-            })}
+            {roster.map((owned) => (
+              <ChampionCard
+                key={owned.id}
+                champion={owned}
+                def={championsByKey.get(owned.championKey)}
+                selectable
+                selected={team.includes(owned.id)}
+                onOpen={() => toggle(owned.id)}
+              />
+            ))}
           </div>
         )}
 

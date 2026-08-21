@@ -15,6 +15,7 @@ import { BossCard } from '../../ui/BossCard/BossCard';
 import { stageBoss } from '../../ui/BossCard/bossRules';
 import { Portrait } from '../../ui/Portrait/Portrait';
 import { championArt } from '../../ui/championArt';
+import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 
 /**
  * Picking a team before a fight.
@@ -179,7 +180,7 @@ export function TeamSelect({
     // 720 rather than the default 480. The body asked for a 30rem minimum inside a 480px
     // panel, so the painted frame's own border and padding had nowhere to go and the
     // action rows drew straight through it — which is the "bugged window" the owner saw.
-    <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose} width={720}>
+    <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose} size="wide">
       <div className={styles.body}>
         <p className={styles.summary}>
           {stage.waves.length} waves · {stage.energyCost} energy · {stage.rewards.silverMin}–
@@ -241,33 +242,21 @@ export function TeamSelect({
             You have no champions yet. Choose a starter from the Haven first.
           </p>
         ) : (
+          // The same painted card the roster draws, which is the point: a player choosing
+          // who to send should be looking at exactly what they looked at when they decided
+          // who was worth levelling. A name and a level in a row cannot say rarity,
+          // affinity or power, and those are the three things the choice turns on.
           <div className={styles.roster}>
-            {roster.map((owned) => {
-              const def = championsByKey.get(owned.championKey);
-              const chosen = team.includes(owned.id);
-              return (
-                <button
-                  key={owned.id}
-                  type="button"
-                  className={styles.card}
-                  aria-pressed={chosen}
-                  disabled={!chosen && team.length >= MAX_SLOTS}
-                  onClick={() => toggle(owned.id)}
-                >
-                  <Portrait
-                    src={championArt(def, bundle?.assets).portrait ?? null}
-                    name={def?.name ?? owned.championKey}
-                    size={34}
-                  />
-                  <span className={styles.cardWho}>
-                    <span className={styles.cardName}>{def?.name ?? owned.championKey}</span>
-                    <span className={styles.cardMeta}>
-                      Lv {owned.level} · ★{owned.rank} · {def?.element ?? '—'}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+            {roster.map((owned) => (
+              <ChampionCard
+                key={owned.id}
+                champion={owned}
+                def={championsByKey.get(owned.championKey)}
+                selectable
+                selected={team.includes(owned.id)}
+                onOpen={() => toggle(owned.id)}
+              />
+            ))}
           </div>
         )}
 

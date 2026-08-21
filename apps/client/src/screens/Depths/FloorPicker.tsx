@@ -51,7 +51,7 @@ export function FloorPicker({
   const deepestShut = shut ? (standings.get(shut.key)?.lockedReason ?? null) : null;
 
   return (
-    <Modal open title={dungeon.name} onClose={onClose} width={640}>
+    <Modal open title={dungeon.name} onClose={onClose} size="work">
       <div className={styles.body}>
         <p className={styles.lore}>{dungeon.lore}</p>
 

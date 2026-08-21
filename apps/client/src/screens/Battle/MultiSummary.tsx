@@ -44,7 +44,7 @@ export function MultiSummary({
   const losses = result.runs.length - result.wins;
 
   return (
-    <Modal open title={`${result.runs.length} runs`} onClose={onClose}>
+    <Modal open title={`${result.runs.length} runs`} onClose={onClose} size="work">
       <div className={styles.body}>
         <p className={styles.tally}>
           <span className={styles.wins}>{result.wins} won</span>

@@ -22,11 +22,20 @@ const amount = (value: number, percent: boolean): string => `+${value}${percent 
 
 export function RelicCard({
   relic,
+  wornBy,
   selected,
   onSelect,
   compact,
 }: {
   relic: GearInstance;
+  /**
+   * The champion wearing it, where the caller knows and it is worth saying.
+   *
+   * The vault knows the name and says it; the champion sheet's own slot dialog does not
+   * pass one, because "worn by the champion whose sheet you are looking at" is a sentence
+   * about the obvious.
+   */
+  wornBy?: string;
   selected?: boolean;
   onSelect?: () => void;
   /** Hides the substats — for a picker row where the set and the main stat are the choice. */
@@ -70,7 +79,10 @@ export function RelicCard({
               })),
             }),
         ...(relic.locked ? { locked: true } : {}),
-        ...(relic.equippedChampionId && !compact ? { equippedBy: 'Worn' } : {}),
+        // Who is wearing it, when the caller knows and it is worth saying. It used to pass
+        // the literal string "Worn", which the library dutifully drew as "Equipped by
+        // Worn" — a sentence about nobody.
+        ...(wornBy && !compact ? { equippedBy: wornBy } : {}),
         ...(onSelect ? { selectable: true, selected: Boolean(selected) } : {}),
       }}
       on={onSelect ? { 'artifact:select': () => onSelect() } : undefined}

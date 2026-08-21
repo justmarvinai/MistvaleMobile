@@ -5,6 +5,44 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — every champion picker draws the same card
+
+Choosing who to send used to look nothing like choosing who to level. The campaign
+stage dialog and the Arena's team picker drew a name and a line of text; the Depths
+inherits the campaign's. Rarity, affinity, role and power — the four things the choice
+actually turns on — were visible only on the Champions tab, so a player picking a team
+was picking from a list of strings they had to remember the meaning of.
+
+`ChampionCard` moved out of `screens/Champions` into `ui/` and is now what every picker
+draws. Same frame, same stars, same affinity badge, same power, and the same selected
+state, so a picker shows what is chosen without inventing a second visual language for
+it.
+
+### Changed — dialogs that do something get the room to do it
+
+Every modal in the game was 480px wide on a 1920px screen, which put a nine-column
+relic vault and a forty-champion roster inside a phone-width column with the rest of
+the display empty around it. Modals name what they are now rather than a number:
+`info` (560) for something to read, `work` (900) for something to do, `wide` (1240)
+for choosing among many things, `full` (1480) for a sheet. Seventeen call sites say
+which they are; informational dialogs deliberately did not grow, because a sentence
+does not read better at 1240px.
+
+They also cap at the viewport height and scroll their body rather than drawing their
+footer off the bottom of a laptop screen — which is what the relic slot was doing.
+
+### Fixed — the relic slot dialog is laid out, full or empty
+
+At 1240 it puts the worn piece beside the vault instead of above it, so comparing a
+candidate against what is on no longer means scrolling between them, and the vault
+scrolls on its own while the worn piece and its two buttons stay put. The title says
+which slot it is rather than interpolating the raw key in lower case.
+
+The empty case was its own bug: with nothing worn the "worn" column was not rendered at
+all, so the vault squeezed into the 20rem track and the dialog drew as a wide, short
+letterbox with two sentences in it. The slot is always drawn now — its own glyph in an
+empty socket when it is bare — and the vault's empty message fills the space it owns.
+
 ### Fixed — a fight the browser left no longer bricks the account
 
 Closing or reloading the tab mid-battle made an account unplayable until an operator

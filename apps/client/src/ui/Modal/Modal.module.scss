@@ -20,10 +20,25 @@
 .dialog {
   width: 100%;
   outline: none;
+  /* Never taller than the window it is in. The backdrop's own padding is the gutter, so a
+     dialog that wants more room than the screen has scrolls its body instead of drawing
+     its footer off the bottom — which is what the relic slot was doing on a laptop. */
+  max-height: calc(100vh - #{$space-5 * 2});
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 
   @include motion-safe {
     animation: rise $duration-base $ease-out;
   }
+}
+
+/* The panel fills the dialog and hands the overflow to the body, so the painted frame and
+   the title bar stay put while the content moves under them. */
+.dialog > * {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .body {
@@ -32,6 +47,9 @@
   gap: $space-3;
   color: $parchment-dim;
   font-size: 14px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .footer {

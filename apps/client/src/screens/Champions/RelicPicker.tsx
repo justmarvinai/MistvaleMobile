@@ -9,6 +9,9 @@ import { Forge } from '../Relics/Forge';
 import { usePlayerStore } from '../../state/playerStore';
 import styles from './RelicPicker.module.scss';
 import { statLabel } from '../../ui/statLabels';
+import { RELIC_SLOT_LABEL, relicGlyph } from '../../ui/relicArt';
+import { Slot } from '@/fui/components/Slot.ts';
+import { Fui } from '@/fui/react';
 
 /**
  * Choosing a relic for one slot.
@@ -100,57 +103,87 @@ export function RelicPicker({
   };
 
   return (
-    <Modal open title={`${slot} relic`} onClose={onClose}>
+    <Modal open title={`${RELIC_SLOT_LABEL[slot]} relic`} onClose={onClose} size="wide">
       <div className={styles.body}>
-        {worn && (
+        {/* Two columns at this width: what is on, and what could be. They used to stack, so
+            comparing the worn piece against a candidate meant scrolling between them —
+            which is the one thing this dialog exists to let a player do. */}
+        <div className={styles.columns}>
+          {/* Always rendered, empty or not. Dropping the column when nothing is worn left a
+              one-column grid inside a two-column track — the vault squeezed into 20rem with
+              the rest of the dialog blank beside it, which is the collapsed strip the owner
+              photographed. An empty socket is also the truer answer: the slot exists, it is
+              simply bare. */}
           <section className={styles.current}>
             <h3 className={styles.heading}>Worn now</h3>
-            <RelicCard relic={worn} />
-            <div className={styles.wornActions}>
-              <Button
-                disabled={busy || !canForge || worn.level >= 16}
-                title={
-                  canForge
-                    ? worn.level >= 16
-                      ? 'Already fully upgraded'
-                      : undefined
-                    : 'The forge opens at account level 3'
-                }
-                onClick={() => setForging(true)}
-              >
-                {worn.level >= 16 ? 'Maxed' : 'Forge'}
-              </Button>
-              <Button
-                variant="ghost"
-                disabled={busy}
-                onClick={() => void act(() => gameApi.unequip(worn.id))}
-              >
-                Take it off
-              </Button>
-            </div>
-          </section>
-        )}
-
-        <section>
-          <h3 className={styles.heading}>In the vault</h3>
-          {candidates.length === 0 ? (
-            <p className={styles.empty}>
-              No spare {slot} relics. They drop from campaign stage {slotNumber(slot)} and from the
-              Bazaar.
-            </p>
-          ) : (
-            <div className={styles.grid}>
-              {candidates.map((piece) => (
-                <RelicCard
-                  key={piece.id}
-                  relic={piece}
-                  selected={selected === piece.id}
-                  onSelect={() => setSelected(piece.id === selected ? null : piece.id)}
+            {worn ? (
+              <>
+                <RelicCard relic={worn} />
+                <div className={styles.wornActions}>
+                  <Button
+                    disabled={busy || !canForge || worn.level >= 16}
+                    title={
+                      canForge
+                        ? worn.level >= 16
+                          ? 'Already fully upgraded'
+                          : undefined
+                        : 'The forge opens at account level 3'
+                    }
+                    onClick={() => setForging(true)}
+                  >
+                    {worn.level >= 16 ? 'Maxed' : 'Forge'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() => void act(() => gameApi.unequip(worn.id))}
+                  >
+                    Take it off
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className={styles.socket}>
+                <Fui
+                  of={Slot}
+                  className={styles.socketArt}
+                  options={{ size: 'lg', item: null, placeholder: relicGlyph(slot) }}
+                  attrs={{
+                    role: 'presentation',
+                    tabindex: undefined,
+                    'aria-label': undefined,
+                    title: undefined,
+                  }}
                 />
-              ))}
-            </div>
-          )}
-        </section>
+                <p className={styles.socketNote}>
+                  Nothing in this slot. Pick one from the vault and the numbers below will say
+                  exactly what it changes.
+                </p>
+              </div>
+            )}
+          </section>
+
+          <section className={styles.vault}>
+            <h3 className={styles.heading}>In the vault</h3>
+            {candidates.length === 0 ? (
+              <p className={styles.empty}>
+                No spare {RELIC_SLOT_LABEL[slot].toLowerCase()} relics. They drop from campaign
+                stage {slotNumber(slot)} of any chapter, and turn up in the Bazaar.
+              </p>
+            ) : (
+              <div className={styles.grid}>
+                {candidates.map((piece) => (
+                  <RelicCard
+                    key={piece.id}
+                    relic={piece}
+                    selected={selected === piece.id}
+                    onSelect={() => setSelected(piece.id === selected ? null : piece.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
 
         {selected && preview?.championId === championId && (
           <section className={styles.preview}>

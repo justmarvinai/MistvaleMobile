@@ -8,7 +8,7 @@ import { Panel } from '../../ui/Panel/Panel';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { ChampionDetailModal } from './ChampionDetail';
-import { ChampionCard } from './ChampionCard';
+import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 import styles from './ChampionsScreen.module.scss';
 import { Heading } from '@/ui/Heading/Heading';
 import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
