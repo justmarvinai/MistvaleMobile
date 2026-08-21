@@ -89,6 +89,13 @@ export interface PlayerSummary {
   rosterCapacity: number;
   tutorialStep: number;
   createdAt: string;
+  /**
+   * The champion whose face this account wears, or null for the plain crest.
+   *
+   * A key rather than a roster id, so the client draws it from the content bundle it
+   * already holds — no second request, and a top bar that is right on the first paint.
+   */
+  avatarChampionKey: string | null;
 }
 
 /**

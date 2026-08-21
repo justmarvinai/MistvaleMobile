@@ -183,6 +183,13 @@
       "when": 1787085682193,
       "tag": "0025_vault_action_id",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1787085683193,
+      "tag": "0026_avatar_champion",
+      "breakpoints": true
     }
   ]
 }

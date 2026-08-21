@@ -318,6 +318,13 @@ The `loginTrack` content type holds the days themselves — one entity per *trac
 ### `players.showcase`
 `jsonb` array of `player_champions` ids, in display order. Instance ids rather than champion keys: the public card shows *this* Aureleth at her level and rank, not the definition. Empty means the player has never chosen, and the card falls back to their strongest — so a card is never blank, and the picker is something to reach for rather than something to get past. A chosen champion that is later released simply drops out of the card rather than leaving a hole.
 
+### `players.avatar_champion_key`
+`text`, nullable. The champion whose face the account wears in the top bar and on its public card; null is the plain crest with the profile name's initial on it, which is where every account starts and a perfectly good place to stay.
+
+A champion **key** rather than a `player_champions` id, and that is the whole difference between this and `showcase` above. The showcase presents a particular copy — this Aureleth, at her level and rank — so it has to name the instance. A face is a face: which unit, not which copy. Storing the key means feeding away one Anuria of three does not blank the portrait, and a rank-up that mints a new row does not either.
+
+Ownership and champion-hood are checked when it is **set** — the key has to resolve in the published bundle, must not be food, and the account must hold a copy. It is deliberately *not* re-checked on read: an account that fed away its last Anuria still chose her, and a portrait that vanishes without being touched is worse than one that outlives the copy behind it. The showcase is where ownership is asserted; this is a picture.
+
 ### `arena_state`
 `player_id pk, rating, tier, weekly_high, tokens, tokens_updated_at, defence_team jsonb (player_champion ids in formation order), offers jsonb, offers_refreshed_at, refreshes_used, refresh_day, last_weekly_claim, pending_chest_week, pending_chest_high`.
 Tokens follow energy's pattern — a value plus the moment it was written, everything else derived against the clock — so an idle account costs nothing to keep current and there is no job that can fall behind.

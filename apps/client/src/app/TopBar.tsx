@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
-import type { EnergyState, PlayerSummary } from '@mistvale/shared';
-import { StatBar } from '@/fui/components/StatBar.ts';
+import type { EnergyState } from '@mistvale/shared';
 import { TopBar as FuiTopBar } from '@/fui/components/TopBar.ts';
-import { Fui, useFui, useFuiAttrs } from '@/fui/react';
+import { useFui } from '@/fui/react';
+import { ProfileChip } from '@/ui/ProfileChip/ProfileChip';
 import { useTooltip } from '@/ui/Tooltip/useTooltip';
 import { usePlayerStore } from '@/state/playerStore';
 import { useProfileStore } from '@/state/profileStore';
@@ -13,20 +13,16 @@ import styles from './TopBar.module.scss';
 /**
  * The persistent resource bar.
  *
- * Painted by the library since the design rework — the avatar, the currency rail, the tool
- * buttons and their badges are all its `TopBar`. What stays Mistvale's is everything that
- * moves:
+ * The library paints the ground, the currency rail and the tool buttons. **The player chip
+ * is Mistvale's** (`ui/ProfileChip`) — the library's is a 38px disc and a name, which is
+ * right for a bar that only has to say whose account this is and far too small for what the
+ * owner asked for: a chosen portrait, framed, with the level on it and the experience bar
+ * beside the name. The library builds no chip at all here, because it is handed neither a
+ * name nor an avatar; ours is portalled into the same painted ground and ordered first.
  *
  * Energy counts up locally between server responses: the server sends the value and the
  * timestamp of the next tick, and this component animates towards it. It never credits
  * energy on its own — any action re-syncs from the server (docs/ARCHITECTURE.md §4.4).
- * The projection is unchanged; only where the number is drawn moved.
- *
- * And the account's own progress, which used to be a thin arc drawn around the avatar. A
- * ring is a shape that can say "some of the way" and nothing else — it has no room for the
- * two numbers a player actually wants, which are how much experience they have and how
- * much is left. So the ring is off and there is a real bar under the name instead, with
- * both numbers beside it (see `LevelProgress`).
  */
 export function TopBar({
   onOpenSettings,
@@ -60,11 +56,9 @@ export function TopBar({
     FuiTopBar,
     {
       class: styles.bar,
-      style: { '--mv-avatar-initial': `"${(player?.profileName ?? '?').charAt(0).toUpperCase()}"` },
-      name: player?.profileName ?? '',
-      level: player?.level ?? 1,
-      // Deliberately not passed: the ring it drives is off (see TopBar.module.scss), and
-      // the same fraction is drawn as a bar under the name where it can carry its numbers.
+      // No `name` and no `avatar`, which is how the library is told not to build a chip:
+      // Mistvale's own is portalled in below. Passing either would draw a second, smaller
+      // player beside the first.
       resources: [
         // Energy first: it is the one number that decides whether the next thing the
         // player wanted to do is possible at all.
@@ -106,11 +100,6 @@ export function TopBar({
       ],
     },
     {
-      // The chip is the way into your own card — the same one the ladder shows other
-      // people, which is what makes "choose your four" a decision rather than a form.
-      'top:profile': () => {
-        if (player) void showProfile(player.id);
-      },
       'top:action': (id: string) => {
         if (id === 'mail') onOpenMail();
         else if (id === 'news') onOpenNews();
@@ -123,36 +112,15 @@ export function TopBar({
     (bar, next) => {
       for (const res of next.resources) bar.setResource(res.id, res.value, res.max);
       if (next.resources[0]?.refillIn != null) bar.setRefill('energy', next.resources[0].refillIn);
-
-      // The level numeral and the name have no setter in the library, and both change
-      // while the bar is on screen — a level-up is the single most visible thing that can
-      // happen to an account, and it sat at whatever it had been when the page loaded
-      // until the player reloaded. Written into the library's own nodes rather than
-      // rebuilt beside them: the chrome is the library's, the value is ours.
-      const numeral = bar.el.querySelector<HTMLElement>('.fui-topbar__level');
-      if (numeral) numeral.textContent = String(next.level ?? 1);
-      const named = bar.el.querySelector<HTMLElement>('.fui-topbar__name');
-      if (named && next.name) named.textContent = next.name;
     },
   );
 
-  // The chip's accessible name, which has to carry two things the library's does not.
-  //
-  // It labels the chip with the player's name — that says *who*, not what pressing it
-  // does, and it opens the profile card the ladder shows other people. And the level is
-  // drawn as a bare numeral on the avatar's corner, which is the genre's own shape and
-  // what the library's examples do, but "1" on its own is not something a screen reader
-  // can make sense of. Both go in the label instead.
-  useFuiAttrs(instance?.el.querySelector<HTMLElement>('.fui-topbar__player'), {
-    'aria-label': player
-      ? `Your profile card — ${player.profileName}, level ${player.level}`
-      : 'Your profile card',
-  });
-
-  // The chip is the library's, and the progress under the name is Mistvale's — so it is
-  // portalled into the chip rather than passed to it. The chip element is built once and
-  // kept for the life of the bar (see `useFui`), so the target is stable.
-  const chip = instance?.el.querySelector<HTMLElement>('.fui-topbar__player') ?? null;
+  // Mistvale's chip goes into the library's painted ground rather than beside it, so it
+  // sits on the same leather as the rail. A portal appends, and the rail already claims
+  // the slack with `margin-left: auto` — so the chip is ordered first in CSS rather than
+  // inserted first in the DOM. The root is built once and kept for the life of the bar
+  // (see `useFui`), so the target is stable.
+  const ground = instance?.el ?? null;
 
   // The rail's three cells, in the order they were declared above. There is no id in the
   // library's markup to match on, but the order is the one this file chose, and the cells
@@ -208,68 +176,12 @@ export function TopBar({
   return (
     <>
       <div ref={ref} style={{ display: 'contents' }} />
-      {chip && createPortal(<LevelProgress player={player} />, chip)}
-    </>
-  );
-}
-
-/**
- * How far into the level, in the two numbers that answer it.
- *
- * `xpToNextLevel` is the span of the *current* level rather than a running total, so the
- * fraction is `xp / xpToNextLevel` and the remainder is the subtraction — no cumulative
- * table, and nothing here that the server has not already worked out.
- *
- * The bar is the library's `StatBar` on its `xp` artwork, kept live through its own
- * `set`/`setMax` rather than rebuilt: a bar that is reconstructed when the number changes
- * restarts its fill animation from empty, which is the one thing a progress bar must not
- * do at the moment it advances.
- *
- * At the level cap there is no next level and no span to divide by. The bar reads full and
- * the caption says so, which is a better answer than a bar stuck at zero.
- */
-function LevelProgress({ player }: { player: PlayerSummary }): JSX.Element {
-  const capped = player.xpToNextLevel <= 0;
-  const value = capped ? 1 : Math.min(player.xp, player.xpToNextLevel);
-  const max = capped ? 1 : player.xpToNextLevel;
-  const left = Math.max(0, player.xpToNextLevel - player.xp);
-
-  return (
-    <span className={styles.progress}>
-      <Fui
-        of={StatBar}
-        className={styles.xpBar}
-        options={{
-          kind: 'xp',
-          value,
-          max,
-          // No `label` and no `readout`: both draw *inside* the bar, and the two numbers
-          // are already beside it where they have room to be read. The name the bar needs
-          // is the one a screen reader asks for, which goes on the element instead.
-          readout: 'none',
-          width: '100%',
-          trail: false,
-        }}
-        attrs={{ 'aria-label': 'Experience toward the next level' }}
-        apply={(bar, next) => {
-          bar.setMax(next.max ?? 1);
-          bar.set(next.value ?? 0);
-        }}
-      />
-      <span className={styles.xpNumbers}>
-        {capped ? (
-          'Level cap'
-        ) : (
-          <>
-            {player.xp.toLocaleString('en-US')} / {player.xpToNextLevel.toLocaleString('en-US')}
-            <span className={styles.xpLeft}>
-              {' '}
-              · {left.toLocaleString('en-US')} to Lv {player.level + 1}
-            </span>
-          </>
+      {ground &&
+        createPortal(
+          <ProfileChip player={player} onOpenProfile={() => void showProfile(player.id)} />,
+          ground,
         )}
-      </span>
-    </span>
+    </>
   );
 }
 

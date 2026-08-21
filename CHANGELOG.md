@@ -5,6 +5,36 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the top bar is a place you are, and the face on it is yours
+
+The bar was the library's defaults on a desktop window: 12px text, 17px coins, 30px
+buttons and a 38px disc with an initial in it. That reads as a browser toolbar rather than
+as the top of a game (the owner's note, 2026-08-21). Everything on it is bigger, and the
+player chip is Mistvale's own now — the library keeps the ground, the currency rail and the
+tool buttons, which is chrome it is good at, and the chip is ours because every part of it
+is state React drives.
+
+**The chip is a framed portrait with the level on its corner**, the name at a size worth
+reading, what the account is worth, and the experience bar with both numbers beside it. The
+same shape the owner's references use, in Mistvale's kit.
+
+**And the portrait is a champion you own.** Choose it on your own profile card — one press,
+because a face is a cosmetic choice with nothing to weigh — and it shows in the bar above
+every screen and on the card other wardens see. Every champion is offered once however many
+copies are held, the strongest of them drawn; food is refused, on the client for politeness
+and on the server for real. "No portrait" sits beside the faces as the way back, because a
+player who tried one and disliked it needs somewhere to press that is not another champion.
+
+It is stored as a champion **key** rather than a roster id, which is the difference between
+this and the showcase beside it. The showcase presents a particular copy at its level and
+rank, so it names the instance; a face is a face. Feeding away one Anuria of three does not
+blank your portrait, and a rank-up that mints a new row does not either.
+
+**Power** is the four strongest champions added together — a team you could field rather
+than a total that rewards hoarding — abbreviated to three significant figures, because the
+number moves every time a relic is forged and nobody reads the tenth of a thousand.
+
+
 ### Changed — the campaign is three screens, and the last of them shows you what you are fighting
 
 A map with a seven-disc strip bolted underneath gave the map 55% of a screen and the strip

@@ -222,6 +222,22 @@ export const players = pgTable(
      */
     showcase: jsonb('showcase').notNull().default([]).$type<string[]>(),
 
+    /**
+     * The champion whose face this account wears, or null for the plain crest.
+     *
+     * A champion *key* rather than a `player_champions` id, and that is the difference
+     * between this and `showcase` above. The showcase presents a particular copy — this
+     * Aureleth, at her level and rank — so it has to name the instance. An avatar is a
+     * face: which unit, not which copy. Storing the key means feeding away one copy of a
+     * champion you own three of does not blank your portrait, and the picture survives a
+     * rank-up that mints a new row.
+     *
+     * Ownership is checked when it is set. It is deliberately *not* re-checked on read:
+     * an account that fed away its last Aureleth still chose her, and a portrait that
+     * vanishes without being touched is worse than one that outlives the copy behind it.
+     */
+    avatarChampionKey: text('avatar_champion_key'),
+
     lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

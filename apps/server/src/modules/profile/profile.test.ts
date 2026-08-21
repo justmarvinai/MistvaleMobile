@@ -368,7 +368,7 @@ describe.skipIf(!dbUp)('the profile card', () => {
     expect(response.json().data.profile.showcase).toHaveLength(1);
   });
 
-  it('turns an anonymous caller away from both endpoints', async () => {
+  it('turns an anonymous caller away from every endpoint', async () => {
     const card = await app.inject({
       method: 'GET',
       url: apiPath(ROUTES.profile.card(playerId)),
@@ -378,6 +378,73 @@ describe.skipIf(!dbUp)('the profile card', () => {
       url: apiPath(ROUTES.profile.showcase),
       payload: { championIds: [] },
     });
-    expect([card.statusCode, showcase.statusCode]).toEqual([401, 401]);
+    const avatar = await app.inject({
+      method: 'PUT',
+      url: apiPath(ROUTES.profile.avatar),
+      payload: { championKey: null },
+    });
+    expect([card.statusCode, showcase.statusCode, avatar.statusCode]).toEqual([401, 401, 401]);
+  });
+
+  // ── The face ──────────────────────────────────────────────────────────────
+
+  it('starts with no face and takes the one the player chooses', async () => {
+    expect((await read()).avatarChampionKey).toBeNull();
+
+    await give('anuria');
+    const card = await profile.setAvatar(ctx(), playerId, 'anuria');
+    expect(card.avatarChampionKey).toBe('anuria');
+    expect((await read()).avatarChampionKey).toBe('anuria');
+  });
+
+  it('takes it off again, which is the way back from a portrait you dislike', async () => {
+    await give('anuria');
+    await profile.setAvatar(ctx(), playerId, 'anuria');
+
+    const card = await profile.setAvatar(ctx(), playerId, null);
+    expect(card.avatarChampionKey).toBeNull();
+  });
+
+  it('refuses a champion the player does not own', async () => {
+    await expect(profile.setAvatar(ctx(), playerId, 'anuria')).rejects.toThrow(/own/i);
+    expect((await read()).avatarChampionKey).toBeNull();
+  });
+
+  it('refuses a champion nobody has published', async () => {
+    await expect(profile.setAvatar(ctx(), playerId, 'not_a_champion')).rejects.toThrow(
+      /no such champion/i,
+    );
+  });
+
+  it('refuses food, even when the player owns it', async () => {
+    const food = app.content.current().bundle.champions.find((def) => def.isFood)!;
+    await give(food.key);
+    await expect(profile.setAvatar(ctx(), playerId, food.key)).rejects.toThrow(/brood-kin/i);
+  });
+
+  it('keeps the face when the copy behind it is gone', async () => {
+    // Owning it once is the claim. A portrait that vanishes because a duplicate was fed
+    // away is a change nobody asked for, and the showcase is where ownership is asserted.
+    const ids = await give('anuria');
+    await profile.setAvatar(ctx(), playerId, 'anuria');
+    await app.db.delete(playerChampions).where(eq(playerChampions.id, ids[0] as string));
+
+    expect((await read()).avatarChampionKey).toBe('anuria');
+  });
+
+  it('sets the face over HTTP, and reports it on the session snapshot', async () => {
+    await give('anuria');
+    const response = await as({
+      method: 'PUT',
+      url: apiPath(ROUTES.profile.avatar),
+      payload: { championKey: 'anuria' },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().data.profile.avatarChampionKey).toBe('anuria');
+
+    // The top bar draws from the session snapshot rather than from the card, so the field
+    // has to reach both or the face is only visible on the page nobody is looking at.
+    const me = await as({ method: 'GET', url: apiPath(ROUTES.auth.me) });
+    expect(me.json().data.player.avatarChampionKey).toBe('anuria');
   });
 });

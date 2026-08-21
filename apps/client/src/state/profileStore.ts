@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { PublicProfile } from '@mistvale/shared';
 import { gameApi } from '../api/game';
+import { usePlayerStore } from './playerStore';
 
 /**
  * Public profile cards.
@@ -23,6 +24,7 @@ interface ProfileStoreState {
   show: (playerId: string) => Promise<void>;
   close: () => void;
   setShowcase: (championIds: string[]) => Promise<void>;
+  setAvatar: (championKey: string | null) => Promise<void>;
   reset: () => void;
 }
 
@@ -60,6 +62,25 @@ export const useProfileStore = create<ProfileStoreState>((set, get) => ({
         cards: { ...state.cards, [card.playerId]: card },
         saving: false,
       }));
+    } catch (error) {
+      set({ saving: false, error: message(error, 'That could not be saved.') });
+    }
+  },
+
+  /**
+   * Chooses the face, and tells the shell about it.
+   *
+   * The card comes back from the server, but the *top bar* draws from the player snapshot
+   * rather than from any card — so the snapshot is re-read as well. Without that the
+   * portrait changes on the card the player is looking at and not on the bar above it,
+   * which is the one place they were trying to change.
+   */
+  async setAvatar(championKey) {
+    set({ saving: true, error: null });
+    try {
+      const card = await gameApi.setAvatar(championKey);
+      set((state) => ({ cards: { ...state.cards, [card.playerId]: card }, saving: false }));
+      await usePlayerStore.getState().refresh();
     } catch (error) {
       set({ saving: false, error: message(error, 'That could not be saved.') });
     }

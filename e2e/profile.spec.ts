@@ -4,9 +4,10 @@ import { leaveTutorial } from './support';
 /**
  * The public profile card, in a real browser.
  *
- * The card's contents and every showcase rule are pinned against a real database (17 cases
- * in `profile.test.ts`). What a browser adds is that the chip in the top bar actually opens
- * it — the card is only worth having if there is a way to it.
+ * The card's contents and every showcase and avatar rule are pinned against a real database
+ * (24 cases in `profile.test.ts`). What a browser adds is that the chip in the top bar
+ * actually opens it — the card is only worth having if there is a way to it — and that a
+ * chosen face reaches the two places it has to reach.
  */
 
 const password = 'a-good-long-password';
@@ -64,6 +65,49 @@ test.describe('the profile card', () => {
     expect(card.text).toContain('"championsOwned"');
   });
 
+  test('wears a champion you own, on the card and on the bar, across a reload', async ({
+    page,
+  }) => {
+    test.slow();
+    const profileName = await register(page, 'e2eav', 'Facewearer');
+
+    const chip = page.getByRole('button', { name: /your profile card/i });
+    await chip.click();
+    const dialog = page.getByRole('dialog', { name: new RegExp(profileName, 'i') });
+    await expect(dialog).toBeVisible({ timeout: 15_000 });
+
+    // A fresh account wears its own initial, so the chip has no portrait in it yet.
+    await expect(chip.locator('img')).toHaveCount(0);
+
+    await dialog.getByRole('button', { name: /choose your face/i }).click();
+    await expect(dialog.getByText(/any champion you own/i)).toBeVisible();
+
+    // The way back is offered beside the faces, because a player who tried a portrait and
+    // disliked it needs somewhere to press that is not "a different champion".
+    await expect(dialog.getByRole('button', { name: /no portrait/i })).toBeVisible();
+
+    // One press chooses and saves — there is nothing to weigh about a face — and it lands
+    // back on the card, wearing it.
+    await dialog
+      .getByRole('button', { name: /lv \d+ of \d+.*power/i })
+      .first()
+      .click();
+    await expect(dialog.getByRole('button', { name: /choose your face/i })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(dialog.locator('img').first()).toBeVisible();
+
+    // The bar above every screen is the place a player was trying to change.
+    await dialog.getByRole('button', { name: /^close$/i }).click();
+    await expect(dialog).toBeHidden({ timeout: 15_000 });
+    await expect(chip.locator('img')).toHaveCount(1, { timeout: 15_000 });
+
+    // And it is the server's, not a flash of local state: a reload has to bring it back.
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible({ timeout: 30_000 });
+    await expect(chip.locator('img')).toHaveCount(1, { timeout: 20_000 });
+  });
+
   test('turns an anonymous caller away from the card and the showcase', async ({ page }) => {
     await page.goto('/');
 
@@ -77,9 +121,15 @@ test.describe('the profile card', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ championIds: [] }),
       });
-      return [card.status, showcase.status];
+      const avatar = await fetch('/api/player/avatar', {
+        method: 'PUT',
+        credentials: 'omit',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ championKey: null }),
+      });
+      return [card.status, showcase.status, avatar.status];
     });
-    expect(statuses).toEqual([401, 401]);
+    expect(statuses).toEqual([401, 401, 401]);
   });
 });
 

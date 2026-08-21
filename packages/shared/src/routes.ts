@@ -165,6 +165,8 @@ export const ROUTES = {
     card: (id: string) => `/profiles/${encodeURIComponent(id)}`,
     /** The four champions the owner wants to be known by. */
     showcase: '/player/showcase',
+    /** The champion whose face the account wears, or null for the crest. */
+    avatar: '/player/avatar',
   },
   tutorial: {
     /** The step in front of the player, or nothing once it is done. */

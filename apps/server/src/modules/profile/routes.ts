@@ -1,5 +1,11 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { ROUTES, apiSuccess, routePattern, setShowcaseRequestSchema } from '@mistvale/shared';
+import {
+  ROUTES,
+  apiSuccess,
+  routePattern,
+  setAvatarRequestSchema,
+  setShowcaseRequestSchema,
+} from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
 import * as profile from './service';
 import { idParam } from '../../lib/params';
@@ -31,6 +37,12 @@ export const profileRoutes: FastifyPluginAsync = async (app) => {
   app.put(ROUTES.profile.showcase, async (request, reply) => {
     const body = setShowcaseRequestSchema.parse(request.body);
     const updated = await profile.setShowcase(ctx(), requirePlayer(request), body.championIds);
+    return reply.send(apiSuccess({ profile: updated }, app.content.rev));
+  });
+
+  app.put(ROUTES.profile.avatar, async (request, reply) => {
+    const body = setAvatarRequestSchema.parse(request.body);
+    const updated = await profile.setAvatar(ctx(), requirePlayer(request), body.championKey);
     return reply.send(apiSuccess({ profile: updated }, app.content.rev));
   });
 };

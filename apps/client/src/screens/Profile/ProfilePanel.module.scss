@@ -30,17 +30,115 @@
   gap: $space-3;
 }
 
+/* The warden's face: the champion they chose, or their initial. Framed either way, and
+   ringed in the champion's rarity when there is one — the same treatment the top bar's chip
+   gives it, because they are the same portrait and a card that dressed it differently would
+   read as a different account. */
 .avatar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 3rem;
+  width: 5rem;
+  height: 5rem;
+  flex: none;
   background: $panel-inset;
-  border: 1px solid $gold;
   color: $gold;
   font-family: $font-display;
-  font-size: 1.5rem;
+  font-size: 2rem;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-style: solid;
+    border-width: 16px;
+    border-image-source: var(--fui-img-frame-sm-double);
+    border-image-slice: var(--fui-slice-frame-sm-double, 36 36 36 36);
+    border-image-repeat: stretch;
+    pointer-events: none;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 0 2px var(--mv-face-ring, transparent);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &[data-rarity='common'] {
+    --mv-face-ring: #{rgba($rarity-common, 0.75)};
+  }
+  &[data-rarity='uncommon'] {
+    --mv-face-ring: #{rgba($rarity-uncommon, 0.75)};
+  }
+  &[data-rarity='rare'] {
+    --mv-face-ring: #{rgba($rarity-rare, 0.8)};
+  }
+  &[data-rarity='epic'] {
+    --mv-face-ring: #{rgba($rarity-epic, 0.85)};
+  }
+  &[data-rarity='legendary'] {
+    --mv-face-ring: #{rgba($rarity-legendary, 0.9)};
+  }
+  &[data-rarity='none'] {
+    --mv-face-ring: #{rgba($gold, 0.55)};
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* The way back to the crest, sized to stand in a row of champion cards without pretending
+   to be one. */
+.crest {
+  @include interactive;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  width: $card-champion;
+  min-height: 13rem;
+  padding: $space-3;
+  border: 1px solid $edge;
+  background: rgba(14, 12, 10, 0.72);
+  text-align: center;
+
+  &:hover:not(:disabled) {
+    border-color: $accent-dim;
+  }
+
+  &[data-selected='true'] {
+    border-color: $accent;
+    box-shadow: inset 0 0 0 1px rgba(194, 118, 74, 0.35);
+  }
+}
+
+.crestMark {
+  width: 3rem;
+  height: 3rem;
+  background: var(--fui-img-crest-stone-guard) center / contain no-repeat;
+  filter: grayscale(0.7) brightness(0.9);
+}
+
+.crestLabel {
+  @include display-text(13px);
+  color: $parchment;
+}
+
+.crestNote {
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: $muted;
 }
 
 .identityText {
@@ -120,8 +218,9 @@
 
 .showcase,
 .pickerList {
-  display: grid;
-  gap: $space-2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
   margin: 0;
   padding: 0;
   list-style: none;

@@ -35,6 +35,7 @@ import type {
   MailView,
   NewsView,
   PublicProfile,
+  SetAvatarRequest,
   SetShowcaseRequest,
   TutorialAdvanceRequest,
   TutorialAdvanceResult,
@@ -382,6 +383,14 @@ export const gameApi = {
       .put<{ profile: PublicProfile }>(ROUTES.profile.showcase, {
         championIds,
       } satisfies SetShowcaseRequest)
+      .then((data) => data.profile),
+
+  /** The face the account wears. `null` takes it off, back to the crest. */
+  setAvatar: (championKey: string | null) =>
+    api
+      .put<{ profile: PublicProfile }>(ROUTES.profile.avatar, {
+        championKey,
+      } satisfies SetAvatarRequest)
       .then((data) => data.profile),
 
   // ── The tutorial ──────────────────────────────────────────────────────────

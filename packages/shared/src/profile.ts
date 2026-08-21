@@ -54,11 +54,24 @@ export const publicProfileSchema = z.object({
   furthestStage: z.string().nullable(),
   /** Total campaign stars, which is the one number that tracks *thoroughness*. */
   stars: z.number().int(),
+  /** The champion whose face this warden wears, or null for the plain crest. */
+  avatarChampionKey: z.string().nullable(),
   showcase: z.array(showcaseChampionSchema),
   /** ISO-8601 of the day the account was made. */
   joinedAt: z.string(),
 });
 export type PublicProfile = z.infer<typeof publicProfileSchema>;
+
+/**
+ * Choosing the face.
+ *
+ * `null` clears it back to the crest, which has to be sayable — a player who tried a
+ * portrait and did not like it needs a way back, and "pick a different one" is not it.
+ */
+export const setAvatarRequestSchema = z.object({
+  championKey: z.string().min(1).max(64).nullable(),
+});
+export type SetAvatarRequest = z.infer<typeof setAvatarRequestSchema>;
 
 export const setShowcaseRequestSchema = z.object({
   /**

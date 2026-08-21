@@ -264,6 +264,7 @@ export function toPlayerSummary(player: PlayerRow, now: Date): PlayerSummary {
     rosterCapacity: player.rosterCapacity,
     tutorialStep: player.tutorialStep,
     createdAt: player.createdAt.toISOString(),
+    avatarChampionKey: player.avatarChampionKey,
   };
 }
 

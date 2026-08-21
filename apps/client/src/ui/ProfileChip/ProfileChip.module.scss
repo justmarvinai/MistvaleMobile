@@ -1,0 +1,209 @@
+/* The chip: a framed face with the level on it, the name, what the account is worth, and
+   the experience bar under both.
+
+   The shape is the owner's reference — a portrait with a level badge and a bar beside it —
+   drawn in Mistvale's own kit rather than borrowed. The frame, the badge and the bar are
+   all FantasyUIs art addressed by custom property, so the whole chip re-skins with the
+   theme. */
+
+.chip {
+  @include interactive;
+
+  /* First on the bar. The chip is portalled onto the library's painted ground and so lands
+     after the currency rail in the DOM; the rail takes the slack with its own
+     `margin-left: auto`, so the order is all that has to be said — and saying it here keeps
+     the bar from having to know what the chip's class is called. */
+  order: -1;
+
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: $space-3;
+  padding: $space-1 $space-3 $space-1 $space-2;
+  text-align: left;
+  color: $parchment;
+  min-width: 0;
+
+  &:hover .face {
+    filter: brightness(1.1);
+  }
+
+  &:hover .name {
+    color: $accent-soft;
+  }
+}
+
+/* ── The face ──────────────────────────────────────────────────────────────
+   A square rather than a disc: a drawn avatar is a painted portrait with a composition,
+   and a circle crops the top of every head in the game. */
+.face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  flex: none;
+  background: rgba(12, 10, 9, 0.6);
+  transition: filter $duration-fast $ease-out;
+
+  /* The painted frame, over the portrait rather than around it, so the art fills the
+     square and the ornament sits on its edge. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-style: solid;
+    /* 12px rather than the theme's own 18: `border-image` scales the 36px corner art into
+       whatever width it is given, and at 18 the ornament eats a 56px portrait alive. */
+    border-width: 12px;
+    border-image-source: var(--fui-img-frame-sm-double);
+    border-image-slice: var(--fui-slice-frame-sm-double, 36 36 36 36);
+    border-image-repeat: stretch;
+    pointer-events: none;
+  }
+
+  /* The rarity of the champion whose face this is, as a ring inside the frame. It is the
+     one fact about a portrait that a collector reads first, and the frame art is the same
+     bronze whoever is in it. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 0 2px var(--mv-face-ring, transparent);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &[data-rarity='common'] {
+    --mv-face-ring: #{rgba($rarity-common, 0.75)};
+  }
+  &[data-rarity='uncommon'] {
+    --mv-face-ring: #{rgba($rarity-uncommon, 0.75)};
+  }
+  &[data-rarity='rare'] {
+    --mv-face-ring: #{rgba($rarity-rare, 0.8)};
+  }
+  &[data-rarity='epic'] {
+    --mv-face-ring: #{rgba($rarity-epic, 0.85)};
+  }
+  &[data-rarity='legendary'] {
+    --mv-face-ring: #{rgba($rarity-legendary, 0.9)};
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.initial {
+  font-family: $font-display;
+  font-size: 27px;
+  line-height: 1;
+  color: $accent-soft;
+  text-shadow: 0 1px 3px #000;
+}
+
+/* The numeral, on the corner of the portrait — the genre's own shape, and where a player
+   already looks for it. It reads as part of the frame rather than as a label beside it. */
+.level {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  z-index: 2;
+  min-width: 1.7rem;
+  padding: 1px 5px;
+  border: 1px solid rgba(194, 118, 74, 0.7);
+  background: rgba(12, 10, 9, 0.94);
+  font-family: $font-mono;
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: center;
+  color: $accent-soft;
+}
+
+/* ── The lines ───────────────────────────────────────────────────────────── */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: baseline;
+  gap: $space-3;
+  min-width: 0;
+}
+
+.name {
+  @include display-text(20px);
+  letter-spacing: 0.03em;
+  color: $parchment;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color $duration-fast $ease-out;
+}
+
+/* What the account is worth, beside the name and not under it: it is the second thing a
+   player looks at and the first thing they compare. */
+.power {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  font-family: $font-mono;
+  font-size: 13px;
+  color: $gold-soft;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  min-width: 0;
+}
+
+/* `--fui-bar-h` is the library's own knob for bar height, and the theme sets it to 32px —
+   right for a boss's health, far too tall for a line under a name. Overriding the property
+   rather than the height keeps the track art, the well inset and the fill in proportion,
+   which setting `height` directly would not. */
+.xpBar {
+  --fui-bar-h: 14px;
+
+  flex: 1 1 11rem;
+  min-width: 6rem;
+  max-width: 15rem;
+}
+
+.numbers {
+  flex: none;
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* The half a player is actually counting down. */
+.remaining {
+  color: $accent-soft;
+}
+
+/* A narrow window keeps the face, the name and the bar; the running total and the
+   countdown are what a tooltip is for. */
+@media (max-width: 900px) {
+  .numbers {
+    display: none;
+  }
+
+  .xpBar {
+    flex-basis: 7rem;
+  }
+}

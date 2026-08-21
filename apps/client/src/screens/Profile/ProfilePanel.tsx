@@ -14,6 +14,8 @@ import styles from './ProfilePanel.module.scss';
 import { arenaTierEmblem } from '../../ui/arenaTier';
 import { championArt } from '../../ui/championArt';
 import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
+import { Portrait } from '../../ui/Portrait/Portrait';
+import { avatarFaces } from './faces';
 
 /** How many champions a card shows. Mirrors `SHOWCASE_MAX` on the server. */
 const SHOWCASE_MAX = 4;
@@ -38,33 +40,49 @@ export function ProfilePanel(): JSX.Element {
   const saving = useProfileStore((state) => state.saving);
   const close = useProfileStore((state) => state.close);
   const setShowcase = useProfileStore((state) => state.setShowcase);
+  const setAvatar = useProfileStore((state) => state.setAvatar);
   const self = usePlayerStore((state) => state.player);
 
   /**
-   * Whose card the picker is open for, rather than a bare "editing" flag.
+   * What the panel is doing, and *whose* card it is doing it to.
    *
-   * Derived rather than synchronised: the picker is open only while it names the card on
-   * screen, so shutting the panel or opening somebody else's card closes it by arithmetic
-   * instead of by an effect racing to tidy up after the fact.
+   * The card id travels with the mode rather than beside it, so shutting the panel or
+   * opening somebody else's card drops the player back to reading by arithmetic — no
+   * effect racing to tidy up after the fact, and no way to end up editing one warden's
+   * card while looking at another's.
    */
-  const [editingFor, setEditingFor] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ for: string; mode: 'showcase' | 'avatar' } | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
 
   const card = openId ? cards[openId] : undefined;
   const isSelf = Boolean(openId && self && openId === self.id);
-  const editing = editingFor !== null && editingFor === openId;
+  const mode = editing && editing.for === openId ? editing.mode : 'card';
 
-  const startEditing = (): void => {
+  const startShowcase = (): void => {
     if (!openId) return;
     setPicked(card?.showcase.map((champion) => champion.id) ?? []);
-    setEditingFor(openId);
+    setEditing({ for: openId, mode: 'showcase' });
+  };
+
+  const startAvatar = (): void => {
+    if (!openId) return;
+    setEditing({ for: openId, mode: 'avatar' });
   };
 
   const save = async (): Promise<void> => {
     await setShowcase(picked);
     if (!useProfileStore.getState().error) {
-      setEditingFor(null);
+      setEditing(null);
       toast.success('Your card is updated.');
+    }
+  };
+
+  /** Chooses the face and closes the picker — one press, because there is nothing to weigh. */
+  const chooseFace = async (championKey: string | null): Promise<void> => {
+    await setAvatar(championKey);
+    if (!useProfileStore.getState().error) {
+      setEditing(null);
+      toast.success(championKey ? 'That is your face now.' : 'Back to the crest.');
     }
   };
 
@@ -73,34 +91,38 @@ export function ProfilePanel(): JSX.Element {
       open={openId !== null}
       title={card ? card.profileName : 'Warden'}
       onClose={close}
-      // Two dialogs in one frame: a card to read, and a roster to choose from. The card
-      // reads better narrow; the picker is a grid of painted cards and wants the room.
-      size={editing ? 'wide' : 'work'}
+      // Three dialogs in one frame: a card to read, and two rosters to choose from. The
+      // card reads better narrow; a picker is a grid of painted cards and wants the room.
+      size={mode === 'card' ? 'work' : 'wide'}
       footer={
-        isSelf && card ? (
-          editing ? (
-            <>
-              <Button variant="ghost" disabled={saving} onClick={() => setEditingFor(null)}>
-                Cancel
-              </Button>
-              <Button variant="primary" disabled={saving} onClick={() => void save()}>
-                {saving ? 'Saving…' : 'Save the four'}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" onClick={close}>
-                Close
-              </Button>
-              <Button variant="primary" onClick={startEditing}>
-                Choose your four
-              </Button>
-            </>
-          )
-        ) : (
+        !isSelf || !card ? (
           <Button variant="primary" onClick={close}>
             Close
           </Button>
+        ) : mode === 'showcase' ? (
+          <>
+            <Button variant="ghost" disabled={saving} onClick={() => setEditing(null)}>
+              Cancel
+            </Button>
+            <Button variant="primary" disabled={saving} onClick={() => void save()}>
+              {saving ? 'Saving…' : 'Save the four'}
+            </Button>
+          </>
+        ) : mode === 'avatar' ? (
+          // No save button: picking a face *is* the save. A picker where one press chooses
+          // and a second confirms asks a question nobody has an answer to.
+          <Button variant="ghost" disabled={saving} onClick={() => setEditing(null)}>
+            Done
+          </Button>
+        ) : (
+          <>
+            <Button variant="ghost" onClick={startAvatar}>
+              Choose your face
+            </Button>
+            <Button variant="primary" onClick={startShowcase}>
+              Choose your four
+            </Button>
+          </>
         )
       }
     >
@@ -110,8 +132,14 @@ export function ProfilePanel(): JSX.Element {
         <p className={styles.empty}>Looking them up…</p>
       ) : !card ? (
         <p className={styles.empty}>There is nothing to show.</p>
-      ) : editing ? (
+      ) : mode === 'showcase' ? (
         <ShowcasePicker picked={picked} onChange={setPicked} />
+      ) : mode === 'avatar' ? (
+        <AvatarPicker
+          chosen={card.avatarChampionKey}
+          busy={saving}
+          onChoose={(key) => void chooseFace(key)}
+        />
       ) : (
         <Card card={card} />
       )}
@@ -121,12 +149,27 @@ export function ProfilePanel(): JSX.Element {
 
 function Card({ card }: { card: PublicProfile }): JSX.Element {
   const joined = new Date(card.joinedAt).toLocaleDateString();
+  const bundle = useContentStore((state) => state.bundle);
+  const face = card.avatarChampionKey
+    ? bundle?.champions.find((champion) => champion.key === card.avatarChampionKey)
+    : undefined;
 
   return (
     <div className={styles.card}>
       <div className={styles.identity}>
-        <div className={styles.avatar} aria-hidden="true">
-          {card.profileName.charAt(0).toUpperCase()}
+        {/* The face the warden chose, or their initial. The initial is not a placeholder
+            waiting to be replaced — plenty of accounts will keep it — so it is drawn in the
+            same frame rather than as a lesser version of one. */}
+        <div className={styles.avatar} data-rarity={face?.rarity ?? 'none'} aria-hidden="true">
+          {face ? (
+            <Portrait
+              src={championArt(face, bundle?.assets).portrait ?? null}
+              name={face.name}
+              size={72}
+            />
+          ) : (
+            card.profileName.charAt(0).toUpperCase()
+          )}
         </div>
         <div className={styles.identityText}>
           <span className={styles.name}>{card.profileName}</span>
@@ -236,6 +279,80 @@ function ShowcaseTile({ champion }: { champion: ShowcaseChampion }): JSX.Element
         }}
       />
     </li>
+  );
+}
+
+/**
+ * The owner choosing the face they wear.
+ *
+ * One card per *champion* rather than per copy: three Anurias are one face, and a picker
+ * that offered the same portrait three times would be asking a question with no answer.
+ * The strongest copy of each is the one drawn, because if a player is going to look at one
+ * of their Anurias it may as well be the good one.
+ *
+ * Food is left out for the same reason the showcase leaves it out, and picking is a single
+ * press — a face is a cosmetic choice with nothing to weigh, and it is already saved by the
+ * time the player has looked at it.
+ */
+function AvatarPicker({
+  chosen,
+  busy,
+  onChoose,
+}: {
+  chosen: string | null;
+  busy: boolean;
+  onChoose: (championKey: string | null) => void;
+}): JSX.Element {
+  const champions = useRosterStore((state) => state.champions);
+  const load = useRosterStore((state) => state.load);
+  const bundle = useContentStore((state) => state.bundle);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const faces = useMemo(() => avatarFaces(champions, bundle?.champions ?? []), [champions, bundle]);
+
+  return (
+    <div className={styles.picker}>
+      <p className={styles.pickerHint}>
+        Any champion you own. It shows on your card and in the bar above every screen.
+      </p>
+
+      {faces.length === 0 ? (
+        <p className={styles.empty}>You have nobody to wear yet.</p>
+      ) : (
+        <ul className={styles.pickerList}>
+          <li>
+            {/* The way back. A player who tried a portrait and did not like it needs
+                somewhere to press that is not "a different champion". */}
+            <button
+              type="button"
+              className={styles.crest}
+              data-selected={chosen === null}
+              disabled={busy}
+              onClick={() => onChoose(null)}
+            >
+              <span className={styles.crestMark} aria-hidden="true" />
+              <span className={styles.crestLabel}>No portrait</span>
+              <span className={styles.crestNote}>Your initial, on a plain frame</span>
+            </button>
+          </li>
+
+          {faces.map(({ champion, def }) => (
+            <li key={def.key}>
+              <ChampionCard
+                champion={champion}
+                def={def}
+                selectable
+                selected={chosen === def.key}
+                onOpen={() => !busy && onChoose(def.key)}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

@@ -51,6 +51,7 @@ export async function card(ctx: ProfileContext, playerId: string): Promise<Publi
       title: players.title,
       level: players.level,
       showcase: players.showcase,
+      avatarChampionKey: players.avatarChampionKey,
       createdAt: players.createdAt,
     })
     .from(players)
@@ -102,6 +103,7 @@ export async function card(ctx: ProfileContext, playerId: string): Promise<Publi
     championsTotal: collectable.size,
     furthestStage: furthestStage(ctx, progress),
     stars: progress.reduce((total, row) => total + row.stars, 0),
+    avatarChampionKey: player.avatarChampionKey,
     showcase,
     joinedAt: player.createdAt.toISOString(),
   };
@@ -234,6 +236,52 @@ async function showcaseFor(
   if (chosen.length === 0) return built.sort((a, b) => b.power - a.power);
   const order = new Map([...chosen].map((id, index) => [id, index]));
   return built.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+}
+
+/**
+ * Chooses the face the account wears, or takes it off.
+ *
+ * Two rules, and both are about what "a champion you own" means. It has to be a champion
+ * this account holds a copy of — checked by *key*, so any copy will do and the answer does
+ * not change when one of three is fed away. And it has to be a champion rather than food:
+ * a Broodling is a resource with a portrait, and a warden wearing one has misunderstood
+ * something the game should not have let them misunderstand.
+ *
+ * The key is checked against the published bundle as well as against the roster, because a
+ * roster row can outlive the content that defined it — a champion pulled from a publish
+ * leaves its copies behind, and drawing a face the client has no definition for is an
+ * empty frame nobody can explain.
+ */
+export async function setAvatar(
+  ctx: ProfileContext,
+  playerId: string,
+  championKey: string | null,
+): Promise<PublicProfile> {
+  if (championKey !== null) {
+    const def = ctx.content
+      .current()
+      .bundle.champions.find((champion) => champion.key === championKey);
+    if (!def) throw new AppError('VALIDATION', 'No such champion.');
+    if (def.isFood) {
+      throw new AppError('VALIDATION', 'Brood-kin are fed to champions, not worn as one.');
+    }
+
+    const [owned] = await ctx.db
+      .select({ id: playerChampions.id })
+      .from(playerChampions)
+      .where(
+        and(eq(playerChampions.playerId, playerId), eq(playerChampions.championKey, championKey)),
+      )
+      .limit(1);
+    if (!owned) throw new AppError('VALIDATION', 'You can only wear a champion you own.');
+  }
+
+  await ctx.db
+    .update(players)
+    .set({ avatarChampionKey: championKey, updatedAt: new Date() })
+    .where(eq(players.id, playerId));
+
+  return card(ctx, playerId);
 }
 
 /** Sets the champions the card shows. An empty list hands the choice back to the game. */
