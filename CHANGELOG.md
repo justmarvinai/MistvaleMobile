@@ -35,7 +35,7 @@ highlight key, where a library-drawn disc never could.
 
 ### Changed — the Haven is a rail of painted places, not a grid of icons
 
-Thirteen 64px sockets in a wrapped grid is a toolbar: every place in the game the same
+Twelve 64px sockets in a wrapped grid is a toolbar: every place in the game the same
 size as every other, none of them worth looking at, and the whole camp readable in one
 glance that told you nothing. The owner's call is a row of tall boards you drag along
 (2026-08-21), and that is what it is now — each with its own artwork, its name, and the

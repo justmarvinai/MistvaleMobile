@@ -214,9 +214,16 @@ criteria of its own, and it does not gate P9e or P10.
 | **C3** | The game explains itself on hover · equipped relics show their rarity · the tutorial says what to do as well as what it means · the Chronicle as a faction index that hides nothing · `SEED.sh --replace`, so a rewrite of published content can actually ship | ✅ |
 | **C4** | The Haven as a draggable rail of painted boards · the campaign as three screens — the vale, a chapter's stage list, then a team screen that shows the enemy line-up | ✅ |
 
-**Backlog carried out of a batch rather than done in it:** **Q6** — the eight 1254×1254
-champion avatars (14 MB published, drawn at 150px). Parked at the owner's instruction; the
-fix means adding a native image module to the build on the box the budget is about.
+**Backlog carried out of a batch rather than done in it.** Two items, and they are the same
+question wearing different clothes — both are parked on the owner's instruction, and both want
+a native image module in the build on the box the budget is about.
+
+- **Q6** — the eight 1254×1254 champion avatars, 14 MB published and drawn at 150px.
+- **Q7** — the Haven's twelve station boards draw the crest each station already has rather
+  than the painted backdrops in `assets/ui/backgrounds/haven_bgs/`. Three of twelve exist and
+  the owner's call (2026-08-21) is to hold until all of them do, because three painted boards
+  beside nine crests reads as broken rather than as partial. The pass is then one helper —
+  file present → board art, file absent → crest — plus the downscaling publish step.
 
 ---
 

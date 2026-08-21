@@ -19,7 +19,7 @@ import styles from './HavenScreen.module.scss';
  * The Haven — home base and the screen the player lands on.
  *
  * **A rail of painted places, not a grid of icons** (the owner's call, 2026-08-21). It used
- * to be thirteen 64px sockets in a wrapped grid, which is a toolbar: every place in the game
+ * to be twelve 64px sockets in a wrapped grid, which is a toolbar: every place in the game
  * the same size as every other, none of them worth looking at, and the whole camp readable
  * in one glance that told you nothing. Now each is a tall painted panel with its own art, its
  * name and what you go there *for*, and they run off the side of the window — so the camp is
@@ -118,7 +118,7 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
  * mouse explains itself to nobody on the platform this game is going to (`docs/UI_UX`).
  *
  * Still its own component, and still for the same reason: a tooltip is a hook and there are
- * thirteen of these in a map. The hover now carries what the panel cannot hold — the
+ * twelve of these in a map. The hover now carries what the panel cannot hold — the
  * unlock's exact wording, and the "click to go there" that a locked one must not say.
  */
 function Station({

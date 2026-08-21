@@ -25,6 +25,20 @@ One model (64×64 still + 9-frame idle). **All EA enemies use it**, differentiat
 ### Placeholder champions (owner-approved convention)
 The 30 art-pending roster champions + 6 food units (CONTENT_PLAN §1b) **also use `enemy_lizard`** with a per-champion tint and a framed, tinted still as their avatar (distinct rarity frame so cards still read correctly). When Marvin uploads a champion's real sprite/avatar through the Admin asset manager, the asset-registry reference swaps and every screen updates — no code, no redeploy. This convention applies to all future champions authored before their art exists.
 
+### Haven backdrops — `assets/ui/backgrounds/haven_bgs/`
+One painted scene per station on the Haven rail, named **`haven_<screenId>.jpg`** after the
+screen it belongs to in `apps/client/src/app/screens.ts` — so a file is matched to its board
+by name and nothing has to be wired by hand. Three exist: `haven_arena`, `haven_campaign`,
+`haven_depths`. Nine are still wanted: `haven_champions`, `haven_relics`, `haven_mistgate`,
+`haven_chronicle`, `haven_bazaar`, `haven_quests`, `haven_missions`, `haven_events`,
+`haven_calendar`.
+
+**Not used yet, by the owner's call** (USER_QUESTIONS Q7, 2026-08-21): the boards keep the
+crest each station already draws until every station has a picture, because three painted
+boards beside nine crests reads as broken rather than as partial. When the set is complete
+they publish **downscaled** — a board is drawn about 230px wide, and at ~3 MB apiece twelve
+full-size JPEGs would be ~36 MB of Haven against a budget written for a 1-core box.
+
 ### UI — `assets/ui/Kenney Fantasy UI Borders/`
 Panels/borders/dividers (Default + Double styles, 32 variants each + transparent variants, SVG source, CC0 license file included). Used as 9-slice frames per UI_UX_DESIGN.md — selectively, not for everything.
 
