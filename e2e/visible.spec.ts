@@ -59,6 +59,13 @@ test.describe('what a player can actually see', () => {
     // thing at its own centre, not that a wrapper of ours exists.
     await expectOnTop(page, '.fui-waves', 'the wave pips');
     await expectOnTop(page, '.fui-battlectl', 'the battle controls');
+
+    // The hotbar is the one that has to be *waited* for rather than looked at. Auto appears
+    // with the screen, but the skill bar is keyed on the player actually being handed a
+    // turn — so between those two moments the fight is playing out its opening and there is
+    // no bar in the DOM to be on top of anything. Asserting it straight after Auto is a race
+    // this suite happened to win until the page also began streaming a soundtrack.
+    await expect(page.locator('.fui-actionbar')).toBeVisible({ timeout: 25_000 });
     await expectOnTop(page, '.fui-actionbar', 'the skill bar');
 
     // And the canvas the fight is drawn on must be the only one on the page. Two of them

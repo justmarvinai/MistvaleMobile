@@ -94,7 +94,7 @@
 | 21 | Events | Active event pages: banner, point rules, milestone track, time left |
 | 22 | Login calendar | 30-day grid + 7-day welcome strip, today glow, claim animation |
 | 23 | Mail | List + detail, claim attachments, claim-all |
-| 24 | Profile & Settings | Public card preview, audio sliders (music/SFX), battle speed default, reduced motion, language (EN at EA), credits, logout, change password |
+| 24 | Profile & Settings | Public card preview, three audio sliders (music / sound effects / voice — a spoken line answers to its own fader, since turning the interface down must not silence the narrator; a new warden opens at 5% music and 50% voice), battle speed default, reduced motion, language (EN at EA), credits, logout, change password |
 | 25 | Error/Maintenance | Friendly mist-ghost mascot + request-id display |
 
 ## 4. Battle screen (the crown jewel)
