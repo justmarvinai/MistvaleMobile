@@ -54,7 +54,9 @@ test.describe('a brand-new account', () => {
     for (const { label, level } of SHROUDED_AT_LEVEL_ONE) {
       const tile = page.getByRole('button', { name: label, exact: true }).first();
       await expect(tile, label).toHaveAttribute('aria-disabled', 'true');
-      // A locked door that does not say when it opens is just a locked door.
+      // A locked door that does not say when it opens is just a locked door. This one is
+      // the *dock* item, which still carries a native `title` — the Haven's stations moved
+      // to painted tooltips and say it in visible text instead.
       await expect(tile, label).toHaveAttribute('title', new RegExp(`level ${level}`, 'i'));
     }
   });

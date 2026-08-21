@@ -205,6 +205,6 @@ test.describe('the management loop', () => {
     const bazaar = page.getByRole('button', { name: /^bazaar$/i }).first();
     await expect(bazaar).toBeVisible();
     await expect(bazaar).toHaveAttribute('aria-disabled', 'true');
-    await expect(bazaar).toHaveAttribute('title', /level 5/i);
+    await expect(bazaar).toContainText(/level 5/i);
   });
 });

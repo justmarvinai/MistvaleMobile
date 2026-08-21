@@ -24,7 +24,10 @@ test.describe('the login calendar', () => {
     const station = page.getByRole('button', { name: /calendar/i }).first();
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
-    await expect(station).toHaveAttribute('title', /level 2/i);
+    // The hint is *read*, not hovered: a station says when it opens in visible text under
+    // its name. It used to be a native `title` as well, which the painted tooltip replaced —
+    // and an attribute nobody can see was always the weaker thing to assert.
+    await expect(station).toContainText(/level 2/i);
   });
 
   test('opens on the first victory, and a collected day is spent', async ({ page }) => {

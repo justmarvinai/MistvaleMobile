@@ -29,7 +29,10 @@ test.describe('quests', () => {
     const station = page.getByRole('button', { name: /quests/i }).first();
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
-    await expect(station).toHaveAttribute('title', /level 4/i);
+    // The hint is *read*, not hovered: a station says when it opens in visible text under
+    // its name. It used to be a native `title` as well, which the painted tooltip replaced —
+    // and an attribute nobody can see was always the weaker thing to assert.
+    await expect(station).toContainText(/level 4/i);
   });
 
   test('tracks from the first battle, even before it can be claimed', async ({ page }) => {

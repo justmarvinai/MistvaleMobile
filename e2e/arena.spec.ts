@@ -31,7 +31,10 @@ test.describe('the Arena', () => {
     const station = page.getByRole('button', { name: /arena/i }).first();
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
-    await expect(station).toHaveAttribute('title', /level 8/i);
+    // The hint is *read*, not hovered: a station says when it opens in visible text under
+    // its name. It used to be a native `title` as well, which the painted tooltip replaced —
+    // and an attribute nobody can see was always the weaker thing to assert.
+    await expect(station).toContainText(/level 8/i);
   });
 
   test('refuses the hub for the same reason the dock gives', async ({ page }) => {
