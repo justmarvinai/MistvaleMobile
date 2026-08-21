@@ -145,7 +145,7 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 - **Login calendar:** 30-day rolling track + separate 7-day newcomer track (day 7: Gleaming Sigil ×2).
 - **Bazaar:** rotating relic/sigil/essence stock for silver (refresh timer + manual refresh), crystal tab (energy refills, silver caches, roster slots).
 - **Mail:** system/admin gifts with claimable attachments; **News:** announcement feed on Haven.
-- **Chronicle:** collection index (owned/seen/teased factions) — collection pressure made visible.
+- **Chronicle:** collection index, **grouped by faction** with an `owned/total` on each shelf, which is the shape the genre uses and the one that makes "which of these am I missing" a glance. **Nothing is hidden** — every champion in the game is listed whether or not the player has met them, greyed where they are not held (owner's call, 2026-08-21: a wall of question marks cannot be planned against, and the point of a collection tracker is to show what exists). Collection pressure made visible.
 - **Profile:** public card (level, arena tier, showcase champions) viewable from arena/leaderboard.
 
 ## 12. Account & unlock cadence

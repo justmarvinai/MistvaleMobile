@@ -85,7 +85,7 @@
 | 11 | Champion detail | Left: big idle stage w/ element ring; right tabs: **Stats** (base+gear breakdown), **Gear** (9 slots visual), **Skills** (tome UI), **Masteries** (3 trees), **Lore**; actions: level-up (food), rank-up, ascend, lock |
 | 12 | Gear inventory | Grid w/ slot/set/rank filters, compare tooltip vs equipped, upgrade forge modal (cost, success %, animated attempt), bulk-sell w/ rarity guardrails |
 | 13 | Mistgate (summon) | Portal centerpiece (16rem, twin counter-rotating rings); sigil selector w/ counts; rate-up champions as **faces**; the epic and legendary **mercy clocks on the gate itself**; x1/x10; the reveal cinematic (below); pity/rates panel ("Odds & Mercy" — transparent) |
-| 14 | Chronicle | Collection book: all champions, owned/unseen states, filters; entry = model + lore + kit |
+| 14 | Chronicle | **Faction index** — a shelf per faction with its own `owned/total`, the genre's shape and the one that answers "which of the Sacred Order am I missing". Every champion in the game is listed whether met or not; the ones you do not hold are **greyed, never hidden**. A tile is a face, a name, the rarity as its frame and the affinity as a corner pip; role, faction, lore, copies held and best rank are on the hover. |
 | 15 | The Depths hub | Cave map with 4 gear dungeons + Proving Grounds + Essence Springs (today's open springs highlighted); floor picker w/ best-floor marker |
 | 16 | Arena | Defense team editor, opponent offers (profile, power, tier, medal preview), refresh timer/cost, token meter, tier ladder w/ weekly chest, leaderboard tab |
 | 17 | Hall of Valor | 4 element statues; per-stat upgrade tracks (10 pips), medal balance, next-cost |

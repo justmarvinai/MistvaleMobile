@@ -10,12 +10,26 @@
   min-height: 0;
 }
 
+/* The controls stay put and the shelves scroll under them, so a player five factions down
+   can still change the filter without scrolling back. */
+.body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: $space-3;
+  min-height: 0;
+}
+
 .controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: $space-3;
-  margin-bottom: $space-3;
+}
+
+.tally {
+  margin-left: auto;
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.78rem;
 }
 
 .filters {
@@ -47,14 +61,68 @@
   cursor: pointer;
 }
 
+.shelves {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: $space-2;
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+/* One faction. The index is *by faction* because "which of the Sacred Order am I missing"
+   is the question a collector asks, and a flat grid of two hundred faces cannot answer it. */
+.shelf {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.shelfHead {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  /* Opaque, because the tiles scroll under it. */
+  padding: $space-1 0;
+  background: $ground;
+}
+
+.shelfName {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 0.95rem;
+  font-weight: normal;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.shelfCount {
+  color: $accent;
+  font-family: $font-mono;
+  font-size: 0.9rem;
+}
+
+.shelfOf {
+  color: $muted;
+}
+
+/* Fills the rest of the row, which is what makes a header a header rather than a line of
+   text floating above a grid. */
+.shelfRule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, $edge, transparent);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
   gap: $space-2;
   align-content: start;
-  max-height: calc(100% - 3rem);
-  overflow-y: auto;
-  padding-right: $space-2;
 }
 
 .entry {
@@ -68,39 +136,57 @@
   border: 1px solid $edge;
   border-top-width: 2px;
   border-top-color: $edge;
+  cursor: help;
 
-  &[data-state='owned'] {
-    &[data-rarity='common'] {
-      border-top-color: $rarity-common;
-    }
-    &[data-rarity='uncommon'] {
-      border-top-color: $rarity-uncommon;
-    }
-    &[data-rarity='rare'] {
-      border-top-color: $rarity-rare;
-    }
-    &[data-rarity='epic'] {
-      border-top-color: $rarity-epic;
-    }
-    &[data-rarity='legendary'] {
-      border-top-color: $rarity-legendary;
-    }
+  /* Rarity on every tile, owned or not. It used to be owned-only, on the theory that a
+     champion you have never met should give nothing away — but the whole screen is a list
+     of what exists, and a collector deciding what to chase is deciding by rarity. */
+  &[data-rarity='common'] {
+    --mv-tier: #{$rarity-common};
+  }
+  &[data-rarity='uncommon'] {
+    --mv-tier: #{$rarity-uncommon};
+  }
+  &[data-rarity='rare'] {
+    --mv-tier: #{$rarity-rare};
+  }
+  &[data-rarity='epic'] {
+    --mv-tier: #{$rarity-epic};
+  }
+  &[data-rarity='legendary'] {
+    --mv-tier: #{$rarity-legendary};
   }
 
-  &[data-state='seen'] {
-    opacity: 0.6;
+  border-top-color: var(--mv-tier, #{$edge});
+
+  &[data-state='owned'] {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--mv-tier) 10%, transparent), transparent 60%),
+      $panel;
+  }
+
+  /* Met, and not held: the face is there but the colour is not. */
+  &[data-state='seen'] img {
+    filter: grayscale(0.85) brightness(0.75);
+  }
+
+  /* Never encountered. **Shown, not hidden** — the owner's call: a wall of question marks
+     is a wall of nothing, and the point of a collection screen is to show what exists. */
+  &[data-state='unknown'] {
+    border-top-color: color-mix(in srgb, var(--mv-tier) 40%, transparent);
 
     img {
       filter: grayscale(1) brightness(0.6);
     }
-  }
 
-  &[data-state='unknown'] {
-    opacity: 0.35;
+    .name {
+      color: $muted;
+    }
   }
 }
 
 .portrait {
+  position: relative;
   display: grid;
   place-items: center;
   width: 100%;
@@ -116,10 +202,20 @@
   }
 }
 
-.silhouette {
-  color: $muted-deep;
-  font-family: $font-mono;
-  font-size: 1.4rem;
+/* The affinity, as a corner pip. The second thing a collector reads after rarity, and the
+   one a team is built around — but a full badge on a 100px tile is a badge with a face
+   behind it, so it is a dot. The name is on the tooltip. */
+.affinity {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--mv-affinity, #{$muted});
+  box-shadow:
+    0 0 4px var(--mv-affinity, #{$muted}),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45);
 }
 
 .name {
@@ -129,13 +225,29 @@
   line-height: 1.2;
 }
 
+/* The one line under the name: how far the best copy got, and how many there are. A tile
+   that says nothing there — never met — says so quietly rather than leaving a hole the
+   grid has to close. */
+.marks {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 0.62rem;
+  line-height: 1.2;
+
+  &[data-quiet='true'] {
+    color: $muted-deep;
+  }
+}
+
+.rank {
+  color: $gold;
+  letter-spacing: -1px;
+}
+
 .copies {
-  position: absolute;
-  top: 3px;
-  right: 4px;
   color: $accent;
   font-family: $font-mono;
-  font-size: 0.65rem;
 }
 
 .progress {

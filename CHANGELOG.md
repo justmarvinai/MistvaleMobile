@@ -5,6 +5,34 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the Chronicle is a faction index, and it hides nothing
+
+Two hundred faces in one flat grid could not answer the question a collector actually
+asks, which is "which of the Sacred Order am I still missing". It is a shelf per faction
+now, in content's own order, each with its own `owned/total` — the shape the genre uses,
+and the reference the owner pointed at.
+
+The per-faction tally counts the whole faction rather than what the filter left showing.
+"Vale Sentinels 1/6" has to mean the same thing whether or not "Still missing" is pressed;
+filtering the tiles and filtering the tally are different questions and only one of them
+was asked.
+
+**Nothing is hidden any more** (the owner's call). A champion never encountered drew a
+question mark and the word `???`, on the theory that a gap should be visible without
+spoiling what fills it. In practice a wall of question marks is a wall of nothing: it
+cannot be planned against, and the whole point of a collection tracker is to show what
+exists. Every champion is drawn with their real face and real name; the ones you do not
+hold are simply grey.
+
+And the tile says more than a face and a name without becoming a card. The **rarity** is
+its frame — it is what a summon is judged by, and it is now on every tile rather than only
+the owned ones — and the **affinity** is a corner pip, because that is what a team is built
+around. The rest is on the hover: role, faction, the champion's title, their lore, how many
+copies are held and the best rank among them.
+
+The grouping rules moved into `screens/Chronicle/shelves.ts` and are tested, because each
+of them is a way the index could go quietly wrong and be believed.
+
 ### Changed — the tutorial says what to do
 
 Fifteen steps of the Wardenmaster's voice with the actual instruction buried somewhere
