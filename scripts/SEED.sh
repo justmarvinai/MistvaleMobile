@@ -8,6 +8,11 @@
 #
 #   default          load seeds only into EMPTY content tables (safe, idempotent,
 #                    run on every deploy — never overwrites authored content)
+#   --replace <type>  overwrite ONE named content family from the seeds, leaving
+#                     every other type alone. For a release that *rewrites*
+#                     something already published — the tutorial's script, a set
+#                     of quest descriptions — which the default can never deliver
+#                     because it only adds. Backed up and confirmed like a force.
 #   --force-content  full content refresh from the seeds: takes a backup first,
 #                    requires a typed confirmation, and NEVER touches player data
 #
@@ -33,6 +38,9 @@ ${C_BOLD}SEED.sh${C_RESET} — load content seeds (empty tables only, unless for
   Usage: SEED.sh [options]
 
   Options:
+    --replace <types> re-seed only the named content types (comma-separated),
+                      e.g. --replace tutorialStep. Everything else is untouched.
+                      Takes a backup and asks for confirmation, like a force.
     --force-content   re-seed ALL content definition tables from git seeds.
                       Takes a database backup first and asks for a typed
                       confirmation. Player data is never touched.
@@ -47,6 +55,7 @@ ${C_BOLD}SEED.sh${C_RESET} — load content seeds (empty tables only, unless for
 
   Examples:
     sudo -u ${APP_USER} ${SCRIPTS_DIR}/SEED.sh
+    sudo ${SCRIPTS_DIR}/SEED.sh --replace tutorialStep
     sudo ${SCRIPTS_DIR}/SEED.sh --force-content
 
   Notes:
@@ -60,12 +69,18 @@ EOF
 FORCE_CONTENT=0
 SKIP_BACKUP=0
 RESTART=0
+REPLACE_TYPES=
 
 while (($# > 0)); do
 	case "$1" in
 	-h | --help)
 		usage
 		exit 0
+		;;
+	--replace)
+		[[ -n "${2:-}" ]] || die "--replace needs a content type, e.g. --replace tutorialStep"
+		REPLACE_TYPES="$2"
+		shift 2
 		;;
 	--force-content)
 		FORCE_CONTENT=1
@@ -100,6 +115,34 @@ require_env DATABASE_URL
 db_reachable || die "cannot reach the database ($(mask_db_url "${DATABASE_URL}")) — is PostgreSQL running?"
 
 # -----------------------------------------------------------------------------
+# Targeted replace: the same guards as a force, scoped to the named types.
+# -----------------------------------------------------------------------------
+if [[ -n "${REPLACE_TYPES}" ]]; then
+	((FORCE_CONTENT == 1)) && die "--replace and --force-content do the same job at different scales; pick one"
+
+	step "Replacing content: ${REPLACE_TYPES}"
+
+	confirm "REPLACE" \
+		"This replaces every ${REPLACE_TYPES} entity with the git seeds. Anything authored for those types in the Admin Suite WILL BE LOST. Every other content type, and all player data, is untouched."
+
+	if ((SKIP_BACKUP == 0)); then
+		log "taking a safety backup first (BACKUP.sh)"
+		BACKUP_ARGS=(--label pre-replace)
+		((QUIET == 1)) && BACKUP_ARGS+=(--quiet)
+		"${SCRIPTS_DIR}/BACKUP.sh" "${BACKUP_ARGS[@]}" ||
+			die "backup failed — refusing to replace content without a fresh backup (override with --skip-backup)"
+	else
+		warn "--skip-backup given: replacing without a fresh backup"
+	fi
+
+	# Same reasoning as a force: a running server holds the old content in its
+	# in-memory cache, so the restart is part of the operation.
+	if svc_active "${SERVICE}"; then
+		RESTART=1
+	fi
+fi
+
+# -----------------------------------------------------------------------------
 # Forced re-seed: back up, confirm, then hand over to the server command.
 # -----------------------------------------------------------------------------
 if ((FORCE_CONTENT == 1)); then
@@ -131,6 +174,7 @@ fi
 step "Seeding content"
 SEED_ARGS=()
 ((FORCE_CONTENT == 1)) && SEED_ARGS+=(--force-content)
+[[ -n "${REPLACE_TYPES}" ]] && SEED_ARGS+=(--replace "${REPLACE_TYPES}")
 
 if ((${#SEED_ARGS[@]} > 0)); then
 	run_server_entry "${ENTRY_SEED}" "${SCRIPT_SEED}" "${SEED_ARGS[@]}" || die "seeding failed"
