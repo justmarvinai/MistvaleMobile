@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { BattleEvent, UnitRef } from '@mistvale/engine';
 import type { MultiBattleRequest, MultiBattleResult } from '@mistvale/shared';
+import { ApiRequestError } from '../api/client';
 import { gameApi, newActionId, type BattleView } from '../api/game';
 import {
   applyAll,
@@ -242,6 +243,7 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
         set({ busy: false });
         adopt(battle, 0);
       } catch (cause) {
+        if (await recoverOpenBattle(cause, get, set)) return;
         set({ busy: false, error: messageOf(cause) });
         throw cause;
       }
@@ -257,6 +259,7 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
         set({ busy: false });
         adopt(battle, 0);
       } catch (cause) {
+        if (await recoverOpenBattle(cause, get, set)) return;
         set({ busy: false, error: messageOf(cause) });
         throw cause;
       }
@@ -471,4 +474,32 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
 
 function messageOf(cause: unknown): string {
   return cause instanceof Error ? cause.message : 'Something went wrong.';
+}
+
+/**
+ * Turns "you are already in a battle" into being in that battle.
+ *
+ * The refusal is correct — one fight at a time — but on its own it is a dead end, and for a
+ * while it was a *permanent* one. Which screen you are on is a value in a store rather than
+ * a URL, so a reload lands on the Haven; `BattleScreen` is what asks to resume and it never
+ * mounted; the session stayed active forever and every attempt to start anything answered
+ * with this. The account needed an operator to reset it.
+ *
+ * The shell resumes on sign-in now, which is the main road. This is the guard rail beside
+ * it: whatever produced an open fight the client had lost track of, the first thing the
+ * player does afterwards puts them back in it rather than telling them they cannot play.
+ *
+ * Returns true when it recovered, so the caller neither reports an error nor rethrows —
+ * from the player's side the press worked, they are simply in the fight they already had.
+ */
+async function recoverOpenBattle(
+  cause: unknown,
+  get: () => BattleStoreState,
+  set: (partial: Partial<BattleStoreState>) => void,
+): Promise<boolean> {
+  if (!(cause instanceof ApiRequestError) || cause.code !== 'ALREADY_EXISTS') return false;
+  await get().resume();
+  const recovered = get().battle?.status === 'active';
+  if (recovered) set({ error: null });
+  return recovered;
 }

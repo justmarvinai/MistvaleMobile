@@ -30,6 +30,7 @@ import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screen
 import { useNavStore } from '@/state/navStore';
 import { useTutorialStore } from '@/state/tutorialStore';
 import { useLoadoutStore } from '@/state/loadoutStore';
+import { useBattleStore } from '@/state/battleStore';
 import { useUnlockStore } from '@/state/unlockStore';
 import { resetAccountState } from '@/state/resetAccount';
 import { TopBar } from './TopBar';
@@ -150,6 +151,28 @@ export function App() {
   );
 }
 
+/**
+ * The room a fight belongs to, for a battle resumed without any navigation behind it.
+ *
+ * The practice sandbox is reached from the campaign, and the tutorial's cold open is fought
+ * before there is anywhere else to be — so both land where a player would expect to be put
+ * down rather than where the fight was technically opened.
+ */
+function screenForMode(mode: string): ScreenId {
+  switch (mode) {
+    case 'arena':
+      return 'arena';
+    case 'dungeon':
+    case 'springs':
+    case 'proving':
+      return 'depths';
+    case 'tutorial':
+      return 'haven';
+    default:
+      return 'campaign';
+  }
+}
+
 /** The signed-in game shell: resource bar, current screen, navigation dock. */
 function GameShell() {
   const screen = useNavStore((state) => state.screen);
@@ -182,6 +205,40 @@ function GameShell() {
   useEffect(() => {
     if (account) adoptLoadout(account.id);
   }, [account, adoptLoadout]);
+
+  /**
+   * A fight that is still open, picked back up.
+   *
+   * This is the one piece of navigation the shell does on the player's behalf, and it is
+   * here because of how badly the alternative failed. Which screen you are on is a value in
+   * a store, not a URL — so a reload always lands on the Haven. `BattleScreen` asks to
+   * resume when it mounts, but after a reload it never mounts, so nothing ever asked. The
+   * session stayed `active` forever and every later start answered "You are already in a
+   * battle", about a fight the player had no way to reach, finish or retreat from. It took
+   * an operator resetting the account.
+   *
+   * Resuming rather than discarding, because the fight is real: the energy is spent, the
+   * board is stored, and the server can hand back exactly where it stopped. Losing it would
+   * be charging somebody for a battle and then deleting it.
+   *
+   * Once per sign-in, and only from a resting screen — `setScreen` is a no-op onto the
+   * screen you are already on, but reading the guard out loud is what stops this ever
+   * yanking somebody out of what they are doing.
+   */
+  const resumeBattle = useBattleStore((state) => state.resume);
+  const enterFrom = useNavStore((state) => state.enterFrom);
+  useEffect(() => {
+    if (!account) return;
+    void resumeBattle().then(() => {
+      const { battle } = useBattleStore.getState();
+      if (battle?.status !== 'active') return;
+      if (useNavStore.getState().screen !== 'haven') return;
+      // Entered *from* the room the fight belongs to, so the results panel's "Back to the
+      // campaign" goes to the campaign. A reload has no history to remember, and the fight
+      // itself is the only thing that knows where it came from.
+      enterFrom('battle', screenForMode(battle.mode));
+    });
+  }, [account, resumeBattle, enterFrom]);
 
   // A step's goal is completed by *doing the thing*, and the module that did it reports to
   // the server rather than to the overlay. Re-reading on every screen change is what turns

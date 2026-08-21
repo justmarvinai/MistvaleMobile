@@ -14,6 +14,16 @@ interface NavState {
   /** Where "back" goes from a full-screen takeover like the battle. */
   previous: ScreenId;
   setScreen: (screen: ScreenId) => void;
+  /**
+   * Puts the player on a screen as if they had walked there from `from`.
+   *
+   * For the one case where they did not walk anywhere: the shell resuming a fight that was
+   * still open when the browser closed. `setScreen` would record the Haven as the way back,
+   * because that is where a reload lands — so the results panel's "Back to the campaign"
+   * would deposit somebody on the Haven. The fight knows which room it belongs to; this is
+   * how it says so.
+   */
+  enterFrom: (screen: ScreenId, from: ScreenId) => void;
   back: () => void;
 }
 
@@ -23,6 +33,9 @@ export const useNavStore = create<NavState>((set, get) => ({
   setScreen(screen) {
     if (screen === get().screen) return;
     set({ screen, previous: get().screen });
+  },
+  enterFrom(screen, from) {
+    set({ screen, previous: from });
   },
   back() {
     set({ screen: get().previous, previous: 'haven' });
