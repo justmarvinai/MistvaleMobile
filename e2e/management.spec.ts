@@ -202,9 +202,12 @@ test.describe('the management loop', () => {
     // A fresh warden is nowhere near it, and that is the point: the dock shows it as a
     // teaser rather than hiding it, so the player can see what is coming
     // (docs/UI_UX_DESIGN.md §2, docs/GAME_DESIGN.md §12).
+    // The *dock* item, as the comment above says — its own text is the label and a badge
+    // count, and the "when" lives in a native `title`. The Haven's stations are the ones
+    // that moved to painted tooltips and say it in visible text.
     const bazaar = page.getByRole('button', { name: /^bazaar$/i }).first();
     await expect(bazaar).toBeVisible();
     await expect(bazaar).toHaveAttribute('aria-disabled', 'true');
-    await expect(bazaar).toContainText(/level 5/i);
+    await expect(bazaar).toHaveAttribute('title', /level 5/i);
   });
 });
