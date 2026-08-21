@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ChampionDetail, GearSetDef, GearSlot, Stat } from '@mistvale/shared';
+import type { ChampionDetail, GearInstance, GearSetDef, GearSlot, Stat } from '@mistvale/shared';
 import { GEAR_SLOTS } from '@mistvale/shared';
 import { ArtifactSet } from '@/fui/components/ArtifactSet.ts';
 import { SkillCard } from '@/fui/components/SkillCard.ts';
@@ -23,6 +23,8 @@ import styles from './ChampionDetail.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Icon } from '../../ui/Icon/Icon';
 import { ChampionIdle } from '../../ui/ChampionIdle/ChampionIdle';
+import { useTip } from '../../ui/Tooltip/useTooltip';
+import { emptySocketTip, relicTip } from '../../ui/Tooltip/tips';
 
 /** A set's bonus as one readable line — the same numbers the engine applies. */
 function setEffect(set: GearSetDef): string {
@@ -147,9 +149,15 @@ export function ChampionDetailModal({
    * Only sets with a piece on this champion appear: listing all sixteen would be a
    * catalogue rather than a status, and the catalogue lives in the vault.
    */
-  const setProgress = (() => {
+  /** How many pieces of each set are on, which both the bonus panel and each socket want. */
+  const setCounts = (() => {
     const counts = new Map<string, number>();
     for (const relic of detail.gear) counts.set(relic.setKey, (counts.get(relic.setKey) ?? 0) + 1);
+    return counts;
+  })();
+
+  const setProgress = (() => {
+    const counts = setCounts;
     const active = new Map(stats.setBonuses.map((bonus) => [bonus.setKey, bonus]));
     return [...counts.entries()]
       .flatMap(([key, have]) => {
@@ -389,65 +397,21 @@ export function ChampionDetailModal({
                   const worn = wornBySlot.get(slot);
                   const slotDef = bundle?.gearSlots.find((entry) => entry.key === slot);
                   const locked = (slotDef?.ascensionRequired ?? 0) > champion.ascension;
-                  const setName = worn
-                    ? (bundle?.gearSets.find((entry) => entry.key === worn.setKey)?.name ??
-                      worn.setKey)
-                    : null;
+                  const set = worn
+                    ? bundle?.gearSets.find((entry) => entry.key === worn.setKey)
+                    : undefined;
                   return (
-                    <button
+                    <RelicSocket
                       key={slot}
-                      type="button"
-                      className={styles.slot}
+                      slot={slot}
+                      worn={worn}
+                      set={set}
+                      wearing={worn ? (setCounts.get(worn.setKey) ?? 0) : 0}
+                      locked={locked}
+                      lockedAt={slotDef?.ascensionRequired ?? 0}
                       disabled={locked || busy}
-                      onClick={() => setSlotPicking(slot)}
-                      title={
-                        locked
-                          ? `Needs ascension ${slotDef?.ascensionRequired}`
-                          : worn
-                            ? `${setName} · +${worn.level}`
-                            : `Empty ${SLOT_LABEL[slot]}`
-                      }
-                    >
-                      {/* The socket is the slot's picture, not a second control — see the
-                        Haven's stations for the same reasoning. */}
-                      <Fui
-                        of={Slot}
-                        className={styles.slotSocket}
-                        options={{
-                          size: 'lg',
-                          locked,
-                          item: worn
-                            ? {
-                                icon: relicArt(slot),
-                                name: setName ?? slot,
-                                rarity: worn.rarity,
-                              }
-                            : null,
-                          placeholder: relicGlyph(slot),
-                        }}
-                        attrs={{
-                          role: 'presentation',
-                          tabindex: undefined,
-                          'aria-label': undefined,
-                          title: undefined,
-                        }}
-                        // Options are construction-time. Without this the socket kept
-                        // whatever it was built holding: equip a relic and the slot stayed
-                        // empty, take one off and it stayed full, until the sheet was closed
-                        // and re-opened. The numbers above it were right the whole time,
-                        // which is what made it read as the game losing the change.
-                        apply={(socket, next) => socket.setItem(next.item ?? null)}
-                      />
-                      <span className={styles.slotName}>{SLOT_LABEL[slot]}</span>
-                      {worn ? (
-                        <span className={styles.slotMain}>
-                          {statLabel(worn.main.stat)} +{worn.main.value}
-                          {worn.main.percent ? '%' : ''} · +{worn.level}
-                        </span>
-                      ) : (
-                        <span className={styles.slotEmpty}>{locked ? 'Locked' : 'Empty'}</span>
-                      )}
-                    </button>
+                      onOpen={() => setSlotPicking(slot)}
+                    />
                   );
                 })}
               </div>
@@ -555,3 +519,95 @@ export const STAT_ORDER: readonly Stat[] = [
   'res',
   'acc',
 ];
+
+/**
+ * One of the nine relic slots on a champion.
+ *
+ * Its own component for two reasons that arrived together. A tooltip is a hook, and nine
+ * of them cannot be called from inside a `map`. And the socket is the place the owner
+ * found the game at its least legible: a painted icon, the slot's name and "+20 · +1",
+ * with **no indication of rarity at all** — so a legendary weapon and a common one were
+ * the same grey row, and the one fact that decides whether a piece is worth forging was
+ * the one fact the sheet did not show.
+ *
+ * The rarity now colours the cell itself, not only the socket's own faint inner glow, and
+ * the set's name sits under the slot in that colour — because the set is what a player
+ * calls the piece and it is what the colour is *about*.
+ */
+function RelicSocket({
+  slot,
+  worn,
+  set,
+  wearing,
+  locked,
+  lockedAt,
+  disabled,
+  onOpen,
+}: {
+  slot: GearSlot;
+  worn: GearInstance | undefined;
+  set: GearSetDef | undefined;
+  /** Pieces of this set already on the champion, for the tooltip's progress line. */
+  wearing: number;
+  locked: boolean;
+  lockedAt: number;
+  disabled: boolean;
+  onOpen: () => void;
+}): JSX.Element {
+  const tip = worn
+    ? relicTip(worn, { set, wearing, hint: 'Click to change it' })
+    : emptySocketTip(slot, locked ? lockedAt : undefined);
+  const ref = useTip(tip);
+  const setName = set?.name ?? worn?.setKey ?? null;
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={styles.slot}
+      // The rarity is on the cell, where it can be seen, rather than only inside the
+      // library's socket where it is a four-pixel glow behind a painted icon.
+      data-rarity={worn?.rarity ?? undefined}
+      data-filled={Boolean(worn)}
+      disabled={disabled}
+      onClick={onOpen}
+    >
+      {/* The socket is the slot's picture, not a second control — see the Haven's
+          stations for the same reasoning. */}
+      <Fui
+        of={Slot}
+        className={styles.slotSocket}
+        options={{
+          size: 'lg',
+          locked,
+          item: worn ? { icon: relicArt(slot), name: setName ?? slot, rarity: worn.rarity } : null,
+          placeholder: relicGlyph(slot),
+        }}
+        attrs={{
+          role: 'presentation',
+          tabindex: undefined,
+          'aria-label': undefined,
+          title: undefined,
+        }}
+        // Options are construction-time. Without this the socket kept whatever it was
+        // built holding: equip a relic and the slot stayed empty, take one off and it
+        // stayed full, until the sheet was closed and re-opened. The numbers above it
+        // were right the whole time, which is what made it read as the game losing the
+        // change.
+        apply={(socket, next) => socket.setItem(next.item ?? null)}
+      />
+      <span className={styles.slotName}>{SLOT_LABEL[slot]}</span>
+      {worn ? (
+        <>
+          <span className={styles.slotSet}>{setName}</span>
+          <span className={styles.slotMain}>
+            {statLabel(worn.main.stat)} +{worn.main.value}
+            {worn.main.percent ? '%' : ''} · +{worn.level}
+          </span>
+        </>
+      ) : (
+        <span className={styles.slotEmpty}>{locked ? 'Locked' : 'Empty'}</span>
+      )}
+    </button>
+  );
+}

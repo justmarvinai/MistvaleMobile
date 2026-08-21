@@ -43,3 +43,11 @@
 .total {
   color: $parchment;
 }
+
+/* The label carries the row's tooltip, so it says so: a dotted underline is the oldest
+   convention there is for "there is more here", and it costs one line. */
+.rowLabel {
+  cursor: help;
+  text-decoration: underline dotted color-mix(in srgb, #{$muted} 60%, transparent);
+  text-underline-offset: 3px;
+}

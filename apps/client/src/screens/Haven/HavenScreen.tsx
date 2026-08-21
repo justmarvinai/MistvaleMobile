@@ -5,8 +5,14 @@ import { useRosterStore } from '@/state/rosterStore';
 import { Heading } from '@/ui/Heading/Heading';
 import { Panel } from '@/ui/Panel/Panel';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
-import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from '@/app/screens';
+import {
+  DOCK_SCREENS,
+  isScreenUnlocked,
+  type ScreenDefinition,
+  type ScreenId,
+} from '@/app/screens';
 import { StarterChoice } from './StarterChoice';
+import { useTip } from '@/ui/Tooltip/useTooltip';
 import styles from './HavenScreen.module.scss';
 
 /**
@@ -86,42 +92,79 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
           {stations.map((screen) => {
             const unlocked = isScreenUnlocked(screen, unlocks);
             return (
-              <button
+              <Station
                 key={screen.id}
-                type="button"
-                className={`${styles.station} ${unlocked ? '' : styles.shrouded}`}
-                onClick={() => unlocked && onNavigate(screen.id)}
-                aria-disabled={!unlocked}
-                title={unlocked ? undefined : screen.lockedHint}
-              >
-                <Fui
-                  of={Slot}
-                  className={styles.stationSocket}
-                  options={{
-                    size: 'lg',
-                    locked: !unlocked,
-                    item: { icon: screen.art, name: screen.label },
-                  }}
-                  // The socket is the station's *picture*, not a second control. `Slot` is
-                  // built to be one — an inventory cell you click — so left alone it
-                  // renders a focusable `role="button"` inside this button, which is a
-                  // control a screen reader announces and a keyboard lands on with nothing
-                  // to do. The station around it already carries the name, the tooltip and
-                  // the click.
-                  attrs={{
-                    role: 'presentation',
-                    tabindex: undefined,
-                    'aria-label': undefined,
-                    title: undefined,
-                  }}
-                />
-                <span className={styles.stationLabel}>{screen.label}</span>
-                {!unlocked && <span className={styles.stationHint}>{screen.lockedHint}</span>}
-              </button>
+                screen={screen}
+                unlocked={unlocked}
+                onNavigate={() => onNavigate(screen.id)}
+              />
             );
           })}
         </section>
       </div>
     </div>
+  );
+}
+
+/**
+ * One place in the Haven.
+ *
+ * Its own component so it can carry a painted tooltip — a hook, and there are nine of them
+ * in a map. What the tooltip adds is what the card cannot: what you go there *for*. A
+ * shrouded station said "Reach level 8" in a native `title` and an open one said nothing
+ * at all, so the Haven's whole job — showing a player what the game has and what is still
+ * ahead of them — was carried by nine icons and nine words.
+ */
+function Station({
+  screen,
+  unlocked,
+  onNavigate,
+}: {
+  screen: ScreenDefinition;
+  unlocked: boolean;
+  onNavigate: () => void;
+}): JSX.Element {
+  const ref = useTip({
+    title: screen.label,
+    subtitle: unlocked ? 'Open' : 'Shrouded',
+    ...(screen.blurb ? { flavor: screen.blurb } : {}),
+    ...(unlocked
+      ? { hint: 'Click to go there' }
+      : screen.lockedHint
+        ? { requires: [screen.lockedHint] }
+        : {}),
+  });
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={`${styles.station} ${unlocked ? '' : styles.shrouded}`}
+      onClick={() => unlocked && onNavigate()}
+      aria-disabled={!unlocked}
+    >
+      <Fui
+        of={Slot}
+        className={styles.stationSocket}
+        options={{
+          size: 'lg',
+          locked: !unlocked,
+          item: { icon: screen.art, name: screen.label },
+        }}
+        // The socket is the station's *picture*, not a second control. `Slot` is built to
+        // be one — an inventory cell you click — so left alone it renders a focusable
+        // `role="button"` inside this button, which is a control a screen reader announces
+        // and a keyboard lands on with nothing to do. The station around it already
+        // carries the name, the tooltip and the click.
+        attrs={{
+          role: 'presentation',
+          tabindex: undefined,
+          'aria-label': undefined,
+          title: undefined,
+        }}
+      />
+      <span className={styles.stationLabel}>{screen.label}</span>
+      {!unlocked && <span className={styles.stationHint}>{screen.lockedHint}</span>}
+    </button>
   );
 }

@@ -1,5 +1,7 @@
 import type { ChampionStats, Stat } from '@mistvale/shared';
 import { STAT_ORDER, statLabel } from '../../ui/statLabels';
+import { useTip } from '../../ui/Tooltip/useTooltip';
+import { statTip } from '../../ui/Tooltip/tips';
 import styles from './StatTable.module.scss';
 
 /**
@@ -11,6 +13,13 @@ import styles from './StatTable.module.scss';
  *
  * Masteries earn their own column rather than being folded into the relic one because they
  * are a *different decision* — relics are farmed and swapped, masteries are committed to.
+ *
+ * Every row says what its stat *does* on hover. Four of the eight are self-evident and
+ * four are not: speed decides how often a champion acts and is what most fights are
+ * actually settled by; accuracy and resistance are a pair, and neither means anything
+ * without the other; critical damage is a multiplier that does nothing without a rate to
+ * trigger it. A table that lists eight numbers and explains none of them is a table a new
+ * player cannot read, and this one is the first build decision the game asks for.
  */
 
 /** Stats measured in percentage points get a % suffix; the rest are magnitudes. */
@@ -29,27 +38,50 @@ export function StatTable({ stats }: { stats: ChampionStats }): JSX.Element {
         </tr>
       </thead>
       <tbody>
-        {STAT_ORDER.map((stat) => {
-          const bonus = Math.round(stats.gear[stat]);
-          const learned = Math.round(stats.mastery?.[stat] ?? 0);
-          return (
-            <tr key={stat}>
-              <th scope="row">{statLabel(stat)}</th>
-              <td>{Math.round(stats.base[stat]).toLocaleString()}</td>
-              <td className={bonus > 0 ? styles.bonus : styles.zero}>
-                {bonus > 0 ? `+${bonus.toLocaleString()}` : '—'}
-              </td>
-              <td className={learned > 0 ? styles.bonus : styles.zero}>
-                {learned > 0 ? `+${learned.toLocaleString()}` : '—'}
-              </td>
-              <td className={styles.total}>
-                {Math.round(stats.total[stat]).toLocaleString()}
-                {PERCENT.has(stat) ? '%' : ''}
-              </td>
-            </tr>
-          );
-        })}
+        {STAT_ORDER.map((stat) => (
+          <StatRow key={stat} stat={stat} stats={stats} />
+        ))}
       </tbody>
     </table>
+  );
+}
+
+/**
+ * One row.
+ *
+ * A component because a tooltip is a hook, and eight of them cannot be called from inside
+ * a map. The tooltip is attached to the row's *label* rather than the row: a `<tr>` in a
+ * table with collapsed borders has a box a pointer can be inside without being over any
+ * cell, which puts the card in a different place depending on where in the gap you are.
+ */
+function StatRow({ stat, stats }: { stat: Stat; stats: ChampionStats }): JSX.Element {
+  const bonus = Math.round(stats.gear[stat]);
+  const learned = Math.round(stats.mastery?.[stat] ?? 0);
+  const ref = useTip(
+    statTip(stat, {
+      base: stats.base[stat],
+      gear: stats.gear[stat],
+      masteries: stats.mastery?.[stat] ?? 0,
+      total: stats.total[stat],
+    }),
+  );
+
+  return (
+    <tr>
+      <th scope="row" ref={ref} className={styles.rowLabel}>
+        {statLabel(stat)}
+      </th>
+      <td>{Math.round(stats.base[stat]).toLocaleString()}</td>
+      <td className={bonus > 0 ? styles.bonus : styles.zero}>
+        {bonus > 0 ? `+${bonus.toLocaleString()}` : '—'}
+      </td>
+      <td className={learned > 0 ? styles.bonus : styles.zero}>
+        {learned > 0 ? `+${learned.toLocaleString()}` : '—'}
+      </td>
+      <td className={styles.total}>
+        {Math.round(stats.total[stat]).toLocaleString()}
+        {PERCENT.has(stat) ? '%' : ''}
+      </td>
+    </tr>
   );
 }

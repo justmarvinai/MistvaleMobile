@@ -20,6 +20,21 @@
   line-height: 1.4;
 }
 
+/* Items carry their rarity here as well as everywhere else. A wallet key has no rarity
+   and keeps the plain edge, which is right: silver is not common, it is silver. */
+.reward[data-rarity='uncommon'] {
+  border-color: color-mix(in srgb, #{$rarity-uncommon} 55%, transparent);
+}
+.reward[data-rarity='rare'] {
+  border-color: color-mix(in srgb, #{$rarity-rare} 60%, transparent);
+}
+.reward[data-rarity='epic'] {
+  border-color: color-mix(in srgb, #{$rarity-epic} 65%, transparent);
+}
+.reward[data-rarity='legendary'] {
+  border-color: color-mix(in srgb, #{$rarity-legendary} 70%, transparent);
+}
+
 .amount {
   color: $gold;
   font-family: $font-mono;

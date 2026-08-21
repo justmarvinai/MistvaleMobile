@@ -5,6 +5,57 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a tooltip inside a dialog was drawn behind the dialog
+
+The shared tooltip sat at `z-index: 900` and `$z-modal` is 1000, so every painted tooltip
+opened inside a dialog rendered *underneath* it. The three that worked were the three on
+the shell — the currency cells and the hotbar. Every one added since would have been
+invisible, which is most of them: the champion sheet, the relic slot, the food picker, the
+team choosers. It is above the toasts as well now, on the same reasoning — a tooltip
+belongs to the pointer, and nothing the pointer is on should be able to cover it.
+
+### Added — the game explains itself on hover
+
+`ui/Tooltip/tips.ts` is the wording, kept out of React the way the combat tips already are,
+because these sentences are the game teaching its own rules and a sentence written inside a
+component is a sentence nobody checks again. One builder per kind of thing, so a relic
+answers the same question wherever it is hovered.
+
+- **Relics** — which set, what the set does, and **how far off complete it is**. That last
+  one is the question a player actually has while looking at a socket, and the only place
+  it was answered was a panel two tabs away.
+- **Rewards** — every chip in the game, which is the most repeated element there is:
+  quests, missions, events, the calendar, mail, the shop, and the results screen the owner
+  named. "1 Gleaming Sigil" is complete information to somebody who has played a week and
+  nothing at all to somebody on their first evening, which is exactly who is reading it.
+  Items carry their own published description and rarity.
+- **Champions** — the two facts a 150px card has no room for and a player picking a team is
+  asking: which affinity this one brings, and how much of its kit is actually on.
+- **Stats** — four of the eight cannot be guessed. Speed decides how often a champion acts
+  and is what most fights are settled by; accuracy and resistance are a pair and neither
+  means anything alone; critical damage does nothing without a rate to trigger it. The row
+  also breaks its total into base, relics and masteries.
+- **Mastery nodes** — where the *refusal* goes. A node you cannot take yet had its reason
+  in a native `title`: the browser's grey box, three seconds late, in the operating
+  system's font. That sentence is the whole of what the player needs.
+- **The Haven's stations** — what you go there *for*, which nine icons and nine words could
+  never say. `ScreenDefinition.blurb` is where those live.
+
+`Fui` and `FuiSlotted` take a `tip` now, so any library-painted component can carry one in
+a line — which is what made the champion cards and the relic cards cheap.
+
+### Changed — equipped relics carry their rarity
+
+The champion sheet drew a painted icon, the slot's name and "+20 · +1" in the same grey for
+a common relic and a legendary one — so the single fact that decides whether a piece is
+worth forging was the one fact the sheet did not show. The library's socket does tint
+itself, but as a four-pixel glow behind a 64px icon, which is legible on a bare square and
+invisible in a row with a name beside it.
+
+The cell carries it now: the border, a wash of the colour behind it, and **the set's name
+in that colour** — because the set is what a player calls the piece and it is what the
+colour is about. One `--mv-relic` per rarity drives all three.
+
 ### Changed — the Mistgate is worth going to, and the pull is worth watching
 
 The gate was a 9rem circle above two buttons, and the reveal was ten cards turning over

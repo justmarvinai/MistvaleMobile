@@ -1,6 +1,8 @@
 import { useCallback, useLayoutEffect, useRef, useState, type JSX, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type { BaseOptions } from './core/component.ts';
+import type { TooltipOptions } from './components/Tooltip.ts';
+import { useTooltip } from '@/ui/Tooltip/useTooltip';
 
 /**
  * The seam between React and FantasyUIs.
@@ -209,6 +211,7 @@ export function Fui<T extends Instance, O extends FuiOptionsOf>({
   apply,
   className,
   attrs,
+  tip,
   ...rest
 }: {
   of: FuiCtor<T, O>;
@@ -232,9 +235,12 @@ export function Fui<T extends Instance, O extends FuiOptionsOf>({
   className?: string;
   /** Written to the component's own element — see `useFuiAttrs`. */
   attrs?: FuiAttrs;
+  /** A painted tooltip on the component's own element — see `useTooltip`. */
+  tip?: TooltipOptions | null;
 } & Omit<JSX.IntrinsicElements['div'], 'className' | 'children'>): JSX.Element {
   const { ref, instance } = useFui(of, withClass(options, className), on, apply);
   useFuiAttrs(instance?.el, attrs);
+  useTooltip(instance?.el, tip ?? null);
   return <div {...rest} ref={ref} style={CONTENTS} />;
 }
 
@@ -355,6 +361,7 @@ export function FuiSlotted<T extends Instance, O extends FuiOptionsOf>({
   slot,
   className,
   attrs,
+  tip,
   children,
   ...rest
 }: {
@@ -373,10 +380,13 @@ export function FuiSlotted<T extends Instance, O extends FuiOptionsOf>({
   className?: string;
   /** Written to the component's own element — see `useFuiAttrs`. */
   attrs?: FuiAttrs;
+  /** A painted tooltip on the component's own element — see `useTooltip`. */
+  tip?: TooltipOptions | null;
   children?: ReactNode;
 } & Omit<JSX.IntrinsicElements['div'], 'className' | 'children'>): JSX.Element {
   const { ref, instance } = useFui(of, withClass(options, className), on, apply);
   useFuiAttrs(instance?.el, attrs);
+  useTooltip(instance?.el, tip ?? null);
   // Null until the component is constructed, which is one render. Rendering the children
   // into nothing for that render is correct rather than a flash: the chrome is already on
   // screen, and the body fills in the same frame the portal target appears.

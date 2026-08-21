@@ -1,11 +1,19 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ARENA_TIERS, ARENA_TIER_LABELS, type ArenaTier } from '@mistvale/shared';
-import { ResultScreen, type ResultReward, type ResultStat } from '@/fui/components/ResultScreen.ts';
+import {
+  ResultScreen,
+  type ResultReward,
+  type ResultScreenOptions,
+  type ResultStat,
+} from '@/fui/components/ResultScreen.ts';
 import { useFui, useFuiAttrs } from '@/fui/react';
 import { useDialogLayer } from '../../ui/Modal/dialog';
 import { rewardArt } from '../../ui/Rewards/art';
 import { useRewardName } from '../../ui/Rewards/Rewards';
+import { useTooltip } from '../../ui/Tooltip/useTooltip';
+import { rewardTip } from '../../ui/Tooltip/tips';
+import type { TooltipOptions } from '@/fui/components/Tooltip.ts';
 import { useBattleStore } from '../../state/battleStore';
 import { useContentStore } from '../../state/contentStore';
 import styles from './Results.module.scss';
@@ -177,6 +185,34 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
     };
   }, [arena, nameOf, outcome, practice, rewards, stageName, won]);
 
+  /**
+   * One tooltip per chip, in the order the library builds them: experience, then silver,
+   * then the first-win rewards. Derived from the same options the card was built from, so
+   * the two cannot drift — a chip that appears without a tip here would be a chip the
+   * options never asked for.
+   */
+  const chipTips = useMemo<TooltipOptions[]>(() => {
+    // Only the victory branch of the options union pays anything, so the other four have
+    // no chips and no tips. Read through a narrowed view rather than four `in` checks.
+    const paid = options as Partial<ResultScreenOptions>;
+    const tips: TooltipOptions[] = [];
+    if (paid.xp) tips.push(rewardTip('playerXp', paid.xp, { name: 'Experience', signed: true }));
+    if (paid.gold) tips.push(rewardTip('silver', paid.gold, { name: 'Silver', signed: true }));
+    for (const chip of paid.rewards ?? []) {
+      // A chip's label is optional to the library and always set by this file, so an
+      // unlabelled one is a chip whose own name is the honest fallback.
+      const label = chip.label ?? chip.icon;
+      tips.push(
+        rewardTip(label, chip.qty ?? 1, {
+          name: label,
+          item: bundle?.items.find((entry) => entry.name === label),
+          signed: true,
+        }),
+      );
+    }
+    return tips;
+  }, [bundle, options]);
+
   const { ref, instance } = useFui(
     ResultScreen,
     { ...options, class: styles.result },
@@ -225,7 +261,56 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
   // high its z-index went, and the Wardenmaster's parchment swallowed the only button on
   // the victory screen. The overlay is deliberately below modals so the starter choice
   // can land on top of it; the result has to be up there with the modals to clear it.
-  return createPortal(<div ref={ref} style={{ display: 'contents' }} />, document.body);
+  return createPortal(
+    <>
+      <div ref={ref} style={{ display: 'contents' }} />
+      <ChipTips host={instance?.el ?? null} tips={chipTips} />
+    </>,
+    document.body,
+  );
+}
+
+/**
+ * Tooltips on the reward chips.
+ *
+ * The chips are the least legible thing the game shows a player, and they show it at the
+ * one moment a player is definitely looking: a 24px painted icon and "x2", with the
+ * library's own `title` attribute behind it — which is the browser's grey box, three
+ * seconds late, in the operating system's font, on a screen made entirely of painted
+ * nine-slices.
+ *
+ * Found by position inside the library's card, the same way the hotbar's are (`SkillTips`).
+ * Safe for the same reason: the chips are built from one list in one order, and the order
+ * is the one this file chose.
+ */
+function ChipTips({
+  host,
+  tips,
+}: {
+  host: HTMLElement | null;
+  tips: readonly TooltipOptions[];
+}): JSX.Element {
+  return (
+    <>
+      {tips.map((tip, index) => (
+        <ChipTip key={index} host={host} index={index} tip={tip} />
+      ))}
+    </>
+  );
+}
+
+function ChipTip({
+  host,
+  index,
+  tip,
+}: {
+  host: HTMLElement | null;
+  index: number;
+  tip: TooltipOptions;
+}): null {
+  const chip = host?.querySelectorAll<HTMLElement>('.fui-result__chip')[index] ?? null;
+  useTooltip(chip, tip);
+  return null;
 }
 
 /** Whether a tier change went up the ladder. Read off the canonical order, not the name. */

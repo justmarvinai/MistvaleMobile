@@ -13,6 +13,7 @@ import { Fui } from '@/fui/react';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
 import { useInventoryStore } from '../../state/inventoryStore';
+import { useTip } from '../../ui/Tooltip/useTooltip';
 import styles from './MasteryTrees.module.scss';
 
 /**
@@ -159,23 +160,16 @@ export function MasteryTrees({
                   const takeable = check?.ok === true;
 
                   return (
-                    <button
+                    <MasteryNode
                       key={entry.key}
-                      type="button"
-                      className={styles.node}
-                      data-learned={learned ? 'true' : undefined}
+                      node={entry}
+                      tier={tier}
+                      learned={learned}
+                      reason={check?.reason ?? undefined}
                       disabled={learned || !takeable || busy}
-                      title={learned ? 'Already learned.' : (check?.reason ?? entry.description)}
-                      onClick={() => onLearn(entry.key)}
-                    >
-                      <span className={styles.nodeName}>{entry.name}</span>
-                      <span className={styles.nodeText}>{entry.description}</span>
-                      {!learned && (
-                        <span className={styles.nodeCost}>
-                          {costLine(tierCosts[tier], held, itemName)}
-                        </span>
-                      )}
-                    </button>
+                      cost={costLine(tierCosts[tier], held, itemName)}
+                      onLearn={() => onLearn(entry.key)}
+                    />
                   );
                 })}
               </div>
@@ -227,4 +221,59 @@ function costLine(
   const have = held(cost.itemKey);
   const name = itemName(cost.itemKey);
   return `${cost.amount} ${name}${have < cost.amount ? ` · you have ${have}` : ''}`;
+}
+
+/**
+ * One node of a tree.
+ *
+ * Its own component so it can carry a painted tooltip — a hook, and forty-eight of them
+ * cannot be called from inside two nested maps.
+ *
+ * The tooltip is where the *refusal* goes. A node the champion cannot take yet was a
+ * greyed button whose reason lived in a native `title`: the browser's grey box, three
+ * seconds late, saying "Spend 2 more points in this tier first" in the operating system's
+ * font. That sentence is the whole of what a player needs and it was the least visible
+ * text on the screen.
+ */
+function MasteryNode({
+  node,
+  tier,
+  learned,
+  reason,
+  disabled,
+  cost,
+  onLearn,
+}: {
+  node: MasteryDef;
+  tier: number;
+  learned: boolean;
+  reason: string | undefined;
+  disabled: boolean;
+  cost: string;
+  onLearn: () => void;
+}): JSX.Element {
+  const ref = useTip({
+    title: node.name,
+    subtitle: `Tier ${tier}`,
+    ...(learned ? { slotLabel: 'Learned' } : {}),
+    stats: [{ label: 'Cost', value: cost, tone: learned ? 'good' : 'plain' }],
+    flavor: node.description,
+    ...(!learned && reason ? { requires: [reason] } : {}),
+    ...(learned ? {} : { hint: disabled ? undefined : 'Click to learn it' }),
+  });
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={styles.node}
+      data-learned={learned ? 'true' : undefined}
+      disabled={disabled}
+      onClick={onLearn}
+    >
+      <span className={styles.nodeName}>{node.name}</span>
+      <span className={styles.nodeText}>{node.description}</span>
+      {!learned && <span className={styles.nodeCost}>{cost}</span>}
+    </button>
+  );
 }

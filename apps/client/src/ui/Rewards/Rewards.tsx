@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
+import type { ItemDef } from '@mistvale/shared';
 import { useContentStore } from '../../state/contentStore';
+import { useTip } from '../Tooltip/useTooltip';
+import { rewardTip } from '../Tooltip/tips';
 import styles from './Rewards.module.scss';
 
 /**
@@ -61,20 +64,58 @@ export interface RewardsProps {
 
 export function Rewards({ rewards, signed = false, className }: RewardsProps): JSX.Element | null {
   const nameOf = useRewardName();
+  const bundle = useContentStore((state) => state.bundle);
   const entries = Object.entries(rewards).filter(([, amount]) => amount > 0);
   if (entries.length === 0) return null;
 
   return (
     <ul className={[styles.rewards, className ?? ''].filter(Boolean).join(' ')}>
       {entries.map(([key, amount]) => (
-        <li key={key} className={styles.reward}>
-          <span className={styles.amount}>
-            {signed ? '+' : ''}
-            {amount.toLocaleString()}
-          </span>
-          <span className={styles.name}>{nameOf(key)}</span>
-        </li>
+        <Reward
+          key={key}
+          rewardKey={key}
+          amount={amount}
+          signed={signed}
+          name={nameOf(key)}
+          item={bundle?.items.find((entry) => entry.key === key)}
+        />
       ))}
     </ul>
+  );
+}
+
+/**
+ * One chip.
+ *
+ * A component rather than a line inside the map, because a tooltip is a hook. Worth the
+ * indirection: this chip is the most repeated element in the game — quests, missions,
+ * events, the calendar, mail, the shop — and every one of them was a word and a number.
+ * "1 Gleaming Sigil" is complete information to somebody who has played for a week and
+ * says nothing at all to somebody on their first evening, which is precisely who is
+ * reading it.
+ */
+function Reward({
+  rewardKey,
+  amount,
+  signed,
+  name,
+  item,
+}: {
+  rewardKey: string;
+  amount: number;
+  signed: boolean;
+  name: string;
+  item: ItemDef | undefined;
+}): JSX.Element {
+  const ref = useTip(rewardTip(rewardKey, amount, { name, item, signed }));
+
+  return (
+    <li ref={ref} className={styles.reward} data-rarity={item?.rarity ?? undefined}>
+      <span className={styles.amount}>
+        {signed ? '+' : ''}
+        {amount.toLocaleString()}
+      </span>
+      <span className={styles.name}>{name}</span>
+    </li>
   );
 }

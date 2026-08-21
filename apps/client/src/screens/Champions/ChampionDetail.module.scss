@@ -203,9 +203,9 @@
 .slot {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  grid-template-rows: auto auto auto;
   align-items: center;
-  gap: 2px $space-3;
+  gap: 0 $space-3;
   min-height: 4.4rem;
   padding: $space-2;
   background: $panel-inset;
@@ -227,10 +227,56 @@
   }
 }
 
-/* The socket spans both rows on the left; the label and its line stack in the second
-   column beside it. */
+/* The rarity, where it can actually be seen.
+
+   The library's socket tints itself — a radial glow inside the frame and a four-pixel
+   drop-shadow on it — which is legible on a bare 88px square and invisible once that
+   square is one item in a row with a name beside it. The owner's note was exactly this:
+   the sheet said "Weapon · +20 · +1" in the same grey for a common and a legendary, and
+   rarity is the fact that decides whether a piece is worth forging.
+
+   So the cell carries it: the border, a wash of the colour behind it, and the set name in
+   it. `--mv-relic` is set once per rarity and read by all three, which is what keeps a
+   sixth rarity from being four more rules. */
+.slot[data-rarity] {
+  border-color: var(--mv-relic, #{$accent-dim});
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--mv-relic) 12%, transparent), transparent 62%),
+    $panel-inset;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mv-relic) 28%, transparent);
+}
+
+.slot[data-rarity='common'] {
+  --mv-relic: #{$rarity-common};
+}
+.slot[data-rarity='uncommon'] {
+  --mv-relic: #{$rarity-uncommon};
+}
+.slot[data-rarity='rare'] {
+  --mv-relic: #{$rarity-rare};
+}
+.slot[data-rarity='epic'] {
+  --mv-relic: #{$rarity-epic};
+}
+.slot[data-rarity='legendary'] {
+  --mv-relic: #{$rarity-legendary};
+}
+
+/* The set is what a player calls the piece, and it is what the colour is about — so it
+   carries the colour and the slot label above it stays quiet. */
+.slotSet {
+  align-self: center;
+  overflow: hidden;
+  color: var(--mv-relic, #{$parchment});
+  font-size: 0.78rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The socket spans the whole cell on the left; the slot, the set and the main stat stack
+   in the second column beside it. */
 .slotSocket {
-  grid-row: 1 / span 2;
+  grid-row: 1 / -1;
   align-self: center;
 }
 
@@ -243,17 +289,15 @@
 
 .slotMain {
   align-self: start;
-  color: $parchment;
-  font-size: 0.8rem;
-}
-
-.slotLevel {
-  color: $accent;
+  color: $parchment-dim;
   font-family: $font-mono;
   font-size: 0.75rem;
 }
 
 .slotEmpty {
+  /* Spans the two rows the set and the main stat would have filled, so an empty socket is
+     the same height as a full one and the grid does not jump as relics go on. */
+  grid-row: 2 / span 2;
   align-self: start;
   font-size: 0.75rem;
 }

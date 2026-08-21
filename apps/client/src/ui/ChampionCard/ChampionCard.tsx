@@ -3,6 +3,7 @@ import { ChampionCard as FuiChampionCard } from '@/fui/components/ChampionCard.t
 import { FuiSlotted } from '@/fui/react';
 import { useContentStore } from '../../state/contentStore';
 import { championArt } from '../championArt';
+import { championTip } from '../Tooltip/tips';
 import styles from './ChampionCard.module.scss';
 
 /**
@@ -57,6 +58,7 @@ export function ChampionCard({
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
   const art = championArt(def, bundle?.assets);
+  const faction = bundle?.factions.find((entry) => entry.key === def?.factionKey);
 
   const gearWorn = champion.equippedGearIds.length;
 
@@ -64,6 +66,13 @@ export function ChampionCard({
     <FuiSlotted
       of={FuiChampionCard}
       className={styles.card}
+      // The card is 150px and already carries five facts. What a hover adds is the two it
+      // cannot fit and a player choosing a team is actually asking: which affinity this
+      // one brings, and how much of its kit is on.
+      tip={championTip(champion, def, {
+        faction: faction?.name,
+        hint: selectable ? 'Click to pick' : 'Click to open',
+      })}
       options={{
         name: def?.name ?? champion.championKey,
         ...art,

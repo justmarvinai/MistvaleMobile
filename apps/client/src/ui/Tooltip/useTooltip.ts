@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Tooltip, type TooltipOptions } from '@/fui/components/Tooltip.ts';
 
 /**
@@ -33,7 +33,14 @@ function sharedTooltip(): Tooltip {
     shared = new Tooltip({});
     // Off-flow, above everything, and outside the React tree on purpose: it belongs to the
     // page rather than to whichever component happens to be hovered.
-    shared.el.style.zIndex = '900';
+    //
+    // **Above the modals**, which is not where it started. At 900 it sat under `$z-modal`
+    // (1000), so every tooltip inside a dialog rendered behind the dialog — which is most
+    // of them: the champion sheet, the relic slot, the food picker, the team choosers. The
+    // three that worked were the three on the shell. Above `$z-toast` (2000) as well, on
+    // the same reasoning: a tooltip belongs to the pointer, and nothing the pointer is on
+    // should be able to cover it.
+    shared.el.style.zIndex = '3000';
     document.body.appendChild(shared.el);
   }
   return shared;
@@ -88,4 +95,24 @@ export function useTooltip(
 export function destroySharedTooltip(): void {
   shared?.destroy();
   shared = null;
+}
+
+/**
+ * The same thing, for an element React renders itself.
+ *
+ * `useTooltip` takes a node because the elements that first needed one belonged to the
+ * library — a currency cell inside the top bar, a hotbar slot — and there was no React
+ * element to hang anything on. Most of the game is not like that, and `ref={useTip(…)}` is
+ * the whole of it there.
+ *
+ * The node is held in state rather than a ref on purpose: a ref assignment does not
+ * re-render, so the effect that attaches the tooltip would never see the element.
+ *
+ * It is a hook, so a list needs a component per row rather than a call per iteration —
+ * which is the same shape `SkillTips` already uses for the hotbar.
+ */
+export function useTip(options: TooltipOptions | null): (node: HTMLElement | null) => void {
+  const [node, setNode] = useState<HTMLElement | null>(null);
+  useTooltip(node, options);
+  return useCallback((next: HTMLElement | null) => setNode(next), []);
 }

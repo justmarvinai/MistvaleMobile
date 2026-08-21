@@ -4,6 +4,7 @@ import { Fui } from '@/fui/react';
 import { useContentStore } from '../../state/contentStore';
 import { relicArt, relicGlyph } from '../../ui/relicArt';
 import { statLabel } from '../../ui/statLabels';
+import { relicTip } from '../../ui/Tooltip/tips';
 import styles from './RelicCard.module.scss';
 
 /**
@@ -54,6 +55,15 @@ export function RelicCard({
       key={`${relic.level}:${relic.substats.map((sub) => `${sub.stat}${sub.value}${sub.rolls ?? 1}`).join(',')}`}
       of={ArtifactCard}
       className={styles.card}
+      // The same card the champion sheet's socket shows, so a relic answers the same
+      // question wherever it is hovered: which set, what it does complete, and how far
+      // off complete it is. In the vault it belongs to nobody, so there is no count to
+      // give and the tooltip says what the set *does* instead.
+      tip={relicTip(relic, {
+        set,
+        ...(wornBy ? { wornBy } : {}),
+        ...(onSelect ? { hint: 'Click to choose it' } : {}),
+      })}
       options={{
         // The set is what a player calls the piece; the slot is where it goes. A relic has
         // no name of its own in Mistvale, and inventing one would be content.
