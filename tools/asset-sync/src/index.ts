@@ -26,6 +26,66 @@ const targetRoot = resolve(repoRoot, 'apps/client/public/sprites');
 /** Folders under `assets/` that hold animated units. */
 const UNIT_KINDS = ['champions', 'enemies'] as const;
 
+/**
+ * Flat folders of finished media, published under their own names.
+ *
+ * Sprites are *transformed* on the way through — renumbered, renamed, counted into a
+ * manifest — because the client builds their URLs from an index. These are the opposite:
+ * content points at them **by filename**, so the one thing this must not do is rename them.
+ * `background_music_outside_combat.mp3` is what the seeded cue names, and what an operator
+ * retyping that cue in Admin will type.
+ *
+ * Every one is optional. A folder that is not there publishes nothing and says so, which
+ * is what makes silence a supported state rather than an error path — three of the fifteen
+ * tutorial steps have no recording on purpose.
+ */
+interface MediaSet {
+  label: string;
+  /** Where the owner's files are, relative to `assets/`. */
+  from: string;
+  /** Published under `apps/client/public/<to>`. */
+  to: string;
+  extensions: readonly string[];
+}
+
+const AUDIO = ['.mp3', '.ogg', '.m4a', '.wav'] as const;
+const IMAGES = ['.png', '.webp', '.jpg', '.jpeg'] as const;
+
+const MEDIA: readonly MediaSet[] = [
+  {
+    label: 'music',
+    from: 'music_and_sounds/background_music',
+    to: 'audio/music',
+    extensions: AUDIO,
+  },
+  {
+    label: 'tutorial lines',
+    from: 'music_and_sounds/tutorial_sounds',
+    to: 'audio/tutorial',
+    extensions: AUDIO,
+  },
+  { label: 'portraits', from: 'ui/misc_avatars', to: 'portraits', extensions: IMAGES },
+];
+
+const publicRoot = resolve(repoRoot, 'apps/client/public');
+
+interface MediaFile {
+  from: string;
+  to: string;
+}
+
+async function collectMedia(set: MediaSet): Promise<MediaFile[]> {
+  const source = join(sourceRoot, set.from);
+  if (!existsSync(source)) return [];
+  const target = join(publicRoot, set.to);
+  return (await readdir(source, { withFileTypes: true }))
+    .filter((item) => item.isFile())
+    .map((item) => item.name)
+    .filter((name) => set.extensions.some((ext) => name.toLowerCase().endsWith(ext)))
+    .sort()
+    .map((name) => ({ from: join(source, name), to: join(target, name) }));
+}
+
 interface UnitManifestEntry {
   /** Path the content `asset_defs.basePath` uses, e.g. `champions/epic_anuria`. */
   basePath: string;
@@ -146,8 +206,49 @@ async function collect(): Promise<UnitManifestEntry[]> {
   return units;
 }
 
+/**
+ * Publishes one media folder and prunes whatever it did not write.
+ *
+ * The prune is scoped to that folder's own target, so removing a track from `assets/`
+ * removes it from the client and nothing else is touched. A set with no source folder
+ * publishes nothing and prunes nothing — it must not empty a tree it knows nothing about.
+ */
+async function publishMedia(set: MediaSet, files: MediaFile[]): Promise<void> {
+  if (files.length === 0) return;
+  const target = join(publicRoot, set.to);
+  await mkdir(target, { recursive: true });
+  const keep = new Set<string>();
+  for (const file of files) keep.add(await publishFile(file.from, file.to));
+  await prune(target, keep);
+}
+
+/** True when every file is published byte-for-byte and nothing extra sits beside it. */
+async function mediaIsCurrent(set: MediaSet, files: MediaFile[]): Promise<boolean> {
+  const target = join(publicRoot, set.to);
+  if (files.length === 0) {
+    // Nothing to publish. An absent or empty target is current; anything in it is stale — a
+    // track deleted from `assets/` must stop being served rather than linger.
+    if (!existsSync(target)) return true;
+    return (await readdir(target)).length === 0;
+  }
+  const published = existsSync(target) ? new Set(await readdir(target)) : new Set<string>();
+  for (const file of files) {
+    const name = file.to.slice(target.length + 1);
+    if (!published.delete(name)) return false;
+    const [wanted, actual] = await Promise.all([readFile(file.from), readFile(file.to)]);
+    if (!wanted.equals(actual)) return false;
+  }
+  return published.size === 0;
+}
+
+const countMedia = (media: readonly { files: MediaFile[] }[]): number =>
+  media.reduce((sum, entry) => sum + entry.files.length, 0);
+
 async function main(): Promise<void> {
   const units = await collect();
+  const media = await Promise.all(
+    MEDIA.map(async (set) => ({ set, files: await collectMedia(set) })),
+  );
   if (units.length === 0) {
     console.error(`assets: nothing to publish — no unit folders under ${sourceRoot}.`);
     process.exit(1);
@@ -166,7 +267,16 @@ async function main(): Promise<void> {
       );
       process.exit(1);
     }
-    console.log(`assets: ${units.length} units published and current.`);
+    for (const { set, files } of media) {
+      if (!(await mediaIsCurrent(set, files))) {
+        console.error(
+          `assets: published ${set.label} are out of date with assets/${set.from}/.\n` +
+            '  Run `pnpm assets` and commit the result.',
+        );
+        process.exit(1);
+      }
+    }
+    console.log(`assets: ${units.length} units and ${countMedia(media)} media files current.`);
     return;
   }
 
@@ -185,8 +295,17 @@ async function main(): Promise<void> {
   }
   await prune(targetRoot, keep);
 
+  for (const { set, files } of media) await publishMedia(set, files);
+
   const frames = units.reduce((sum, unit) => sum + unit.idleFrames, 0);
   console.log(`assets: published ${units.length} units (${frames} idle frames) → ${targetRoot}`);
+  for (const { set, files } of media) {
+    console.log(
+      files.length === 0
+        ? `assets: no ${set.label} — nothing in assets/${set.from}/.`
+        : `assets: published ${files.length} ${set.label} → ${join(publicRoot, set.to)}`,
+    );
+  }
 }
 
 main().catch((error: unknown) => {

@@ -57,18 +57,18 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
       {tab === 'preferences' ? (
         <div className={styles.section}>
-          {/* Said out loud rather than left as a dead control: the bus and the fader are
-              real and the setting is kept, but Mistvale has no soundtrack yet. A slider
-              that does nothing without saying so is worse than no slider. */}
+          {/* This used to say there was no soundtrack, which was true and worth saying while
+              the music bus was a fader with nothing behind it. There are two tracks now, so
+              the sentence had to go. */}
           <SliderRow
             label="Music"
-            description="No soundtrack yet — this remembers your level for when there is one."
+            description="The soundtrack — one theme for the Vale, another for a fight."
             value={settings.musicVolume}
             onChange={(musicVolume) => void patch({ musicVolume })}
           />
           <SliderRow
             label="Sound effects"
-            description="Interface, battle and rewards."
+            description="Interface, battle, rewards, and the Wardenmaster's voice."
             value={settings.sfxVolume}
             onChange={(sfxVolume) => void patch({ sfxVolume })}
           />

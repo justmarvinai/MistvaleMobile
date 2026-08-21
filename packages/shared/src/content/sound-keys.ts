@@ -47,6 +47,30 @@ export type CueName = (typeof CUE)[keyof typeof CUE];
 /** Every key the client will ever ask for, for a seed to be checked against. */
 export const CUE_KEYS: readonly CueName[] = Object.values(CUE);
 
+/**
+ * The two pieces of music, by the same contract.
+ *
+ * Music is a `soundCue` like everything else — same table, same editor, same bus, same
+ * volume — but it is kept out of `CUE` because nothing calls `playCue` with it. A cue is a
+ * short rendered noise the game fires and forgets; a track is a file that streams, loops,
+ * and is *replaced* rather than layered. `audio/tracks.ts` owns that difference, and these
+ * are the keys it looks up.
+ *
+ * Which of the two is playing follows the screen and nothing else: the game is either in a
+ * fight or it is not.
+ */
+export const MUSIC = {
+  /** The Haven, the map, the roster — everywhere that is not a battle. */
+  field: 'music_field',
+  /** Campaign, the Depths, the Arena, the practice sandbox, the cold open. */
+  combat: 'music_combat',
+} as const;
+
+export type MusicName = (typeof MUSIC)[keyof typeof MUSIC];
+
+/** Both track keys, for the same seed check the cues get. */
+export const MUSIC_KEYS: readonly MusicName[] = Object.values(MUSIC);
+
 /** Which reveal chime a pulled champion earns. */
 export function summonCue(rarity: string): CueName {
   if (rarity === 'legendary') return CUE.summonLegendary;

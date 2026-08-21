@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { mediaUrl, narration } from '@/audio';
 import { Button } from '@/ui/Button/Button';
+import { useDraggable } from '@/ui/useDraggable';
 import { Prose } from '@/ui/Prose/Prose';
 import { Rewards } from '@/ui/Rewards/Rewards';
 import { useTutorialStore, currentStep } from '@/state/tutorialStore';
@@ -14,20 +16,26 @@ import styles from './TutorialOverlay.module.scss';
  *
  * Three jobs, and it is worth being strict about which is which:
  *
- * 1. **Say the line.** A parchment card, out of the way of whatever is being pointed at.
- * 2. **Point.** The named element keeps its normal appearance and everything around it is
- *    dimmed — a hole cut in a scrim rather than a badge stuck on the target, so the thing
- *    the player is being sent to looks exactly like itself.
+ * 1. **Say the line** — in text, and in the Wardenmaster's own voice on the twelve steps
+ *    that have a recording. A parchment card with his face beside it, out of the way of
+ *    whatever is being pointed at, and draggable for when "out of the way" turns out wrong.
+ * 2. **Point.** A lantern-light ring around the named element and *nothing else*. It used
+ *    to dim everything around it instead — a hole cut in a scrim — which is a good way to
+ *    show one small target and a bad way to live on top of a game: half the screen goes
+ *    grey, the art the player came for goes with it, and a fight being narrated is watched
+ *    through a filter. The owner asked for the highlight without the shadow, and he is
+ *    right: a ring that breathes is easier to find on a lit screen than a hole is on a dark
+ *    one.
  * 3. **Take the player there.** A step names a screen; if they are somewhere else, the
  *    overlay navigates once. It never navigates *away* from where they went afterwards —
  *    a player who wanders off mid-step is exploring, which is the thing the tutorial is
  *    trying to teach.
  *
- * What it deliberately does **not** do is block input. The cut-out is not a click-through
- * gate: everything outside it stays usable, because a tutorial that traps somebody in a
- * modal until they press the right button is a tutorial nobody remembers fondly. The
- * server is the thing enforcing order — a step closes when its goal is met and not before
- * — so the overlay can afford to be a signpost rather than a fence.
+ * What it deliberately does **not** do is block input. Nothing here is a gate: everything
+ * stays usable, because a tutorial that traps somebody in a modal until they press the
+ * right button is a tutorial nobody remembers fondly. The server is the thing enforcing
+ * order — a step closes when its goal is met and not before — so the overlay can afford to
+ * be a signpost rather than a fence.
  */
 export function TutorialOverlay() {
   const step = useTutorialStore(currentStep);
@@ -44,6 +52,47 @@ export function TutorialOverlay() {
 
   const [confirmingSkip, setConfirmingSkip] = useState(false);
   const rect = useHighlightRect(step?.highlight ?? '');
+  const {
+    at: cardAt,
+    dragging,
+    panelRef,
+    handleProps,
+    resetPosition,
+  } = useDraggable('Move the Wardenmaster');
+
+  /**
+   * The speaker's face, once we know the file is actually there.
+   *
+   * A portrait is content pointing at a published image, and content can point at one that
+   * has not been drawn yet. A broken-image glyph in the corner of the tutorial card is
+   * worse than no portrait at all, so a load failure falls back to the lantern mark the
+   * overlay used before there was art. Remembered by URL, so moving to another step re-asks
+   * for a *different* face but never re-asks for one already known to be missing.
+   */
+  const [missingArt, setMissingArt] = useState<string[]>([]);
+  const portraitSrc = mediaUrl(step?.portrait ?? '');
+  const portrait = portraitSrc && !missingArt.includes(portraitSrc) ? portraitSrc : null;
+
+  /**
+   * The line, spoken, while the step it belongs to is open.
+   *
+   * Keyed on the step number and not on the audio path, so re-reading the tutorial — which
+   * the poll below does every three seconds — never restarts a line half-way through. The
+   * cleanup is the point of the whole effect: the moment the step closes, whether the player
+   * pressed Continue, skipped the script or signed out, the Wardenmaster stops mid-sentence.
+   * He is talking *about this step*, and a voice still explaining relics over the top of the
+   * next beat is worse than no voice at all.
+   *
+   * Cut rather than faded, for the same reason. Three of the fifteen steps have no recording
+   * and simply stay quiet.
+   */
+  const line = mediaUrl(step?.sound ?? '');
+  useEffect(() => {
+    if (!line) return;
+    narration.play(line);
+    return () => narration.cut();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the step owns the line, not the path
+  }, [step?.step]);
 
   /**
    * While a step is open and unfinished, ask again every few seconds.
@@ -86,60 +135,65 @@ export function TutorialOverlay() {
 
   return (
     <div className={styles.overlay} role="region" aria-label="Tutorial">
-      {/* The dim, cut around whatever is being pointed at. Four panes rather than a
-          box-shadow so the hole is genuinely transparent and the target's own colours
-          come through unaltered.
-          
-          **Only when there is something to point at.** A step with no target — the cold
-          open and the welcome, and any step whose element is not on the screen the player
-          wandered to — used to fall back to a single full-viewport pane, which is the one
-          thing this overlay is not: it read as a modal, greying the whole game out and
-          telling the player they could not touch anything, while being click-through the
-          entire time. Worst of all over a fight, where it dimmed the battle the step was
-          asking them to win. With nothing to circle, the parchment says the line on its
-          own and the game stays lit. */}
-      {rect ? (
-        <>
-          <div className={styles.scrim} style={{ inset: `0 0 auto 0`, height: rect.top }} />
-          <div
-            className={styles.scrim}
-            style={{ top: rect.top + rect.height, left: 0, right: 0, bottom: 0 }}
-          />
-          <div
-            className={styles.scrim}
-            style={{ top: rect.top, left: 0, width: rect.left, height: rect.height }}
-          />
-          <div
-            className={styles.scrim}
-            style={{
-              top: rect.top,
-              left: rect.left + rect.width,
-              right: 0,
-              height: rect.height,
-            }}
-          />
-          <div
-            className={styles.ring}
-            style={{
-              top: rect.top,
-              left: rect.left,
-              width: rect.width,
-              height: rect.height,
-            }}
-            aria-hidden="true"
-          />
-        </>
-      ) : null}
+      {/* The pointer, and nothing else.
+
+          Four dimming panes used to surround this ring, cut around the target so the thing
+          being pointed at kept its own colours. That works on a form and fails on a game: it
+          greyed out the art, the map and — worst — the fight a step was asking the player to
+          win, and it made the tutorial read as a modal while being click-through the whole
+          time. What is left is what was doing the work anyway: a lantern-light ring on an
+          otherwise untouched screen.
+
+          Only when there is something to point at. A step with no target — the cold open,
+          the welcome, or any step whose element is not on the screen the player wandered to
+          — simply says its line. */}
+      {rect && (
+        <div
+          className={styles.ring}
+          style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }}
+          aria-hidden="true"
+        />
+      )}
 
       <div
-        className={[styles.card, rect && rect.top > window.innerHeight / 2 ? styles.high : '']
+        ref={panelRef}
+        className={[
+          styles.card,
+          // The stylesheet's own placement only applies until the player has an opinion:
+          // once the card has been moved it is positioned outright, and `high` — which lifts
+          // it off a target in the bottom half — would fight that.
+          cardAt ? styles.placed : rect && rect.top > window.innerHeight / 2 ? styles.high : '',
+          dragging ? styles.dragging : '',
+        ]
           .filter(Boolean)
           .join(' ')}
+        style={cardAt ? { left: cardAt.x, top: cardAt.y } : undefined}
       >
-        <div className={styles.speaker}>
-          <span className={styles.lantern} aria-hidden="true">
-            ✦
-          </span>
+        {/* The title row is the grab handle, which is where anybody would try first. It is
+            focusable and takes the arrow keys, because a card only a mouse can move is a
+            card some players cannot move at all. */}
+        <div
+          className={styles.speaker}
+          {...handleProps}
+          onDoubleClick={resetPosition}
+          title="Drag to move · arrow keys to nudge · double-click to put it back"
+        >
+          {portrait ? (
+            <img
+              className={styles.face}
+              src={portrait}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              onError={() =>
+                setMissingArt((seen) => (seen.includes(portrait) ? seen : [...seen, portrait]))
+              }
+            />
+          ) : (
+            <span className={styles.lantern} aria-hidden="true">
+              ✦
+            </span>
+          )}
           <span className={styles.who}>The Wardenmaster</span>
           <span className={styles.count}>
             {step.step} / {step.total}

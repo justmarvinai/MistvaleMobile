@@ -13,6 +13,11 @@ build/
 apps/client/public/atlases/
 apps/client/public/icons/
 apps/client/public/sprites/
+# Published by `pnpm assets` from assets/ — the owner's music alone is 16 MB, and a second
+# copy of it in git would be 16 MB nobody can edit. Same rule as the sprites above: the
+# source is committed, the published tree is built.
+apps/client/public/audio/
+apps/client/public/portraits/
 
 # tool caches
 .cache/

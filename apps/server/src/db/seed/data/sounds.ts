@@ -1,4 +1,4 @@
-import type { SoundCueDef, SynthVoice } from '@mistvale/shared';
+import { MUSIC, type SoundCueDef, type SynthVoice } from '@mistvale/shared';
 
 /**
  * What Mistvale sounds like.
@@ -34,9 +34,30 @@ function cue(
     sortOrder,
     bus,
     sample: '',
+    loop: false,
     // Parsed through the schema at publish, so the defaults fill everything omitted here.
     voice: voice as SynthVoice,
     throttleMs,
+    active: true,
+  };
+}
+
+/**
+ * A cue that plays a file rather than a shape.
+ *
+ * `throttleMs` is zero and `loop` is on because the only entries built this way are the two
+ * tracks: a throttle on something that plays for four minutes could only ever refuse the one
+ * restart it needs.
+ */
+function track(key: string, sortOrder: number, sample: string): SoundCueDef {
+  return {
+    key,
+    sortOrder,
+    bus: 'music',
+    sample,
+    loop: true,
+    voice: {} as SynthVoice,
+    throttleMs: 0,
     active: true,
   };
 }
@@ -353,6 +374,15 @@ export const SOUND_CUES: SoundCueDef[] = [
     },
     0,
   ),
+  // ── The music ─────────────────────────────────────────────────────────────
+  // The two tracks, and the only entries in the catalogue standing on a recording rather
+  // than on a synth voice. There is no synthesising a soundtrack: a cue is a shaped tone a
+  // few hundred milliseconds long, and what these point at is minutes of the owner's own
+  // music. A missing file is silence, exactly like a missing cue.
+  //
+  // `voice` is left at its defaults and never reached, because `sample` wins.
+  track(MUSIC.field, 900, 'audio/music/background_music_outside_combat.mp3'),
+  track(MUSIC.combat, 910, 'audio/music/combat_campaign_depths_arena.mp3'),
   cue(
     'summon_legendary',
     360,

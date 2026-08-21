@@ -995,6 +995,24 @@ export const tutorialStepDefSchema = contentMetaSchema.extend({
    * Wardenmaster gives, he gives.
    */
   grantsRelics: z.array(relicGrantSchema).max(9).default([]),
+  /**
+   * Who is speaking, as a published image path — `portraits/wardenmaster_avatar.jpg`.
+   *
+   * Per step rather than one constant for the script, because the speaker is a property of
+   * the line: the Wardenmaster carries the whole of it today, and the moment a second voice
+   * is worth having it is a field on the beats that voice says, not a code change. Empty
+   * falls back to the lantern mark, which is what shipped before there was art.
+   */
+  portrait: z.string().max(200).default(''),
+  /**
+   * The line, spoken, as a published audio path — `audio/tutorial/tutorial_step_3.mp3`.
+   *
+   * Plays once when the step opens and is cut the moment it closes, so a player who reads
+   * faster than the Wardenmaster talks is never trailed by the previous beat. Empty — or a
+   * path with no file behind it — is ordinary and expected: not every step has a recording,
+   * and one that does not is read rather than heard.
+   */
+  sound: z.string().max(200).default(''),
   active: z.boolean().default(true),
 });
 export type TutorialStepDef = z.infer<typeof tutorialStepDefSchema>;
@@ -1052,13 +1070,25 @@ export const soundCueDefSchema = contentMetaSchema.extend({
    */
   bus: z.enum(['music', 'sfx', 'ui']).default('sfx'),
   /**
-   * An `asset` of kind `audio` to play instead of synthesising.
+   * A published audio file to play instead of synthesising, as a path under the client's
+   * own tree — `audio/music/background_music_outside_combat.mp3`.
    *
-   * The upgrade path, and the reason the cue is the unit rather than the sound: drop a
-   * pack into `assets/`, point the cues at it, and the synth stops being used for those
-   * without a line of code moving.
+   * The upgrade path, and the reason the cue is the unit rather than the sound: drop files
+   * into `assets/`, run `pnpm assets`, point the cues at what it published, and the synth
+   * stops being used for those without a line of code moving. The two music tracks are the
+   * first entries to use it.
+   *
+   * Long enough for a real filename, because the owner's are descriptive rather than terse
+   * and a path that will not fit is a track that cannot be pointed at.
    */
-  sample: z.string().max(64).default(''),
+  sample: z.string().max(200).default(''),
+  /**
+   * Play it round again when it ends.
+   *
+   * Only meaningful for a `sample`: a synthesised cue is a few hundred milliseconds of
+   * shaped tone and looping one would be a fault alarm. Music sets it; nothing else does.
+   */
+  loop: z.boolean().default(false),
   voice: synthVoiceSchema.prefault({}),
   /**
    * Ignore a repeat inside this many milliseconds.

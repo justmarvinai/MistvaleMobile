@@ -72,6 +72,7 @@ const cue = (over: Partial<SoundCueDef> = {}): SoundCueDef => ({
   sortOrder: 0,
   bus: 'ui',
   sample: '',
+  loop: false,
   voice: {
     source: 'tone',
     wave: 'square',

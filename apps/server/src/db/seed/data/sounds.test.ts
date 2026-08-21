@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CUE_KEYS, soundCueDefSchema } from '@mistvale/shared';
+import { CUE_KEYS, MUSIC_KEYS, soundCueDefSchema } from '@mistvale/shared';
 import { SOUND_CUES } from './sounds';
 
 /**
@@ -56,11 +56,28 @@ describe('the sound catalogue', () => {
     }
   });
 
-  it('ships with no cue depending on a recording, since no pack is in the repo', () => {
-    // A cue naming a sample nobody uploaded is silent by design (see mixer.ts). Until the
-    // owner picks a pack — USER_QUESTIONS Q4 — every cue must stand on its synth voice.
-    for (const cue of SOUND_CUES) {
+  it('defines both music tracks', () => {
+    const defined = new Set(SOUND_CUES.map((cue) => cue.key));
+    expect(MUSIC_KEYS.filter((key) => !defined.has(key))).toEqual([]);
+  });
+
+  it('gives the music a file, a loop and the music bus — and nothing else any of them', () => {
+    // The split the catalogue rests on. A cue is synthesised and fires and forgets; a track
+    // is a recording that streams and repeats. Mixing the two up is how a four-minute loop
+    // ends up firing on every button press.
+    for (const key of MUSIC_KEYS) {
+      const track = SOUND_CUES.find((entry) => entry.key === key);
+      expect(track?.bus, key).toBe('music');
+      expect(track?.sample, key).not.toBe('');
+      expect(track?.loop, key).toBe(true);
+    }
+    const music: readonly string[] = MUSIC_KEYS;
+    for (const cue of SOUND_CUES.filter((entry) => !music.includes(entry.key))) {
+      // Everything else stands on its synth voice — the owner's pack is music and voice
+      // lines, not interface sounds, and a cue naming a sample nobody published is silent
+      // by design (see mixer.ts).
       expect(cue.sample, cue.key).toBe('');
+      expect(cue.loop, cue.key).toBe(false);
     }
   });
 });

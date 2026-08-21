@@ -40,10 +40,11 @@ test.describe('preferences', () => {
     await expect(root).not.toHaveAttribute('data-mv-motion', 'reduced');
   });
 
-  test('says out loud that there is no soundtrack yet', async ({ page }) => {
-    // The music bus, its fader and the stored setting are all real; there is no track.
-    // A slider that does nothing without saying so is worse than no slider, and this is
-    // the sentence that keeps it honest until a track exists (USER_QUESTIONS Q4).
+  test('offers a fader for each of the two things that make noise', async ({ page }) => {
+    // This asserted the opposite until the owner's audio pack landed: that the panel said
+    // out loud there was no soundtrack, which was the honest thing to say while the music
+    // bus was a fader with nothing behind it. There are two tracks now, so the sentence had
+    // to go and the controls had to stay — both sliders present, neither claiming silence.
     await registerRaw(page, 'e2esnd', 'Listener');
 
     // `registerRaw` stops with the starter choice open, and that dialog has no dismiss —
@@ -67,6 +68,7 @@ test.describe('preferences', () => {
     await expect(settings).toBeVisible({ timeout: 15_000 });
 
     await expect(settings.getByRole('slider', { name: /^music$/i })).toBeVisible();
-    await expect(settings.getByText(/no soundtrack yet/i)).toBeVisible();
+    await expect(settings.getByRole('slider', { name: /^sound effects$/i })).toBeVisible();
+    await expect(settings.getByText(/no soundtrack yet/i)).toHaveCount(0);
   });
 });

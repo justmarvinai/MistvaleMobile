@@ -20,6 +20,10 @@ export const tutorialStandingSchema = z.object({
   highlight: z.string(),
   title: z.string(),
   body: z.string(),
+  /** Who is saying it, as a published image path. Empty falls back to the lantern mark. */
+  portrait: z.string(),
+  /** The line spoken, as a published audio path. Empty on a step with no recording. */
+  sound: z.string(),
   /** What the player must do, if anything. Absent on a beat they simply acknowledge. */
   goal: goalSchema.optional(),
   /** Progress towards that goal, and whether it is met. */

@@ -45,6 +45,28 @@ import type { Goal, RelicGrant, StageDefInput, TutorialStepDef } from '@mistvale
  * about to keep only one of the three.
  */
 
+/**
+ * The Wardenmaster's face, beside every line he says.
+ *
+ * One image for the whole script, but a field on each step rather than a constant, because
+ * the speaker is a property of the line — the day a second voice is worth having it is an
+ * edit in Admin and not a deploy. Published by `pnpm assets` from `assets/ui/misc_avatars/`;
+ * if the file is not there the overlay draws the lantern mark it drew before there was art.
+ */
+const WARDENMASTER = 'portraits/wardenmaster_avatar.jpg';
+
+/**
+ * Where a step's spoken line lives, by step number.
+ *
+ * Convention rather than configuration: the owner's recordings are named for the step they
+ * belong to, so the path is derivable and every step gets one. **Three of the fifteen have
+ * no recording, and that is the design** — the client asks once, gets nothing, and the beat
+ * is read instead of heard. Recording one later is dropping a file into
+ * `assets/music_and_sounds/tutorial_sounds/` with the right number on it; nothing here
+ * changes.
+ */
+const spoken = (number: number): string => `audio/tutorial/tutorial_step_${number}.mp3`;
+
 const step = (
   number: number,
   key: string,
@@ -69,6 +91,8 @@ const step = (
   rewards: options.rewards ?? {},
   grantsBefore: options.grantsBefore ?? {},
   grantsRelics: options.grantsRelics ?? [],
+  portrait: WARDENMASTER,
+  sound: spoken(number),
   active: true,
   sortOrder: number,
 });

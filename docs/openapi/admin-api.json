@@ -7207,7 +7207,11 @@
           "sample": {
             "default": "",
             "type": "string",
-            "maxLength": 64
+            "maxLength": 200
+          },
+          "loop": {
+            "default": false,
+            "type": "boolean"
           },
           "voice": {
             "type": "object",
@@ -7306,6 +7310,7 @@
           "sortOrder",
           "bus",
           "sample",
+          "loop",
           "voice",
           "throttleMs",
           "active"
@@ -8178,6 +8183,16 @@
               "additionalProperties": false
             }
           },
+          "portrait": {
+            "default": "",
+            "type": "string",
+            "maxLength": 200
+          },
+          "sound": {
+            "default": "",
+            "type": "string",
+            "maxLength": 200
+          },
           "active": {
             "default": true,
             "type": "boolean"
@@ -8194,6 +8209,8 @@
           "rewards",
           "grantsBefore",
           "grantsRelics",
+          "portrait",
+          "sound",
           "active"
         ],
         "additionalProperties": false

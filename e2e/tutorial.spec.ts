@@ -38,33 +38,90 @@ test.describe('the tutorial', () => {
     await expect(overlay.getByRole('button', { name: /not yet|go and do it/i })).toBeDisabled();
   });
 
-  test('points without greying the game out, and never dims all of it', async ({ page }) => {
+  test('points at things without dimming any of the game', async ({ page }) => {
     test.slow();
-    // The overlay is a signpost, not a fence — it has `pointer-events: none` and the
-    // server is what enforces order. But a step with nothing to point at fell back to a
-    // single full-viewport pane at 72% black, which reads as exactly the modal it is not:
-    // the whole game greyed out and apparently untouchable, while every click went
-    // straight through. Steps 1 and 2 are both like that, so it was the first thing a new
-    // player saw — and step 1 is a fight, so it dimmed the battle it was asking them to
-    // win.
+    // Two rounds of the same complaint, and the second settled it. The overlay used to dim
+    // everything around whatever it pointed at — a hole cut in a scrim — which fell back to
+    // one full-viewport pane on a step with nothing to point at, and that is the modal this
+    // overlay is deliberately not. That got fixed. The owner then said the remaining dim was
+    // still wrong: highlight the target and leave the game alone. So there is no scrim at
+    // all now, and this asks for the strong version — not "no pane covers everything" but
+    // "no pane covers anything".
     await arrive(page, 'e2dim');
     await expect(page.getByRole('region', { name: 'Tutorial' })).toBeVisible({ timeout: 20_000 });
 
-    const covering = async (): Promise<number> =>
-      page.evaluate(
-        () =>
-          Array.from(document.querySelectorAll('[class*="scrim"]')).filter((el) => {
-            const box = el.getBoundingClientRect();
-            return box.width >= window.innerWidth && box.height >= window.innerHeight;
-          }).length,
-      );
+    /** Everything the overlay draws that paints a translucent dark over the page. */
+    const dimming = async (): Promise<number> =>
+      page.evaluate(() => {
+        const overlay = document.querySelector('[aria-label="Tutorial"]');
+        if (!overlay) return -1;
+        return Array.from(overlay.querySelectorAll('*')).filter((el) => {
+          const box = el.getBoundingClientRect();
+          if (box.width < 40 || box.height < 40) return false;
+          const rgba = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(
+            getComputedStyle(el).backgroundColor,
+          );
+          if (!rgba) return false;
+          const alpha = rgba[4] === undefined ? 1 : Number(rgba[4]);
+          // The card is opaque parchment and is meant to be. A scrim is the other thing: a
+          // large, part-transparent dark rectangle sitting over the game.
+          const dark = Number(rgba[1]) + Number(rgba[2]) + Number(rgba[3]) < 200;
+          return dark && alpha > 0 && alpha < 0.95;
+        }).length;
+      });
 
-    expect(await covering(), 'a pane over the whole viewport').toBe(0);
+    expect(await dimming(), 'the overlay dims part of the screen').toBe(0);
 
     // …and the fight it points at is not behind one either.
     await page.getByRole('button', { name: /meet them on the road/i }).click();
     await expect(page.getByRole('button', { name: /^auto$/i })).toBeVisible({ timeout: 25_000 });
-    expect(await covering(), 'a pane over the whole fight').toBe(0);
+    expect(await dimming(), 'the overlay dims part of the fight').toBe(0);
+  });
+
+  test('speaks with a face, and lets the player shove it out of the way', async ({ page }) => {
+    test.slow();
+    // The card sits over the game and points at things, so sooner or later it points at
+    // something underneath itself. Moving it is the only answer that always works.
+    await arrive(page, 'e2drag');
+    const overlay = page.getByRole('region', { name: 'Tutorial' });
+    await expect(overlay).toBeVisible({ timeout: 20_000 });
+
+    // The Wardenmaster's own face, published from assets/ui/misc_avatars — the thing that
+    // makes the line read as somebody saying it rather than as a tooltip.
+    const face = overlay.locator('img').first();
+    await expect(face).toBeVisible();
+    expect(
+      await face.evaluate((img) => (img as HTMLImageElement).naturalWidth),
+      'the portrait actually loaded',
+    ).toBeGreaterThan(0);
+
+    const handle = overlay.getByRole('button', { name: /move the wardenmaster/i });
+    const card = overlay.locator('div').filter({ has: handle }).last();
+    const before = await card.boundingBox();
+    expect(before, 'the card is laid out').not.toBeNull();
+
+    const grip = (await handle.boundingBox())!;
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(140, 140, { steps: 8 });
+    await page.mouse.up();
+
+    const after = (await card.boundingBox())!;
+    expect(after.x, 'the card moved horizontally').not.toBeCloseTo(before!.x, 0);
+    expect(after.y, 'the card moved vertically').not.toBeCloseTo(before!.y, 0);
+    // And it is still on screen: a panel dragged past the edge would be unrecoverable, since
+    // there is no scrollbar out there.
+    const viewport = page.viewportSize()!;
+    expect(after.x).toBeGreaterThanOrEqual(0);
+    expect(after.y).toBeGreaterThanOrEqual(0);
+    expect(after.x + after.width).toBeLessThanOrEqual(viewport.width);
+    expect(after.y + after.height).toBeLessThanOrEqual(viewport.height);
+
+    // The keyboard reaches it too — a card only a mouse can move is a card some players
+    // cannot move at all.
+    await handle.focus();
+    await page.keyboard.press('ArrowRight');
+    expect((await card.boundingBox())!.x).toBeGreaterThan(after.x);
   });
 
   test('walks the cold open and lets the player move on afterwards', async ({ page }) => {

@@ -3,6 +3,7 @@ import { mixer } from './mixer';
 
 export { CUE, summonCue, type CueName } from './cues';
 export { mixer, type Bus } from './mixer';
+export { mediaUrl, music, narration } from './tracks';
 
 /**
  * Make a noise.

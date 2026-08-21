@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
+import { MUSIC } from '@mistvale/shared';
 import { mixer } from './mixer';
+import { mediaUrl, music, narration } from './tracks';
 import { useContentStore } from '@/state/contentStore';
+import { useNavStore } from '@/state/navStore';
 import { usePlayerStore } from '@/state/playerStore';
 
 /**
@@ -27,10 +30,35 @@ export function useAudio(): void {
 
   useEffect(() => {
     mixer.setLevels({ musicVolume, sfxVolume });
+    music.setLevel(musicVolume);
+    // The Wardenmaster is an effect, not a soundtrack: somebody who turned the music down to
+    // put their own on still wants to be told what to do.
+    narration.setLevel(sfxVolume);
   }, [musicVolume, sfxVolume]);
 
+  /**
+   * Which track is playing, decided by one question: is the player in a fight?
+   *
+   * Every fighting mode in the game — campaign, the Depths, the Arena, the practice sandbox,
+   * the tutorial's cold open — runs on the battle screen, so the screen *is* the answer and
+   * there is nothing to keep in step. The two tracks are ordinary content, so an operator
+   * swaps either in Admin without a deploy, and a cue with no file behind it leaves the game
+   * quiet exactly as it was.
+   */
+  const inBattle = useNavStore((state) => state.screen) === 'battle';
   useEffect(() => {
-    const unlock = (): void => mixer.unlock();
+    const key = inBattle ? MUSIC.combat : MUSIC.field;
+    const track = mediaUrl(cues?.find((cue) => cue.key === key && cue.active)?.sample ?? '');
+    if (track) music.play(track);
+    else music.stop();
+  }, [inBattle, cues]);
+
+  useEffect(() => {
+    const unlock = (): void => {
+      mixer.unlock();
+      music.unlock();
+      narration.unlock();
+    };
     window.addEventListener('pointerdown', unlock, { capture: true, once: true, passive: true });
     window.addEventListener('keydown', unlock, { capture: true, once: true, passive: true });
     return () => {

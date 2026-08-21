@@ -84,6 +84,8 @@ export function build(ctx: TutorialContext, state: TutorialState): TutorialView 
     highlight: def.highlight,
     title: def.title,
     body: def.body,
+    portrait: def.portrait,
+    sound: def.sound,
     ...(def.goal ? { goal: def.goal } : {}),
     progress,
     // A beat is ready the moment it opens; a goal step when its target is met.
