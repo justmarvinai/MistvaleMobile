@@ -110,7 +110,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'battle',
     '',
     'Something on the road',
-    'Wait — do not walk out there yet. There is a Sskarn ambush on the Sunken Road and it has been there a week.\n\nI can hold three of them here, borrowed, for about as long as this takes. Watch what they do: everyone acts in turn, the fast ones twice as often, and the skills that matter are the ones you have been saving.',
+    'A Sskarn ambush has held the Sunken Road for a week. I can hold three champions here — borrowed, and only for as long as this takes.\n\n**What to do:** win this fight. Everyone acts in turn order and the fast ones act more often. Pick a skill, then pick the enemy you want it to land on.',
     {
       goal: goal('stageClear', 1, { mode: 'tutorial', stageKey: 'tut_cold_open' }),
     },
@@ -121,7 +121,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'haven',
     '',
     'The lantern in the fog',
-    'You came out of the mist walking, which is more than most manage. I am the Wardenmaster — the last one, unless somebody is being quiet about it.\n\nThis is the Haven. It is stone, it is dry, and nothing that lives in the fog can cross the wards. Everything else out there is yours to take back.',
+    'You came out of the mist walking, which is more than most manage. I am the Wardenmaster — the last one, unless somebody is being quiet about it. This is the Haven: stone, dry, and nothing in the fog can cross the wards.\n\n**What to do:** press **Continue**. Then I will show you the Gate.',
     { rewards: { silver: 2_000, playerXp: 60 } },
   ),
   step(
@@ -130,7 +130,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'haven',
     'modal:starter-choice',
     'One of them stays',
-    'Three answered the lantern. The Gate has only enough left in it to hold **one** of them here — choose, and choose for yourself, because the other two can still be found later and this one will be with you tonight.',
+    'Three answered the lantern, and the Gate has only enough left in it to keep **one** of them here. The other two can be found again later; this one is with you tonight.\n\n**What to do:** pick one of the three champions, then confirm the choice.',
     {
       goal: goal('championObtained', 1),
       rewards: { silver: 3_000, playerXp: 60 },
@@ -142,7 +142,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'campaign',
     'stage:c01_s1_normal',
     'The Sunken Road',
-    'The road east of here has not been walked in a year. Whatever has moved onto it is weak, slow, and very surprised to see a warden.\n\nGo and take the first stretch of it back. Energy is what a march costs; it comes back on its own, so spend it.',
+    'The road east has not been walked in a year. Whatever moved onto it is weak, slow, and very surprised to see a warden.\n\n**What to do:** open stage **1-1** on the campaign map, send your champion in, and win. A march costs energy — it refills on its own, so spend it.',
     {
       goal: goal('stageClear', 1, { mode: 'campaign', stageKey: 'c01_s1_normal' }),
       rewards: { silver: 4_000, playerXp: 90 },
@@ -154,7 +154,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'mistgate',
     'button:summon-faded',
     'The Mistgate',
-    'Here. Two sigils — I have been saving them and I am too old to use them well.\n\nThe Gate takes a sigil and gives back whatever the mist still holds a shape for. A faded one calls the least of it, but the least of it is a second pair of hands, and you have one pair.',
+    'Two Faded Sigils. I have been saving them and I am too old to use them well. The Gate takes a sigil and gives back whatever the mist still holds a shape for.\n\n**What to do:** at the Mistgate, choose the **Faded Sigil** and press **Summon ×1**.',
     {
       goal: goal('summon', 1, { poolKey: 'faded' }),
       grantsBefore: { sigil_faded: 2 },
@@ -167,7 +167,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'relics',
     'panel:relic-list',
     'What the road gave up',
-    'The dead out there were carrying things, and I have been keeping this one for whoever walked in next. Relics — old warden kit, mostly, and it still fits.\n\nPut it on somebody. A champion wearing nothing is a champion fighting at half of what they are.',
+    'The dead out there were carrying things — old warden kit, mostly, and it still fits. I kept this one for whoever walked in next. This is the vault; everything you find lands here.\n\n**What to do:** a relic goes on from the champion, not from the shelf. Open **Champions**, choose one, and press an empty relic slot to fit the weapon. A champion wearing nothing fights at half of what they are.',
     {
       goal: goal('gearEquip', 1),
       // Given rather than dropped: chapter 1's trash stages hand over a relic about two
@@ -184,7 +184,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'relics',
     'button:relic-upgrade',
     'The forge',
-    'Silver and a hot enough fire will wake a relic up a little further. It does not always take — that is the nature of the thing, and no smith in the Vale has ever managed better.\n\nTake one piece to **+1**. Here is the silver for it; after this you will be finding your own.',
+    'Silver and a hot enough fire will wake a relic up a little further. It does not always take; no smith in the Vale has ever managed better.\n\n**What to do:** choose a relic in the vault and press **Forge** until it reaches **+1**. The silver for it is on me.',
     {
       goal: goal('gearLevel', 1),
       grantsBefore: { silver: 5_000 },
@@ -197,7 +197,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'campaign',
     'stage:c01_s2_normal',
     'Further out',
-    'Better armed than you were an hour ago. Go and prove it on the next stretch — and watch what the relics do, because the difference is the whole lesson.',
+    'Better armed than you were an hour ago. Go and prove it on the next stretch.\n\n**What to do:** clear campaign stage **1-2**. Watch what the relic changed — that difference is the whole lesson.',
     {
       goal: goal('stageClear', 1, { mode: 'campaign', stageKey: 'c01_s2_normal' }),
       rewards: { silver: 4_000, playerXp: 90 },
@@ -209,7 +209,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'quests',
     'panel:quest-daily',
     'The day’s work',
-    'A warden keeps a list. Not because anyone is checking — because the fog takes back anything you leave for a week, and a list is how you notice.\n\nThese refresh every morning. Finish one and **claim** it; the ones you leave unclaimed pay nothing.',
+    'A warden keeps a list. Not because anyone is checking, but because the fog takes back anything you leave for a week, and a list is how you notice.\n\n**What to do:** finish any one daily quest, then press **Claim** on it. A quest you leave unclaimed pays nothing.',
     {
       goal: goal('questClaim', 1),
       rewards: { silver: 3_000, crystals: 50, playerXp: 120 },
@@ -221,7 +221,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'campaign',
     'stage:c01_s3_normal',
     'The turning',
-    'Third stretch. The road bends north here and the ground gets worse — which is how you know you are getting somewhere.',
+    'Third stretch. The road bends north here and the ground gets worse — which is how you know you are getting somewhere.\n\n**What to do:** clear campaign stage **1-3**.',
     {
       goal: goal('stageClear', 1, { mode: 'campaign', stageKey: 'c01_s3_normal' }),
       rewards: { silver: 4_000, playerXp: 90 },
@@ -233,7 +233,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'champions',
     'button:champion-level',
     'Feeding the fire',
-    'The ones the Gate coughs up that are no use in a fight are still use to somebody who is. Feed them to a champion you mean to keep and they hand over what they had.\n\nTake somebody up **three levels**. Rank is the other axis — that costs champions of the same rank, and it is what raises the ceiling rather than the number.',
+    'The ones the Gate coughs up that are no use in a fight are still use to somebody who is. Feed them to a champion you mean to keep, and they hand over what they had.\n\n**What to do:** open a champion, press **Feed for experience**, choose the champions to spend, and take them up **three levels**.',
     {
       goal: goal('championLevelUp', 3),
       grantsBefore: { silver: 6_000 },
@@ -246,7 +246,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'campaign',
     'stage:c01_s4_normal',
     'Sigil country',
-    'Past the turning the mist starts leaving things behind — sigils, sometimes, if you are the first one down the road that week.',
+    'Past the turning the mist starts leaving things behind — sigils, sometimes, if you are the first one down the road that week.\n\n**What to do:** clear campaign stage **1-4**.',
     {
       goal: goal('stageClear', 1, { mode: 'campaign', stageKey: 'c01_s4_normal' }),
       rewards: { silver: 4_000, playerXp: 100 },
@@ -258,7 +258,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'bazaar',
     'panel:bazaar-offers',
     'The Bazaar',
-    'Somebody always sets up in a Haven, and this one restocks on her own schedule and will not tell me what it is.\n\nBuy something. Silver you are holding is silver doing nothing, and the stock rotates whether you shopped or not.',
+    'Somebody always sets up in a Haven. This one restocks on her own schedule and will not tell me what it is.\n\n**What to do:** buy any one thing at the Bazaar. Silver you are holding is silver doing nothing, and the stock rotates whether you shopped or not.',
     {
       goal: goal('shopPurchase', 1, { shopKey: 'bazaar' }),
       grantsBefore: { silver: 4_000 },
@@ -271,7 +271,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'campaign',
     'stage:c01_s7_normal',
     'The thing at the end of the road',
-    'The road ends at a warlord. It always ends at a warlord.\n\nThis one is **Vrash the Fenblade**, and the Sskarn have been following him through the treeline since the fog came in. Clear your way to the seventh stretch and put him down — take a full team, because he does not fight the way the road did.',
+    'The road ends at a warlord. It always ends at a warlord. This one is **Vrash the Fenblade**, and the Sskarn have been following him through the treeline since the fog came in.\n\n**What to do:** clear your way to campaign stage **1-7** and put him down. Take a full team of four — he does not fight the way the road did.',
     {
       goal: goal('stageClear', 1, { mode: 'campaign', stageKey: 'c01_s7_normal' }),
       rewards: { silver: 8_000, crystals: 150, sigil_gleaming: 2, playerXp: 200 },
@@ -283,7 +283,7 @@ export const TUTORIAL_STEPS: TutorialStepDef[] = [
     'haven',
     'dock:depths',
     'The Path from here',
-    'That is everything I know how to teach standing still.\n\nThere are keeps under the Vale — the **Depths** — and they are shut to you until you are ready, which the fog will tell you about before I do. Until then the **Path** is the list that matters: it runs from here to the far end of the Reclamation, and the last thing on it is not a relic.\n\nGo on. The lantern stays lit.',
+    "That is everything I know how to teach standing still. There are keeps under the Vale — the **Depths** — and they stay shut until you are ready for them.\n\n**What to do:** press **Continue**. Then open **Missions** and start the Valewarden's Path: it runs from here to the far end of the Reclamation, and the last thing on it is not a relic.\n\nGo on. The lantern stays lit.",
     { rewards: { silver: 5_000, sigil_gleaming: 1, playerXp: 150 } },
   ),
 ];

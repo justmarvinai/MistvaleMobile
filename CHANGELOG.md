@@ -5,6 +5,39 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the tutorial says what to do
+
+Fifteen steps of the Wardenmaster's voice with the actual instruction buried somewhere
+inside it. The atmosphere was doing its job and nothing else was: "put it on somebody" does
+not say which screen, and "take one piece to +1" does not say which button.
+
+Every step is the same shape now — a line of the Wardenmaster, then a bolded **What to do:**
+and a plain sentence naming the screen and the control. The voice is intact and shorter; the
+steps, their order, what they point at, the goals that close them and everything they pay
+are untouched. `tutorial.test.ts` holds the shape: every step has an instruction, it comes
+last, and the voice before it stays inside four lines.
+
+One instruction was corrected rather than reworded. The equip step points at the vault, and
+a relic cannot be equipped from the vault — it goes on from the champion. The text says so
+now. **The step itself still points at the vault**, since that was not mine to change; if
+that highlight should move to the champion sheet, say so and it is one field in Admin.
+
+### Added — `pnpm seed --replace <type>`, for content that is rewritten rather than added
+
+A plain seed adds what is absent and changes nothing that is present, which is the right
+default and means a *rewrite* can never reach an install that already has the rows — the
+tutorial's script being exactly that case. The only way through was `--force-content`, which
+delivers the change by discarding every other tuning an operator has done since launch.
+
+`--replace tutorialStep` overwrites one named family and nothing else. It prints what it
+overwrote and records a revision with the types in the note, so it is revertable from Admin
+like any other publish.
+
+It runs **after** the fill, not before, which is the whole of the bug that made the first
+version silently do nothing: the fill plans against the snapshot read at the start of the
+run and rebuilds each patched row as `{...missingFields, ...stored}` — so a replace that
+ran first was undone by a backfill writing the pre-replace row back over it.
+
 ### Fixed — a tooltip inside a dialog was drawn behind the dialog
 
 The shared tooltip sat at `z-index: 900` and `$z-modal` is 1000, so every painted tooltip
