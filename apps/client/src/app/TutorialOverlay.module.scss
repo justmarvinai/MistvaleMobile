@@ -53,19 +53,25 @@
   }
 }
 
-/* The parchment. Sits low by default and moves up when the target is in the bottom half. */
+/* The parchment. Sits low by default and moves up when the target is in the bottom half.
+
+   Two columns since the owner's note: his portrait down the left at the card's full height,
+   the words down the right. `padding: 0` on the card and the padding moved into the text
+   column is what lets the picture reach all four of its own edges — a portrait with a gutter
+   round it is an illustration *in* a panel, and what was asked for is somebody standing next
+   to one. */
 .card {
   position: fixed;
   bottom: $space-6;
   left: 50%;
   transform: translateX(-50%);
-  width: min(560px, calc(100vw - #{$space-5 * 2}));
+  width: min(880px, calc(100vw - #{$space-5 * 2}));
   pointer-events: auto;
 
   display: flex;
-  flex-direction: column;
-  gap: $space-3;
-  padding: $space-4 $space-5 $space-4;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden; // the portrait is square; the card's own edge is what clips it
 
   background: linear-gradient(180deg, $panel-raised 0%, $panel 100%);
   border: 2px solid $edge-bright;
@@ -73,6 +79,16 @@
     0 0 0 2px $ground-deep,
     0 12px 40px rgba(0, 0, 0, 0.65);
   animation: rise $duration-slow $ease-out;
+}
+
+/* The words. Everything that used to be the card's own layout now lives here. */
+.column {
+  flex: 1;
+  min-width: 0; // or a long unbroken word in the body stretches the card past its width
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-4 $space-5;
 }
 
 .card.high {
@@ -129,8 +145,6 @@
   color: $accent-dim;
   cursor: grab;
   user-select: none;
-  /* Room for the face to sit in the row without stretching a card that has none. */
-  min-height: 48px;
 
   &:focus-visible {
     outline: 2px solid $accent;
@@ -142,22 +156,35 @@
   cursor: grabbing;
 }
 
-/* The Wardenmaster's face, beside the line he is saying.
+/* The Wardenmaster himself, the full height of the card and attached to it.
 
-   Square and small on purpose: it is a speaker mark, not an illustration, and the card is
-   already carrying a title, a body, a goal line and two buttons. `object-fit: cover` with
-   the focus up top means a portrait exported at any aspect fills the frame on his face
-   rather than letterboxing inside it. */
-.face {
-  width: 48px;
-  height: 48px;
+   `align-self: stretch` and, importantly, **no** `height`: the column of words decides how
+   tall the card is — a long step is a tall card — and he follows it. Setting `height: 100%`
+   as well looks like belt and braces and is the opposite: the card's own height is `auto`,
+   so the percentage resolves to `auto` too, and an explicit height is exactly what switches
+   `stretch` off. It left him ending ninety pixels above the buttons. `object-fit: cover`
+   anchored to the top means the crop takes off the bottom of his armour rather than the top
+   of his head, at any card height.
+
+   A fixed width rather than a share of one, so the words never get narrower as he gets
+   taller. Below the breakpoint he goes entirely: at 640px a 260px column is most of the
+   screen, and the instructions are the part that has to survive. */
+.portrait {
   flex: none;
+  align-self: stretch;
+  width: 260px;
   object-fit: cover;
   object-position: top center;
-  border: 1px solid $edge-bright;
+  border-right: 2px solid $edge-bright;
   background: $panel-inset;
   /* Photographic rather than pixel art — the one place in the game that wants smoothing. */
   image-rendering: auto;
+}
+
+@media (max-width: 720px) {
+  .portrait {
+    display: none;
+  }
 }
 
 .lantern {
@@ -167,6 +194,9 @@
 
 .who {
   flex: 1;
+  /* A name at the top of a panel he is standing beside, rather than a caption on a chip. */
+  font-size: 17px;
+  color: $accent;
 }
 
 .count {
@@ -252,11 +282,18 @@
   color: $danger;
 }
 
+/* Leaving and continuing at opposite ends of a wide card, which is the owner's layout and
+   also the safer one: at 880px a right-aligned pair puts "Skip tutorial" directly under the
+   thumb reaching for "Continue". `margin-top: auto` pins the row to the foot, so on a short
+   step the buttons still line up with the bottom of the portrait rather than floating in
+   the middle of it. */
 .actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: $space-2;
+  margin-top: auto;
+  padding-top: $space-1;
 }
 
 .confirm {

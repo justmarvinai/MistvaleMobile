@@ -169,102 +169,115 @@ export function TutorialOverlay() {
           .join(' ')}
         style={cardAt ? { left: cardAt.x, top: cardAt.y } : undefined}
       >
-        {/* The title row is the grab handle, which is where anybody would try first. It is
-            focusable and takes the arrow keys, because a card only a mouse can move is a
-            card some players cannot move at all. */}
-        <div
-          className={styles.speaker}
-          {...handleProps}
-          onDoubleClick={resetPosition}
-          title="Drag to move · arrow keys to nudge · double-click to put it back"
-        >
-          {portrait ? (
-            <img
-              className={styles.face}
-              src={portrait}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              onError={() =>
-                setMissingArt((seen) => (seen.includes(portrait) ? seen : [...seen, portrait]))
-              }
-            />
-          ) : (
-            <span className={styles.lantern} aria-hidden="true">
-              ✦
-            </span>
-          )}
-          <span className={styles.who}>The Wardenmaster</span>
-          <span className={styles.count}>
-            {step.step} / {step.total}
-          </span>
-        </div>
+        {/* His own panel, the full height of the card and flush against it — the owner's
+            layout, and the right one: at 48px in the corner of a header he was a favicon,
+            and the whole point of putting a face on a tutorial is that somebody is talking
+            to you. Cropped rather than letterboxed, anchored to the top so the crop keeps
+            his face whatever the card grows to.
 
-        <h2 className={styles.title}>{step.title}</h2>
-        <Prose className={styles.body} text={step.body} />
-
-        {goal && (
-          <p className={styles.goal}>
-            <span className={styles.goalLabel}>{goalLabel(goal.type)}</span>
-            {target > 1 && (
-              <span className={styles.goalCount}>
-                {Math.min(step.progress, target)} / {target}
-              </span>
-            )}
-            {step.ready && <span className={styles.goalDone}>done</span>}
-          </p>
+            It is not in the flow of the text column, so a card with no portrait — a step
+            whose art will not load, or a future speaker with none — is the single column
+            this used to be, with nothing to arrange around the gap. */}
+        {portrait && (
+          <img
+            className={styles.portrait}
+            src={portrait}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            onError={() =>
+              setMissingArt((seen) => (seen.includes(portrait) ? seen : [...seen, portrait]))
+            }
+          />
         )}
 
-        {/* What the *previous* step paid, carried onto this one's card rather than held
-            behind an acknowledge button. The second click was a stage the player could not
-            always reach: a step that opens a modal — the starter choice does — puts it on
-            top of the parchment, and a reward card nobody can dismiss is worse than one
-            nobody was asked to. */}
-        {payout && (
-          <div className={styles.payout}>
-            <span className={styles.payoutLabel}>For the last one</span>
-            <Rewards rewards={payout.paid} signed />
-            {payout.relics.length > 0 && (
-              <span className={styles.payoutRelics}>
-                and {payout.relics.length === 1 ? 'a relic' : `${payout.relics.length} relics`}
+        <div className={styles.column}>
+          {/* The title row is the grab handle, which is where anybody would try first. It
+              is focusable and takes the arrow keys, because a card only a mouse can move is
+              a card some players cannot move at all. */}
+          <div
+            className={styles.speaker}
+            {...handleProps}
+            onDoubleClick={resetPosition}
+            title="Drag to move · arrow keys to nudge · double-click to put it back"
+          >
+            {!portrait && (
+              <span className={styles.lantern} aria-hidden="true">
+                ✦
               </span>
+            )}
+            <span className={styles.who}>The Wardenmaster</span>
+            <span className={styles.count}>
+              {step.step} / {step.total}
+            </span>
+          </div>
+
+          <h2 className={styles.title}>{step.title}</h2>
+          <Prose className={styles.body} text={step.body} />
+
+          {goal && (
+            <p className={styles.goal}>
+              <span className={styles.goalLabel}>{goalLabel(goal.type)}</span>
+              {target > 1 && (
+                <span className={styles.goalCount}>
+                  {Math.min(step.progress, target)} / {target}
+                </span>
+              )}
+              {step.ready && <span className={styles.goalDone}>done</span>}
+            </p>
+          )}
+
+          {/* What the *previous* step paid, carried onto this one's card rather than held
+              behind an acknowledge button. The second click was a stage the player could not
+              always reach: a step that opens a modal — the starter choice does — puts it on
+              top of the parchment, and a reward card nobody can dismiss is worse than one
+              nobody was asked to. */}
+          {payout && (
+            <div className={styles.payout}>
+              <span className={styles.payoutLabel}>For the last one</span>
+              <Rewards rewards={payout.paid} signed />
+              {payout.relics.length > 0 && (
+                <span className={styles.payoutRelics}>
+                  and {payout.relics.length === 1 ? 'a relic' : `${payout.relics.length} relics`}
+                </span>
+              )}
+            </div>
+          )}
+
+          {error && <p className={styles.error}>{error}</p>}
+
+          <div className={styles.actions}>
+            {confirmingSkip ? (
+              <>
+                <span className={styles.confirm}>
+                  Skipping is final — the Wardenmaster does not come back.
+                </span>
+                <Button variant="ghost" onClick={() => setConfirmingSkip(false)} disabled={busy}>
+                  Keep going
+                </Button>
+                <Button variant="danger" onClick={() => void skip()} disabled={busy}>
+                  Skip anyway
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* "Skip tutorial", not "Skip": a battle has a Skip of its own for jumping
+                    past playback, and the two can be on screen together — during the cold
+                    open they always are. */}
+                <Button variant="ghost" onClick={() => setConfirmingSkip(true)} disabled={busy}>
+                  Skip tutorial
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => void advance()}
+                  disabled={busy || !step.ready}
+                  title={step.ready ? undefined : 'Finish the step first'}
+                >
+                  {step.ready ? 'Continue' : waitingLabel(step.screen as ScreenId, screen)}
+                </Button>
+              </>
             )}
           </div>
-        )}
-
-        {error && <p className={styles.error}>{error}</p>}
-
-        <div className={styles.actions}>
-          {confirmingSkip ? (
-            <>
-              <span className={styles.confirm}>
-                Skipping is final — the Wardenmaster does not come back.
-              </span>
-              <Button variant="ghost" onClick={() => setConfirmingSkip(false)} disabled={busy}>
-                Keep going
-              </Button>
-              <Button variant="danger" onClick={() => void skip()} disabled={busy}>
-                Skip anyway
-              </Button>
-            </>
-          ) : (
-            <>
-              {/* "Skip tutorial", not "Skip": a battle has a Skip of its own for jumping
-                  past playback, and the two can be on screen together — during the cold
-                  open they always are. */}
-              <Button variant="ghost" onClick={() => setConfirmingSkip(true)} disabled={busy}>
-                Skip tutorial
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => void advance()}
-                disabled={busy || !step.ready}
-                title={step.ready ? undefined : 'Finish the step first'}
-              >
-                {step.ready ? 'Continue' : waitingLabel(step.screen as ScreenId, screen)}
-              </Button>
-            </>
-          )}
         </div>
       </div>
     </div>

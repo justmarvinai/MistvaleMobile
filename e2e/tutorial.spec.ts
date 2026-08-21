@@ -87,21 +87,38 @@ test.describe('the tutorial', () => {
     await expect(overlay).toBeVisible({ timeout: 20_000 });
 
     // The Wardenmaster's own face, published from assets/ui/misc_avatars — the thing that
-    // makes the line read as somebody saying it rather than as a tooltip.
+    // makes the line read as somebody saying it rather than as a tooltip. Full height and
+    // attached to the card's left edge since the owner's mock: at 48px in the corner of a
+    // header he was a favicon.
     const face = overlay.locator('img').first();
     await expect(face).toBeVisible();
+    const portrait = (await face.boundingBox())!;
     expect(
       await face.evaluate((img) => (img as HTMLImageElement).naturalWidth),
       'the portrait actually loaded',
     ).toBeGreaterThan(0);
 
     const handle = overlay.getByRole('button', { name: /move the wardenmaster/i });
-    // The card is the handle's parent, said directly. Reaching for it with `filter({ has })`
-    // is ambiguous when the handle is itself a div: the filter can match the handle as well
-    // as its ancestors, and `.last()` then picks the wrong one or nothing at all.
-    const card = handle.locator('xpath=..');
+    // The card is the handle's grandparent — handle → text column → card — said directly.
+    // Reaching for it with `filter({ has })` is ambiguous when the handle is itself a div:
+    // the filter matches the handle as well as its ancestors, and `.last()` then picks the
+    // wrong one or nothing at all.
+    const card = handle.locator('xpath=../..');
     const before = await card.boundingBox();
     expect(before, 'the card is laid out').not.toBeNull();
+    // He reaches both of the card's own edges: `align-self: stretch` doing its job. Setting
+    // an explicit `height: 100%` beside it silently turns that off — the card's height is
+    // auto, so the percentage is too — and left him ending ninety pixels short of the
+    // buttons. Measured against the card's *inside*, since the painted frame is a real 2px
+    // border and the picture is meant to sit within it rather than over it.
+    const frame = await card.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+    });
+    expect(portrait.height, 'the portrait is the full height of the card').toBeCloseTo(
+      before!.height - frame,
+      0,
+    );
 
     const grip = (await handle.boundingBox())!;
     await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);

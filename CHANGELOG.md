@@ -19,7 +19,10 @@ is an edit in Admin rather than a deploy.
 - **The Wardenmaster speaks his line** while the step it belongs to is open, and
   stops mid-sentence the moment it closes. Three steps have no recording and are
   simply read, which is the design and not a gap.
-- **And has a face**, beside the line, in the tutorial card.
+- **And has a face** — a full-height panel attached to the left of the tutorial card, to
+  the owner's own layout. It began as a 48px square in the header, which is a favicon;
+  the point of putting a face on a tutorial is that somebody is talking to you. The card
+  is two columns now, and Skip and Continue sit at opposite ends of the foot.
 - Both obey the sliders that already existed: music on the music bus, the
   Wardenmaster on effects, since somebody who muted the soundtrack to play their own
   still wants to be told what to do. The Settings panel no longer says there is no
