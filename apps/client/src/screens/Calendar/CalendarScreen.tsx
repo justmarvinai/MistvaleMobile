@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { LoginTrackKind, LoginTrackStanding } from '@mistvale/shared';
 import { DailyRewards } from '@/fui/components/DailyRewards.ts';
+import { ChampionCard as FuiChampionCard } from '@/fui/components/ChampionCard.ts';
 import { Fui } from '@/fui/react';
 import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
@@ -14,6 +15,7 @@ import { toast } from '../../state/uiStore';
 import { trackTiles } from './trackTiles';
 import styles from './CalendarScreen.module.scss';
 import { Heading } from '@/ui/Heading/Heading';
+import { championArt } from '../../ui/championArt';
 
 /**
  * The login calendar.
@@ -153,19 +155,15 @@ export function CalendarScreen(): JSX.Element {
           Thirty nights of keeping the lantern lit. One of them comes with you — and the choice is
           not offered twice, so take the one your roster is missing.
         </p>
+        {/* The painted card, not a name in a box. This is a choice a player makes once and
+            cannot revisit, and "take the one your roster is missing" is unanswerable from
+            four strings — rarity and affinity are what the decision turns on. Level, stars
+            and power are deliberately absent: nobody owns these yet, and a card claiming
+            otherwise would be the screen inventing facts. */}
         <ul className={styles.choices}>
           {(selector?.choices ?? []).map((key) => (
             <li key={key}>
-              <button
-                type="button"
-                className={[styles.choice, picked === key ? styles.choicePicked : '']
-                  .filter(Boolean)
-                  .join(' ')}
-                aria-pressed={picked === key}
-                onClick={() => setPicked(key)}
-              >
-                {championName(key)}
-              </button>
+              <ChoiceCard championKey={key} picked={picked === key} onPick={() => setPicked(key)} />
             </li>
           ))}
         </ul>
@@ -281,5 +279,52 @@ function TrackPanel({
         }}
       />
     </Panel>
+  );
+}
+
+/**
+ * One champion on offer at the end of the calendar.
+ *
+ * Def-only: an unclaimed champion has no level, no rank and no power, so the card carries
+ * the three things that are true of it — who it is, how rare it is, and what it is aligned
+ * with — and nothing it would have to make up. Same frame as the roster's card, because
+ * this is the same act of choosing.
+ */
+function ChoiceCard({
+  championKey,
+  picked,
+  onPick,
+}: {
+  championKey: string;
+  picked: boolean;
+  onPick: () => void;
+}): JSX.Element {
+  const bundle = useContentStore((state) => state.bundle);
+  const def = bundle?.champions.find((entry) => entry.key === championKey);
+  const art = championArt(def, bundle?.assets);
+
+  return (
+    <Fui
+      of={FuiChampionCard}
+      className={styles.choiceCard}
+      options={{
+        name: def?.name ?? championKey,
+        ...art,
+        rarity: def?.rarity ?? 'epic',
+        ...(def?.element ? { affinity: def.element } : {}),
+        selectable: true,
+        selected: picked,
+      }}
+      // The library toggles its own ring on press, before React decides anything; this
+      // puts it back where the state says, which is what makes a second press on the
+      // already-picked card a no-op rather than a silent deselect.
+      apply={(card, next) => card.setSelected(Boolean(next.selected))}
+      on={{ 'champion:select': () => onPick() }}
+      attrs={{
+        'aria-label': [def?.name ?? championKey, def?.rarity, def?.element]
+          .filter(Boolean)
+          .join(', '),
+      }}
+    />
   );
 }

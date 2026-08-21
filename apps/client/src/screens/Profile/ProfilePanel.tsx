@@ -13,6 +13,7 @@ import { toast } from '../../state/uiStore';
 import styles from './ProfilePanel.module.scss';
 import { arenaTierEmblem } from '../../ui/arenaTier';
 import { championArt } from '../../ui/championArt';
+import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 
 /** How many champions a card shows. Mirrors `SHOWCASE_MAX` on the server. */
 const SHOWCASE_MAX = 4;
@@ -72,7 +73,9 @@ export function ProfilePanel(): JSX.Element {
       open={openId !== null}
       title={card ? card.profileName : 'Warden'}
       onClose={close}
-      size="work"
+      // Two dialogs in one frame: a card to read, and a roster to choose from. The card
+      // reads better narrow; the picker is a grid of painted cards and wants the room.
+      size={editing ? 'wide' : 'work'}
       footer={
         isSelf && card ? (
           editing ? (
@@ -284,33 +287,26 @@ function ShowcasePicker({
       <p className={styles.pickerHint}>
         Up to four, in the order you pick them. Choose none and the card shows your strongest.
       </p>
+      {/* The roster's own card, like every other place a champion is chosen. This picker
+          was a list of names and star counts, which asked a player to choose the four they
+          want to be *seen by* from the one view in the game that showed them nothing. The
+          order badge is the card's, because the order is the whole point of this picker —
+          a warden who put their best first should stay that way. */}
       <ul className={styles.pickerList}>
         {roster.map(({ champion, def }) => {
           const position = picked.indexOf(champion.id);
           const full = picked.length >= SHOWCASE_MAX && position === -1;
 
           return (
-            <li key={champion.id}>
-              <button
-                type="button"
-                className={[
-                  styles.pickerItem,
-                  position >= 0 ? styles.pickerPicked : '',
-                  full ? styles.pickerFull : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                aria-pressed={position >= 0}
-                disabled={full}
-                onClick={() => toggle(champion.id)}
-              >
-                {position >= 0 && <span className={styles.pickerOrder}>{position + 1}</span>}
-                <span className={styles.tileName}>{def.name}</span>
-                <span className={styles.tileMeta}>
-                  {'★'.repeat(champion.rank)} · Lv {champion.level}
-                </span>
-                <span className={styles.tilePower}>{champion.power.toLocaleString()}</span>
-              </button>
+            <li key={champion.id} data-full={full}>
+              <ChampionCard
+                champion={champion}
+                def={def}
+                selectable
+                selected={position >= 0}
+                {...(position >= 0 ? { badge: String(position + 1) } : {})}
+                onOpen={() => toggle(champion.id)}
+              />
             </li>
           );
         })}

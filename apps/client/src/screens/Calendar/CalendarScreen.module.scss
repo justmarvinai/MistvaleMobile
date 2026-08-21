@@ -95,33 +95,18 @@
   font-size: 0.875rem;
 }
 
+/* Painted cards, sized from the card's own fixed width rather than from a fraction of the
+   dialog — it cannot be stretched to a track. */
 .choices {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: $space-2;
+  grid-template-columns: repeat(auto-fit, $card-champion);
+  justify-content: center;
+  gap: $space-3;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.choice {
-  width: 100%;
-  padding: $space-2 $space-3;
-  background: $panel-inset;
-  border: 1px solid $edge;
-  color: $parchment;
-  font-family: $font-body;
-  font-size: 0.8125rem;
-  text-align: left;
+.choiceCard {
   cursor: pointer;
-
-  &:hover {
-    border-color: $accent;
-  }
-}
-
-.choicePicked {
-  border-color: $gold;
-  color: $gold;
-  box-shadow: inset 0 0 0 1px rgba(212, 175, 96, 0.24);
 }

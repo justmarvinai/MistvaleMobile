@@ -170,10 +170,19 @@
 }
 
 .pickerList {
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  max-height: 22rem;
+  /* Sized from the painted card's own fixed width, like every other grid that holds one —
+     it cannot be stretched to a track, so the track is built from it. */
+  grid-template-columns: repeat(auto-fill, $card-champion);
+  justify-content: center;
+  max-height: 44vh;
   overflow-y: auto;
   padding-right: $space-1;
+
+  /* Four already chosen: the rest go quiet rather than disappearing, so the roster stays
+     the same shape while a player swaps one out. */
+  li[data-full='true'] {
+    opacity: 0.4;
+  }
 }
 
 .pickerItem {

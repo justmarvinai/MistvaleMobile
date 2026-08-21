@@ -31,6 +31,22 @@
   text-shadow: 0 1px 3px #000;
 }
 
+/* Where the pick's position matters — the showcase's one, two, three, four. Small and
+   gold, in the corner the favourite mark already owns, because they never both apply:
+   a card being picked is not a card being browsed. */
+.badge {
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  background: $gold;
+  color: $ground;
+  font-family: $font-mono;
+  font-size: 11px;
+  line-height: 1;
+}
+
 /* Across the bottom edge: six pips, one per relic slot, filled for what is worn. Read at
    a glance rather than counted, which is why they are pips and not a number. */
 .gearPips {

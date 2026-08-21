@@ -34,6 +34,14 @@ test.describe('the profile card', () => {
     // And the owner is offered the picker, which somebody else's card would not show.
     await dialog.getByRole('button', { name: /choose your four/i }).click();
     await expect(dialog.getByText(/up to four/i)).toBeVisible();
+
+    // The picker draws the roster's own card, like every other place a champion is
+    // chosen. It used to be a list of names and star counts — the one view in the game
+    // that showed a player nothing about the four they were choosing to be seen by.
+    // The accessible name is the card's, composed in `ui/ChampionCard`.
+    await expect(
+      dialog.getByRole('button', { name: /lv \d+ of \d+.*power/i }).first(),
+    ).toBeVisible();
   });
 
   test('shows what a warden did, and never what they hold', async ({ page }) => {

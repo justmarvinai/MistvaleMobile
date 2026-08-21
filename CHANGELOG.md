@@ -65,6 +65,15 @@ draws. Same frame, same stars, same affinity badge, same power, and the same sel
 state, so a picker shows what is chosen without inventing a second visual language for
 it.
 
+Two more that a first pass missed. **The profile showcase** — where a warden picks the
+four they want to be *known by* — was a list of names and star counts, which is the one
+view in the game that has to show the champions and was showing none of them. It draws
+the card now, with the pick's position on it, because the order is the whole point of that
+picker. And **the day-30 calendar choice**, where "take the one your roster is missing" is
+unanswerable from four strings: the painted card, carrying only what is true of a champion
+nobody owns yet — who, how rare, what affinity — and no level, stars or power it would
+have to invent.
+
 ### Changed — dialogs that do something get the room to do it
 
 Every modal in the game was 480px wide on a 1920px screen, which put a nine-column

@@ -38,6 +38,7 @@ export function ChampionCard({
   onOpen,
   selectable,
   selected,
+  badge,
 }: {
   champion: RosterChampion;
   def: ChampionDef | undefined;
@@ -45,6 +46,14 @@ export function ChampionCard({
   /** Renders as a picker rather than a link — used by the food and team choosers. */
   selectable?: boolean;
   selected?: boolean;
+  /**
+   * A short mark over the card's corner, where the pick's *position* matters.
+   *
+   * The profile showcase is the case: four champions in the order the player chose them,
+   * and a picker that showed only "selected" would lose the ordering the card is built on.
+   * Kept as a string rather than a number so a caller can put anything short there.
+   */
+  badge?: string;
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
   const art = championArt(def, bundle?.assets);
@@ -118,6 +127,7 @@ export function ChampionCard({
           is the question the roster grid exists to answer; the favourite mark is what the
           default sort floats to the top. */}
       <span className={styles.marks} aria-hidden="true">
+        {badge && <span className={styles.badge}>{badge}</span>}
         {champion.favourite && !champion.locked && <span className={styles.favourite}>✦</span>}
       </span>
       <span className={styles.gearPips} aria-label={`${gearWorn} of 6 relics worn`}>
