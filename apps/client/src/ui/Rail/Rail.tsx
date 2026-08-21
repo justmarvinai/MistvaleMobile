@@ -49,7 +49,17 @@ export function Rail({ label, children, className }: RailProps): JSX.Element {
 
   const measure = useCallback(() => {
     if (!track) return;
-    setEdges(railEdges(track.scrollLeft, track.scrollWidth, track.clientWidth));
+    const next = railEdges(track.scrollLeft, track.scrollWidth, track.clientWidth);
+    // Compared inside the updater, because `railEdges` returns a fresh object and a
+    // scroll fires one of these per frame — a rail dragged across a wide window would
+    // otherwise re-render every panel on it for three booleans that did not change.
+    setEdges((current) =>
+      current.atStart === next.atStart &&
+      current.atEnd === next.atEnd &&
+      current.overflows === next.overflows
+        ? current
+        : next,
+    );
   }, [track]);
 
   /**

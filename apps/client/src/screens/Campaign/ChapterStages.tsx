@@ -212,6 +212,11 @@ function StageEntry({
       ...(row.bestTurns !== null
         ? [{ label: 'Best', value: `${row.bestTurns} turns`, tone: 'plain' as const }]
         : []),
+      // The other half of "what is this stage for": the warlord drops a relic on nearly
+      // every run and the six stages before it on about two in five.
+      ...(drops.gearChancePct > 0
+        ? [{ label: 'Relic drop', value: `${drops.gearChancePct}%`, tone: 'magic' as const }]
+        : []),
     ],
     ...(drops.setName ? { flavor: `Drops ${drops.setName} relics.` } : {}),
     ...(row.open
