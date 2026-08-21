@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial, pickTeam, resolveBattle } from './support';
+import {
+  dismissUnlocks,
+  leaveTutorial,
+  openCampaignStage,
+  pickTeam,
+  resolveBattle,
+} from './support';
 
 /**
  * The management loop, in a real browser.
@@ -94,11 +100,14 @@ test.describe('the management loop', () => {
         .getByRole('button', { name: /^campaign$/i })
         .first()
         .click();
-      await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible({
+      // The campaign opens on the vale — twelve chapter markers — and the chapter is a page
+      // behind one of them, so what proves the screen arrived is the chapter's *name* on the
+      // map rather than a heading that only the chapter page has.
+      await expect(page.getByRole('main')).toContainText(/veilwood fringe/i, {
         timeout: 15_000,
       });
 
-      await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+      await openCampaignStage(page, '1-1');
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
       await expect(teamDialog).toBeVisible();
       await pickTeam(teamDialog);

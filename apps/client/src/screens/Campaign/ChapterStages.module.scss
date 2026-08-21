@@ -1,0 +1,312 @@
+/* A chapter, opened: the seven stages as rows, and everything a player wants to know
+   before spending energy on one — stars, what drops, how many waves, and the best they
+   have ever managed. A disc on a path could carry none of that. */
+
+.page {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: $space-3;
+  height: 100%;
+  min-height: 0;
+}
+
+.back {
+  @include interactive;
+
+  padding: 4px $space-3;
+  border: 1px solid $edge;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $parchment-dim;
+
+  &:hover {
+    border-color: $accent-dim;
+    color: $accent-soft;
+  }
+}
+
+/* Stages left, the chapter's brief right. The list on its own left half a desktop empty,
+   and what belongs in that half is exactly what a player wants while deciding which row to
+   press: where they are, who is at the end of it, and what the next chest costs. */
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem);
+  align-items: start;
+  gap: $space-4;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: $space-2;
+  @include pixel-scrollbar;
+}
+
+/* One column under a laptop's width: the brief is worth reading, not worth squeezing the
+   rows to a third of the page for. */
+@media (max-width: 1100px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 0;
+}
+
+.brief {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: block;
+}
+
+/* The row is the button. A "Battle" control beside a clickable row is two ways to do one
+   thing, and a thumb finds the row. */
+.row {
+  @include interactive;
+
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $space-4;
+  width: 100%;
+  padding: $space-3 $space-4;
+  border: 1px solid $edge;
+  background: linear-gradient(180deg, rgba(34, 29, 24, 0.86), rgba(18, 16, 13, 0.86));
+  color: $parchment;
+  text-align: left;
+  transition:
+    border-color $duration-fast $ease-out,
+    background-color $duration-fast $ease-out,
+    transform $duration-fast $ease-out;
+
+  &:hover:not(:disabled) {
+    border-color: $accent-dim;
+    transform: translateX(3px);
+  }
+
+  &[data-next='true'] {
+    border-color: rgba(194, 118, 74, 0.55);
+    box-shadow: inset 0 0 0 1px rgba(194, 118, 74, 0.18);
+  }
+
+  &[data-boss='true'] .disc {
+    border-color: rgba(200, 65, 47, 0.6);
+    color: $danger;
+  }
+
+  &[data-locked='true'] {
+    cursor: not-allowed;
+    color: $muted-deep;
+    background: rgba(14, 12, 10, 0.7);
+  }
+}
+
+.disc {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid $edge-bright;
+  background: rgba(12, 10, 9, 0.75);
+  font-family: $font-mono;
+  font-size: 15px;
+  color: $accent-soft;
+}
+
+.bossGlyph {
+  width: 1.4rem;
+  height: 1.4rem;
+  background: currentcolor;
+  mask: var(--mv-glyph) center / contain no-repeat;
+  -webkit-mask: var(--mv-glyph) center / contain no-repeat;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-wrap: wrap;
+}
+
+.label {
+  @include display-text(15px);
+  letter-spacing: 0.06em;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 3px;
+}
+
+/* The kit's own star art, treated the way the library's `StarRating` treats it — drained
+   for an unearned star, haloed for an earned one. Spans rather than that component because
+   these live inside a `<button>`, whose content model is phrasing content and not the div
+   a library component mounts, and because a star that changes after a fight would need the
+   component remounted to notice. Same asset, same look, no instance. */
+.star {
+  width: 15px;
+  height: 15px;
+  background: var(--fui-img-icon-star) center / contain no-repeat;
+  /* A shade brighter than the library's own unlit star: at 15px on a dark row its 0.34
+     read as three specks of dust rather than as an empty track. */
+  filter: grayscale(1) brightness(0.75);
+
+  &[data-lit='true'] {
+    filter: drop-shadow(0 0 3px $gold-soft);
+  }
+}
+
+.tag {
+  @include label-text;
+  padding: 2px $space-2;
+  border: 1px solid rgba(200, 65, 47, 0.45);
+  color: $danger;
+}
+
+.here {
+  @include label-text;
+  color: $accent;
+}
+
+.detail {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: $muted;
+
+  /* Three facts in a row need a mark between them, or they read as one sentence with the
+     words in the wrong order. */
+  > * + *::before {
+    content: '·';
+    margin-right: $space-3;
+    color: $muted-deep;
+  }
+}
+
+.set {
+  color: $parchment-dim;
+}
+
+.slots,
+.waves,
+.best {
+  color: $muted;
+}
+
+.shut {
+  color: $muted;
+}
+
+.end {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+}
+
+.cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: $font-mono;
+  font-size: 13px;
+  color: $parchment-dim;
+
+  &[data-short='true'] {
+    color: $danger;
+  }
+}
+
+.go {
+  @include label-text;
+  padding: 5px $space-4;
+  border: 1px solid $accent-dim;
+  color: $accent;
+  white-space: nowrap;
+}
+
+.row[data-locked='true'] .go {
+  border-color: $edge;
+  color: $muted-deep;
+}
+
+.row:hover:not(:disabled) .go {
+  border-color: $accent;
+  color: $accent-soft;
+  background: rgba(194, 118, 74, 0.12);
+}
+
+/* ── The info popover ─────────────────────────────────────────────────────── */
+
+.note {
+  color: $muted;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+.note + .note {
+  margin-top: $space-2;
+}
+
+.warlord {
+  color: $danger;
+}
+
+.chests {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  margin: $space-2 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chest {
+  display: flex;
+  justify-content: space-between;
+  gap: $space-3;
+  font-size: 12px;
+  color: $muted;
+
+  &[data-paid='true'] {
+    color: $muted-deep;
+  }
+}
+
+.chestStars {
+  font-family: $font-mono;
+  color: $gold;
+}
+
+.chestState {
+  @include label-text;
+}
+
+.empty {
+  color: $muted;
+  font-size: 0.85rem;
+}

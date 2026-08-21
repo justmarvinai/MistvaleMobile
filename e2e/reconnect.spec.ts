@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial, pickTeam } from './support';
+import { leaveTutorial, openCampaignStage, pickTeam } from './support';
 
 /**
  * A fight the player walked out of, and came back to.
@@ -45,7 +45,7 @@ async function intoAFight(page: Page, account: string): Promise<void> {
     .getByRole('button', { name: /^campaign$/i })
     .first()
     .click();
-  await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+  await openCampaignStage(page, '1-1');
   const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
   await pickTeam(teamDialog);
   await teamDialog.getByRole('button', { name: /into the mist/i }).click();
@@ -104,10 +104,13 @@ test.describe('a fight the browser left', () => {
     // there is no history to walk back through, so the resumed fight is entered *from* the
     // room its mode belongs to rather than from wherever the reload happened to land.
     await page.getByRole('button', { name: /back to the campaign/i }).click();
-    await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible({
+    // The campaign opens on the vale — twelve chapter markers — and the chapter is a page
+    // behind one of them, so what proves the screen arrived is the chapter's *name* on the
+    // map rather than a heading that only the chapter page has.
+    await expect(page.getByRole('main')).toContainText(/veilwood fringe/i, {
       timeout: 15_000,
     });
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
     await teamDialog.getByRole('button', { name: /into the mist/i }).click();

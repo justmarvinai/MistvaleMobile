@@ -7,6 +7,9 @@ import { dismissUnlocks, leaveTutorial, resolveBattle } from './support';
  * `auth.spec.ts` proves a visitor can get in; this proves there is a game once they are.
  * A fresh account picks a starter, walks into chapter 1-1, resolves the fight and reads
  * its rewards — the P3 exit criterion, driven the way a player would drive it.
+ *
+ * The campaign is three screens since the rework: the vale, a chapter, then the team. So
+ * this drives all three, and the second test is about the map alone.
  */
 
 const password = 'a-good-long-password';
@@ -46,15 +49,26 @@ test.describe('the campaign loop', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
+
+    // The vale first: twelve markers, and the chapter behind one of them.
+    await expect(page.locator('.fui-map__node[data-id="chapter_01"]')).toBeVisible({
+      timeout: 15_000,
+    });
+    await page.locator('.fui-map__node[data-id="chapter_01"]').click();
     await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible({
       timeout: 15_000,
     });
 
-    // Chapter 1, stage 1.
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    // The chapter page says what a stage is worth before any energy is spent.
+    const firstStage = page.getByRole('button', { name: '1-1', exact: false }).first();
+    await expect(firstStage).toContainText(/waves/i);
+    await firstStage.click();
 
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await expect(teamDialog).toBeVisible();
+
+    // And the team screen says who is on the other side of it.
+    await expect(teamDialog.getByRole('region', { name: /what you will face/i })).toBeVisible();
 
     // Put the starter in the team, then set off.
     await teamDialog
@@ -82,6 +96,8 @@ test.describe('the campaign loop', () => {
     // A first win can be a first level, and a first level can open something.
     await dismissUnlocks(page);
     await expect(results).toBeHidden();
+    // Back on the *chapter*, not the vale: the opened chapter is remembered across the
+    // fight, because farming a stage means coming straight back to it.
     await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible();
   });
 
@@ -112,9 +128,10 @@ test.describe('the campaign loop', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await expect(page.getByRole('heading', { name: /veilwood fringe/i })).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(page.locator('.fui-map__node[data-id="chapter_01"]')).toContainText(
+      /1\. Veilwood Fringe/,
+      { timeout: 15_000 },
+    );
 
     // Twelve markers on the map, and exactly one of them is where the warden is standing —
     // 252 stages laid flat would be a wall rather than a map.

@@ -234,6 +234,26 @@ export async function setSimpleBattlefield(page: Page): Promise<void> {
 }
 
 /**
+ * Opens a campaign stage from wherever the campaign screen happens to be.
+ *
+ * The campaign is three screens since the rework — the vale, then a chapter, then the team
+ * — so "click 1-1" is two clicks when the map is showing and one when the chapter is
+ * already open, and which of those it is depends on what the account did last (the opened
+ * chapter is remembered across a fight, deliberately). This asks the page rather than
+ * assuming: if a marker is on screen, open its chapter first.
+ *
+ * The chapter is derived from the label, so `openCampaignStage(page, '3-4')` works.
+ */
+export async function openCampaignStage(page: Page, label = '1-1'): Promise<void> {
+  const chapter = `chapter_${String(Number(label.split('-')[0])).padStart(2, '0')}`;
+  const marker = page.locator(`.fui-map__node[data-id="${chapter}"]`);
+  if (await marker.isVisible().catch(() => false)) {
+    await marker.click();
+  }
+  await page.getByRole('button', { name: label, exact: false }).first().click();
+}
+
+/**
  * Walks a fresh account from the Haven into campaign stage 1-1, on the default team.
  *
  * Returns once the hotbar names somebody to act with, which is the point at which the
@@ -244,7 +264,7 @@ export async function enterStageOneOne(page: Page): Promise<void> {
     .getByRole('button', { name: /^campaign$/i })
     .first()
     .click();
-  await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+  await openCampaignStage(page);
   const dialog = page.getByRole('dialog', { name: /stage 1/i });
   await pickTeam(dialog);
   await dialog.getByRole('button', { name: /into the mist/i }).click();

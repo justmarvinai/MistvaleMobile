@@ -5,6 +5,34 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the campaign is three screens, and the last of them shows you what you are fighting
+
+A map with a seven-disc strip bolted underneath gave the map 55% of a screen and the strip
+no room to say anything at all. A disc holds a number and a padlock; every question a
+player actually has before spending energy — what drops here, how many waves, what beat me
+last time — had nowhere to go. The owner's call is the reference game's shape, and that is
+what it is now:
+
+- **The vale** is the whole screen. Twelve chapter markers, the road between them, and
+  nothing else on it.
+- **A chapter** is a page of its own, opened by its marker. The seven stages are rows, and
+  a row says its stars, the relic set the chapter farms, the slots that stage drops, how
+  many waves it is, what it costs, and the best turn count ever managed on it. Beside them
+  the chapter's brief: where this is, who holds the last stage, and the star-chest track,
+  counting every difficulty.
+- **The team screen** now shows **the enemy line-up, wave by wave** — every unit, its
+  level, its affinity, and on the hover its role and what a boss does about being fought.
+  Content has named every enemy of every stage since P2 and the only screen that ever read
+  them was the fight itself, by which point the energy is spent and the team is locked.
+
+**Which chapter is open survives a fight.** It used to be local state, so every victory
+dropped the player back on the world map, several clicks from the stage they had just
+cleared and were about to run again — a tax on every lap of the loop the game is made of.
+
+The tutorial's fourth step can finally point at stage 1-1: a stage row carries its own
+highlight key, where a library-drawn disc never could.
+
+
 ### Changed — the Haven is a rail of painted places, not a grid of icons
 
 Thirteen 64px sockets in a wrapped grid is a toolbar: every place in the game the same

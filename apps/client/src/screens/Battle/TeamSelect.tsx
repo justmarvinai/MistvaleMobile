@@ -16,6 +16,7 @@ import { stageBoss } from '../../ui/BossCard/bossRules';
 import { Portrait } from '../../ui/Portrait/Portrait';
 import { championArt } from '../../ui/championArt';
 import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
+import { Opposition } from './Opposition';
 
 /**
  * Picking a team before a fight.
@@ -187,7 +188,12 @@ export function TeamSelect({
           {stage.rewards.silverMax} silver
         </p>
 
-        {/* What is waiting, and what it does about being fought. Content has carried a
+        {/* Who is on the other side, wave by wave. Content has named every enemy of every
+            stage since P2 and the only screen that ever read them was the fight itself —
+            by which point the energy is spent and the team is locked. */}
+        <Opposition stage={stage} />
+
+        {/* What the thing at the end *does* about being fought. Content has carried a
             boss's mechanics since P6 and no screen had ever said what was in them — so a
             keep that is meant to be a puzzle was a wall you lost to before guessing. It is
             here rather than in the fight because this is where the team is chosen. */}

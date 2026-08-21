@@ -207,6 +207,12 @@ criteria of its own, and it does not gate P9e or P10.
 |---|---|---|
 | **B1** | The calendar's one-claim bug · quiet headings, no divider · the right-hand columns become an info button on nine screens · the campaign map fullscreen · the profile chip's XP bar | ✅ |
 | **B2** | The empty battlefield (client fallback + the deploy guard that would have caught it) · the stage dialog drawing outside its frame · remembered teams, speed and Auto · one placeholder for every faceless champion · painted tooltips | ✅ |
+| **B3** | A fight the player makes decisions in — skills that say what they do, chips that say what is on a unit, and the player choosing the target · Auto that can be switched off · Skip that finishes the fight · the ground reaching the sides of the window | ✅ |
+| **B4** | The tutorial's voice, face and movable card, and the dim gone · the first audio the game has ever had, all of it content · `pnpm assets` publishing finished media under its own filenames | ✅ |
+| **C1** | A reload mid-fight no longer bricks the account · the React bridge's stale-handler bug and every control it was under · forging a worn relic · the champion sheet at the width the docs specified | ✅ |
+| **C2** | One champion card in every picker · dialogs with room in them · the relic sheet · the champion sheet wider still · a Mistgate worth going to and a pull worth watching | ✅ |
+| **C3** | The game explains itself on hover · equipped relics show their rarity · the tutorial says what to do as well as what it means · the Chronicle as a faction index that hides nothing · `SEED.sh --replace`, so a rewrite of published content can actually ship | ✅ |
+| **C4** | The Haven as a draggable rail of painted boards · the campaign as three screens — the vale, a chapter's stage list, then a team screen that shows the enemy line-up | ✅ |
 
 **Backlog carried out of a batch rather than done in it:** **Q6** — the eight 1254×1254
 champion avatars (14 MB published, drawn at 150px). Parked at the owner's instruction; the

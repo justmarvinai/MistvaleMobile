@@ -4,6 +4,7 @@ import {
   dismissUnlocks,
   enterStageOneOne,
   expectOnTop,
+  openCampaignStage,
   pickTeam,
   registerRaw,
   resolveBattle,
@@ -47,7 +48,7 @@ test.describe('what a player can actually see', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
     await teamDialog.getByRole('button', { name: /into the mist/i }).click();
@@ -97,7 +98,7 @@ test.describe('what a player can actually see', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
     await teamDialog.getByRole('button', { name: /into the mist/i }).click();
@@ -148,7 +149,7 @@ test.describe('what a player can actually see', () => {
         .getByRole('button', { name: /^campaign$/i })
         .first()
         .click();
-      await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+      await openCampaignStage(page, '1-1');
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
       await pickTeam(teamDialog);
       await teamDialog.getByRole('button', { name: /into the mist/i }).click();
@@ -360,7 +361,7 @@ test.describe('what a player can actually see', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
     await teamDialog.getByRole('button', { name: /into the mist/i }).click();
@@ -395,7 +396,7 @@ test.describe('what a player can actually see', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
     await teamDialog.getByRole('button', { name: /into the mist/i }).click();
@@ -441,7 +442,7 @@ test.describe('what a player can actually see', () => {
         .getByRole('button', { name: /^campaign$/i })
         .first()
         .click();
-      await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+      await openCampaignStage(page, '1-1');
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
       await pickTeam(teamDialog);
       await teamDialog.getByRole('button', { name: /into the mist/i }).click();

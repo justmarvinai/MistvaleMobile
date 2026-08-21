@@ -4,7 +4,23 @@
 
 ## Open questions
 
-**None.** Q4 and Q5 were both answered on 2026-08-18 and are in the decision record below.
+**Q7 — the Haven backdrops that landed mid-batch.** Three images arrived on `main` while the
+Haven was being rebuilt: `assets/ui/backgrounds/haven_bgs/haven_{arena,campaign,depths}.jpg`.
+They look exactly like art for the new station boards, and they are not wired in yet, for two
+reasons worth your call rather than mine:
+
+- **Three of thirteen.** Wiring them now gives three painted boards and ten crest icons, which
+  reads as broken rather than as partial. Are the other ten coming?
+- **Size.** They are ~3 MB JPEGs each. Thirteen of those is ~39 MB of Haven, against a budget
+  written for a 1-core/4 GB box. They need publishing at something like 900px wide as WebP
+  (~120 KB each) — the same native-image-module question Q6 is parked on, so answering one
+  probably answers both.
+
+**Recommended default:** hold until the set is complete, then publish them downscaled through
+`tools/asset-sync` and use them as the board art, keeping the current crest icon as the
+fallback for any station without a picture. Say the word and it is a short pass.
+
+Q4 and Q5 were both answered on 2026-08-18 and are in the decision record below.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)

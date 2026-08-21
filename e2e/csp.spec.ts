@@ -3,7 +3,14 @@ import { createServer, type Server } from 'node:http';
 import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PASSWORD, chooseStarter, leaveTutorial, pickTeam, unique } from './support';
+import {
+  PASSWORD,
+  chooseStarter,
+  leaveTutorial,
+  openCampaignStage,
+  pickTeam,
+  unique,
+} from './support';
 
 /**
  * The battlefield under the policy the live site actually sends.
@@ -153,7 +160,7 @@ test.describe('the site security policy', () => {
         .getByRole('button', { name: /^campaign$/i })
         .first()
         .click();
-      await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+      await openCampaignStage(page, '1-1');
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
       await pickTeam(teamDialog);
       await teamDialog.getByRole('button', { name: /into the mist/i }).click();

@@ -1,0 +1,92 @@
+/* The enemy line-up on the team screen: what the energy is being spent against. */
+
+.opposition {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-3;
+  border: 1px solid rgba(200, 65, 47, 0.24);
+  background: rgba(28, 14, 12, 0.32);
+}
+
+.title {
+  @include label-text;
+  margin: 0;
+  color: $danger;
+}
+
+.waves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-4;
+}
+
+.wave {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-width: 0;
+}
+
+.waveLabel {
+  @include label-text;
+  color: $muted;
+}
+
+.units {
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 4.6rem;
+  padding: $space-1;
+  border: 1px solid $edge;
+  background: rgba(12, 10, 9, 0.6);
+  text-align: center;
+
+  &[data-boss='true'] {
+    border-color: rgba(200, 65, 47, 0.55);
+    box-shadow: inset 0 0 0 1px rgba(200, 65, 47, 0.18);
+  }
+}
+
+.portrait {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+/* The affinity, as a corner pip — the one fact that decides whether a team is the right
+   team, and the only one small enough to draw on a 44px face. */
+.affinity {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(12, 10, 9, 0.85);
+  background: var(--mv-affinity);
+}
+
+.name {
+  font-size: 10px;
+  line-height: 1.25;
+  color: $parchment-dim;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.level {
+  font-family: $font-mono;
+  font-size: 10px;
+  color: $muted;
+}

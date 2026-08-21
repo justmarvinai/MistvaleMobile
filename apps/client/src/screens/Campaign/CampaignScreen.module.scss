@@ -1,9 +1,9 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
-/* The map is the screen now, so most of what used to be here — an accordion row, a chapter
-   head, a stage tile, a star strip — is drawn by the library and gone from this file.
-   What is left is the page's own frame and the two lines of prose the map cannot say. */
+/* The map is the screen. Everything that used to sit under it — a chapter head, a strip of
+   seven discs, three lines of prose — is a page of its own now (`ChapterStages`), so what
+   is left here is the page's frame and the pane the map fills. */
 
 .screen {
   display: grid;
@@ -21,15 +21,14 @@
   min-height: 0;
 }
 
-/* In the title bar now — it only has to stop itself from stretching to the row's height. */
+/* In the title bar — it only has to stop itself from stretching to the row's height. */
 .difficulties {
   align-self: center;
 }
 
-/* The map's box. It takes the slack, which is what makes the map fullscreen: the chapter
-   dock under it is the only other thing in the column, and it is as tall as its own
-   content. A floor, because a very short window should scroll the map rather than crush
-   it into a strip. */
+/* The map's box, and it is the whole content row: the chapter dock that used to take 45%
+   of it is a page of its own. A floor, because a very short window should scroll the map
+   rather than crush it into a strip. */
 .mapPane {
   position: relative;
   flex: 1 1 auto;
@@ -43,34 +42,6 @@
   inset: 0;
 }
 
-/* The chapter under the map: one line of prose and the seven-stage path. It keeps its own
-   height and never takes more than half the screen, so the map is always the larger half. */
-.chapter {
-  display: flex;
-  flex-direction: column;
-  gap: $space-2;
-  flex: 0 1 auto;
-  max-height: 45%;
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: $space-2;
-  @include pixel-scrollbar;
-}
-
-.stages {
-  flex: none;
-}
-
-.lore {
-  color: $muted;
-  font-size: 0.85rem;
-  line-height: 1.7;
-}
-
-.chest {
-  color: $gold;
-}
-
 .note,
 .empty {
   color: $muted;
@@ -80,12 +51,4 @@
 
 .note + .note {
   margin-top: $space-2;
-}
-
-.shut {
-  color: $parchment;
-}
-
-.warlord {
-  color: $danger;
 }

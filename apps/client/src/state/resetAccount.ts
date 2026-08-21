@@ -1,5 +1,6 @@
 import { useArenaStore } from './arenaStore';
 import { useBattleStore } from './battleStore';
+import { useCampaignStore } from './campaignStore';
 import { useDepthsStore } from './depthsStore';
 import { useEventStore } from './eventStore';
 import { useInventoryStore } from './inventoryStore';
@@ -42,6 +43,7 @@ import { useUnlockStore } from './unlockStore';
 export function resetAccountState(): void {
   useArenaStore.getState().reset();
   useBattleStore.getState().reset();
+  useCampaignStore.getState().reset();
   useDepthsStore.getState().reset();
   useEventStore.getState().reset();
   useInventoryStore.getState().reset();

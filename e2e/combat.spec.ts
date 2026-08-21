@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseStarter, pickTeam, registerRaw } from './support';
+import { chooseStarter, openCampaignStage, pickTeam, registerRaw } from './support';
 
 /**
  * The decisions a fight is supposed to let a player make.
@@ -18,7 +18,7 @@ async function intoAFight(page: Page, who: string): Promise<void> {
     .getByRole('button', { name: /^campaign$/i })
     .first()
     .click();
-  await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+  await openCampaignStage(page, '1-1');
   const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
   await pickTeam(teamDialog);
   await teamDialog.getByRole('button', { name: /into the mist/i }).click();

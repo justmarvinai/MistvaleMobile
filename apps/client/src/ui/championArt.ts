@@ -1,4 +1,3 @@
-import type { ChampionDef } from '@mistvale/shared';
 import { avatarPath } from '../game/sprites';
 
 /**
@@ -57,7 +56,11 @@ export interface ChampionArtAsset {
  * Returns exactly one of the two keys, so spreading it can never hand the component both.
  */
 export function championArt(
-  def: ChampionDef | undefined,
+  // Structurally an asset key and nothing else, because an *enemy* is a unit with art too
+  // — the team screen's line-up draws the waves it is about to send four champions into,
+  // and the lookup is identical. Narrowing this to `ChampionDef` would have meant a second
+  // copy of the same six lines under a different name.
+  def: { assetKey?: string } | undefined,
   assets: readonly ChampionArtAsset[] | undefined,
 ): ChampionArt {
   const asset = assets?.find((entry) => entry.key === def?.assetKey);

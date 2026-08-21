@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, dismissUnlocks, registerRaw, resolveBattle } from './support';
+import {
+  chooseStarter,
+  dismissUnlocks,
+  openCampaignStage,
+  registerRaw,
+  resolveBattle,
+} from './support';
 
 /**
  * The game remembers what you sent, and how you like to watch.
@@ -27,7 +33,7 @@ test.describe('the game remembers', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    await openCampaignStage(page, '1-1');
 
     const first = page.getByRole('dialog', { name: /stage 1/i });
     await expect(first).toBeVisible();
@@ -56,7 +62,7 @@ test.describe('the game remembers', () => {
     await expect(results).toBeHidden();
 
     // ── The next stage opens on the same team ─────────────────────────────
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    await openCampaignStage(page, '1-1');
     const second = page.getByRole('dialog', { name: /stage 1/i });
     await expect(second).toBeVisible();
     await expect(
@@ -79,7 +85,7 @@ test.describe('the game remembers', () => {
       .getByRole('button', { name: /^campaign$/i })
       .first()
       .click();
-    await page.getByRole('button', { name: '1-1', exact: false }).first().click();
+    await openCampaignStage(page, '1-1');
     const third = page.getByRole('dialog', { name: /stage 1/i });
     await expect(third.locator('[data-filled="true"]'), 'the team survives a reload').toHaveCount(
       1,

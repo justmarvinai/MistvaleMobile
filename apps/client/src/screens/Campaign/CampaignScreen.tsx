@@ -1,35 +1,39 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CampaignChapterDef, Difficulty, StageDef } from '@mistvale/shared';
 import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
-import { StageSelect } from '@/fui/components/StageSelect.ts';
 import { WorldMap, type MapNode } from '@/fui/components/WorldMap.ts';
 import { Fui } from '@/fui/react';
 import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
 import { useContentStore } from '../../state/contentStore';
+import { useCampaignStore } from '../../state/campaignStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { useProgressStore } from '../../state/progressStore';
 import { regionGlyph } from '../../ui/regionArt';
 import { TeamSelect } from '../Battle/TeamSelect';
+import { ChapterStages } from './ChapterStages';
+import { STARS_PER_CHAPTER_DIFFICULTY } from './chapterView';
 import styles from './CampaignScreen.module.scss';
-import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
-import { stageBoss } from '../../ui/BossCard/bossRules';
 import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 
 /**
- * The campaign map, and since the design rework it is one.
+ * The campaign, in three steps.
  *
- * Twelve chapters on three difficulties is 252 stages, far too many to lay flat: a player
- * wants the chapter they are *in*, not an inventory of everywhere they have been. It used
- * to answer that with an accordion — twelve fold-out rows of text — which is the right
- * information in the shape of a settings screen. Now it is the library's `WorldMap` with
- * the vale's twelve chapters on it, and the chosen one's seven stages snaking below in
- * `StageSelect`, which is the shape this genre has used since the first campaign map and
- * the reason a player can see where they are without reading anything.
+ * **The map is the whole screen** (the owner's call, 2026-08-21, following the reference
+ * game): twelve chapters across the vale and nothing else on it. Opening one is a page of
+ * its own — seven stages as rows, with what each drops and what it cost last time
+ * (`ChapterStages`) — and opening a stage is the team chooser, which since the same change
+ * shows the enemy line-up it is being chosen against.
  *
- * The map opens on the chapter the player is in — the first with something left to do —
- * so it answers "where was I" before it is asked (docs/UI_UX_DESIGN.md §3).
+ * It replaced a map with a seven-disc strip bolted underneath, where the map had 55% of a
+ * screen and the strip could say nothing whatever about any stage on it. Splitting them
+ * gives both the room to be what they are: a map you read at a glance, and a list you read
+ * a line at a time.
+ *
+ * Where the player is — which chapter is open, which difficulty — lives in
+ * `state/campaignStore` rather than in this component, because a fight unmounts the
+ * campaign and every victory used to drop the player back on the world map.
  *
  * Everything shown is read from the published content bundle and the server's progress
  * payload, so adding chapter 13 in Admin puts a marker on the map with no client change,
@@ -47,22 +51,16 @@ const DIFFICULTY_LABEL: Record<Difficulty, string> = {
   brutal: 'Brutal',
 };
 
-/** Three stars on seven stages: what a chapter is worth on one difficulty. */
-const STARS_PER_CHAPTER_DIFFICULTY = 21;
-
 /** Markers per row before the road turns back on itself. */
 const MAP_COLUMNS = 4;
 
 /**
  * The map fills its pane.
  *
- * It used to be a pixel height computed from the row count — 200px, plus 110 for each row
- * after the first — because it sat in a scroller whose own height was indefinite, where a
- * percentage resolves against nothing and collapses the map to a strip. The pane is a
- * definite box now (the screen's content row, minus the chapter dock), so `100%` resolves,
- * and the map is as tall as the window instead of 420px with dead air underneath.
- *
- * `mapPosition` was always in percentages, so the serpentine simply spreads.
+ * It used to be a pixel height computed from the row count, because it sat in a scroller
+ * whose own height was indefinite, where a percentage resolves against nothing and
+ * collapses the map to a strip. The pane is a definite box now — the screen's whole content
+ * row, since the chapter dock moved to a page of its own — so `100%` resolves.
  */
 const MAP_HEIGHT = '100%';
 
@@ -88,18 +86,12 @@ export function CampaignScreen(): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
   const energy = usePlayerStore((state) => state.player?.energy.value ?? 0);
   const standings = useProgressStore((state) => state.stages);
-  const parentStars = useProgressStore((state) => state.parentStars);
-  const claimedChests = useProgressStore((state) => state.claimedChests);
   const loadProgress = useProgressStore((state) => state.load);
-  const [difficulty, setDifficulty] = useState<Difficulty>('normal');
+  const difficulty = useCampaignStore((state) => state.difficulty);
+  const setDifficulty = useCampaignStore((state) => state.setDifficulty);
+  const openedKey = useCampaignStore((state) => state.chapterKey);
+  const openChapter = useCampaignStore((state) => state.openChapter);
   const [chosen, setChosen] = useState<StageDef | null>(null);
-  /**
-   * The chapter the player has opened, or null for "wherever I am".
-   *
-   * Null rather than a key so switching difficulty re-answers the question instead of
-   * carrying a chapter across that may not even be open on the harder road.
-   */
-  const [opened, setOpened] = useState<string | null>(null);
 
   // Re-read on mount: coming back from a fight, the map has to know what opened.
   useEffect(() => {
@@ -153,16 +145,6 @@ export function CampaignScreen(): JSX.Element {
     return (anyOpen ? chapters.at(-1)?.key : chapters[0]?.key) ?? null;
   }, [chapters, stagesByChapter, standings]);
 
-  /** Stars earned in one chapter at the chosen difficulty. */
-  const starsIn = (chapter: CampaignChapterDef): number =>
-    (stagesByChapter.get(chapter.key) ?? []).reduce(
-      (total, stage) => total + (standings.get(stage.key)?.stars ?? 0),
-      0,
-    );
-
-  const showing = opened ?? current;
-  const chapter = chapters.find((entry) => entry.key === showing) ?? null;
-
   const nodes = useMemo<MapNode[]>(
     () =>
       chapters.map((entry, index) => {
@@ -181,7 +163,7 @@ export function CampaignScreen(): JSX.Element {
             ? 'locked'
             : earned >= STARS_PER_CHAPTER_DIFFICULTY
               ? 'cleared'
-              : entry.key === showing
+              : entry.key === current
                 ? 'current'
                 : 'open',
           glyph: regionGlyph(entry.region),
@@ -189,8 +171,8 @@ export function CampaignScreen(): JSX.Element {
           // its *average* clear, and the exact count goes in the note underneath.
           stars: Math.floor(earned / Math.max(stages.length, 1)),
           // A shut chapter says why rather than showing a score nobody could have earned.
-          // It is the only place the reason can live: the marker cannot be opened, so the
-          // prose under the map — which explains the *open* chapter — never gets to.
+          // It is the only place the reason can live: the marker cannot be opened, so
+          // nothing else ever gets to say it.
           note: reachable
             ? `${entry.region} · ${earned}/${STARS_PER_CHAPTER_DIFFICULTY}★`
             : (stages.map((stage) => standings.get(stage.key)?.lockedReason).find(Boolean) ??
@@ -201,7 +183,7 @@ export function CampaignScreen(): JSX.Element {
           ...(next ? { links: [next.key] } : {}),
         };
       }),
-    [chapters, stagesByChapter, standings, showing],
+    [chapters, stagesByChapter, standings, current],
   );
 
   /**
@@ -222,10 +204,41 @@ export function CampaignScreen(): JSX.Element {
   const walked = useMemo(() => {
     const total = chapters.length * STARS_PER_CHAPTER_DIFFICULTY;
     if (total === 0) return 0;
-    return chapters.reduce((sum, entry) => sum + starsIn(entry), 0) / total;
-    // `starsIn` closes over the same two stores the deps already name.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const earned = chapters.reduce(
+      (sum, entry) =>
+        sum +
+        (stagesByChapter.get(entry.key) ?? []).reduce(
+          (chapterStars, stage) => chapterStars + (standings.get(stage.key)?.stars ?? 0),
+          0,
+        ),
+      0,
+    );
+    return earned / total;
   }, [chapters, stagesByChapter, standings]);
+
+  /**
+   * The difficulty strip, built once and handed to whichever view is drawing.
+   *
+   * It belongs to the screen rather than to either page: the difficulty is a mode the whole
+   * campaign is in, and a chapter page that dropped it would make comparing Normal with
+   * Hard a trip back to the map and in again.
+   */
+  const difficulties = (
+    <Fui
+      of={SegmentedControl}
+      className={styles.difficulties}
+      attrs={{ 'aria-label': 'Difficulty' }}
+      options={{
+        value: difficulty,
+        segments: DIFFICULTIES.map((entry) => ({
+          value: entry,
+          label: DIFFICULTY_LABEL[entry],
+          disabled: !available.has(entry),
+        })),
+      }}
+      on={{ 'segment:change': (value: string) => setDifficulty(value as Difficulty) }}
+    />
+  );
 
   if (!bundle) {
     return (
@@ -235,60 +248,56 @@ export function CampaignScreen(): JSX.Element {
     );
   }
 
-  const stages = chapter ? (stagesByChapter.get(chapter.key) ?? []) : [];
-  /**
-   * Why the road stops, if it does.
-   *
-   * A `StageSelect` node is a disc with a number on it and has nowhere to put a sentence,
-   * where the old tiles each carried their own "Clear 1-2 first." Only one of those was
-   * ever worth reading — the first shut door — so it is said once, here, in prose.
-   */
-  const shut = stages.find((stage) => standings.get(stage.key)?.open === false);
-  const shutReason = shut ? (standings.get(shut.key)?.lockedReason ?? null) : null;
-  /**
-   * The warlord at the end of the chapter, named.
-   *
-   * The screen's own tagline has promised "a warlord waiting at the end of each" since P6
-   * and never said who — while content has known all along, in the last wave of the last
-   * stage. What it does is said in the team chooser, where the energy is about to be spent.
-   */
-  const warlord = stages.length > 0 ? stageBoss(stages[stages.length - 1]!, bundle.enemies) : null;
+  const opened = chapters.find((entry) => entry.key === openedKey) ?? null;
 
-  const chest = chapter ? nextChest(chapter, parentStars[chapter.key] ?? 0, claimedChests) : null;
+  /**
+   * The dialog's title, as a player says the stage: "Stage 1-4", not "Stage 4".
+   *
+   * Read off the stage's own parent rather than off whatever chapter happens to be open,
+   * so it stays right no matter where the stage was picked from.
+   */
+  const chosenChapter = chosen
+    ? (chapters.find((entry) => entry.key === chosen.parentKey) ?? null)
+    : null;
+  const team = chosen ? (
+    <TeamSelect
+      stage={chosen}
+      {...(chosenChapter ? { title: `Stage ${chosenChapter.number}-${chosen.number}` } : {})}
+      onClose={() => setChosen(null)}
+    />
+  ) : null;
+
+  if (opened) {
+    return (
+      <>
+        <ChapterStages
+          chapter={opened}
+          difficulty={difficulty}
+          stages={stagesByChapter.get(opened.key) ?? []}
+          onBack={() => openChapter(null)}
+          onPick={setChosen}
+          actions={difficulties}
+        />
+        {team}
+      </>
+    );
+  }
 
   return (
     <div className={styles.screen}>
       <Heading
-        tagline="Twelve chapters, three difficulties, and a warlord waiting at the end of each."
+        tagline={`Twelve chapters, three difficulties, and a warlord at the end of each. You have ${energy} energy.`}
         actions={
           <>
             {/* In the title bar rather than over the map: difficulty is a mode the whole
                 screen is in, the row is already there, and a strip of its own would cost
                 the map thirty pixels on every visit. */}
-            <Fui
-              of={SegmentedControl}
-              className={styles.difficulties}
-              attrs={{ 'aria-label': 'Difficulty' }}
-              options={{
-                value: difficulty,
-                segments: DIFFICULTIES.map((entry) => ({
-                  value: entry,
-                  label: DIFFICULTY_LABEL[entry],
-                  disabled: !available.has(entry),
-                })),
-              }}
-              on={{
-                'segment:change': (value: string) => {
-                  setDifficulty(value as Difficulty);
-                  setOpened(null);
-                },
-              }}
-            />
+            {difficulties}
             <ScreenInfo title="The Campaign">
               <Panel title="The Campaign">
                 <p className={styles.note}>
-                  Push through the Sskarn invasion chapter by chapter. Clearing a stage pays silver
-                  and experience; energy comes back on its own over time. You have {energy}.
+                  Push through the Sskarn invasion chapter by chapter. Open a chapter to see its
+                  seven stages, what each of them drops and what it costs.
                 </p>
                 <p className={styles.note}>
                   Each chapter drops one relic set, and each stage number drops one slot — so a
@@ -315,117 +324,28 @@ export function CampaignScreen(): JSX.Element {
             message="The road through the vale is content — it is laid in the Admin Suite."
           />
         ) : (
-          <>
-            {/* The map is the screen: it takes every pixel the chapter dock underneath it
-                does not, rather than a fixed 420px with the rest of the window empty.
-                Remounted whenever a marker would change — see `mapKey`. */}
-            <div className={styles.mapPane}>
-              <Fui
-                key={mapKey}
-                of={WorldMap}
-                className={styles.map}
-                options={{
-                  nodes,
-                  art: 'bg-wide',
-                  title: 'The Vale',
-                  progress: walked,
-                  height: MAP_HEIGHT,
-                  interactive: true,
-                }}
-                on={{ 'map:enter': (key: string) => setOpened(key) }}
-              />
-            </div>
-
-            {chapter && (
-              <section className={styles.chapter} {...highlightable('panel:chapter')}>
-                <p className={styles.lore}>
-                  {chapter.lore}
-                  {warlord && (
-                    <span className={styles.warlord}> {warlord.name} holds the last stage.</span>
-                  )}
-                  {shutReason && <span className={styles.shut}> {shutReason}</span>}
-                  {chest && (
-                    <span className={styles.chest}>
-                      {' '}
-                      Next chest at {chest.stars}★ — {parentStars[chapter.key] ?? 0} earned across
-                      every difficulty.
-                    </span>
-                  )}
-                </p>
-
-                {/* Keyed for the same reason the map is: `StageSelect` offers
-                    `setStages` but nothing for its title or subtitle, and both carry
-                    numbers that move. Rebuilding a row of seven nodes costs nothing. */}
-                {stages.length === 0 ? (
-                  <p className={styles.empty}>
-                    Nothing here on {DIFFICULTY_LABEL[difficulty]} yet.
-                  </p>
-                ) : (
-                  <Fui
-                    key={`${chapter.key}|${difficulty}|${stages
-                      .map((stage) => {
-                        const standing = standings.get(stage.key);
-                        return `${standing?.open ?? true}:${standing?.stars ?? 0}`;
-                      })
-                      .join(',')}`}
-                    of={StageSelect}
-                    className={styles.stages}
-                    options={{
-                      title: `${chapter.number}. ${chapter.name}`,
-                      subtitle: `${chapter.region} · ${starsIn(chapter)}/${STARS_PER_CHAPTER_DIFFICULTY}★ on ${DIFFICULTY_LABEL[difficulty]}`,
-                      layout: 'path',
-                      columns: 7,
-                      stages: stages.map((stage, index) => {
-                        const standing = standings.get(stage.key);
-                        // Default to open: on the first paint, before progress lands, a
-                        // hopeful map beats one that flickers everything shut.
-                        const unlocked = standing?.open ?? true;
-                        const stars = standing?.stars ?? 0;
-                        return {
-                          id: stage.key,
-                          label: `${chapter.number}-${stage.number}`,
-                          stars,
-                          state: !unlocked
-                            ? ('locked' as const)
-                            : stars > 0
-                              ? ('cleared' as const)
-                              : ('current' as const),
-                          cost: stage.energyCost,
-                          // The warlord waits at the end of every chapter, and the node
-                          // this marks is the one a player saves their energy for.
-                          ...(index === stages.length - 1 ? { boss: true } : {}),
-                        };
-                      }),
-                    }}
-                    on={{
-                      // The node, not its id — `StageSelect` emits the whole entry.
-                      'stage:select': (node: { id: string }) => {
-                        const stage = stages.find((entry) => entry.key === node.id);
-                        if (stage) setChosen(stage);
-                      },
-                    }}
-                  />
-                )}
-              </section>
-            )}
-          </>
+          // The map *is* the screen now: it takes the whole content row rather than 55% of
+          // it. Remounted whenever a marker would change — see `mapKey`.
+          <div className={styles.mapPane}>
+            <Fui
+              key={mapKey}
+              of={WorldMap}
+              className={styles.map}
+              options={{
+                nodes,
+                art: 'bg-wide',
+                title: 'The Vale',
+                progress: walked,
+                height: MAP_HEIGHT,
+                interactive: true,
+              }}
+              on={{ 'map:enter': (key: string) => openChapter(key) }}
+            />
+          </div>
         )}
       </div>
 
-      {chosen && <TeamSelect stage={chosen} onClose={() => setChosen(null)} />}
+      {team}
     </div>
   );
-}
-
-/** The next star-chest tier a chapter still owes, or null once they are all paid. */
-function nextChest(
-  chapter: CampaignChapterDef,
-  stars: number,
-  claimed: Record<string, number[]>,
-): { stars: number } | null {
-  const paid = new Set(claimed[chapter.key] ?? []);
-  const pending = [...chapter.starRewards]
-    .sort((a, b) => a.stars - b.stars)
-    .find((tier) => !paid.has(tier.stars) && tier.stars > stars);
-  return pending ? { stars: pending.stars } : null;
 }
