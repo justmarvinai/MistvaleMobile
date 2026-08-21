@@ -70,7 +70,8 @@ MistvaleMobile/
 │   │   │   ├── ui/             # Mistvale UI kit: Panel, Button, Bar, Modal, ...
 │   │   │   ├── state/          # zustand stores (session, player, roster, content, battle)
 │   │   │   ├── api/            # typed API client (generated from shared DTOs)
-│   │   │   ├── audio/          # mixer (buses, unlock, throttle) + synth (pure: voice → samples)
+│   │   │   ├── audio/          # mixer (cues: buses, unlock, throttle) + synth (pure: voice → samples)
+│   │   │   │                   # + tracks (files: music loop, narration, crossfade)
 │   │   │   └── styles/         # tokens.scss, mixins, global
 │   │   └── public/             # packed atlases, fonts, icons, audio (build output of asset pipeline)
 │   └── server/

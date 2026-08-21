@@ -101,6 +101,8 @@ describe('what the overlay is told', () => {
     rewards: {},
     grantsBefore: {},
     grantsRelics: [],
+    portrait: '',
+    sound: '',
     active: true,
     ...extra,
   });

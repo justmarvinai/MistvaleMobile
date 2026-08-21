@@ -96,7 +96,10 @@ test.describe('the tutorial', () => {
     ).toBeGreaterThan(0);
 
     const handle = overlay.getByRole('button', { name: /move the wardenmaster/i });
-    const card = overlay.locator('div').filter({ has: handle }).last();
+    // The card is the handle's parent, said directly. Reaching for it with `filter({ has })`
+    // is ambiguous when the handle is itself a div: the filter can match the handle as well
+    // as its ancestors, and `.last()` then picks the wrong one or nothing at all.
+    const card = handle.locator('xpath=..');
     const before = await card.boundingBox();
     expect(before, 'the card is laid out').not.toBeNull();
 

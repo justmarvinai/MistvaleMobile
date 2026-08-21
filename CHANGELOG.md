@@ -5,6 +5,57 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the game has a soundtrack, and the Wardenmaster has a voice
+
+The owner's audio pack: two music tracks and twelve of the tutorial's fifteen lines,
+plus his portrait. All of it is content — `soundCue.sample` and `.loop` for the
+music, `tutorialStep.portrait` and `.sound` for the tutorial — so swapping any of it
+is an edit in Admin rather than a deploy.
+
+- **Music follows the screen.** One theme everywhere that is not a fight, another in
+  one, crossfaded rather than cut, looping, and dropped entirely when the fader
+  reaches zero — a muted eight-megabyte track that keeps streaming is bandwidth and
+  battery spent on silence.
+- **The Wardenmaster speaks his line** while the step it belongs to is open, and
+  stops mid-sentence the moment it closes. Three steps have no recording and are
+  simply read, which is the design and not a gap.
+- **And has a face**, beside the line, in the tutorial card.
+- Both obey the sliders that already existed: music on the music bus, the
+  Wardenmaster on effects, since somebody who muted the soundtrack to play their own
+  still wants to be told what to do. The Settings panel no longer says there is no
+  soundtrack, because there is one.
+
+`audio/tracks.ts` is where the split lives: `mixer.ts` renders cues from parameters,
+this streams files. One is fired and forgotten a thousand times; the other is one
+file at a time, replaced rather than layered.
+
+### Changed — the tutorial stops dimming the game
+
+It pointed by cutting a hole in a scrim, so everything except the target went dark.
+That shows one small target well and lives badly on top of a game: the art the player
+came for greys out with it, and a fight being narrated is watched through a filter.
+The ring was doing the work anyway — it is heavier now so it wins on a lit screen —
+and the four panes are gone. The overlay still never blocks input; the server is what
+enforces order.
+
+### Added — the tutorial card can be dragged out of the way
+
+It points at things, so sooner or later it points at something underneath itself. The
+title row is the handle, arrow keys nudge it (Shift for a bigger step), double-click
+puts it back, and every move is clamped inside the window — a panel dragged off-screen
+would have no scrollbar to bring it back. `ui/useDraggable.ts`, kept general: a battle
+log or a comparison sheet will want the same thing.
+
+### Changed — `pnpm assets` publishes finished media, not just sprites
+
+Sprites are transformed on the way through — renumbered, counted into a manifest —
+because the client builds their URLs from an index. Music, narration and portraits are
+the opposite: content points at them by filename, so they are copied under their own
+names into `public/audio/{music,tutorial}` and `public/portraits`. All three are
+gitignored for the reason the sprites are, only more so: the two tracks alone are
+16 MB, and a second copy in git would be 16 MB nobody can edit. A source folder that is
+not there publishes nothing and says so.
+
 ### Added — a fight you can make decisions in
 
 Everything here has been in the engine's contract since P3 and none of it had ever reached
