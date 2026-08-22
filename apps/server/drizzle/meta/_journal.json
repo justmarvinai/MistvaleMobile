@@ -190,6 +190,13 @@
       "when": 1787085683193,
       "tag": "0026_avatar_champion",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1787085684193,
+      "tag": "0027_awakening",
+      "breakpoints": true
     }
   ]
 }

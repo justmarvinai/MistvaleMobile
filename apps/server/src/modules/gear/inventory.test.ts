@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance, InjectOptions } from 'fastify';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { ROUTES, apiPath, type GearInstance } from '@mistvale/shared';
 import {
   contentEntries,
@@ -145,6 +145,33 @@ describe.skipIf(!dbUp)('the management loop', () => {
 
   async function setSilver(amount: number): Promise<void> {
     await app.db.update(players).set({ silver: amount }).where(eq(players.id, playerId));
+  }
+
+  /**
+   * Stands a champion exactly where every ladder demands it stands.
+   *
+   * Read from the server rather than typed in: the cap is the rarity's business now, and a
+   * test that hardcoded 10 was a test that would go stale the next time the table moved —
+   * which is precisely what happened when it did.
+   */
+  async function standAtCap(championId: string, rank?: number): Promise<number> {
+    if (rank !== undefined) {
+      await app.db.update(playerChampions).set({ rank }).where(eq(playerChampions.id, championId));
+    }
+    const detail = await as({ method: 'GET', url: apiPath(ROUTES.roster.detail(championId)) });
+    const cap = detail.json().data.champion.champion.levelCap as number;
+    await app.db
+      .update(playerChampions)
+      .set({ level: cap })
+      .where(eq(playerChampions.id, championId));
+    return cap;
+  }
+
+  /** Food at a given star, which the rank-up ladder now asks for in fours and fives. */
+  async function giveFoodAtRank(count: number, rank: number): Promise<string[]> {
+    const ids = await giveFood(count);
+    await app.db.update(playerChampions).set({ rank }).where(inArray(playerChampions.id, ids));
+    return ids;
   }
 
   // ── Relics ───────────────────────────────────────────────────────────────
@@ -488,13 +515,11 @@ describe.skipIf(!dbUp)('the management loop', () => {
     });
 
     it('spends silver and food, adds a star and resets the level', async () => {
+      // A starter is an Epic, so it begins at ★4 and its rank-up eats four ★4 bodies.
       const champion = await chooseStarter();
-      await app.db
-        .update(playerChampions)
-        .set({ level: 10 })
-        .where(eq(playerChampions.id, champion.id));
-      await setSilver(50_000);
-      const food = await giveFood(1);
+      await standAtCap(champion.id);
+      await setSilver(500_000);
+      const food = await giveFoodAtRank(4, 4);
 
       const response = await as({
         method: 'POST',
@@ -504,21 +529,17 @@ describe.skipIf(!dbUp)('the management loop', () => {
       expect(response.statusCode, response.body).toBe(200);
 
       const detail = response.json().data.champion.champion;
-      expect(detail.rank).toBe(2);
+      expect(detail.rank).toBe(5);
       expect(detail.level).toBe(1);
-      expect(detail.levelCap).toBe(20);
-      expect(response.json().data.silver).toBe(50_000 - 2_000);
+      expect(detail.levelCap).toBe(50);
+      expect(response.json().data.silver).toBe(500_000 - 100_000);
     });
 
     it('refuses food of the wrong rank', async () => {
       const champion = await chooseStarter();
-      await app.db
-        .update(playerChampions)
-        .set({ level: 10 })
-        .where(eq(playerChampions.id, champion.id));
-      await setSilver(50_000);
-      const food = await giveFood(1);
-      await app.db.update(playerChampions).set({ rank: 3 }).where(eq(playerChampions.id, food[0]!));
+      await standAtCap(champion.id);
+      await setSilver(500_000);
+      const food = await giveFoodAtRank(4, 3);
 
       const response = await as({
         method: 'POST',
@@ -526,17 +547,54 @@ describe.skipIf(!dbUp)('the management loop', () => {
         payload: { foodIds: food, actionId: actionId('rank') },
       });
       expect(response.statusCode).toBe(400);
-      expect(response.json().error.message).toMatch(/★1/);
+      expect(response.json().error.message).toMatch(/★4/);
+    });
+
+    it('stops an Epic at ★6, which is where its rarity ends', async () => {
+      const champion = await chooseStarter();
+      await standAtCap(champion.id, 6);
+      await setSilver(2_000_000);
+
+      const detail = await as({ method: 'GET', url: apiPath(ROUTES.roster.detail(champion.id)) });
+      // The client is told there is no step rather than being left to guess.
+      expect(detail.json().data.champion.costs.rankUp).toBeNull();
+      expect(detail.json().data.champion.costs.maxRank).toBe(6);
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.rankUp(champion.id)),
+        payload: { foodIds: await giveFoodAtRank(6, 6), actionId: actionId('rank') },
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.message).toMatch(/epic champion stops at ★6/i);
+    });
+
+    it('never offers a Common a star at all', async () => {
+      // Brood-kin are Commons, and a Common keeps the star it was called at — so the whole
+      // ladder is absent rather than merely finished.
+      const [food] = await giveFood(1);
+      await standAtCap(food as string);
+
+      const detail = await as({
+        method: 'GET',
+        url: apiPath(ROUTES.roster.detail(food as string)),
+      });
+      expect(detail.json().data.champion.costs.rankUp).toBeNull();
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.rankUp(food as string)),
+        payload: { foodIds: await giveFood(1), actionId: actionId('rank') },
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.message).toMatch(/common champions keep the star/i);
     });
   });
 
   describe('ascension', () => {
     it('spends the essences its element and rarity call for', async () => {
       const champion = await chooseStarter();
-      await app.db
-        .update(playerChampions)
-        .set({ rank: 3 })
-        .where(eq(playerChampions.id, champion.id));
+      await standAtCap(champion.id, 3);
 
       const detail = await as({ method: 'GET', url: apiPath(ROUTES.roster.detail(champion.id)) });
       const cost = detail.json().data.champion.costs.ascend.items as Record<string, number>;
@@ -568,10 +626,7 @@ describe.skipIf(!dbUp)('the management loop', () => {
 
     it('refuses without the essences, and spends nothing', async () => {
       const champion = await chooseStarter();
-      await app.db
-        .update(playerChampions)
-        .set({ rank: 3 })
-        .where(eq(playerChampions.id, champion.id));
+      await standAtCap(champion.id, 3);
 
       const response = await as({
         method: 'POST',
@@ -582,15 +637,214 @@ describe.skipIf(!dbUp)('the management loop', () => {
       expect(response.json().error.code).toBe('INSUFFICIENT_FUNDS');
     });
 
-    it('will not let a ★1 champion ascend at all', async () => {
+    it('waits for the level cap, like every other ladder', async () => {
       const champion = await chooseStarter();
+      // Ranked but not levelled: the one gate all three ladders share.
+      await app.db
+        .update(playerChampions)
+        .set({ rank: 3, level: 1 })
+        .where(eq(playerChampions.id, champion.id));
+
       const response = await as({
         method: 'POST',
         url: apiPath(ROUTES.roster.ascend(champion.id)),
         payload: { actionId: actionId('asc') },
       });
       expect(response.statusCode).toBe(400);
-      expect(response.json().error.message).toMatch(/★1|rank/i);
+      expect(response.json().error.message).toMatch(/level cap/i);
+    });
+
+    it('is not offered to a Common at all, whatever star it is on', async () => {
+      const [food] = await giveFood(1);
+      await standAtCap(food as string);
+
+      const detail = await as({
+        method: 'GET',
+        url: apiPath(ROUTES.roster.detail(food as string)),
+      });
+      expect(detail.json().data.champion.costs.ascend).toBeNull();
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.ascend(food as string)),
+        payload: { actionId: actionId('asc') },
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.message).toMatch(/rare champions and above/i);
+    });
+  });
+
+  describe('brews', () => {
+    it('pours experience in without eating a champion', async () => {
+      const champion = await chooseStarter();
+      await app.db.transaction((tx) => grantItems(tx, playerId, { xp_brew: 10 }, 'test'));
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.levelUp(champion.id)),
+        payload: { brews: 4, actionId: actionId('brew') },
+      });
+      expect(response.statusCode, response.body).toBe(200);
+      expect(response.json().data.champion.champion.level).toBeGreaterThan(1);
+      expect(response.json().data.consumed).toEqual([]);
+
+      const held = await as({ method: 'GET', url: apiPath(ROUTES.inventory.items) });
+      const items = held.json().data.items as { itemKey: string; quantity: number }[];
+      expect(items.find((entry) => entry.itemKey === 'xp_brew')?.quantity).toBe(6);
+    });
+
+    it('takes brews and bodies in the same feed', async () => {
+      const champion = await chooseStarter();
+      await app.db.transaction((tx) => grantItems(tx, playerId, { xp_brew: 3 }, 'test'));
+      const food = await giveFood(2);
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.levelUp(champion.id)),
+        payload: { foodIds: food, brews: 3, actionId: actionId('mix') },
+      });
+      expect(response.statusCode, response.body).toBe(200);
+      expect(response.json().data.consumed).toHaveLength(2);
+    });
+
+    it('refuses brews nobody holds, and spends nothing', async () => {
+      const champion = await chooseStarter();
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.levelUp(champion.id)),
+        payload: { brews: 5, actionId: actionId('nobrew') },
+      });
+      expect(response.statusCode).toBe(409);
+      expect(response.json().error.code).toBe('INSUFFICIENT_FUNDS');
+
+      const detail = await as({ method: 'GET', url: apiPath(ROUTES.roster.detail(champion.id)) });
+      expect(detail.json().data.champion.champion.level).toBe(1);
+    });
+
+    it('refuses a feed with nothing in it', async () => {
+      const champion = await chooseStarter();
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.levelUp(champion.id)),
+        payload: { actionId: actionId('empty') },
+      });
+      expect(response.statusCode).toBe(400);
+    });
+  });
+
+  describe('awakening', () => {
+    /** Everything the last ladder waits on: the last star, the cap, and a full ascension. */
+    async function readyToAwaken(championId: string): Promise<void> {
+      const detail = await as({ method: 'GET', url: apiPath(ROUTES.roster.detail(championId)) });
+      const ceiling = detail.json().data.champion.costs.maxRank as number;
+      await app.db
+        .update(playerChampions)
+        .set({ rank: ceiling, ascension: 6 })
+        .where(eq(playerChampions.id, championId));
+      await standAtCap(championId);
+    }
+
+    it('spends the shards and the silver, and carries the champion past its anchor', async () => {
+      const champion = await chooseStarter();
+      await readyToAwaken(champion.id);
+      await setSilver(1_000_000);
+
+      const before = await as({ method: 'GET', url: apiPath(ROUTES.roster.detail(champion.id)) });
+      const cost = before.json().data.champion.costs.awaken;
+      expect(cost).not.toBeNull();
+      expect(cost.ready).toEqual({ atMaxRank: true, atLevelCap: true, atMaxAscension: true });
+      const power = before.json().data.champion.stats.power as number;
+
+      await app.db.transaction((tx) => grantItems(tx, playerId, cost.items, 'test'));
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.awaken(champion.id)),
+        payload: { actionId: actionId('awake') },
+      });
+      expect(response.statusCode, response.body).toBe(200);
+
+      const after = response.json().data.champion;
+      expect(after.champion.awakening).toBe(1);
+      expect(after.stats.power).toBeGreaterThan(power);
+      expect(response.json().data.silver).toBe(1_000_000 - cost.silver);
+    });
+
+    it('waits for the last star', async () => {
+      const champion = await chooseStarter();
+      await app.db
+        .update(playerChampions)
+        .set({ rank: 4, ascension: 6 })
+        .where(eq(playerChampions.id, champion.id));
+      await standAtCap(champion.id);
+      await setSilver(1_000_000);
+      await app.db.transaction((tx) => grantItems(tx, playerId, { waking_shard: 99 }, 'test'));
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.awaken(champion.id)),
+        payload: { actionId: actionId('early') },
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.message).toMatch(/last star/i);
+    });
+
+    it('waits for the ascension it comes after', async () => {
+      const champion = await chooseStarter();
+      await app.db
+        .update(playerChampions)
+        .set({ rank: 6, ascension: 0 })
+        .where(eq(playerChampions.id, champion.id));
+      await standAtCap(champion.id);
+      await setSilver(1_000_000);
+      await app.db.transaction((tx) => grantItems(tx, playerId, { waking_shard: 99 }, 'test'));
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.awaken(champion.id)),
+        payload: { actionId: actionId('unasc') },
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.message).toMatch(/after ascension/i);
+    });
+
+    it('is not offered to a Common at all', async () => {
+      const [food] = await giveFood(1);
+      await standAtCap(food as string);
+
+      const detail = await as({
+        method: 'GET',
+        url: apiPath(ROUTES.roster.detail(food as string)),
+      });
+      expect(detail.json().data.champion.costs.awaken).toBeNull();
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.awaken(food as string)),
+        payload: { actionId: actionId('nope') },
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.message).toMatch(/rare champions and above/i);
+    });
+
+    it('refuses without the shards, and spends nothing', async () => {
+      const champion = await chooseStarter();
+      await readyToAwaken(champion.id);
+      await setSilver(1_000_000);
+
+      const response = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.roster.awaken(champion.id)),
+        payload: { actionId: actionId('broke') },
+      });
+      expect(response.statusCode).toBe(409);
+
+      const detail = await as({ method: 'GET', url: apiPath(ROUTES.roster.detail(champion.id)) });
+      expect(detail.json().data.champion.champion.awakening).toBe(0);
+      const silver = await app.db
+        .select({ silver: players.silver })
+        .from(players)
+        .where(eq(players.id, playerId));
+      expect(silver[0]?.silver).toBe(1_000_000);
     });
   });
 

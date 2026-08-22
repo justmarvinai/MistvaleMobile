@@ -44,6 +44,8 @@ export const ROUTES = {
     rankUp: (id: string) => `/player/champions/${encodeURIComponent(id)}/rank-up`,
     /** `/player/champions/:id/ascend` — spend essences for an ascension level. */
     ascend: (id: string) => `/player/champions/${encodeURIComponent(id)}/ascend`,
+    /** `/player/champions/:id/awaken` — the last ladder, once every other one is finished. */
+    awaken: (id: string) => `/player/champions/${encodeURIComponent(id)}/awaken`,
     /** `/player/champions/:id/skill-upgrade` — spend a tome on a chosen skill. */
     skillUpgrade: (id: string) => `/player/champions/${encodeURIComponent(id)}/skill-upgrade`,
     /** `/player/champions/:id/masteries` — learn one node, paying its emblems. */

@@ -59,17 +59,38 @@ export const championDetailSchema = z.object({
         allowedByRank: z.boolean(),
       })
       .nullable(),
+    /** Null when this rarity never awakens, or when it is already awakened 6. */
+    awaken: z
+      .object({
+        items: z.record(z.string(), z.number().int()),
+        silver: z.number().int(),
+        /** Every gate awakening waits on, so the screen can say which one is shut. */
+        ready: z.object({
+          atMaxRank: z.boolean(),
+          atLevelCap: z.boolean(),
+          atMaxAscension: z.boolean(),
+        }),
+      })
+      .nullable(),
+    /** The star ceiling this champion's rarity allows, for the track the screen draws. */
+    maxRank: z.number().int(),
   }),
 });
 export type ChampionDetail = z.infer<typeof championDetailSchema>;
 
 // ── Requests ────────────────────────────────────────────────────────────────
 
-export const levelUpRequestSchema = z.object({
-  /** Roster ids to consume. Locked, favourited and equipped champions are refused. */
-  foodIds: z.array(z.string().uuid()).min(1).max(20),
-  actionId: z.string().min(8).max(64),
-});
+export const levelUpRequestSchema = z
+  .object({
+    /** Roster ids to consume. Locked, favourited and equipped champions are refused. */
+    foodIds: z.array(z.string().uuid()).max(20).default([]),
+    /** Mistbrews to pour in. One kind, not one per breath. */
+    brews: z.number().int().min(0).max(500).default(0),
+    actionId: z.string().min(8).max(64),
+  })
+  .refine((value) => value.foodIds.length > 0 || value.brews > 0, {
+    message: 'Feed something: champions, brews, or both.',
+  });
 export type LevelUpRequest = z.infer<typeof levelUpRequestSchema>;
 
 export const rankUpRequestSchema = z.object({
@@ -82,6 +103,11 @@ export const ascendRequestSchema = z.object({
   actionId: z.string().min(8).max(64),
 });
 export type AscendRequest = z.infer<typeof ascendRequestSchema>;
+
+export const awakenRequestSchema = z.object({
+  actionId: z.string().min(8).max(64),
+});
+export type AwakenRequest = z.infer<typeof awakenRequestSchema>;
 
 /**
  * A skill upgrade, paid for one of two ways.

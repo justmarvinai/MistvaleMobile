@@ -43,6 +43,10 @@ export const LEVEL_CAP_BY_RANK: readonly number[] = [0, 20, 20, 30, 40, 50, 60];
 /** The highest level any champion can reach, at ★6. */
 export const MAX_CHAMPION_LEVEL = 60;
 
+/** Ascension and awakening both run 0–6, so a player learns one range rather than two. */
+export const MAX_ASCENSION = 6;
+export const MAX_AWAKENING = 6;
+
 /** Relic slots: six armour slots plus three ascension-gated accessories. */
 export const GEAR_SLOTS = [
   'weapon',

@@ -50,6 +50,7 @@ export const GOAL_TYPES = [
   'championRankUp',
   /** A champion ascended. */
   'championAscend',
+  'championAwaken',
   /** A mastery node learned. */
   'masteryLearn',
   /** A purchase in a shop. Filter: `shopKey`. */
@@ -95,6 +96,7 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   championLevelUp: 'count',
   championRankUp: 'count',
   championAscend: 'count',
+  championAwaken: 'count',
   masteryLearn: 'count',
   shopPurchase: 'count',
   arenaBattle: 'count',
@@ -126,6 +128,7 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   gearLevel: [],
   championLevelUp: [],
   championRankUp: ['rank'],
+  championAwaken: ['awakening'],
   championAscend: [],
   masteryLearn: [],
   shopPurchase: ['shopKey'],

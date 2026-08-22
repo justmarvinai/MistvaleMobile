@@ -45,6 +45,15 @@ export const playerChampions = pgTable(
     /** Star rank 1–6; caps the level (LEVEL_CAP_BY_RANK). */
     rank: smallint('rank').notNull().default(1),
     ascension: smallint('ascension').notNull().default(0),
+    /**
+     * Awakening 0–6 — the ladder that opens once every other one is finished.
+     *
+     * Its own column rather than more ascension, because the two are gated on different
+     * things and pay out differently: ascension is essences from the Springs and it stops
+     * where the star rank stops, awakening is a single deep-game material and it stops
+     * nowhere but its own top.
+     */
+    awakening: smallint('awakening').notNull().default(0),
     xp: bigint('xp', { mode: 'number' }).notNull().default(0),
 
     /**

@@ -293,7 +293,7 @@ export async function claim(
 
     for (const championKey of champions) {
       try {
-        await grantChampion(tx, playerId, championKey);
+        await grantChampion(tx, playerId, championKey, {}, ctx.content.current().bundle.champions);
       } catch (cause) {
         if (cause instanceof AppError && cause.code === 'ROSTER_FULL') {
           throw new AppError(

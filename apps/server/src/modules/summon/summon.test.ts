@@ -1,7 +1,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance, InjectOptions } from 'fastify';
 import { eq } from 'drizzle-orm';
-import { ROUTES, apiPath, type SummonBanner, type SummonResult } from '@mistvale/shared';
+import {
+  ROUTES,
+  apiPath,
+  baseRankOf,
+  type SummonBanner,
+  type SummonResult,
+} from '@mistvale/shared';
 import {
   contentEntries,
   contentRevisions,
@@ -385,7 +391,10 @@ describe.skipIf(!dbUp)('the Mistgate', () => {
       const entry = chronicle.entries.find(
         (candidate: { championKey: string }) => candidate.championKey === key,
       );
-      expect(entry).toMatchObject({ owned: true, seen: true, copies: 1, bestRank: 1 });
+      expect(entry).toMatchObject({ owned: true, seen: true, copies: 1 });
+      // The star is the rarity's, not ★1: a champion arrives where its rarity starts.
+      const def = app.content.current().bundle.champions.find((entry) => entry.key === key)!;
+      expect(entry.bestRank).toBe(baseRankOf(def));
       expect(chronicle.owned).toBe(1);
     });
 

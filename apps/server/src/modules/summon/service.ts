@@ -185,7 +185,13 @@ export async function pull(
       // refusing it here would take the sigil and give nothing back.
       let rosterRow = null;
       try {
-        const granted = await grantChampion(tx, playerId, outcome.championKey);
+        const granted = await grantChampion(
+          tx,
+          playerId,
+          outcome.championKey,
+          {},
+          bundle.champions,
+        );
         const gear = await gearByChampion(tx, [granted.id]);
         const [row] = await tx
           .select()

@@ -1,7 +1,12 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import {
-  LEVEL_CAP_BY_RANK,
+  MAX_AWAKENING,
   MAX_RANK,
+  RANK_RANGE_BY_RARITY,
+  baseRankOf,
+  canDeepen,
+  canRankUp,
+  maxRankFor,
   type ChampionDef,
   type Element,
   type Rarity,
@@ -35,6 +40,12 @@ export interface ProgressionConfig {
   maxAscensionByRank: readonly number[];
   skillUpgradeMaxLevel: number;
   tomeByRarity: Readonly<Record<Rarity, string>>;
+  /** Cost per awakening level, keyed "1".."6", scaled by the same rarity multiplier. */
+  awakeningCosts: Readonly<Record<string, Readonly<Record<string, number>>>>;
+  /** Silver alongside the material, per awakening level. */
+  awakeningSilver: readonly number[];
+  /** How much champion experience one brew is worth. */
+  brewXp: number;
 }
 
 export const DEFAULT_PROGRESSION: ProgressionConfig = Object.freeze({
@@ -70,6 +81,19 @@ export const DEFAULT_PROGRESSION: ProgressionConfig = Object.freeze({
     epic: 'tome_epic',
     legendary: 'tome_legendary',
   }),
+  // Awakening is one material and silver, and that is the simplification: the source game
+  // pays for it out of a whole second summoning economy, which is a system Mistvale does
+  // not have and does not need to grow in order to have a last ladder.
+  awakeningCosts: Object.freeze({
+    1: { waking_shard: 4 },
+    2: { waking_shard: 8 },
+    3: { waking_shard: 14 },
+    4: { waking_shard: 22 },
+    5: { waking_shard: 34 },
+    6: { waking_shard: 50 },
+  }),
+  awakeningSilver: Object.freeze([20_000, 50_000, 120_000, 250_000, 500_000, 1_000_000]),
+  brewXp: 1_500,
 });
 
 export function progressionConfigFrom(
@@ -108,6 +132,17 @@ export function progressionConfigFrom(
       (value) => typeof value === 'number',
     ),
     tomeByRarity: pick('economy.tomeByRarity', DEFAULT_PROGRESSION.tomeByRarity, isObject),
+    awakeningCosts: pick('economy.awakeningCosts', DEFAULT_PROGRESSION.awakeningCosts, isObject),
+    awakeningSilver: pick(
+      'economy.awakeningSilver',
+      DEFAULT_PROGRESSION.awakeningSilver,
+      isNumberArray,
+    ),
+    brewXp: pick(
+      'economy.brewXp',
+      DEFAULT_PROGRESSION.brewXp,
+      (value) => typeof value === 'number',
+    ),
   });
 }
 
@@ -148,17 +183,49 @@ function resolveEssenceKey(token: string, element: Element): string {
   return match ? `essence_${element}_${match[1]}` : token;
 }
 
-/** What ranking up from here needs: R food champions of exactly R stars, plus silver. */
+/**
+ * What ranking up from here needs: R food champions of exactly R stars, plus silver.
+ *
+ * Null once the champion has run out of track, and **the track is the rarity's**: a Common
+ * never has one, an Uncommon and a Rare stop at ★5, and only an Epic or a Legendary reaches
+ * ★6. Refusing here rather than at the door means the client never draws a button for a
+ * step that does not exist.
+ */
 export function rankUpCost(
+  def: Pick<ChampionDef, 'rarity' | 'baseRank'>,
   rank: number,
   config: ProgressionConfig,
 ): { foodRank: number; foodCount: number; silver: number } | null {
-  if (rank >= MAX_RANK) return null;
+  if (!canRankUp(def.rarity, rank, baseRankOf(def))) return null;
   return {
     foodRank: rank,
     foodCount: rank,
     silver: config.rankUpSilver[rank - 1] ?? 0,
   };
+}
+
+/**
+ * What the next awakening level costs.
+ *
+ * The same shape as ascension and scaled by the same rarity multiplier, so one retune moves
+ * both — and there is no element token in it, because a Waking Shard is a Waking Shard
+ * whatever breath the champion has.
+ */
+export function awakeningCost(
+  def: Pick<ChampionDef, 'rarity'>,
+  nextLevel: number,
+  config: ProgressionConfig,
+): { items: Record<string, number>; silver: number } | null {
+  if (!canDeepen(def.rarity)) return null;
+  const template = config.awakeningCosts[String(nextLevel)];
+  if (!template) return null;
+  const multiplier = config.ascensionRarityMultiplier[def.rarity] ?? 1;
+
+  const items: Record<string, number> = {};
+  for (const [itemKey, amount] of Object.entries(template)) {
+    items[itemKey] = Math.max(1, Math.round(amount * multiplier));
+  }
+  return { items, silver: Math.round((config.awakeningSilver[nextLevel - 1] ?? 0) * multiplier) };
 }
 
 // ── Levelling ───────────────────────────────────────────────────────────────
@@ -184,11 +251,16 @@ export interface LevelUpOutcome {
   levelsGained: number;
 }
 
+/** The one XP consumable. One brew, not one per breath — the source game's four are busywork. */
+export const BREW_ITEM_KEY = 'xp_brew';
+
 export async function levelUpWithFood(
   db: Database,
   playerId: string,
   championId: string,
   foodIds: readonly string[],
+  brews: number,
+  config: ProgressionConfig,
   content: ContentCache,
 ): Promise<LevelUpOutcome> {
   return db.transaction(async (tx) => {
@@ -203,7 +275,21 @@ export async function levelUpWithFood(
       );
     }
 
-    const xpGained = food.reduce((sum, row) => sum + foodXpValue(row), 0);
+    // Brews are checked and spent before anything is credited, like every other cost in
+    // this module: a feed that half-happened is worse than one that was refused.
+    if (brews > 0) {
+      const held = await itemQuantities(tx, playerId);
+      const have = held.get(BREW_ITEM_KEY) ?? 0;
+      if (have < brews) {
+        throw new AppError(
+          'INSUFFICIENT_FUNDS',
+          `Not enough brews — you have ${have} of ${brews}.`,
+        );
+      }
+      await grantItems(tx, playerId, { [BREW_ITEM_KEY]: -brews }, `champion:level:${championId}`);
+    }
+
+    const xpGained = food.reduce((sum, row) => sum + foodXpValue(row), 0) + brews * config.brewXp;
     let level = champion.level;
     let xp = champion.xp + xpGained;
     while (level < cap) {
@@ -243,14 +329,24 @@ export async function rankUp(
   db: Database,
   playerId: string,
   championId: string,
+  def: Pick<ChampionDef, 'rarity' | 'baseRank'>,
   foodIds: readonly string[],
   config: ProgressionConfig,
   content: ContentCache,
 ): Promise<{ champion: PlayerChampionRow; consumed: string[] }> {
   return db.transaction(async (tx) => {
     const champion = await lockChampion(tx, playerId, championId);
-    const cost = rankUpCost(champion.rank, config);
-    if (!cost) throw new AppError('VALIDATION', 'This champion is already ★6.');
+    const cost = rankUpCost(def, champion.rank, config);
+    if (!cost) {
+      // Two different refusals wearing one shape. A Common has no track at all, and saying
+      // "already ★2" to somebody holding a ★1 Common would be a lie about the reason.
+      throw new AppError(
+        'VALIDATION',
+        RANK_RANGE_BY_RARITY[def.rarity].upgradable
+          ? `A ${def.rarity} champion stops at ★${maxRankFor(def.rarity, baseRankOf(def))}.`
+          : 'Common champions keep the star they were called at.',
+      );
+    }
 
     if (champion.level < levelCapForRank(champion.rank)) {
       throw new AppError('VALIDATION', 'A champion must be at its level cap to rank up.');
@@ -308,6 +404,19 @@ export async function ascend(
     const champion = await lockChampion(tx, playerId, championId);
     const next = champion.ascension + 1;
 
+    // Rarity first: "a Common cannot ascend" is a different sentence from "rank it up
+    // first", and telling somebody to rank up a champion that cannot be ranked up is the
+    // worst of the two answers.
+    if (!canDeepen(def.rarity)) {
+      throw new AppError(
+        'VALIDATION',
+        'Only Rare champions and above ascend. This one has gone as far as it goes.',
+      );
+    }
+    if (champion.level < levelCapForRank(champion.rank)) {
+      throw new AppError('VALIDATION', 'A champion must be at its level cap to ascend.');
+    }
+
     const cap = ascensionCapForRank(champion.rank, config);
     if (next > cap) {
       throw new AppError(
@@ -346,6 +455,96 @@ export async function ascend(
     if (!updated) throw AppError.notFound('No such champion.');
 
     await track(tx, { content }, playerId, [{ type: 'championAscend' }]);
+    return updated;
+  });
+}
+
+// ── Awakening ───────────────────────────────────────────────────────────────
+
+/**
+ * The last ladder, and the only one that carries a champion past its authored numbers.
+ *
+ * Everything else scales an anchor *down*: a ★6/60/Asc6 champion is exactly the stats an
+ * operator typed into Admin. Awakening multiplies on top, which is what makes it worth the
+ * material — and why it is gated on being finished with all three of the others.
+ *
+ * Simplified from the source game deliberately: there, awakening is paid for out of a
+ * second summoning economy with its own currency, its own banner and its own pity. Here it
+ * is one material and silver. The depth is in *getting* the material, which is the deep
+ * game's job, rather than in a second system to learn.
+ */
+export async function awaken(
+  db: Database,
+  playerId: string,
+  championId: string,
+  def: Pick<ChampionDef, 'rarity' | 'baseRank'>,
+  config: ProgressionConfig,
+  content: ContentCache,
+): Promise<PlayerChampionRow> {
+  return db.transaction(async (tx) => {
+    const champion = await lockChampion(tx, playerId, championId);
+    const next = champion.awakening + 1;
+
+    if (!canDeepen(def.rarity)) {
+      throw new AppError(
+        'VALIDATION',
+        'Only Rare champions and above awaken. This one has gone as far as it goes.',
+      );
+    }
+    if (next > MAX_AWAKENING) {
+      throw new AppError('VALIDATION', `This champion is already awakened ${MAX_AWAKENING}.`);
+    }
+
+    // Every ladder asks the same thing before it moves, and awakening asks for the top of
+    // all three: the star track finished, the ascension finished, and standing at the cap.
+    if (canRankUp(def.rarity, champion.rank, baseRankOf(def))) {
+      throw new AppError(
+        'VALIDATION',
+        `Awakening waits for the last star. Take this champion to ★${maxRankFor(def.rarity, baseRankOf(def))} first.`,
+      );
+    }
+    if (champion.level < levelCapForRank(champion.rank)) {
+      throw new AppError('VALIDATION', 'A champion must be at its level cap to awaken.');
+    }
+    const ascensionCap = ascensionCapForRank(champion.rank, config);
+    if (champion.ascension < ascensionCap) {
+      throw new AppError(
+        'VALIDATION',
+        `Awakening comes after ascension. Take this champion to Ascension ${ascensionCap} first.`,
+      );
+    }
+
+    const cost = awakeningCost(def, next, config);
+    if (!cost) throw new AppError('VALIDATION', 'No awakening cost is published for that level.');
+
+    const held = await itemQuantities(tx, playerId);
+    const missing = Object.entries(cost.items).find(
+      ([itemKey, amount]) => (held.get(itemKey) ?? 0) < amount,
+    );
+    if (missing) {
+      throw new AppError(
+        'INSUFFICIENT_FUNDS',
+        `Not enough ${missing[0]} — ${held.get(missing[0]) ?? 0} of ${missing[1]}.`,
+      );
+    }
+
+    const spend: Record<string, number> = {};
+    for (const [itemKey, amount] of Object.entries(cost.items)) spend[itemKey] = -amount;
+    await grantItems(tx, playerId, spend, `champion:awaken:${championId}`);
+    if (cost.silver > 0) {
+      await grant(tx, playerId, { silver: -cost.silver }, `champion:awaken:${championId}`);
+    }
+
+    const [updated] = await tx
+      .update(playerChampions)
+      .set({ awakening: next, updatedAt: new Date() })
+      .where(eq(playerChampions.id, championId))
+      .returning();
+    if (!updated) throw AppError.notFound('No such champion.');
+
+    await track(tx, { content }, playerId, [
+      { type: 'championAwaken', facts: { awakening: updated.awakening } },
+    ]);
     return updated;
   });
 }
@@ -548,4 +747,4 @@ async function consume(tx: Executor, rows: readonly PlayerChampionRow[]): Promis
 }
 
 /** The cap for a rank, re-exported so callers need only this module. */
-export { levelCapForRank, LEVEL_CAP_BY_RANK };
+export { levelCapForRank };

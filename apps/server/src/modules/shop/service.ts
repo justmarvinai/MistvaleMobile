@@ -387,7 +387,7 @@ export async function buy(
     } else if (offer.kind === 'champion') {
       const def = context.champions.get(offer.refKey);
       if (!def) throw AppError.notFound('That champion is no longer published.');
-      await grantChampion(tx, playerId, def.key);
+      await grantChampion(tx, playerId, def.key, {}, [def]);
       result.championKey = def.key;
     } else if (offer.kind === 'gear') {
       // The relic already exists and already belongs to the player; buying it is what

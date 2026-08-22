@@ -5,6 +5,7 @@ import {
   apiSuccess,
   routePattern,
   ascendRequestSchema,
+  awakenRequestSchema,
   buyVaultSlotsRequestSchema,
   championFlagsRequestSchema,
   equipGearRequestSchema,
@@ -47,6 +48,23 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   const rarityOf = (championKey: string): Rarity | undefined =>
     app.content.current().bundle.champions.find((entry) => entry.key === championKey)?.rarity;
+
+  /**
+   * The published definition behind a champion somebody owns.
+   *
+   * Three ladders need it now — the star ceiling, the ascension gate and the awakening
+   * gate all come off the rarity — so the lookup that used to live inside `ascend` is a
+   * helper. A copy can outlive the content that defined it, and every one of those ladders
+   * would otherwise be deciding what to do about a champion it cannot describe.
+   */
+  const championDef = async (playerId: string, championId: string) => {
+    const owned = await champions.loadOwned(app.db, playerId, championId);
+    const def = app.content
+      .current()
+      .bundle.champions.find((entry) => entry.key === owned.championKey);
+    if (!def) throw AppError.notFound('That champion is no longer published.');
+    return def;
+  };
 
   app.addHook('preHandler', app.requireAuth);
 
@@ -102,6 +120,8 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       playerId,
       id,
       body.foodIds,
+      body.brews,
+      context().progression,
       app.content,
     );
     const detail = await champions.loadDetail(app.db, playerId, id, context());
@@ -127,10 +147,12 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const id = idParam(request);
     const body = rankUpRequestSchema.parse(request.body);
 
+    const rankDef = await championDef(playerId, id);
     const result = await progression.rankUp(
       app.db,
       playerId,
       id,
+      rankDef,
       body.foodIds,
       context().progression,
       app.content,
@@ -158,16 +180,30 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const id = idParam(request);
     ascendRequestSchema.parse(request.body);
 
-    const ctx = context();
-    const owned = await champions.loadOwned(app.db, playerId, id);
-    const def = app.content
-      .current()
-      .bundle.champions.find((entry) => entry.key === owned.championKey);
-    if (!def) throw AppError.notFound('That champion is no longer published.');
-
-    await progression.ascend(app.db, playerId, id, def, ctx.progression, app.content);
+    const def = await championDef(playerId, id);
+    await progression.ascend(app.db, playerId, id, def, context().progression, app.content);
     const detail = await champions.loadDetail(app.db, playerId, id, context());
     request.log.info({ playerId, championId: id }, 'champion ascended');
+    return reply.send(
+      apiSuccess(
+        { champion: detail, consumed: [], silver: await silverOf(playerId), levelsGained: 0 },
+        app.content.rev,
+      ),
+    );
+  });
+
+  app.post(routePattern(ROUTES.roster.awaken), async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const { id } = request.params as { id: string };
+    awakenRequestSchema.parse(request.body);
+
+    const def = await championDef(playerId, id);
+    await progression.awaken(app.db, playerId, id, def, context().progression, app.content);
+    const detail = await champions.loadDetail(app.db, playerId, id, context());
+    request.log.info(
+      { playerId, championId: id, awakening: detail.champion.awakening },
+      'champion awakened',
+    );
     return reply.send(
       apiSuccess(
         { champion: detail, consumed: [], silver: await silverOf(playerId), levelsGained: 0 },

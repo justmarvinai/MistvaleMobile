@@ -233,7 +233,7 @@ export async function claim(
     const champions: string[] = [];
     for (const championKey of def.grants.champions) {
       try {
-        await grantChampion(tx, playerId, championKey);
+        await grantChampion(tx, playerId, championKey, {}, ctx.content.current().bundle.champions);
         champions.push(championKey);
       } catch (cause) {
         // A full roster must not swallow the reward of an eighty-step chain.

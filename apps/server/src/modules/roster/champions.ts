@@ -1,6 +1,10 @@
 import { and, eq } from 'drizzle-orm';
 import { championScalingFrom, deriveStats } from '@mistvale/engine';
 import {
+  MAX_ASCENSION,
+  baseRankOf,
+  canDeepen,
+  maxRankFor,
   type ChampionDetail,
   type ChampionStats,
   type MasteryDef,
@@ -27,6 +31,7 @@ import {
 import {
   ascensionCapForRank,
   ascensionCost,
+  awakeningCost,
   progressionConfigFrom,
   rankUpCost,
   type ProgressionConfig,
@@ -80,7 +85,7 @@ export function masteryContribution(
 
 /** A champion's base stats — its definition scaled to this copy's tier, before relics. */
 export function baseStatsFor(
-  row: Pick<PlayerChampionRow, 'championKey' | 'level' | 'rank' | 'ascension'>,
+  row: Pick<PlayerChampionRow, 'championKey' | 'level' | 'rank' | 'ascension' | 'awakening'>,
   context: ChampionContext,
 ): StatBlock {
   const bundle = context.content.current().bundle;
@@ -111,6 +116,7 @@ export function toRosterChampion(
     level: row.level,
     rank: row.rank,
     ascension: row.ascension,
+    awakening: row.awakening,
     xp: row.xp,
     locked: row.locked,
     favourite: row.favourite,
@@ -151,8 +157,12 @@ export function toChampionDetail(
   };
 
   const nextAscension = row.ascension + 1;
-  const ascensionAllowed = nextAscension <= ascensionCapForRank(row.rank, context.progression);
-  const rankCost = rankUpCost(row.rank, context.progression);
+  const ascensionCap = ascensionCapForRank(row.rank, context.progression);
+  const ascensionAllowed = nextAscension <= ascensionCap;
+  const rankCost = rankUpCost(def, row.rank, context.progression);
+  const atCap = row.level >= levelCapForRank(row.rank);
+  const ceiling = maxRankFor(def.rarity, baseRankOf(def));
+  const awakenCost = awakeningCost(def, row.awakening + 1, context.progression);
 
   return {
     champion: toRosterChampion(row, gear, context),
@@ -161,14 +171,25 @@ export function toChampionDetail(
     skillUpgrades: row.skillUpgrades ?? {},
     masteries: mastery.stateFor(row, context.masteryNodes, context.masteryCosts, playerLevel),
     costs: {
-      rankUp: rankCost ? { ...rankCost, atLevelCap: row.level >= levelCapForRank(row.rank) } : null,
+      rankUp: rankCost ? { ...rankCost, atLevelCap: atCap } : null,
       ascend:
-        nextAscension > 6
+        !canDeepen(def.rarity) || nextAscension > MAX_ASCENSION
           ? null
           : {
               items: ascensionCost(def, nextAscension, context.progression),
               allowedByRank: ascensionAllowed,
             },
+      awaken: awakenCost
+        ? {
+            ...awakenCost,
+            ready: {
+              atMaxRank: row.rank >= ceiling,
+              atLevelCap: atCap,
+              atMaxAscension: row.ascension >= ascensionCap,
+            },
+          }
+        : null,
+      maxRank: ceiling,
     },
   };
 }

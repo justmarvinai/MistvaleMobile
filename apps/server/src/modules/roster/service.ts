@@ -1,5 +1,5 @@
 import { and, eq, inArray } from 'drizzle-orm';
-import { LEVEL_CAP_BY_RANK, type ChampionDef } from '@mistvale/shared';
+import { baseRankOf, levelCapForRank, type ChampionDef } from '@mistvale/shared';
 import { playerChampions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
@@ -32,9 +32,9 @@ export interface RosterEntry {
 }
 
 /** The highest level a champion of this rank may reach. */
-export function levelCapForRank(rank: number): number {
-  return LEVEL_CAP_BY_RANK[Math.min(Math.max(rank, 1), 6)] ?? 60;
-}
+// The cap rule lives in `@mistvale/shared` so the client draws the same track the server
+// enforces. Re-exported here because every caller in this module already imports from it.
+export { levelCapForRank };
 
 export async function listRoster(db: Executor, playerId: string): Promise<RosterEntry[]> {
   return db
@@ -96,6 +96,14 @@ export async function grantChampion(
   playerId: string,
   championKey: string,
   options: GrantChampionOptions = {},
+  /**
+   * The published definitions, for the star this champion is called at.
+   *
+   * Optional so the many callers that grant a champion without a content handle keep
+   * working; without it a champion falls back to ★1, which is only ever right for a
+   * Common. Every path that can pass it does.
+   */
+  defs?: readonly Pick<ChampionDef, 'key' | 'rarity' | 'baseRank'>[],
 ): Promise<RosterEntry> {
   const [player] = await tx
     .select({ rosterCapacity: players.rosterCapacity })
@@ -112,7 +120,13 @@ export async function grantChampion(
     throw new AppError('ROSTER_FULL', 'Your roster is full. Expand it or free a slot first.');
   }
 
-  const rank = Math.min(Math.max(options.rank ?? 1, 1), 6);
+  // The star a champion arrives at is its rarity's, not ★1: an Epic is summoned at ★4 and
+  // a Legendary at ★5, which is the whole point of tying the track to the rarity. An
+  // explicit `rank` still wins, because the Arena's bots and the tutorial's borrowed team
+  // are built at a tier of their own choosing.
+  const def = defs?.find((entry) => entry.key === championKey);
+  const granted = options.rank ?? (def ? baseRankOf(def) : 1);
+  const rank = Math.min(Math.max(granted, 1), 6);
   const level = Math.min(Math.max(options.level ?? 1, 1), levelCapForRank(rank));
 
   const [row] = await tx
@@ -177,7 +191,16 @@ export async function grantStarterPack(
     throw new AppError('VALIDATION', 'That is not one of the available starters.');
   }
 
-  const granted = await grantChampion(tx, playerId, chosen.key, { level: 1, rank: 1 });
+  // No explicit rank: a starter arrives at the star its rarity is called at, like every
+  // other champion in the game. It used to be pinned to ★1, which under the new track
+  // would have handed a new warden an Epic three stars below where an Epic starts.
+  const granted = await grantChampion(
+    tx,
+    playerId,
+    chosen.key,
+    { level: 1 },
+    content.current().bundle.champions,
+  );
 
   // The welcome grant. A new warden should be able to reach the Mistgate on their first
   // evening rather than farming towards it — the pull is the hook, and a player who has
