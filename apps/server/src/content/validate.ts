@@ -2,11 +2,14 @@ import {
   CONTENT_LOAD_ORDER,
   CONTENT_REGISTRY,
   EFFECT_COMPONENT_TYPES,
+  RANK_RANGE_BY_RARITY,
   STATUS_ENGINE_TYPES,
+  isValidBaseRank,
   rewardItemKeys,
   type ContentIssue,
   type ContentType,
   type ContentValidationResult,
+  type Rarity,
 } from '@mistvale/shared';
 
 /**
@@ -191,8 +194,9 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       factionKey: string;
       skills: string[];
       assetKey: string;
-      rarity: string;
+      rarity: Rarity;
       isFood: boolean;
+      baseRank?: number;
     };
 
     reference({ contentType: 'champion', key, path: 'factionKey' }, 'faction', champion.factionKey);
@@ -200,6 +204,22 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     champion.skills.forEach((skillKey, index) => {
       reference({ contentType: 'champion', key, path: `skills.${index}` }, 'skill', skillKey);
     });
+
+    // The star a champion starts at decides where its track ends, so a value outside the
+    // rarity's range is not a taste question — it would strand the champion between two
+    // ladders. An error rather than a warning, and named with the range so an operator can
+    // fix it without reading the code.
+    if (champion.baseRank !== undefined && !isValidBaseRank(champion.rarity, champion.baseRank)) {
+      const { base } = RANK_RANGE_BY_RARITY[champion.rarity];
+      const allowed = base.min === base.max ? `★${base.min}` : `★${base.min} or ★${base.max}`;
+      errors.push({
+        severity: 'error',
+        contentType: 'champion',
+        key,
+        path: 'baseRank',
+        message: `A ${champion.rarity} champion starts at ${allowed}; this one says ★${champion.baseRank}.`,
+      });
+    }
 
     // Kit depth by rarity is a design rule (docs/CONTENT_PLAN_EA01.md §1b); a Legendary
     // with two skills is almost certainly an unfinished draft rather than an intent.

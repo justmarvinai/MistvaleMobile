@@ -191,6 +191,19 @@ export const championDefSchema = contentMetaSchema.extend({
   skills: z.array(contentKeySchema).min(1).max(5),
   aura: auraSchema.nullable().default(null),
   assetKey: contentKeySchema,
+  /**
+   * The star this champion is summoned and granted at.
+   *
+   * Constrained by rarity, and only two rarities have a choice: a Common may be authored
+   * at ★1 or ★2 and an Uncommon at ★2 or ★3, which is what makes an early roster feel
+   * unequal without anything being unfair. A Rare is ★3, an Epic ★4 and a Legendary ★5,
+   * always — a Rare that started at ★4 would be an Epic wearing the wrong colour.
+   *
+   * Optional, and absent means "the lowest this rarity starts at" (`baseRankOf`). Publish
+   * validation refuses a value outside the rarity's range, because the star ceiling is
+   * derived from this and a bad one would strand a champion mid-track.
+   */
+  baseRank: z.number().int().min(1).max(6).optional(),
   /** Food units are excluded from the Chronicle's completion count. */
   isFood: z.boolean().default(false),
   summonable: z.boolean().default(true),

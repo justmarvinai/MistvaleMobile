@@ -17,7 +17,7 @@ import type { BattleUnit, StatusInstance } from './types';
  *     restores exactly the value the unit started with (COMBAT_SYSTEM §1).
  */
 
-/** Stats that scale with level, rank and ascension. The rest are flat by design. */
+/** Stats that scale with level, rank, ascension and awakening. The rest are flat by design. */
 const SCALED_STATS = ['hp', 'atk', 'def'] as const;
 
 /**
@@ -29,19 +29,24 @@ const SCALED_STATS = ['hp', 'atk', 'def'] as const;
  */
 export function deriveStats(
   anchor: BaseStats,
-  tier: { level: number; rank: number; ascension: number },
+  tier: { level: number; rank: number; ascension: number; awakening?: number },
   scaling: ChampionScalingConfig,
 ): Record<Stat, number> {
   const level = clamp(tier.level, 1, 60);
   const rank = clamp(tier.rank, 1, scaling.rankMultipliers.length);
   const ascension = Math.max(0, tier.ascension);
+  // Optional on the tier, because the anchor is authored at Asc 6 and **awakening 0**: an
+  // awakened champion is meant to be past its authored numbers, which is the whole point
+  // of a ladder that opens after every other one is finished.
+  const awakening = Math.max(0, tier.awakening ?? 0);
 
   const floor = scaling.levelFloorPct / 100;
   const progress = (level - 1) / 59;
   const levelFactor = floor + (1 - floor) * Math.pow(progress, scaling.levelCurveExponent);
   const rankFactor = scaling.rankMultipliers[rank - 1] ?? 1;
   const ascensionFactor = 1 + (ascension * scaling.ascensionBonusPct) / 100;
-  const factor = levelFactor * rankFactor * ascensionFactor;
+  const awakeningFactor = 1 + (awakening * scaling.awakeningBonusPct) / 100;
+  const factor = levelFactor * rankFactor * ascensionFactor * awakeningFactor;
 
   const derived: Record<Stat, number> = {
     hp: anchor.hp,

@@ -29,8 +29,19 @@ export type Role = (typeof ROLES)[number];
 export const MIN_RANK = 1;
 export const MAX_RANK = 6;
 
-/** Max champion level for each star rank (index 0 unused). */
-export const LEVEL_CAP_BY_RANK: readonly number[] = [0, 10, 20, 30, 40, 50, 60];
+/**
+ * Max champion level for each star rank (index 0 unused).
+ *
+ * Ten levels a star from ★3 up, and **★1 and ★2 share a cap of 20** (the owner's call,
+ * 2026-08-22). The source game gives ★1 ten levels, which in practice is a rank nobody
+ * spends anything on: a ★1 is food, and food that caps at 10 is food you rank up
+ * immediately. Sharing the cap makes a ★1 worth levelling as food in its own right, which
+ * is the only thing a ★1 is for here — Common champions never leave ★1–★2.
+ */
+export const LEVEL_CAP_BY_RANK: readonly number[] = [0, 20, 20, 30, 40, 50, 60];
+
+/** The highest level any champion can reach, at ★6. */
+export const MAX_CHAMPION_LEVEL = 60;
 
 /** Relic slots: six armour slots plus three ascension-gated accessories. */
 export const GEAR_SLOTS = [

@@ -17,6 +17,8 @@ export const rosterChampionSchema = z.object({
   level: z.number().int(),
   rank: z.number().int(),
   ascension: z.number().int(),
+  /** Awakening level 0–6, the ladder that opens once every other one is finished. */
+  awakening: z.number().int(),
   xp: z.number().int(),
   locked: z.boolean(),
   favourite: z.boolean(),

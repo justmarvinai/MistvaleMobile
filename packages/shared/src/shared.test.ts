@@ -75,9 +75,21 @@ describe('element wheel', () => {
 });
 
 describe('rank level caps', () => {
-  it('caps each star rank ten levels above the previous one', () => {
-    for (let rank = 1; rank <= MAX_RANK; rank += 1) {
+  it('caps each star rank ten levels above the previous one, from ★3 up', () => {
+    for (let rank = 3; rank <= MAX_RANK; rank += 1) {
       expect(LEVEL_CAP_BY_RANK[rank]).toBe(rank * 10);
+    }
+  });
+
+  it('shares a cap of 20 between ★1 and ★2', () => {
+    // The owner's call: a ★1 is food, and food that caps at 10 is food nobody levels.
+    expect(LEVEL_CAP_BY_RANK[1]).toBe(20);
+    expect(LEVEL_CAP_BY_RANK[2]).toBe(20);
+  });
+
+  it('never goes backwards as the stars go up', () => {
+    for (let rank = 2; rank <= MAX_RANK; rank += 1) {
+      expect(LEVEL_CAP_BY_RANK[rank]).toBeGreaterThanOrEqual(LEVEL_CAP_BY_RANK[rank - 1] as number);
     }
   });
 });

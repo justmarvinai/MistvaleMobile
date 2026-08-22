@@ -27,6 +27,8 @@ export interface ChampionEntry {
   level: number;
   rank: number;
   ascension: number;
+  /** Awakening level 0–6. Absent is 0 — the tier every champion is granted at. */
+  awakening?: number;
   /** Flat stat additions from gear, sets, Hall of Valor and unconditional masteries. */
   bonuses?: Partial<Record<Stat, number>>;
   /**

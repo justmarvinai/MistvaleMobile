@@ -119,6 +119,14 @@ export interface ChampionScalingConfig {
   levelFloorPct: number;
   rankMultipliers: readonly number[];
   ascensionBonusPct: number;
+  /**
+   * What one awakening level adds, as a percentage of the anchor.
+   *
+   * Bigger per step than an ascension because there are fewer steps and each one costs a
+   * material that only the deep game pays out — and because awakening is the last thing
+   * left to do to a champion that has run out of every other ladder.
+   */
+  awakeningBonusPct: number;
 }
 
 export const DEFAULT_CHAMPION_SCALING: ChampionScalingConfig = Object.freeze({
@@ -126,6 +134,7 @@ export const DEFAULT_CHAMPION_SCALING: ChampionScalingConfig = Object.freeze({
   levelFloorPct: 18,
   rankMultipliers: Object.freeze([0.42, 0.55, 0.68, 0.79, 0.9, 1]),
   ascensionBonusPct: 2,
+  awakeningBonusPct: 3,
 });
 
 export function championScalingFrom(
@@ -152,6 +161,10 @@ export function championScalingFrom(
     ascensionBonusPct: number(
       'champion.ascensionBonusPct',
       DEFAULT_CHAMPION_SCALING.ascensionBonusPct,
+    ),
+    awakeningBonusPct: number(
+      'champion.awakeningBonusPct',
+      DEFAULT_CHAMPION_SCALING.awakeningBonusPct,
     ),
   });
 }
