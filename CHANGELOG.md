@@ -5,6 +5,45 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the vale is the screen, not a window on it
+
+The campaign map arrived in its own box: a border down every side and a second scene inside
+it, lit brighter than the game around it, so the road read as a separate window floating on
+the game rather than as part of it (owner, 2026-08-22). And its markers were the library's
+phone-sized defaults on a desktop window — a 30px disc under an 11px name, which is the same
+fault C5 found on the top bar.
+
+The frame is gone, the ground is gone, and the vale's art stays only as far as it can fade
+out before the pane's edge — the first cut left a faint vertical line down both sides, which
+is what a mask wider than its box always leaves. Markers are 52px (68px for a warlord) with
+16px names, the road under them is drawn heavier now that it competes with the game's own
+backdrop, and the chapters step down the pane rather than crowding the region title.
+
+All of it lives in the campaign screen's own stylesheet, scoped inside the map's pane:
+`WorldMap.css` is vendored and the next `pnpm fui:vendor` would overwrite an edit to it.
+
+### Changed — the speed ladder is ×1 · ×2 · ×4 · ×6, and you can see the rungs you have not earned
+
+The top of the ladder is ×6 rather than ×8 at the owner's call ("x8 is too fast I think") —
+the rung moved, the campaign that earns it did not. ×4 still opens on finishing the campaign
+on Normal and ×6 on finishing it on Brutal.
+
+**And the locked rungs are visible now**, which they were not: the library's control draws
+speed as one button that steps to the next *unlocked* multiplier, so a rung an account had
+not earned was not merely unpressable but invisible — ×4 and ×6 existed with nothing in the
+game to say so. `ui/SpeedLadder` draws all four, strikes through the ones not yet earned and
+says which campaign opens each. An unlock nobody can see is a feature that does not exist.
+
+It is Mistvale's control rather than the library's for the reason that decides every one of
+these calls: the state is React's and the library's component cannot express it. Only its
+speed button is hidden — the row it sits in is one painted piece of art and forking it to
+drop a button would fork the art too.
+
+**`battle.speedUnlocks` changed value**, so a box that already has it needs the new pairing:
+edit the one key in Game config, or `SEED.sh --replace gameConfig` where nothing else has
+been tuned. A plain seed will not touch a key that is already published.
+
+
 ### Changed — the first walk down a road is one you watch
 
 **Skip is offered only on a stage this account has already beaten** (owner, 2026-08-22).

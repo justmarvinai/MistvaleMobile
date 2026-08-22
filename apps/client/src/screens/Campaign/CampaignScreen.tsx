@@ -78,7 +78,11 @@ function mapPosition(index: number): { x: number; y: number } {
   const column = row % 2 === 0 ? withinRow : MAP_COLUMNS - 1 - withinRow;
   return {
     x: 12 + column * (76 / (MAP_COLUMNS - 1)),
-    y: 16 + row * 28 + (index % 3) * 3,
+    // The first row starts below the region title rather than beside it. With the map's
+    // frame gone the title floats on the same ground the markers do, and at 1440 the
+    // progress bar and chapter one's disc were touching. The rows are closer together to
+    // pay for it, which also uses the foot of the pane that was standing empty.
+    y: 20 + row * 28 + (index % 3) * 3,
   };
 }
 

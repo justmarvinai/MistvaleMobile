@@ -1,0 +1,49 @@
+/* Four rungs, one of them lit.
+
+   Deliberately small and quiet: it lives on the battle HUD beside Auto and Retreat, where
+   anything loud competes with the fight. A locked rung is dimmer and struck through rather
+   than hidden — being seen is its entire job. */
+
+.ladder {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid $edge;
+  background: rgba(10, 9, 7, 0.55);
+}
+
+.rung {
+  min-width: 2.4rem;
+  padding: 3px $space-1;
+  border: 1px solid transparent;
+  background: none;
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    color $duration-fast $ease-out,
+    border-color $duration-fast $ease-out,
+    background-color $duration-fast $ease-out;
+
+  &:hover:not(:disabled) {
+    color: $parchment;
+    background: rgba(194, 118, 74, 0.14);
+  }
+
+  &[data-state='current'] {
+    border-color: rgba(194, 118, 74, 0.55);
+    background: rgba(194, 118, 74, 0.2);
+    color: $accent-soft;
+  }
+
+  /* Struck through, not hidden. A player should be able to see the ladder they are on and
+     the two rungs above it, which is the whole reason this component exists. */
+  &[data-state='locked'] {
+    color: $muted-deep;
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+}

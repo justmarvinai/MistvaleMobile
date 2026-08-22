@@ -38,7 +38,7 @@ Every grant/spend flows through `RewardService` → `economy_log`, so the Admin 
 - **Account XP:** per energy spent (≈8 XP/energy ⚙) + quest chunks (100/500/1,000). L60 cap ≈ 3–4 months of active play ⚙.
 
 ## 3b. Watching a fight
-- **Playback speeds** ⚙ (`battle.speedUnlocks`, owner 2026-08-22): ×1 and ×2 from the first fight · **×3 for the campaign finished on Normal** · **×4 for the campaign finished on Brutal**. "Finished" is all 84 stages of that difficulty cleared at least once. A speed the config does not name is open to everybody, which is how the two starting rungs are expressed; there is deliberately no way to spell "never".
+- **Playback speeds** ⚙ (`battle.speedUnlocks`, owner 2026-08-22): **×1 · ×2 · ×4 · ×6** — the first two from the first fight, **×4 for the campaign finished on Normal**, **×6 for the campaign finished on Brutal**. "Finished" is all 84 stages of that difficulty cleared at least once. A speed the config does not name is open to everybody, which is how the two starting rungs are expressed; there is deliberately no way to spell "never".
 - **Skip** (jumping a fight to its end) is offered on a stage already cleared once, and always in the Arena. Not an economy lever — a skipped fight pays exactly what a watched one pays — but it lives here because it is the other thing the campaign's completion buys.
 
 ## 4. Relic (gear) economy

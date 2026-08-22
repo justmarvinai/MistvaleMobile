@@ -300,7 +300,7 @@ describe.skipIf(!dbUp)('progress', () => {
       expect(finished.normal).toBe(true);
       expect(finished.hard).toBe(false);
       expect(finished.brutal).toBe(false);
-      expect(speedsFor(finished)).toEqual([1, 2, 3]);
+      expect(speedsFor(finished)).toEqual([1, 2, 4]);
     });
 
     it('opens the top rung once Brutal is walked as well', async () => {
@@ -308,7 +308,7 @@ describe.skipIf(!dbUp)('progress', () => {
         await markCleared(key);
       }
       expect(speedsFor(await progress.campaignsFinished(app.db, playerId, app.content))).toEqual([
-        1, 2, 3, 4,
+        1, 2, 4, 6,
       ]);
     });
   });

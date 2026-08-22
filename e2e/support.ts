@@ -107,33 +107,28 @@ export async function dismissUnlocks(page: Page): Promise<void> {
 }
 
 /**
- * Winds the speed control up to the fastest rung this account has earned.
+ * Winds the speed up to the fastest rung this account has earned.
  *
  * Since C7 a stage nobody has beaten offers no Skip, so a first clear has to actually
- * *play* — and at ×1 a three-wave fight is most of a spec's timeout. The library's control
- * is one button that cycles, and `cycleSpeed` steps over the rungs that are still locked,
- * so the reachable readings are exactly the earned ones. Press around the loop once to
- * learn them, then press until it lands on the fastest. Nothing here is a back door: it is
- * the press a player makes.
+ * *play* — and at ×1 a three-wave fight is most of a spec's timeout. `SpeedLadder` draws
+ * every rung and disables the ones not earned, so the fastest enabled button is the
+ * fastest this account can go. Nothing here is a back door: it is the press a player makes.
  */
 async function useFastestSpeed(page: Page): Promise<void> {
-  const button = page.getByRole('button', { name: /battle speed/i });
-  if (!(await button.isVisible().catch(() => false))) return;
+  const rungs = page.getByRole('group', { name: /battle speed/i }).getByRole('button');
+  if (
+    !(await rungs
+      .first()
+      .isVisible()
+      .catch(() => false))
+  )
+    return;
 
-  const read = async (): Promise<number> =>
-    Number(/\d+/.exec((await button.innerText().catch(() => '')).trim())?.[0] ?? '1');
-
-  const rungs = new Set<number>();
-  for (let press = 0; press < 5; press += 1) {
-    const now = await read();
-    if (rungs.has(now)) break;
-    rungs.add(now);
-    await button.click({ timeout: 5_000 }).catch(() => undefined);
-  }
-
-  const fastest = Math.max(...rungs);
-  for (let press = 0; press < 5 && (await read()) !== fastest; press += 1) {
-    await button.click({ timeout: 5_000 }).catch(() => undefined);
+  for (const rung of (await rungs.all()).reverse()) {
+    if (await rung.isEnabled().catch(() => false)) {
+      await rung.click({ timeout: 5_000 }).catch(() => undefined);
+      return;
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { BATTLE_SPEEDS, clampSpeed, type SkillDef } from '@mistvale/shared';
+import { DEFAULT_SPEED_UNLOCKS, clampSpeed, type SkillDef } from '@mistvale/shared';
 import type { UnitRef } from '@mistvale/engine';
 import { ActionBar } from '@/fui/components/ActionBar.ts';
 import { BattleControls } from '@/fui/components/BattleControls.ts';
@@ -20,6 +20,7 @@ import { autoShouldAsk, settledOnServer, watchedToTheEnd } from '../../state/bat
 import { useBattleStore } from '../../state/battleStore';
 import { useLoadoutStore } from '../../state/loadoutStore';
 import { useContentStore } from '../../state/contentStore';
+import { SpeedLadder } from '../../ui/SpeedLadder/SpeedLadder';
 import { useNavStore } from '../../state/navStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { currentStep, useTutorialStore } from '../../state/tutorialStore';
@@ -99,6 +100,14 @@ export function BattleScreen(): JSX.Element {
   // progress. Clamped so a speed remembered before a retune (or hand-edited into local
   // storage) lands on the fastest one actually open rather than off the end of the control.
   const openSpeeds = usePlayerStore((state) => state.battleSpeeds);
+  // Which campaign earns each locked rung. Content, so the ladder can say the condition
+  // rather than a sentence this screen made up.
+  const speedUnlocks = useContentStore((state) =>
+    state.bundle?.config['battle.speedUnlocks'] &&
+    typeof state.bundle.config['battle.speedUnlocks'] === 'object'
+      ? (state.bundle.config['battle.speedUnlocks'] as Record<string, string>)
+      : DEFAULT_SPEED_UNLOCKS,
+  );
   const speed = clampSpeed(preferredSpeed, openSpeeds);
   const preferredAuto = useLoadoutStore((state) => state.auto);
   const rememberSpeed = useLoadoutStore((state) => state.setSpeed);
@@ -458,12 +467,11 @@ export function BattleScreen(): JSX.Element {
               // already engaged shows the button pressed instead of contradicting itself.
               auto: preferredAuto,
               speed,
-              // The whole ladder, with the rungs this account has not earned handed to the
-              // library as *locked* rather than left out. Same behaviour — `cycleSpeed`
-              // steps over a locked rung — but it is the library's own vocabulary for a
-              // progression gate, so the day it paints one we get it for nothing.
-              speeds: [...BATTLE_SPEEDS],
-              lockedSpeeds: BATTLE_SPEEDS.filter((rung) => !openSpeeds.includes(rung)),
+              // One rung, because its speed button is hidden: `SpeedLadder` draws the whole
+              // ladder beside it. The library's control steps to the next *unlocked* rung,
+              // which means a rung nobody has earned is invisible — and an unlock nobody
+              // can see is a feature that does not exist.
+              speeds: [speed],
               pausable: false,
               retreatable: true,
             }}
@@ -475,14 +483,6 @@ export function BattleScreen(): JSX.Element {
                 rememberAuto(on);
                 setAuto(on);
                 if (on) void runAuto();
-              },
-              // The library's speed is any number in `speeds`; Mistvale's is a rung on a
-              // ladder the account has earned. `clampSpeed` is the narrowing, and it is the
-              // same call the screen opened with rather than a second rule.
-              'battle:speed': ({ speed: next }: { speed: number }) => {
-                const chosen = clampSpeed(next, openSpeeds);
-                rememberSpeed(chosen);
-                setSpeed(chosen);
               },
               'battle:retreat': () => void retreat(),
             }}
@@ -497,6 +497,17 @@ export function BattleScreen(): JSX.Element {
               last chunk and the button that exists to skip an auto-battle was missing for
               all of it. Auto is the other way in — while it is engaged there is always a
               recording ahead of the player, and skipping it is the whole point. */}
+          {/* The ladder the library cannot draw. Beside its row rather than inside it,
+              because the row is the library's chrome and this is state React owns. */}
+          <SpeedLadder
+            open={openSpeeds}
+            current={speed}
+            unlocks={speedUnlocks}
+            onPick={(next) => {
+              rememberSpeed(next);
+              setSpeed(next);
+            }}
+          />
           {/* `!watched` rather than `playing`: auto drains its buffer between requests, and
               gating on the queue made the button blink out and back several times a fight.
               Pressing it with nothing queued is a no-op.

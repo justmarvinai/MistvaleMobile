@@ -144,3 +144,11 @@
   line-height: 1.6;
   color: $muted;
 }
+
+/* The library's own speed button, hidden.
+   `SpeedLadder` draws the ladder instead — see the component for why. Hidden rather than
+   removed because `BattleControls` builds Auto, speed and Retreat as one painted row, and
+   forking the row to drop one button would fork the art with it. */
+.hud :global(.fui-battlectl__speed) {
+  display: none;
+}

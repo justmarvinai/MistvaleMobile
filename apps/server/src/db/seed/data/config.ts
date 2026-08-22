@@ -490,12 +490,12 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
   //
   // Speed is animation and nothing else: it divides the delay between events the server
   // has already decided. What is gated is the *rung*, and gating it is the owner's rule
-  // (2026-08-22) — ×1 and ×2 from the first fight, ×3 for walking the whole vale on
-  // Normal, ×4 for walking it again on Brutal. A speed not named here is open to
+  // (2026-08-22) — ×1 and ×2 from the first fight, ×4 for walking the whole vale on
+  // Normal, ×6 for walking it again on Brutal. A speed not named here is open to
   // everybody, which is how the two starting rungs are expressed without a special case.
   entry(
     'battle.speedUnlocks',
-    { '3': 'normal', '4': 'brutal' },
+    { '4': 'normal', '6': 'brutal' },
     'battle',
     'Playback speeds and the campaign that earns them',
     'Keyed by speed, valued by the campaign difficulty that must be finished outright — every stage of it cleared once. A speed left out is available from the start.',

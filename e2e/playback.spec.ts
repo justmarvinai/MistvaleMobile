@@ -45,17 +45,20 @@ test.describe('what a player may skip watching', () => {
 
     // ── The speed ladder a fresh account has earned ─────────────────────
     //
-    // The library's control is one button that cycles, and `cycleSpeed` steps over a
-    // locked rung — so what a player can reach is exactly what pressing it reaches.
+    // Every rung is *drawn*, including the two this account has not earned — that is the
+    // whole reason the ladder exists, since the library's cycling button could only ever
+    // show a rung you already had. So the assertion is about what is shown as well as what
+    // can be pressed.
     await enterStageOne(page);
-    const speed = page.getByRole('button', { name: /battle speed/i });
-    const reachable = new Set<string>();
-    for (let press = 0; press < 6; press += 1) {
-      reachable.add((await speed.innerText()).trim());
-      await speed.click();
-      await page.waitForTimeout(120);
-    }
-    expect([...reachable].sort()).toEqual(['×1', '×2']);
+    const rungs = page.getByRole('group', { name: /battle speed/i }).getByRole('button');
+    await expect(rungs).toHaveText(['×1', '×2', '×4', '×6']);
+    await expect(rungs.nth(0)).toBeEnabled();
+    await expect(rungs.nth(1)).toBeEnabled();
+    await expect(rungs.nth(2)).toBeDisabled();
+    await expect(rungs.nth(3)).toBeDisabled();
+
+    // And a locked rung says what earns it, rather than only refusing.
+    await expect(rungs.nth(3)).toHaveAccessibleName(/not yet earned/i);
 
     // ── First visit: no Skip ────────────────────────────────────────────
     await engageAuto(page);

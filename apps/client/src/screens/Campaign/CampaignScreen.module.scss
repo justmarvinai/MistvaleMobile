@@ -52,3 +52,96 @@
 .note + .note {
   margin-top: $space-2;
 }
+
+/* ── The vale is the screen, not a window on it ──────────────────────────────
+ *
+ * The owner's report (2026-08-22): the campaign "looks like a second window on top of the
+ * game's window, because there is a second different background behind it", with a border
+ * around it and markers too small to read.
+ *
+ * All three are the library's own `WorldMap.css`, which is vendored and must not be edited
+ * — the next `pnpm fui:vendor` would overwrite it. So they are answered here, scoped inside
+ * `.mapPane`, which is the tightest place that can reach them and the one that says whose
+ * decision this is. `:global` because the classes are the library's; the nesting is what
+ * keeps them from leaking to any other map.
+ *
+ * The sizes are the same fault C5 found on the top bar: a 30px disc with an 11px name under
+ * it is a phone's map read on a desktop window. */
+.mapPane :global(.fui-map) {
+  /* The frame and the ground both go. The game already has a backdrop; the map's job is to
+     put a road on it, not to bring its own room. */
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+/* The vale's art stays — it is what makes the thing a map rather than twelve buttons — but
+   it stops being a *scene*: no brightness lift to sit louder than the game around it, and
+   faded out at every edge instead of cut off at one, so there is no rectangle to see. */
+.mapPane :global(.fui-map__art) {
+  filter: none;
+  opacity: 0.5;
+  /* The fade has to *finish* inside the pane. A radial wider than the box leaves the art
+     still half-painted where the box stops, and that hard stop is a rectangle again — it
+     was the faint vertical line left down both sides of the first cut. */
+  mask-image: radial-gradient(68% 86% at 50% 48%, #000 18%, transparent 96%);
+  -webkit-mask-image: radial-gradient(68% 86% at 50% 48%, #000 18%, transparent 96%);
+}
+
+/* The library's vignette is what drew the box's inside edge. The mask above does the same
+   job without an edge to see. */
+.mapPane :global(.fui-map__art::after) {
+  display: none;
+}
+
+.mapPane :global(.fui-map__title) {
+  font-size: 22px;
+}
+
+.mapPane :global(.fui-map__progress) {
+  height: 7px;
+}
+
+/* ── The markers ─────────────────────────────────────────────────────────── */
+
+.mapPane :global(.fui-map__disc) {
+  width: 52px;
+  height: 52px;
+  border-width: 3px;
+}
+
+.mapPane :global(.fui-map__node.is-boss .fui-map__disc) {
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+}
+
+.mapPane :global(.fui-map__node) {
+  gap: 6px;
+}
+
+.mapPane :global(.fui-map__name) {
+  font-size: 16px;
+}
+
+.mapPane :global(.fui-map__stars) {
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+.mapPane :global(.fui-map__note) {
+  font-size: 12.5px;
+}
+
+/* A locked chapter at half opacity over a *transparent* map is nearly gone — the library
+   dims against its own opaque ground. Enough to read that it is shut, not so little that
+   the road ahead disappears. */
+.mapPane :global(.fui-map__node[data-state='locked']) {
+  opacity: 0.72;
+}
+
+/* The road itself, drawn heavier now that it is competing with the game's own backdrop
+   rather than with the map's flat one. */
+.mapPane :global(.fui-map__paths line) {
+  stroke-width: 0.9;
+}
