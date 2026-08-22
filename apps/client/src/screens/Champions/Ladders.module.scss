@@ -1,0 +1,107 @@
+/* Four ladders, one shape.
+
+   A row is: what it is, where it stands, the reading, what the next rung costs or what is
+   in the way, and the button. Every ladder uses the same five columns so the eye learns the
+   layout once — which is the point of drawing them together rather than as three buttons
+   and an absence. */
+
+.ladders {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rung {
+  display: grid;
+  grid-template-columns: 5.5rem 6rem auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-2 $space-3;
+  border: 1px solid $edge;
+  background: linear-gradient(180deg, rgba(34, 29, 24, 0.7), rgba(18, 16, 13, 0.7));
+
+  &[data-state='ready'] {
+    border-color: rgba(194, 118, 74, 0.45);
+  }
+
+  /* A ladder this rarity never had reads as absent rather than as failed: no red, no
+     border, just quiet. It is still drawn, because "Commons keep their star" is a rule
+     worth learning from the screen. */
+  &[data-state='absent'] {
+    opacity: 0.55;
+    border-style: dashed;
+  }
+}
+
+.label {
+  @include label-text;
+  color: $parchment-dim;
+}
+
+.track {
+  position: relative;
+  display: block;
+  height: 8px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, $accent-deep, $accent);
+  transition: width $duration-slow $ease-out;
+}
+
+.rung[data-state='done'] .fill {
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.6), $gold);
+}
+
+.reading {
+  font-family: $font-mono;
+  font-size: 12px;
+  color: $parchment;
+  white-space: nowrap;
+}
+
+.detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-1 $space-3;
+  min-width: 0;
+  font-size: 11.5px;
+}
+
+.cost {
+  color: $muted;
+
+  & + &::before {
+    content: '·';
+    margin-right: $space-3;
+    color: $muted-deep;
+  }
+}
+
+/* The one sentence a player is looking for when a button is grey. */
+.blocked {
+  color: $warning;
+}
+
+@media (max-width: 900px) {
+  .rung {
+    grid-template-columns: 5rem 1fr auto;
+    row-gap: $space-1;
+  }
+
+  .track {
+    grid-column: 2 / -1;
+  }
+
+  .detail {
+    grid-column: 1 / -1;
+  }
+}

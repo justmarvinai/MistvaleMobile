@@ -74,6 +74,16 @@ export const championDetailSchema = z.object({
       .nullable(),
     /** The star ceiling this champion's rarity allows, for the track the screen draws. */
     maxRank: z.number().int(),
+    /**
+     * Whether this rarity has an ascension and an awakening at all.
+     *
+     * Said outright rather than inferred from two nulls, because "finished" and "never had
+     * one" are different sentences and a client reconstructing the difference from absent
+     * costs gets it wrong the moment either rule moves.
+     */
+    deepens: z.boolean(),
+    /** Whether this rarity's star track moves at all — false for Commons. */
+    starTrackMoves: z.boolean(),
   }),
 });
 export type ChampionDetail = z.infer<typeof championDetailSchema>;

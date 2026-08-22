@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import { championScalingFrom, deriveStats } from '@mistvale/engine';
 import {
   MAX_ASCENSION,
+  RANK_RANGE_BY_RARITY,
   baseRankOf,
   canDeepen,
   maxRankFor,
@@ -190,6 +191,8 @@ export function toChampionDetail(
           }
         : null,
       maxRank: ceiling,
+      deepens: canDeepen(def.rarity),
+      starTrackMoves: RANK_RANGE_BY_RARITY[def.rarity].upgradable,
     },
   };
 }
