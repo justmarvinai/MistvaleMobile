@@ -2342,6 +2342,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'emberclan',
     element: 'ember',
     rarity: 'uncommon',
+    baseRank: 2,
     role: 'attack',
     baseStats: {
       hp: 10_600,
@@ -2370,6 +2371,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'hollowborn',
     element: 'ember',
     rarity: 'uncommon',
+    baseRank: 3,
     role: 'hp',
     baseStats: {
       hp: 13_700,
@@ -2398,6 +2400,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'sskarn',
     element: 'verdant',
     rarity: 'uncommon',
+    baseRank: 2,
     role: 'attack',
     baseStats: {
       hp: 10_400,
@@ -3296,6 +3299,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'sskarn',
     element: 'ember',
     rarity: 'common',
+    baseRank: 1,
     role: 'attack',
     baseStats: {
       hp: 8_200,
@@ -3324,6 +3328,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'sskarn',
     element: 'tide',
     rarity: 'common',
+    baseRank: 1,
     role: 'attack',
     baseStats: {
       hp: 8_200,
@@ -3352,6 +3357,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'sskarn',
     element: 'verdant',
     rarity: 'common',
+    baseRank: 2,
     role: 'attack',
     baseStats: {
       hp: 8_200,
@@ -3380,6 +3386,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'sskarn',
     element: 'ember',
     rarity: 'uncommon',
+    baseRank: 2,
     role: 'defense',
     baseStats: {
       hp: 12_900,
@@ -3408,6 +3415,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'sskarn',
     element: 'tide',
     rarity: 'uncommon',
+    baseRank: 2,
     role: 'defense',
     baseStats: {
       hp: 12_900,
@@ -3436,6 +3444,7 @@ export const EXTENDED_CHAMPIONS: ChampionSeed[] = [
     factionKey: 'sskarn',
     element: 'verdant',
     rarity: 'uncommon',
+    baseRank: 3,
     role: 'defense',
     baseStats: {
       hp: 12_900,

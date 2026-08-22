@@ -466,6 +466,41 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'A champion cannot ascend past this for its rank — indexed by rank − 1, so ★1 cannot ascend at all and ★6 reaches 6.',
   ),
   entry(
+    'economy.awakeningCosts',
+    {
+      1: { waking_shard: 4 },
+      2: { waking_shard: 8 },
+      3: { waking_shard: 14 },
+      4: { waking_shard: 22 },
+      5: { waking_shard: 34 },
+      6: { waking_shard: 50 },
+    },
+    'economy',
+    'Awakening cost per level',
+    'Waking Shards for an Epic champion, scaled by the same rarity multiplier ascension uses. One material and no element token — a shard is a shard whatever breath the champion has.',
+  ),
+  entry(
+    'economy.awakeningSilver',
+    [20_000, 50_000, 120_000, 250_000, 500_000, 1_000_000],
+    'economy',
+    'Awakening silver fee',
+    'Indexed by the awakening level being bought − 1, and scaled by the rarity multiplier. Paid alongside the shards.',
+  ),
+  entry(
+    'economy.brewXp',
+    1_500,
+    'economy',
+    'Champion experience per Mistbrew',
+    'One brew, poured. There is deliberately only one kind — four brews split by breath is an inventory chore rather than a decision.',
+  ),
+  entry(
+    'champion.awakeningBonusPct',
+    3,
+    'champion',
+    'Awakening stat bonus per level',
+    'Percent added to HP, ATK and DEF per awakening level. The only ladder that carries a champion past its authored ★6/60/Asc6 anchor, which is what makes the shards worth chasing.',
+  ),
+  entry(
     'economy.masteryCosts',
     {
       1: { itemKey: 'emblem_bronze', amount: 20 },
@@ -876,6 +911,32 @@ export const ITEMS: ItemDefInput[] = [
     'rare',
     'Elementally silent, and useful to everyone.',
     70,
+  ),
+
+  // ── The two the ladders run on ────────────────────────────────────────────
+  //
+  // One brew, not one per breath. The source game splits its experience potions four ways
+  // by affinity, which turns levelling into an inventory-sorting exercise and adds nothing
+  // to the decision — you always want the one you cannot spend.
+  item(
+    'xp_brew',
+    'Mistbrew',
+    'consumable',
+    'uncommon',
+    'Bottled fog with something bright still moving in it. Champions drink it and remember fights they never had.',
+    64,
+  ),
+  // The awakening material, and the only one. It is the whole simplification: the source
+  // game pays for awakening out of a second summoning economy with its own currency and
+  // its own pity, where here the depth is in *getting* the shard rather than in a second
+  // system to learn.
+  item(
+    'waking_shard',
+    'Waking Shard',
+    'material',
+    'legendary',
+    'A splinter of something that was never asleep. Held too long, it starts to hold back.',
+    65,
   ),
 
   item('tome_rare', 'Rare Tome', 'tome', 'rare', 'Teaches a Rare champion a little more.', 70),

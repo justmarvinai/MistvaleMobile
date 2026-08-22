@@ -333,7 +333,27 @@ function provingDrops(plan: DungeonPlan, floor: number): StageDefInput['rewards'
     gearRarityWeights: {},
     gearSlots: [],
     gearSetKeys: [],
-    items: [{ itemKey, chance: 1, min, max }],
+    items: [
+      { itemKey, chance: 1, min, max },
+      // The Waking Shard, and this is the only place it falls.
+      //
+      // Awakening is the last thing left to do to a champion, so its material comes off the
+      // deepest thing there is to fight — and only from the back half of it, which is what
+      // makes the Proving Grounds worth pushing rather than farming at the level that is
+      // comfortable. One material and one source is the simplification: the source game
+      // funds awakening from a whole second summoning economy, and Mistvale does not need a
+      // second economy in order to have a last ladder.
+      ...(depth > 0.5
+        ? [
+            {
+              itemKey: 'waking_shard',
+              chance: depth > 0.8 ? 0.9 : 0.45,
+              min: 1,
+              max: depth > 0.8 ? 3 : 2,
+            },
+          ]
+        : []),
+    ],
   };
 }
 

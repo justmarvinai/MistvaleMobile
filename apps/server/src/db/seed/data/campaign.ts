@@ -336,13 +336,27 @@ function buildDrops(
     },
     gearSlots: SLOT_BY_STAGE[stageNumber - 1] ?? [],
     // The boss is the campaign's ascension faucet; the Springs are the reliable one.
+    //
+    // Brews come off the campaign because levelling is what the campaign is *for*: the road
+    // is where a warband is grown, and a stage that pays experience the player can carry
+    // back to somebody else keeps a cleared chapter worth farming. They fall more often and
+    // in bigger handfuls further in, so pushing forward beats grinding 1-1.
     items: isBoss
       ? [
           { itemKey: 'essence_pure', chance: 0.5, min: 1, max: 3 },
           { itemKey: `essence_${plan.element}_lesser`, chance: 0.7, min: 1, max: 4 },
           { itemKey: 'sigil_faded', chance: 0.25, min: 1, max: 1 },
+          { itemKey: 'xp_brew', chance: 0.8, min: 2, max: 3 + chapterStep },
         ]
-      : [{ itemKey: `essence_${plan.element}_lesser`, chance: 0.14, min: 1, max: 2 }],
+      : [
+          { itemKey: `essence_${plan.element}_lesser`, chance: 0.14, min: 1, max: 2 },
+          {
+            itemKey: 'xp_brew',
+            chance: 0.35 + difficultyStep * 0.08,
+            min: 1,
+            max: 1 + chapterStep,
+          },
+        ],
   };
 }
 

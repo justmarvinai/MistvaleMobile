@@ -92,6 +92,37 @@ export const SHOPS: ShopDefInput[] = [
         pricePerRank: 0,
       },
 
+      // Brews for silver: the one purchase that is always worth something, because
+      // levelling is the thing a player is always doing. Deliberately generous — the
+      // bottleneck on a warband should be the *food chain* that ranks it up, not the
+      // experience that levels it.
+      {
+        key: 'brew_flask',
+        kind: 'item',
+        name: 'Flask of Mistbrew',
+        weight: 100,
+        currency: 'silver',
+        price: 4_000,
+        refKey: 'xp_brew',
+        quantity: 5,
+        minAccountLevel: 1,
+        dailyLimit: 0,
+        pricePerRank: 0,
+      },
+      {
+        key: 'brew_cask',
+        kind: 'item',
+        name: 'Cask of Mistbrew',
+        weight: 40,
+        currency: 'crystals',
+        price: 60,
+        refKey: 'xp_brew',
+        quantity: 40,
+        minAccountLevel: 4,
+        dailyLimit: 2,
+        pricePerRank: 0,
+      },
+
       // ── Essences, the ascension faucet outside the Springs ─────────────
       {
         key: 'lesser_essence_bundle',
