@@ -179,14 +179,17 @@ export const gameApi = {
   champion: (id: string) =>
     api.get<{ champion: ChampionDetail }>(ROUTES.roster.detail(id)).then((data) => data.champion),
 
-  levelUp: (id: string, foodIds: string[], actionId: string) =>
-    api.post<ProgressionResponse>(ROUTES.roster.levelUp(id), { foodIds, actionId }),
+  levelUp: (id: string, foodIds: string[], brews: number, actionId: string) =>
+    api.post<ProgressionResponse>(ROUTES.roster.levelUp(id), { foodIds, brews, actionId }),
 
   rankUp: (id: string, foodIds: string[], actionId: string) =>
     api.post<ProgressionResponse>(ROUTES.roster.rankUp(id), { foodIds, actionId }),
 
   ascend: (id: string, actionId: string) =>
     api.post<ProgressionResponse>(ROUTES.roster.ascend(id), { actionId }),
+
+  awaken: (id: string, actionId: string) =>
+    api.post<ProgressionResponse>(ROUTES.roster.awaken(id), { actionId }),
 
   upgradeSkill: (id: string, input: SkillUpgradeRequest) =>
     api.post<ProgressionResponse>(ROUTES.roster.skillUpgrade(id), input),

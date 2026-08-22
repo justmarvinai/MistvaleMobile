@@ -61,12 +61,11 @@ function Rung({
   return (
     <li ref={ref} className={styles.rung} data-state={row.state}>
       <span className={styles.label}>{row.label}</span>
+      <span className={styles.reading}>{row.reading}</span>
 
       <span className={styles.track} aria-hidden="true">
         <span className={styles.fill} style={{ width: `${pct}%` }} />
       </span>
-
-      <span className={styles.reading}>{row.reading}</span>
 
       {/* The cost, and — when something is in the way — which thing. Both on the row rather
           than behind a hover: this is the sentence a player is actually looking for. */}
@@ -82,14 +81,23 @@ function Rung({
         ) : null}
       </span>
 
-      <Button
-        {...(row.id === 'level' ? highlightable('button:champion-level') : {})}
-        variant={row.state === 'ready' ? 'primary' : 'ghost'}
-        disabled={busy || row.state !== 'ready'}
-        onClick={onTake}
-      >
-        {row.action}
-      </Button>
+      {/* A ladder this rarity never had carries no button, because there is nothing to
+          press now or ever — the row's own sentence is the whole answer. A *finished*
+          ladder keeps its disabled one, because "Fully ascended" is a state worth
+          stating in the place the press would have been. */}
+      {row.state !== 'absent' && (
+        <span className={styles.act}>
+          <Button
+            {...(row.id === 'level' ? highlightable('button:champion-level') : {})}
+            variant={row.state === 'ready' ? 'primary' : 'ghost'}
+            disabled={busy || row.state !== 'ready'}
+            fullWidth
+            onClick={onTake}
+          >
+            {row.action}
+          </Button>
+        </span>
+      )}
     </li>
   );
 }

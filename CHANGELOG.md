@@ -5,6 +5,71 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — a champion's rarity decides which ladders it has
+
+Champion progression is the source game's now, with one deliberate difference: **the star
+track belongs to the rarity, not to the champion** (owner, 2026-08-22). A Common keeps the
+star it was called at — one or two — and can never move; an Uncommon is called at ★2 or ★3
+and climbs to ★5; a Rare is called at ★3 and climbs to ★5; an Epic at ★4 and a Legendary at
+★5, both to ★6, which is the ceiling in the game. Rare and above ascend and awaken; nothing
+below them does. Every champion now enters play at its rarity's called rank rather than at
+★1, and `0027_awakening` moved the ones already in players' hands up to theirs.
+
+**The level cap follows the star**: ★1 and ★2 stop at 20, ★3 at 30, ★4 at 40, ★5 at 50 and
+★6 at 60, and 60 is the end of the road for anybody. **A rank-up resets the champion to
+level 1** against its new cap, and every ladder above level requires the champion to be
+standing at its current cap first — a star is a commitment rather than an upgrade.
+
+Where the ceilings live matters: `RANK_RANGE_BY_RARITY` is a *rule* in shared code rather
+than a tunable, so a Common cannot be authored into a six-star. What is content is where a
+champion is **called** — `champion.baseRank`, defaulting to the bottom of its rarity's band,
+so a Rare is ★3 and a Legendary ★5 without anybody typing it.
+
+### Added — Mistbrew, and the fourth ladder
+
+**Mistbrew** is the one experience consumable — not one per element, because the source
+game's four-way split turns levelling into inventory sorting and adds nothing to the
+decision. It is worth 1,500 champion XP, falls off campaign stages and sells at the Bazaar,
+and it is poured on the same dialog that chooses food, because "a few brews and one
+broodling" is one decision rather than two errands.
+
+**Awakening** is the fourth ladder and the last thing left to do to a champion: six levels,
+Rare and above, gated on the rarity's star ceiling, that rank's level cap and a full
+ascension — in that order, so the sentence a player is shown is always the next thing they
+can actually go and do. It is paid in **Waking Shards**, which fall in the back half of the
+Depths and nowhere else. One material and one source is the simplification: the source game
+funds awakening from a second summoning economy with its own currency and its own pity, and
+Mistvale puts the depth in reaching the shard instead.
+
+### Changed — the champion sheet says what each ladder wants
+
+The three ladders that existed were three buttons whose real content lived in a native
+`title`: what a rank-up cost, why an ascension was greyed out and how far either could go
+were all a hover away on a mouse and unreachable on a phone. They are four rows now, one
+shape drawn four times — what it is and where it stands, its track, then the sentence and
+the button. A ladder the rarity never had is drawn too, dashed and grey-tracked and with no
+button at all, because there is nothing to press now or ever and "Commons keep the star they
+were called at" is a rule better learned from the screen than from a refusal.
+
+### Fixed — the champion sheet never read what you were holding
+
+Every material cost on the sheet is priced against the inventory store, and nothing on the
+way to the sheet ever filled it: the store was loaded by the relic screens alone. A player
+who came straight from the Haven was told they were short the whole amount of everything —
+ascension essences they had farmed, and brews they had won in the fight before. It has been
+wrong since ascension costs shipped and only became visible when levelling started spending
+items. The sheet loads what is held when it opens, the way the relic picker always has.
+
+### Operations — a release that changes nested content needs `--replace`
+
+The seed adds missing entities and backfills missing **top-level** fields; it never reaches
+inside one that is already published. So C6's brew and shard published cleanly as new items
+and then dropped nowhere at all, because the drops that pay them live inside
+`stage.rewards.drops`, `dungeon` floor loot and `shop.offers` — all of which already
+existed. `SEED.sh --replace stage,dungeon,shop` is part of this release, and
+DEPLOYMENT_OPERATIONS §5 now says so for the next one.
+
+
 ### Changed — the top bar is a place you are, and the face on it is yours
 
 The bar was the library's defaults on a desktop window: 12px text, 17px coins, 30px

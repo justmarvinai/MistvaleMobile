@@ -251,7 +251,7 @@ Three of those are worth their own sentence:
 | column | notes |
 |---|---|
 | id, player_id, champion_key | |
-| level, xp, stars (rank), ascension (0-6) | |
+| level, xp, stars (rank), ascension (0-6), awakening (0-6) | `rank` is the champion's *current* star, which starts at the definition's `baseRank` rather than at 1 (migration `0027_awakening` backfilled every existing row to at least its rarity's called rank). How far it can climb is never stored — it is the rarity's ceiling, read from `RANK_RANGE_BY_RARITY` at every gate. |
 | skill_upgrades jsonb | per-skill tome levels |
 | masteries jsonb | picked nodes (validated vs tree rules) |
 | locked bool, favorite bool | food-protection |

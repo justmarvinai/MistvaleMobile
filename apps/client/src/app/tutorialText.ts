@@ -31,6 +31,7 @@ const GOAL_LABELS: Readonly<Record<string, string>> = Object.freeze({
   championLevelUp: 'Level a champion',
   championRankUp: 'Rank a champion up',
   championAscend: 'Ascend a champion',
+  championAwaken: 'Awaken a champion',
   championObtained: 'Take a champion',
   masteryLearn: 'Learn a mastery',
   shopPurchase: 'Buy something',

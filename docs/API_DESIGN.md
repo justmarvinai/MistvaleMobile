@@ -23,9 +23,10 @@
 
 ### Champions & gear
 | GET `/player/champions/:id` | One champion: assembled stats split into base and relic contribution, worn relics, skill levels, and what each ladder's next step costs. |
-| POST `/player/champions/:id/level` | `{foodIds[], actionId}` — consume food champions for XP. Refuses anything locked, favourited, still wearing relics, or the champion itself. |
-| POST `/player/champions/:id/rank-up` | `{foodIds[], actionId}` — exactly R champions of exactly R stars plus a silver fee; resets the champion to level 1. |
-| POST `/player/champions/:id/ascend` | `{actionId}` — spends element-matched essences scaled by rarity. Capped by star rank. |
+| POST `/player/champions/:id/level` | `{foodIds[], brews, actionId}` — consume food champions and/or Mistbrew for XP; at least one of the two must be non-empty. Refuses anything locked, favourited, still wearing relics, or the champion itself, and refuses more brews than are held. |
+| POST `/player/champions/:id/rank-up` | `{foodIds[], actionId}` — exactly R champions of exactly R stars plus a silver fee; resets the champion to level 1. Refused at the *rarity's* ceiling, with two different sentences: a Common was never on a star track, and anything else has finished the one it was on. |
+| POST `/player/champions/:id/ascend` | `{actionId}` — spends element-matched essences scaled by rarity. Rare and above only, capped by star rank, and only at the level cap. |
+| POST `/player/champions/:id/awaken` | `{actionId}` — spends Waking Shards and silver. Rare and above only, and gated in the order a player would have to clear them: the rarity's star ceiling, then that rank's level cap, then a full ascension. |
 | POST `/player/champions/:id/skill-upgrade` | `{skillKey, source, actionId}` — `source` is a tome of the champion's rarity or a duplicate of the same champion. The player picks the skill (a deliberate deviation from the source game's random books). |
 | POST `/player/champions/:id/masteries` | `{nodeKey, actionId}` — learns one node, spending the tier's emblems. Refuses in order: trainer level, node exists, build rules, then affordability, so nothing is charged for a refusal. Returns the whole champion. |
 | POST `/player/champions/:id/masteries/reset` | `{actionId}` — forgets every node. The first reset per champion is free; later ones cost crystals. Returns the champion and what it cost. |

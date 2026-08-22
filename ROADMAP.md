@@ -214,6 +214,7 @@ criteria of its own, and it does not gate P9e or P10.
 | **C3** | The game explains itself on hover · equipped relics show their rarity · the tutorial says what to do as well as what it means · the Chronicle as a faction index that hides nothing · `SEED.sh --replace`, so a rewrite of published content can actually ship | ✅ |
 | **C4** | The Haven as a draggable rail of painted boards · the campaign as three screens — the vale, a chapter's stage list, then a team screen that shows the enemy line-up | ✅ |
 | **C5** | The top bar at a size worth looking at · the player chip rebuilt as a framed portrait with the level, the name, the account's power and the experience bar · **a face you choose from the champions you own**, stored server-side and shown on your public card | ✅ |
+| **C6** | Champion progression rebuilt to the source game's shape: **the star track belongs to the rarity** (Commons never move, Uncommon/Rare to ★5, Epic/Legendary to ★6), level caps 20/20/30/40/50/60 with a rank-up resetting to level 1, **Mistbrew** as the one XP consumable, and **awakening** as a fourth ladder paid in Waking Shards out of the deep Depths · the champion sheet as four ladders that each say which gate is shut · the sheet finally reading what the player is holding | ✅ |
 
 **Backlog carried out of a batch rather than done in it.** Two items, and they are the same
 question wearing different clothes — both are parked on the owner's instruction, and both want

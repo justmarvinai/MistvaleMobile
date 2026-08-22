@@ -28,6 +28,7 @@ function champion(power: number, id = String(power)): RosterChampion {
     level: 1,
     rank: 1,
     ascension: 0,
+    awakening: 0,
     xp: 0,
     locked: false,
     favourite: false,

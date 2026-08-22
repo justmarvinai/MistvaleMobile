@@ -62,5 +62,7 @@ All scripts read one `/srv/mistvale/.env`; no secrets in git; `.env.example` doc
 4. Tag release `ea-0.1.x`; CHANGELOG entry (script reminds).
 Rollback = `UPDATE.sh --rollback` (previous release dir + DB restore only if a migration was destructive — script warns).
 
+**A release that changes a *nested* field of already-published content needs `--replace`.** The plain seed adds missing entities and backfills missing **top-level** fields; it never reaches inside one that is already there. So a release that adds a drop to `stage.rewards.drops.items`, an offer to `shop.offers`, or a floor's loot to a `dungeon` ships the code for it and leaves the live rows exactly as they were — no error, no warning, and a faucet that simply never runs. C6 is the worked example: the Mistbrew and the Waking Shard published fine as new `item` entities, and neither dropped anywhere until `SEED.sh --replace stage,dungeon,shop` ran. Name the affected families in the release's CHANGELOG entry and run the replace as step 2b, before the smoke test.
+
 ## 6. Resolved decisions (owner, 2026-08-16)
 - Domain: `play.pathlands.cc` (game) + `/admin` path (Admin Panel) — DNS already pointed at the VPS. Bare-metal systemd deployment (no Docker). Daily reset default Europe/Berlin. Still open operationally (non-blocking): optional IP allowlist for `/admin`, optional rclone offsite backup target.

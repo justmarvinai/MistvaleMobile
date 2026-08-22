@@ -16,11 +16,11 @@ import { useInventoryStore, itemCount } from '../../state/inventoryStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { FoodPicker } from './FoodPicker';
+import { Ladders } from './Ladders';
 import { MasteryTrees } from './MasteryTrees';
 import { RelicPicker } from './RelicPicker';
 import { StatTable } from './StatTable';
 import styles from './ChampionDetail.module.scss';
-import { highlightable } from '../../app/highlight';
 import { Icon } from '../../ui/Icon/Icon';
 import { ChampionIdle } from '../../ui/ChampionIdle/ChampionIdle';
 import { useTip } from '../../ui/Tooltip/useTooltip';
@@ -70,8 +70,10 @@ export function ChampionDetailModal({
   const bundle = useContentStore((state) => state.bundle);
   const items = useInventoryStore((state) => state.items);
   const refreshInventory = useInventoryStore((state) => state.refresh);
+  const loadInventory = useInventoryStore((state) => state.load);
   const refreshRoster = useRosterStore((state) => state.load);
   const refreshPlayer = usePlayerStore((state) => state.refresh);
+  const silver = usePlayerStore((state) => state.player?.silver ?? 0);
 
   const [detail, setDetail] = useState<ChampionDetail | null>(null);
   const [tab, setTab] = useState<Tab>('gear');
@@ -86,6 +88,15 @@ export function ChampionDetailModal({
   // after the modal moved on must not overwrite what is on screen.
   const [reloadToken, setReloadToken] = useState(0);
   const reload = useCallback(() => setReloadToken((token) => token + 1), []);
+
+  // What the ladders cost is read against what is *held*, and nothing else in the app ever
+  // loaded that list: the store is filled by the relic screens, so a player who came
+  // straight from the Haven saw every material cost as "short the whole amount" — brews
+  // they had just won included. Loaded here for the same reason `RelicPicker` loads it,
+  // because this is the screen that spends them.
+  useEffect(() => {
+    void loadInventory();
+  }, [loadInventory]);
 
   useEffect(() => {
     let cancelled = false;
@@ -134,12 +145,8 @@ export function ChampionDetailModal({
     );
   }
 
-  const { champion, stats, costs } = detail;
+  const { champion, stats } = detail;
   const wornBySlot = new Map(detail.gear.map((piece) => [piece.slot, piece]));
-  const ascendCost = costs.ascend?.items ?? {};
-  const canAffordAscend =
-    costs.ascend?.allowedByRank === true &&
-    Object.entries(ascendCost).every(([key, amount]) => itemCount(items, key) >= amount);
 
   const skills = (bundle?.skills ?? []).filter((skill) => def.skills.includes(skill.key));
 
@@ -262,46 +269,22 @@ export function ChampionDetailModal({
                 *for* — everything in the right column is inspection, these are the actions —
                 and the column is sticky, so they are in view the whole way down. */}
             <div className={styles.ladders}>
-              <Button
-                {...highlightable('button:champion-level')}
-                variant="secondary"
-                disabled={busy || champion.level >= champion.levelCap}
-                onClick={() => setPicking('level')}
-              >
-                {champion.level >= champion.levelCap ? 'At level cap' : 'Feed for experience'}
-              </Button>
-
-              <Button
-                variant="secondary"
-                disabled={busy || !costs.rankUp || !costs.rankUp.atLevelCap}
-                onClick={() => setPicking('rank')}
-                title={
-                  costs.rankUp
-                    ? `${costs.rankUp.foodCount} × ★${costs.rankUp.foodRank} champions + ${costs.rankUp.silver.toLocaleString()} silver`
-                    : 'Already ★6'
-                }
-              >
-                {costs.rankUp ? `Rank up to ★${champion.rank + 1}` : 'Fully ranked'}
-              </Button>
-
-              <Button
-                variant="secondary"
-                disabled={busy || !canAffordAscend}
-                title={
-                  costs.ascend?.allowedByRank === false
-                    ? 'Rank this champion up first'
-                    : Object.entries(ascendCost)
-                        .map(
-                          ([key, amount]) => `${amount} × ${key} (have ${itemCount(items, key)})`,
-                        )
-                        .join(' · ')
-                }
-                onClick={() =>
-                  void run('Ascended.', () => gameApi.ascend(championId, newActionId()))
-                }
-              >
-                {costs.ascend ? `Ascend to ${champion.ascension + 1}` : 'Fully ascended'}
-              </Button>
+              <Ladders
+                context={{
+                  detail,
+                  held: new Map(items.map((entry) => [entry.itemKey, entry.quantity])),
+                  silver,
+                  items: bundle?.items ?? [],
+                }}
+                busy={busy}
+                onTake={(id) => {
+                  if (id === 'level' || id === 'rank') return setPicking(id);
+                  if (id === 'ascension') {
+                    return void run('Ascended.', () => gameApi.ascend(championId, newActionId()));
+                  }
+                  return void run('Awakened.', () => gameApi.awaken(championId, newActionId()));
+                }}
+              />
             </div>
 
             {/* Beside the buttons that raise them. They used to sit at the very bottom of the
@@ -481,11 +464,11 @@ export function ChampionDetailModal({
           mode={picking}
           champion={detail}
           onClose={() => setPicking(null)}
-          onConfirm={async (ids) => {
+          onConfirm={async (ids, brews) => {
             setPicking(null);
             await run(picking === 'level' ? 'Experience granted.' : 'Rank raised.', () =>
               picking === 'level'
-                ? gameApi.levelUp(championId, ids, newActionId())
+                ? gameApi.levelUp(championId, ids, brews, newActionId())
                 : gameApi.rankUp(championId, ids, newActionId()),
             );
           }}

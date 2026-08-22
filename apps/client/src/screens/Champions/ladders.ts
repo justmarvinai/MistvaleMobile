@@ -1,9 +1,4 @@
-import {
-  MAX_ASCENSION,
-  MAX_AWAKENING,
-  type ChampionDetail,
-  type ItemDef,
-} from '@mistvale/shared';
+import { MAX_ASCENSION, MAX_AWAKENING, type ChampionDetail, type ItemDef } from '@mistvale/shared';
 
 /**
  * The four ladders, as four rows a player can read.
@@ -57,12 +52,7 @@ export interface LadderContext {
 }
 
 export function ladderRows(context: LadderContext): LadderRow[] {
-  return [
-    levelRow(context),
-    rankRow(context),
-    ascensionRow(context),
-    awakeningRow(context),
-  ];
+  return [levelRow(context), rankRow(context), ascensionRow(context), awakeningRow(context)];
 }
 
 function levelRow({ detail }: LadderContext): LadderRow {
@@ -97,8 +87,8 @@ function rankRow({ detail, silver }: LadderContext): LadderRow {
       reading: never ? `★${rank}` : `★${rank} of ${ceiling}`,
       cost: [],
       state: never ? 'absent' : 'done',
-      ...(never ? { blockedBy: 'Common champions keep the star they were called at' } : {}),
-      action: never ? 'No star track' : 'Fully starred',
+      ...(never ? { blockedBy: 'Commons keep the star they were called at' } : {}),
+      action: never ? 'No star track' : 'Maxed',
     };
   }
 
@@ -108,7 +98,7 @@ function rankRow({ detail, silver }: LadderContext): LadderRow {
     `${cost.silver.toLocaleString('en-US')} silver`,
   ];
   const blocked = !cost.atLevelCap
-    ? 'Take it to its level cap first'
+    ? 'Reach the level cap first'
     : shortSilver
       ? `Short ${(cost.silver - silver).toLocaleString('en-US')} silver`
       : undefined;
@@ -121,7 +111,7 @@ function rankRow({ detail, silver }: LadderContext): LadderRow {
     cost: priced,
     state: blocked ? 'blocked' : 'ready',
     ...(blocked ? { blockedBy: blocked } : {}),
-    action: `Raise to ★${rank + 1}`,
+    action: 'Rank up',
   };
 }
 
@@ -139,18 +129,16 @@ function ascensionRow({ detail, held, items }: LadderContext): LadderRow {
       reading: absent ? '—' : `${ascension} of ${MAX_ASCENSION}`,
       cost: [],
       state: absent ? 'absent' : 'done',
-      ...(absent ? { blockedBy: 'Only Rare champions and above ascend' } : {}),
-      action: absent ? 'Never ascends' : 'Fully ascended',
+      ...(absent ? { blockedBy: 'Rare and above only' } : {}),
+      action: absent ? 'Never ascends' : 'Maxed',
     };
   }
 
-  const missing = Object.entries(cost.items).find(
-    ([key, amount]) => (held.get(key) ?? 0) < amount,
-  );
+  const missing = Object.entries(cost.items).find(([key, amount]) => (held.get(key) ?? 0) < amount);
   const blocked = !cost.allowedByRank
     ? 'Raise its star first'
     : detail.champion.level < detail.champion.levelCap
-      ? 'Take it to its level cap first'
+      ? 'Reach the level cap first'
       : missing
         ? `Short ${missing[1] - (held.get(missing[0]) ?? 0)} ${nameOf(missing[0], items)}`
         : undefined;
@@ -163,7 +151,7 @@ function ascensionRow({ detail, held, items }: LadderContext): LadderRow {
     cost: Object.entries(cost.items).map(([key, amount]) => `${amount} ${nameOf(key, items)}`),
     state: blocked ? 'blocked' : 'ready',
     ...(blocked ? { blockedBy: blocked } : {}),
-    action: `Ascend to ${ascension + 1}`,
+    action: 'Ascend',
   };
 }
 
@@ -181,17 +169,17 @@ function awakeningRow({ detail, held, silver, items }: LadderContext): LadderRow
       reading: absent ? '—' : `${awakening} of ${MAX_AWAKENING}`,
       cost: [],
       state: absent ? 'absent' : 'done',
-      ...(absent ? { blockedBy: 'Only Rare champions and above awaken' } : {}),
-      action: absent ? 'Never awakens' : 'Fully awakened',
+      ...(absent ? { blockedBy: 'Rare and above only' } : {}),
+      action: absent ? 'Never awakens' : 'Maxed',
     };
   }
 
   // The order matters: it is the order a player would have to do them in, so the sentence
   // they are shown is the next thing they can actually go and do.
   const blocked = !cost.ready.atMaxRank
-    ? `Take it to ★${detail.costs.maxRank} first`
+    ? `Reach ★${detail.costs.maxRank} first`
     : !cost.ready.atLevelCap
-      ? 'Take it to its level cap first'
+      ? 'Reach the level cap first'
       : !cost.ready.atMaxAscension
         ? 'Finish its ascension first'
         : silver < cost.silver
@@ -209,7 +197,7 @@ function awakeningRow({ detail, held, silver, items }: LadderContext): LadderRow
     ],
     state: blocked ? 'blocked' : 'ready',
     ...(blocked ? { blockedBy: blocked } : {}),
-    action: `Awaken to ${awakening + 1}`,
+    action: 'Awaken',
   };
 }
 

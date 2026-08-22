@@ -13,6 +13,7 @@ function owned(championKey: string, power: number, id = `${championKey}-${power}
     level: 1,
     rank: 1,
     ascension: 0,
+    awakening: 0,
     xp: 0,
     locked: false,
     favourite: false,

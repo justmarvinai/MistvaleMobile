@@ -4,8 +4,12 @@ import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
+import { useInventoryStore, itemCount } from '../../state/inventoryStore';
 import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 import styles from './FoodPicker.module.scss';
+
+/** The one XP consumable, mirrored from the server's `BREW_ITEM_KEY`. */
+const BREW_KEY = 'xp_brew';
 
 /**
  * Choosing what to feed.
@@ -26,11 +30,20 @@ export function FoodPicker({
   mode: 'level' | 'rank';
   champion: ChampionDetail;
   onClose: () => void;
-  onConfirm: (ids: string[]) => Promise<void> | void;
+  onConfirm: (ids: string[], brews: number) => Promise<void> | void;
 }): JSX.Element {
   const roster = useRosterStore((state) => state.champions);
   const bundle = useContentStore((state) => state.bundle);
   const [chosen, setChosen] = useState<string[]>([]);
+  /**
+   * Brews poured in alongside the bodies.
+   *
+   * On the same dialog rather than a second one, because it is the same decision: how much
+   * experience am I willing to spend on this champion. Rank-up has no brews — a star is
+   * bought with bodies and nothing else — so the stepper only exists in `level` mode.
+   */
+  const [brews, setBrews] = useState(0);
+  const held = useInventoryStore((state) => itemCount(state.items, BREW_KEY));
 
   const defs = useMemo(
     () => new Map((bundle?.champions ?? []).map((entry) => [entry.key, entry])),
@@ -98,15 +111,75 @@ export function FoodPicker({
           </div>
         )}
 
+        {/* Brews sit with the bodies because they answer the same question — how much
+            experience is this champion worth to me — and separating them into a second
+            dialog would make "a few brews and one broodling" two errands. */}
+        {mode === 'level' && (
+          <div className={styles.brews}>
+            <span className={styles.brewLabel}>
+              Mistbrew
+              <span className={styles.brewHeld}>{held} held</span>
+            </span>
+            <div className={styles.stepper}>
+              <button
+                type="button"
+                className={styles.step}
+                onClick={() => setBrews((value) => Math.max(0, value - 10))}
+                disabled={brews <= 0}
+                aria-label="Ten fewer brews"
+              >
+                −10
+              </button>
+              <button
+                type="button"
+                className={styles.step}
+                onClick={() => setBrews((value) => Math.max(0, value - 1))}
+                disabled={brews <= 0}
+                aria-label="One fewer brew"
+              >
+                −
+              </button>
+              <span className={styles.stepValue} aria-live="polite">
+                {brews}
+              </span>
+              <button
+                type="button"
+                className={styles.step}
+                onClick={() => setBrews((value) => Math.min(held, value + 1))}
+                disabled={brews >= held}
+                aria-label="One more brew"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                className={styles.step}
+                onClick={() => setBrews((value) => Math.min(held, value + 10))}
+                disabled={brews >= held}
+                aria-label="Ten more brews"
+              >
+                +10
+              </button>
+              <Button variant="ghost" disabled={held === 0} onClick={() => setBrews(held)}>
+                All
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className={styles.actions}>
           <span className={styles.count}>
             {chosen.length}
             {requirement ? ` / ${requirement.foodCount}` : ''} selected
+            {mode === 'level' && brews > 0 ? ` · ${brews} brew${brews === 1 ? '' : 's'}` : ''}
           </span>
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button disabled={!ready} onClick={() => void onConfirm(chosen)}>
+          <Button
+            disabled={mode === 'level' ? chosen.length === 0 && brews === 0 : !ready}
+            onClick={() => void onConfirm(chosen, brews)}
+          >
             {mode === 'level' ? 'Feed' : 'Rank up'}
           </Button>
         </div>

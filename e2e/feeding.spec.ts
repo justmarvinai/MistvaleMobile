@@ -55,10 +55,27 @@ test.describe('feeding a champion', () => {
     await expect(roster().first()).toBeVisible({ timeout: 15_000 });
     const before = await roster().count();
 
+    // ── The sheet reads what is held ──────────────────────────────────────
+    //
+    // Every material cost on the champion sheet — the brews the level ladder spends, the
+    // essences the ascension ladder spends, the shards the awakening ladder spends — is
+    // priced against the inventory store, and nothing on the way here ever filled it: it
+    // was loaded by the relic screens alone. A player who came straight from the Haven was
+    // told they were short the whole amount of everything, brews they had just won
+    // included. Asserted as the request rather than as a number, because what is held on a
+    // fresh account is a drop roll and this is about the read happening at all.
+    const readsItems = page.waitForRequest(
+      (request) => request.url().includes('/api/player/items'),
+      { timeout: 15_000 },
+    );
+
     // The strongest is the starter — the brood are food and sort below it.
     await roster().first().click();
+    await readsItems;
 
-    await page.getByRole('button', { name: /feed for experience/i }).click();
+    // The level ladder's own button. It said "Feed for experience" until the four ladders
+    // landed and the words moved to the row above it.
+    await page.getByRole('button', { name: /^feed$/i }).click();
 
     // By the dialog's own name, not by its text: the champion sheet underneath carries the
     // button that opened this one, so a text filter matches both.

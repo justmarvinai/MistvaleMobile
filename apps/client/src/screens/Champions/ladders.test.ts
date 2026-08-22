@@ -7,10 +7,12 @@ const ITEMS = [
   { key: 'essence_pure', name: 'Pure Essence' },
 ];
 
-function detail(over: {
-  champion?: Partial<ChampionDetail['champion']>;
-  costs?: Partial<ChampionDetail['costs']>;
-} = {}): ChampionDetail {
+function detail(
+  over: {
+    champion?: Partial<ChampionDetail['champion']>;
+    costs?: Partial<ChampionDetail['costs']>;
+  } = {},
+): ChampionDetail {
   return {
     champion: {
       id: 'c1',
@@ -82,7 +84,7 @@ describe('the star row', () => {
     expect(rank.state).toBe('ready');
     expect(rank.reading).toBe('★4 of 6');
     expect(rank.cost).toEqual(['4 × ★4 champions', '100,000 silver']);
-    expect(rank.action).toBe('Raise to ★5');
+    expect(rank.action).toBe('Rank up');
   });
 
   it('names the level cap as the gate, before it names the silver', () => {
@@ -106,7 +108,14 @@ describe('the star row', () => {
     const rank = row(
       rows({
         champion: { rank: 2 },
-        costs: { rankUp: null, maxRank: 2, starTrackMoves: false, deepens: false, awaken: null, ascend: null },
+        costs: {
+          rankUp: null,
+          maxRank: 2,
+          starTrackMoves: false,
+          deepens: false,
+          awaken: null,
+          ascend: null,
+        },
       }),
       'rank',
     );
@@ -118,7 +127,7 @@ describe('the star row', () => {
   it('tells a finished Legendary it is fully starred', () => {
     const rank = row(rows({ champion: { rank: 6 }, costs: { rankUp: null } }), 'rank');
     expect(rank.state).toBe('done');
-    expect(rank.action).toBe('Fully starred');
+    expect(rank.action).toBe('Maxed');
   });
 });
 
@@ -156,7 +165,7 @@ describe('the awakening row', () => {
   it('names the gates in the order a player would clear them', () => {
     const held = new Map([['waking_shard', 99]]);
     const notStarred = row(rows({}, 1_000_000, held), 'awakening');
-    expect(notStarred.blockedBy).toBe('Take it to ★6 first');
+    expect(notStarred.blockedBy).toBe('Reach ★6 first');
 
     const notLevelled = row(
       rows(
@@ -214,7 +223,7 @@ describe('the awakening row', () => {
     );
     expect(ready.state).toBe('ready');
     expect(ready.cost).toEqual(['4 Waking Shard', '20,000 silver']);
-    expect(ready.action).toBe('Awaken to 1');
+    expect(ready.action).toBe('Awaken');
   });
 
   it('counts the shards that are missing, after every other gate is open', () => {
@@ -238,7 +247,10 @@ describe('the awakening row', () => {
   });
 
   it('tells a Rare that never awakened that it never will, if it cannot', () => {
-    const absent = row(rows({ costs: { awaken: null, ascend: null, deepens: false } }), 'awakening');
+    const absent = row(
+      rows({ costs: { awaken: null, ascend: null, deepens: false } }),
+      'awakening',
+    );
     expect(absent.state).toBe('absent');
     expect(absent.action).toBe('Never awakens');
   });

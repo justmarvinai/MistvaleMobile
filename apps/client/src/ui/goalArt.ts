@@ -24,6 +24,7 @@ const GOAL_GLYPH: Readonly<Record<GoalType, string>> = Object.freeze({
   gearLevel: 'glyph-arcane-symbol',
   championLevelUp: 'glyph-magic-feather',
   championRankUp: 'glyph-shooting-stars',
+  championAwaken: 'glyph-phoenix',
   championAscend: 'glyph-celestial-body',
   masteryLearn: 'glyph-spell-book',
   shopPurchase: 'glyph-burning-scroll',

@@ -54,3 +54,64 @@
   font-size: 0.85rem;
   line-height: 1.6;
 }
+
+/* The brew stepper, on the same dialog as the bodies: both answer "how much experience is
+   this champion worth to me", and splitting them would make one feed two errands. */
+.brews {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  flex-wrap: wrap;
+  padding: $space-3;
+  border: 1px solid $edge;
+  background: rgba(14, 12, 10, 0.6);
+}
+
+.brewLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  @include display-text(14px);
+  color: $parchment;
+}
+
+.brewHeld {
+  @include label-text;
+  color: $muted;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.step {
+  @include interactive;
+
+  min-width: 2.2rem;
+  padding: 4px $space-2;
+  border: 1px solid $edge-bright;
+  font-family: $font-mono;
+  font-size: 13px;
+  color: $parchment;
+
+  &:hover:not(:disabled) {
+    border-color: $accent-dim;
+    color: $accent-soft;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.stepValue {
+  min-width: 3rem;
+  text-align: center;
+  font-family: $font-mono;
+  font-size: 16px;
+  color: $accent-soft;
+}

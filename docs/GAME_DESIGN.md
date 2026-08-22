@@ -20,7 +20,7 @@
 ### 1.1 Depth budget — "deep grind, gentle onboarding" (owner directive)
 Mistvale must be **as grindy and content-rich as the source game without its ten years of accreted complexity**. The source is the structure; we ship its *core* systems complete and park its bolt-on layers. Binding rules:
 - **Grind depth is sacred.** There must always be something worth farming: gear RNG (substats/rolls/sets), 252 stars × 3 difficulties, 4 dungeon ladders + springs rotation + Proving Grounds, per-champion masteries, Hall of Valor's year-scale sink, arena weeklies, events, missions, the collection itself. "Play 5 minutes then AFK" must never be optimal — energy, tokens, rotations, and events keep sessions meaningful all day.
-- **Entry complexity is budgeted.** Deliberate simplifications vs the source (already reflected throughout these docs): 4 elements with one simple wheel · 28 status effects instead of 40+ · no awakening/blessings/glyphs/gear-ascension meta-layers at EA · one arena, one medal currency · choice-based tomes · free gear removal · 48-node masteries instead of ~72 · simplified 3-star rule · no faction-locked or tower modes at EA. Each parked layer returns post-EA only when the base game feels mastered, never before.
+- **Entry complexity is budgeted.** Deliberate simplifications vs the source (already reflected throughout these docs): 4 elements with one simple wheel · 28 status effects instead of 40+ · no blessings/glyphs/gear-ascension meta-layers at EA · **awakening kept but paid from one material out of the Depths** rather than from a second summoning economy with its own currency and pity (owner, 2026-08-22) · one arena, one medal currency · choice-based tomes · free gear removal · 48-node masteries instead of ~72 · simplified 3-star rule · no faction-locked or tower modes at EA. Each parked layer returns post-EA only when the base game feels mastered, never before.
 - **Teach by unlocking.** Systems appear one at a time via the level-gating table (§12) with one-sentence explanations; a new player should never see more than one unfamiliar system at once.
 - When a future design choice trades depth against approachability: keep the grind, cut the rulebook.
 
@@ -84,10 +84,24 @@ Starter choice presents ⭐-marked three on pedestals with honest guidance (Maru
 
 ## 7. Champion progression (the four ladders)
 
-1. **Level & rank:** Level cap by star rank — ★1→10, ★2→20, ★3→30, ★4→40, ★5→50, ★6→60. XP from battles (+events). **Rank-up** at max level consumes food champions: N champions of rank N−1 stars? No — Mistvale uses the source pattern: to go from rank R to R+1, feed R champions of rank ≥R stars? **Locked rule (simple + familiar): rank-up from R→R+1 costs R "food" champions of exactly R stars** (e.g. 3★→4★: three 3★ champions). Ranked food ("broodlings" — leveled Commons) comes from campaign farming. Full costs in ECONOMY_BALANCE.md.
-2. **Ascension:** 6 levels per champion (capped by star rank, source-faithful), paid in element **Essences** (Lesser/Greater/Prime + universal Pure Essence) from the Essence Springs. Every level boosts base stats; accessory slots gate on it — **Ring @ Asc 2, Amulet @ Asc 4, Banner @ Asc 6** — and Asc 6 additionally empowers one kit-defined skill. Exact tables in ECONOMY_BALANCE.md.
-3. **Skill Tomes:** Rare/Epic/Legendary tomes upgrade skills along each skill's ladder (damage %, effect chance, cooldown −1). Tome rarity must match champion rarity. EA choice: player **picks** the skill to upgrade (friendlier than RSL's random books — flagged as a deliberate deviation).
-4. **Masteries:** unlock at account level 14 (with Proving Grounds). Three trees — **Onslaught** (offense), **Bulwark** (defense), **Insight** (utility/support) — 6 tiers each, paid in Bronze/Silver/Gold **Emblems**; capstones are build-defining (e.g. Onslaught capstone *Deathmark* ≈ Warmaster-style bonus damage; full trees in COMBAT_SYSTEM.md §9). Reset costs crystals.
+**Which ladders a champion has is decided by its rarity** (owner, 2026-08-22). A champion is *called* at a star rank inside its rarity's band and can climb to its rarity's ceiling — and Commons have no climb at all, which is what makes them the food chain rather than a project:
+
+| Rarity | Called at | Ceiling | Level cap at the ceiling | Ascends & awakens |
+|---|---|---|---|---|
+| Common | ★1–2 | its own ★ | 20 | no |
+| Uncommon | ★2–3 | ★5 | 50 | no |
+| Rare | ★3 | ★5 | 50 | yes |
+| Epic | ★4 | ★6 | 60 | yes |
+| Legendary | ★5 | ★6 | 60 | yes |
+
+A champion's called rank is content (`champion.baseRank`); leaving it unset means the bottom of the rarity's band, so a Rare is ★3 and a Legendary ★5 without anybody typing it. The ceiling is never content — it is the rarity's, so a Common cannot be authored into a six-star.
+
+1. **Level:** the cap is the star rank's — **★1/★2→20, ★3→30, ★4→40, ★5→50, ★6→60**, and 60 is the maximum any champion reaches. Experience comes from battles, from **Mistbrew** (one XP consumable, not one per element — the source game's four-way split turns levelling into inventory sorting and adds nothing to the decision), and from feeding other champions. Brews and bodies go into the same dialog because they answer the same question.
+2. **Stars (rank-up):** at the level cap, **R→R+1 costs R food champions of exactly R stars** plus silver (e.g. ★4→★5: four ★4 champions). Ranked food ("broodlings" — levelled Commons) comes from campaign farming. **A rank-up resets the champion to level 1** against its new, higher cap — the source game's rule, and the reason a star is a commitment rather than an upgrade. Full costs in ECONOMY_BALANCE.md.
+3. **Ascension:** 6 levels, capped by star rank, **Rare and above only**, paid in element **Essences** (Lesser/Greater/Prime + universal Pure Essence) from the Essence Springs. Every level boosts base stats; accessory slots gate on it — **Ring @ Asc 2, Amulet @ Asc 4, Banner @ Asc 6** — and Asc 6 additionally empowers one kit-defined skill. Exact tables in ECONOMY_BALANCE.md.
+4. **Awakening:** 6 levels, **Rare and above only**, and the last thing left to do to a champion. It is gated on everything else being finished — the rarity's star ceiling, that rank's level cap, and a full ascension — and paid in **Waking Shards** and silver. The shard falls in the back half of the Depths and nowhere else. This is the deliberate simplification: the source game funds awakening from a second summoning economy with its own currency and its own pity, where Mistvale puts the depth in *getting* the shard rather than in a second system to learn.
+5. **Skill Tomes:** Rare/Epic/Legendary tomes upgrade skills along each skill's ladder (damage %, effect chance, cooldown −1). Tome rarity must match champion rarity. EA choice: player **picks** the skill to upgrade (friendlier than RSL's random books — flagged as a deliberate deviation).
+6. **Masteries:** unlock at account level 14 (with Proving Grounds). Three trees — **Onslaught** (offense), **Bulwark** (defense), **Insight** (utility/support) — 6 tiers each, paid in Bronze/Silver/Gold **Emblems**; capstones are build-defining (e.g. Onslaught capstone *Deathmark* ≈ Warmaster-style bonus damage; full trees in COMBAT_SYSTEM.md §9). Reset costs crystals.
 
 **Power score:** single derived number per champion (stat-weighted, formula in COMBAT doc) used for lists, arena matchmaking bands, and bot synthesis — informational, never a gameplay input.
 

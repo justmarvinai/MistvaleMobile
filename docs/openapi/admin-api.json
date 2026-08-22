@@ -1229,6 +1229,11 @@
             "maxLength": 64,
             "pattern": "^[a-z][a-z0-9_]*$"
           },
+          "baseRank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6
+          },
           "isFood": {
             "default": false,
             "type": "boolean"
@@ -2374,6 +2379,7 @@
                     "championLevelUp",
                     "championRankUp",
                     "championAscend",
+                    "championAwaken",
                     "masteryLearn",
                     "shopPurchase",
                     "arenaBattle",
@@ -4793,6 +4799,7 @@
                     "championLevelUp",
                     "championRankUp",
                     "championAscend",
+                    "championAwaken",
                     "masteryLearn",
                     "shopPurchase",
                     "arenaBattle",
@@ -5046,6 +5053,7 @@
                     "championLevelUp",
                     "championRankUp",
                     "championAscend",
+                    "championAwaken",
                     "masteryLearn",
                     "shopPurchase",
                     "arenaBattle",
@@ -8071,6 +8079,7 @@
                   "championLevelUp",
                   "championRankUp",
                   "championAscend",
+                  "championAwaken",
                   "masteryLearn",
                   "shopPurchase",
                   "arenaBattle",

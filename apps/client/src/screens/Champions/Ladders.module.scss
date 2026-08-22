@@ -1,9 +1,11 @@
 /* Four ladders, one shape.
 
-   A row is: what it is, where it stands, the reading, what the next rung costs or what is
-   in the way, and the button. Every ladder uses the same five columns so the eye learns the
-   layout once — which is the point of drawing them together rather than as three buttons
-   and an absence. */
+   A rung says the same four things in the same order — what it is and where it stands on
+   one line, the track under them, then what the next rung costs or what is in the way,
+   beside the button that takes it. Stacked rather than in five columns because the sheet's
+   champion column is 340px wide (`ChampionDetail.module.scss`): a row laid out for a wide
+   pane squeezed its cost text to one character per line and pushed its button out through
+   the frame, which is the same fixed-width-in-a-narrow-holder fault D9 fixed elsewhere. */
 
 .ladders {
   display: flex;
@@ -16,9 +18,9 @@
 
 .rung {
   display: grid;
-  grid-template-columns: 5.5rem 6rem auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: $space-3;
+  gap: $space-1 $space-2;
   padding: $space-2 $space-3;
   border: 1px solid $edge;
   background: linear-gradient(180deg, rgba(34, 29, 24, 0.7), rgba(18, 16, 13, 0.7));
@@ -39,11 +41,21 @@
 .label {
   @include label-text;
   color: $parchment-dim;
+  min-width: 0;
+}
+
+.reading {
+  justify-self: end;
+  font-family: $font-mono;
+  font-size: 13px;
+  color: $parchment;
+  white-space: nowrap;
 }
 
 .track {
   position: relative;
   display: block;
+  grid-column: 1 / -1;
   height: 8px;
   background: $panel-inset;
   border: 1px solid $edge;
@@ -61,29 +73,27 @@
   background: linear-gradient(90deg, rgba(201, 162, 39, 0.6), $gold);
 }
 
-.reading {
-  font-family: $font-mono;
-  font-size: 12px;
-  color: $parchment;
-  white-space: nowrap;
+/* A ladder that does not exist for this rarity still stands somewhere — a Common really is
+   at ★1 of ★1 — but painting that full in the accent reads as *finished*, which is the one
+   thing it is not. Grey says "this is a track you do not climb". */
+.rung[data-state='absent'] .fill {
+  background: $muted-deep;
 }
 
+/* On the third line, beside the button — never sharing the header, where the reading and a
+   9-sliced button between them left it one word wide. It keeps its cell when empty so the
+   button stays on the right rather than sliding under the label. */
 .detail {
   display: flex;
-  flex-wrap: wrap;
-  gap: $space-1 $space-3;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
   font-size: 11.5px;
+  line-height: 1.35;
 }
 
 .cost {
   color: $muted;
-
-  & + &::before {
-    content: '·';
-    margin-right: $space-3;
-    color: $muted-deep;
-  }
 }
 
 /* The one sentence a player is looking for when a button is grey. */
@@ -91,17 +101,12 @@
   color: $warning;
 }
 
-@media (max-width: 900px) {
-  .rung {
-    grid-template-columns: 5rem 1fr auto;
-    row-gap: $space-1;
-  }
-
-  .track {
-    grid-column: 2 / -1;
-  }
-
-  .detail {
-    grid-column: 1 / -1;
-  }
+/* Three rows to a rung — label and reading, the track, then the sentence and the button —
+   because four rows put the fourth ladder past the foot of the champion column and two put
+   the sentence in a one-word gutter. The button gets its own cell rather than sitting loose
+   in the grid, because the painted button is the library's element and `fullWidth` needs a
+   box whose width means something. */
+.act {
+  display: block;
+  width: 9rem;
 }
