@@ -60,6 +60,23 @@ ascension essences they had farmed, and brews they had won in the fight before. 
 wrong since ascension costs shipped and only became visible when levelling started spending
 items. The sheet loads what is held when it opens, the way the relic picker always has.
 
+### Fixed — a broken roster took the whole frame down, not just the room
+
+The screen-level boundary's own comment promises that a screen which throws "leaves the
+dock and the top bar alive". C5 quietly broke that: it gave the top bar the account's
+power — the four strongest champions added together — so the bar reads the same roster the
+screens do, and the bar sits *outside* the boundary. One malformed roster response then
+spread a non-array in the chip and took the frame down with the room, dock and all, which
+is the exact failure the boundary exists to prevent.
+
+The chrome has its own net now: quiet rather than a full-page alert, because a second
+`role="alert"` in a 60px strip shouts over the real one the screen is already showing, and
+reset by navigation rather than keyed to it, so walking to another room clears it without
+rebuilding the bar every time a player changes screens.
+
+`e2e/resilience.spec.ts` had been failing on this and is green again — the value of a test
+that breaks the app from outside is that it does not care which commit caused the break.
+
 ### Operations — a release that changes nested content needs `--replace`
 
 The seed adds missing entities and backfills missing **top-level** fields; it never reaches

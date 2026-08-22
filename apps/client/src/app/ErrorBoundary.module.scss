@@ -51,3 +51,27 @@
   font-size: 0.72rem;
   opacity: 0.6;
 }
+
+/* The chrome fallback: one muted line where a bar should be, rather than a full-page alert
+   inside a 60px strip. It stays out of the way because the screen under it is usually
+   explaining the same fault at full size. */
+.quiet {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  margin: 0;
+  padding: $space-2 $space-3;
+  color: $muted;
+  font-size: 12px;
+}
+
+.quietRetry {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: $accent;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}

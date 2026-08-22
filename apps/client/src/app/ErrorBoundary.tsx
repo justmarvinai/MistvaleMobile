@@ -4,6 +4,24 @@ import styles from './ErrorBoundary.module.scss';
 interface Props {
   /** Named in the fallback, so a report says *where* rather than "it broke". */
   area: string;
+  /**
+   * How loudly it fails.
+   *
+   * `page` owns the space it was given and offers a way out. `quiet` is for a strip of
+   * chrome, where a full-page alert in a 60px bar would shout over the screen's own — and
+   * would be a second `role="alert"` on a page that already has the real one.
+   */
+  variant?: 'page' | 'quiet';
+  /**
+   * Clears the error when this changes.
+   *
+   * The screen boundary is keyed on the screen, which remounts it on every navigation —
+   * right there, because the room is changing anyway. Chrome must not remount on every
+   * navigation (the top bar would rebuild its painted parts and restart its bars), so it
+   * takes the same recovery without the same cost: nothing happens while it is healthy,
+   * and walking to another room is what clears it once it is not.
+   */
+  resetKey?: string | number;
   children: ReactNode;
 }
 
@@ -26,6 +44,10 @@ interface State {
  *   bar still shows the wallet, and the player can walk away from the broken room.
  * - Around the **shell**, there is nothing left to preserve, so the fallback is a full page
  *   that offers a reload.
+ * - Around **chrome** — the top bar — quietly, because the bar reads the same roster the
+ *   screen does. C5 gave it the account's power, which is the four strongest champions
+ *   added together, and put it *outside* the screen boundary: one malformed roster
+ *   response then took down the frame this file exists to keep standing, dock and all.
  *
  * Class component because that is the only way React exposes this; there is no hook.
  */
@@ -34,6 +56,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     return { error };
+  }
+
+  override componentDidUpdate(previous: Props): void {
+    if (this.state.error && previous.resetKey !== this.props.resetKey) this.retry();
   }
 
   override componentDidCatch(error: Error, info: ErrorInfo): void {
@@ -47,6 +73,19 @@ export class ErrorBoundary extends Component<Props, State> {
   override render(): ReactNode {
     const { error } = this.state;
     if (!error) return this.props.children;
+
+    if (this.props.variant === 'quiet') {
+      // Deliberately not `role="alert"`: the screen underneath is almost certainly showing
+      // the real one, and two of them is a page that shouts twice about one fault.
+      return (
+        <p className={styles.quiet}>
+          The {this.props.area} could not be drawn.{' '}
+          <button type="button" className={styles.quietRetry} onClick={this.retry}>
+            Try again
+          </button>
+        </p>
+      );
+    }
 
     return (
       <div className={styles.fallback} role="alert">

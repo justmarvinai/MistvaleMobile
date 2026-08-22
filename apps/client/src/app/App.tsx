@@ -276,11 +276,19 @@ function GameShell() {
   return (
     <>
       <div className={styles.shell}>
-        <TopBar
-          onOpenSettings={() => setSettingsOpen(true)}
-          onOpenMail={() => navigate('mail')}
-          onOpenNews={() => setNewsOpen(true)}
-        />
+        {/* The bar reads the same roster the screens do — C5 gave it the account's power,
+            which is the four strongest champions added together — so it needs the same net.
+            Without one it sat outside the screen's boundary and a single malformed roster
+            response took the whole frame down, dock included, which is the exact failure the
+            boundary below was added to prevent. Reset rather than keyed, so walking to
+            another room clears it without rebuilding the bar on every navigation. */}
+        <ErrorBoundary area="top bar" variant="quiet" resetKey={screen}>
+          <TopBar
+            onOpenSettings={() => setSettingsOpen(true)}
+            onOpenMail={() => navigate('mail')}
+            onOpenNews={() => setNewsOpen(true)}
+          />
+        </ErrorBoundary>
 
         <main className={styles.content}>
           {/* Keyed by screen so walking to another room clears a failure rather than
