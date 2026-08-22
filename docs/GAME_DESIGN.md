@@ -105,7 +105,7 @@ A champion's called rank is content (`champion.baseRank`); leaving it unset mean
 
 **Watching a fight, and not watching one** (owner, 2026-08-22). Two conveniences, both earned:
 
-- **Skip** — jumping a fight to its end — is offered only on a stage this account has **already beaten once**, so the first walk down a road is a fight a player sees. The Arena is exempt (its "stage" is an opponent, never a repeat); the cold open is not (being watched is the point of it).
+- **Skip** — jumping a fight to its end — is offered only on a stage this account has **already beaten once**, so the first walk down a road is a fight a player sees. The Arena is exempt (its "stage" is an opponent, never a repeat). The **cold open is the one fight in the game that is never skippable** — it records no clear, so it can never earn its way past the rule; that is deliberate, and the tutorial's own *Skip tutorial* is the way past it, which takes the cold open with it.
 - **Playback speed** runs ×1–×4. ×1 and ×2 are there from the first fight, **×3 opens on finishing the campaign on Normal** and **×4 on finishing it on Brutal** — every stage of that difficulty cleared at least once. The pairing is `battle.speedUnlocks` in Game config.
 
 Both are gated on progress the server computes and the client is *told*; neither is refused at the mutation, because neither changes an outcome, a roll or a timer — a skipped fight resolves exactly as a watched one does, and a multiplier only divides the delay between events already decided.

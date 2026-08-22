@@ -216,9 +216,13 @@ test.describe('the tutorial', () => {
     await expect(page.getByText(/^Turn [1-9]/)).toBeVisible({ timeout: 30_000 });
     await expect(results).toBeHidden();
 
-    // And Skip is the deliberate way past the rest of it — the battle's own Skip, not the
-    // Wardenmaster's, which is why the two are named apart.
-    await page.getByRole('button', { name: /^skip$/i }).click();
+    // The rest of it is fought rather than skipped. Since C7 a fight can only be jumped to
+    // its end on a stage already beaten, and the cold open records no clear at all — so it
+    // is the one battle in the game that is *never* skippable. That is deliberate: the
+    // tutorial's own "Skip tutorial" is the way past the tutorial, and it takes the cold
+    // open with it. `resolveBattle` presses Auto and waits, which is what a player who
+    // does not want to watch actually has.
+    await resolveBattle(page);
     await expect(results).toBeVisible({ timeout: 30_000 });
     await expect(results).toContainText(/victory/i);
 

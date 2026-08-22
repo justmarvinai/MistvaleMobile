@@ -107,6 +107,37 @@ export async function dismissUnlocks(page: Page): Promise<void> {
 }
 
 /**
+ * Winds the speed control up to the fastest rung this account has earned.
+ *
+ * Since C7 a stage nobody has beaten offers no Skip, so a first clear has to actually
+ * *play* — and at ×1 a three-wave fight is most of a spec's timeout. The library's control
+ * is one button that cycles, and `cycleSpeed` steps over the rungs that are still locked,
+ * so the reachable readings are exactly the earned ones. Press around the loop once to
+ * learn them, then press until it lands on the fastest. Nothing here is a back door: it is
+ * the press a player makes.
+ */
+async function useFastestSpeed(page: Page): Promise<void> {
+  const button = page.getByRole('button', { name: /battle speed/i });
+  if (!(await button.isVisible().catch(() => false))) return;
+
+  const read = async (): Promise<number> =>
+    Number(/\d+/.exec((await button.innerText().catch(() => '')).trim())?.[0] ?? '1');
+
+  const rungs = new Set<number>();
+  for (let press = 0; press < 5; press += 1) {
+    const now = await read();
+    if (rungs.has(now)) break;
+    rungs.add(now);
+    await button.click({ timeout: 5_000 }).catch(() => undefined);
+  }
+
+  const fastest = Math.max(...rungs);
+  for (let press = 0; press < 5 && (await read()) !== fastest; press += 1) {
+    await button.click({ timeout: 5_000 }).catch(() => undefined);
+  }
+}
+
+/**
  * Fights the battle on screen through to its results, without watching it.
  *
  * Two presses, and both are things a real player does: **Auto** asks the server to
@@ -123,6 +154,8 @@ export async function dismissUnlocks(page: Page): Promise<void> {
 export async function resolveBattle(page: Page): Promise<void> {
   const auto = page.getByRole('button', { name: /^auto$/i });
   await auto.waitFor({ timeout: 20_000 });
+
+  await useFastestSpeed(page);
   // Only if it is not already engaged. Auto is a real toggle since B2c — and a standing
   // preference, so a fight can *open* with it on — where it used to run the fight out
   // whichever way it was pressed. A helper that clicks it blindly turns it off and then

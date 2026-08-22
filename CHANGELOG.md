@@ -13,7 +13,9 @@ be got right: by the time a fight's last turn resolves the clear has already bee
 so an answer worked out at the end would say every first attempt was skippable the moment
 it was over. The Arena is exempt — its "stage key" is an opponent rather than a place, so no
 arena fight is ever a repeat and gating it would mean never skipping one at all. The cold
-open is not exempt: being watched is the whole point of it.
+open is not exempt, and since it records no clear it is the one fight in the game that can
+never earn its way past the rule — deliberately, because the tutorial's own *Skip tutorial*
+is the way past the tutorial and it takes the opening fight with it.
 
 **Playback runs ×1 to ×4 now.** ×1 and ×2 are there from the first fight, ×3 opens on
 finishing the campaign on Normal and ×4 on finishing it on Brutal — every stage of that
