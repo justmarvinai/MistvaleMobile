@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { BattleEvent, UnitRef } from '@mistvale/engine';
-import type { MultiBattleRequest, MultiBattleResult } from '@mistvale/shared';
+import type { BattleSpeed, MultiBattleRequest, MultiBattleResult } from '@mistvale/shared';
 import { ApiRequestError } from '../api/client';
 import { gameApi, newActionId, type BattleView } from '../api/game';
 import {
@@ -43,8 +43,8 @@ interface BattleStoreState {
   /** Events queued but not yet played. */
   pending: BattleEvent[];
   playing: boolean;
-  /** ×1 or ×2, persisted by the settings store. */
-  speed: 1 | 2;
+  /** ×1–×4, persisted by the loadout store and bounded by what the account has earned. */
+  speed: BattleSpeed;
   auto: boolean;
   busy: boolean;
   error: string | null;
@@ -73,7 +73,7 @@ interface BattleStoreState {
   setFocus: (focus: UnitRef | null) => void;
   runAuto: () => Promise<void>;
   retreat: () => Promise<void>;
-  setSpeed: (speed: 1 | 2) => void;
+  setSpeed: (speed: BattleSpeed) => void;
   setAuto: (auto: boolean) => void;
   /** Jumps to the end of what has already resolved. */
   skipToLatest: () => Promise<void>;

@@ -5,6 +5,32 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the first walk down a road is one you watch
+
+**Skip is offered only on a stage this account has already beaten** (owner, 2026-08-22).
+It is decided when the fight opens and carried on the battle, which is the part that had to
+be got right: by the time a fight's last turn resolves the clear has already been recorded,
+so an answer worked out at the end would say every first attempt was skippable the moment
+it was over. The Arena is exempt — its "stage key" is an opponent rather than a place, so no
+arena fight is ever a repeat and gating it would mean never skipping one at all. The cold
+open is not exempt: being watched is the whole point of it.
+
+**Playback runs ×1 to ×4 now.** ×1 and ×2 are there from the first fight, ×3 opens on
+finishing the campaign on Normal and ×4 on finishing it on Brutal — every stage of that
+difficulty cleared at least once, checked against published content rather than a stored
+counter, so a republished chapter cannot leave a stale flag behind. The pairing is
+`battle.speedUnlocks` in Game config, and a speed it does not name is open to everybody,
+which is how the two starting rungs are expressed without a special case.
+
+Both gates are the server's word and the client obeys them; neither is refused at the
+mutation. Nothing about skipping or speed touches an outcome, a roll or a timer — the
+engine resolves the same fight either way, and a multiplier only divides the delay between
+events that were already decided — so there is nothing for a refusal to protect, and
+refusing the unbounded auto that Skip sends would also block the legitimate "resolve this
+in one answer" that farming tools and the suite rely on. Anyone who defeats either check
+watches less animation and gains nothing.
+
+
 ### Changed — a champion's rarity decides which ladders it has
 
 Champion progression is the source game's now, with one deliberate difference: **the star

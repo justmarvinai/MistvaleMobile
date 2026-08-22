@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { SkillDef } from '@mistvale/shared';
+import { BATTLE_SPEEDS, clampSpeed, type SkillDef } from '@mistvale/shared';
 import type { UnitRef } from '@mistvale/engine';
 import { ActionBar } from '@/fui/components/ActionBar.ts';
 import { BattleControls } from '@/fui/components/BattleControls.ts';
@@ -67,6 +67,10 @@ export function BattleScreen(): JSX.Element {
   // answer and gates the buttons that talk to it; `watched` is the playback's and gates
   // everything that gives the outcome away.
   const settled = useBattleStore(settledOnServer);
+  // The server's answer, not a guess: a fight is skippable only on a stage already beaten.
+  // Absent on nothing — every view carries it — but defaulted so a battle read from an
+  // older response cannot make the button appear.
+  const canSkip = useBattleStore((state) => state.battle?.canSkip === true);
   // Auto's own clock: the server's, bounded by how far ahead it already is — see
   // `autoShouldAsk`.
   const autoWants = useBattleStore(autoShouldAsk);
@@ -91,6 +95,11 @@ export function BattleScreen(): JSX.Element {
 
   // How this player likes to watch a fight, remembered across fights and sign-ins.
   const preferredSpeed = useLoadoutStore((state) => state.speed);
+  // Which rungs this account has earned — the server's answer, since the gate is campaign
+  // progress. Clamped so a speed remembered before a retune (or hand-edited into local
+  // storage) lands on the fastest one actually open rather than off the end of the control.
+  const openSpeeds = usePlayerStore((state) => state.battleSpeeds);
+  const speed = clampSpeed(preferredSpeed, openSpeeds);
   const preferredAuto = useLoadoutStore((state) => state.auto);
   const rememberSpeed = useLoadoutStore((state) => state.setSpeed);
   const rememberAuto = useLoadoutStore((state) => state.setAuto);
@@ -256,8 +265,8 @@ export function BattleScreen(): JSX.Element {
    * has to know.
    */
   useEffect(() => {
-    setSpeed(preferredSpeed);
-  }, [preferredSpeed, setSpeed]);
+    setSpeed(speed);
+  }, [speed, setSpeed]);
 
   /**
    * And so is Auto — as a loop rather than a single shot.
@@ -442,14 +451,19 @@ export function BattleScreen(): JSX.Element {
                at construction and its own `setAuto` *emits* `battle:auto`, so pushing the
                new value in through the setter would echo straight back into the handler
                below. Four buttons with no animation state are cheap to rebuild. */
-            key={`${preferredAuto}|${preferredSpeed}`}
+            key={`${preferredAuto}|${speed}|${openSpeeds.join('')}`}
             of={BattleControls}
             options={{
               // The remembered answer rather than the fight's, so a battle opened with Auto
               // already engaged shows the button pressed instead of contradicting itself.
               auto: preferredAuto,
-              speed: preferredSpeed,
-              speeds: [1, 2],
+              speed,
+              // The whole ladder, with the rungs this account has not earned handed to the
+              // library as *locked* rather than left out. Same behaviour — `cycleSpeed`
+              // steps over a locked rung — but it is the library's own vocabulary for a
+              // progression gate, so the day it paints one we get it for nothing.
+              speeds: [...BATTLE_SPEEDS],
+              lockedSpeeds: BATTLE_SPEEDS.filter((rung) => !openSpeeds.includes(rung)),
               pausable: false,
               retreatable: true,
             }}
@@ -462,10 +476,11 @@ export function BattleScreen(): JSX.Element {
                 setAuto(on);
                 if (on) void runAuto();
               },
-              // The store's speed is a two-value union; the library's is any number in
-              // `speeds`, so the narrowing happens here rather than being asserted.
+              // The library's speed is any number in `speeds`; Mistvale's is a rung on a
+              // ladder the account has earned. `clampSpeed` is the narrowing, and it is the
+              // same call the screen opened with rather than a second rule.
               'battle:speed': ({ speed: next }: { speed: number }) => {
-                const chosen = next === 2 ? 2 : 1;
+                const chosen = clampSpeed(next, openSpeeds);
                 rememberSpeed(chosen);
                 setSpeed(chosen);
               },
@@ -484,8 +499,13 @@ export function BattleScreen(): JSX.Element {
               recording ahead of the player, and skipping it is the whole point. */}
           {/* `!watched` rather than `playing`: auto drains its buffer between requests, and
               gating on the queue made the button blink out and back several times a fight.
-              Pressing it with nothing queued is a no-op. */}
-          {!watched && (settled || preferredAuto) && (
+              Pressing it with nothing queued is a no-op.
+
+              And only on a stage this account has already beaten (owner, 2026-08-22) — the
+              first walk down a road is a fight you watch. The server decided it when the
+              battle opened and refuses the request regardless; this is so the button is
+              not offered and then taken away. */}
+          {canSkip && !watched && (settled || preferredAuto) && (
             <Button size="sm" variant="ghost" onClick={() => void skipToLatest()}>
               Skip
             </Button>

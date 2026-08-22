@@ -866,6 +866,65 @@ describe.skipIf(!dbUp)('the game loop', () => {
     });
   });
 
+  // ── Skipping a fight ─────────────────────────────────────────────────────
+
+  /**
+   * The owner's rule (2026-08-22): a stage has to have been beaten once before its fight
+   * can be jumped to the end, so the first walk down a road is one a player watches.
+   *
+   * Decided when the fight *opens*, which is the part worth a test against a real
+   * database: by the time the last turn resolves, `recordClear` has already run, so a
+   * `canSkip` recomputed at the end would answer about the clear this very battle
+   * produced — and every first attempt would report itself skippable the moment it was
+   * over.
+   */
+  describe('whether a fight can be skipped', () => {
+    it('says no on a stage nobody has beaten, and yes once they have', async () => {
+      const champions = await chooseStarter();
+      const championId = champions[0]!.id;
+      await app.db.update(players).set({ energy: 200 }).where(eq(players.id, playerId));
+
+      const first = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [championId],
+          actionId: 'skipgate-first',
+        },
+      });
+      expect(first.statusCode, first.body).toBe(200);
+      expect(first.json().data.canSkip).toBe(false);
+
+      // It stays false for the whole of the fight that earns the clear — including the
+      // response that carries the victory, which is the one a recompute would get wrong.
+      const battleId = first.json().data.id as string;
+      const finished = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.action(battleId)),
+        payload: { actionId: 'skipgate-resolve', auto: true },
+      });
+      expect(finished.statusCode, finished.body).toBe(200);
+      expect(finished.json().data.canSkip).toBe(false);
+
+      // Only a fight opened *after* the clear may be skipped.
+      if (finished.json().data.outcome !== 'victory') return;
+      const second = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [championId],
+          actionId: 'skipgate-second',
+        },
+      });
+      expect(second.statusCode, second.body).toBe(200);
+      expect(second.json().data.canSkip).toBe(true);
+    });
+  });
+
   // ── The cold open ────────────────────────────────────────────────────────
 
   /**

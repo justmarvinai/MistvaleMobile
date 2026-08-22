@@ -2,10 +2,15 @@ import type { FastifyPluginAsync } from 'fastify';
 import { eq } from 'drizzle-orm';
 import {
   DEFAULT_PLAYER_SETTINGS,
+  DEFAULT_SPEED_UNLOCKS,
+  DIFFICULTIES,
   ROUTES,
   apiSuccess,
   computeUnlocks,
+  speedsFor,
   updateSettingsRequestSchema,
+  type Difficulty,
+  type SpeedUnlocks,
 } from '@mistvale/shared';
 import { players } from '../../db/schema/index';
 import { AppError } from '../../lib/errors';
@@ -15,6 +20,7 @@ import * as events from '../meta/events';
 import * as login from '../meta/login';
 import * as mailService from '../mail/service';
 import * as missions from '../meta/missions';
+import * as progress from '../progress/service';
 import * as quests from '../meta/quests';
 
 /**
@@ -43,6 +49,14 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
           // The honorific the Path awarded, shown beside the profile name.
           title: player.title,
           unlocks: computeUnlocks(player.level),
+          // Which playback speeds this account has earned. Server-side because the gate is
+          // *progress* — the campaign finished outright on a difficulty — and the client
+          // must never work that out for itself. The multiplier it then applies is pure
+          // animation, so there is nothing else here for the server to police.
+          battleSpeeds: speedsFor(
+            await progress.campaignsFinished(app.db, player.id, app.content),
+            speedUnlocksFrom(app.content.current().bundle.config),
+          ),
           // Today's farming allowance rides on the snapshot the shell already refetches
           // after every battle, so the team-select screen never has to ask for it.
           multiBattle: multiState(app.content, player, now),
@@ -102,3 +116,24 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
     return reply.send(apiSuccess({ settings }, app.contentRevision));
   });
 };
+
+/**
+ * The speed → difficulty pairing, out of `game_config`.
+ *
+ * Read defensively rather than cast: this is operator-editable content, and a malformed
+ * value should cost the retune rather than the whole player snapshot. Anything that is not
+ * a speed naming a real difficulty is dropped, and an empty result falls back to the
+ * shipped pairing — which is `speedsFor`'s default anyway.
+ */
+function speedUnlocksFrom(config: Readonly<Record<string, unknown>>): SpeedUnlocks {
+  const raw = config['battle.speedUnlocks'];
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return DEFAULT_SPEED_UNLOCKS;
+
+  const cleaned: Record<string, Difficulty> = {};
+  for (const [speed, difficulty] of Object.entries(raw as Record<string, unknown>)) {
+    if (!/^[1-9][0-9]*$/.test(speed)) continue;
+    if (!(DIFFICULTIES as readonly string[]).includes(difficulty as string)) continue;
+    cleaned[speed] = difficulty as Difficulty;
+  }
+  return Object.keys(cleaned).length > 0 ? Object.freeze(cleaned) : DEFAULT_SPEED_UNLOCKS;
+}

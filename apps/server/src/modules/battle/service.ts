@@ -22,6 +22,7 @@ import {
   multiBattleResultSchema,
   type ArenaResult,
   type BattleMode,
+  canSkipBattle,
   type ChampionDef,
   type EnemyDef,
   type GearInstance,
@@ -89,6 +90,14 @@ export interface BattleView {
   state: BattleState;
   events: BattleEvent[];
   rewards: RewardSummary | null;
+  /**
+   * Whether the player may jump this fight to its end (`canSkipBattle`).
+   *
+   * Decided when the fight opened and carried on the row, so it says the same thing on
+   * every turn and after a reload — and so it cannot be flipped by the clear this very
+   * battle is about to record.
+   */
+  canSkip: boolean;
 }
 
 export interface RewardSummary {
@@ -365,6 +374,18 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       throw new AppError('LOCKED_CONTENT', 'You can only practise a stage you have cleared.');
     }
 
+    // Whether this fight can be jumped to its end, settled now rather than at the end.
+    // It has to be *now*: the answer is about a clear that already existed when the fight
+    // opened, and the fight itself may be the one that records the first (owner's rule,
+    // 2026-08-22). Practice has already proved a clear above; arena needs no lookup at all.
+    const canSkip = canSkipBattle(
+      options.mode,
+      options.mode === 'practice' ||
+        (options.mode !== 'arena' &&
+          !borrowed &&
+          (await progress.hasCleared(tx, options.playerId, stage.key))),
+    );
+
     const owned = borrowed ? [] : await roster.findOwned(tx, options.playerId, options.team);
     if (!borrowed && owned.length !== options.team.length) {
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
@@ -457,6 +478,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         // fight rather than an error. Each turn then overwrites it with its own, which is
         // right: by the time an action has been taken, a replayed start is not a retry.
         lastActionId: options.actionId,
+        canSkip,
         status: openingState.finished ? 'finished' : 'active',
         outcome: openingState.outcome,
         ...(openingState.finished ? { finishedAt: now } : {}),
@@ -493,6 +515,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       state: openingState,
       events: openingEvents,
       rewards: summary,
+      canSkip,
     };
   });
 }
@@ -637,6 +660,7 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
       state: result.state,
       events,
       rewards: summary,
+      canSkip: row.canSkip,
     };
   });
 }
@@ -691,6 +715,7 @@ export async function retreat(
       state: result.state,
       events,
       rewards: summary,
+      canSkip: row.canSkip,
     };
   });
 }
@@ -1243,6 +1268,7 @@ export function toView(row: typeof battleSessions.$inferSelect): BattleView {
     state: row.state as BattleState,
     events: row.events as BattleEvent[],
     rewards: (row.rewards as RewardSummary | null) ?? null,
+    canSkip: row.canSkip,
   };
 }
 

@@ -532,6 +532,10 @@ export async function attack(
         events: openingEvents,
         energySpent: 0,
         lastActionId: options.actionId,
+        // Always skippable: an arena stage key is an opponent rather than a place, so no
+        // arena fight is ever a repeat and the "beat it once first" rule has nothing to
+        // measure. Gating it would mean never skipping one at all (`canSkipBattle`).
+        canSkip: true,
         status: openingState.finished ? 'finished' : 'active',
         outcome: openingState.outcome,
         ...(openingState.finished ? { finishedAt: now } : {}),
@@ -568,6 +572,7 @@ export async function attack(
       state: openingState,
       events: openingEvents,
       rewards,
+      canSkip: true,
     };
   });
 }

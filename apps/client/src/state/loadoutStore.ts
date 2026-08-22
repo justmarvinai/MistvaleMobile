@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { BATTLE_SPEEDS, type BattleSpeed } from '@mistvale/shared';
 
 /**
  * The team you last sent, and how you like to watch a fight.
@@ -33,7 +34,7 @@ const MAX_SLOTS = 4;
 interface Remembered {
   /** Champion instance ids, in the order they were chosen — slot one is the leader. */
   teams: Record<string, string[]>;
-  speed: 1 | 2;
+  speed: BattleSpeed;
   auto: boolean;
 }
 
@@ -56,7 +57,7 @@ interface LoadoutState extends Remembered {
    * a player who cannot see why.
    */
   teamFor: (mode: string, owned: ReadonlySet<string>) => string[];
-  setSpeed: (speed: 1 | 2) => void;
+  setSpeed: (speed: BattleSpeed) => void;
   setAuto: (auto: boolean) => void;
   reset: () => void;
 }
@@ -74,7 +75,11 @@ function read(accountId: string): Remembered {
         teams[mode] = team.filter((id): id is string => typeof id === 'string').slice(0, MAX_SLOTS);
       }
     }
-    return { teams, speed: value.speed === 2 ? 2 : 1, auto: value.auto === true };
+    // Read through the ladder rather than a two-value check: the rungs are ×1–×4 now, and
+    // a hand-edited or retuned value should land on a real speed rather than silently on
+    // ×1. What is *open* is the server's word and clamped where it is used.
+    const speed = BATTLE_SPEEDS.find((entry) => entry === value.speed) ?? 1;
+    return { teams, speed, auto: value.auto === true };
   } catch {
     // Private browsing, a full quota, a hand-edited key. A remembered team is a
     // convenience; nothing here is worth an error boundary.

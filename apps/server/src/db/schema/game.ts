@@ -134,6 +134,17 @@ export const battleSessions = pgTable(
     /** Everything emitted so far, appended per step. */
     events: jsonb('events').notNull().default([]),
 
+    /**
+     * Whether this fight may be skipped — jumped to its end without watching.
+     *
+     * Decided once, when the fight opens, and stored rather than recomputed: the rule is
+     * "had this stage been beaten *before* this fight", and by the time the last turn
+     * resolves `recordClear` has already run, so asking again would answer about a clear
+     * this very battle produced. Arena fights are always true — their stage key is an
+     * opponent rather than a place (`canSkipBattle`).
+     */
+    canSkip: boolean('can_skip').notNull().default(false),
+
     /** `active` while it can still take actions; anything else is terminal. */
     status: text('status').notNull().default('active'),
     outcome: text('outcome'),

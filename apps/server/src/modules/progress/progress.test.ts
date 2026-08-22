@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance, InjectOptions } from 'fastify';
 import { eq } from 'drizzle-orm';
-import { ROUTES, apiPath, type StageStanding } from '@mistvale/shared';
+import { ROUTES, apiPath, speedsFor, type StageStanding } from '@mistvale/shared';
 import {
   chapterRewards,
   contentEntries,
@@ -12,6 +12,7 @@ import {
 import { buildSeedContent } from '../../db/seed/seeders';
 import * as contentRepo from '../../content/repo';
 import { validateAndNormalise, type ContentSet } from '../../content/validate';
+import * as progress from './service';
 import {
   buildTestApp,
   extractSessionCookie,
@@ -252,6 +253,63 @@ describe.skipIf(!dbUp)('progress', () => {
       // A re-clear must not hand it over a second time.
       const again = await fight(championId);
       expect(again.rewards.chestTiers).toEqual([]);
+    });
+  });
+
+  describe('finishing a campaign difficulty', () => {
+    /**
+     * What the playback speeds are gated on (owner, 2026-08-22): ×3 for walking the whole
+     * vale on Normal, ×4 for walking it again on Brutal.
+     *
+     * Worth a database test rather than a unit one because "the whole campaign" is read
+     * from *published content* against *this player's rows* — 84 stages a difficulty, and
+     * the answer has to be false while even one of them is missing.
+     */
+    function campaignKeys(difficulty: string): string[] {
+      return app.content
+        .current()
+        .bundle.stages.filter(
+          (stage) => stage.mode === 'campaign' && stage.difficulty === difficulty,
+        )
+        .map((stage) => stage.key);
+    }
+
+    it('is false until every stage of that difficulty is cleared', async () => {
+      const keys = campaignKeys('normal');
+      expect(keys.length).toBeGreaterThan(1);
+
+      expect(await progress.campaignsFinished(app.db, playerId, app.content)).toMatchObject({
+        normal: false,
+      });
+
+      // All but the last one. One missing stage is still an unfinished campaign.
+      for (const key of keys.slice(0, -1)) await markCleared(key);
+      expect(await progress.campaignsFinished(app.db, playerId, app.content)).toMatchObject({
+        normal: false,
+      });
+
+      await markCleared(keys[keys.length - 1]!);
+      expect(await progress.campaignsFinished(app.db, playerId, app.content)).toMatchObject({
+        normal: true,
+      });
+    });
+
+    it('answers per difficulty, so Normal does not hand over Brutal', async () => {
+      for (const key of campaignKeys('normal')) await markCleared(key);
+      const finished = await progress.campaignsFinished(app.db, playerId, app.content);
+      expect(finished.normal).toBe(true);
+      expect(finished.hard).toBe(false);
+      expect(finished.brutal).toBe(false);
+      expect(speedsFor(finished)).toEqual([1, 2, 3]);
+    });
+
+    it('opens the top rung once Brutal is walked as well', async () => {
+      for (const key of [...campaignKeys('normal'), ...campaignKeys('brutal')]) {
+        await markCleared(key);
+      }
+      expect(speedsFor(await progress.campaignsFinished(app.db, playerId, app.content))).toEqual([
+        1, 2, 3, 4,
+      ]);
     });
   });
 

@@ -124,6 +124,14 @@ export interface BattleView {
   state: BattleState;
   events: BattleEvent[];
   rewards: BattleRewards | null;
+  /**
+   * Whether this fight may be jumped to its end.
+   *
+   * The server's answer, decided when the fight opened: a stage has to have been beaten
+   * once before its fight can be skipped. Hiding the button on this is politeness — the
+   * server refuses the unbounded auto that Skip sends either way.
+   */
+  canSkip: boolean;
 }
 
 export const gameApi = {

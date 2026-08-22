@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import {
+  speedsFor,
+  type BattleSpeed,
   DEFAULT_PLAYER_SETTINGS,
   ROUTES,
   computeUnlocks,
@@ -12,6 +14,15 @@ import {
 import { api } from '@/api/client';
 
 /**
+ * What a fresh account may watch at, before the server has answered.
+ *
+ * `speedsFor({})` rather than a literal, so the two rungs everybody starts with are the
+ * same two rungs the server derives from an empty campaign — one rule read twice, not two
+ * rules that can drift.
+ */
+const STARTING_SPEEDS: readonly BattleSpeed[] = Object.freeze(speedsFor({}));
+
+/**
  * The player snapshot the shell renders from.
  *
  * Fetched on entering the game and refreshed after actions — never polled. Everything
@@ -22,6 +33,8 @@ interface PlayerSnapshot {
   account: AccountSummary;
   player: PlayerSummary;
   unlocks: UnlockFlags;
+  /** Playback speeds this account has earned, ×1 first. */
+  battleSpeeds: BattleSpeed[];
   /** The honorific the Valewarden's Path awarded, if any. */
   title: string | null;
   multiBattle: MultiBattleState;
@@ -63,6 +76,15 @@ const NO_MULTI_BATTLE: MultiBattleState = Object.freeze({
 interface PlayerState {
   player: PlayerSummary | null;
   unlocks: UnlockFlags;
+  /**
+   * How fast this account may watch a fight (`speedsFor`).
+   *
+   * Server-computed like every other gate: ×3 is earned by finishing the campaign on
+   * Normal and ×4 by finishing it on Brutal, and the client must not work that out from a
+   * map it happens to be holding. The multiplier itself is pure animation, which is why
+   * this is the only part of speed the server has an opinion about.
+   */
+  battleSpeeds: BattleSpeed[];
   /** The honorific shown beside the profile name. */
   title: string | null;
   /** Today's farming allowance, server-computed like every other gate. */
@@ -82,6 +104,7 @@ interface PlayerState {
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   player: null,
   unlocks: computeUnlocks(1),
+  battleSpeeds: [...STARTING_SPEEDS],
   title: null,
   multiBattle: NO_MULTI_BATTLE,
   badges: NO_BADGES,
@@ -101,6 +124,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       set({
         player: snapshot.player,
         unlocks: snapshot.unlocks,
+        battleSpeeds:
+          snapshot.battleSpeeds && snapshot.battleSpeeds.length > 0
+            ? snapshot.battleSpeeds
+            : [...STARTING_SPEEDS],
         title: snapshot.title ?? null,
         multiBattle: snapshot.multiBattle ?? NO_MULTI_BATTLE,
         badges: snapshot.badges ?? NO_BADGES,
@@ -139,6 +166,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set({
       player: null,
       unlocks: computeUnlocks(1),
+      battleSpeeds: [...STARTING_SPEEDS],
       title: null,
       multiBattle: NO_MULTI_BATTLE,
       badges: NO_BADGES,

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BATTLE_MODES } from './enums';
+import { BATTLE_MODES, type BattleMode, type Difficulty } from './enums';
 import { gearInstanceSchema } from './gear';
 
 /**
@@ -79,3 +79,85 @@ export const multiBattleStateSchema = z.object({
   maxPerCall: z.number().int(),
 });
 export type MultiBattleState = z.infer<typeof multiBattleStateSchema>;
+
+// ── Playback: speed, and skipping the recording ─────────────────────────────
+
+/**
+ * How fast a fight can be played back.
+ *
+ * Playback only: the speed divides the delay between events the server has already
+ * decided, so it changes how long a player watches and nothing else. That is why the
+ * ladder lives here rather than in the engine, and why the server does not police the
+ * multiplier — there is no outcome to protect. What the server *does* own is which rungs
+ * an account has reached, because that is progress and the client must never guess it.
+ */
+export const BATTLE_SPEEDS = [1, 2, 3, 4] as const;
+export type BattleSpeed = (typeof BATTLE_SPEEDS)[number];
+
+/**
+ * Which campaign difficulty a speed is earned by finishing (owner, 2026-08-22).
+ *
+ * ×1 and ×2 are there from the first fight; ×3 is the reward for walking the whole vale on
+ * Normal and ×4 for walking it again on Brutal. Absent means "always available", which is
+ * how the two starting rungs are expressed without a special case.
+ *
+ * Seeded into `game_config` as `battle.speedUnlocks`, so the pairing is retuned in Admin
+ * rather than in a release.
+ */
+export type SpeedUnlocks = Readonly<Record<string, Difficulty>>;
+
+export const DEFAULT_SPEED_UNLOCKS: SpeedUnlocks = Object.freeze({
+  '3': 'normal',
+  '4': 'brutal',
+});
+
+/**
+ * The speeds an account may play at, given which campaign difficulties it has finished.
+ *
+ * Always includes ×1, whatever the config says: a fight nobody can watch at any speed is
+ * not a state an operator should be able to author by mistake.
+ */
+export function speedsFor(
+  finished: Readonly<Partial<Record<Difficulty, boolean>>>,
+  unlocks: SpeedUnlocks = DEFAULT_SPEED_UNLOCKS,
+): BattleSpeed[] {
+  const open = BATTLE_SPEEDS.filter((speed) => {
+    const needs = unlocks[String(speed)];
+    return needs === undefined || finished[needs] === true;
+  });
+  return open.length > 0 ? [...open] : [1];
+}
+
+/** Clamps a remembered speed to what is actually open, for a client reading its own store. */
+export function clampSpeed(speed: number, open: readonly BattleSpeed[]): BattleSpeed {
+  const allowed = open.length > 0 ? open : ([1] as const);
+  const match = allowed.find((entry) => entry === speed);
+  return match ?? (allowed[allowed.length - 1] as BattleSpeed);
+}
+
+/**
+ * Whether a fight may be skipped — jumped to its end without watching.
+ *
+ * The rule is the owner's (2026-08-22): a stage has to have been beaten at least once
+ * before its fight can be skipped, so the first time down a road is a fight a player
+ * actually sees. It applies to everything with a stage to have cleared — the campaign, the
+ * Depths, and the practice sandbox, which already refuses a stage nobody has beaten.
+ *
+ * **The Arena is exempt**, because its "stage key" is an opponent rather than a place: no
+ * arena fight is ever a repeat, so gating it would mean never skipping one at all, which
+ * is a different rule from the one asked for. The tutorial's cold open is not exempt and
+ * has no clear to its name — being watched is the entire point of it.
+ *
+ * **Decided server-side, obeyed client-side, and deliberately not refused at the
+ * mutation.** Which stages an account has beaten is progress and the client must never
+ * guess it, so the answer rides on the battle. But skipping resolves a fight the engine
+ * was going to resolve identically either way — no outcome, no roll, no timer moves — so
+ * there is nothing for a refusal to protect, and refusing the unbounded `auto` that Skip
+ * sends would also block the legitimate "resolve this fight in one answer" that farming
+ * tools and the suite use. Playback speed is gated exactly the same way and for exactly
+ * the same reason. Anyone who defeats the check watches less animation and gains nothing.
+ */
+export function canSkipBattle(mode: BattleMode, clearedBefore: boolean): boolean {
+  if (mode === 'arena') return true;
+  return clearedBefore;
+}

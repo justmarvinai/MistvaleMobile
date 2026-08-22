@@ -103,6 +103,13 @@ A champion's called rank is content (`champion.baseRank`); leaving it unset mean
 5. **Skill Tomes:** Rare/Epic/Legendary tomes upgrade skills along each skill's ladder (damage %, effect chance, cooldown −1). Tome rarity must match champion rarity. EA choice: player **picks** the skill to upgrade (friendlier than RSL's random books — flagged as a deliberate deviation).
 6. **Masteries:** unlock at account level 14 (with Proving Grounds). Three trees — **Onslaught** (offense), **Bulwark** (defense), **Insight** (utility/support) — 6 tiers each, paid in Bronze/Silver/Gold **Emblems**; capstones are build-defining (e.g. Onslaught capstone *Deathmark* ≈ Warmaster-style bonus damage; full trees in COMBAT_SYSTEM.md §9). Reset costs crystals.
 
+**Watching a fight, and not watching one** (owner, 2026-08-22). Two conveniences, both earned:
+
+- **Skip** — jumping a fight to its end — is offered only on a stage this account has **already beaten once**, so the first walk down a road is a fight a player sees. The Arena is exempt (its "stage" is an opponent, never a repeat); the cold open is not (being watched is the point of it).
+- **Playback speed** runs ×1–×4. ×1 and ×2 are there from the first fight, **×3 opens on finishing the campaign on Normal** and **×4 on finishing it on Brutal** — every stage of that difficulty cleared at least once. The pairing is `battle.speedUnlocks` in Game config.
+
+Both are gated on progress the server computes and the client is *told*; neither is refused at the mutation, because neither changes an outcome, a roll or a timer — a skipped fight resolves exactly as a watched one does, and a multiplier only divides the delay between events already decided.
+
 **Power score:** single derived number per champion (stat-weighted, formula in COMBAT doc) used for lists, arena matchmaking bands, and bot synthesis — informational, never a gameplay input.
 
 ## 8. Gear ("Relics")

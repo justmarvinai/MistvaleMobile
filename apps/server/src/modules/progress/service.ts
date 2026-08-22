@@ -1,5 +1,10 @@
-import { and, eq, inArray, sql } from 'drizzle-orm';
-import { mergeRewards, type CampaignChapterDef, type StageDef } from '@mistvale/shared';
+import { and, eq, gt, inArray, sql } from 'drizzle-orm';
+import {
+  mergeRewards,
+  type CampaignChapterDef,
+  type Difficulty,
+  type StageDef,
+} from '@mistvale/shared';
 import { chapterRewards, stageProgress } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import type { StageProgressRow } from '../../db/schema/game';
@@ -55,6 +60,52 @@ export async function hasCleared(
     .from(stageProgress)
     .where(and(eq(stageProgress.playerId, playerId), eq(stageProgress.stageKey, stageKey)));
   return (row?.clears ?? 0) > 0;
+}
+
+/**
+ * Which campaign difficulties an account has finished outright.
+ *
+ * "Finished" is every published campaign stage of that difficulty cleared at least once —
+ * all 84 of them, twelve chapters of seven. It is read for the playback speeds a player
+ * has earned (`speedsFor`), which is why it is one query rather than a `standings()` load:
+ * this runs on `GET /api/player`, which the shell refetches after every fight.
+ *
+ * Derived rather than stored, because a stored flag is a flag that can be wrong — a
+ * republished chapter would add stages the counter never saw.
+ */
+export async function campaignsFinished(
+  db: Executor,
+  playerId: string,
+  content: ContentCache,
+): Promise<Partial<Record<Difficulty, boolean>>> {
+  const wanted = new Map<Difficulty, Set<string>>();
+  for (const stage of content.current().bundle.stages) {
+    if (stage.mode !== 'campaign') continue;
+    const set = wanted.get(stage.difficulty) ?? new Set<string>();
+    set.add(stage.key);
+    wanted.set(stage.difficulty, set);
+  }
+
+  const keys = [...wanted.values()].flatMap((set) => [...set]);
+  if (keys.length === 0) return {};
+
+  const rows = await db
+    .select({ stageKey: stageProgress.stageKey })
+    .from(stageProgress)
+    .where(
+      and(
+        eq(stageProgress.playerId, playerId),
+        gt(stageProgress.clears, 0),
+        inArray(stageProgress.stageKey, keys),
+      ),
+    );
+  const cleared = new Set(rows.map((row) => row.stageKey));
+
+  const finished: Partial<Record<Difficulty, boolean>> = {};
+  for (const [difficulty, set] of wanted) {
+    finished[difficulty] = [...set].every((key) => cleared.has(key));
+  }
+  return finished;
 }
 
 // ── Unlocks ─────────────────────────────────────────────────────────────────
