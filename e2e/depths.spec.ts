@@ -112,7 +112,15 @@ test.describe('the Depths', () => {
       return body.data;
     });
 
-    expect(bundle.dungeons).toHaveLength(10);
+    // The *keeps*, by kind rather than by counting every `dungeon` entity in the bundle.
+    // A Titan is a `dungeon` too since C9 — it is the content type everything about a keep
+    // already fits — but it has no floors, no rotation and no clears, and the Depths hub
+    // filters it out. A raw count here would make publishing one fail a test about
+    // something else, which is what it did.
+    const keeps = bundle.dungeons.filter((dungeon) =>
+      ['relic', 'proving', 'springs'].includes(dungeon.kind),
+    );
+    expect(keeps).toHaveLength(10);
 
     // Named by the modes that *are* the Depths rather than by "not campaign": the cold
     // open is a `tutorial` stage, and a filter phrased as an exclusion quietly counted it.
@@ -122,7 +130,7 @@ test.describe('the Depths', () => {
     expect(floors).toHaveLength(120);
 
     // Every keep's floor count matches what it advertises on the hub.
-    for (const dungeon of bundle.dungeons) {
+    for (const dungeon of keeps) {
       const own = floors.filter((stage) => stage.parentKey === dungeon.key);
       expect(own, dungeon.key).toHaveLength(dungeon.floors);
     }

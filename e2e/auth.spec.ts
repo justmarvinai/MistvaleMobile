@@ -84,11 +84,15 @@ test.describe('account lifecycle', () => {
       .getByRole('navigation')
       .getByRole('button', { name: /Champions/ })
       .click();
-    await expect(page.getByRole('heading', { name: 'Champions' })).toBeVisible();
+    // Scoped to the screen. An unscoped heading locator also matches the painted tooltip
+    // still open under the cursor that just clicked the dock — the library gives it
+    // `role="tooltip"` and an `h3` inside — so "the Champions heading" has to mean the
+    // one belonging to the screen rather than any element with that name on the page.
+    await expect(page.getByRole('main').getByRole('heading', { name: /Champions/ })).toBeVisible();
 
     // Keyboard shortcut returns to the Haven (dock slot 1).
     await page.keyboard.press('1');
-    await expect(page.getByRole('heading', { name: 'The Haven' })).toBeVisible();
+    await expect(page.getByRole('main').getByRole('heading', { name: /The Haven/ })).toBeVisible();
 
     // Settings open and preferences persist.
     await page.getByRole('button', { name: 'Settings' }).click();
