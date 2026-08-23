@@ -30,6 +30,10 @@ function unique(prefix: string): string {
 
 test.describe('the practice sandbox', () => {
   test('appears once a stage is cleared, and costs nothing when it is used', async ({ page }) => {
+    // Two fights, and since C7 the first of them cannot be skipped — a stage nobody has
+    // beaten has no Skip, so the clear that *earns* the sandbox has to play out. It fits
+    // inside the default budget only by luck.
+    test.slow();
     await page.goto('/');
 
     await page.getByRole('tab', { name: 'New warden' }).click();

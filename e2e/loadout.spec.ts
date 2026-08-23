@@ -52,7 +52,9 @@ test.describe('the game remembers', () => {
     await expect(auto).toBeVisible({ timeout: 30_000 });
     await auto.click();
     await expect(auto).toHaveAttribute('aria-pressed', 'true');
-    await page.locator('.fui-battlectl__speed').click();
+    // ×2 off the ladder rather than the library's cycling button, which C8 hid: a rung an
+    // account has not earned was invisible on it, so `ui/SpeedLadder` draws them all.
+    await page.getByRole('button', { name: /^×2 speed$/i }).click();
 
     await resolveBattle(page);
     const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn/i });
@@ -97,6 +99,10 @@ test.describe('the game remembers', () => {
     await expect(page.locator('.fui-battlectl__auto')).toHaveAttribute('aria-pressed', 'true', {
       timeout: 30_000,
     });
-    await expect(page.locator('.fui-battlectl__speed')).toContainText('2', { timeout: 15_000 });
+    await expect(page.getByRole('button', { name: /^×2 speed$/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+      { timeout: 15_000 },
+    );
   });
 });
