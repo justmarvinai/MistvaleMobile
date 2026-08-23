@@ -22,17 +22,21 @@ backdrop, and the chapters step down the pane rather than crowding the region ti
 All of it lives in the campaign screen's own stylesheet, scoped inside the map's pane:
 `WorldMap.css` is vendored and the next `pnpm fui:vendor` would overwrite an edit to it.
 
-### Changed — the speed ladder is ×1 · ×2 · ×4 · ×6, and you can see the rungs you have not earned
+### Changed — the speed ladder is ×1 · ×2 · ×4, and you can see the rung you have not earned
 
-The top of the ladder is ×6 rather than ×8 at the owner's call ("x8 is too fast I think") —
-the rung moved, the campaign that earns it did not. ×4 still opens on finishing the campaign
-on Normal and ×6 on finishing it on Brutal.
+The ladder stops at ×4. It was cut twice on the way — ×8 to ×6 and then ×6 away entirely —
+because each top rung in turn was judged too fast to watch. ×4 opens on finishing the
+campaign on Normal, the condition it has had throughout.
 
-**And the locked rungs are visible now**, which they were not: the library's control draws
-speed as one button that steps to the next *unlocked* multiplier, so a rung an account had
-not earned was not merely unpressable but invisible — ×4 and ×6 existed with nothing in the
-game to say so. `ui/SpeedLadder` draws all four, strikes through the ones not yet earned and
-says which campaign opens each. An unlock nobody can see is a feature that does not exist.
+**Finishing Brutal now opens no speed.** The rung it used to open is gone and ×4's condition
+did not move, which is what "same unlock criteria" means when the ladder loses a rung. It is
+one value in `battle.speedUnlocks` if Brutal should take ×4 instead.
+
+**And the locked rung is visible now**, which it was not: the library's control draws speed
+as one button that steps to the next *unlocked* multiplier, so a rung an account had not
+earned was not merely unpressable but invisible — the earned speeds existed with nothing in
+the game to say so. `ui/SpeedLadder` draws all three, strikes through the one not yet earned
+and says which campaign opens it. An unlock nobody can see is a feature that does not exist.
 
 It is Mistvale's control rather than the library's for the reason that decides every one of
 these calls: the state is React's and the library's component cannot express it. Only its

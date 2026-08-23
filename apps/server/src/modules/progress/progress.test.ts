@@ -303,12 +303,15 @@ describe.skipIf(!dbUp)('progress', () => {
       expect(speedsFor(finished)).toEqual([1, 2, 4]);
     });
 
-    it('opens the top rung once Brutal is walked as well', async () => {
+    it('adds nothing for Brutal, whose rung the owner removed', async () => {
+      // The ladder stops at ×4 and ×4's condition is Normal, so walking Brutal as well
+      // leaves the ladder where it was. Kept as a test rather than deleted: it is the one
+      // consequence of dropping the top rung that a player would actually notice.
       for (const key of [...campaignKeys('normal'), ...campaignKeys('brutal')]) {
         await markCleared(key);
       }
       expect(speedsFor(await progress.campaignsFinished(app.db, playerId, app.content))).toEqual([
-        1, 2, 4, 6,
+        1, 2, 4,
       ]);
     });
   });

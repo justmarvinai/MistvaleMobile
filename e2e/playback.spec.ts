@@ -51,14 +51,13 @@ test.describe('what a player may skip watching', () => {
     // can be pressed.
     await enterStageOne(page);
     const rungs = page.getByRole('group', { name: /battle speed/i }).getByRole('button');
-    await expect(rungs).toHaveText(['×1', '×2', '×4', '×6']);
+    await expect(rungs).toHaveText(['×1', '×2', '×4']);
     await expect(rungs.nth(0)).toBeEnabled();
     await expect(rungs.nth(1)).toBeEnabled();
     await expect(rungs.nth(2)).toBeDisabled();
-    await expect(rungs.nth(3)).toBeDisabled();
 
     // And a locked rung says what earns it, rather than only refusing.
-    await expect(rungs.nth(3)).toHaveAccessibleName(/not yet earned/i);
+    await expect(rungs.nth(2)).toHaveAccessibleName(/not yet earned/i);
 
     // ── First visit: no Skip ────────────────────────────────────────────
     await engageAuto(page);

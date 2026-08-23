@@ -2,19 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { speedRungs, unlockSentence } from './speedLadder';
 
 describe('speedRungs', () => {
-  const unlocks = { '4': 'normal', '6': 'brutal' };
+  const unlocks = { '4': 'normal' };
 
   it('shows every rung a fresh account will ever have, not only the ones it holds', () => {
-    // The whole point: ×4 and ×6 are drawn even though this account cannot press them.
+    // The whole point: ×4 is drawn even though this account cannot press it.
     const rungs = speedRungs({ open: [1, 2], current: 1, unlocks });
-    expect(rungs.map((rung) => rung.speed)).toEqual([1, 2, 4, 6]);
-    expect(rungs.map((rung) => rung.state)).toEqual(['current', 'open', 'locked', 'locked']);
+    expect(rungs.map((rung) => rung.speed)).toEqual([1, 2, 4]);
+    expect(rungs.map((rung) => rung.state)).toEqual(['current', 'open', 'locked']);
   });
 
   it('says what earns a locked rung, in the difficulty config names', () => {
     const rungs = speedRungs({ open: [1, 2], current: 2, unlocks });
     expect(rungs[2]?.requires).toBe('Finish the campaign on Normal');
-    expect(rungs[3]?.requires).toBe('Finish the campaign on Brutal');
   });
 
   it('says nothing about a rung whose condition nobody wrote down', () => {
@@ -32,7 +31,7 @@ describe('speedRungs', () => {
   it('leaves nothing current when the held speed is not open, so nothing lies', () => {
     // Reachable only through a stale store; the screen clamps before it renders. Drawn as
     // "no rung in use" rather than lighting one the account cannot press.
-    const rungs = speedRungs({ open: [1, 2], current: 6, unlocks });
+    const rungs = speedRungs({ open: [1, 2], current: 4, unlocks });
     expect(rungs.some((rung) => rung.state === 'current')).toBe(false);
   });
 });

@@ -91,18 +91,21 @@ export type MultiBattleState = z.infer<typeof multiBattleStateSchema>;
  * multiplier — there is no outcome to protect. What the server *does* own is which rungs
  * an account has reached, because that is progress and the client must never guess it.
  */
-export const BATTLE_SPEEDS = [1, 2, 4, 6] as const;
+export const BATTLE_SPEEDS = [1, 2, 4] as const;
 export type BattleSpeed = (typeof BATTLE_SPEEDS)[number];
 
 /**
  * Which campaign difficulty a speed is earned by finishing (owner, 2026-08-22).
  *
  * ×1 and ×2 are there from the first fight; ×4 is the reward for walking the whole vale on
- * Normal and ×6 for walking it again on Brutal. Absent means "always available", which is
- * how the two starting rungs are expressed without a special case.
+ * Normal. Absent means "always available", which is how the two starting rungs are
+ * expressed without a special case.
  *
- * The top of the ladder is ×6 rather than ×8 at the owner's call (2026-08-22, "x8 is too
- * fast I think") — the rung moved, the condition that earns it did not.
+ * The ladder stops at ×4 (owner, 2026-08-22, after trying ×6 and then ×8 above it — both
+ * were judged too fast). **Finishing Brutal now opens no speed**, because the rung it used
+ * to open is gone and the condition on ×4 did not move: the owner asked for the same
+ * criteria, and ×4's criterion was Normal. It is one value in `battle.speedUnlocks` if that
+ * should change.
  *
  * Seeded into `game_config` as `battle.speedUnlocks`, so the pairing is retuned in Admin
  * rather than in a release.
@@ -111,7 +114,6 @@ export type SpeedUnlocks = Readonly<Record<string, Difficulty>>;
 
 export const DEFAULT_SPEED_UNLOCKS: SpeedUnlocks = Object.freeze({
   '4': 'normal',
-  '6': 'brutal',
 });
 
 /**

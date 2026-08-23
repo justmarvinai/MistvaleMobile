@@ -22,7 +22,7 @@
 | PATCH `/player/settings` | Audio/gfx/preferences jsonb (schema-validated). |
 
 ### Champions & gear
-| GET `/player` | Adds `battleSpeeds` — the playback multipliers this account has earned (×1–×4; ×3 for the campaign finished on Normal, ×4 on Brutal). Server-computed because the gate is progress; the multiplier itself is animation and is not policed. |
+| GET `/player` | Adds `battleSpeeds` — the playback multipliers this account has earned (×1, ×2, ×4; ×4 for the campaign finished on Normal). Server-computed because the gate is progress; the multiplier itself is animation and is not policed. |
 | GET `/player/champions/:id` | One champion: assembled stats split into base and relic contribution, worn relics, skill levels, and what each ladder's next step costs. |
 | POST `/player/champions/:id/level` | `{foodIds[], brews, actionId}` — consume food champions and/or Mistbrew for XP; at least one of the two must be non-empty. Refuses anything locked, favourited, still wearing relics, or the champion itself, and refuses more brews than are held. |
 | POST `/player/champions/:id/rank-up` | `{foodIds[], actionId}` — exactly R champions of exactly R stars plus a silver fee; resets the champion to level 1. Refused at the *rarity's* ceiling, with two different sentences: a Common was never on a star track, and anything else has finished the one it was on. |
