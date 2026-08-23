@@ -1,0 +1,135 @@
+@use '../../styles/tokens' as *;
+
+/* Saved relic sets, above the paperdoll. See LoadoutBar.tsx. */
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  border: 1px solid $edge;
+  background: rgb(0 0 0 / 18%);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  min-height: 30px;
+}
+
+.title {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $muted;
+}
+
+.namer {
+  display: flex;
+  align-items: flex-end;
+  gap: $space-2;
+}
+
+.none {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: $danger;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  /* A grid rather than `space-between`: the actions column is `auto`, so it is the width
+     of the buttons in it and the name beside it takes the slack rather than the other way
+     round. The React bridge wraps each button in a `display: contents` div, so there is no
+     element in between to put a width on — the column is where it has to be settled. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-1 $space-2;
+  background: rgb(0 0 0 / 22%);
+
+  /* A set that would change nothing is dimmed rather than hidden: it is still the set you
+     saved, and hiding it would make the list change as you move gear around. */
+  &[data-idle='true'] {
+    opacity: 0.55;
+  }
+}
+
+.about {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  min-width: 0;
+}
+
+.name {
+  font-size: 0.9rem;
+  color: $parchment;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* One pip per slot the set covers — the fastest way to see "this is a full nine" against
+   "this is the three pieces I had when I saved it". */
+.slots {
+  display: flex;
+  gap: 2px;
+}
+
+.slotDot {
+  width: 15px;
+  height: 15px;
+  background: $accent-soft;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  flex: 0 0 auto;
+}
+
+.forget {
+  width: 24px;
+  height: 24px;
+  border: 1px solid $edge;
+  background: none;
+  color: $muted;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: $danger;
+    border-color: $danger;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}

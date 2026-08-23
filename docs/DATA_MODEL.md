@@ -285,6 +285,15 @@ Stock is rolled per player and **stored**, not derived on read: what a player is
 ### `dungeon_progress` — **not built; deliberately**
 A floor *is* a stage, so its clear is already a `stage_progress` row with `parent_key` set to the dungeon. "Deepest floor" is the largest floor number among those rows and "clears" is their sum, both derived on read. A second table would be the same fact written twice, and the second copy is the one that drifts.
 
+### `gear_loadouts`
+`player_id, name, gear_ids jsonb, from_champion_id`, unique on `(player_id, name)`.
+
+A saved relic set: the nine pieces a build is made of, named. It owns **relic ids rather than a champion**, which is the shape that serves both of the things players want out of it — one good set moved between champions as content demands, and two builds for one champion.
+
+**`gear_ids` is deliberately not a set of foreign keys.** A relic named in a loadout can be sold, and a loadout naming a sold piece is an ordinary state of the world months after saving it: applying skips what is gone and says so, where a cascade would silently rewrite the set instead. `from_champion_id` *is* a foreign key, but only as a note about where the set was captured — it nulls out if that champion is fed away, and nothing reads it but the "saved from" line.
+
+Applying is planned before it is written (`planLoadout`, pure and shared with the client) and the writes go in one order for one reason: the partial unique index on `(equipped_champion_id, slot)` must never see two occupants, so every slot is cleared before anything is put into it — the same rule a single equip follows.
+
 ### `titan_records`
 `player_id, dungeon_key, best_damage bigint, best_tier_key, last_damage bigint, runs int`, unique on `(player_id, dungeon_key)`.
 

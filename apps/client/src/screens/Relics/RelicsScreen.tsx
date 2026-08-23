@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { GearInstance, GearSlot } from '@mistvale/shared';
-import { GEAR_SLOTS } from '@mistvale/shared';
+import type { GearInstance, GearSlot, Rarity } from '@mistvale/shared';
+import { GEAR_MAX_LEVEL, GEAR_SLOTS, RARITIES } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';
@@ -26,6 +26,24 @@ import { VaultMeter } from '../../ui/VaultMeter/VaultMeter';
  */
 
 type Filter = 'all' | 'unequipped' | GearSlot;
+
+/**
+ * The three axes a player actually sorts a hundred relics along.
+ *
+ * Slot was the only one the vault had, and it is the least useful of the three: nobody
+ * looks for "a helm", they look for "the epics I have not forged" or "everything Ironroot".
+ * Rarity and set are the two that turn a grid into a shortlist, and a shortlist is what the
+ * bulk actions act on — which is the whole of the owner's request (2026-08-22): acting on a
+ * *filter* rather than on a click per relic.
+ */
+interface Refine {
+  rarity: Rarity | 'any';
+  setKey: string | 'any';
+  /** Only pieces nobody has spent silver on — the fodder-shaped question. */
+  unforgedOnly: boolean;
+}
+
+const NO_REFINE: Refine = { rarity: 'any', setKey: 'any', unforgedOnly: false };
 
 export function RelicsScreen(): JSX.Element {
   const gear = useInventoryStore((state) => state.gear);
@@ -61,7 +79,9 @@ export function RelicsScreen(): JSX.Element {
   const canForge = usePlayerStore((state) => state.unlocks?.relicUpgrading ?? false);
 
   const [filter, setFilter] = useState<Filter>('unequipped');
+  const [refine, setRefine] = useState<Refine>(NO_REFINE);
   const [selection, setSelection] = useState<string[]>([]);
+  const [forgeTo, setForgeTo] = useState(8);
   const [forging, setForging] = useState<GearInstance | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -73,14 +93,25 @@ export function RelicsScreen(): JSX.Element {
 
   const visible = useMemo(() => {
     const list = gear.filter((piece) => {
-      if (filter === 'all') return true;
-      if (filter === 'unequipped') return piece.equippedChampionId === null;
-      return piece.slot === filter;
+      if (filter === 'unequipped' && piece.equippedChampionId !== null) return false;
+      if (filter !== 'all' && filter !== 'unequipped' && piece.slot !== filter) return false;
+      if (refine.rarity !== 'any' && piece.rarity !== refine.rarity) return false;
+      if (refine.setKey !== 'any' && piece.setKey !== refine.setKey) return false;
+      if (refine.unforgedOnly && piece.level > 0) return false;
+      return true;
     });
     return [...list].sort(
       (a, b) => b.rank - a.rank || b.level - a.level || a.slot.localeCompare(b.slot),
     );
-  }, [gear, filter]);
+  }, [gear, filter, refine]);
+
+  /** The sets the account actually holds, so the picker is not sixteen names of nothing. */
+  const heldSets = useMemo(() => {
+    const keys = new Set(gear.map((piece) => piece.setKey));
+    return (bundle?.gearSets ?? [])
+      .filter((set) => keys.has(set.key))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [gear, bundle]);
 
   const selected = useMemo(
     () => gear.filter((piece) => selection.includes(piece.id)),
@@ -88,6 +119,8 @@ export function RelicsScreen(): JSX.Element {
   );
   const sellTotal = selected.reduce((sum, piece) => sum + piece.sellValue, 0);
   const blocked = selected.filter((piece) => piece.locked || piece.equippedChampionId !== null);
+  /** How many of the selection the forge would actually touch at the chosen level. */
+  const forgeable = selected.filter((piece) => piece.level < forgeTo).length;
 
   const toggle = (id: string): void =>
     setSelection((current) =>
@@ -120,6 +153,37 @@ export function RelicsScreen(): JSX.Element {
       setNotice(`Sold ${result.sold.length} for ${result.paid.toLocaleString()} silver.`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Those could not be sold.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /**
+   * Everything currently on screen.
+   *
+   * The action the owner's list asked for: acting on a *filter* rather than on a click per
+   * relic. It selects what the filters have narrowed to rather than everything owned, so
+   * "select all" always means the thing the player is looking at.
+   */
+  const selectVisible = (): void => setSelection(visible.map((piece) => piece.id));
+
+  /** Forges the selection toward a level. Equipped pieces are fine — this is not a sell. */
+  const forgeSelection = async (): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const ids = selected.filter((piece) => piece.level < forgeTo).map((piece) => piece.id);
+      const result = await gameApi.upgradeMany(ids, forgeTo, newActionId());
+      const climbed = result.entries.filter((entry) => entry.toLevel > entry.fromLevel).length;
+      await Promise.all([refresh(), refreshPlayer()]);
+      setNotice(
+        `${climbed} of ${result.entries.length} climbed — ${result.silverSpent.toLocaleString()} silver.` +
+          (result.stoppedBecause ? ` ${result.stoppedBecause}` : ''),
+      );
+      setSelection([]);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'That forge run could not be made.');
     } finally {
       setBusy(false);
     }
@@ -240,6 +304,73 @@ export function RelicsScreen(): JSX.Element {
           ))}
         </div>
 
+        {/* Rarity and set, which are the two axes a hundred relics are actually sorted
+            along — and the shortlist the bulk actions act on. */}
+        <div className={styles.refine} role="group" aria-label="Narrow the list">
+          <label className={styles.refineField}>
+            <span className={styles.refineLabel}>Rarity</span>
+            <select
+              className={styles.select}
+              value={refine.rarity}
+              onChange={(event) =>
+                setRefine((current) => ({
+                  ...current,
+                  rarity: event.target.value as Refine['rarity'],
+                }))
+              }
+            >
+              <option value="any">Any</option>
+              {RARITIES.map((rarity) => (
+                <option key={rarity} value={rarity}>
+                  {rarity[0]!.toUpperCase() + rarity.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.refineField}>
+            <span className={styles.refineLabel}>Set</span>
+            <select
+              className={styles.select}
+              value={refine.setKey}
+              onChange={(event) =>
+                setRefine((current) => ({ ...current, setKey: event.target.value }))
+              }
+            >
+              <option value="any">Any</option>
+              {heldSets.map((set) => (
+                <option key={set.key} value={set.key}>
+                  {set.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.refineToggle}>
+            <input
+              type="checkbox"
+              checked={refine.unforgedOnly}
+              onChange={(event) =>
+                setRefine((current) => ({ ...current, unforgedOnly: event.target.checked }))
+              }
+            />
+            <span>Unforged only</span>
+          </label>
+
+          <span className={styles.refineCount}>
+            {visible.length} of {gear.length}
+          </span>
+
+          <Button size="sm" variant="ghost" disabled={visible.length === 0} onClick={selectVisible}>
+            Select these {visible.length}
+          </Button>
+          {(refine.rarity !== 'any' || refine.setKey !== 'any' || refine.unforgedOnly) && (
+            <Button size="sm" variant="ghost" onClick={() => setRefine(NO_REFINE)}>
+              Reset
+            </Button>
+          )}
+        </div>
+
         {loading && gear.length === 0 ? (
           <p className={styles.empty}>Opening the vault…</p>
         ) : visible.length === 0 ? (
@@ -301,7 +432,31 @@ export function RelicsScreen(): JSX.Element {
                 deselect them.
               </p>
             )}
+            {/* Two things to do with a selection, and they want different guards. Selling
+                refuses locked and worn pieces; forging welcomes a worn piece, because a
+                worn piece is exactly the one worth forging. */}
             <div className={styles.sellActions}>
+              <label className={styles.forgeTo}>
+                <span className={styles.refineLabel}>Forge to</span>
+                <select
+                  className={styles.select}
+                  value={forgeTo}
+                  onChange={(event) => setForgeTo(Number(event.target.value))}
+                >
+                  {[4, 8, 12, GEAR_MAX_LEVEL].map((level) => (
+                    <option key={level} value={level}>
+                      +{level}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <Button
+                variant="ghost"
+                disabled={busy || !canForge || forgeable === 0}
+                onClick={() => void forgeSelection()}
+              >
+                {forgeable === 0 ? 'All at that level' : `Forge ${forgeable}`}
+              </Button>
               <Button variant="ghost" onClick={() => setSelection([])}>
                 Clear
               </Button>

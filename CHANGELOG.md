@@ -5,6 +5,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — relic loadouts, and acting on a filter instead of a click per relic
+
+Moving a build was nine unequips, nine equips and nine things to remember — the small change
+felt most often. A **loadout** is a named list of relic ids on the account, saved from
+whoever is wearing them and applied to anybody:
+
+- **It belongs to the account, not to a champion.** That is the shape that serves both of
+  the things players want: one good set moved between champions as content demands, and two
+  builds for one champion.
+- **Each row says what applying it would do before it is pressed** — how many go on, how
+  many come off, and what is skipped. The preview is `planLoadout`, the same pure function
+  the server applies with, so it cannot promise something the server will refuse.
+- **A sold relic is skipped, not fatal.** A loadout naming a piece fed away is the ordinary
+  state of the world months after saving it; refusing the whole apply would make loadouts
+  rot. So is an accessory the champion has not ascended to, which says which ascension it
+  wants.
+- **A full vault refuses before anything moves**, on the *net* change — a set arriving from
+  another champion costs no room at all, and one arriving from the vault frees some.
+- Saving over a name replaces it. "Save my gear as Speed set" said twice in a week means
+  the second one.
+
+And the vault can act on a **filter** rather than on a click per relic. Rarity, set and
+"unforged only" narrow the grid; **Select these N** takes exactly what is on screen; and a
+selection can now be **forged to a level in one run** — the same cost curve, the same chance
+per level, the same substat roll every four levels, run per relic, stopping cleanly when the
+silver runs out and saying so. Equipped relics are welcome in a forge run and refused in a
+sell, because a worn piece is exactly the one worth forging.
+
+Two goal types the fan-out already had do the reporting: applying a set reports each piece as
+a `gearEquip`, so a daily asking for one is satisfied by doing it the fast way.
+
 ### Added — the Valewurm, a fight nobody wins
 
 Every other mode in Mistvale asks *can you beat this*. The Valewurm asks **how far can you

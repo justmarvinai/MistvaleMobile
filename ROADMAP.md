@@ -217,7 +217,7 @@ criteria of its own, and it does not gate P9e or P10.
 | **C6** | Champion progression rebuilt to the source game's shape: **the star track belongs to the rarity** (Commons never move, Uncommon/Rare to ★5, Epic/Legendary to ★6), level caps 20/20/30/40/50/60 with a rank-up resetting to level 1, **Mistbrew** as the one XP consumable, and **awakening** as a fourth ladder paid in Waking Shards out of the deep Depths · the champion sheet as four ladders that each say which gate is shut · the sheet finally reading what the player is holding | ✅ |
 | **C7** | Two rules about watching a fight: **Skip only on a stage already beaten** (decided when the fight opens, since the clear it may itself record would otherwise answer the question), and **playback ×1–×4** with ×3 earned by the campaign on Normal and ×4 on Brutal | ✅ |
 | **C8** | The campaign map without its own window — no frame, no second background, markers at a size a desktop can read · the speed ladder settled at **×1 · ×2 · ×4** (×4 on the Normal campaign) with `ui/SpeedLadder` drawing the rung an account has *not* earned and what opens it | ✅ |
-| **C9** | Five, from the improvement list: **a fight that moves** (hit impacts, swings, casts, deaths — item 14) ✅ · **the Solo Titan** (the Valewurm — item 1) ✅ · relic loadouts and bulk relic actions · roster filter and sort · a "what's ready" card on the Haven | ◐ in progress |
+| **C9** | Five, from the improvement list: **a fight that moves** (hit impacts, swings, casts, deaths — item 14) ✅ · **the Solo Titan** (the Valewurm — item 1) ✅ · **relic loadouts and bulk relic actions** (items 5 and 6) ✅ · roster filter and sort · a "what's ready" card on the Haven | ◐ in progress |
 
 **Backlog carried out of a batch rather than done in it.** Two items, and they are the same
 question wearing different clothes — both are parked on the owner's instruction, and both want
@@ -257,10 +257,13 @@ engine, the goal DSL and the events framework already do most of the work*.
 
 **Would be felt every session (small, high-frequency)**
 
-5. **Relic loadouts** — save and swap a champion's nine relics as a set. Moving a set today
-   is nine equips and nine memories.
-6. **Bulk relic actions** — sell/forge by filter. The vault already has selection and a
-   toolbar; what is missing is acting on a filter rather than on a click per relic.
+5. ~~**Relic loadouts**~~ — **Done — C9.** A named list of relic ids on the *account*
+   rather than on a champion, so one good set moves between champions and one champion can
+   keep two builds. `planLoadout` is pure and shared, so the row's preview and the server's
+   apply are one rule read twice.
+6. ~~**Bulk relic actions**~~ — **Done — C9.** Rarity, set and "unforged only" narrow the
+   grid; **Select these N** takes what is on screen; and the selection forges to a level in
+   one run that stops cleanly on an empty purse.
 7. **Roster filter and sort** — by faction, rarity, role, "not at cap", "wearing nothing".
    Thirty-seven champions is already past what a flat grid serves.
 8. **A "what is ready" card on the Haven** — quests claimable, arena tokens full, today's

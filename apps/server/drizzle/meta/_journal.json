@@ -211,6 +211,13 @@
       "when": 1787085686193,
       "tag": "0029_titan_records",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1787085687193,
+      "tag": "0030_gear_loadouts",
+      "breakpoints": true
     }
   ]
 }

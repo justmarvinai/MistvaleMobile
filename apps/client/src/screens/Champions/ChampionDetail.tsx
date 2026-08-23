@@ -19,6 +19,7 @@ import { FoodPicker } from './FoodPicker';
 import { Ladders } from './Ladders';
 import { MasteryTrees } from './MasteryTrees';
 import { RelicPicker } from './RelicPicker';
+import { LoadoutBar } from './LoadoutBar';
 import { StatTable } from './StatTable';
 import styles from './ChampionDetail.module.scss';
 import { Icon } from '../../ui/Icon/Icon';
@@ -69,6 +70,9 @@ export function ChampionDetailModal({
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
   const items = useInventoryStore((state) => state.items);
+  // Every relic the account owns, not just this champion's: a loadout can name a piece
+  // that is currently on somebody else, and the plan a row shows has to know that.
+  const allGear = useInventoryStore((state) => state.gear);
   const refreshInventory = useInventoryStore((state) => state.refresh);
   const loadInventory = useInventoryStore((state) => state.load);
   const refreshRoster = useRosterStore((state) => state.load);
@@ -375,29 +379,45 @@ export function ChampionDetailModal({
             )}
 
             {tab === 'gear' && (
-              <div className={styles.slots}>
-                {GEAR_SLOTS.map((slot) => {
-                  const worn = wornBySlot.get(slot);
-                  const slotDef = bundle?.gearSlots.find((entry) => entry.key === slot);
-                  const locked = (slotDef?.ascensionRequired ?? 0) > champion.ascension;
-                  const set = worn
-                    ? bundle?.gearSets.find((entry) => entry.key === worn.setKey)
-                    : undefined;
-                  return (
-                    <RelicSocket
-                      key={slot}
-                      slot={slot}
-                      worn={worn}
-                      set={set}
-                      wearing={worn ? (setCounts.get(worn.setKey) ?? 0) : 0}
-                      locked={locked}
-                      lockedAt={slotDef?.ascensionRequired ?? 0}
-                      disabled={locked || busy}
-                      onOpen={() => setSlotPicking(slot)}
-                    />
-                  );
-                })}
-              </div>
+              <>
+                {/* Saved sets sit above the sockets, because that is where a build *is* —
+                    the nine pieces you are looking at when you decide somebody else should
+                    be wearing them. */}
+                <LoadoutBar
+                  championId={championId}
+                  ascension={champion.ascension}
+                  gear={allGear}
+                  busy={busy}
+                  onApplied={(said) => {
+                    setNotice(said);
+                    void refreshInventory();
+                    reload();
+                  }}
+                />
+                <div className={styles.slots}>
+                  {GEAR_SLOTS.map((slot) => {
+                    const worn = wornBySlot.get(slot);
+                    const slotDef = bundle?.gearSlots.find((entry) => entry.key === slot);
+                    const locked = (slotDef?.ascensionRequired ?? 0) > champion.ascension;
+                    const set = worn
+                      ? bundle?.gearSets.find((entry) => entry.key === worn.setKey)
+                      : undefined;
+                    return (
+                      <RelicSocket
+                        key={slot}
+                        slot={slot}
+                        worn={worn}
+                        set={set}
+                        wearing={worn ? (setCounts.get(worn.setKey) ?? 0) : 0}
+                        locked={locked}
+                        lockedAt={slotDef?.ascensionRequired ?? 0}
+                        disabled={locked || busy}
+                        onOpen={() => setSlotPicking(slot)}
+                      />
+                    );
+                  })}
+                </div>
+              </>
             )}
 
             {tab === 'skills' && (

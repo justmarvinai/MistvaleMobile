@@ -21,6 +21,9 @@ import type {
   VaultState,
   Chronicle,
   Depths,
+  BulkUpgradeResult,
+  Loadout,
+  LoadoutPlan,
   Titan,
   TitanRun,
   MultiBattleRequest,
@@ -73,6 +76,8 @@ export type {
   ChampionDetail,
   Chronicle,
   Depths,
+  Loadout,
+  LoadoutPlan,
   Titan,
   TitanRun,
   GearInstance,
@@ -302,6 +307,34 @@ export const gameApi = {
     api.get<{ progress: Progress }>(ROUTES.progress.stages).then((data) => data.progress),
 
   depths: () => api.get<{ depths: Depths }>(ROUTES.depths.overview).then((data) => data.depths),
+
+  /** Every saved relic set on the account. */
+  loadouts: () =>
+    api.get<{ loadouts: Loadout[] }>(ROUTES.loadouts.list).then((data) => data.loadouts),
+
+  /** Captures what a champion is wearing, under a name. Saving over a name replaces it. */
+  saveLoadout: (name: string, championId: string) =>
+    api
+      .post<{ loadout: Loadout }>(ROUTES.loadouts.save, { name, championId })
+      .then((data) => data.loadout),
+
+  renameLoadout: (id: string, name: string) =>
+    api
+      .patch<{ loadout: Loadout }>(ROUTES.loadouts.byId(id), { name })
+      .then((data) => data.loadout),
+
+  deleteLoadout: (id: string) => api.del<{ ok: boolean }>(ROUTES.loadouts.byId(id)),
+
+  /** Puts a set on a champion. Comes back with the whole vault, since it can touch nine. */
+  applyLoadout: (id: string, championId: string, actionId: string) =>
+    api.post<{ plan: LoadoutPlan; gear: GearInstance[]; vault: VaultState }>(
+      ROUTES.loadouts.apply(id),
+      { championId, actionId },
+    ),
+
+  /** Forges several relics toward a level in one run. */
+  upgradeMany: (ids: readonly string[], toLevel: number, actionId: string) =>
+    api.post<BulkUpgradeResult>(ROUTES.gear.upgradeMany, { ids, toLevel, actionId }),
 
   /** Every Titan, its ladder, the keys left today, and this account's own record. */
   titan: () => api.get<{ titan: Titan }>(ROUTES.titan.overview).then((data) => data.titan),

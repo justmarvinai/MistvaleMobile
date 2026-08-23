@@ -4,6 +4,8 @@ import {
   ACCESSORY_ASCENSION_REQUIREMENT,
   GEAR_MAX_LEVEL,
   GEAR_SLOTS,
+  type BulkUpgradeEntry,
+  type BulkUpgradeResult,
   type GearInstance,
   type GearSlot,
   type GearStatLine,
@@ -755,6 +757,135 @@ export async function sell(
     await tx.delete(gearInstances).where(inArray(gearInstances.id, [...ids]));
 
     return { silver: await currentSilver(tx, playerId), sold: rows.map((row) => row.id), paid };
+  });
+}
+
+/** How many relics one bulk forge may touch. Operator-editable, like every other cap. */
+export function maxBulkForge(config: Readonly<Record<string, unknown>>): number {
+  const value = config['gear.maxBulkForge'];
+  return typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : 20;
+}
+
+/**
+ * Forges several relics toward a level, in one transaction.
+ *
+ * The vault's whole second job is picking the piece worth upgrading out of a hundred, and
+ * "take everything I have selected to +8" is the action that job ends in. Nothing here is
+ * a shortcut past the forge's own rules: the same cost curve, the same chance per level,
+ * the same substat roll every four levels — it is the loop `upgrade` runs, run per relic.
+ *
+ * Three things make it a different shape from calling `upgrade` twenty times:
+ *
+ *  - **It stops when the silver runs out**, cleanly, and says so. Twenty separate calls
+ *    would each fail on their own and leave the player to work out which ones went through.
+ *  - **One wallet read for the run.** Silver is spent across relics, so a per-call balance
+ *    would let a double-tap outspend it.
+ *  - **Equipped relics are allowed.** A worn piece is exactly the piece worth forging, and
+ *    the vault's default filter hiding them is why the Forge button had to move onto the
+ *    champion sheet in C1. This is not a sell.
+ */
+export async function upgradeMany(
+  db: Database,
+  playerId: string,
+  ids: readonly string[],
+  toLevel: number,
+  context: GearContext,
+  seed: number,
+  content: ContentCache,
+): Promise<BulkUpgradeResult> {
+  return db.transaction(async (tx) => {
+    const rows = await tx
+      .select()
+      .from(gearInstances)
+      .where(and(eq(gearInstances.playerId, playerId), inArray(gearInstances.id, [...ids])))
+      .for('update');
+    if (rows.length !== ids.length) {
+      throw AppError.notFound('One of those relics is not yours.');
+    }
+
+    const [wallet] = await tx
+      .select({ silver: players.silver })
+      .from(players)
+      .where(eq(players.id, playerId))
+      .for('update');
+    if (!wallet) throw AppError.notFound('No such player.');
+
+    const rng = createRng(seed);
+    const entries: BulkUpgradeEntry[] = [];
+    let silver = wallet.silver;
+    let spent = 0;
+    let attemptsMade = 0;
+    let highest = 0;
+    let stoppedBecause: string | null = null;
+
+    // Ordered by how far each has to go, so a run that runs out of silver has finished the
+    // cheap ones rather than half-finished the expensive ones. The player asked for a
+    // level, not for a particular relic to get there first.
+    const ordered = [...rows].sort((a, b) => b.level - a.level);
+
+    for (const row of ordered) {
+      let piece = pieceOf(row);
+      const from = piece.level;
+      let attempts = 0;
+      let cost = 0;
+
+      while (piece.level < Math.min(toLevel, GEAR_MAX_LEVEL)) {
+        const target = piece.level + 1;
+        const price = upgradeCost(context.economy, piece.rank, target);
+        if (silver < price) {
+          stoppedBecause = 'Out of silver.';
+          break;
+        }
+        silver -= price;
+        spent += price;
+        cost += price;
+        attempts += 1;
+        attemptsMade += 1;
+
+        if (rng.chance(upgradeChance(context.economy, target))) {
+          const result = applyUpgrade(rng, context.tables, piece);
+          piece = { ...piece, level: target, main: result.main, substats: result.substats };
+        }
+      }
+
+      if (attempts > 0) {
+        await tx
+          .update(gearInstances)
+          .set({
+            level: piece.level,
+            mainStat: piece.main,
+            substats: [...piece.substats],
+            updatedAt: new Date(),
+          })
+          .where(eq(gearInstances.id, row.id));
+      }
+      highest = Math.max(highest, piece.level);
+      entries.push({
+        gearId: row.id,
+        fromLevel: from,
+        toLevel: piece.level,
+        attempts,
+        silverSpent: cost,
+      });
+      if (stoppedBecause) break;
+    }
+
+    if (attemptsMade === 0) {
+      throw new AppError(
+        'INSUFFICIENT_FUNDS',
+        silver < 1 ? 'Not enough silver for an attempt.' : 'Nothing there needs forging.',
+      );
+    }
+
+    // One economy row for the run, the same rule a single bulk-continue forge follows: the
+    // run is the action a player took.
+    await grant(tx, playerId, { silver: -spent }, `gear:upgrade:bulk:${entries.length}`);
+    await track(tx, { content }, playerId, [
+      { type: 'gearUpgrade', amount: attemptsMade },
+      { type: 'gearLevel', amount: highest },
+    ]);
+
+    return { entries, silverSpent: spent, silver, stoppedBecause };
   });
 }
 

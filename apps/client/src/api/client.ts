@@ -127,6 +127,8 @@ export const api = {
     request<T>(path, { method: 'PATCH', body, signal }),
   put: <T>(path: string, body?: unknown, signal?: AbortSignal) =>
     request<T>(path, { method: 'PUT', body, signal }),
+  /** `delete` is a reserved word, so the verb is spelled out where it is used. */
+  del: <T>(path: string, signal?: AbortSignal) => request<T>(path, { method: 'DELETE', signal }),
 };
 
 /** Health probe used by the boot screen; bypasses the envelope. */

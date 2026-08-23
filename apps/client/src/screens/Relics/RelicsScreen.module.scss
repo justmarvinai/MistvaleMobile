@@ -152,7 +152,61 @@
 
 .sellActions {
   display: flex;
+  align-items: center;
   gap: $space-2;
+  margin-left: auto;
+}
+
+/* Rarity, set and "unforged only" — the row that turns a grid into a shortlist, and the
+   shortlist the bulk actions act on. Wraps rather than squashing: a select squeezed to
+   60px is a select nobody can read the options of. */
+.refine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-2;
+}
+
+.refineField,
+.forgeTo {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+}
+
+.refineLabel {
+  color: $muted;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* The browser's own select, dressed. A painted dropdown is a component the library does
+   not have, and a hand-built one is a listbox with keyboard support to get wrong — where
+   the native control already has all of it and only wants the theme's colours. */
+.select {
+  padding: 3px $space-1;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $parchment;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.refineToggle {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  color: $muted;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.refineCount {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.78rem;
   margin-left: auto;
 }
 

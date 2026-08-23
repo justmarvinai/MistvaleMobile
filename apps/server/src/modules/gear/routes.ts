@@ -16,6 +16,10 @@ import {
   sellGearRequestSchema,
   skillUpgradeRequestSchema,
   upgradeGearRequestSchema,
+  upgradeManyRequestSchema,
+  applyLoadoutRequestSchema,
+  renameLoadoutRequestSchema,
+  saveLoadoutRequestSchema,
   type Rarity,
 } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
@@ -23,6 +27,7 @@ import * as champions from '../roster/champions';
 import * as progression from '../roster/progression';
 import { itemQuantities } from '../rewards/service';
 import * as gear from './service';
+import * as loadouts from './loadouts';
 import { idParam, uuidQuery } from '../../lib/params';
 
 /**
@@ -326,6 +331,90 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
         app.content.rev,
       ),
     );
+  });
+
+  /**
+   * Forges several relics toward a level in one run.
+   *
+   * The vault's second job is picking the piece worth upgrading out of a hundred, and this
+   * is the action that job ends in. Nothing about the forge's rules changes — same cost
+   * curve, same chance per level, same substat roll every four levels — and the count is
+   * capped by config so a hundred-relic run cannot be posted.
+   */
+  app.post(ROUTES.gear.upgradeMany, async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const body = upgradeManyRequestSchema.parse(request.body);
+    const cap = gear.maxBulkForge(app.content.current().bundle.config);
+    if (body.ids.length > cap) {
+      throw new AppError('VALIDATION', `A forge run takes at most ${cap} relics.`);
+    }
+
+    const ctx = context();
+    const result = await gear.upgradeMany(
+      app.db,
+      playerId,
+      body.ids,
+      body.toLevel,
+      ctx.gear,
+      upgradeSeed(),
+      app.content,
+    );
+    request.log.info(
+      { playerId, relics: result.entries.length, spent: result.silverSpent },
+      'relics forged in bulk',
+    );
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  // ── Loadouts ─────────────────────────────────────────────────────────────
+
+  app.get(ROUTES.loadouts.list, async (request, reply) => {
+    const playerId = requirePlayer(request);
+    return reply.send(
+      apiSuccess({ loadouts: await loadouts.list(app.db, playerId) }, app.content.rev),
+    );
+  });
+
+  app.post(ROUTES.loadouts.save, async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const body = saveLoadoutRequestSchema.parse(request.body);
+    const loadout = await loadouts.save(app.db, playerId, app.content, body.name, body.championId);
+    return reply.send(apiSuccess({ loadout }, app.content.rev));
+  });
+
+  app.patch(routePattern(ROUTES.loadouts.byId), async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const body = renameLoadoutRequestSchema.parse(request.body);
+    const loadout = await loadouts.rename(app.db, playerId, idParam(request), body.name);
+    return reply.send(apiSuccess({ loadout }, app.content.rev));
+  });
+
+  app.delete(routePattern(ROUTES.loadouts.byId), async (request, reply) => {
+    const playerId = requirePlayer(request);
+    await loadouts.remove(app.db, playerId, idParam(request));
+    return reply.send(apiSuccess({ ok: true }, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.loadouts.apply), async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const body = applyLoadoutRequestSchema.parse(request.body);
+    const ctx = context();
+    const result = await loadouts.apply(
+      app.db,
+      playerId,
+      app.content,
+      idParam(request),
+      body.championId,
+      ctx.gear,
+    );
+    // The whole vault comes back rather than the pieces that moved: a loadout can touch
+    // nine relics on two champions, and a screen re-deriving that from a list of ids is a
+    // second implementation of the plan it just asked the server to make.
+    const [list, vault] = await Promise.all([
+      gear.listGear(app.db, playerId, ctx.gear),
+      gear.vaultState(app.db, playerId, ctx.gear),
+    ]);
+    return reply.send(apiSuccess({ plan: result.plan, gear: list, vault }, app.content.rev));
   });
 
   app.post(ROUTES.gear.sell, async (request, reply) => {

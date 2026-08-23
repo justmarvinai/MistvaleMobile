@@ -205,5 +205,42 @@ export const championSightings = pgTable(
   ],
 );
 
+/**
+ * A saved set of relics — the nine pieces a build is made of, named.
+ *
+ * The loadout owns *relic ids* rather than a champion, which is the shape that serves both
+ * of the things players want out of it: one good set moved between champions as content
+ * demands, and two builds for one champion. It is not a foreign key to `gear_instances`
+ * either — a relic named here can be sold, and a loadout naming a sold piece is an ordinary
+ * state of the world months after saving it. Applying skips what is gone and says so; a
+ * cascade would silently rewrite the set instead.
+ *
+ * `from_champion_id` is a note about where it was captured, for the "saved from" line, and
+ * nulls out if that champion is fed away.
+ */
+export const gearLoadouts = pgTable(
+  'gear_loadouts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    /** `gear_instances` ids. Deliberately not foreign keys — see above. */
+    gearIds: jsonb('gear_ids').notNull().default([]).$type<string[]>(),
+    fromChampionId: uuid('from_champion_id').references(() => playerChampions.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('gear_loadouts_player_idx').on(table.playerId),
+    // One name per account: a list with two "Speed set"s is a list nobody can use.
+    uniqueIndex('gear_loadouts_player_name_key').on(table.playerId, table.name),
+  ],
+);
+
 export type SummonHistoryRow = typeof summonHistory.$inferSelect;
 export type ChampionSightingRow = typeof championSightings.$inferSelect;
+export type GearLoadoutRow = typeof gearLoadouts.$inferSelect;

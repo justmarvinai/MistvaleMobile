@@ -80,6 +80,18 @@ export const ROUTES = {
     lock: (id: string) => `/player/gear/${encodeURIComponent(id)}/lock`,
     /** `/player/gear/:id/preview` — what equipping it would do, server-computed. */
     preview: (id: string) => `/player/gear/${encodeURIComponent(id)}/preview`,
+    /** Forge several relics toward a level in one run. Stops cleanly when silver runs out. */
+    upgradeMany: '/player/gear/upgrade-many',
+  },
+  loadouts: {
+    /** Every saved relic set on the account. */
+    list: '/player/loadouts',
+    /** Captures what a champion is wearing, under a name. Saving over a name replaces it. */
+    save: '/player/loadouts',
+    /** `/player/loadouts/:id` — rename with PATCH, forget with DELETE. */
+    byId: (id: string) => `/player/loadouts/${encodeURIComponent(id)}`,
+    /** `/player/loadouts/:id/apply` — put the set on a champion. */
+    apply: (id: string) => `/player/loadouts/${encodeURIComponent(id)}/apply`,
   },
   summon: {
     /** Every published pool, with the player's sigils and mercy state folded in. */

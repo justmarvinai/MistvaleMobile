@@ -67,6 +67,42 @@ export const upgradeGearRequestSchema = z.object({
 });
 export type UpgradeGearRequest = z.infer<typeof upgradeGearRequestSchema>;
 
+export const upgradeManyRequestSchema = z.object({
+  /** Relics to forge. Equipped ones are allowed — a worn piece is the piece worth forging. */
+  ids: z.array(z.string().uuid()).min(1).max(50),
+  /** The level to take each of them to. Ones already there are left alone. */
+  toLevel: z.number().int().min(1).max(GEAR_MAX_LEVEL),
+  actionId: z.string().min(8).max(64),
+});
+export type UpgradeManyRequest = z.infer<typeof upgradeManyRequestSchema>;
+
+/**
+ * What one relic got out of a bulk forge run.
+ *
+ * A summary rather than the per-attempt log a single forge returns: a bulk run is twenty
+ * relics and could be two hundred attempts, and the screen shows a table of outcomes rather
+ * than animating each one — which is the difference between "take these to +8" and "watch
+ * this one climb".
+ */
+export const bulkUpgradeEntrySchema = z.object({
+  gearId: z.string(),
+  fromLevel: z.number().int(),
+  toLevel: z.number().int(),
+  attempts: z.number().int(),
+  silverSpent: z.number().int(),
+});
+export type BulkUpgradeEntry = z.infer<typeof bulkUpgradeEntrySchema>;
+
+export const bulkUpgradeResultSchema = z.object({
+  entries: z.array(bulkUpgradeEntrySchema),
+  silverSpent: z.number().int(),
+  /** The wallet afterwards. */
+  silver: z.number().int(),
+  /** Set when the run stopped early, phrased for the player. */
+  stoppedBecause: z.string().nullable(),
+});
+export type BulkUpgradeResult = z.infer<typeof bulkUpgradeResultSchema>;
+
 export const sellGearRequestSchema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(200),
   actionId: z.string().min(8).max(64),
