@@ -12,6 +12,7 @@ export * from './depths';
 export * from './mastery';
 export * from './battle';
 export * from './arena';
+export * from './titan';
 export * from './quest';
 export * from './mission';
 export * from './event';

@@ -87,6 +87,7 @@ export const BATTLE_MODES = [
   'arena',
   'tutorial',
   'practice',
+  'titan',
 ] as const;
 export type BattleMode = (typeof BATTLE_MODES)[number];
 

@@ -15,6 +15,7 @@ export type ScreenId =
   | 'campaign'
   | 'depths'
   | 'arena'
+  | 'titan'
   | 'champions'
   | 'relics'
   | 'mistgate'
@@ -114,6 +115,18 @@ export const SCREENS: readonly ScreenDefinition[] = [
       'Four against four, against other wardens’ standing defences. Pays valor medals and a chest each week.',
     unlock: 'arena',
     lockedHint: 'Opens at level 8',
+    inDock: true,
+  },
+  {
+    id: 'titan',
+    label: 'The Valewurm',
+    icon: 'nav-titan',
+    glyph: 'glyph-thorny-branch',
+    art: 'blood-serpent-coil',
+    blurb:
+      'One enormous thing, two keys a day, and a ladder of chests for how much of it you moved. The fight worth optimising rather than clearing.',
+    unlock: 'titan',
+    lockedHint: 'Opens at level 16',
     inDock: true,
   },
   {

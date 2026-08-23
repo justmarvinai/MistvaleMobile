@@ -4,6 +4,7 @@ import {
   loadContent,
   simulateColdOpen,
   simulateStage,
+  simulateTitan,
   starterKeys,
   withRelics,
   type LoadedContent,
@@ -251,6 +252,10 @@ function main(): void {
   // fully levelled team, or the treadmill has no end — but it is allowed to be hard,
   // which is why the bar there is lower.
   for (const dungeon of [...content.dungeons.values()].sort((a, b) => a.sortOrder - b.sortOrder)) {
+    // A Titan is a `dungeon` entity because that is where everything else about it fits,
+    // but "does the deepest floor fall" is not a question about it: it is authored so
+    // that nobody clears it. Its own gates are below.
+    if (dungeon.kind === 'titan') continue;
     const floors = dungeonFloors(content, dungeon.key);
     const first = floors[0];
     const deepest = floors[floors.length - 1];
@@ -362,6 +367,91 @@ function main(): void {
       passed: opening.medianWorstHp >= 0.15,
       measured: `driven to ${(opening.medianWorstHp * 100).toFixed(0)}%`,
     });
+  }
+
+  // ── Gate 3d: the Titan is a ladder, not a wall or a formality ───────────
+  //
+  // The one mode a win rate says nothing about, because it is authored so that nobody
+  // wins. What has to be true instead is a *spread*: a fresh account gets paid something
+  // on its first key, a built account climbs, and there is still a rung above what a
+  // fully-built team manages — otherwise the mode has a ceiling and the puzzle is over.
+  //
+  // Priced against the sim's deliberately modest relic set (`FULL_RELICS`), so a real
+  // endgame set with good substats does better than the numbers here — which is what
+  // leaves the top rung reachable rather than theoretical.
+  const titanKeep = [...content.dungeons.values()].find(
+    (dungeon) => dungeon.kind === 'titan' && dungeon.titan,
+  );
+  const titanStage = titanKeep
+    ? [...content.stages.values()].find(
+        (stage) => stage.mode === 'titan' && stage.parentKey === titanKeep.key,
+      )
+    : undefined;
+  if (titanKeep?.titan && titanStage) {
+    const ladder = [...titanKeep.titan.tiers].sort((a, b) => a.damage - b.damage);
+    const bottom = ladder[0];
+    const top = ladder[ladder.length - 1];
+    const cap = titanKeep.titan.turnCap;
+    // Fewer runs than the campaign gates: a Titan run is fifty turns rather than a dozen,
+    // and the spread it is measuring is an order of magnitude wide.
+    const titanRuns = Math.max(40, Math.round(RUNS / 20));
+
+    const fresh = simulateTitan(
+      content,
+      titanStage.key,
+      parTeam(content).map((member) => ({ ...member, level: 30, rank: 4, ascension: 0 })),
+      cap,
+      titanRuns,
+    );
+    const built = simulateTitan(
+      content,
+      titanStage.key,
+      withRelics(
+        content,
+        parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 6 })),
+      ),
+      cap,
+      titanRuns,
+    );
+
+    console.log(`\nThe Titan — ${titanStage.key}, ${cap}-turn cap, ${titanRuns} runs`);
+    for (const [name, result] of [
+      ['a fresh account', fresh],
+      ['fully built', built],
+    ] as const) {
+      console.log(
+        `  ${name.padEnd(16)} median ${result.medianDamage.toLocaleString()} · ` +
+          `best ${result.bestDamage.toLocaleString()} · ` +
+          `${(result.cappedRate * 100).toFixed(0)}% lasted the cap`,
+      );
+    }
+
+    if (bottom && top) {
+      gates.push({
+        name: 'titan-survives',
+        detail: 'nobody kills the Titan — it is a measuring stick, not a boss',
+        passed: built.killRate === 0,
+        measured: `${(built.killRate * 100).toFixed(1)}% killed it`,
+      });
+      gates.push({
+        name: 'titan-entry-pays',
+        detail: 'a fresh account reaches the bottom rung on a typical first key',
+        passed: fresh.medianDamage >= bottom.damage,
+        measured: `${fresh.medianDamage.toLocaleString()} vs ${bottom.damage.toLocaleString()}`,
+      });
+      gates.push({
+        name: 'titan-rewards-investment',
+        detail: 'and a fully built one is at least an order of magnitude past it',
+        passed: built.medianDamage >= fresh.medianDamage * 10,
+        measured: `${built.medianDamage.toLocaleString()} vs ${fresh.medianDamage.toLocaleString()}`,
+      });
+      gates.push({
+        name: 'titan-keeps-a-ceiling',
+        detail: 'with the top rung still above what a built team typically manages',
+        passed: built.medianDamage < top.damage,
+        measured: `${built.medianDamage.toLocaleString()} vs ${top.damage.toLocaleString()}`,
+      });
+    }
   }
 
   // ── Gate 4: the headless performance budget ─────────────────────────────

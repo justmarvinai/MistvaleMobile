@@ -6,10 +6,12 @@ import {
   STATUS_ENGINE_TYPES,
   isValidBaseRank,
   rewardItemKeys,
+  titanRuleProblems,
   type ContentIssue,
   type ContentType,
   type ContentValidationResult,
   type Rarity,
+  type TitanRules,
 } from '@mistvale/shared';
 
 /**
@@ -633,6 +635,13 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     }
   }
 
+  const titanStagesByKeep = new Map<string, number>();
+  for (const [, entity] of parsed.get('stage') ?? []) {
+    const stage = entity as { mode: string; parentKey: string };
+    if (stage.mode !== 'titan') continue;
+    titanStagesByKeep.set(stage.parentKey, (titanStagesByKeep.get(stage.parentKey) ?? 0) + 1);
+  }
+
   for (const [key, entity] of parsed.get('dungeon') ?? []) {
     const dungeon = entity as {
       kind: string;
@@ -640,7 +649,57 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       itemKeys: string[];
       bossEnemyKey?: string;
       openDays: number[];
+      titan?: TitanRules;
     };
+
+    // A Titan is the one dungeon kind whose rules are the mode. Without them there is no
+    // cap, no keys and no ladder — a run could never end and could never pay — so this is
+    // refused at publish rather than discovered by the first player to press the button.
+    if (dungeon.kind === 'titan') {
+      if (!dungeon.titan) {
+        errors.push({
+          severity: 'error',
+          contentType: 'dungeon',
+          key,
+          path: 'titan',
+          message: 'A Titan needs its rules: a turn cap, its keys a day, and a damage ladder.',
+        });
+      } else {
+        for (const problem of titanRuleProblems(dungeon.titan)) {
+          errors.push({
+            severity: 'error',
+            contentType: 'dungeon',
+            key,
+            path: 'titan.tiers',
+            message: problem,
+          });
+        }
+      }
+
+      // Exactly one stage, because a Titan is one fight. Two would make "the Titan run"
+      // ambiguous everywhere it is looked up; none makes the keep unfightable.
+      const stages = titanStagesByKeep.get(key) ?? 0;
+      if (stages !== 1) {
+        errors.push({
+          severity: 'error',
+          contentType: 'dungeon',
+          key,
+          path: 'titan',
+          message:
+            stages === 0
+              ? 'A Titan needs exactly one `titan` stage to be fought on, and has none.'
+              : `A Titan is one fight; this keep has ${stages} titan stages.`,
+        });
+      }
+    } else if (dungeon.titan) {
+      errors.push({
+        severity: 'error',
+        contentType: 'dungeon',
+        key,
+        path: 'titan',
+        message: `Titan rules belong to a titan keep; this one is ${dungeon.kind}. They would be read by nothing.`,
+      });
+    }
 
     dungeon.setKeys.forEach((setKey, index) => {
       reference({ contentType: 'dungeon', key, path: `setKeys.${index}` }, 'gearSet', setKey);
@@ -691,8 +750,29 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
 
     // Every Depths mode hangs off a dungeon, so a floor whose keep was deleted would be a
     // stage nothing can reach — invisible on the hub, and still fightable by key.
-    if (stage.mode === 'dungeon' || stage.mode === 'springs' || stage.mode === 'proving') {
+    if (
+      stage.mode === 'dungeon' ||
+      stage.mode === 'springs' ||
+      stage.mode === 'proving' ||
+      stage.mode === 'titan'
+    ) {
       reference({ contentType: 'stage', key, path: 'parentKey' }, 'dungeon', stage.parentKey);
+    }
+
+    // A Titan is fought in one wave against one thing. Waves would mean a "boss" you clear
+    // your way to, which is a dungeon floor; a second enemy would mean damage split across
+    // targets, and the ladder is about damage done to the Titan.
+    if (stage.mode === 'titan') {
+      const units = stage.waves.flat();
+      if (stage.waves.length !== 1 || units.length !== 1) {
+        errors.push({
+          severity: 'error',
+          contentType: 'stage',
+          key,
+          path: 'waves',
+          message: 'A Titan run is one wave against one Titan, and nothing else.',
+        });
+      }
     }
 
     // A borrowed team belongs to the cold open and nowhere else. On any other stage it

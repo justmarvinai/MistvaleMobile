@@ -132,6 +132,41 @@ Six relic slots — **Weapon, Helm, Shield, Gauntlets, Cuirass, Boots** — plus
 - **Proving Grounds** (mastery dungeon, 10 floors): drops Emblems; weekly-ish cadence via energy pricing.
 - **Essence Springs** (ascension keeps, source-faithful rotation): **Pure Spring open every day**; Verdant Mon & Thu, Ember Tue & Fri, Tide Wed & Sat, **Mist Sun only**; all springs open daily during a new account's first 7 days. 10 floors each.
 
+### 9.2b The Valewurm (Solo Titan)
+
+**Shipped C9.** The one mode that is not about winning. The Valewurm is a single enormous
+enemy, authored so that no team kills it, and a run ends when the last champion falls or the
+turn cap runs out. What a run is worth is **how much damage it did**, paid at the highest
+rung of a ladder — so a run that ends badly still pays, and a run that ends slightly better
+pays slightly better. That comparison is the whole loop: change one thing about the team,
+spend a key, see whether the number moved.
+
+It is the source game's Clan Boss with the clan taken out. The parked plan couples the Vale
+Titan to Warbands (§14) and the puzzle never needed a guild — only an opponent nobody clears.
+
+- **Keys, not energy.** Two a day per keep, restored by the daily rollover, spent when the
+  fight opens and never refunded. The resource the mode limits is *attempts*, which is what
+  stops it being brute-forced by farming. It also cannot be multi-battled.
+- **A turn cap belongs to the Titan**, not to `combat.maxTurns` — 50 turns for the Valewurm,
+  with the enrage from turn 30 making the back half the dangerous half.
+- **Paid on any ending.** Victory, defeat, the cap and a retreat all score. A retreat is
+  scored rather than voided because damage only ever accumulates: stopping early can only
+  lower the number, so there is nothing for a forfeit to protect.
+- **The mechanics are the puzzle.** The Valewurm's hit-counter shield wants five hits between
+  its turns, which is reachable with a multi-hit attack on the team and out of reach with four
+  big single ones — a *team-building* answer rather than a gear one. Turn-meter manipulation
+  is deliberately left open, which is what earns a support a slot on a team built to hit
+  things. Both are stated on the boss card before the key is spent.
+- **The ladder is measured, not guessed.** `pnpm sim` fights the Valewurm with a fresh, a
+  middling and a fully-built team and gates four things: that nobody kills it, that a fresh
+  account clears the bottom rung, that a built one is an order of magnitude past that, and
+  that the top rung is still above what a built team typically manages — so the mode keeps a
+  ceiling to chase.
+
+A Titan is a `dungeon` entity of kind `titan` with a `titan` block (cap, keys, ladder) and a
+single `titan`-mode stage, so a second one is an Admin edit rather than a release. It is
+excluded from the Depths hub, which is about floors and clears — neither of which it has.
+
 ### 9.3 Arena (async PvP) + Hall of Valor
 Classic arena: 4v4 vs snapshot **defense teams**; tokens cap 10, +1/hour (source-faithful), opponent offer list with refresh; Elo-lite rating → tiers **Bronze I-III, Silver I-III, Gold I-III, Platinum**; per-win **Valor Medals** (amount scales with tier) + weekly tier chest (reset Monday). **AI bots seed every band** (never an empty ladder; natural names with no bot marker — owner-approved; admin-managed). **Hall of Valor**: spend Valor Medals on permanent account-wide element-keyed stat bonuses (per element × stat, 10 levels — the Great Hall analog), doubling as the long-term arena sink.
 
@@ -171,13 +206,13 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 
 ## 12. Account & unlock cadence
 
-Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · L9 Chronicle · **L10 The Depths (springs)** · L12 relic dungeons · **L14 Proving Grounds + Masteries** · L16+ deep floors pacing. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
+Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · L9 Chronicle · **L10 The Depths (springs)** · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · L16+ deep floors pacing. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
 
 ## 13. Fairness & EA posture
 No payments in EA (crystals fully earnable; "premium" is a pacing currency, not a paywall). Real odds displayed. Bots never take top-10 leaderboard slots at week end (auto-yield rule). Single account per player expected but not enforced beyond rate limits. All balance changes publish-logged → visible "balance updated" badges (champion `balance_version`).
 
 ## 14. Post-EA parked systems (architected-for, not built)
-**Warbands** (guilds) + **the Vale Titan** (clan-boss analog) — first post-EA priority per the brief · **The Mistspire** (Doom-Tower-style ascending tower) · **Faction Trials** (faction-locked crypt ladders) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · Battle pass ("Vale Pass") · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
+**Warbands** (guilds) — first post-EA priority per the brief; ~~the Vale Titan (clan-boss analog)~~ **shipped solo in C9 as the Valewurm** (§9.2b), since the puzzle never needed a guild · **The Mistspire** (Doom-Tower-style ascending tower) · **Faction Trials** (faction-locked crypt ladders) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · Battle pass ("Vale Pass") · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
 
 ## 15. Approved additions (owner-approved 2026-08-16 — all in EA-0.1 scope)
 1. **Choice-based skill tomes** (vs the source's random books) — §7.

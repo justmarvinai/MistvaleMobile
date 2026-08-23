@@ -285,6 +285,15 @@ Stock is rolled per player and **stored**, not derived on read: what a player is
 ### `dungeon_progress` — **not built; deliberately**
 A floor *is* a stage, so its clear is already a `stage_progress` row with `parent_key` set to the dungeon. "Deepest floor" is the largest floor number among those rows and "clears" is their sum, both derived on read. A second table would be the same fact written twice, and the second copy is the one that drifts.
 
+### `titan_records`
+`player_id, dungeon_key, best_damage bigint, best_tier_key, last_damage bigint, runs int`, unique on `(player_id, dungeon_key)`.
+
+One bounded row per player per Titan, and deliberately **not** a log of runs. A Titan pays *per run*, at the rung that run reached, so there is no "already collected" state to keep — which is exactly what makes this a record rather than progress. What it holds is the two numbers the mode is about: the best you have ever managed, and the last thing you did, so "did that change help" is a glance rather than a memory. A `titan_runs` log would grow without bound for a fact nobody reads twice, and the nightly prune would have to learn about it.
+
+Keys are not here: they are an ordinary entry in `players.daily_counters`, keyed `titan:<dungeon_key>` so two Titans cannot share an allowance, and so the rollover needs no job (§5.1).
+
+**`best_tier_key` is the rung the *record run* reached**, not a recomputation — a worse run afterwards does not demote it, and only a new best moves it.
+
 ### `player_quests` / `player_missions`
 `player_id, quest_key, period_anchor, progress jsonb, completed_at, claimed_at`, unique on `(player_id, quest_key, period_anchor)`. Missions: the same without the anchor, unique on `(player_id, mission_key)`.
 

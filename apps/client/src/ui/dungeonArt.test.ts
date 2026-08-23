@@ -12,6 +12,7 @@ const KEEPS = [
   'spring_ember',
   'spring_tide',
   'spring_mist',
+  'titan_valewurm',
 ];
 
 describe('dungeonArt', () => {
@@ -26,9 +27,12 @@ describe('dungeonArt', () => {
     expect(dungeonArt('nothing_at_all')).toBeTruthy();
   });
 
-  it('colours the three groups apart, and answers for a fourth', () => {
-    const inks = ['relic', 'proving', 'springs'].map(dungeonInk);
-    expect(new Set(inks).size).toBe(3);
+  it('colours the four groups apart, and answers for a fifth', () => {
+    // A hub where two kinds share a colour is a hub nobody can scan, which is the whole
+    // reason the ink is by kind rather than by keep.
+    const kinds = ['relic', 'proving', 'springs', 'titan'];
+    const inks = kinds.map(dungeonInk);
+    expect(new Set(inks).size).toBe(kinds.length);
     expect(dungeonInk('something_new')).toBeUndefined();
   });
 });

@@ -41,6 +41,33 @@ export function bossRules(mechanics: BossMechanics | undefined): BossRule[] {
       glyph: 'glyph-hourglass',
     });
   }
+  // The three below were carried in content from P6 and stated by nothing — the same gap
+  // this file was written to close, left open in its own middle. The hit shield in
+  // particular is the *only* mechanic that changes which champions belong on a team rather
+  // than how they are geared, so leaving it unsaid made a team-building puzzle a guess.
+  if (mechanics.hitShield) {
+    rules.push({
+      label: `Shield — ${mechanics.hitShield.hits} hits`,
+      detail: `Land ${mechanics.hitShield.hits} hits between its turns to break it, or the whole team loses ${Math.round(mechanics.hitShield.punishTmPct)}% of its turn meter. A multi-hit attack is worth more here than a bigger one.`,
+      glyph: 'glyph-shield-block',
+    });
+  }
+  if (mechanics.thresholdRetaliation) {
+    rules.push({
+      label: `Answers every ${mechanics.thresholdRetaliation.perHpPct}%`,
+      detail: mechanics.thresholdRetaliation.skipIfDot
+        ? `It strikes back each time its health falls through another ${mechanics.thresholdRetaliation.perHpPct}%. Poison and burns do not set it off — chip it, or burst past a band in one blow.`
+        : `It strikes back each time its health falls through another ${mechanics.thresholdRetaliation.perHpPct}%, however the damage arrived.`,
+      glyph: 'glyph-fist-punch',
+    });
+  }
+  if (mechanics.addSummon) {
+    rules.push({
+      label: 'Calls for help',
+      detail: `It brings ${mechanics.addSummon.perTurn} more each turn, up to ${mechanics.addSummon.cap} at once. Bring something that hits everybody, or the adds will bury you.`,
+      glyph: 'glyph-cloaked-figure',
+    });
+  }
   if (mechanics.enrage) {
     rules.push({
       label: `Enrages on turn ${mechanics.enrage.afterTurn}`,

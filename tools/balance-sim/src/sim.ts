@@ -371,3 +371,110 @@ export function dungeonFloors(content: LoadedContent, dungeonKey: string): Stage
     .filter((stage) => stage.mode !== 'campaign' && stage.parentKey === dungeonKey)
     .sort((a, b) => a.number - b.number);
 }
+
+// ── The Titan ───────────────────────────────────────────────────────────────
+
+/** What a Titan run managed, which is the only number the mode is about. */
+export interface TitanResult {
+  stageKey: string;
+  runs: number;
+  /** Damage dealt to the Titan, per run, sorted ascending. */
+  damage: number[];
+  medianDamage: number;
+  bestDamage: number;
+  worstDamage: number;
+  /** How many runs ended by the turn cap rather than by the team falling. */
+  cappedRate: number;
+  /** How many runs actually killed it — should be none at EA. */
+  killRate: number;
+  medianTurns: number;
+  msPerRun: number;
+}
+
+/**
+ * Fights a Titan and measures how far a team gets.
+ *
+ * The Titan is the one mode a win rate says nothing about — it is authored so that nobody
+ * wins — so what is simulated here is the *distribution of damage*, which is what the
+ * ladder is priced against. A ladder whose top rung nobody reaches is a rung that does not
+ * exist, and one whose top rung everybody reaches is a mode with no ceiling; both are
+ * failures this can see and a win rate cannot.
+ *
+ * The turn cap comes from the keep, exactly as the battle route applies it, because a run
+ * measured against the global 300-turn guard is a run nobody will ever fight.
+ */
+export function simulateTitan(
+  content: LoadedContent,
+  stageKey: string,
+  team: readonly TeamSpec[],
+  turnCap: number,
+  runs: number,
+  seedBase = 1,
+): TitanResult {
+  const stage = content.stages.get(stageKey);
+  if (!stage) throw new Error(`No stage "${stageKey}" in the seeds.`);
+
+  const combat = { ...combatConfigFrom(content.config), maxTurns: turnCap };
+  const scaling = championScalingFrom(content.config);
+  const rules = buildRules('titan', content.skills, content.statuses);
+
+  const entries: ChampionEntry[] = team.map((member) => {
+    const def = content.champions.get(member.championKey);
+    if (!def) throw new Error(`No champion "${member.championKey}" in the seeds.`);
+    return {
+      def,
+      level: member.level,
+      rank: member.rank,
+      ascension: member.ascension,
+      ...(member.bonuses ? { bonuses: member.bonuses } : {}),
+    };
+  });
+
+  const damage: number[] = [];
+  const turns: number[] = [];
+  let capped = 0;
+  let killed = 0;
+  const started = performance.now();
+
+  for (let run = 0; run < runs; run += 1) {
+    const allies = buildTeam(entries, scaling, 'titan');
+    const waves = buildStageWaves(stage, content.enemies);
+    const opened = createBattle(
+      { seed: seedBase + run, mode: 'titan', allies, waves },
+      rules,
+      combat,
+    );
+    const result = advance(opened.state, rules, combat, { auto: true });
+    const events = [...opened.events, ...result.events];
+
+    // The same fold the server settles with: absorbed damage counts, and a blow the
+    // Titan landed on itself does not.
+    let dealt = 0;
+    for (const event of events) {
+      if (event.type !== 'damage') continue;
+      if (event.target.side !== 'enemy' || event.source.side === 'enemy') continue;
+      dealt += event.amount + event.absorbed;
+    }
+    damage.push(dealt);
+    turns.push(result.state.turn);
+    if (result.state.outcome === 'turnLimit') capped += 1;
+    if (result.state.outcome === 'victory') killed += 1;
+  }
+
+  const elapsed = performance.now() - started;
+  const sorted = [...damage].sort((a, b) => a - b);
+  const sortedTurns = [...turns].sort((a, b) => a - b);
+
+  return {
+    stageKey,
+    runs,
+    damage: sorted,
+    medianDamage: sorted[Math.floor(sorted.length / 2)] ?? 0,
+    bestDamage: sorted[sorted.length - 1] ?? 0,
+    worstDamage: sorted[0] ?? 0,
+    cappedRate: capped / runs,
+    killRate: killed / runs,
+    medianTurns: sortedTurns[Math.floor(sortedTurns.length / 2)] ?? 0,
+    msPerRun: elapsed / runs,
+  };
+}

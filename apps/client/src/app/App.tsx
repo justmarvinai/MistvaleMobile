@@ -8,6 +8,7 @@ import { HavenScreen } from '@/screens/Haven/HavenScreen';
 import { CampaignScreen } from '@/screens/Campaign/CampaignScreen';
 import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { DepthsScreen } from '@/screens/Depths/DepthsScreen';
+import { TitanScreen } from '@/screens/Titan/TitanScreen';
 import { ArenaScreen } from '@/screens/Arena/ArenaScreen';
 import { QuestsScreen } from '@/screens/Quests/QuestsScreen';
 import { MissionsScreen } from '@/screens/Missions/MissionsScreen';
@@ -166,6 +167,8 @@ function screenForMode(mode: string): ScreenId {
     case 'springs':
     case 'proving':
       return 'depths';
+    case 'titan':
+      return 'titan';
     case 'tutorial':
       return 'haven';
     default:
@@ -301,6 +304,8 @@ function GameShell() {
               <CampaignScreen />
             ) : screen === 'depths' ? (
               <DepthsScreen />
+            ) : screen === 'titan' ? (
+              <TitanScreen />
             ) : screen === 'arena' ? (
               <ArenaScreen />
             ) : screen === 'battle' ? (

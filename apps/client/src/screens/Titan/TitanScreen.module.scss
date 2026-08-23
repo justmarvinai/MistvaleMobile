@@ -1,0 +1,201 @@
+@use '../../styles/tokens' as *;
+
+/* The Valewurm. See TitanScreen.tsx.
+
+   One keep, one fight, one number — so the layout is a header that carries the entry (keys
+   and the button, B1's rule) and three panes under it that say what you managed, what is
+   above you, and what it does about being fought. */
+
+.screen {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: $space-3;
+  height: 100%;
+  min-height: 0;
+}
+
+.keeps {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: $space-2;
+}
+
+.keep {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+/* Key art rather than an icon: this is the one thing on the screen, and a 24px glyph
+   beside a name would make it look like a row in a list of many. */
+.art {
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter: drop-shadow(0 0 12px rgb(143 47 47 / 45%));
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.name {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 1.5rem;
+  color: $parchment;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.9rem;
+  color: $muted;
+}
+
+/* Keys and the button together: the allowance is the reason the button is or is not
+   pressable, so they are one thing rather than a number somewhere else on the page. */
+.entry {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $space-2;
+  flex: 0 0 auto;
+}
+
+.keys {
+  font-family: $font-mono;
+  font-size: 0.9rem;
+  color: $gold-soft;
+
+  &[data-spent='true'] {
+    color: $muted;
+  }
+}
+
+/* Three panes, and they wrap rather than squash: the ladder is the widest of them and a
+   two-column squeeze turns its reward chips into a stack of one. */
+.panes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: $space-3;
+  align-items: start;
+}
+
+.record,
+.ladder,
+.boss {
+  min-width: 0;
+}
+
+.none {
+  margin: 0;
+  color: $muted;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.figures {
+  display: flex;
+  gap: $space-4;
+  margin: 0 0 $space-2;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  dt {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $muted;
+  }
+
+  dd {
+    margin: 0;
+    font-family: $font-mono;
+    font-size: 1.25rem;
+    color: $parchment;
+  }
+}
+
+.best {
+  color: $gold;
+}
+
+/* A run that matched or beat the record reads differently from one that did not — that
+   comparison *is* the mode, and a number on its own says nothing about it. */
+.last[data-better='true'] {
+  color: $success;
+}
+
+.standingLine {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+.rungs {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rung {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px $space-3;
+  padding: $space-2;
+  border-left: 3px solid $edge;
+  background: rgb(0 0 0 / 18%);
+
+  /* Reached is a state, not a tick: the rung a player is standing on and the ones above it
+     are the whole point of looking at this list. */
+  &[data-reached='true'] {
+    border-left-color: $gold;
+    background: rgb(201 162 39 / 10%);
+  }
+}
+
+.rungName {
+  font-family: $font-display;
+  font-size: 1rem;
+  color: $parchment;
+
+  .rung[data-reached='false'] & {
+    color: $muted;
+  }
+}
+
+.rungDamage {
+  font-family: $font-mono;
+  font-size: 0.85rem;
+  color: $muted;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rungRewards {
+  grid-column: 1 / -1;
+}

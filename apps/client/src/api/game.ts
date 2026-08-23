@@ -21,6 +21,8 @@ import type {
   VaultState,
   Chronicle,
   Depths,
+  Titan,
+  TitanRun,
   MultiBattleRequest,
   MultiBattleResult,
   EventClaimRequest,
@@ -71,6 +73,8 @@ export type {
   ChampionDetail,
   Chronicle,
   Depths,
+  Titan,
+  TitanRun,
   GearInstance,
   HallOfValor,
   InventoryItem,
@@ -111,6 +115,11 @@ export interface BattleRewards {
   firstWin: Record<string, number>;
   /** What an Arena fight moved, on both ratings. Null for every other mode. */
   arena: ArenaResult | null;
+  /**
+   * What a Titan run managed, and what it was paid for it. Null for every other mode — a
+   * Titan is the only fight scored on how far it got rather than on whether it was won.
+   */
+  titan: TitanRun | null;
   /** Relics the vault had no room for, and the silver paid in their place (Q5). */
   vaultOverflow: VaultOverflow;
 }
@@ -293,6 +302,9 @@ export const gameApi = {
     api.get<{ progress: Progress }>(ROUTES.progress.stages).then((data) => data.progress),
 
   depths: () => api.get<{ depths: Depths }>(ROUTES.depths.overview).then((data) => data.depths),
+
+  /** Every Titan, its ladder, the keys left today, and this account's own record. */
+  titan: () => api.get<{ titan: Titan }>(ROUTES.titan.overview).then((data) => data.titan),
 
   // ── The Arena ─────────────────────────────────────────────────────────────
 

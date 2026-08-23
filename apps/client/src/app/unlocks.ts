@@ -107,6 +107,12 @@ const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> =
     blurb:
       'Emblems buy a champion the things a champion cannot be taught. Two trees of three, and no undoing it cheaply.',
   },
+  titan: {
+    screen: 'titan',
+    title: 'The Valewurm',
+    blurb:
+      'Something is coiled under the whole vale, and nobody expects to kill it. Two keys a day to go down and find out how much of it you can move — and then to come back with a better answer.',
+  },
 });
 
 /** Every unlock, in the order the game hands them over. */

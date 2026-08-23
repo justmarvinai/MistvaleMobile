@@ -60,6 +60,7 @@ export const ICON_NAMES = [
   'nav-quests',
   'nav-relics',
   'nav-settings',
+  'nav-titan',
   'nav-valor',
   // buff
   'buff-ally-protection',

@@ -72,6 +72,22 @@ Six levels, Rare and above only, and the last ladder — gated on the rarity's s
 ## 7. Masteries (Emblems)
 Full build = 100 Bronze + 600 Silver + 950 Gold Emblems (source-faithful shape; per-node costs in COMBAT §9). Proving Grounds run yields by floor ⚙: F1–4 Bronze 20–32, F5–7 Silver 10–16, F8–10 Gold 8–12 → first full mastery build ≈ 2 focused weeks. Crystal buyout 800 ⚙; reset first-free then 150 ⚙.
 
+## 7b. The Valewurm (Solo Titan)
+**Two keys a day**, restored by the daily rollover, spent when a run opens and never refunded — the mode is attempts-limited rather than resource-limited, which is what stops a fixed wall being brute-forced with a big enough energy bar. No energy cost and no multi-battle.
+
+**Paid per run at the highest rung reached**, on any ending — victory, defeat, the cap, or a retreat. Six rungs ⚙, priced against **measured** damage rather than guessed: `pnpm sim` fights the Valewurm with a fresh, a middling and a fully-built team, and the ladder is set so a fresh account clears the bottom rung on a typical first key while the top rung sits above what a fully-built team (on the sim's deliberately modest relic set) usually manages.
+
+| Rung | Damage ⚙ | Pays ⚙ |
+|---|---|---|
+| Splintered Hoard | 8,000 | 12k silver · 2 Bronze Emblem |
+| Mossbound Cache | 25,000 | 28k silver · 4 Bronze Emblem · 2 Mistbrew |
+| Rootdeep Coffer | 60,000 | 55k silver · 2 Silver Emblem · 1 Pure Essence |
+| Wyrmscale Vault | 110,000 | 95k silver · 4 Silver Emblem · 2 Pure Essence · 25 crystals |
+| Heart of the Vale | 175,000 | 160k silver · 2 Gold Emblem · 2 Waking Shard · 50 crystals |
+| Titanshard | 250,000 | 260k silver · 4 Gold Emblem · 4 Waking Shard · 1 Mistwoven Sigil · 100 crystals |
+
+**What it is a faucet for** is deliberately the two materials the deep game is short of — mastery emblems and Waking Shards — at a rate that is meaningful but capped by the keys, so it accelerates a build rather than replacing the Proving Grounds and the deep Depths floors that supply them.
+
 ## 8. Arena & Hall of Valor
 - **Rating:** Elo-lite K=32 vs snapshot defense; win +20–35 by gap ⚙; loss-floor protection in Bronze 〔dev — friendlier smalltown ladder〕. Weekly reset Monday 04:00 (config timezone): rating soft-decays toward tier floors ⚙.
 - **Tier thresholds** ⚙: Bronze I 0 / II 800 / III 1,000; Silver I 1,200 / II 1,400 / III 1,700; Gold I 2,000 / II 2,300 / III 2,600; Platinum 3,000.

@@ -165,9 +165,10 @@ export type AssetDef = z.infer<typeof assetDefSchema>;
 /** Base stats at ★6 / level 60 / ascension 6; lower tiers derive from these. */
 export const baseStatsSchema = z.object({
   // The ceiling is a guard against a slipped zero, not a design limit: it has to clear the
-  // heaviest thing the game fights, which since the Depths is a keep-boss rather than a
-  // chapter warlord. Champions live an order of magnitude below it.
-  hp: z.number().int().min(100).max(250_000),
+  // heaviest thing the game fights, which since C9 is a Titan rather than a keep-boss —
+  // a wall authored so that no team kills it, where a keep-boss is authored to fall.
+  // Champions live three orders of magnitude below it and keep-bosses two.
+  hp: z.number().int().min(100).max(100_000_000),
   atk: z.number().int().min(10).max(5_000),
   def: z.number().int().min(10).max(5_000),
   spd: z.number().int().min(50).max(200),
@@ -495,19 +496,65 @@ export const waveUnitSchema = z.object({
   slot: z.number().int().min(0).max(3),
 });
 
-export const STAGE_MODES = ['campaign', 'dungeon', 'springs', 'proving', 'tutorial'] as const;
+export const STAGE_MODES = [
+  'campaign',
+  'dungeon',
+  'springs',
+  'proving',
+  'tutorial',
+  'titan',
+] as const;
 
 // ── The Depths ──────────────────────────────────────────────────────────────
 
 /**
  * What kind of keep a dungeon is.
  *
- * The three kinds differ in what they pay and when they open, not in how they are fought:
+ * The first three differ in what they pay and when they open, not in how they are fought:
  * a floor is a stage like any other, so everything the campaign already does — unlocks,
  * stars, clears, first-clear bonuses — applies here without a second implementation.
+ *
+ * **`titan` is the exception, and it is one deliberately.** A Titan is not cleared; it is
+ * *survived*, and what a run is worth is how much of it you took down before the turn cap
+ * or your own last champion ran out. So a titan keep carries a `titan` block — the cap, the
+ * keys, and the damage tiers — and its single floor is fought with keys rather than energy
+ * and paid on any ending rather than on a victory.
  */
-export const DUNGEON_KINDS = ['relic', 'proving', 'springs'] as const;
+export const DUNGEON_KINDS = ['relic', 'proving', 'springs', 'titan'] as const;
 export type DungeonKind = (typeof DUNGEON_KINDS)[number];
+
+/**
+ * One rung of a Titan's damage ladder.
+ *
+ * The same shape as a chapter's star chest — a threshold and a bag of rewards — because it
+ * is the same idea: a number you reach rather than a thing you beat. What differs is that
+ * a Titan pays it *every run* rather than once, since the run is the achievement.
+ */
+export const titanTierSchema = z.object({
+  key: contentKeySchema,
+  name: z.string().min(1).max(48),
+  /** Damage this rung wants. The highest rung a run reaches is the one it is paid at. */
+  damage: z.number().int().min(1).max(1_000_000_000),
+  rewards: z.record(z.string(), z.number()),
+});
+export type TitanTier = z.infer<typeof titanTierSchema>;
+
+/**
+ * A Titan's rules: how long a run lasts, how many a day, and what each is worth.
+ *
+ * The turn cap is the mode. A campaign stage ends when one side is gone; a Titan is built
+ * so that side is always yours, and the cap is what turns "can you win" into "how far can
+ * you get" — the fight worth optimising that the rest of the game does not have.
+ */
+export const titanRulesSchema = z.object({
+  /** Turns a run lasts before the Titan sees you off. Overrides `combat.maxTurns`. */
+  turnCap: z.number().int().min(5).max(200).default(50),
+  /** Keys a day. Spent instead of energy, and restored by the daily rollover. */
+  keysPerDay: z.number().int().min(1).max(20).default(2),
+  /** Ascending by damage. Publish validation refuses an out-of-order or empty ladder. */
+  tiers: z.array(titanTierSchema).max(12).default([]),
+});
+export type TitanRules = z.infer<typeof titanRulesSchema>;
 
 export const dungeonDefSchema = contentMetaSchema.extend({
   name: z.string().min(1).max(64),
@@ -533,6 +580,11 @@ export const dungeonDefSchema = contentMetaSchema.extend({
   openDays: z.array(z.number().int().min(0).max(6)).max(7).default([]),
   /** Account level the whole dungeon opens at. Floor 1 inherits it; deeper floors chain. */
   unlockLevel: z.number().int().min(1).max(60).default(1),
+  /**
+   * What makes a Titan a Titan. Required on a `titan` keep and refused on every other kind
+   * (publish validation), because the three numbers here are the whole of the mode.
+   */
+  titan: titanRulesSchema.optional(),
 });
 export type DungeonDef = z.infer<typeof dungeonDefSchema>;
 

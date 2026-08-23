@@ -31,6 +31,7 @@ import {
   type MultiBattleState,
   type MultiBattleStopReason,
   type StageDef,
+  type TitanRun,
 } from '@mistvale/shared';
 import { battleSessions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
@@ -42,6 +43,7 @@ import * as hall from '../arena/hall';
 import * as ladder from '../arena/ladder';
 import { arenaConfigFrom } from '../arena/rating';
 import * as depths from '../depths/service';
+import * as titan from '../titan/service';
 import * as gear from '../gear/service';
 import { borrowedTeam, PresetTeamError } from './preset';
 import * as mastery from '../mastery/service';
@@ -117,6 +119,12 @@ export interface RewardSummary {
   /** Chapter star-chest tiers this clear crossed. */
   chestTiers: number[];
   /**
+   * What a Titan run was worth: the damage, the rung it reached, and whether it beat the
+   * account's own record. Null for every other mode — a Titan is the only fight in the
+   * game paid for how far it got rather than for whether it was won.
+   */
+  titan: TitanRun | null;
+  /**
    * The day's first victory in this mode, paid automatically. Empty once it has been
    * earned today, or in a mode the config pays nothing for.
    */
@@ -151,6 +159,7 @@ const NO_REWARDS: RewardSummary = {
   chestTiers: [],
   firstWin: {},
   arena: null,
+  titan: null,
   vaultOverflow: gear.NO_OVERFLOW,
 };
 
@@ -175,6 +184,26 @@ function engineRules(content: ContentCache, mode: BattleMode) {
 }
 
 type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
+
+/**
+ * The engine config a fight runs on, with a Titan's own turn cap applied.
+ *
+ * `combat.maxTurns` is a runaway guard at 300; a Titan's cap is the *length of the puzzle*
+ * and belongs to the keep. It is applied as an override on the config rather than as a new
+ * rule, because a cap is a number the engine already reads. Every path that advances a
+ * fight goes through this, since a cap honoured only when the fight opened is no cap.
+ */
+function titanConfigFor(
+  ctx: BattleContext,
+  config: ReturnType<typeof combatConfigFrom>,
+  mode: string,
+  stageKey: string,
+): ReturnType<typeof combatConfigFrom> {
+  if (mode !== 'titan') return config;
+  const stage = contentMaps(ctx.content).stages.get(stageKey);
+  const keep = stage ? titan.keepForStage(ctx.content, stage) : null;
+  return keep ? { ...config, maxTurns: keep.rules.turnCap } : config;
+}
 
 function assertTeamShape(team: readonly string[]): void {
   if (team.length === 0 || team.length > MAX_TEAM) {
@@ -403,10 +432,34 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       level: player.level,
       now,
     });
+    // A Titan is paid for in keys rather than energy: the resource the mode limits is
+    // *attempts*, because the whole point is a wall you cannot brute-force by farming.
+    // Refused and spent here, under the player-row lock this transaction already holds,
+    // so two taps on a flaky connection cannot spend one key twice.
+    const keep = titan.keepForStage(ctx.content, stage);
+    if (options.mode === 'titan') {
+      if (!keep) {
+        throw new AppError('CONTENT_STALE', `Stage "${stage.key}" has no Titan behind it.`);
+      }
+      await titan.spendKey(
+        tx,
+        ctx.content,
+        {
+          playerId: options.playerId,
+          level: player.level,
+          dailyCounters: player.dailyCounters,
+          dailyCountersDay: player.dailyCountersDay,
+        },
+        keep,
+        now,
+      );
+    }
+
     // Practice re-fights are free by design (GAME_DESIGN §15 — the sandbox), and so is the
     // cold open — a fight before the account has spent anything cannot cost energy it has
     // not been shown yet.
-    const cost = options.mode === 'practice' || borrowed ? 0 : stage.energyCost;
+    const cost =
+      options.mode === 'practice' || options.mode === 'titan' || borrowed ? 0 : stage.energyCost;
     if (energy.value < cost) {
       throw new AppError('ENERGY_LOW', 'Not enough energy for that stage.');
     }
@@ -426,6 +479,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // not be able to predict a fight from a previous one's replay.
     const seed = randomSeed();
     const rules = engineRules(ctx.content, options.mode);
+    const battleConfig = titanConfigFor(ctx, config, options.mode, stage.key);
     const opened = createBattle(
       {
         seed,
@@ -434,7 +488,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         waves: buildStageWaves(stage, enemies),
       },
       rules,
-      config,
+      battleConfig,
     );
 
     // …and then run it to the first decision the player actually has to make.
@@ -451,7 +505,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // `auto: false` stops the moment an ally is ready to choose, so what the player gets
     // is the opening as it happened: meters filling, any enemy faster than the whole team
     // acting first, and then the bar.
-    const first = advance(opened.state, rules, config, { auto: false });
+    const first = advance(opened.state, rules, battleConfig, { auto: false });
     const openingState = first.state;
     const openingEvents = [...opened.events, ...first.events];
 
@@ -491,13 +545,15 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // lost. Settled here rather than left `active` with `finished` state, which is a fight
     // the player could neither act in nor be paid for.
     const summary = openingState.finished
-      ? await settle(
-          tx,
-          ctx,
-          { ...row, teamIds: (row.teamIds as string[]) ?? [] },
-          openingState,
-          options.playerId,
-        )
+      ? options.mode === 'titan'
+        ? await settleTitan(tx, ctx, row, openingEvents, options.playerId)
+        : await settle(
+            tx,
+            ctx,
+            { ...row, teamIds: (row.teamIds as string[]) ?? [] },
+            openingState,
+            options.playerId,
+          )
       : null;
     if (summary) {
       await tx
@@ -611,9 +667,14 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
     const snapshot = ctx.content.current();
     const config = combatConfigFrom(snapshot.bundle.config);
     const rules = engineRules(ctx.content, row.mode as BattleMode);
+    // Every turn of a Titan run has to be advanced against the *Titan's* cap, not the
+    // global runaway guard — a cap applied only when the fight opened would let the run go
+    // on to 300 turns from the second step onward, which is the mode with its point
+    // removed.
+    const battleConfig = titanConfigFor(ctx, config, row.mode, row.stageKey);
 
     const state = row.state as BattleState;
-    const result = advance(state, rules, config, {
+    const result = advance(state, rules, battleConfig, {
       auto: options.auto ?? false,
       ...(options.autoTurns === undefined ? {} : { autoTurns: options.autoTurns }),
       ...(options.focus ? { focus: options.focus } : {}),
@@ -628,13 +689,15 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
       summary =
         row.mode === 'arena'
           ? await settleArena(tx, ctx, row, result.state.outcome, options.playerId)
-          : await settle(
-              tx,
-              ctx,
-              { ...row, teamIds: (row.teamIds as string[]) ?? [] },
-              result.state,
-              options.playerId,
-            );
+          : row.mode === 'titan'
+            ? await settleTitan(tx, ctx, row, events, options.playerId)
+            : await settle(
+                tx,
+                ctx,
+                { ...row, teamIds: (row.teamIds as string[]) ?? [] },
+                result.state,
+                options.playerId,
+              );
     }
 
     await tx
@@ -684,14 +747,27 @@ export async function retreat(
     const config = combatConfigFrom(snapshot.bundle.config);
     const rules = engineRules(ctx.content, row.mode as BattleMode);
 
-    const result = retreatBattle(row.state as BattleState, rules, config);
+    const result = retreatBattle(
+      row.state as BattleState,
+      rules,
+      titanConfigFor(ctx, config, row.mode, row.stageKey),
+    );
     const events = [...(row.events as BattleEvent[]), ...result.events];
 
     // Walking out of an arena fight is a loss, not an escape from one. The token is gone
     // either way, so a costless retreat would only mean a player could abandon every fight
     // that started badly — which would make losing rating opt-in and the ladder a fiction.
+    // Walking out of a Titan run is not an escape either — the key is spent — but unlike
+    // the Arena there is nothing to be spared by it: damage only ever accumulates, so
+    // stopping early can only lower the score. So a retreat is settled and *paid* for what
+    // it managed, which is the honest reading of "how far did you get" and means a
+    // mis-click does not cost a whole attempt.
     const summary =
-      row.mode === 'arena' ? await settleArena(tx, ctx, row, 'retreat', playerId) : null;
+      row.mode === 'arena'
+        ? await settleArena(tx, ctx, row, 'retreat', playerId)
+        : row.mode === 'titan'
+          ? await settleTitan(tx, ctx, row, events, playerId)
+          : null;
 
     await tx
       .update(battleSessions)
@@ -1118,6 +1194,7 @@ async function settle(
     chestTiers: cleared.chestTiers,
     firstWin,
     arena: null,
+    titan: null,
   };
 }
 
@@ -1153,6 +1230,58 @@ export async function settleArena(
     outcome === 'victory' ? await quests.awardFirstWin(tx, ctx, playerId, 'arena') : {};
 
   return { ...NO_REWARDS, firstWin, arena };
+}
+
+/**
+ * Settles a Titan run: scores it, records it, and pays the rung it reached.
+ *
+ * Separate from `settle` for the reason the mode exists — `settle` returns null unless the
+ * outcome is `victory`, and a Titan run almost never is one. **Every ending pays**: the
+ * turn cap is the ordinary one, a defeat is the early one, and a kill is the top of the
+ * ladder. What differs between them is only how much damage was done by the time it
+ * stopped, which is the number the whole mode is about.
+ *
+ * The rewards go through `RewardService` like everything else, so a Titan chest lands in
+ * the economy log beside a chapter chest and nothing here becomes a second payout path.
+ */
+async function settleTitan(
+  tx: Tx,
+  ctx: BattleContext,
+  row: { stageKey: string },
+  events: readonly BattleEvent[],
+  playerId: string,
+): Promise<RewardSummary> {
+  const { stages } = contentMaps(ctx.content);
+  const stage = stages.get(row.stageKey);
+  const keep = stage ? titan.keepForStage(ctx.content, stage) : null;
+  // A Titan un-published mid-fight. The run is over and cannot be scored against a ladder
+  // that no longer exists; saying so beats crediting a rung nobody authored.
+  if (!keep) return { ...NO_REWARDS };
+
+  const now = new Date();
+  const counters = await titan.countersOf(tx, ctx.content, playerId, now);
+  const run = await titan.settleRun(tx, playerId, keep, events, counters);
+
+  const bonus = { ...run.rewards };
+  const granted =
+    Object.keys(bonus).length > 0
+      ? await rewards.grant(tx, playerId, bonus, rewards.battleSource('titan', row.stageKey))
+      : null;
+
+  // One run is two reports: it happened, and it is worth this much. The damage one is a
+  // *threshold*, so a mission asking for half a million wants one run that did it rather
+  // than fifty that add up — which is what `GOAL_ACCUMULATION` says about `titanDamage`.
+  await meta.track(tx, ctx, playerId, [
+    { type: 'titanRun', facts: { dungeonKey: keep.dungeon.key } },
+    { type: 'titanDamage', amount: run.damage, facts: { dungeonKey: keep.dungeon.key } },
+  ]);
+
+  return {
+    ...NO_REWARDS,
+    titan: run,
+    bonus,
+    levelsGained: granted?.levelsGained ?? 0,
+  };
 }
 
 /** Whether a stage's waves hold anything content has flagged as a boss. */

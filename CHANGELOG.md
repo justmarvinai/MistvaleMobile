@@ -5,6 +5,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the Valewurm, a fight nobody wins
+
+Every other mode in Mistvale asks *can you beat this*. The Valewurm asks **how far can you
+get**, which is a different question and the one the loop was missing: a wall that does not
+move, a team that does, and a number afterwards that says whether the last thing you changed
+helped. It is the source game's Clan Boss with the clan taken out — the puzzle never needed
+a guild, only an opponent nobody clears.
+
+- **A run ends on the turn cap**, not on a victory. Fifty turns for the Valewurm, with an
+  enrage from turn thirty that makes the back half the dangerous half.
+- **Paid on damage, on any ending.** Victory, defeat, the cap and a retreat all score at the
+  highest rung the run reached. A retreat is scored rather than voided because damage only
+  accumulates — stopping early can only lower the number, so a mis-click does not cost a
+  whole attempt.
+- **Keys, not energy.** Two a day, spent when the fight opens and never refunded, and no
+  multi-battle. The resource the mode limits is *attempts*, which is what stops a fixed wall
+  being brute-forced with a big enough energy bar.
+- **The mechanics are the puzzle.** The hit-counter shield wants five hits between its turns
+  — reachable with a multi-hit attack on the team, out of reach with four big single ones —
+  and turn-meter manipulation is deliberately left open. Both are stated on the boss card
+  before the key is spent.
+
+The screen is the record and the ladder: your best run, what the last key did beside it, every
+rung with what it pays and which you have reached, and what it does about being fought. A
+run's result reads *Measured* rather than *Defeat*, because calling a good run a loss is the
+screen arguing with the mode.
+
+**The ladder is measured rather than guessed.** `pnpm sim` fights the Valewurm with a fresh,
+a middling and a fully-built team and gates four things about the spread: nobody kills it, a
+fresh account clears the bottom rung, a built one is an order of magnitude past that, and the
+top rung is still above what a built team typically manages — so there is something left to
+chase. Two goal types (`titanRun`, `titanDamage`) come with it, so a quest or a mission can
+ask for a run or for a damage figure.
+
+A Titan is a `dungeon` of kind `titan` carrying a `titan` block — the cap, the keys and the
+ladder — plus one `titan`-mode stage. A second one is an Admin edit, not a release.
+
+### Fixed — three boss mechanics that content carried and no screen said
+
+`BossCard` was written in D8 to turn a boss's flags into the sentences that change what a
+player does, and it stated two of the five. The hit-counter shield, the threshold retaliation
+and the add-summoning had been in content since P6 and appeared nowhere — so a keep that is
+meant to be a puzzle was still a wall you lost to before guessing. All five are stated now,
+and a test counts them, so a sixth mechanic added to the schema fails the build rather than
+being silently left off the card.
+
 ### Added — a fight that moves
 
 Battles were static: bodies idled, numbers changed, and nothing in between said a blow had

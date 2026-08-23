@@ -25,6 +25,8 @@ const DUNGEON_ART: Readonly<Record<string, string>> = Object.freeze({
   spring_ember: 'fire-molten-heart',
   spring_tide: 'fx-frost-comet',
   spring_mist: 'orb-voidspiral',
+  // The thing under all of it.
+  titan_valewurm: 'blood-serpent-coil',
 });
 
 /** What a keep of this kind looks like when nobody has drawn it one of its own. */
@@ -32,6 +34,7 @@ const KIND_ART: Readonly<Record<string, string>> = Object.freeze({
   relic: 'earth-rune-arch',
   proving: 'earth-monolith',
   springs: 'fx-lotus-spring',
+  titan: 'blood-serpent-coil',
 });
 
 const FALLBACK = 'bg-scene-dark';
@@ -50,6 +53,7 @@ const KIND_INK: Readonly<Record<string, string>> = Object.freeze({
   relic: '#c2764a',
   proving: '#c9a227',
   springs: '#57b35c',
+  titan: '#8f2f2f',
 });
 
 export function dungeonInk(kind: string): string | undefined {

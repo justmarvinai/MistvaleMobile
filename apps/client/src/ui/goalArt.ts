@@ -37,6 +37,8 @@ const GOAL_GLYPH: Readonly<Record<GoalType, string>> = Object.freeze({
   questClaim: 'glyph-holy-totem',
   claimAllDailies: 'glyph-peace-dove',
   championObtained: 'glyph-owl',
+  titanRun: 'glyph-thorny-branch',
+  titanDamage: 'glyph-stomp-impact',
 });
 
 /** The generic one, for a goal type content invented after this was written. */

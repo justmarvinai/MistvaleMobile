@@ -109,6 +109,16 @@ export const ROUTES = {
     /** The dungeon list with today's rotation and how deep the player has been. */
     overview: '/depths',
   },
+  titan: {
+    /**
+     * Every Titan, its ladder, the keys left today and this account's own record.
+     *
+     * A read only: a run is an ordinary battle (`mode: 'titan'`) through the battle
+     * routes, so the playback, Auto, the speed ladder and a reload mid-fight all work
+     * here without a second implementation of any of them.
+     */
+    overview: '/titan',
+  },
   arena: {
     /** State, offers and the token meter in one read — what the hub renders from. */
     state: '/arena',

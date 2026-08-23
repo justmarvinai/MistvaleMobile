@@ -88,6 +88,7 @@ export const ICONS = {
   'nav-campaign': { group: 'nav', name: 'treasure-map', use: 'Campaign' },
   'nav-depths': { group: 'nav', name: 'cave-entrance', use: 'The Depths' },
   'nav-arena': { group: 'nav', name: 'crossed-sabres', use: 'Arena' },
+  'nav-titan': { group: 'nav', name: 'sea-serpent', use: 'The Titan' },
   'nav-mistgate': { group: 'nav', name: 'portal', use: 'Mistgate (summoning)' },
   'nav-bazaar': { group: 'nav', name: 'shop', use: 'Bazaar' },
   'nav-quests': { group: 'nav', name: 'scroll-quill', use: 'Quests' },

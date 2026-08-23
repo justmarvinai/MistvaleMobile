@@ -245,5 +245,39 @@ export const chapterRewards = pgTable(
   ],
 );
 
+/**
+ * What an account has managed against each Titan.
+ *
+ * One row per player per keep rather than a log of runs. A Titan pays *per run*, at the
+ * rung that run reached, so nothing here is a claim ledger — there is no "already
+ * collected" state to keep, which is exactly what makes it a record rather than progress.
+ * What it holds is the two numbers the screen is about: the best you have ever managed,
+ * and the last thing you did, so "did that change help" is a glance rather than a memory.
+ *
+ * Deliberately not a `titan_runs` table. A per-run log grows without bound for a fact
+ * nobody reads twice, and the nightly prune would have to learn about it; a bounded row
+ * per keep says everything the mode needs and costs one write a run.
+ */
+export const titanRecords = pgTable(
+  'titan_records',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    /** `dungeon_defs` key of the Titan. */
+    dungeonKey: text('dungeon_key').notNull(),
+    /** Best damage ever dealt here, and the rung it reached. */
+    bestDamage: bigint('best_damage', { mode: 'number' }).notNull().default(0),
+    bestTierKey: text('best_tier_key'),
+    /** The most recent run, whatever it was worth. */
+    lastDamage: bigint('last_damage', { mode: 'number' }).notNull().default(0),
+    runs: integer('runs').notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('titan_records_player_dungeon_key').on(table.playerId, table.dungeonKey)],
+);
+
 export type StageProgressRow = typeof stageProgress.$inferSelect;
 export type ChapterRewardRow = typeof chapterRewards.$inferSelect;
+export type TitanRecordRow = typeof titanRecords.$inferSelect;

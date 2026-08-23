@@ -91,6 +91,7 @@ export interface UnlockFlags {
   dungeons: boolean;
   provingGrounds: boolean;
   masteries: boolean;
+  titan: boolean;
 }
 
 /** Account level at which each feature unlocks. Mirrored in game_config from P1. */
@@ -108,6 +109,7 @@ export const UNLOCK_LEVELS: Readonly<Record<keyof UnlockFlags, number>> = Object
   dungeons: 12,
   provingGrounds: 14,
   masteries: 14,
+  titan: 16,
 });
 
 export function computeUnlocks(level: number): UnlockFlags {

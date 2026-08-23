@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { MultiBattleResult, StageDef } from '@mistvale/shared';
+import type { MultiBattleResult, StageDef, TitanStanding } from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
@@ -46,11 +46,21 @@ const MAX_SLOTS = 4;
 export function TeamSelect({
   stage,
   title,
+  titan,
   onClose,
 }: {
   stage: StageDef;
   /** Heading for the modal; defaults to the stage's own number. */
   title?: string;
+  /**
+   * The Titan's standing, when this is a Titan run.
+   *
+   * A Titan is the one fight paid for in *keys* rather than energy, cannot be farmed, and
+   * has no clear to practise — so the three lines about cost, farming and practice are
+   * about something else here. Passed in rather than looked up, so the picker stays a
+   * picker and the Titan screen stays the one place that knows about keys.
+   */
+  titan?: TitanStanding;
   onClose: () => void;
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
@@ -104,7 +114,9 @@ export function TeamSelect({
     [bundle],
   );
 
-  const affordable = energy >= stage.energyCost;
+  // A Titan costs a key rather than energy, so the energy bar has nothing to say about
+  // whether the button works — but a spent allowance does.
+  const affordable = titan ? titan.keysLeft > 0 : energy >= stage.energyCost;
   /** Whoever stands in the last wave, if it is somebody worth warning about. */
   const boss = stageBoss(stage, bundle?.enemies);
   const picked = team.length > 0;
@@ -184,8 +196,9 @@ export function TeamSelect({
     <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose} size="wide">
       <div className={styles.body}>
         <p className={styles.summary}>
-          {stage.waves.length} waves · {stage.energyCost} energy · {stage.rewards.silverMin}–
-          {stage.rewards.silverMax} silver
+          {titan
+            ? `One wave · ${titan.turnCap} turns · paid for the damage you do`
+            : `${stage.waves.length} waves · ${stage.energyCost} energy · ${stage.rewards.silverMin}–${stage.rewards.silverMax} silver`}
         </p>
 
         {/* Who is on the other side, wave by wave. Content has named every enemy of every
@@ -270,16 +283,18 @@ export function TeamSelect({
 
         <div className={styles.actions}>
           <span className={styles.cost}>
-            {affordable
-              ? `Costs ${stage.energyCost} energy — you have ${energy}`
-              : `Needs ${stage.energyCost} energy — you have ${energy}`}
+            {titan
+              ? `Costs one key — ${titan.keysLeft} of ${titan.keysPerDay} left today`
+              : affordable
+                ? `Costs ${stage.energyCost} energy — you have ${energy}`
+                : `Needs ${stage.energyCost} energy — you have ${energy}`}
           </span>
           <Button onClick={() => void start(stage.mode)} disabled={!canStart}>
             {busy ? 'Starting…' : 'Into the mist'}
           </Button>
         </div>
 
-        {multi.unlocked && (
+        {multi.unlocked && !titan && (
           <div className={styles.farm}>
             <span className={styles.farmLabel}>
               Farm without watching — {multi.runsLeftToday} of {multi.dailyCap} runs left today

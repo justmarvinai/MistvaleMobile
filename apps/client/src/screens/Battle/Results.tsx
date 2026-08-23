@@ -80,6 +80,7 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
   // bug rather than as the deal the player took.
   const practice = battle?.mode === 'practice';
   const arena = rewards?.arena ?? null;
+  const titan = rewards?.titan ?? null;
 
   const options = useMemo(() => {
     // The Arena pays in rating and medals and nothing else, and it pays on a loss too — so
@@ -114,6 +115,43 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
               : `${arena.opponent} held`,
         stats,
         actions: [{ id: 'leave', label: 'Back to the Arena', primary: true }],
+      };
+    }
+
+    // A Titan run has no victory to report and does not need one. What it has is a number,
+    // the rung that number reached, and whether it beat the last one — which is the whole
+    // feedback loop of the mode and is worth more than "Defeat" in large letters.
+    if (titan) {
+      const stats: ResultStat[] = [
+        {
+          label: 'Damage dealt',
+          value: titan.damage.toLocaleString(),
+          best: titan.personalBest,
+        },
+      ];
+      if (titan.previousBest > 0) {
+        stats.push({
+          label: titan.personalBest ? 'Previous best' : 'Your best',
+          value: titan.previousBest.toLocaleString(),
+        });
+      }
+      stats.push({ label: 'Keys left today', value: titan.keysLeft });
+
+      const chips: ResultReward[] = Object.entries(titan.rewards)
+        .filter((entry): entry is [string, number] => typeof entry[1] === 'number' && entry[1] > 0)
+        .map(([key, amount]) => ({ icon: rewardArt(key), label: nameOf(key), qty: amount }));
+
+      return {
+        // Neutral rather than defeat: nobody was supposed to win, and calling a good run a
+        // loss is the screen arguing with the mode.
+        outcome: titan.personalBest ? ('victory' as const) : ('neutral' as const),
+        title: titan.personalBest ? 'A new best' : 'Measured',
+        subtitle: titan.tierName
+          ? `${titan.damage.toLocaleString()} damage — ${titan.tierName}`
+          : `${titan.damage.toLocaleString()} damage — not enough for the first rung yet`,
+        stats,
+        ...(chips.length > 0 ? { rewards: chips } : {}),
+        actions: [{ id: 'leave', label: 'Back to the Valewurm', primary: true }],
       };
     }
 
@@ -183,7 +221,7 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
       ...(chips.length > 0 ? { rewards: chips } : {}),
       actions: [{ id: 'leave', label: 'Back to the campaign', primary: true }],
     };
-  }, [arena, nameOf, outcome, practice, rewards, stageName, won]);
+  }, [arena, nameOf, outcome, practice, rewards, stageName, titan, won]);
 
   /**
    * One tooltip per chip, in the order the library builds them: experience, then silver,

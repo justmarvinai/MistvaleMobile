@@ -34,7 +34,12 @@ export const depthsRoutes: FastifyPluginAsync = async (app) => {
     const floorNumbers = new Map(bundle.stages.map((stage) => [stage.key, stage.number]));
     const reached = await depths.standings(app.db, playerId, floorNumbers);
 
-    const dungeons: DungeonStanding[] = bundle.dungeons.map((dungeon) => {
+    // Titans are not keeps in the Depths sense — no floors, no rotation, no clears — and
+    // they have their own screen. Filtered here rather than at the seed so a Titan can go
+    // on using the `dungeon` content type, which is where every other thing about it fits.
+    const keeps = bundle.dungeons.filter((dungeon) => dungeon.kind !== 'titan');
+
+    const dungeons: DungeonStanding[] = keeps.map((dungeon) => {
       const gate = depths.gateFor(dungeon, player.level, context.rotation);
       const standing = reached.get(dungeon.key);
       return {
