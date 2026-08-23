@@ -232,7 +232,58 @@ a native image module in the build on the box the budget is about.
 ---
 
 ### Post-EA (parked, in brief-priority order)
-Warbands (guilds) + Vale Titan → the Mistspire → Faction Trials → Live/Tag Arena → Fusions → Forge/crafting → Boons → Awakening/Mythic → Vale Pass → skins/localization/native wrappers.
+Warbands (guilds) + Vale Titan → the Mistspire → Faction Trials → Live/Tag Arena → Fusions → Forge/crafting → Boons → ~~Awakening~~ (**done — C6**) / Mythic → Vale Pass → skins/localization/native wrappers.
+
+### Proposed (2026-08-22) — the owner asked what else would make the game better
+
+Not approved, not scheduled: a list to pick from. Ordered by value-for-cost rather than by
+size, and each notes what it can lean on, because the cheap ones are cheap *because the
+engine, the goal DSL and the events framework already do most of the work*.
+
+**Would change how the game plays**
+
+1. **A solo Titan** — one huge enemy, a few keys a day, damage-tier chests. The parked plan
+   couples the Vale Titan to Warbands, but the *puzzle* — improve the same team against the
+   same wall — needs no guild at all. It is the one thing the loop lacks: a fight worth
+   optimising rather than clearing. Leans on `dungeon` stages, `BossCard` and the reward
+   tiers the chapter chests already use.
+2. **The Mistspire** — the parked tower, but the reason to want it is that no mode yet
+   rewards *breadth*: the Arena and the campaign are both won with one good team.
+3. **Faction Trials** — the other breadth pressure, and the one that gives the eight
+   factions a mechanical meaning rather than a visual one.
+4. **The Vale Pass** — a season with a reward track. Parked as a large item, but P8's goal
+   engine, `event` content, the ladder rail and `ui/Ledger` are between them most of it.
+
+**Would be felt every session (small, high-frequency)**
+
+5. **Relic loadouts** — save and swap a champion's nine relics as a set. Moving a set today
+   is nine equips and nine memories.
+6. **Bulk relic actions** — sell/forge by filter. The vault already has selection and a
+   toolbar; what is missing is acting on a filter rather than on a click per relic.
+7. **Roster filter and sort** — by faction, rarity, role, "not at cap", "wearing nothing".
+   Thirty-seven champions is already past what a flat grid serves.
+8. **A "what is ready" card on the Haven** — quests claimable, arena tokens full, today's
+   spring, multi-battle left. Every one of those numbers is already on the player snapshot;
+   nothing on the Haven says any of them.
+9. **Relic compare on equip** — the preview endpoint returns the delta already; the screen
+   shows the candidate rather than the difference.
+
+**Structural gaps**
+
+10. **Warbands** — the largest parked item and the only real social layer. Worth splitting:
+    a friends list and one borrowed champion per day is a fraction of the cost and most of
+    the felt benefit.
+11. **Localisation scaffolding** — no strings are extracted. Retrofitting is strictly more
+    expensive per screen added, so if it is ever wanted, earlier is cheaper.
+
+**Debts worth paying**
+
+12. **Q6 — the champion avatars.** 14 MB published at 1254px and drawn at 150, against a
+    budget written for a 1-core box.
+13. **A2's balance sandbox** (Admin) — until it exists, retuning a stage is a deploy rather
+    than an edit, which quietly undercuts "content is data".
+14. **Battle presentation** — hit reactions and skill impact frames. The fight reads as
+    numbers over idle loops; the engine already emits everything an impact frame would need.
 
 ### Standing Definition of Done (every phase)
 Typecheck/lint/tests green in CI · engine goldens updated only deliberately · new content editable in Admin (no SQL-only fields) · docs + CHANGELOG updated · deploy scripts still pass on a scratch run · checkpoint offered to the owner.
