@@ -31,9 +31,73 @@ export interface VisualUnit {
   alive: boolean;
   buffs: StatusChip[];
   debuffs: StatusChip[];
-  /** Set for a beat when the unit is struck or healed, for the flash and shake. */
-  impulse: 'hit' | 'crit' | 'heal' | null;
+  /**
+   * Set for a beat when something happens *to* the unit, for the flash and the shake.
+   *
+   * More kinds than a hit and a heal since D10: a glancing blow, a shrugged-off debuff and
+   * a death all read differently, and a fight where every beat looks the same is the
+   * static one the owner reported.
+   */
+  impulse: Impulse | null;
 }
+
+export type Impulse = 'hit' | 'crit' | 'weak' | 'heal' | 'shield' | 'resist' | 'death';
+
+/**
+ * A transient thing drawn *on* the field rather than a change of unit state.
+ *
+ * Floaters are the numbers; these are the motion — a lunge, a burst where a blow landed,
+ * the glow of a skill being cast. Spawned by an event, drawn once by whichever renderer is
+ * running, and expired by id the same way floaters are, so neither renderer has to keep a
+ * clock of its own.
+ */
+export interface Effect {
+  id: number;
+  kind: EffectKind;
+  /** Who it happens to — the struck unit, the healed one, the caster. */
+  ref: UnitRef;
+  /** Where a lunge is aimed. Only a `strike` has one. */
+  toward?: UnitRef;
+  /** The caster's or victim's element, so a burst is coloured by who threw it. */
+  element?: string;
+  quality?: HitQuality;
+  crit?: boolean;
+}
+
+/**
+ * How far above a unit's feet each burst is drawn, in virtual pixels.
+ *
+ * Bodies are anchored at the feet in both renderers, so an effect placed at a unit's
+ * position lands on the floor — which is where the first cut put every impact, reading as a
+ * puddle rather than a blow. Shared rather than duplicated so the painted battlefield and
+ * the browser-drawn one cannot drift apart on it.
+ */
+export const BURST_LIFT: Readonly<Record<EffectKind, number>> = Object.freeze({
+  strike: 0,
+  // Chest height on a ~176px body: where a blow lands and where the eye already is.
+  impact: 74,
+  // Wider than an impact and centred on the caster: a cast gathers *around* somebody
+  // rather than landing on them, and at knee height it read as a puddle.
+  cast: 74,
+  heal: 74,
+  shield: 74,
+  resist: 74,
+  // A death collapses downward, so its ring stays nearer the ground.
+  death: 40,
+});
+
+export type EffectKind =
+  /** The attacker leans into the blow. */
+  | 'strike'
+  /** A skill winds up on the caster. */
+  | 'cast'
+  /** The blow lands on the target. */
+  | 'impact'
+  | 'heal'
+  | 'shield'
+  /** A debuff that failed to stick — the nearest thing the engine has to a dodge. */
+  | 'resist'
+  | 'death';
 
 export interface Floater {
   id: number;
@@ -60,6 +124,8 @@ export interface PlaybackView {
   /** The skill just used, for the name flash. */
   lastSkill: string | null;
   floaters: Floater[];
+  /** Motion spawned by the last few events; renderers draw each id once. */
+  effects: Effect[];
   banner: Banner | null;
   finished: boolean;
   outcome: string | null;
@@ -74,6 +140,7 @@ export function emptyView(): PlaybackView {
     acting: null,
     lastSkill: null,
     floaters: [],
+    effects: [],
     banner: null,
     finished: false,
     outcome: null,
@@ -169,6 +236,7 @@ export function eventDuration(event: BattleEvent): number {
 
 let floaterId = 0;
 let bannerId = 0;
+let effectId = 0;
 
 /** Applies one event to the view. Mutates a draft the caller owns. */
 export function applyEvent(
@@ -233,6 +301,15 @@ export function applyEvent(
 
     case 'skillUsed': {
       view.lastSkill = event.skill;
+      // The wind-up. Coloured by the caster's element rather than the skill's, because a
+      // skill has no element of its own in the contract and a champion always does — and
+      // "who threw this" is what the colour is for.
+      const caster = findUnit(view, event.unit);
+      spawn(view, {
+        kind: 'cast',
+        ref: event.unit,
+        ...(caster?.element ? { element: caster.element } : {}),
+      });
       break;
     }
 
@@ -240,7 +317,31 @@ export function applyEvent(
       const unit = findUnit(view, event.target);
       if (!unit) break;
       unit.hp = event.remainingHp;
-      unit.impulse = event.crit ? 'crit' : 'hit';
+      // A glancing blow reads differently from a solid one, and a crit differently again.
+      // Three kinds rather than two, because affinity is a thing the game asks a player to
+      // build around and the fight never once said which way a hit had gone.
+      unit.impulse = event.crit ? 'crit' : event.quality === 'weak' ? 'weak' : 'hit';
+
+      // The attacker leans in, and something bursts where the blow landed. Only on the
+      // *first* hit of a multi-hit skill: five lunges for one swing reads as five swings,
+      // and the engine already paces later hits faster for the same reason.
+      const striker = findUnit(view, event.source);
+      if (event.hitIndex === 0 && striker && striker.ref.side !== event.target.side) {
+        spawn(view, {
+          kind: 'strike',
+          ref: event.source,
+          toward: event.target,
+          ...(striker.element ? { element: striker.element } : {}),
+        });
+      }
+      spawn(view, {
+        kind: 'impact',
+        ref: event.target,
+        quality: event.quality,
+        crit: event.crit,
+        ...(striker?.element ? { element: striker.element } : {}),
+      });
+
       if (event.amount > 0 || event.absorbed > 0) {
         view.floaters.push({
           id: floaterId++,
@@ -259,6 +360,7 @@ export function applyEvent(
       if (!unit) break;
       unit.hp = event.remainingHp;
       unit.impulse = 'heal';
+      spawn(view, { kind: 'heal', ref: event.target });
       view.floaters.push({
         id: floaterId++,
         ref: event.target,
@@ -269,6 +371,9 @@ export function applyEvent(
     }
 
     case 'shieldGained': {
+      const shielded = findUnit(view, event.target);
+      if (shielded) shielded.impulse = 'shield';
+      spawn(view, { kind: 'shield', ref: event.target });
       view.floaters.push({
         id: floaterId++,
         ref: event.target,
@@ -294,6 +399,12 @@ export function applyEvent(
     }
 
     case 'statusResisted': {
+      // The nearest thing this engine has to a dodge: an attack never misses, but a debuff
+      // can fail to stick. It gets its own beat — a sidestep and a flash — because
+      // shrugging something off is the one defensive moment the fight can actually show.
+      const shrugged = findUnit(view, event.target);
+      if (shrugged) shrugged.impulse = 'resist';
+      spawn(view, { kind: 'resist', ref: event.target, toward: event.source });
       view.floaters.push({
         id: floaterId++,
         ref: event.target,
@@ -362,6 +473,12 @@ export function applyEvent(
       unit.hp = 0;
       unit.buffs = [];
       unit.debuffs = [];
+      unit.impulse = 'death';
+      spawn(view, {
+        kind: 'death',
+        ref: event.unit,
+        ...(unit.element ? { element: unit.element } : {}),
+      });
       break;
     }
 
@@ -397,6 +514,10 @@ export function applyAll(
 ): void {
   for (const event of events) applyEvent(view, event, statusKind);
   view.floaters = [];
+  // Effects go with them, and for the same reason: this is what Skip runs, and a skip that
+  // arrived with forty queued bursts would play the whole fight's motion at once on the
+  // frame the player asked to stop watching.
+  view.effects = [];
   view.banner = null;
 }
 
@@ -405,4 +526,21 @@ export function trimFloaters(view: PlaybackView, keep = 12): void {
   if (view.floaters.length > keep) {
     view.floaters = view.floaters.slice(view.floaters.length - keep);
   }
+  // Effects are trimmed harder and on the same pass. They are shorter-lived than a floater
+  // — a burst is a few frames — and a renderer that has already drawn one by id will not
+  // draw it again, so anything still in the list is either playing or already spent.
+  if (view.effects.length > keep) {
+    view.effects = view.effects.slice(view.effects.length - keep);
+  }
+}
+
+/**
+ * Queues one effect.
+ *
+ * Ids are handed out here and nowhere else, which is what lets a renderer draw each beat
+ * exactly once: it keeps the ids it has seen and skips them, the same contract floaters
+ * have had since P3.
+ */
+function spawn(view: PlaybackView, effect: Omit<Effect, 'id'>): void {
+  view.effects.push({ id: effectId++, ...effect });
 }

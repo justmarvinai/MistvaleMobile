@@ -9,7 +9,8 @@ import {
   type Ticker,
 } from 'pixi.js';
 import type { UnitRef } from '@mistvale/engine';
-import type { Floater, PlaybackView, VisualUnit } from './playback';
+import { BURST_LIFT } from './playback';
+import type { Effect, EffectKind, Floater, PlaybackView, VisualUnit } from './playback';
 import { loadIdleFrames, loadPlaceholderTexture } from './sprites';
 import { mirrored } from './facing';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH, type Scene } from './stage';
@@ -24,6 +25,55 @@ import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH, type Scene } from './stage';
  * Formations stagger diagonally per side so four units never overlap, and each unit keeps
  * its idle loop running the whole fight, because a still battlefield reads as broken.
  */
+
+/** Frames a body takes to fall, at Pixi's 60fps `deltaTime` of 1 per frame. */
+const FALL_FRAMES = 30;
+
+/**
+ * Blends two packed RGB colours.
+ *
+ * Pixi's tint multiplies, so flashing by *setting* a colour would darken a body rather than
+ * light it — the mix has to happen here, channel by channel, before it is handed over.
+ */
+function mixTint(base: number, towards: number, amount: number): number {
+  const t = Math.max(0, Math.min(1, amount));
+  const mix = (shift: number): number => {
+    const a = (base >> shift) & 0xff;
+    const b = (towards >> shift) & 0xff;
+    return Math.round(a + (b - a) * t) & 0xff;
+  };
+  return (mix(16) << 16) | (mix(8) << 8) | mix(0);
+}
+
+/**
+ * One frame of a burst: a ring that opens and fades.
+ *
+ * A cast blooms inward instead, which is what makes a wind-up read as gathering rather
+ * than as another blow landing.
+ */
+function drawBurst(burst: Burst): void {
+  const progress = 1 - burst.life / burst.total;
+  const eased = burst.kind === 'cast' ? 1 - progress : progress;
+  const radius = Math.max(1, burst.radius * (0.25 + eased * 0.75));
+  const alpha = (1 - progress) * 0.85;
+
+  burst.gfx.clear();
+  // A faint disc under the ring. The field is nearly black and a two-pixel stroke on it is
+  // a hairline — the fill is what makes the blow read at a glance, and it fades out first
+  // so what is left at the end is the ring rather than a smear.
+  burst.gfx
+    .ellipse(burst.x, burst.y, radius, radius * 0.65)
+    .fill({ color: burst.colour, alpha: alpha * 0.3 });
+  burst.gfx
+    .ellipse(burst.x, burst.y, radius, radius * 0.65)
+    .stroke({ width: burst.kind === 'impact' ? 3 : 2, color: burst.colour, alpha });
+  // A second, tighter ring on a heavy landing, so a crit reads as more than a bigger circle.
+  if (burst.kind === 'impact' && burst.radius > 44) {
+    burst.gfx
+      .ellipse(burst.x, burst.y, radius * 0.55, radius * 0.35)
+      .stroke({ width: 2, color: burst.colour, alpha: alpha * 0.8 });
+  }
+}
 
 const ELEMENT_TINT: Record<string, number> = {
   ember: 0xe5533d,
@@ -80,7 +130,36 @@ interface UnitVisual {
   chips: Container;
   /** Frames of shake left, so a hit reads without a tween library. */
   shake: number;
+  /** Frames of lunge left, and how far toward the target it leans. */
+  lunge: { life: number; total: number; dx: number; dy: number } | null;
+  /** Frames of colour-flash left, and what colour. White for a hit, green for a heal. */
+  flash: { life: number; total: number; colour: number } | null;
+  /** Counts up while the unit is falling, so a death is a slump rather than a switch. */
+  fall: number;
+  /** Whether the body is standing, so a flash knows what colour to return to. */
+  alive: boolean;
+  /** Which way it faces, so it slumps away from the fight rather than into it. */
+  mirrored: boolean;
   home: { x: number; y: number };
+}
+
+/**
+ * A burst on the field: an expanding ring where a blow landed, a bloom where one was cast.
+ *
+ * Graphics rather than sprites because there is no effect art to draw from and inventing
+ * icons is against the brief — a ring that opens and fades is honest geometry, costs
+ * nothing to load and reads at every speed the ladder offers.
+ */
+interface Burst {
+  gfx: Graphics;
+  life: number;
+  total: number;
+  x: number;
+  y: number;
+  colour: number;
+  /** Peak radius. A crit opens wider than a glancing blow. */
+  radius: number;
+  kind: EffectKind;
 }
 
 interface FloaterVisual {
@@ -119,6 +198,11 @@ export class BattleScene implements Scene {
   private readonly bannerLayer = new Container();
 
   private readonly units = new Map<string, UnitVisual>();
+  /** Bursts already drawn, by effect id, so one beat is never played twice. */
+  private readonly bursts = new Map<number, Burst>();
+  /** Effect ids already spawned, so a re-applied view does not replay a beat. */
+  private played = new Set<number>();
+  private readonly effectLayer = new Container();
 
   /**
    * How many bodies are standing on the field right now.
@@ -144,7 +228,15 @@ export class BattleScene implements Scene {
 
     this.mist = new Graphics();
     this.backdrop.addChild(this.mist);
-    this.root.addChild(this.backdrop, this.unitsLayer, this.floaterLayer, this.bannerLayer);
+    // Effects sit above the bodies and below the numbers: a burst should read as landing
+    // *on* the unit, and a damage number should never be hidden behind one.
+    this.root.addChild(
+      this.backdrop,
+      this.unitsLayer,
+      this.effectLayer,
+      this.floaterLayer,
+      this.bannerLayer,
+    );
     this.drawBackdrop();
   }
 
@@ -215,6 +307,7 @@ export class BattleScene implements Scene {
       this.units.delete(key);
     }
 
+    this.syncEffects(view);
     this.syncFloaters(view);
     this.syncBanner(view);
   }
@@ -230,7 +323,21 @@ export class BattleScene implements Scene {
     chips.position.set(-26, 26);
 
     container.addChild(ring, hpBar, chips);
-    return { container, sprite: null, baseTint: 0xffffff, hpBar, ring, chips, shake: 0, home };
+    return {
+      container,
+      sprite: null,
+      baseTint: 0xffffff,
+      hpBar,
+      ring,
+      chips,
+      shake: 0,
+      lunge: null,
+      flash: null,
+      fall: 0,
+      alive: true,
+      mirrored: false,
+      home,
+    };
   }
 
   /**
@@ -249,6 +356,7 @@ export class BattleScene implements Scene {
   private async attachSprite(visual: UnitVisual, unit: VisualUnit): Promise<void> {
     const art = this.artFor(unit.defKey);
     const flip = mirrored(art, unit.ref.side) ? -1 : 1;
+    visual.mirrored = flip < 0;
     const frames: Texture[] = await loadIdleFrames(art);
     if (visual.container.destroyed) return;
 
@@ -296,10 +404,13 @@ export class BattleScene implements Scene {
   private updateUnit(visual: UnitVisual, unit: VisualUnit, view: PlaybackView): void {
     const acting = view.acting !== null && this.key(view.acting) === this.key(unit.ref);
 
+    visual.alive = unit.alive;
     if (visual.sprite) {
       visual.sprite.alpha = unit.alive ? 1 : 0.25;
       // A fallen unit dims and desaturates rather than vanishing, so the slot still reads.
-      visual.sprite.tint = unit.alive ? visual.baseTint : 0x4a443c;
+      // Skipped while a flash is playing: the flash owns the tint until it burns out, and
+      // writing the resting colour here every frame would cancel it before it was seen.
+      if (!visual.flash) visual.sprite.tint = unit.alive ? visual.baseTint : 0x4a443c;
     }
 
     // Health bar.
@@ -328,7 +439,168 @@ export class BattleScene implements Scene {
       visual.chips.addChild(pip);
     });
 
-    if (unit.impulse) visual.shake = unit.impulse === 'crit' ? 12 : 7;
+    // What a beat looks like on the body itself. The shake is the weight of the blow, the
+    // flash is what kind it was — one line each, because the fight has to read at ×4 as
+    // well as at ×1 and anything subtler is invisible at speed.
+    switch (unit.impulse) {
+      case 'crit':
+        visual.shake = 14;
+        visual.flash = { life: 7, total: 7, colour: 0xfff1c4 };
+        break;
+      case 'hit':
+        visual.shake = 8;
+        visual.flash = { life: 5, total: 5, colour: 0xffd9c9 };
+        break;
+      // A glancing blow barely moves anybody: that *is* the information.
+      case 'weak':
+        visual.shake = 3;
+        visual.flash = { life: 4, total: 4, colour: 0x8f8b79 };
+        break;
+      case 'heal':
+        visual.flash = { life: 14, total: 14, colour: 0x57b35c };
+        break;
+      case 'shield':
+        visual.flash = { life: 14, total: 14, colour: 0x3f8fd4 };
+        break;
+      case 'resist':
+        visual.flash = { life: 10, total: 10, colour: 0xc9a227 };
+        break;
+      case 'death':
+        visual.fall = 1;
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Turns the view's effects into motion, once each.
+   *
+   * Keyed on the effect's id exactly as floaters are, so replaying the same view — which
+   * happens on every animation frame — does not re-fire a beat that is already playing.
+   */
+  private syncEffects(view: PlaybackView): void {
+    for (const effect of view.effects) {
+      if (this.bursts.has(effect.id) || this.played.has(effect.id)) continue;
+      this.played.add(effect.id);
+      this.spawnEffect(effect);
+    }
+    // The set is bounded by the same trim the view gets, plus room for what is in flight.
+    if (this.played.size > 64) {
+      this.played = new Set([...this.played].slice(-32));
+    }
+  }
+
+  private spawnEffect(effect: Effect): void {
+    const target = this.units.get(this.key(effect.ref));
+    if (!target) return;
+    const colour = effect.element ? (ELEMENT_TINT[effect.element] ?? 0xc2764a) : 0xc2764a;
+
+    switch (effect.kind) {
+      case 'strike': {
+        // The attacker leans a third of the way toward whoever it is hitting, and springs
+        // back. A third rather than the whole distance: this is a swing, not a charge, and
+        // a body that crosses the field would fight the formation the screen is teaching.
+        const toward = effect.toward ? this.units.get(this.key(effect.toward)) : undefined;
+        if (!toward) return;
+        const dx = (toward.home.x - target.home.x) * 0.28;
+        const dy = (toward.home.y - target.home.y) * 0.28;
+        target.lunge = { life: 16, total: 16, dx, dy };
+        return;
+      }
+
+      case 'impact': {
+        const big = effect.crit === true;
+        const weak = effect.quality === 'weak';
+        this.addBurst(effect, {
+          x: target.home.x,
+          y: target.home.y - BURST_LIFT.impact,
+          colour: big ? 0xfff1c4 : weak ? 0x8f8b79 : colour,
+          radius: big ? 54 : weak ? 22 : 36,
+          life: big ? 22 : 16,
+        });
+        return;
+      }
+
+      case 'cast':
+        // A bloom at the caster's feet: the wind-up, so a skill is visibly *thrown* rather
+        // than arriving as a number on somebody else.
+        this.addBurst(effect, {
+          x: target.home.x,
+          y: target.home.y - BURST_LIFT.cast,
+          colour,
+          radius: 52,
+          life: 20,
+        });
+        return;
+
+      case 'heal':
+        this.addBurst(effect, {
+          x: target.home.x,
+          y: target.home.y - BURST_LIFT.heal,
+          colour: 0x57b35c,
+          radius: 34,
+          life: 22,
+        });
+        return;
+
+      case 'shield':
+        this.addBurst(effect, {
+          x: target.home.x,
+          y: target.home.y - BURST_LIFT.shield,
+          colour: 0x3f8fd4,
+          radius: 38,
+          life: 22,
+        });
+        return;
+
+      case 'resist': {
+        // A sidestep away from whoever threw it — the one defensive move the engine's
+        // events can honestly describe, since an attack in this game never misses.
+        const from = effect.toward ? this.units.get(this.key(effect.toward)) : undefined;
+        const away = from ? Math.sign(target.home.x - from.home.x) || 1 : 1;
+        target.lunge = { life: 14, total: 14, dx: away * 14, dy: 0 };
+        this.addBurst(effect, {
+          x: target.home.x,
+          y: target.home.y - BURST_LIFT.resist,
+          colour: 0xc9a227,
+          radius: 26,
+          life: 16,
+        });
+        return;
+      }
+
+      case 'death':
+        this.addBurst(effect, {
+          x: target.home.x,
+          y: target.home.y - BURST_LIFT.death,
+          colour: 0x8f2f2f,
+          radius: 46,
+          life: 26,
+        });
+        return;
+
+      default:
+        return;
+    }
+  }
+
+  private addBurst(
+    effect: Effect,
+    spec: { x: number; y: number; colour: number; radius: number; life: number },
+  ): void {
+    const gfx = new Graphics();
+    this.effectLayer.addChild(gfx);
+    this.bursts.set(effect.id, {
+      gfx,
+      life: spec.life,
+      total: spec.life,
+      x: spec.x,
+      y: spec.y,
+      colour: spec.colour,
+      radius: spec.radius,
+      kind: effect.kind,
+    });
   }
 
   private syncFloaters(view: PlaybackView): void {
@@ -386,16 +658,72 @@ export class BattleScene implements Scene {
     }
 
     for (const visual of this.units.values()) {
+      // Position is the sum of two things: where a lunge has carried the body, and the
+      // jitter of a hit landing on it. Composed rather than exclusive — a unit that is
+      // struck mid-swing should shake where it stands, not snap home to do it.
+      let x = visual.home.x;
+      let y = visual.home.y;
+
+      if (visual.lunge) {
+        visual.lunge.life -= delta;
+        if (visual.lunge.life <= 0) {
+          visual.lunge = null;
+        } else {
+          // Out fast, back slow: `sin(pi * t)` peaks in the middle, which is a swing.
+          const progress = 1 - visual.lunge.life / visual.lunge.total;
+          const eased = Math.sin(Math.PI * Math.min(1, Math.max(0, progress)));
+          x += visual.lunge.dx * eased;
+          y += visual.lunge.dy * eased;
+        }
+      }
+
       if (visual.shake > 0) {
         visual.shake -= delta;
         const magnitude = Math.max(0, visual.shake) * 0.35;
-        visual.container.position.set(
-          visual.home.x + (Math.random() - 0.5) * magnitude * 2,
-          visual.home.y + (Math.random() - 0.5) * magnitude,
-        );
-      } else {
-        visual.container.position.set(visual.home.x, visual.home.y);
+        x += (Math.random() - 0.5) * magnitude * 2;
+        y += (Math.random() - 0.5) * magnitude;
       }
+
+      visual.container.position.set(x, y);
+
+      // The flash rides on the sprite's tint, so it survives whatever the body is.
+      if (visual.flash && visual.sprite) {
+        visual.flash.life -= delta;
+        if (visual.flash.life <= 0) {
+          visual.flash = null;
+          visual.sprite.tint = visual.alive ? visual.baseTint : 0x4a443c;
+        } else {
+          // Capped short of the whole way: a body mixed *fully* into the flash colour is a
+          // white silhouette rather than a champion being hit, and at ×1 that silhouette is
+          // on screen long enough to read as the art having failed to load.
+          const strength = (visual.flash.life / visual.flash.total) * 0.7;
+          visual.sprite.tint = mixTint(
+            visual.alive ? visual.baseTint : 0x4a443c,
+            visual.flash.colour,
+            strength,
+          );
+        }
+      }
+
+      // A death is a slump: the body leans and sinks over about half a second rather than
+      // switching to its dimmed state between one frame and the next.
+      if (visual.fall > 0 && visual.fall < FALL_FRAMES) {
+        visual.fall += delta;
+        const progress = Math.min(1, visual.fall / FALL_FRAMES);
+        visual.container.rotation = progress * 0.35 * (visual.mirrored ? -1 : 1);
+        visual.container.position.set(x, y + progress * 8);
+      }
+    }
+
+    for (const [id, burst] of this.bursts) {
+      burst.life -= delta;
+      if (burst.life <= 0) {
+        this.effectLayer.removeChild(burst.gfx);
+        burst.gfx.destroy();
+        this.bursts.delete(id);
+        continue;
+      }
+      drawBurst(burst);
     }
 
     for (const [id, floater] of this.floaters) {

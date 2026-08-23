@@ -79,7 +79,7 @@ P(stick) = 0.90 + min(0.07, max(0, Δ) × 0.0025)   # parity ≈ 90%, caps ≈ 9
            − max(0, −Δ) × 0.01                     # each RES point above ACC ≈ −1 pp
 clamped to [0.05, 0.97] ⚙                          # 5% floor, 3% irreducible resist
 ```
-Failed contest = **RESIST** floater. "Cannot be resisted" skill flags skip the contest. Buffs/self/ally effects never contest. Rule-of-thumb parity with the source: out-ACC the target's RES by ~25 and you're capped.
+Failed contest = **RESIST** floater. **There is no accuracy check on damage** — an attack always connects, and ACC/RES gate only whether a status sticks. That is deliberate and source-faithful, and it is why the battlefield has no dodge animation: the defensive beats the screen can honestly show are a resist and a weak hit (UI_UX §4). "Cannot be resisted" skill flags skip the contest. Buffs/self/ally effects never contest. Rule-of-thumb parity with the source: out-ACC the target's RES by ~25 and you're capped.
 
 ## 6. Damage
 ```

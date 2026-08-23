@@ -313,7 +313,10 @@ describe('applyAll', () => {
 
     const stepped = emptyView();
     for (const event of events) applyEvent(stepped, event, statusKind);
+    // Cleared the way `applyAll` clears them: both carry ids that count up per call, so
+    // comparing them would only ever prove that two runs are two runs.
     stepped.floaters = [];
+    stepped.effects = [];
     stepped.banner = null;
 
     const jumped = emptyView();
@@ -399,5 +402,188 @@ describe('trimFloaters', () => {
     }
     trimFloaters(view, 12);
     expect(view.floaters).toHaveLength(12);
+  });
+});
+
+/**
+ * The motion the fight is made of.
+ *
+ * The owner's report (2026-08-22) was that battles are "extremely static besides the
+ * characters having their animations" — and they were: `impulse` had three kinds, one
+ * renderer turned it into a shake, and the other ignored it entirely. Everything a beat
+ * needs was already in the engine's event contract and none of it reached the screen.
+ *
+ * These pin the *decisions* rather than the drawing, because both renderers read this one
+ * model and neither should be inventing beats of its own.
+ */
+describe('effects', () => {
+  it('lunges the attacker and bursts on the target, once per swing', () => {
+    const view = opened();
+    // Two hits of one skill: the strike is the swing, the impacts are the blows.
+    for (const hitIndex of [0, 1]) {
+      applyEvent(
+        view,
+        ev('damage', {
+          source: { side: 'ally', slot: 0 },
+          target: { side: 'enemy', slot: 0 },
+          amount: 100,
+          absorbed: 0,
+          quality: 'normal',
+          crit: false,
+          hitIndex,
+          hits: 2,
+          remainingHp: 900 - hitIndex * 100,
+        }),
+        statusKind,
+      );
+    }
+
+    const strikes = view.effects.filter((effect) => effect.kind === 'strike');
+    const impacts = view.effects.filter((effect) => effect.kind === 'impact');
+    expect(strikes).toHaveLength(1);
+    expect(strikes[0]?.ref).toEqual({ side: 'ally', slot: 0 });
+    expect(strikes[0]?.toward).toEqual({ side: 'enemy', slot: 0 });
+    expect(impacts).toHaveLength(2);
+  });
+
+  it('does not lunge a unit at its own side — a DoT has no swing', () => {
+    const view = opened();
+    applyEvent(
+      view,
+      ev('damage', {
+        source: { side: 'enemy', slot: 0 },
+        target: { side: 'enemy', slot: 1 },
+        amount: 40,
+        absorbed: 0,
+        quality: 'normal',
+        crit: false,
+        hitIndex: 0,
+        hits: 1,
+        trueDamage: true,
+        remainingHp: 960,
+      }),
+      statusKind,
+    );
+    expect(view.effects.filter((effect) => effect.kind === 'strike')).toHaveLength(0);
+    expect(view.effects.filter((effect) => effect.kind === 'impact')).toHaveLength(1);
+  });
+
+  it('tells a glancing blow from a solid one and from a crit', () => {
+    const view = opened();
+    const hit = (quality: 'normal' | 'weak' | 'strong', crit: boolean) => {
+      applyEvent(
+        view,
+        ev('damage', {
+          source: { side: 'enemy', slot: 0 },
+          target: { side: 'ally', slot: 0 },
+          amount: 50,
+          absorbed: 0,
+          quality,
+          crit,
+          hitIndex: 0,
+          hits: 1,
+          remainingHp: 500,
+        }),
+        statusKind,
+      );
+      return view.allies[0]?.impulse;
+    };
+
+    expect(hit('weak', false)).toBe('weak');
+    expect(hit('normal', false)).toBe('hit');
+    expect(hit('strong', false)).toBe('hit');
+    // A crit outranks affinity: the biggest thing that happened is what the body shows.
+    expect(hit('weak', true)).toBe('crit');
+  });
+
+  it('gives a cast its own beat, coloured by whoever threw it', () => {
+    const view = opened();
+    applyEvent(
+      view,
+      ev('skillUsed', {
+        unit: { side: 'ally', slot: 0 },
+        skill: 'strike',
+        targets: [{ side: 'enemy', slot: 0 }],
+      }),
+      statusKind,
+    );
+    const cast = view.effects.find((effect) => effect.kind === 'cast');
+    expect(cast?.ref).toEqual({ side: 'ally', slot: 0 });
+    expect(cast?.element).toBe('mist');
+  });
+
+  it('makes shrugging off a debuff a beat of its own', () => {
+    // The nearest thing this engine has to a dodge — an attack never misses, but a debuff
+    // can fail to land, and that is a defensive moment worth showing.
+    const view = opened();
+    applyEvent(
+      view,
+      ev('statusResisted', {
+        source: { side: 'enemy', slot: 0 },
+        target: { side: 'ally', slot: 0 },
+        status: 'atk_down',
+        reason: 'resist',
+      }),
+      statusKind,
+    );
+    expect(view.allies[0]?.impulse).toBe('resist');
+    const resist = view.effects.find((effect) => effect.kind === 'resist');
+    expect(resist?.toward).toEqual({ side: 'enemy', slot: 0 });
+  });
+
+  it('marks a heal, a shield and a death', () => {
+    const view = opened();
+    applyEvent(
+      view,
+      ev('heal', {
+        source: { side: 'ally', slot: 0 },
+        target: { side: 'ally', slot: 0 },
+        amount: 100,
+        remainingHp: 1000,
+      }),
+      statusKind,
+    );
+    expect(view.allies[0]?.impulse).toBe('heal');
+
+    applyEvent(
+      view,
+      ev('shieldGained', { target: { side: 'ally', slot: 0 }, amount: 200, turns: 2 }),
+      statusKind,
+    );
+    expect(view.allies[0]?.impulse).toBe('shield');
+
+    applyEvent(view, ev('died', { unit: { side: 'enemy', slot: 1 } }), statusKind);
+    expect(view.enemies[1]?.impulse).toBe('death');
+    expect(view.effects.some((effect) => effect.kind === 'death')).toBe(true);
+  });
+
+  it('hands every effect its own id, so a renderer can draw each one once', () => {
+    const view = opened();
+    applyEvent(
+      view,
+      ev('skillUsed', { unit: { side: 'ally', slot: 0 }, skill: 's', targets: [] }),
+      statusKind,
+    );
+    applyEvent(
+      view,
+      ev('skillUsed', { unit: { side: 'ally', slot: 0 }, skill: 's', targets: [] }),
+      statusKind,
+    );
+    const ids = view.effects.map((effect) => effect.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('is trimmed with the floaters, so a long fight does not accumulate them', () => {
+    const view = opened();
+    for (let i = 0; i < 40; i += 1) {
+      applyEvent(
+        view,
+        ev('skillUsed', { unit: { side: 'ally', slot: 0 }, skill: 's', targets: [] }),
+        statusKind,
+      );
+    }
+    expect(view.effects.length).toBeGreaterThan(12);
+    trimFloaters(view);
+    expect(view.effects).toHaveLength(12);
   });
 });

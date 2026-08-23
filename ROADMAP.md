@@ -217,6 +217,7 @@ criteria of its own, and it does not gate P9e or P10.
 | **C6** | Champion progression rebuilt to the source game's shape: **the star track belongs to the rarity** (Commons never move, Uncommon/Rare to ★5, Epic/Legendary to ★6), level caps 20/20/30/40/50/60 with a rank-up resetting to level 1, **Mistbrew** as the one XP consumable, and **awakening** as a fourth ladder paid in Waking Shards out of the deep Depths · the champion sheet as four ladders that each say which gate is shut · the sheet finally reading what the player is holding | ✅ |
 | **C7** | Two rules about watching a fight: **Skip only on a stage already beaten** (decided when the fight opens, since the clear it may itself record would otherwise answer the question), and **playback ×1–×4** with ×3 earned by the campaign on Normal and ×4 on Brutal | ✅ |
 | **C8** | The campaign map without its own window — no frame, no second background, markers at a size a desktop can read · the speed ladder settled at **×1 · ×2 · ×4** (×4 on the Normal campaign) with `ui/SpeedLadder` drawing the rung an account has *not* earned and what opens it | ✅ |
+| **C9** | Five, from the improvement list: **a fight that moves** (hit impacts, swings, casts, deaths — item 14) · the Solo Titan · relic loadouts and bulk relic actions · roster filter and sort · a "what's ready" card on the Haven | ◐ in progress |
 
 **Backlog carried out of a batch rather than done in it.** Two items, and they are the same
 question wearing different clothes — both are parked on the owner's instruction, and both want
@@ -282,8 +283,11 @@ engine, the goal DSL and the events framework already do most of the work*.
     budget written for a 1-core box.
 13. **A2's balance sandbox** (Admin) — until it exists, retuning a stage is a deploy rather
     than an edit, which quietly undercuts "content is data".
-14. **Battle presentation** — hit reactions and skill impact frames. The fight reads as
-    numbers over idle loops; the engine already emits everything an impact frame would need.
+14. ~~**Battle presentation** — hit reactions and skill impact frames.~~ **Done — C9.** The
+    engine did already emit everything an impact frame needed; `game/playback` now folds it
+    into an effect stream and both battlefield renderers draw it. No dodge, because the
+    engine has no miss — a resist and a weak hit are the honest defensive beats.
+    See CHANGELOG *a fight that moves* and UI_UX §4.
 
 ### Standing Definition of Done (every phase)
 Typecheck/lint/tests green in CI · engine goldens updated only deliberately · new content editable in Admin (no SQL-only fields) · docs + CHANGELOG updated · deploy scripts still pass on a scratch run · checkpoint offered to the owner.

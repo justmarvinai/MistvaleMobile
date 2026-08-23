@@ -45,8 +45,228 @@
 .fighter {
   position: absolute;
   height: calc(100% * 176 / 540);
-  /* The anchor is the feet, as it is for the sprite in the scene. */
-  transform: translate(-50%, -100%);
+  --mv-lunge-x: 0%;
+  --mv-lunge-y: 0%;
+  /* The anchor is the feet, as it is for the sprite in the scene. The lunge is added to
+     that anchor rather than replacing it, which is why both live in one transform. */
+  transform: translate(calc(-50% + var(--mv-lunge-x)), calc(-100% + var(--mv-lunge-y)));
+  transition: transform 140ms $ease-out;
+}
+
+/* A body that has been struck jitters where it stands. Deliberately short and sharp: the
+   fight has to read at ×4 as well as at ×1, and a slow shake at speed is a blur. */
+.fighter[data-beat='impact'] .sprite {
+  animation: mv-struck 260ms $ease-out;
+}
+
+.fighter[data-beat='impact'][data-quality='crit'] .sprite {
+  animation: mv-struck-hard 300ms $ease-out;
+}
+
+/* A glancing blow barely moves anybody — that absence *is* the information, so it gets a
+   flash and no shake at all. */
+.fighter[data-beat='impact'][data-quality='weak'] .sprite {
+  animation: mv-glanced 240ms $ease-out;
+}
+
+.fighter[data-beat='heal'] .sprite {
+  animation: mv-mended 360ms $ease-out;
+}
+
+.fighter[data-beat='shield'] .sprite {
+  animation: mv-warded 360ms $ease-out;
+}
+
+/* A death is a slump, not a switch: it leans and sinks rather than dimming between frames.
+   `forwards` because the fallen state that follows is the resting one. */
+.fighter[data-beat='death'] {
+  animation: mv-felled 480ms $ease-out forwards;
+}
+
+/* The white frame is *brief*. A hit flash is idiomatic for pixel art, but held for the
+   length of the shake it stops being a flash and becomes a state — the body reads as a
+   white silhouette rather than as a champion being hit. Out by a third of the way; the
+   shake carries the rest. */
+@keyframes mv-struck {
+  0% {
+    transform: translateX(0);
+    filter: brightness(1.9) saturate(0.65);
+  }
+  30% {
+    transform: translateX(6%);
+    filter: none;
+  }
+  60% {
+    transform: translateX(-4%);
+  }
+  100% {
+    transform: translateX(0);
+    filter: none;
+  }
+}
+
+@keyframes mv-struck-hard {
+  0% {
+    transform: translateX(0) scale(1.08);
+    filter: brightness(2.3) saturate(0.55);
+  }
+  25% {
+    transform: translateX(11%) scale(1.04);
+    filter: none;
+  }
+  55% {
+    transform: translateX(-8%) scale(1);
+  }
+  80% {
+    transform: translateX(4%);
+  }
+  100% {
+    transform: translateX(0);
+    filter: none;
+  }
+}
+
+@keyframes mv-glanced {
+  0% {
+    filter: brightness(1.4) saturate(0.5);
+  }
+  40%,
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes mv-mended {
+  0%,
+  100% {
+    filter: none;
+  }
+  40% {
+    filter: brightness(1.5) hue-rotate(-25deg);
+  }
+}
+
+@keyframes mv-warded {
+  0%,
+  100% {
+    filter: none;
+  }
+  40% {
+    filter: brightness(1.4) hue-rotate(150deg);
+  }
+}
+
+@keyframes mv-felled {
+  0% {
+    transform: translate(calc(-50% + var(--mv-lunge-x)), calc(-100% + var(--mv-lunge-y)))
+      rotate(0deg);
+  }
+  100% {
+    transform: translate(calc(-50% + var(--mv-lunge-x)), calc(-100% + var(--mv-lunge-y) + 4%))
+      rotate(14deg);
+  }
+}
+
+/* ── Bursts ─────────────────────────────────────────────────────────────────
+   A ring that opens where a blow landed. Geometry rather than art, because there is no
+   effect art to draw from and inventing icons is against the brief — and a ring costs
+   nothing to load and reads at every speed on the ladder. */
+.burst {
+  position: absolute;
+  width: calc(100% * 96 / 960);
+  aspect-ratio: 1.55;
+  margin-left: calc(100% * -48 / 960);
+  border: 2px solid var(--mv-burst, #{$accent});
+  border-radius: 50%;
+  /* A disc under the ring and a glow around it. The field is nearly black, and a
+     two-pixel stroke on black is a hairline — the fill is what makes a blow read at a
+     glance, and `color-mix` keeps it the burst's own colour rather than a second token. */
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--mv-burst) 26%, transparent),
+    transparent
+  );
+  box-shadow: 0 0 14px -2px var(--mv-burst);
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  animation: mv-burst 320ms $ease-out forwards;
+}
+
+.burst[data-element='ember'] {
+  --mv-burst: #e5533d;
+}
+.burst[data-element='tide'] {
+  --mv-burst: #3f8fd4;
+}
+.burst[data-element='verdant'] {
+  --mv-burst: #57b35c;
+}
+.burst[data-element='mist'] {
+  --mv-burst: #a06bd8;
+}
+
+.burst[data-quality='crit'] {
+  --mv-burst: #fff1c4;
+  border-width: 3px;
+  animation-duration: 360ms;
+  width: calc(100% * 150 / 960);
+  margin-left: calc(100% * -75 / 960);
+}
+
+.burst[data-quality='weak'] {
+  --mv-burst: #8f8b79;
+  width: calc(100% * 60 / 960);
+  margin-left: calc(100% * -30 / 960);
+}
+
+.burst[data-kind='heal'] {
+  --mv-burst: #57b35c;
+}
+.burst[data-kind='shield'] {
+  --mv-burst: #3f8fd4;
+}
+.burst[data-kind='resist'] {
+  --mv-burst: #c9a227;
+}
+.burst[data-kind='death'] {
+  --mv-burst: #8f2f2f;
+  animation-duration: 520ms;
+}
+
+/* A cast gathers *inward*, which is what makes a wind-up read as drawing breath rather
+   than as another blow landing. */
+.burst[data-kind='cast'] {
+  animation-name: mv-gather;
+  animation-duration: 340ms;
+}
+
+@keyframes mv-burst {
+  0% {
+    opacity: 1;
+    scale: 0.3;
+  }
+  70% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.2;
+  }
+}
+
+@keyframes mv-gather {
+  0% {
+    opacity: 0;
+    scale: 1.3;
+  }
+  35% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.25;
+  }
 }
 
 .fighter[data-alive='false'] {

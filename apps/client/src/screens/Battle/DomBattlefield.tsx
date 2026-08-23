@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '@/game/stage';
 import { slotPosition } from '@/game/battleScene';
 import { framePath, loadSpriteManifest, spriteEntry, stillPath } from '@/game/sprites';
 import { CHAMPION_PLACEHOLDER } from '@/ui/championArt';
 import { mirrored } from '@/game/facing';
 import { Floaters } from './Floaters';
-import type { PlaybackView, VisualUnit } from '@/game/playback';
+import { NO_BEATS, advanceBeats, beatFor, type LiveBeat } from './beats';
+import { BURST_LIFT } from '@/game/playback';
+import type { Effect, PlaybackView, VisualUnit } from '@/game/playback';
 import styles from './DomBattlefield.module.scss';
 
 /**
@@ -43,6 +45,10 @@ export function DomBattlefield({
 }): JSX.Element {
   const units = useMemo(() => [...view.allies, ...view.enemies], [view.allies, view.enemies]);
   const actingKey = view.acting ? `${view.acting.side}:${view.acting.slot}` : null;
+  // The motion. It has to be *held* here rather than read off the view, because a CSS
+  // animation does not restart on a re-render — a beat has to be added and then taken away
+  // again to be seen at all, and the view keeps its effects around for a dozen events.
+  const beats = useBeats(view.effects);
   const frame = useIdleFrame();
   // The manifest says how many frames each unit has. Nothing else on this path asks for it —
   // the Pixi loader is what usually pulls it in, and it is not running — so the fallback
@@ -64,8 +70,16 @@ export function DomBattlefield({
             frame={frame}
             framesReady={framesReady}
             acting={actingKey === `${unit.ref.side}:${unit.ref.slot}`}
+            beats={beats}
           />
         ))}
+        {/* Bursts sit above the bodies and below the numbers, the same order the painted
+            battlefield uses, so the two renderers read as one game. */}
+        {beats
+          .filter((beat) => beat.kind !== 'strike')
+          .map((beat) => (
+            <Burst key={beat.id} beat={beat} />
+          ))}
         <Floaters floaters={view.floaters} />
       </div>
     </div>
@@ -112,14 +126,22 @@ function Fighter({
   frame,
   framesReady,
   acting,
+  beats,
 }: {
   unit: VisualUnit;
   art: string;
   frame: number;
   framesReady: boolean;
   acting: boolean;
+  beats: readonly LiveBeat[];
 }): JSX.Element {
+  const key = `${unit.ref.side}:${unit.ref.slot}`;
   const at = slotPosition(unit.ref.side, unit.ref.slot);
+  // A swing leans the body toward whoever it is hitting; a shrugged-off debuff steps away
+  // from whoever threw it. Both are the same mechanic with a different sign.
+  const swing = beatFor(beats, key, ['strike', 'resist']);
+  const landed = beatFor(beats, key, ['impact', 'heal', 'shield', 'death']);
+  const lunge = swing ? lungeOffset(swing) : null;
   const ratio = unit.maxHp > 0 ? Math.max(0, Math.min(1, unit.hp / unit.maxHp)) : 0;
   // A unit with no published frames holds on its still.
   const frames = framesReady ? (spriteEntry(art)?.idleFrames ?? 0) : 0;
@@ -132,7 +154,15 @@ function Fighter({
       data-mirrored={mirrored(art, unit.ref.side)}
       data-alive={unit.alive}
       data-acting={acting}
-      style={{ left: pct(at.x, VIRTUAL_WIDTH), top: pct(at.y, VIRTUAL_HEIGHT) }}
+      data-beat={landed?.kind ?? swing?.kind ?? undefined}
+      data-quality={landed?.crit === true ? 'crit' : landed?.quality}
+      style={{
+        left: pct(at.x, VIRTUAL_WIDTH),
+        top: pct(at.y, VIRTUAL_HEIGHT),
+        // The lunge is inline because its direction is a fact about the formation rather
+        // than about the class: only this component knows which way the target lies.
+        ...(lunge ? { '--mv-lunge-x': `${lunge.x}%`, '--mv-lunge-y': `${lunge.y}%` } : {}),
+      }}
     >
       <img
         className={styles.sprite}
@@ -177,4 +207,85 @@ function silhouetteUrl(): string | null {
     .getPropertyValue(`--fui-img-${CHAMPION_PLACEHOLDER}`)
     .trim();
   return /^url\(\s*["']?(.+?)["']?\s*\)$/.exec(value)?.[1] ?? null;
+}
+
+/**
+ * Holds the beats that are currently playing, and ticks them out again.
+ *
+ * One clock, running for the life of the battlefield, rather than a state write when the
+ * view changes and a second timer to clean up after it. The clean-up half is the one that
+ * matters: without it the last blow of a fight would stay frozen on screen, because nothing
+ * is ever going to change the view again. The cost of leaving it running is nothing —
+ * `advanceBeats` hands back the state it was given when nothing has changed, and `useState`
+ * bails out on an identical value, so an idle field re-renders zero times a second.
+ */
+function useBeats(effects: readonly Effect[]): readonly LiveBeat[] {
+  const [state, setState] = useState(NO_BEATS);
+  // The view reaches the clock through a ref rather than through the interval's
+  // dependencies: re-arming a timer on every new effect would reset its phase, and a beat
+  // would start late by however much of the tick was left.
+  const incoming = useRef(effects);
+
+  useEffect(() => {
+    incoming.current = effects;
+  }, [effects]);
+
+  useEffect(() => {
+    // Roughly two frames. Cheap: the list is a dozen entries and the work is a filter.
+    const timer = window.setInterval(() => {
+      setState((live) => advanceBeats(live, incoming.current, Date.now()));
+    }, 45);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return state.live;
+}
+
+/**
+ * How far, and which way, a body leans.
+ *
+ * A fraction of the gap rather than the whole of it: this is a swing, not a charge, and a
+ * champion who crossed the field would fight the formation the screen spends the rest of
+ * its time teaching. Percentages of the fighter's own box, so it scales with the canvas.
+ */
+function lungeOffset(beat: LiveBeat): { x: number; y: number } {
+  if (beat.kind === 'resist') {
+    // Away from whoever threw it. No target means step back the way the unit faces.
+    const from = beat.toward;
+    const away = from
+      ? Math.sign(beat.ref.slot - from.slot) || (beat.ref.side === 'ally' ? -1 : 1)
+      : 1;
+    return { x: away * 14, y: 0 };
+  }
+  const to = beat.toward;
+  if (!to) return { x: 0, y: 0 };
+  const here = slotPosition(beat.ref.side, beat.ref.slot);
+  const there = slotPosition(to.side, to.slot);
+  return {
+    x: ((there.x - here.x) / VIRTUAL_WIDTH) * 100 * 0.28,
+    y: ((there.y - here.y) / VIRTUAL_HEIGHT) * 100 * 0.28,
+  };
+}
+
+/** One burst, positioned on the unit it belongs to and animated out by CSS. */
+function Burst({ beat }: { beat: LiveBeat }): JSX.Element {
+  const at = slotPosition(beat.ref.side, beat.ref.slot);
+  return (
+    <span
+      className={styles.burst}
+      // Named for the suite the same way the floor is: a bundler-hashed class is not
+      // something a test can ask for, and `data-kind` alone is ambiguous — the floating
+      // numbers carry one too.
+      data-burst=""
+      data-kind={beat.kind}
+      data-quality={beat.crit === true ? 'crit' : beat.quality}
+      data-element={beat.element}
+      style={{
+        left: pct(at.x, VIRTUAL_WIDTH),
+        // Lifted onto the body: both renderers anchor a unit at its feet, so an effect
+        // drawn at the unit's own position lands on the floor.
+        top: pct(at.y - BURST_LIFT[beat.kind], VIRTUAL_HEIGHT),
+      }}
+    />
+  );
 }

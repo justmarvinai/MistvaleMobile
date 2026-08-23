@@ -5,6 +5,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — a fight that moves
+
+Battles were static: bodies idled, numbers changed, and nothing in between said a blow had
+been struck or landed (owner, 2026-08-23). The event log already carried everything needed —
+who swung, at whom, how hard, what element, what was shrugged off — and none of it reached
+the screen.
+
+It does now, as a layer of motion derived from the same events the numbers come from:
+
+- **A swing leans.** An attacker steps a third of the way toward whoever it is hitting and
+  springs back — a swing, not a charge, because a body that crosses the field fights the
+  formation the screen spends the rest of its time teaching.
+- **A landing shakes and flashes.** The body that took the blow jitters where it stands and
+  takes a brief colour flash, sharper and longer for a crit, and a flash with no shake at all
+  for a glancing hit — that absence *is* the information. The flash is capped short of the
+  whole way: a body mixed fully into white is a silhouette, not a champion being hit.
+- **A ring opens where it arrived**, at chest height rather than at the feet, in the
+  element's own colour — pale gold for a crit, grey for a glance, green for a heal, blue for
+  a ward, red for a death. A cast blooms *inward* instead, so a wind-up reads as gathering
+  rather than as another blow landing.
+- **A shrugged-off debuff sidesteps.** Attacks in Mistvale never miss — ACC and RES gate
+  statuses, not damage — so a resist is the one defensive beat the engine's events can
+  honestly describe, and it steps the defender away from whoever threw it.
+- **A death slumps.** The body leans and sinks over about half a second instead of switching
+  to its dimmed state between one frame and the next.
+
+All of it is decided once, in `game/playback`, and drawn twice: the painted battlefield
+composes it in Pixi, the simple one in CSS, and both read the same `PlaybackView`. Nothing
+about it is a second source of truth — an effect is a consequence of an event the server
+sent, it never changes an outcome, and Skip clears the lot rather than replaying it.
+
 ### Changed — the vale is the screen, not a window on it
 
 The campaign map arrived in its own box: a border down every side and a second scene inside
