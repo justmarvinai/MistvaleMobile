@@ -69,22 +69,37 @@
 
 .member {
   display: flex;
+  overflow: hidden;
   flex-direction: column;
   align-items: center;
+  min-width: 0;
   gap: 2px;
   text-align: center;
 }
 
+// Two lines, always, however long the name is. Mistvale's champions run from "Anuria" to
+// "Vess'aryn of the Deep Thorn", and left to wrap freely the four cells finish at four
+// different heights — which pushes the par of one trial a centimetre below the par of the
+// one beside it, in a row where comparing them is the whole point.
 .memberName {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: 2 * 1.2 * 0.72rem;
   color: $parchment;
   font-size: 0.72rem;
   line-height: 1.2;
+  // Mistvale has single words longer than a quarter of a card — "Cindermaw", "Palewatch" —
+  // and a name that cannot wrap inside its cell draws over the frame instead.
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .memberRank {
   color: $parchment-dim;
   font-family: $font-mono;
   font-size: 0.68rem;
+  white-space: nowrap;
 }
 
 .score {

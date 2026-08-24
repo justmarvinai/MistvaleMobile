@@ -166,7 +166,7 @@ function TrialCard({
               <span className={styles.memberName}>{def?.name ?? key}</span>
               {member && (
                 <span className={styles.memberRank}>
-                  {'★'.repeat(member.rank)} · {member.level}
+                  ★{member.rank} · {member.level}
                 </span>
               )}
             </li>
