@@ -271,7 +271,14 @@ const STAT_TIP: Readonly<Record<string, { title: string; flavor: string }>> = Ob
 /** A row of the stat table, as a tooltip. */
 export function statTip(
   stat: string,
-  values: { base: number; gear: number; masteries: number; total: number },
+  values: {
+    base: number;
+    gear: number;
+    masteries: number;
+    /** Imprint and standing together. Optional so an older caller still compiles. */
+    collection?: number;
+    total: number;
+  },
 ): TooltipOptions {
   const known = STAT_TIP[stat];
   const round = (value: number): string => Math.round(value).toLocaleString('en-US');
@@ -291,6 +298,17 @@ export function statTip(
         value: values.masteries > 0 ? `+${round(values.masteries)}` : '—',
         tone: values.masteries > 0 ? 'good' : 'plain',
       },
+      // Only when there is one: a row reading "From your collection —" on a new account
+      // advertises a system it has no way to have earned yet.
+      ...((values.collection ?? 0) > 0
+        ? [
+            {
+              label: 'From your collection',
+              value: `+${round(values.collection ?? 0)}`,
+              tone: 'good' as const,
+            },
+          ]
+        : []),
       { label: 'Total', value: round(values.total), tone: 'magic' },
     ],
     ...(known ? { flavor: known.flavor } : {}),

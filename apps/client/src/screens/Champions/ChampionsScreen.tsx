@@ -7,6 +7,7 @@ import { Fui } from '@/fui/react';
 import { Panel } from '../../ui/Panel/Panel';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
+import { usePlayerStore } from '../../state/playerStore';
 import { ChampionDetailModal } from './ChampionDetail';
 import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 import styles from './ChampionsScreen.module.scss';
@@ -49,6 +50,10 @@ export function ChampionsScreen(): JSX.Element {
   const loading = useRosterStore((state) => state.loading);
   const load = useRosterStore((state) => state.load);
   const bundle = useContentStore((state) => state.bundle);
+  const standing = usePlayerStore((state) => state.standing);
+  const refreshPlayer = usePlayerStore((state) => state.refresh);
+  // "Holding 1 champions" is the sort of thing a player reads once and never trusts again.
+  const held = standing.champions === 1 ? 'champion' : 'champions';
 
   const [sort, setSort] = useState<SortKey>('power');
   const [filter, setFilter] = useState<RosterFilter>(NO_FILTER);
@@ -59,7 +64,12 @@ export function ChampionsScreen(): JSX.Element {
 
   useEffect(() => {
     void load();
-  }, [load]);
+    // Standing rides on the player snapshot, and the roster changes without it — a summon,
+    // a starter choice or a champion fed away all move the count while the snapshot on hand
+    // still says what it said at boot. Re-reading here is what stops this screen saying
+    // "Holding 0 champions" over a grid of nine, which is exactly what it did before.
+    void refreshPlayer();
+  }, [load, refreshPlayer]);
 
   const defs = useMemo(
     () => new Map((bundle?.champions ?? []).map((champion) => [champion.key, champion])),
@@ -117,6 +127,20 @@ export function ChampionsScreen(): JSX.Element {
               className={styles.collection}
               options={{ title: 'The roll', unit: 'champions', showTotal: true, tiers }}
             />
+
+            {/* What breadth is worth, beside the tally that measures it. The two belong
+                together: the roll says what is left to collect and this says why it is
+                worth collecting, and split across two screens neither one answers the
+                other's question. */}
+            <Panel title="Standing">
+              <p className={styles.note}>
+                {standing.tier > 0
+                  ? `Holding ${standing.champions} ${held} earns every one of them +${standing.bonus.hpPct}% HP, ATK and DEF.`
+                  : `Holding ${standing.champions} ${held}. Breadth of collection pays a little to everything you field.`}
+                {standing.nextAt !== null &&
+                  ` ${standing.nextAt - standing.champions} more for the next tier.`}
+              </p>
+            </Panel>
 
             <Panel title="How they grow">
               <p className={styles.note}>

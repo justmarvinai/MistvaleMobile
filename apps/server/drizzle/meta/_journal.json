@@ -225,6 +225,13 @@
       "when": 1787085700000,
       "tag": "0031_gear_reforge",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1787085701000,
+      "tag": "0032_champion_imprints",
+      "breakpoints": true
     }
   ]
 }

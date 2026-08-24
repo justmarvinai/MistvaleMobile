@@ -34,6 +34,7 @@ function detail(
     gear: [],
     skillUpgrades: {},
     masteries: {} as ChampionDetail['masteries'],
+    imprint: {} as ChampionDetail['imprint'],
     costs: {
       rankUp: { foodRank: 4, foodCount: 4, silver: 100_000, atLevelCap: true },
       ascend: { items: { essence_pure: 12 }, allowedByRank: true },

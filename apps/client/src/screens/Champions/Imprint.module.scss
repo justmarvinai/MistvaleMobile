@@ -1,0 +1,58 @@
+@use '../../styles/tokens' as *;
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: $space-3;
+  border: 1px solid rgba($accent, 0.3);
+  background: rgba(0, 0, 0, 0.2);
+  gap: $space-1;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+}
+
+.title {
+  margin: 0;
+  color: $accent-soft;
+  font-family: $font-display;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.level {
+  color: $gold;
+  font-family: $font-mono;
+  font-size: 0.85rem;
+}
+
+.copies {
+  margin: 0;
+  color: $parchment;
+  font-size: 0.9rem;
+
+  strong {
+    color: $gold;
+    font-family: $font-mono;
+    font-size: 1.05rem;
+  }
+}
+
+.bonus {
+  margin: 0;
+  color: $accent-soft;
+  font-family: $font-mono;
+  font-size: 0.82rem;
+}
+
+.next {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}

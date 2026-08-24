@@ -357,6 +357,56 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Multiplier per purchase already made. At 25,000 and 1.3 the fifteenth and last slab costs about 984,000 and the whole ceiling costs about 4.2M — expensive on purpose, since the alternative to buying room is pressing sell.',
   ),
 
+  // ── Imprint and Standing (C10b) ───────────────────────────────────────────
+  entry(
+    'progression.imprintCopies',
+    {
+      legendary: [2, 3, 4, 5, 6],
+      epic: [2, 3, 5, 7, 10],
+      rare: [3, 5, 9, 15, 23],
+      uncommon: [4, 8, 16, 29, 46],
+      common: [6, 13, 26, 46, 71],
+    },
+    'progression',
+    'Imprint copies by rarity',
+    'Cumulative copies obtained per imprint level, by rarity — the *thresholds* differ rather than the bonus, since a second Uncommon is an afternoon and a second Legendary is a month. Every ladder starts at two: the first copy is the champion, the second is the first mark. Copies are counted as they arrive, so feeding the duplicate away never undoes the imprint it earned.',
+  ),
+  entry(
+    'progression.imprintBonus',
+    [
+      { hpPct: 3, atkPct: 3, defPct: 3 },
+      { hpPct: 6, atkPct: 6, defPct: 6 },
+      { hpPct: 10, atkPct: 10, defPct: 10 },
+      { hpPct: 15, atkPct: 15, defPct: 15 },
+      { hpPct: 21, atkPct: 21, defPct: 21 },
+    ],
+    'progression',
+    'Imprint bonus per level',
+    "Percentages of the champion's **base** stats, resolved the way relic percentages are — so imprint never compounds with standing or a relic. Front-loaded: the first duplicate is the one that has to feel like something. No SPD field, deliberately — speed decides turn order before anything else, and an account-wide speed bonus would retune every boss built on a turn count.",
+  ),
+  entry(
+    'progression.standingChampions',
+    [5, 10, 15, 20, 25, 30, 37],
+    'progression',
+    'Standing tiers (distinct champions held)',
+    'Non-food champions **held**, not seen — so letting your only copy of somebody go is a real cost, which is what keeps "is this worth more as food" a decision. Food is left out of both sides: it exists to be spent, and counting it would make the correct play lower a number the screen tells a player to raise.',
+  ),
+  entry(
+    'progression.standingBonus',
+    [
+      { hpPct: 1, atkPct: 1, defPct: 1 },
+      { hpPct: 2, atkPct: 2, defPct: 2 },
+      { hpPct: 3, atkPct: 3, defPct: 3 },
+      { hpPct: 4, atkPct: 4, defPct: 4 },
+      { hpPct: 5, atkPct: 5, defPct: 5 },
+      { hpPct: 6, atkPct: 6, defPct: 6 },
+      { hpPct: 8, atkPct: 8, defPct: 8 },
+    ],
+    'progression',
+    'Standing bonus per tier',
+    'An order of magnitude smaller than imprint, because it applies to every champion at once and asks for no decision — it is a reward for playing broadly, not a build. The whole ladder is worth +8% at the top, which is a fraction of one relic set.',
+  ),
+
   // ── Reforging (C10a) ──────────────────────────────────────────────────────
   entry(
     'economy.gearDismantleBase',

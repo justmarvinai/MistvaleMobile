@@ -148,6 +148,39 @@ export function withRelics(content: LoadedContent, team: readonly TeamSpec[]): T
   });
 }
 
+/**
+ * What a *finished collection* is worth on top of the relics (C10b).
+ *
+ * A maxed account does not only have maxed relics — it has duplicates of the champions it
+ * built and it holds most of the roster, and both of those pay. Leaving them out would
+ * make every "a built team can do X" gate quietly understate a real endgame team, which is
+ * the wrong direction for a ceiling gate to be wrong in.
+ *
+ * Deliberately **not** applied to the fresh and par teams: a new account has no duplicates
+ * and a handful of champions, so the entry gates measure what a beginner actually fields.
+ *
+ * Values track `standing.ts`'s shipped ladders — imprint level 3 (a realistic amount of
+ * duplication on a champion somebody chose to build, not the level-5 ceiling) plus a full
+ * standing tier. If those ladders are retuned, this moves with them.
+ */
+const COLLECTION_PCT = 10 + 8;
+
+export function withCollection(content: LoadedContent, team: readonly TeamSpec[]): TeamSpec[] {
+  const scaling = championScalingFrom(content.config);
+  return team.map((member) => {
+    const def = content.champions.get(member.championKey);
+    if (!def) throw new Error(`No champion "${member.championKey}" in the seeds.`);
+    const base = deriveStats(def.baseStats, member, scaling);
+    const bonuses: Partial<Record<Stat, number>> = { ...member.bonuses };
+    // HP, ATK and DEF only — the ladders grant no speed by construction, which is the one
+    // thing that would move turn order and with it every boss built around a turn count.
+    for (const stat of ['hp', 'atk', 'def'] as const) {
+      bonuses[stat] = (bonuses[stat] ?? 0) + Math.round((base[stat] * COLLECTION_PCT) / 100);
+    }
+    return { ...member, bonuses };
+  });
+}
+
 export interface StageResult {
   stageKey: string;
   runs: number;

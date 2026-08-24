@@ -5,6 +5,44 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Imprint and Standing: what a collection is worth
+
+Two of the seven, and one pass because both answer the same question — what does a
+*collection* do for the four champions you field?
+
+**Imprint** answers the worst moment in a gacha game: pulling a Legendary you already own.
+Mistvale's only use for a duplicate was rank-up food, which makes the best pull in the game
+arrive as a consumable. A second copy now also leaves a permanent mark on every copy of that
+champion — up to +21% HP, ATK and DEF at the fifth mark.
+
+- **Copies are counted as they arrive, never as they are held.** Feeding the duplicate away
+  is the correct play — it is how a champion ranks up — and a mechanic that undid the imprint
+  for doing the correct thing would be a trap rather than a decision.
+- **Every ladder starts at the second copy.** The first is the champion; the second is the
+  first mark.
+- Thresholds are rarity-scaled and the bonus curve is shared, because "a second copy" is an
+  afternoon for an Uncommon and a month for a Legendary.
+
+**Standing** answers the other one: thirty-seven champions and a game that only ever asks
+about four. Holding a broad collection pays a little to everything, so the Chronicle's grey
+tiles are a target rather than a shelf — +1% at five champions up to +8% at all thirty-seven.
+It counts what an account **holds**, not what it has seen, which is what keeps "is this
+Bracken Puck worth more as food" a real decision. Food is excluded from both sides.
+
+Both are percentages of a champion's **base** stats, added to the same block and resolved the
+way relic percentages already are — so they never compound with each other or with a relic.
+**Neither grants speed**, and the three-field shape enforces that rather than documenting it:
+speed decides turn order before anything else in the engine, and an account-wide speed bonus
+would silently retune every boss mechanic built around a turn count.
+
+The champion sheet gains a **Collection** column beside base, relics and masteries — drawn
+only when there is something in it — because this is the one contribution a player cannot see
+by looking at the champion, and an unexplained number in a total is worse than no column.
+
+`pnpm sim`'s maxed teams now carry the collection bonus, since a finished account has
+duplicates of what it built and holds most of the roster. All 29 gates still pass, though the
+Titan's ceiling tightened from 200k to 224k against its 250k top rung — the one to watch.
+
 ### Added — Reforge, and a use for the relics the vault makes you get rid of
 
 First of the seven the owner picked on 2026-08-24. The vault fills with relics that are one

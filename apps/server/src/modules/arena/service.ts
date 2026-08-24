@@ -29,6 +29,7 @@ import * as mastery from '../mastery/service';
 import * as rewards from '../rewards/service';
 import * as roster from '../roster/service';
 import * as hall from './hall';
+import { accountBonusFor, accountBonusesFor } from '../roster/account';
 import {
   assertUnlocked,
   config,
@@ -78,6 +79,10 @@ async function teamMembers(
     owned.map((member) => member.id),
   );
   const hallLevels = await hall.levelsFor(db, ownerId);
+  // The same account the Hall belongs to. In the Arena both sides are shown from one call,
+  // so reading it per `ownerId` is what stops an attacker's collection flattering a
+  // defender's team.
+  const accountBonuses = await accountBonusesFor(db, ctx.content, ownerId);
 
   return owned.flatMap((member) => {
     const def = champions.get(member.championKey);
@@ -85,10 +90,13 @@ async function teamMembers(
     const base = deriveStats(def.baseStats, member, scaling);
     const learned = mastery.resolveMasteries(member.masteries ?? [], masteryNodes);
     const masteryStats = mastery.applyMasteryStats(base, learned);
-    const assembled = gear.assembleChampion(base, equipped.get(member.id) ?? [], gearContext, {
-      flat: masteryStats,
-      setBonusAmplifyPct: learned.setBonusAmplifyPct,
-    });
+    const assembled = gear.assembleChampion(
+      base,
+      equipped.get(member.id) ?? [],
+      gearContext,
+      { flat: masteryStats, setBonusAmplifyPct: learned.setBonusAmplifyPct },
+      accountBonusFor(accountBonuses, member.championKey, def.rarity),
+    );
     // Power shown to an attacker includes the Hall, because it is part of what they will
     // actually be fighting — an opponent who looks weaker than they hit would be a lie.
     const hallBonus = hall.bonusFor(hallLevels, def.element, base, settings);

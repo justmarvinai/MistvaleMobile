@@ -5,6 +5,7 @@ export * from './api';
 export * from './auth';
 export * from './player';
 export * from './readiness';
+export * from './standing';
 export * from './gear';
 export * from './loadout';
 export * from './champion';

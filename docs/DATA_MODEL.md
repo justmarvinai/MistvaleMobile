@@ -268,6 +268,15 @@ Three of those are worth their own sentence:
 | reforges smallint default 0 | how many substat rerolls this relic has had (C10a). Stored rather than counted from `economy_log`, because the price of the next reroll is built on it and the log is prunable (P8i) — a pruned month must not make every old relic cheap to reroll again |
 | source, obtained_at | |
 
+### `champion_imprints`
+| column | notes |
+|---|---|
+| id, player_id | |
+| champion_key, copies integer default 1 | unique on `(player_id, champion_key)` |
+| updated_at | |
+
+Copies **obtained**, not copies held (C10b). Feeding a duplicate away is how a champion ranks up in Mistvale, so a count derived from `player_champions` would undo the imprint for making the correct play. Nothing else in the schema answers this: `champion_sightings` is one row per key ever *seen*, and `summon_history` misses every champion that arrived from a mission, an event, the mail or an operator grant. Written from `grantChampion`, the single funnel all of those pass through, with an `on conflict do update` so a ×10 that pulls the same champion twice cannot lose one. **Standing needs no table** — it is distinct non-food keys in `player_champions`, counted on read.
+
 ### `shop_states`
 | column | notes |
 |---|---|

@@ -14,6 +14,7 @@ import { AppError } from '../../lib/errors';
 
 import * as gear from '../gear/service';
 import * as mastery from '../mastery/service';
+import { accountBonusFor, accountBonusesFor } from '../roster/account';
 import { arenaConfigFrom } from '../arena/rating';
 
 /**
@@ -201,6 +202,10 @@ async function showcaseFor(
     ctx.db,
     rows.map((row) => row.id),
   );
+  // The card shows what a champion actually is on that account, collection included —
+  // a showcase that quietly understated four champions would be the one screen in the game
+  // whose whole job is to be looked at getting it wrong.
+  const accountBonuses = await accountBonusesFor(ctx.db, ctx.content, playerId);
 
   const built = rows.flatMap<ShowcaseChampion>((row) => {
     const def = champions.get(row.championKey);
@@ -210,10 +215,16 @@ async function showcaseFor(
 
     const base = deriveStats(def.baseStats, row, scaling);
     const learned = mastery.resolveMasteries(row.masteries ?? [], nodes);
-    const assembled = gear.assembleChampion(base, equipped.get(row.id) ?? [], gearContext, {
-      flat: mastery.applyMasteryStats(base, learned),
-      setBonusAmplifyPct: learned.setBonusAmplifyPct,
-    });
+    const assembled = gear.assembleChampion(
+      base,
+      equipped.get(row.id) ?? [],
+      gearContext,
+      {
+        flat: mastery.applyMasteryStats(base, learned),
+        setBonusAmplifyPct: learned.setBonusAmplifyPct,
+      },
+      accountBonusFor(accountBonuses, row.championKey, def.rarity),
+    );
 
     return [
       {

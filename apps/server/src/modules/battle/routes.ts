@@ -11,6 +11,7 @@ import {
 import { MAX_SIDE_SLOTS } from '@mistvale/engine';
 import { AppError } from '../../lib/errors';
 import * as championView from '../roster/champions';
+import { accountBonusesFor } from '../roster/account';
 import * as roster from '../roster/service';
 import * as battle from './service';
 import { idParam } from '../../lib/params';
@@ -98,7 +99,10 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
     const champions = await championView.loadRoster(
       app.db,
       playerId,
-      championView.championContextFrom(app.content),
+      championView.championContextFrom(
+        app.content,
+        await accountBonusesFor(app.db, app.content, playerId),
+      ),
     );
     return reply.send(apiSuccess({ champions }, app.content.rev));
   });
@@ -129,7 +133,10 @@ export const gameRoutes: FastifyPluginAsync = async (app) => {
     const champions = await championView.loadRoster(
       app.db,
       playerId,
-      championView.championContextFrom(app.content),
+      championView.championContextFrom(
+        app.content,
+        await accountBonusesFor(app.db, app.content, playerId),
+      ),
     );
     request.log.info({ playerId, championKey }, 'starter chosen');
     return reply.send(apiSuccess({ champions }, app.content.rev));

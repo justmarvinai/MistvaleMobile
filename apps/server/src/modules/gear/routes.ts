@@ -26,6 +26,7 @@ import {
 } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
 import * as champions from '../roster/champions';
+import { accountBonusFor, accountBonusesFor } from '../roster/account';
 import * as progression from '../roster/progression';
 import { itemQuantities } from '../rewards/service';
 import * as gear from './service';
@@ -48,7 +49,29 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     return id;
   };
 
-  const context = (): champions.ChampionContext => champions.championContextFrom(app.content);
+  /**
+   * The parts of a champion context that cost nothing to build.
+   *
+   * Most of this file only wants the relic tables or the progression curves, neither of
+   * which knows anything about an account — so those stay synchronous and free. Anything
+   * that *assembles* a champion needs `championCtx` below, and the split is deliberate:
+   * a shared, request-lifetime context carrying one player's collection bonus is exactly
+   * how the next request through the same route gets the wrong stats.
+   */
+  const bare = (): { gear: gear.GearContext; progression: progression.ProgressionConfig } => {
+    const bundle = app.content.current().bundle;
+    return {
+      gear: gear.gearContextFrom(bundle),
+      progression: progression.progressionConfigFrom(bundle.config),
+    };
+  };
+
+  /** The full context, including what this account's collection is worth (C10b). */
+  const championCtx = async (playerId: string): Promise<champions.ChampionContext> =>
+    champions.championContextFrom(
+      app.content,
+      await accountBonusesFor(app.db, app.content, playerId),
+    );
 
   /** A relic upgrade seed comes from the OS, never from a battle's replayable stream. */
   const upgradeSeed = (): number => randomInt(0, 2 ** 31 - 1);
@@ -85,7 +108,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.get(ROUTES.gear.list, async (request, reply) => {
     const playerId = requirePlayer(request);
-    const ctx = context().gear;
+    const ctx = bare().gear;
     // The vault comes with the list rather than from a second call: the screen that shows
     // relics is the screen that shows how many more will fit, and one round trip on a
     // one-core box is worth more than the tidiness of two endpoints.
@@ -98,14 +121,14 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
   app.get(ROUTES.gear.vault, async (request, reply) => {
     const playerId = requirePlayer(request);
-    const vault = await gear.vaultState(app.db, playerId, context().gear);
+    const vault = await gear.vaultState(app.db, playerId, bare().gear);
     return reply.send(apiSuccess({ vault }, app.content.rev));
   });
 
   app.post(ROUTES.gear.buyVaultSlots, async (request, reply) => {
     const playerId = requirePlayer(request);
     const body = buyVaultSlotsRequestSchema.parse(request.body ?? {});
-    const vault = await gear.buyVaultSlots(app.db, playerId, body.actionId, context().gear);
+    const vault = await gear.buyVaultSlots(app.db, playerId, body.actionId, bare().gear);
     return reply.send(apiSuccess({ vault }, app.content.rev));
   });
 
@@ -113,7 +136,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
   app.get(routePattern(ROUTES.roster.detail), async (request, reply) => {
     const playerId = requirePlayer(request);
     const id = idParam(request);
-    const detail = await champions.loadDetail(app.db, playerId, id, context());
+    const detail = await champions.loadDetail(app.db, playerId, id, await championCtx(playerId));
     return reply.send(apiSuccess({ champion: detail }, app.content.rev));
   });
 
@@ -128,10 +151,10 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       id,
       body.foodIds,
       body.brews,
-      context().progression,
+      bare().progression,
       app.content,
     );
-    const detail = await champions.loadDetail(app.db, playerId, id, context());
+    const detail = await champions.loadDetail(app.db, playerId, id, await championCtx(playerId));
     request.log.info(
       { playerId, championId: id, fed: result.consumed.length, xp: result.xpGained },
       'champion levelled',
@@ -161,10 +184,10 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       id,
       rankDef,
       body.foodIds,
-      context().progression,
+      bare().progression,
       app.content,
     );
-    const detail = await champions.loadDetail(app.db, playerId, id, context());
+    const detail = await champions.loadDetail(app.db, playerId, id, await championCtx(playerId));
     request.log.info(
       { playerId, championId: id, rank: result.champion.rank },
       'champion ranked up',
@@ -188,8 +211,8 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     ascendRequestSchema.parse(request.body);
 
     const def = await championDef(playerId, id);
-    await progression.ascend(app.db, playerId, id, def, context().progression, app.content);
-    const detail = await champions.loadDetail(app.db, playerId, id, context());
+    await progression.ascend(app.db, playerId, id, def, bare().progression, app.content);
+    const detail = await champions.loadDetail(app.db, playerId, id, await championCtx(playerId));
     request.log.info({ playerId, championId: id }, 'champion ascended');
     return reply.send(
       apiSuccess(
@@ -205,8 +228,8 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     awakenRequestSchema.parse(request.body);
 
     const def = await championDef(playerId, id);
-    await progression.awaken(app.db, playerId, id, def, context().progression, app.content);
-    const detail = await champions.loadDetail(app.db, playerId, id, context());
+    await progression.awaken(app.db, playerId, id, def, bare().progression, app.content);
+    const detail = await champions.loadDetail(app.db, playerId, id, await championCtx(playerId));
     request.log.info(
       { playerId, championId: id, awakening: detail.champion.awakening },
       'champion awakened',
@@ -237,9 +260,9 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       body.skillKey,
       body.source,
       def,
-      context().progression,
+      bare().progression,
     );
-    const detail = await champions.loadDetail(app.db, playerId, id, context());
+    const detail = await champions.loadDetail(app.db, playerId, id, await championCtx(playerId));
     return reply.send(
       apiSuccess(
         {
@@ -259,7 +282,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const body = championFlagsRequestSchema.parse(request.body);
 
     await progression.setFlags(app.db, playerId, id, body);
-    const detail = await champions.loadDetail(app.db, playerId, id, context());
+    const detail = await champions.loadDetail(app.db, playerId, id, await championCtx(playerId));
     return reply.send(apiSuccess({ champion: detail }, app.content.rev));
   });
 
@@ -272,7 +295,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       playerId,
       body.ids,
       rarityOf,
-      context().progression,
+      bare().progression,
     );
     request.log.info({ playerId, count: result.released.length }, 'champions released');
     return reply.send(apiSuccess(result, app.content.rev));
@@ -284,9 +307,14 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const id = idParam(request);
     const body = equipGearRequestSchema.parse(request.body);
 
-    const ctx = context();
+    const ctx = await championCtx(playerId);
     await gear.equip(app.db, playerId, id, body.championId, ctx.gear, app.content);
-    const detail = await champions.loadDetail(app.db, playerId, body.championId, context());
+    const detail = await champions.loadDetail(
+      app.db,
+      playerId,
+      body.championId,
+      await championCtx(playerId),
+    );
     return reply.send(apiSuccess({ champion: detail }, app.content.rev));
   });
 
@@ -294,8 +322,8 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const playerId = requirePlayer(request);
     const id = idParam(request);
 
-    const row = await gear.unequip(app.db, playerId, id, context().gear);
-    return reply.send(apiSuccess({ gear: gear.toDto(row, context().gear) }, app.content.rev));
+    const row = await gear.unequip(app.db, playerId, id, bare().gear);
+    return reply.send(apiSuccess({ gear: gear.toDto(row, bare().gear) }, app.content.rev));
   });
 
   app.post(routePattern(ROUTES.gear.lock), async (request, reply) => {
@@ -304,7 +332,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const body = lockGearRequestSchema.parse(request.body);
 
     const row = await gear.setLocked(app.db, playerId, id, body.locked);
-    return reply.send(apiSuccess({ gear: gear.toDto(row, context().gear) }, app.content.rev));
+    return reply.send(apiSuccess({ gear: gear.toDto(row, bare().gear) }, app.content.rev));
   });
 
   app.post(routePattern(ROUTES.gear.upgrade), async (request, reply) => {
@@ -312,7 +340,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const id = idParam(request);
     const body = upgradeGearRequestSchema.parse(request.body);
 
-    const ctx = context();
+    const ctx = await championCtx(playerId);
     const result = await gear.upgrade(
       app.db,
       playerId,
@@ -351,7 +379,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       throw new AppError('VALIDATION', `A forge run takes at most ${cap} relics.`);
     }
 
-    const ctx = context();
+    const ctx = await championCtx(playerId);
     const result = await gear.upgradeMany(
       app.db,
       playerId,
@@ -400,7 +428,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
   app.post(routePattern(ROUTES.loadouts.apply), async (request, reply) => {
     const playerId = requirePlayer(request);
     const body = applyLoadoutRequestSchema.parse(request.body);
-    const ctx = context();
+    const ctx = await championCtx(playerId);
     const result = await loadouts.apply(
       app.db,
       playerId,
@@ -423,7 +451,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const playerId = requirePlayer(request);
     const body = sellGearRequestSchema.parse(request.body);
 
-    const result = await gear.sell(app.db, playerId, body.ids, context().gear);
+    const result = await gear.sell(app.db, playerId, body.ids, bare().gear);
     request.log.info({ playerId, count: result.sold.length, paid: result.paid }, 'relics sold');
     return reply.send(apiSuccess(result, app.content.rev));
   });
@@ -439,7 +467,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const playerId = requirePlayer(request);
     const body = dismantleGearRequestSchema.parse(request.body);
 
-    const result = await gear.dismantle(app.db, playerId, body.ids, context().gear);
+    const result = await gear.dismantle(app.db, playerId, body.ids, bare().gear);
     request.log.info(
       { playerId, count: result.removed.length, dust: result.dust },
       'relics dismantled',
@@ -457,7 +485,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
    */
   app.get(routePattern(ROUTES.gear.reforge), async (request, reply) => {
     const playerId = requirePlayer(request);
-    const quote = await gear.reforgeQuote(app.db, playerId, idParam(request), context().gear);
+    const quote = await gear.reforgeQuote(app.db, playerId, idParam(request), bare().gear);
     return reply.send(apiSuccess(quote, app.content.rev));
   });
 
@@ -475,7 +503,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
         expectStat: body.expectStat,
         expectPercent: body.expectPercent,
       },
-      context().gear,
+      bare().gear,
       upgradeSeed(),
       app.content,
     );
@@ -499,7 +527,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
     const id = idParam(request);
     const championId = uuidQuery(request, 'championId');
 
-    const ctx = context();
+    const ctx = await championCtx(playerId);
     const [candidate] = await gear
       .listGear(app.db, playerId, ctx.gear)
       .then((all) => all.filter((piece) => piece.id === id));
@@ -518,6 +546,9 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
       [...worn, candidate].map(toRow),
       ctx.gear,
       champions.masteryContribution(owned, base, ctx),
+      // The collection's contribution too, or the preview promises a total the champion
+      // sheet then contradicts by exactly the account bonus.
+      accountBonusFor(ctx.account, owned.championKey, rarityOf(owned.championKey) ?? 'common'),
     );
 
     return reply.send(
@@ -530,6 +561,7 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
               base,
               gear: assembled.gear,
               mastery: assembled.mastery,
+              account: assembled.account,
               total: assembled.total,
               setBonuses: assembled.setBonuses,
               power: assembled.power,

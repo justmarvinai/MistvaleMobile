@@ -21,6 +21,7 @@ import { MasteryTrees } from './MasteryTrees';
 import { RelicPicker } from './RelicPicker';
 import { LoadoutBar } from './LoadoutBar';
 import { StatTable } from './StatTable';
+import { Imprint } from './Imprint';
 import styles from './ChampionDetail.module.scss';
 import { Icon } from '../../ui/Icon/Icon';
 import { ChampionIdle } from '../../ui/ChampionIdle/ChampionIdle';
@@ -309,6 +310,13 @@ export function ChampionDetailModal({
                 reading skills. */}
             <div className={styles.summary}>
               <StatTable stats={stats} />
+
+              {/* The imprint ladder, beside the numbers it explains.
+                  Drawn whenever the account has more than one copy — a single copy is every
+                  champion's starting state and says nothing, but a *second* is the moment
+                  this feature exists for, and the moment a player needs telling that the
+                  duplicate they just pulled was not a waste. */}
+              {detail.imprint.copies > 1 && <Imprint state={detail.imprint} />}
 
               {/* What the pieces add up to — the whole reason relic *sets* exist, and the one
                   thing this sheet never said. Counted from what is worn, with the incomplete

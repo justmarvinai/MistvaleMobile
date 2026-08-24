@@ -3,6 +3,7 @@ import { baseRankOf, levelCapForRank, type ChampionDef } from '@mistvale/shared'
 import { playerChampions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
+import { recordCopy } from './account';
 import { grantItems } from '../rewards/service';
 import { track } from '../meta/progress';
 import type { ContentCache } from '../../content/cache';
@@ -151,6 +152,14 @@ export async function grantChampion(
     });
 
   if (!row) throw new AppError('INTERNAL', 'Could not add that champion.');
+
+  // One more copy, counted here because this is the single funnel every champion enters a
+  // roster through — a pull, a starter, a mission, an event, the mail and an operator grant
+  // all land in this function. Counted on *arrival* rather than derived from the roster, so
+  // feeding the duplicate away (which is the correct play, and how a champion ranks up)
+  // cannot undo the imprint it earned (C10b).
+  await recordCopy(tx, playerId, championKey);
+
   return row;
 }
 

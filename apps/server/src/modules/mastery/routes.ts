@@ -10,6 +10,7 @@ import {
 import { players } from '../../db/schema/index';
 import { AppError } from '../../lib/errors';
 import * as championView from '../roster/champions';
+import { accountBonusesFor } from '../roster/account';
 import * as mastery from './service';
 import { idParam } from '../../lib/params';
 
@@ -34,7 +35,10 @@ export const masteryRoutes: FastifyPluginAsync = async (app) => {
     const playerId = requirePlayer(request);
     const id = idParam(request);
     const body = masteryLearnRequestSchema.parse(request.body);
-    const context = championView.championContextFrom(app.content);
+    const context = championView.championContextFrom(
+      app.content,
+      await accountBonusesFor(app.db, app.content, playerId),
+    );
 
     const detail = await app.db.transaction(async (tx) => {
       const [player] = await tx
@@ -64,7 +68,10 @@ export const masteryRoutes: FastifyPluginAsync = async (app) => {
     const playerId = requirePlayer(request);
     const id = idParam(request);
     masteryResetRequestSchema.parse(request.body);
-    const context = championView.championContextFrom(app.content);
+    const context = championView.championContextFrom(
+      app.content,
+      await accountBonusesFor(app.db, app.content, playerId),
+    );
 
     const result = await app.db.transaction(async (tx) => {
       const [player] = await tx

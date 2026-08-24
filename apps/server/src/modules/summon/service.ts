@@ -17,6 +17,7 @@ import { AppError } from '../../lib/errors';
 import { grantItems, itemQuantities } from '../rewards/service';
 import { grantChampion } from '../roster/service';
 import { championContextFrom, toRosterChampion } from '../roster/champions';
+import { accountBonusesFor } from '../roster/account';
 import { gearByChampion } from '../gear/service';
 import { track } from '../meta/progress';
 import { pityStates, poolContents, rarityLookup, rollMany, type PityCounters } from './roll';
@@ -163,7 +164,12 @@ export async function pull(
       throw new AppError('CONTENT_STALE', 'That pool has no champions that can be summoned.');
     }
 
-    const championContext = championContextFrom(content);
+    // Read after the pulls land, so a ×10 that added a copy shows the imprint it just
+    // earned rather than the one the account had before pressing the button.
+    const championContext = championContextFrom(
+      content,
+      await accountBonusesFor(tx, content, playerId),
+    );
     const results: SummonResult[] = [];
     let latest: PityCounters = counters;
 
@@ -263,7 +269,7 @@ async function recentResults(
     .orderBy(desc(summonHistory.createdAt))
     .limit(count);
 
-  const context = championContextFrom(content);
+  const context = championContextFrom(content, await accountBonusesFor(tx, content, playerId));
   const results: SummonResult[] = [];
 
   for (const row of [...rows].reverse()) {

@@ -14,6 +14,13 @@ import styles from './StatTable.module.scss';
  * Masteries earn their own column rather than being folded into the relic one because they
  * are a *different decision* — relics are farmed and swapped, masteries are committed to.
  *
+ * **Collection** is the fourth, and the one that most needs saying out loud: imprint and
+ * standing are the only contributions a player cannot see by looking at the champion. The
+ * relics are on it and the masteries are on its board, but a bonus earned by pulling a
+ * duplicate two months ago would otherwise be an unexplained number in the total — and an
+ * unexplained number in a stat table is worse than no column at all. Drawn only when it is
+ * non-zero, so a new account still gets the four-column table it can read.
+ *
  * Every row says what its stat *does* on hover. Four of the eight are self-evident and
  * four are not: speed decides how often a champion acts and is what most fights are
  * actually settled by; accuracy and resistance are a pair, and neither means anything
@@ -26,6 +33,10 @@ import styles from './StatTable.module.scss';
 const PERCENT: ReadonlySet<Stat> = new Set<Stat>(['critRate', 'critDmg']);
 
 export function StatTable({ stats }: { stats: ChampionStats }): JSX.Element {
+  // A column of eight dashes teaches nothing and costs a fifth of the table's width, so
+  // the collection column appears with the collection.
+  const showCollection = STAT_ORDER.some((stat) => Math.round(stats.account?.[stat] ?? 0) !== 0);
+
   return (
     <table className={styles.table}>
       <thead>
@@ -34,12 +45,13 @@ export function StatTable({ stats }: { stats: ChampionStats }): JSX.Element {
           <th scope="col">Base</th>
           <th scope="col">Relics</th>
           <th scope="col">Masteries</th>
+          {showCollection && <th scope="col">Collection</th>}
           <th scope="col">Total</th>
         </tr>
       </thead>
       <tbody>
         {STAT_ORDER.map((stat) => (
-          <StatRow key={stat} stat={stat} stats={stats} />
+          <StatRow key={stat} stat={stat} stats={stats} showCollection={showCollection} />
         ))}
       </tbody>
     </table>
@@ -54,14 +66,24 @@ export function StatTable({ stats }: { stats: ChampionStats }): JSX.Element {
  * table with collapsed borders has a box a pointer can be inside without being over any
  * cell, which puts the card in a different place depending on where in the gap you are.
  */
-function StatRow({ stat, stats }: { stat: Stat; stats: ChampionStats }): JSX.Element {
+function StatRow({
+  stat,
+  stats,
+  showCollection,
+}: {
+  stat: Stat;
+  stats: ChampionStats;
+  showCollection: boolean;
+}): JSX.Element {
   const bonus = Math.round(stats.gear[stat]);
   const learned = Math.round(stats.mastery?.[stat] ?? 0);
+  const collected = Math.round(stats.account?.[stat] ?? 0);
   const ref = useTip(
     statTip(stat, {
       base: stats.base[stat],
       gear: stats.gear[stat],
       masteries: stats.mastery?.[stat] ?? 0,
+      collection: stats.account?.[stat] ?? 0,
       total: stats.total[stat],
     }),
   );
@@ -78,6 +100,11 @@ function StatRow({ stat, stats }: { stat: Stat; stats: ChampionStats }): JSX.Ele
       <td className={learned > 0 ? styles.bonus : styles.zero}>
         {learned > 0 ? `+${learned.toLocaleString()}` : '—'}
       </td>
+      {showCollection && (
+        <td className={collected > 0 ? styles.bonus : styles.zero}>
+          {collected > 0 ? `+${collected.toLocaleString()}` : '—'}
+        </td>
+      )}
       <td className={styles.total}>
         {Math.round(stats.total[stat]).toLocaleString()}
         {PERCENT.has(stat) ? '%' : ''}

@@ -6,6 +6,7 @@ import {
   simulateStage,
   simulateTitan,
   starterKeys,
+  withCollection,
   withRelics,
   type LoadedContent,
   type StageResult,
@@ -189,9 +190,12 @@ function main(): void {
         ...(difficulty === 'brutal' ? { level: 60, rank: 6, ascension: 4 } : {}),
       })),
     );
-    const maxed = withRelics(
+    const maxed = withCollection(
       content,
-      parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 6 })),
+      withRelics(
+        content,
+        parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 6 })),
+      ),
     );
 
     const entry = simulateStage(content, opening.key, arriving, RUNS);
@@ -269,9 +273,12 @@ function main(): void {
     // The deepest floor is measured against a team that has actually farmed for it:
     // levelled, ranked, ascended and wearing relics. An unequipped champion is not who
     // walks into floor 15, and gating on one would tune the Depths for nobody.
-    const maxed = withRelics(
+    const maxed = withCollection(
       content,
-      parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 4 })),
+      withRelics(
+        content,
+        parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 4 })),
+      ),
     );
 
     const shallow = simulateStage(content, first.key, entry, RUNS);
@@ -406,9 +413,12 @@ function main(): void {
     const built = simulateTitan(
       content,
       titanStage.key,
-      withRelics(
+      withCollection(
         content,
-        parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 6 })),
+        withRelics(
+          content,
+          parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 6 })),
+        ),
       ),
       cap,
       titanRuns,

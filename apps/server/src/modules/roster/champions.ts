@@ -2,10 +2,12 @@ import { and, eq } from 'drizzle-orm';
 import { championScalingFrom, deriveStats } from '@mistvale/engine';
 import {
   MAX_ASCENSION,
+  NO_STAT_BONUS,
   RANK_RANGE_BY_RARITY,
   baseRankOf,
   canDeepen,
   maxRankFor,
+  type AccountStatBonus,
   type ChampionDetail,
   type ChampionStats,
   type MasteryDef,
@@ -21,6 +23,7 @@ import {
   type PlayerChampionRow,
 } from '../../db/schema/index';
 import { AppError } from '../../lib/errors';
+import { accountBonusFor, imprintFor, type AccountBonuses } from './account';
 import { championXpToNextLevel } from '../rewards/service';
 import {
   assembleChampion,
@@ -58,9 +61,22 @@ export interface ChampionContext {
   /** Published mastery nodes and what they cost, indexed once per request. */
   masteryNodes: ReadonlyMap<string, MasteryDef>;
   masteryCosts: mastery.MasteryCosts;
+  /**
+   * What the account's collection is worth to every champion in it (C10b).
+   *
+   * **Required**, and read once per request rather than once per champion — a roster of
+   * thirty-seven would otherwise be thirty-seven round trips. A caller with no account to
+   * speak of (a bot's snapshot, the tutorial's borrowed team) passes `NO_ACCOUNT_BONUSES`
+   * explicitly, so "this team gets no collection bonus" is a decision somebody made rather
+   * than a default nobody noticed.
+   */
+  account: AccountBonuses;
 }
 
-export function championContextFrom(content: ContentCache): ChampionContext {
+export function championContextFrom(
+  content: ContentCache,
+  account: AccountBonuses,
+): ChampionContext {
   const bundle = content.current().bundle;
   return {
     gear: gearContextFrom(bundle),
@@ -68,6 +84,7 @@ export function championContextFrom(content: ContentCache): ChampionContext {
     content,
     masteryNodes: mastery.nodesFrom(content),
     masteryCosts: mastery.costsFrom(bundle.config),
+    account,
   };
 }
 
@@ -96,6 +113,20 @@ export function baseStatsFor(
   return deriveStats(def.baseStats, row, scaling);
 }
 
+/**
+ * What the account's collection adds to one champion.
+ *
+ * A champion whose definition has gone stale gets nothing rather than throwing: the roster
+ * is drawn from rows a player owns, and a copy can outlive the content that described it.
+ */
+function accountBonusOf(championKey: string, context: ChampionContext): AccountStatBonus {
+  const def = context.content
+    .current()
+    .bundle.champions.find((champion) => champion.key === championKey);
+  if (!def) return NO_STAT_BONUS;
+  return accountBonusFor(context.account, championKey, def.rarity);
+}
+
 /** Everything the roster grid shows for one champion. */
 export function toRosterChampion(
   row: PlayerChampionRow,
@@ -108,6 +139,7 @@ export function toRosterChampion(
     gear,
     context.gear,
     masteryContribution(row, base, context),
+    accountBonusOf(row.championKey, context),
   );
   const cap = levelCapForRank(row.rank);
 
@@ -142,6 +174,7 @@ export function toChampionDetail(
     gear,
     context.gear,
     masteryContribution(row, base, context),
+    accountBonusOf(row.championKey, context),
   );
   const def = context.content
     .current()
@@ -152,10 +185,12 @@ export function toChampionDetail(
     base,
     gear: assembled.gear,
     mastery: assembled.mastery,
+    account: assembled.account,
     total: assembled.total,
     setBonuses: assembled.setBonuses,
     power: assembled.power,
   };
+  const imprint = imprintFor(context.account, row.championKey, def.rarity);
 
   const nextAscension = row.ascension + 1;
   const ascensionCap = ascensionCapForRank(row.rank, context.progression);
@@ -171,6 +206,7 @@ export function toChampionDetail(
     gear: gear.map((piece) => toDto(piece, context.gear)),
     skillUpgrades: row.skillUpgrades ?? {},
     masteries: mastery.stateFor(row, context.masteryNodes, context.masteryCosts, playerLevel),
+    imprint,
     costs: {
       rankUp: rankCost ? { ...rankCost, atLevelCap: atCap } : null,
       ascend:

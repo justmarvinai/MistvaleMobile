@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { imprintStateSchema } from './standing';
 import { championStatsSchema, gearInstanceSchema } from './gear';
 import { masteryStateSchema } from './mastery';
 
@@ -40,6 +41,15 @@ export const championDetailSchema = z.object({
   skillUpgrades: z.record(z.string(), z.number().int()),
   /** Learned masteries, the picks still available, and what a reset would cost. */
   masteries: masteryStateSchema,
+  /**
+   * How many copies of this champion the account has obtained, and what that is worth.
+   *
+   * On the detail rather than on the roster card, because it is the only place a player
+   * can be told *why* — a card with a number on it and no ladder beside it is a mystery,
+   * and this is the one contribution to a champion's stats that cannot be seen by looking
+   * at the champion itself.
+   */
+  imprint: imprintStateSchema,
   /** What the next step on each ladder needs, so the client never guesses a cost. */
   costs: z.object({
     rankUp: z

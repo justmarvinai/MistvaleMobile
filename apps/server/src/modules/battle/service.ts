@@ -53,6 +53,7 @@ import * as progress from '../progress/service';
 import * as chronicle from '../summon/service';
 import * as rewards from '../rewards/service';
 import * as roster from '../roster/service';
+import { accountBonusFor, accountBonusesFor } from '../roster/account';
 
 /**
  * Battles, server-side.
@@ -290,6 +291,11 @@ export async function assembleEntries(
   const arenaConfig = arenaConfigFrom(snapshot.bundle.config);
   const hallLevels = await hall.levelsFor(tx, hallOwnerId);
 
+  // Imprint and standing belong to the same account the Hall does, and answer the same
+  // question — what this *collection* is worth to the four champions it sent. Read once
+  // for the team rather than once per member.
+  const accountBonuses = await accountBonusesFor(tx, ctx.content, hallOwnerId);
+
   return owned.map((member) => {
     const def = champions.get(member.championKey);
     if (!def) {
@@ -304,14 +310,26 @@ export async function assembleEntries(
     // here, and what needs a fight to decide rides in as effects the engine evaluates.
     const learned = mastery.resolveMasteries(member.masteries ?? [], masteryNodes);
     const masteryStats = mastery.applyMasteryStats(base, learned);
-    const assembled = gear.assembleChampion(base, equipped.get(member.id) ?? [], gearContext, {
-      flat: masteryStats,
-      setBonusAmplifyPct: learned.setBonusAmplifyPct,
-    });
+    const assembled = gear.assembleChampion(
+      base,
+      equipped.get(member.id) ?? [],
+      gearContext,
+      { flat: masteryStats, setBonusAmplifyPct: learned.setBonusAmplifyPct },
+      accountBonusFor(accountBonuses, member.championKey, def.rarity),
+    );
 
     const bonuses = { ...assembled.gear };
     for (const [stat, value] of Object.entries(masteryStats) as [keyof typeof bonuses, number][]) {
       bonuses[stat] = (bonuses[stat] ?? 0) + value;
+    }
+    // The engine fights with `bonuses`, so the collection's contribution has to be folded
+    // in here as well — a champion whose sheet says 22,000 HP and whose fight starts at
+    // 20,000 is the exact disagreement the account column exists to make visible.
+    for (const [stat, value] of Object.entries(assembled.account) as [
+      keyof typeof bonuses,
+      number,
+    ][]) {
+      if (value !== 0) bonuses[stat] = (bonuses[stat] ?? 0) + value;
     }
     for (const [stat, value] of Object.entries(
       hall.bonusFor(hallLevels, def.element, base, arenaConfig),

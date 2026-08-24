@@ -198,6 +198,33 @@ export const summonHistory = pgTable(
  * The Chronicle is a record of the world, not a list of receipts, so a champion fought in
  * the campaign or shown on a banner registers as *seen* even if it was never pulled.
  */
+/**
+ * How many copies of a champion an account has ever obtained (C10b).
+ *
+ * **Obtained, not held.** Feeding a duplicate away is the correct play in Mistvale — it is
+ * how a champion ranks up — and a count derived from `player_champions` would undo the
+ * imprint for doing the right thing, which is a trap rather than a decision. Nothing else
+ * in the schema answers this: `champion_sightings` is one row per key ever seen, and
+ * `summon_history` misses every champion that arrived from a mission, an event or the mail.
+ */
+export const championImprints = pgTable(
+  'champion_imprints',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    championKey: text('champion_key').notNull(),
+    /** Every copy ever added to the roster, the first one included. */
+    copies: integer('copies').notNull().default(1),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('champion_imprints_player_champion').on(table.playerId, table.championKey),
+  ],
+);
+export type ChampionImprintRow = typeof championImprints.$inferSelect;
+
 export const championSightings = pgTable(
   'champion_sightings',
   {

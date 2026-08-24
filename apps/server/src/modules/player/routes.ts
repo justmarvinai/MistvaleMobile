@@ -23,6 +23,7 @@ import * as missions from '../meta/missions';
 import * as progress from '../progress/service';
 import * as quests from '../meta/quests';
 import { readinessFor } from './readiness';
+import { accountBonusesFor } from '../roster/account';
 
 /**
  * Player snapshot and settings.
@@ -97,6 +98,10 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
           // dock pips follow, and the reason the Haven's card needs no round trips of its
           // own. Everything in it is null or empty below its unlock.
           readiness: await readinessFor(app.db, app.content, player, now),
+          // What breadth of collection is worth right now (C10b). On the snapshot because
+          // it is account-wide and changes rarely — a screen that wanted it would otherwise
+          // fetch it, and the roster is exactly the screen that wants it.
+          standing: (await accountBonusesFor(app.db, app.content, player.id)).standing,
           settings: { ...DEFAULT_PLAYER_SETTINGS, ...player.settings },
           serverTime: now.toISOString(),
         },

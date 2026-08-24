@@ -283,6 +283,14 @@ export const championStatsSchema = z.object({
   gear: statBlockSchema,
   /** What learned masteries add. Separate from relics so the screen can show both. */
   mastery: statBlockSchema,
+  /**
+   * What the *collection* adds — imprint on this champion plus the account's standing.
+   *
+   * Its own column because it is the one contribution a player cannot see by looking at
+   * the champion: relics are on it and masteries are on its board, but a bonus earned by
+   * pulling a duplicate months ago would otherwise be an unexplained number in the total.
+   */
+  account: statBlockSchema,
   total: statBlockSchema,
   setBonuses: z.array(activeSetBonusSchema),
   power: z.number().int(),

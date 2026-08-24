@@ -12,6 +12,7 @@ import {
   type GearSlot,
   type GearStatLine,
   type GearUpgradeAttempt,
+  type AccountStatBonus,
   type Rarity,
   type ReforgeQuote,
   type ReforgeResult,
@@ -173,10 +174,20 @@ export function assembleChampion(
    * three columns — what the champion is, what it is wearing, and what it has learned —
    * rather than one number a player has to take on trust.
    */
-  masteries: MasteryContribution = EMPTY_MASTERIES,
+  masteries: MasteryContribution,
+  /**
+   * What imprint and standing add, as percentages of `base` (C10b).
+   *
+   * **Required rather than defaulted**, so the compiler names every place a champion is
+   * assembled when the shape changes. A default here would let one call site quietly
+   * disagree with the engine about how strong a champion is — which is precisely the class
+   * of bug this project keeps finding, and the reason the mastery column exists at all.
+   */
+  account: AccountStatBonus,
 ): {
   gear: StatBlock;
   mastery: StatBlock;
+  account: StatBlock;
   total: StatBlock;
   setBonuses: ReturnType<typeof assembleGearBonus>['setBonuses'];
   power: number;
@@ -193,11 +204,29 @@ export function assembleChampion(
     mastery[stat] += value;
   }
 
+  // Percentages of the champion's **base**, exactly as relic percentages resolve — so
+  // imprint and standing cannot compound with each other or with a relic, and the order
+  // they are applied in cannot matter (COMBAT_SYSTEM §1).
+  const accountBlock = emptyBlock();
+  accountBlock.hp = Math.round((base.hp * account.hpPct) / 100);
+  accountBlock.atk = Math.round((base.atk * account.atkPct) / 100);
+  accountBlock.def = Math.round((base.def * account.defPct) / 100);
+
   const total = { ...base };
   for (const stat of Object.keys(total) as (keyof StatBlock)[]) {
-    total[stat] = Math.max(0, Math.round(base[stat] + bonus[stat] + mastery[stat]));
+    total[stat] = Math.max(
+      0,
+      Math.round(base[stat] + bonus[stat] + mastery[stat] + accountBlock[stat]),
+    );
   }
-  return { gear: bonus, mastery, total, setBonuses, power: powerScore(total, context.economy) };
+  return {
+    gear: bonus,
+    mastery,
+    account: accountBlock,
+    total,
+    setBonuses,
+    power: powerScore(total, context.economy),
+  };
 }
 
 /** What a champion's learned masteries are worth, before the fight starts. */
@@ -206,7 +235,10 @@ export interface MasteryContribution {
   setBonusAmplifyPct: number;
 }
 
-const EMPTY_MASTERIES: MasteryContribution = Object.freeze({ flat: {}, setBonusAmplifyPct: 0 });
+export const EMPTY_MASTERIES: MasteryContribution = Object.freeze({
+  flat: {},
+  setBonusAmplifyPct: 0,
+});
 
 function emptyBlock(): StatBlock {
   return { hp: 0, atk: 0, def: 0, spd: 0, critRate: 0, critDmg: 0, res: 0, acc: 0 };
