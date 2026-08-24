@@ -13,6 +13,8 @@ import {
   lockGearRequestSchema,
   rankUpRequestSchema,
   releaseChampionsRequestSchema,
+  dismantleGearRequestSchema,
+  reforgeGearRequestSchema,
   sellGearRequestSchema,
   skillUpgradeRequestSchema,
   upgradeGearRequestSchema,
@@ -423,6 +425,64 @@ export const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
     const result = await gear.sell(app.db, playerId, body.ids, context().gear);
     request.log.info({ playerId, count: result.sold.length, paid: result.paid }, 'relics sold');
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  /**
+   * Grinds relics down for Reliquary Dust.
+   *
+   * The other half of the vault's ceiling: a player who has to get rid of relics chooses
+   * here whether the overflow becomes silver or the currency that fixes what they kept.
+   * Same refusals as a sell, because it is the same decision made differently.
+   */
+  app.post(ROUTES.gear.dismantle, async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const body = dismantleGearRequestSchema.parse(request.body);
+
+    const result = await gear.dismantle(app.db, playerId, body.ids, context().gear);
+    request.log.info(
+      { playerId, count: result.removed.length, dust: result.dust },
+      'relics dismantled',
+    );
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  /**
+   * What reforging this relic would cost, and what each of its lines could become.
+   *
+   * A read, and the reason the mutation can stay a single tap: the pool every line is
+   * gambling against is published before anything is spent, the same way the Mistgate
+   * publishes its rates. `blockedReason` is computed by the same function the mutation
+   * refuses with, so the button's sentence and the server's are one sentence.
+   */
+  app.get(routePattern(ROUTES.gear.reforge), async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const quote = await gear.reforgeQuote(app.db, playerId, idParam(request), context().gear);
+    return reply.send(apiSuccess(quote, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.gear.reforge), async (request, reply) => {
+    const playerId = requirePlayer(request);
+    const id = idParam(request);
+    const body = reforgeGearRequestSchema.parse(request.body);
+
+    const result = await gear.reforge(
+      app.db,
+      playerId,
+      id,
+      {
+        substatIndex: body.substatIndex,
+        expectStat: body.expectStat,
+        expectPercent: body.expectPercent,
+      },
+      context().gear,
+      upgradeSeed(),
+      app.content,
+    );
+    request.log.info(
+      { playerId, gearId: id, from: result.before.stat, to: result.after.stat },
+      'relic reforged',
+    );
     return reply.send(apiSuccess(result, app.content.rev));
   });
 

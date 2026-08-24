@@ -8,14 +8,18 @@ import {
 } from '@mistvale/shared';
 import {
   DEFAULT_GEAR_ECONOMY,
+  applyReforge,
   applyUpgrade,
   assembleGearBonus,
   emptyStatBlock,
   gearEconomyFrom,
   gearTablesFrom,
   mainStatValue,
+  dismantleValue,
   pickRarity,
   powerScore,
+  reforgeCandidates,
+  reforgePrice,
   rollGear,
   sellValue,
   upgradeChance,
@@ -495,5 +499,120 @@ describe('reading the economy from config', () => {
     });
     expect(economy.sellBase).toEqual(DEFAULT_GEAR_ECONOMY.sellBase);
     expect(economy.sellPerLevel).toBe(DEFAULT_GEAR_ECONOMY.sellPerLevel);
+  });
+});
+
+describe('reforging', () => {
+  it('offers every rollable stat except the main and the lines already worn', () => {
+    // The exclusion rule a fresh roll and an upgrade already follow — one stat form per
+    // relic — with the line being *replaced* deliberately left out of the taken set,
+    // since it is on its way off the piece.
+    const start = piece({
+      main: { stat: 'atk', percent: false, value: 60 },
+      substats: [
+        { stat: 'spd', percent: false, value: 4, rolls: 1 },
+        { stat: 'res', percent: false, value: 5, rolls: 1 },
+      ],
+    });
+    const keys = reforgeCandidates(TABLES, start, 0).map(
+      (def) => `${def.stat}:${def.percent ? 'pct' : 'flat'}`,
+    );
+    expect(keys).not.toContain('atk:flat');
+    expect(keys).not.toContain('res:flat');
+    // …and not its own form either: a reforge always comes back a different line, so a
+    // player who paid to move off flat SPD is never handed flat SPD back. Its *other*
+    // form stays available, which at Mistvale's numbers is a real change.
+    expect(keys).not.toContain('spd:flat');
+    expect(keys).toContain('def:flat');
+  });
+
+  it('keeps the rolls that went into a line and re-rolls them on the new stat', () => {
+    // The whole design decision. Carrying the old *value* across would make a four-roll
+    // ACC line into a four-roll-sized SPD line, which is nonsense between stats of
+    // different scales; dropping to one roll would make reforging a punishment for
+    // having invested. So the count survives and the values are drawn again.
+    const start = piece({
+      substats: [
+        { stat: 'acc', percent: false, value: 24, rolls: 4 },
+        { stat: 'hp', percent: false, value: 100, rolls: 1 },
+      ],
+    });
+    const result = applyReforge(createRng(7), TABLES, start, 0)!;
+    expect(result.after.rolls).toBe(4);
+    expect(result.before.stat).toBe('acc');
+    expect(`${result.after.stat}:${result.after.percent}`).not.toBe('acc:false');
+    // Four rolls of whatever it landed on, so the value sits inside four times that
+    // stat's own ★6 range — found by form rather than by name, since ATK% and flat ATK
+    // are different definitions with very different numbers.
+    const def = [...TABLES.stats.values()].find(
+      (entry) => entry.stat === result.after.stat && entry.percent === result.after.percent,
+    )!;
+    expect(result.after.value).toBeGreaterThanOrEqual((def.subMin[5] ?? 0) * 4);
+    expect(result.after.value).toBeLessThanOrEqual((def.subMax[5] ?? 0) * 4);
+  });
+
+  it('leaves every other line exactly where it was', () => {
+    const start = piece({
+      substats: [
+        { stat: 'spd', percent: false, value: 9, rolls: 2 },
+        { stat: 'res', percent: false, value: 5, rolls: 1 },
+      ],
+    });
+    const result = applyReforge(createRng(3), TABLES, start, 1)!;
+    expect(result.substats[0]).toEqual(start.substats[0]);
+    expect(result.substats).toHaveLength(2);
+  });
+
+  it('refuses rather than charges when there is nothing left to become', () => {
+    // Reachable precisely *because* a line's own stat is excluded: a relic whose main and
+    // substats already cover every rollable form has nowhere left to go. Mistvale's real
+    // tables have far more forms than a relic has lines, so this is a guard rather than a
+    // state players meet — but a caller must never take the dust for a reroll that cannot
+    // happen, so the arithmetic says no before the service can.
+    const every = [...TABLES.stats.values()].filter((def) => def.canBeSub);
+    const tight = gearTablesFrom({
+      gearStats: every.slice(0, 3),
+      gearSlots: [],
+      gearSets: [],
+    });
+    const start = piece({
+      main: { stat: every[0]!.stat, percent: every[0]!.percent, value: 1 },
+      substats: every
+        .slice(1, 3)
+        .map((def) => ({ stat: def.stat, percent: def.percent, value: 1, rolls: 1 })),
+    });
+    expect(reforgeCandidates(tight, start, 0)).toEqual([]);
+    expect(applyReforge(createRng(1), tight, start, 0)).toBeNull();
+  });
+
+  it("prices the next reforge off the rank and the relic's own history", () => {
+    // Growth compounds per *relic*, not per account, so months of work on an old piece
+    // never prices a player out of fixing a new drop.
+    const first = reforgePrice(DEFAULT_GEAR_ECONOMY, 6, 0);
+    const second = reforgePrice(DEFAULT_GEAR_ECONOMY, 6, 1);
+    expect(first.dust).toBe(DEFAULT_GEAR_ECONOMY.reforgeDust);
+    expect(second.dust).toBeGreaterThan(first.dust);
+
+    const lowRank = reforgePrice(DEFAULT_GEAR_ECONOMY, 1, 0);
+    expect(lowRank.dust).toBeLessThan(first.dust);
+  });
+
+  it('pays more dust for a relic somebody actually levelled', () => {
+    const raw = dismantleValue(DEFAULT_GEAR_ECONOMY, piece({ level: 0 }));
+    const worked = dismantleValue(DEFAULT_GEAR_ECONOMY, piece({ level: 16 }));
+    expect(worked).toBeGreaterThan(raw * 5);
+  });
+
+  it('is priced so the overflow can pay for the keeper', () => {
+    // The exchange rate the whole feature rests on: grinding down one good ★6 relic
+    // should be worth roughly one reroll of another. Far off in either direction and it
+    // is either a formality or a wall.
+    const legendary = dismantleValue(
+      DEFAULT_GEAR_ECONOMY,
+      piece({ rank: 6, rarity: 'legendary', level: 16 }),
+    );
+    const cost = reforgePrice(DEFAULT_GEAR_ECONOMY, 6, 0).dust;
+    expect(cost).toBeGreaterThan(legendary * 0.8);
+    expect(cost).toBeLessThan(legendary * 3);
   });
 });

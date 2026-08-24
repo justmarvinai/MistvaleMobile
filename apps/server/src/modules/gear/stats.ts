@@ -77,6 +77,31 @@ export interface GearEconomyConfig {
   vaultUpgradeCost: number;
   /** Multiplied in once per purchase already made, so each slab costs more than the last. */
   vaultUpgradeCostGrowth: number;
+
+  // ── Reforging (C10) ───────────────────────────────────────────────────────
+  /**
+   * Reliquary Dust a dismantle pays, per rank, before rarity and level.
+   *
+   * Deliberately a *separate* curve from `sellBase` rather than a fraction of it: silver
+   * and dust are wanted at different points in an account's life, and tying one to the
+   * other means an operator retuning the silver economy silently retunes reforging too.
+   */
+  dismantleBase: readonly number[];
+  dismantleRarityMultiplier: Readonly<Record<Rarity, number>>;
+  dismantlePerLevel: number;
+  /** Dust for the first reforge of a relic, at ★6. Lower ranks scale by `costByRank`. */
+  reforgeDust: number;
+  /** Silver alongside the dust, so the sink drains both. Scales the same way. */
+  reforgeSilver: number;
+  /** Multiplied in once per reforge already done to *this relic*. */
+  reforgeCostGrowth: number;
+  /**
+   * How many times one relic may be reforged, ever.
+   *
+   * A ceiling rather than pure price escalation, because escalation alone is only a
+   * barrier to somebody with less silver than patience. Zero means no limit.
+   */
+  reforgeMaxPerRelic: number;
 }
 
 export const DEFAULT_GEAR_ECONOMY: GearEconomyConfig = Object.freeze({
@@ -141,6 +166,27 @@ export const DEFAULT_GEAR_ECONOMY: GearEconomyConfig = Object.freeze({
   vaultSlotsPerUpgrade: 50,
   vaultUpgradeCost: 25_000,
   vaultUpgradeCostGrowth: 1.3,
+  // The exchange rate the whole feature rests on, measured rather than guessed
+  // (`stats.test.ts` pins it): a ★6 Legendary at +16 grinds down to about 1,040 dust, and
+  // the first reroll of a ★6 relic costs 1,000 — so one keeper's worth of overflow buys
+  // one reroll of the keeper. The junk a farmed evening actually produces is ★5–6 at +0,
+  // worth 50–110 each, so a session's overflow is one or two rerolls.
+  dismantleBase: Object.freeze([2, 5, 12, 22, 38, 70]),
+  dismantleRarityMultiplier: Object.freeze({
+    common: 1,
+    uncommon: 1.15,
+    rare: 1.35,
+    epic: 1.6,
+    legendary: 2,
+  }),
+  dismantlePerLevel: 0.4,
+  reforgeDust: 1_000,
+  // Roughly one ★6 Legendary's sell value, so the two halves of the price are comparable —
+  // but dust is meant to be the binding one, since dust is the half that can only come
+  // from letting relics go.
+  reforgeSilver: 100_000,
+  reforgeCostGrowth: 1.6,
+  reforgeMaxPerRelic: 6,
 });
 
 const CONFIG_KEYS = {
@@ -158,6 +204,13 @@ const CONFIG_KEYS = {
   vaultSlotsPerUpgrade: 'economy.vaultSlotsPerUpgrade',
   vaultUpgradeCost: 'economy.vaultUpgradeCost',
   vaultUpgradeCostGrowth: 'economy.vaultUpgradeCostGrowth',
+  dismantleBase: 'economy.gearDismantleBase',
+  dismantleRarityMultiplier: 'economy.gearDismantleRarityMultiplier',
+  dismantlePerLevel: 'economy.gearDismantlePerLevel',
+  reforgeDust: 'economy.gearReforgeDust',
+  reforgeSilver: 'economy.gearReforgeSilver',
+  reforgeCostGrowth: 'economy.gearReforgeCostGrowth',
+  reforgeMaxPerRelic: 'economy.gearReforgeMaxPerRelic',
 } as const;
 
 /**
@@ -222,6 +275,25 @@ export function gearEconomyFrom(config: Readonly<Record<string, unknown>>): Gear
     vaultUpgradeCostGrowth: number(
       CONFIG_KEYS.vaultUpgradeCostGrowth,
       DEFAULT_GEAR_ECONOMY.vaultUpgradeCostGrowth,
+    ),
+    dismantleBase: numbers(CONFIG_KEYS.dismantleBase, DEFAULT_GEAR_ECONOMY.dismantleBase),
+    dismantleRarityMultiplier: record(
+      CONFIG_KEYS.dismantleRarityMultiplier,
+      DEFAULT_GEAR_ECONOMY.dismantleRarityMultiplier,
+    ),
+    dismantlePerLevel: number(
+      CONFIG_KEYS.dismantlePerLevel,
+      DEFAULT_GEAR_ECONOMY.dismantlePerLevel,
+    ),
+    reforgeDust: number(CONFIG_KEYS.reforgeDust, DEFAULT_GEAR_ECONOMY.reforgeDust),
+    reforgeSilver: number(CONFIG_KEYS.reforgeSilver, DEFAULT_GEAR_ECONOMY.reforgeSilver),
+    reforgeCostGrowth: number(
+      CONFIG_KEYS.reforgeCostGrowth,
+      DEFAULT_GEAR_ECONOMY.reforgeCostGrowth,
+    ),
+    reforgeMaxPerRelic: number(
+      CONFIG_KEYS.reforgeMaxPerRelic,
+      DEFAULT_GEAR_ECONOMY.reforgeMaxPerRelic,
     ),
   });
 }
@@ -347,6 +419,125 @@ export function sellValue(economy: GearEconomyConfig, piece: GearPiece): number 
   const base = economy.sellBase[rankIndex(piece.rank)] ?? 0;
   const rarity = economy.sellRarityMultiplier[piece.rarity] ?? 1;
   return Math.max(1, Math.round(base * rarity * (1 + economy.sellPerLevel * piece.level)));
+}
+
+// ── Reforging (C10) ─────────────────────────────────────────────────────────
+
+/** What grinding a relic down pays, in Reliquary Dust. */
+export function dismantleValue(economy: GearEconomyConfig, piece: GearPiece): number {
+  const base = economy.dismantleBase[rankIndex(piece.rank)] ?? 0;
+  const rarity = economy.dismantleRarityMultiplier[piece.rarity] ?? 1;
+  return Math.max(1, Math.round(base * rarity * (1 + economy.dismantlePerLevel * piece.level)));
+}
+
+export interface ReforgePrice {
+  dust: number;
+  silver: number;
+}
+
+/**
+ * What the next reforge of this relic costs.
+ *
+ * Two things move it: the relic's **rank**, so a ★2 practice piece is cheap to play with
+ * and a ★6 build piece is not, and **how many times this relic has already been reforged**,
+ * which is what stops one relic being fed through until every line is perfect. The growth
+ * compounds per relic rather than per account, so a player is never priced out of fixing a
+ * new drop by the work they did on an old one.
+ */
+export function reforgePrice(
+  economy: GearEconomyConfig,
+  rank: number,
+  reforges: number,
+): ReforgePrice {
+  const rankMultiplier = economy.costByRank[rankIndex(rank)] ?? 1;
+  const done = Math.max(0, Math.floor(reforges));
+  const growth = Math.pow(Math.max(1, economy.reforgeCostGrowth), done);
+  return {
+    dust: Math.max(1, Math.round(economy.reforgeDust * rankMultiplier * growth)),
+    silver: Math.max(0, Math.round(economy.reforgeSilver * rankMultiplier * growth)),
+  };
+}
+
+/**
+ * Every stat one line could turn into.
+ *
+ * The same exclusion rule a fresh roll and an upgrade already use — a relic never carries
+ * one stat *form* twice — and **the line's own form is excluded as well**, so a reforge
+ * always comes back as a different line. That is a deliberate choice against the source
+ * genre, where a reroll can hand back exactly what you started with: this feature exists
+ * to answer "perfect rolls, wrong stat", and paying its price to be told *no* is the one
+ * outcome that teaches a player never to press it again.
+ *
+ * The exclusion is by form rather than by stat, which is the game's own rule everywhere
+ * else — a weapon may carry flat ATK and ATK% at once. So flat DEF can reforge into DEF%,
+ * and that is a real change: at Mistvale's numbers the two are worth wildly different
+ * amounts on the same champion. What cannot happen is flat DEF coming back as flat DEF.
+ *
+ * Published rather than hidden, so the panel can say exactly what a reroll may turn into
+ * before anything is spent — the Mistgate's transparency rule applied to relics.
+ */
+export function reforgeCandidates(
+  tables: GearTables,
+  piece: GearPiece,
+  index: number,
+): GearStatDef[] {
+  const line = piece.substats[index];
+  if (!line) return [];
+  const taken = new Set<string>([
+    statFormKey(piece.main.stat, piece.main.percent),
+    ...piece.substats.map((other) => statFormKey(other.stat, other.percent)),
+  ]);
+  return [...tables.stats.values()].filter(
+    (def) => def.canBeSub && !taken.has(statFormKey(def.stat, def.percent)),
+  );
+}
+
+/** What one stat rolls between at a rank, per roll — the numbers a quote publishes. */
+export function substatRange(def: GearStatDef, rank: number): { min: number; max: number } {
+  const at = rankIndex(rank);
+  const min = def.subMin[at] ?? 0;
+  const max = def.subMax[at] ?? min;
+  return { min: roundStat(min, def.percent), max: roundStat(Math.max(min, max), def.percent) };
+}
+
+/**
+ * Rerolls one substat into a different stat, keeping the work that went into it.
+ *
+ * The **rolls are preserved and re-rolled**, not carried across: a line that had been
+ * deepened four times comes back as four fresh rolls of the new stat. That is the honest
+ * middle between the two bad options — carrying the old *value* onto a new stat would make
+ * a +4 ACC line into a +4-sized SPD line, which is nonsense across stats of different
+ * scales, and dropping to a single roll would make reforging a punishment for having
+ * invested. What is gambled is the stat, and how well four rolls land.
+ *
+ * Returns `null` when there is nothing it could become, which a caller must refuse rather
+ * than charge for.
+ */
+export function applyReforge(
+  rng: Rng,
+  tables: GearTables,
+  piece: GearPiece,
+  index: number,
+): { substats: GearStatLine[]; before: GearStatLine; after: GearStatLine } | null {
+  const before = piece.substats[index];
+  if (!before) return null;
+  const pool = reforgeCandidates(tables, piece, index);
+  if (pool.length === 0) return null;
+
+  const def = pool[rng.int(0, pool.length - 1)]!;
+  const rolls = Math.max(1, Math.floor(before.rolls ?? 1));
+  let value = 0;
+  for (let roll = 0; roll < rolls; roll += 1) {
+    value += rollSubstatValue(rng, def, piece.rank);
+  }
+  const after: GearStatLine = {
+    stat: def.stat,
+    percent: def.percent,
+    value: roundStat(value, def.percent),
+    rolls,
+  };
+  const substats = piece.substats.map((entry, at) => (at === index ? after : { ...entry }));
+  return { substats, before: { ...before }, after };
 }
 
 // ── Rolling a new relic ─────────────────────────────────────────────────────

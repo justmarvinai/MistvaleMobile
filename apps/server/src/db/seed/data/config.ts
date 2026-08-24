@@ -357,6 +357,57 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Multiplier per purchase already made. At 25,000 and 1.3 the fifteenth and last slab costs about 984,000 and the whole ceiling costs about 4.2M — expensive on purpose, since the alternative to buying room is pressing sell.',
   ),
 
+  // ── Reforging (C10a) ──────────────────────────────────────────────────────
+  entry(
+    'economy.gearDismantleBase',
+    [2, 5, 12, 22, 38, 70],
+    'economy',
+    'Dismantle dust by rank',
+    'Reliquary Dust a relic grinds down to at each rank, before rarity and level. A separate curve from the silver sell value on purpose: tying the two together means retuning the silver economy silently retunes reforging.',
+  ),
+  entry(
+    'economy.gearDismantleRarityMultiplier',
+    { common: 1, uncommon: 1.15, rare: 1.35, epic: 1.6, legendary: 2 },
+    'economy',
+    'Dismantle dust by rarity',
+    'A flatter curve than selling uses. Dust is meant to come mostly from *volume* — the hundred relics a farmed week produces — rather than from the occasional legendary, which a player usually wants to keep.',
+  ),
+  entry(
+    'economy.gearDismantlePerLevel',
+    0.4,
+    'economy',
+    'Dismantle dust per upgrade level',
+    'Added per level the relic reached, so a +16 piece grinds to roughly seven times a +0 one. Higher than the silver equivalent because a levelled relic being dismantled is a decision worth paying for.',
+  ),
+  entry(
+    'economy.gearReforgeDust',
+    1_000,
+    'economy',
+    'Reforge cost (dust, at ★6)',
+    "The first reroll of a ★6 relic. Set to about what one ★6 legendary at +16 grinds down to, which is the exchange rate this feature is for: one keeper's worth of overflow buys one reroll of the keeper. Lower ranks scale by the upgrade cost-by-rank curve.",
+  ),
+  entry(
+    'economy.gearReforgeSilver',
+    100_000,
+    'economy',
+    'Reforge cost (silver, at ★6)',
+    "Alongside the dust, so the sink drains both — roughly one ★6 legendary's sell value. Dust is meant to be the binding half, since it is the half that can only come from letting relics go. Scales by rank the same way.",
+  ),
+  entry(
+    'economy.gearReforgeCostGrowth',
+    1.6,
+    'economy',
+    'Reforge cost growth',
+    'Multiplied in once per reforge already done to *this relic*, not to the account — so work on an old relic never prices a player out of fixing a new drop. At 1.6 the sixth reroll of one relic costs about ten times the first.',
+  ),
+  entry(
+    'economy.gearReforgeMaxPerRelic',
+    6,
+    'economy',
+    'Reforges per relic',
+    'A ceiling as well as a price, because escalation alone is only a barrier to somebody with less silver than patience. Zero removes the limit and leaves the cost curve to do the work.',
+  ),
+
   entry(
     'economy.gearRemovalFree',
     true,
@@ -952,6 +1003,18 @@ export const ITEMS: ItemDefInput[] = [
     'legendary',
     'A splinter of something that was never asleep. Held too long, it starts to hold back.',
     65,
+  ),
+
+  // The reforging currency, and the only thing it is for. It has no drop table of its own
+  // by design: it comes out of relics ground down, which is what makes rerolling
+  // self-limiting — the vault's overflow pays to fix what the vault kept (C10a).
+  item(
+    'reliquary_dust',
+    'Reliquary Dust',
+    'material',
+    'rare',
+    'What is left when a relic is talked out of the shape it was found in. It remembers being something.',
+    66,
   ),
 
   item('tome_rare', 'Rare Tome', 'tome', 'rare', 'Teaches a Rare champion a little more.', 70),

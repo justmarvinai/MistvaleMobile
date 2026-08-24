@@ -218,6 +218,13 @@
       "when": 1787085687193,
       "tag": "0030_gear_loadouts",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1787085700000,
+      "tag": "0031_gear_reforge",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,7 @@ import { gameApi } from '../../api/game';
 import { useInventoryStore } from '../../state/inventoryStore';
 import { RelicCard } from '../Relics/RelicCard';
 import { Forge } from '../Relics/Forge';
+import { Reforge } from '../Relics/Reforge';
 import { usePlayerStore } from '../../state/playerStore';
 import styles from './RelicPicker.module.scss';
 import { statLabel } from '../../ui/statLabels';
@@ -54,6 +55,7 @@ export function RelicPicker({
    */
   const [forging, setForging] = useState(false);
   const canForge = usePlayerStore((state) => state.unlocks?.relicUpgrading ?? false);
+  const [reforging, setReforging] = useState(false);
 
   const [selected, setSelected] = useState<string | null>(null);
   const [preview, setPreview] = useState<GearPreview | null>(null);
@@ -132,6 +134,23 @@ export function RelicPicker({
                     onClick={() => setForging(true)}
                   >
                     {worn.level >= 16 ? 'Maxed' : 'Forge'}
+                  </Button>
+                  {/* Beside the forge because it is the same kind of decision about the
+                      same piece — and on the *worn* relic on purpose, since the one worth
+                      rerolling a line on is the one a champion is already wearing. */}
+                  <Button
+                    variant="ghost"
+                    disabled={busy || !canForge || worn.substats.length === 0}
+                    title={
+                      canForge
+                        ? worn.substats.length === 0
+                          ? 'This relic has no substats to reforge'
+                          : undefined
+                        : 'The forge opens at account level 3'
+                    }
+                    onClick={() => setReforging(true)}
+                  >
+                    Reforge
                   </Button>
                   <Button
                     variant="ghost"
@@ -221,6 +240,17 @@ export function RelicPicker({
           </Button>
         </div>
       </div>
+
+      {reforging && worn && (
+        <Reforge
+          relic={worn}
+          onClose={() => setReforging(false)}
+          onChanged={async () => {
+            await loadInventory();
+            await onChanged();
+          }}
+        />
+      )}
 
       {forging && worn && (
         <Forge

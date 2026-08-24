@@ -40,6 +40,8 @@ export const GOAL_TYPES = [
   'summon',
   /** One relic upgrade attempt, successful or not — the attempt is the activity. */
   'gearUpgrade',
+  /** One substat rerolled. The reroll is the activity, whatever it landed on. */
+  'gearReforge',
   /** A relic put on a champion. Filter: `slot`. Re-equipping the same piece counts again. */
   'gearEquip',
   /** The highest relic level reached. A *threshold* goal: progress is a high-water mark. */
@@ -99,6 +101,7 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   useEnergy: 'count',
   summon: 'count',
   gearUpgrade: 'count',
+  gearReforge: 'count',
   gearEquip: 'count',
   gearLevel: 'highest',
   championLevelUp: 'count',
@@ -134,6 +137,7 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   useEnergy: [],
   summon: ['poolKey'],
   gearUpgrade: [],
+  gearReforge: [],
   gearEquip: ['slot'],
   gearLevel: [],
   championLevelUp: [],

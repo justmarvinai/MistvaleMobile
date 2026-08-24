@@ -57,6 +57,10 @@ import type {
   SummonBanner,
   SummonHistoryEntry,
   SummonResponse,
+  DismantleResult,
+  ReforgeQuote,
+  ReforgeResult,
+  Stat,
 } from '@mistvale/shared';
 import { ROUTES } from '@mistvale/shared';
 import type { BattleEvent, BattleState, UnitRef } from '@mistvale/engine';
@@ -267,6 +271,26 @@ export const gameApi = {
   sellGear: (ids: string[], actionId: string) =>
     api.post<{ sold: string[]; silver: number; paid: number }>(ROUTES.gear.sell, {
       ids,
+      actionId,
+    }),
+
+  /** Grinds relics down for Reliquary Dust instead of selling them for silver. */
+  dismantleGear: (ids: string[], actionId: string) =>
+    api.post<DismantleResult>(ROUTES.gear.dismantle, { ids, actionId }),
+
+  /** What a reforge would cost, and what each line could turn into. */
+  reforgeQuote: (gearId: string) => api.get<ReforgeQuote>(ROUTES.gear.reforge(gearId)),
+
+  reforgeGear: (
+    gearId: string,
+    substatIndex: number,
+    expect: { stat: Stat; percent: boolean },
+    actionId: string,
+  ) =>
+    api.post<ReforgeResult>(ROUTES.gear.reforge(gearId), {
+      substatIndex,
+      expectStat: expect.stat,
+      expectPercent: expect.percent,
       actionId,
     }),
 

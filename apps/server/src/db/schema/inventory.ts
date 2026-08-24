@@ -87,6 +87,14 @@ export const gearInstances = pgTable(
     }),
     /** Locked relics survive a mass sell — the guard against a misclick on a farmed piece. */
     locked: boolean('locked').notNull().default(false),
+    /**
+     * How many times a substat on this relic has been rerolled (C10a).
+     *
+     * Stored rather than counted from the economy log, because the log is prunable (P8i)
+     * and the price of the next reforge is built on this number — a pruned month must not
+     * make every old relic cheap to reroll again.
+     */
+    reforges: smallint('reforges').notNull().default(0),
 
     /** Where it came from: a stage key, a shop key, `starter`. */
     source: text('source').notNull().default(''),

@@ -5,6 +5,38 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Reforge, and a use for the relics the vault makes you get rid of
+
+First of the seven the owner picked on 2026-08-24. The vault fills with relics that are one
+bad roll from good, and the only thing to do with them was press sell.
+
+**Reforge rerolls one substat into a different one, keeping the rolls that went into it.**
+A line deepened four times comes back as four fresh rolls of the new stat — the honest middle
+between carrying the old *value* across (nonsense between stats of different scales) and
+dropping to a single roll (a punishment for having invested). What is gambled is which stat,
+and how well those rolls land.
+
+- **It always comes back different.** The line's own form is excluded, so a player who paid
+  to move off flat SPD is never handed flat SPD back. Flat DEF may become DEF%, which at
+  Mistvale's numbers is a real change and not a technicality.
+- **The pool is published before anything is spent** — every stat the line could turn into,
+  with its per-roll range at that relic's rank. The Mistgate's odds rule, applied to relics.
+- **The price climbs per relic, not per account**, and stops at six rerolls. Months of work
+  on an old piece never price a player out of fixing a new drop.
+- A stale screen is refused rather than charged: the request names the line it thought it
+  was rerolling.
+
+**It is paid for in Reliquary Dust, which only comes from dismantling relics.** No drop table
+of its own — that is the design. The vault's ceiling already obliges a player to get rid of
+relics, so this makes what they get rid of into the currency that fixes what they kept, and
+reforging is self-limiting without a second faucet to balance. The selection bar shows both
+prices side by side, because the decision is between them and nobody should have to press one
+to find out what the other was worth. One ★6 legendary's worth of overflow buys one reroll of
+the keeper — measured against the real curves rather than guessed, and pinned by a test.
+
+Dust lives on the vault screen rather than in the currency rail: it is a material, and this is
+the one screen that both earns it and spends it.
+
 ### Added — a roster you can search, and a Haven that says what is waiting
 
 Two of the five things on the owner's list (2026-08-22), both about finding what you came for.

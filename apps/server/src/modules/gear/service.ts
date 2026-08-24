@@ -4,13 +4,18 @@ import {
   ACCESSORY_ASCENSION_REQUIREMENT,
   GEAR_MAX_LEVEL,
   GEAR_SLOTS,
+  REFORGE_DUST_ITEM,
   type BulkUpgradeEntry,
   type BulkUpgradeResult,
+  type DismantleResult,
   type GearInstance,
   type GearSlot,
   type GearStatLine,
   type GearUpgradeAttempt,
   type Rarity,
+  type ReforgeQuote,
+  type ReforgeResult,
+  type Stat,
   type StatBlock,
 } from '@mistvale/shared';
 import { gearInstances, playerChampions, players } from '../../db/schema/index';
@@ -18,18 +23,23 @@ import type { Database } from '../../db/client';
 import type { ContentCache } from '../../content/cache';
 import type { GearInstanceRow } from '../../db/schema/inventory';
 import { AppError } from '../../lib/errors';
-import { grant } from '../rewards/service';
+import { grant, grantItems, itemQuantities } from '../rewards/service';
 import { track } from '../meta/progress';
 import {
+  applyReforge,
   applyUpgrade,
   assembleGearBonus,
+  dismantleValue,
   gearEconomyFrom,
   gearTablesFrom,
   mainStatValue,
   pickRarity,
   powerScore,
+  reforgeCandidates,
+  reforgePrice,
   rollGear,
   sellValue,
+  substatRange,
   statFormKey,
   upgradeChance,
   upgradeCost,
@@ -109,6 +119,8 @@ export function toDto(row: GearInstanceRow, context: GearContext): GearInstance 
     upgradeCost:
       row.level >= GEAR_MAX_LEVEL ? 0 : upgradeCost(context.economy, row.rank, nextLevel),
     upgradeChance: row.level >= GEAR_MAX_LEVEL ? 0 : upgradeChance(context.economy, nextLevel),
+    dismantleValue: dismantleValue(context.economy, piece),
+    reforges: row.reforges,
   };
 }
 
@@ -757,6 +769,215 @@ export async function sell(
     await tx.delete(gearInstances).where(inArray(gearInstances.id, [...ids]));
 
     return { silver: await currentSilver(tx, playerId), sold: rows.map((row) => row.id), paid };
+  });
+}
+
+// ── Dismantling and reforging (C10a) ────────────────────────────────────────
+
+/**
+ * Grinds relics down to Reliquary Dust instead of selling them for silver.
+ *
+ * The vault has a ceiling (Q5), so a player is *already* obliged to get rid of relics;
+ * this makes what they get rid of into the currency that fixes the ones they kept. That
+ * is what keeps reforging self-limiting without a drop table of its own: you may only
+ * reroll as much as you are willing to feed the mill.
+ *
+ * The refusals are a sell's, deliberately — a run that quietly spared the locked piece in
+ * a hundred-relic selection is a run whose result nobody can check.
+ */
+export async function dismantle(
+  db: Database,
+  playerId: string,
+  ids: readonly string[],
+  context: GearContext,
+): Promise<DismantleResult> {
+  return db.transaction(async (tx) => {
+    const rows = await tx
+      .select()
+      .from(gearInstances)
+      .where(and(eq(gearInstances.playerId, playerId), inArray(gearInstances.id, [...ids])))
+      .for('update');
+
+    if (rows.length !== ids.length) {
+      throw AppError.notFound('One of those relics is not yours.');
+    }
+    const blocked = rows.find((row) => row.locked || row.equippedChampionId !== null);
+    if (blocked) {
+      throw new AppError(
+        'VALIDATION',
+        blocked.locked
+          ? 'A locked relic is in the selection. Unlock it first.'
+          : 'An equipped relic is in the selection. Take it off first.',
+      );
+    }
+
+    const dust = rows.reduce((sum, row) => sum + dismantleValue(context.economy, pieceOf(row)), 0);
+    await grantItems(tx, playerId, { [REFORGE_DUST_ITEM]: dust }, `gear:dismantle:${rows.length}`);
+    await tx.delete(gearInstances).where(inArray(gearInstances.id, [...ids]));
+
+    const held = await itemQuantities(tx, playerId);
+    return {
+      removed: rows.map((row) => row.id),
+      dust,
+      dustHeld: held.get(REFORGE_DUST_ITEM) ?? 0,
+    };
+  });
+}
+
+/**
+ * What reforging this relic would cost, and what each line could become.
+ *
+ * A read, and a deliberately generous one: the panel shows the price *and* the pool every
+ * line is gambling against before anything is spent. That is the Mistgate's published-odds
+ * rule applied to relics — a gamble whose shape a player cannot see is a slot machine, and
+ * this game does not have one.
+ */
+export async function reforgeQuote(
+  db: Database,
+  playerId: string,
+  gearId: string,
+  context: GearContext,
+): Promise<ReforgeQuote> {
+  const row = await ownedGear(db, playerId, gearId);
+  const piece = pieceOf(row);
+  const price = reforgePrice(context.economy, row.rank, row.reforges);
+  const held = await itemQuantities(db, playerId);
+  const dustHeld = held.get(REFORGE_DUST_ITEM) ?? 0;
+  const silverHeld = await currentSilver(db, playerId);
+
+  const lines = piece.substats.map((line, index) => ({
+    index,
+    line,
+    candidates: reforgeCandidates(context.tables, piece, index).map((def) => ({
+      stat: def.stat as Stat,
+      percent: def.percent,
+      ...substatRange(def, piece.rank),
+    })),
+  }));
+
+  return {
+    gearId: row.id,
+    reforges: row.reforges,
+    dust: price.dust,
+    silver: price.silver,
+    dustHeld,
+    silverHeld,
+    lines,
+    blockedReason: reforgeBlockedReason(context.economy, row, lines),
+  };
+}
+
+/**
+ * Why this relic cannot be reforged, in the sentence the button will show.
+ *
+ * Shared by the quote and the mutation so the screen and the server can never disagree
+ * about whether the button should have been pressable — the same shape `planLoadout` gave
+ * loadouts in C9.
+ */
+function reforgeBlockedReason(
+  economy: GearEconomyConfig,
+  row: GearInstanceRow,
+  lines: readonly { candidates: readonly unknown[] }[],
+): string | null {
+  if (lines.length === 0) {
+    return 'This relic has no substats to reforge. Upgrade it first.';
+  }
+  const ceiling = Math.floor(economy.reforgeMaxPerRelic);
+  if (ceiling > 0 && row.reforges >= ceiling) {
+    return `This relic has been reforged ${ceiling} times. That is as far as it goes.`;
+  }
+  if (lines.every((line) => line.candidates.length === 0)) {
+    return 'There is no other stat this relic could take.';
+  }
+  return null;
+}
+
+/**
+ * Rerolls one substat into a different stat.
+ *
+ * **The line is chosen and the stat is not** — that is the whole gamble, and the reason
+ * this drains a currency rather than selling an outcome. What is *not* gambled is the work
+ * already in the line: a substat deepened four times comes back as four fresh rolls of the
+ * new stat, so reforging is never a punishment for having invested (`applyReforge`).
+ *
+ * `expectStat`/`expectPercent` guard a stale screen. Substats only ever gain, so the index
+ * is stable in practice — but "in practice" is not a thing to spend a player's dust on,
+ * and a second tab that reforged the same relic a moment ago would otherwise reroll a line
+ * the player never looked at.
+ */
+export async function reforge(
+  db: Database,
+  playerId: string,
+  gearId: string,
+  request: { substatIndex: number; expectStat: Stat; expectPercent: boolean },
+  context: GearContext,
+  seed: number,
+  content: ContentCache,
+): Promise<ReforgeResult> {
+  return db.transaction(async (tx) => {
+    const row = await ownedGear(tx, playerId, gearId, { lock: true });
+    const piece = pieceOf(row);
+
+    const lines = piece.substats.map((_, index) => ({
+      candidates: reforgeCandidates(context.tables, piece, index),
+    }));
+    const blocked = reforgeBlockedReason(context.economy, row, lines);
+    if (blocked) throw new AppError('VALIDATION', blocked);
+
+    const target = piece.substats[request.substatIndex];
+    if (!target) {
+      throw new AppError('VALIDATION', 'That relic has no such substat.');
+    }
+    if (target.stat !== request.expectStat || target.percent !== request.expectPercent) {
+      // `VALIDATION` rather than a conflict code, because the vocabulary has none and the
+      // request genuinely no longer describes the relic. What matters is the sentence: a
+      // player whose second tab reforged this relic a moment ago must be told to look
+      // again rather than charged for a line they never chose.
+      throw new AppError(
+        'VALIDATION',
+        'That line has changed since the screen read it. Open the relic again.',
+      );
+    }
+
+    const price = reforgePrice(context.economy, row.rank, row.reforges);
+    // Dust first: it is the scarcer half and the one with a per-item floor, so failing on
+    // it before any silver moves keeps a refusal from being a partial charge.
+    await grantItems(tx, playerId, { [REFORGE_DUST_ITEM]: -price.dust }, `gear:reforge:${gearId}`);
+    if (price.silver > 0) {
+      await grant(tx, playerId, { silver: -price.silver }, `gear:reforge:${gearId}`);
+    }
+
+    const result = applyReforge(createRng(seed), context.tables, piece, request.substatIndex);
+    if (!result) {
+      // Unreachable given the block above, and a throw rather than a silent no-op because
+      // the charge has already happened — rolling the transaction back is the only honest
+      // answer to "we took your dust and changed nothing".
+      throw new AppError('VALIDATION', 'There is no other stat this line could take.');
+    }
+
+    const [updated] = await tx
+      .update(gearInstances)
+      .set({
+        substats: result.substats,
+        reforges: row.reforges + 1,
+        updatedAt: new Date(),
+      })
+      .where(eq(gearInstances.id, gearId))
+      .returning();
+    if (!updated) throw AppError.notFound('No such relic.');
+
+    await track(tx, { content }, playerId, [{ type: 'gearReforge', amount: 1 }]);
+
+    const held = await itemQuantities(tx, playerId);
+    return {
+      gear: toDto(updated, context),
+      before: result.before,
+      after: result.after,
+      dustSpent: price.dust,
+      silverSpent: price.silver,
+      dustHeld: held.get(REFORGE_DUST_ITEM) ?? 0,
+      silver: await currentSilver(tx, playerId),
+    };
   });
 }
 

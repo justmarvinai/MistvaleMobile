@@ -14,6 +14,8 @@ import { championTip, emptySocketTip, relicTip, rewardTip, statTip } from './tip
 
 const relic = (over: Partial<GearInstance> = {}): GearInstance => ({
   id: 'g1',
+  dismantleValue: 40,
+  reforges: 0,
   setKey: 'ember',
   slot: 'weapon',
   rank: 5,

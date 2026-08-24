@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { GearInstance, GearSlot, Rarity } from '@mistvale/shared';
-import { GEAR_MAX_LEVEL, GEAR_SLOTS, RARITIES } from '@mistvale/shared';
+import { GEAR_MAX_LEVEL, GEAR_SLOTS, RARITIES, REFORGE_DUST_ITEM } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
-import { useInventoryStore } from '../../state/inventoryStore';
+import { itemCount, useInventoryStore } from '../../state/inventoryStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { RelicCard } from './RelicCard';
 import { Forge } from './Forge';
+import { Reforge } from './Reforge';
 import styles from './RelicsScreen.module.scss';
 import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
@@ -51,6 +52,7 @@ export function RelicsScreen(): JSX.Element {
   const load = useInventoryStore((state) => state.load);
   const refresh = useInventoryStore((state) => state.refresh);
   const setLocked = useInventoryStore((state) => state.setLocked);
+  const items = useInventoryStore((state) => state.items);
   const vault = useInventoryStore((state) => state.vault);
   const buyVaultSlots = useInventoryStore((state) => state.buyVaultSlots);
   const bundle = useContentStore((state) => state.bundle);
@@ -83,6 +85,7 @@ export function RelicsScreen(): JSX.Element {
   const [selection, setSelection] = useState<string[]>([]);
   const [forgeTo, setForgeTo] = useState(8);
   const [forging, setForging] = useState<GearInstance | null>(null);
+  const [reforging, setReforging] = useState<GearInstance | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -118,6 +121,8 @@ export function RelicsScreen(): JSX.Element {
     [gear, selection],
   );
   const sellTotal = selected.reduce((sum, piece) => sum + piece.sellValue, 0);
+  const dustTotal = selected.reduce((sum, piece) => sum + piece.dismantleValue, 0);
+  const dustHeld = itemCount(items, REFORGE_DUST_ITEM);
   const blocked = selected.filter((piece) => piece.locked || piece.equippedChampionId !== null);
   /** How many of the selection the forge would actually touch at the chosen level. */
   const forgeable = selected.filter((piece) => piece.level < forgeTo).length;
@@ -137,6 +142,32 @@ export function RelicsScreen(): JSX.Element {
       setNotice(said);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'That could not be done.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /**
+   * Grinds the selection down for Reliquary Dust instead of silver.
+   *
+   * The same selection and the same refusals as a sell, because it is the same decision
+   * made differently: the vault has a ceiling, so relics *have* to go — this is the choice
+   * of what they turn into. Silver buys vault slots and forge attempts; dust is the only
+   * thing that fixes a line on a relic already worth keeping.
+   */
+  const dismantle = async (): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const result = await gameApi.dismantleGear(selection, newActionId());
+      setSelection([]);
+      await Promise.all([refresh(), refreshPlayer()]);
+      setNotice(
+        `Ground ${result.removed.length} down for ${result.dust.toLocaleString()} Reliquary Dust.`,
+      );
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Those could not be dismantled.');
     } finally {
       setBusy(false);
     }
@@ -207,7 +238,7 @@ export function RelicsScreen(): JSX.Element {
   return (
     <div className={styles.screen}>
       <Heading
-        tagline="What the vale gave up. Wear it, feed it to something better, or sell it on."
+        tagline="What the vale gave up. Wear it, forge it, grind it down, or sell it on."
         actions={
           <ScreenInfo title="The Vault" label="About the vault">
             <p>
@@ -248,6 +279,11 @@ export function RelicsScreen(): JSX.Element {
           <span className={styles.count}>
             {gear.filter((piece) => piece.equippedChampionId).length} worn
           </span>
+
+          {/* Dust has no home in the currency rail — it is a *material*, and the rail is for
+              the three the whole game spends. But it is earned here and spent here, so the
+              one screen that should always say how much of it you have is this one. */}
+          <span className={styles.count}>{dustHeld.toLocaleString()} Reliquary Dust</span>
 
           <div className={styles.toolActions}>
             {vault &&
@@ -404,6 +440,21 @@ export function RelicsScreen(): JSX.Element {
                   <button
                     type="button"
                     className={styles.mini}
+                    onClick={() => setReforging(piece)}
+                    disabled={piece.substats.length === 0 || !canForge}
+                    title={
+                      canForge
+                        ? piece.substats.length === 0
+                          ? 'No substats to reforge'
+                          : undefined
+                        : 'The forge opens at account level 3'
+                    }
+                  >
+                    Reforge
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.mini}
                     aria-pressed={piece.locked}
                     onClick={() => void setLocked(piece.id, !piece.locked)}
                   >
@@ -424,7 +475,10 @@ export function RelicsScreen(): JSX.Element {
           <div className={styles.sellBody}>
             <div className={styles.sellWhat}>
               <span className={styles.sellCount}>{selection.length} selected</span>
+              {/* Both prices, side by side, because the decision is between them and a
+                  player should never have to press one to find out what the other was. */}
               <span className={styles.sellValue}>{sellTotal.toLocaleString()} silver</span>
+              <span className={styles.dustValue}>{dustTotal.toLocaleString()} dust</span>
             </div>
             {blocked.length > 0 && (
               <p className={styles.warn}>
@@ -460,12 +514,29 @@ export function RelicsScreen(): JSX.Element {
               <Button variant="ghost" onClick={() => setSelection([])}>
                 Clear
               </Button>
+              <Button
+                variant="ghost"
+                disabled={busy || blocked.length > 0}
+                onClick={() => void dismantle()}
+              >
+                Dismantle
+              </Button>
               <Button disabled={busy || blocked.length > 0} onClick={() => void sell()}>
                 Sell
               </Button>
             </div>
           </div>
         </Panel>
+      )}
+
+      {reforging && (
+        <Reforge
+          relic={reforging}
+          onClose={() => setReforging(null)}
+          onChanged={async () => {
+            await Promise.all([refresh(), refreshPlayer()]);
+          }}
+        />
       )}
 
       {forging && (

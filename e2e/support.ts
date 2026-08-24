@@ -186,6 +186,30 @@ export async function resolveBattle(page: Page): Promise<void> {
 }
 
 /**
+ * Leaves the results modal a fight ends on, and clears whatever queued behind it.
+ *
+ * `resolveBattle` deliberately stops *at* the results — a spec asserting on the loot has to
+ * read it before it goes. But every spec that wants the shell afterwards has the same three
+ * things in its way: the results dialog, the unlock cards a level-up queued, and the speed
+ * ladder's own "×N is open now" card. Doing it in three places would be three places to fix
+ * when one of them changes.
+ */
+export async function leaveResults(page: Page): Promise<void> {
+  const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn|practice/i });
+  if (await results.isVisible().catch(() => false)) {
+    // "Back to the campaign" on a campaign stage, "Back to the Depths" below — the shape
+    // is the same and only the place changes.
+    await results
+      .getByRole('button', { name: /^back to /i })
+      .first()
+      .click()
+      .catch(() => undefined);
+    await results.waitFor({ state: 'hidden', timeout: 20_000 }).catch(() => undefined);
+  }
+  await dismissUnlocks(page);
+}
+
+/**
  * Asserts an element is not merely *in the layout* but actually on top at its own centre.
  *
  * Playwright's `toBeVisible` answers a CSS question — is it displayed, does it have a

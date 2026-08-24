@@ -82,6 +82,21 @@ export const ROUTES = {
     preview: (id: string) => `/player/gear/${encodeURIComponent(id)}/preview`,
     /** Forge several relics toward a level in one run. Stops cleanly when silver runs out. */
     upgradeMany: '/player/gear/upgrade-many',
+    /**
+     * Grind relics down to Reliquary Dust instead of selling them for silver.
+     *
+     * The vault's ceiling already forces a player to get rid of relics; this makes what
+     * they get rid of into the currency that fixes the ones they kept. Same refusals as a
+     * sell — equipped or locked is a refusal, not a skip.
+     */
+    dismantle: '/player/gear/dismantle',
+    /**
+     * `/player/gear/:id/reforge` — GET quotes it, POST does it.
+     *
+     * The quote is a read because the panel has to show the price *and* what each line
+     * could become before anything is spent (the "Odds & Mercy" rule, applied to relics).
+     */
+    reforge: (id: string) => `/player/gear/${encodeURIComponent(id)}/reforge`,
   },
   loadouts: {
     /** Every saved relic set on the account. */

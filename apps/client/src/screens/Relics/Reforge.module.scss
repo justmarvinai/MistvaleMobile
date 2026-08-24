@@ -1,0 +1,180 @@
+@use '../../styles/tokens' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.lead {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.blocked {
+  margin: 0;
+  padding: $space-3;
+  border: 1px solid rgba($parchment-dim, 0.3);
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.lines {
+  display: grid;
+  gap: $space-1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  padding: $space-2 $space-3;
+  border: 1px solid rgba($parchment-dim, 0.25);
+  background: rgba(0, 0, 0, 0.2);
+  color: $parchment;
+  cursor: pointer;
+  font-family: $font-body;
+  gap: $space-3;
+  text-align: left;
+
+  &[data-chosen='true'] {
+    border-color: $accent;
+    background: rgba($accent, 0.12);
+  }
+}
+
+.lineStat {
+  font-family: $font-mono;
+  font-size: 1rem;
+}
+
+.lineRolls {
+  color: $parchment-dim;
+  font-size: 0.8rem;
+}
+
+/* The published pool. Deliberately plain and complete — this is the odds panel, and an
+   odds panel that hides a row is worse than none. */
+.pool {
+  padding: $space-2 $space-3;
+  border: 1px solid rgba($accent, 0.25);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.poolLabel {
+  display: block;
+  margin-bottom: $space-1;
+  color: $accent;
+  font-family: $font-display;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Chips rather than a grid of rows. The first cut used `space-between` inside wide grid
+   columns, which pushed each name away from its own range and hard against the *next*
+   name — so the list read as "4–6% per roll ATK" instead of "ATK 4–6%". A chip keeps a
+   stat and its numbers as one object, and wrapping does the rest. */
+.poolList {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  gap: $space-1 $space-2;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    padding: 2px $space-2;
+    border: 1px solid rgba($parchment-dim, 0.2);
+    background: rgba(0, 0, 0, 0.25);
+    gap: 6px;
+  }
+}
+
+.poolStat {
+  color: $parchment;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.poolRange {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  color: $parchment;
+  font-size: 0.9rem;
+  gap: $space-3;
+
+  strong {
+    color: $gold;
+    font-family: $font-mono;
+  }
+}
+
+.held {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.short strong,
+.short .held {
+  color: $danger;
+}
+
+.history {
+  color: $parchment-dim;
+  font-size: 0.8rem;
+}
+
+.outcome {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin: 0;
+  padding: $space-2;
+  background: rgba($accent, 0.1);
+  font-family: $font-mono;
+  gap: $space-2;
+}
+
+.was {
+  color: $parchment-dim;
+  text-decoration: line-through;
+}
+
+.arrow {
+  color: $accent;
+}
+
+.now {
+  color: $gold;
+  font-size: 1.05rem;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $space-2;
+}

@@ -40,6 +40,9 @@
 | POST `/player/gear/:id/lock` | `{locked}` — protects a relic from a mass sell. |
 | POST `/player/gear/:id/upgrade` | `{times, actionId}` — resolves the whole run server-side and returns every attempt in order, so the client animates them without deciding one. A run stops at the first success, at the cap, or when the silver runs out; a failure still charges. |
 | POST `/player/gear/sell` | `{ids[], actionId}` → silver. Refuses the whole selection if any of it is locked or worn, rather than quietly sparing some of it. |
+| POST `/player/gear/dismantle` | `{ids[], actionId}` — grinds relics down to Reliquary Dust instead of selling them for silver. Same refusals as a sell: a locked or worn relic stops the whole run rather than being quietly spared, because a hundred-relic run that silently skipped one is a run nobody can check. |
+| GET `/player/gear/:id/reforge` | The price of the next reroll, what the player holds, and **what each line could turn into** — the pool, with each candidate's per-roll range. Published before anything is spent, the same way the Mistgate publishes its rates. `blockedReason` is computed by the same function the mutation refuses with, so the button's sentence and the server's are one sentence. |
+| POST `/player/gear/:id/reforge` | `{substatIndex, expectStat, expectPercent, actionId}` — rerolls one line into a different stat, keeping the rolls that went into it. `expectStat`/`expectPercent` guard a stale screen: a second tab that reforged this relic a moment ago must be refused rather than charged for a line its owner never chose. |
 | GET `/player/gear` | Every relic the player owns, with sell value and next-upgrade cost and chance already computed. |
 | GET `/player/items` | Stackables held, by item key. |
 | GET `/player/gear/:id/preview?championId=` | Stat-diff preview, computed by assembling the champion twice — set bonuses appearing or vanishing included, which is exactly what a client-side sum would get wrong. |

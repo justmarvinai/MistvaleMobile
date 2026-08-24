@@ -150,6 +150,16 @@
   font-size: 1.1rem;
 }
 
+/* The other price, beside the silver one. Dimmer and smaller, because silver is still the
+   default answer and dust is the deliberate one. */
+.dustValue {
+  margin: 0;
+  color: $accent;
+  font-family: $font-mono;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
 .sellActions {
   display: flex;
   align-items: center;

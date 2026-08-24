@@ -11,6 +11,16 @@ import { GEAR_SLOTS, MAX_RANK, MIN_RANK, RARITIES, STATS, type Stat } from './en
  * below are all server-computed and simply reported here.
  */
 
+/**
+ * The item key reforging is paid in.
+ *
+ * A constant rather than a config knob: the *price* is content and the *currency* is not,
+ * because pointing reforging at a different item mid-life would strand every stack a
+ * player had already ground out. The item itself is ordinary content — its name, art and
+ * description are all editable in Admin, which is the part an operator actually wants.
+ */
+export const REFORGE_DUST_ITEM = 'reliquary_dust';
+
 /** The maximum upgrade level; substats roll at every fourth level up to it. */
 export const GEAR_MAX_LEVEL = 16;
 export const GEAR_SUBSTAT_ROLL_LEVELS: readonly number[] = [4, 8, 12, 16];
@@ -44,6 +54,16 @@ export const gearInstanceSchema = z.object({
   sellValue: z.number().int(),
   upgradeCost: z.number().int(),
   upgradeChance: z.number(),
+  /** What grinding it down pays instead, in Reliquary Dust. */
+  dismantleValue: z.number().int(),
+  /**
+   * How many times this relic has been reforged.
+   *
+   * On the instance rather than derived, because the price of the next reforge is built
+   * on it: each one costs more than the last, which is what stops a relic being fed
+   * through a slot machine until every line is perfect.
+   */
+  reforges: z.number().int(),
 });
 export type GearInstance = z.infer<typeof gearInstanceSchema>;
 
@@ -112,6 +132,39 @@ export type SellGearRequest = z.infer<typeof sellGearRequestSchema>;
 export const lockGearRequestSchema = z.object({ locked: z.boolean() });
 export type LockGearRequest = z.infer<typeof lockGearRequestSchema>;
 
+/**
+ * Grinding relics down for Reliquary Dust rather than selling them for silver.
+ *
+ * The same shape as a sell because it is the same decision made differently, and the same
+ * refusals: a worn or locked relic stops the whole run rather than being quietly spared.
+ */
+export const dismantleGearRequestSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(200),
+  actionId: z.string().min(8).max(64),
+});
+export type DismantleGearRequest = z.infer<typeof dismantleGearRequestSchema>;
+
+/**
+ * Rerolling one substat line into a different stat.
+ *
+ * The line is chosen, the stat that replaces it is not — that is the gamble, and the
+ * reason this is a sink rather than a shop. `substatIndex` addresses the line as the
+ * player sees it, so a relic whose lines have moved (they never do; substats only ever
+ * gain) could not be reforged by a stale screen without the server noticing.
+ */
+export const reforgeGearRequestSchema = z.object({
+  substatIndex: z
+    .number()
+    .int()
+    .min(0)
+    .max(GEAR_MAX_SUBSTATS - 1),
+  /** The line the client believed it was reforging, as a guard against a stale screen. */
+  expectStat: z.enum(STATS),
+  expectPercent: z.boolean(),
+  actionId: z.string().min(8).max(64),
+});
+export type ReforgeGearRequest = z.infer<typeof reforgeGearRequestSchema>;
+
 // ── Responses ───────────────────────────────────────────────────────────────
 
 /** One upgrade attempt, in the order they happened. */
@@ -133,6 +186,66 @@ export const gearUpgradeResultSchema = z.object({
   silver: z.number().int(),
 });
 export type GearUpgradeResult = z.infer<typeof gearUpgradeResultSchema>;
+
+export const dismantleResultSchema = z.object({
+  /** Ids that no longer exist. */
+  removed: z.array(z.string()),
+  dust: z.number().int(),
+  /** The player's dust after the run, so the screen never has to add up. */
+  dustHeld: z.number().int(),
+});
+export type DismantleResult = z.infer<typeof dismantleResultSchema>;
+
+/**
+ * What one line could become, and what the reroll would cost.
+ *
+ * Published before anything is spent, for the same reason the Mistgate publishes its
+ * rates: a gamble a player cannot see the shape of is not a decision, it is a slot
+ * machine. The candidates are the stats the relic could take — every substat form the
+ * tables allow, less its own main and less the lines it already carries.
+ */
+export const reforgeQuoteLineSchema = z.object({
+  index: z.number().int(),
+  line: gearStatLineSchema,
+  /** Every stat this line could turn into, in the tables' own order. */
+  candidates: z.array(
+    z.object({
+      stat: z.enum(STATS),
+      percent: z.boolean(),
+      /** What this stat rolls between at the relic's rank, per roll. */
+      min: z.number(),
+      max: z.number(),
+    }),
+  ),
+});
+export type ReforgeQuoteLine = z.infer<typeof reforgeQuoteLineSchema>;
+
+export const reforgeQuoteSchema = z.object({
+  gearId: z.string(),
+  reforges: z.number().int(),
+  /** What the next reforge costs, whichever line is chosen. */
+  dust: z.number().int(),
+  silver: z.number().int(),
+  /** What the player holds right now, so the button can say why it is off. */
+  dustHeld: z.number().int(),
+  silverHeld: z.number().int(),
+  lines: z.array(reforgeQuoteLineSchema),
+  /** Why it cannot be reforged at all, when it cannot. Null when it can. */
+  blockedReason: z.string().nullable(),
+});
+export type ReforgeQuote = z.infer<typeof reforgeQuoteSchema>;
+
+export const reforgeResultSchema = z.object({
+  gear: gearInstanceSchema,
+  /** The line as it was, and as it is now — the whole point of the screen. */
+  before: gearStatLineSchema,
+  after: gearStatLineSchema,
+  dustSpent: z.number().int(),
+  silverSpent: z.number().int(),
+  dustHeld: z.number().int(),
+  silver: z.number().int(),
+});
+export type ReforgeResult = z.infer<typeof reforgeResultSchema>;
 
 /** Stats grouped by where they come from, so the detail screen can show the sum honestly. */
 export const statBlockSchema = z.object({

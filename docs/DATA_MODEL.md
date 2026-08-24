@@ -265,6 +265,7 @@ Three of those are worth their own sentence:
 | main_stat jsonb `{stat, percent, value}` | recomputed from `gear_stat_defs` on each upgrade level |
 | substats jsonb `[{stat, percent, value, rolls}]` | rolled at drop and at +4/+8/+12/+16; **never** recomputed from the tables afterwards, so retuning them cannot restat a piece a player already owns |
 | equipped_champion_id fk nullable → player_champions (unique per slot enforced by partial unique index `(equipped_champion_id, slot)`) | |
+| reforges smallint default 0 | how many substat rerolls this relic has had (C10a). Stored rather than counted from `economy_log`, because the price of the next reroll is built on it and the log is prunable (P8i) — a pruned month must not make every old relic cheap to reroll again |
 | source, obtained_at | |
 
 ### `shop_states`
