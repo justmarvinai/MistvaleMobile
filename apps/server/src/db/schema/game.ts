@@ -378,9 +378,10 @@ export const playerDeepRuns = pgTable(
     deepest: integer('deepest').notNull().default(0),
 
     /** `[{ championId, hpPct, alive }]` — the party as it stands, health carried forward. */
-    party: jsonb('party').notNull().default([]).$type<
-      { championId: string; hpPct: number; alive: boolean }[]
-    >(),
+    party: jsonb('party')
+      .notNull()
+      .default([])
+      .$type<{ championId: string; hpPct: number; alive: boolean }[]>(),
     /** Boon keys taken, in order. A boon that stacks appears more than once. */
     boons: jsonb('boons').notNull().default([]).$type<string[]>(),
     /** Room keys currently behind the doors. */

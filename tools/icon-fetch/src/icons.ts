@@ -118,6 +118,7 @@ export const ICONS = {
   'nav-valor': { group: 'nav', name: 'stone-stack', use: 'Hall of Valor' },
   'nav-trials': { group: 'nav', name: 'maze', use: 'Trials' },
   'nav-worldboss': { group: 'nav', name: 'rally-the-troops', use: 'The world boss' },
+  'nav-deeprun': { group: 'nav', name: 'stairs-cake', use: 'The Deep Run' },
 
   // ── Portraits — stand-ins for art that does not exist yet ─────────────────────────────
   //

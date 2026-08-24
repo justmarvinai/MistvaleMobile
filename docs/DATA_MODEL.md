@@ -306,6 +306,26 @@ Stock is rolled per player and **stored**, not derived on read: what a player is
 ### `dungeon_progress` — **not built; deliberately**
 A floor *is* a stage, so its clear is already a `stage_progress` row with `parent_key` set to the dungeon. "Deepest floor" is the largest floor number among those rows and "clears" is their sum, both derived on read. A second table would be the same fact written twice, and the second copy is the one that drifts.
 
+### `player_deep_runs`
+
+`player_id, run_key, seed, offer_nonce, status, phase, floor, deepest, party jsonb, boons
+jsonb, doors jsonb, boon_offer jsonb, current_room, battle_id, rewards jsonb`, with a partial
+unique index on `(player_id, run_key) where status = 'active'`.
+
+The only **resumable state that spans battles**. A descent is a dozen floors and somebody who
+closes the tab on floor 7 has to find floor 7 when they come back, so everything a run is
+made of is on the row rather than recomputed: the party's health, who has fallen, the boons
+taken, the doors open, the boons offered.
+
+`seed` plus `offer_nonce` is what keeps the draws honest. Doors and boon offers come from the
+run's own seeded stream, and the nonce moves only when something is **taken** — so refusing
+an offer and asking again returns the same three, and a descent replays identically. A
+rogue-lite whose offers re-roll for free has no decisions in it.
+
+The partial unique index is the "one descent at a time" rule made structural rather than
+checked: two live runs would mean two sets of doors and a battle that could be filed against
+either.
+
 ### `world_boss_wakes` — the one shared row
 
 `dungeon_key, anchor, max_hp, damage_taken, felled_at, felled_by, strikes, wardens`, unique

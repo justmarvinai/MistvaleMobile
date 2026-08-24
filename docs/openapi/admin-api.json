@@ -1436,6 +1436,12 @@
               "$ref": "#/components/schemas/ExpeditionDef"
             }
           },
+          "deepRuns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeepRunDef"
+            }
+          },
           "config": {
             "type": "object",
             "propertyNames": {
@@ -1494,6 +1500,7 @@
           "tutorialSteps",
           "soundCues",
           "expeditions",
+          "deepRuns",
           "config"
         ],
         "additionalProperties": false
@@ -1744,6 +1751,7 @@
               "tutorialStep",
               "soundCue",
               "expedition",
+              "deepRun",
               "gameConfig"
             ]
           },
@@ -1805,6 +1813,1571 @@
         ],
         "additionalProperties": false
       },
+      "DeepRunDef": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "lore": {
+            "default": "",
+            "type": "string",
+            "maxLength": 2000
+          },
+          "tagline": {
+            "default": "",
+            "type": "string",
+            "maxLength": 120
+          },
+          "backgroundAsset": {
+            "default": "",
+            "type": "string",
+            "maxLength": 64
+          },
+          "unlockLevel": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "runsPerDay": {
+            "default": 2,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "floors": {
+            "default": 12,
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 60
+          },
+          "forks": {
+            "default": 3,
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 4
+          },
+          "rooms": {
+            "minItems": 1,
+            "maxItems": 80,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 64,
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 48
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "fight",
+                    "elite",
+                    "rest",
+                    "cache"
+                  ]
+                },
+                "description": {
+                  "default": "",
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "minFloor": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                },
+                "maxFloor": {
+                  "default": 60,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                },
+                "waves": {
+                  "default": [],
+                  "maxItems": 3,
+                  "type": "array",
+                  "items": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "enemyKey": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 64,
+                          "pattern": "^[a-z][a-z0-9_]*$"
+                        },
+                        "level": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        },
+                        "stars": {
+                          "default": 1,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 6
+                        },
+                        "slot": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 3
+                        }
+                      },
+                      "required": [
+                        "enemyKey",
+                        "level",
+                        "stars",
+                        "slot"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "healPct": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "rewards": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "boonsOffered": {
+                  "default": 3,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4
+                },
+                "weight": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0.1,
+                  "maximum": 20
+                }
+              },
+              "required": [
+                "key",
+                "name",
+                "kind",
+                "description",
+                "minFloor",
+                "maxFloor",
+                "waves",
+                "healPct",
+                "rewards",
+                "boonsOffered",
+                "weight"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "boons": {
+            "minItems": 1,
+            "maxItems": 80,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 64,
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 48
+                },
+                "description": {
+                  "default": "",
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "rarity": {
+                  "default": "common",
+                  "type": "string",
+                  "enum": [
+                    "common",
+                    "uncommon",
+                    "rare",
+                    "epic",
+                    "legendary"
+                  ]
+                },
+                "bonuses": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "enum": [
+                      "hp",
+                      "atk",
+                      "def",
+                      "spd",
+                      "critRate",
+                      "critDmg",
+                      "res",
+                      "acc"
+                    ]
+                  },
+                  "additionalProperties": {
+                    "type": "number",
+                    "minimum": -5000,
+                    "maximum": 20000
+                  }
+                },
+                "effects": {
+                  "default": [],
+                  "maxItems": 4,
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "stat"
+                          },
+                          "stat": {
+                            "type": "string",
+                            "enum": [
+                              "hp",
+                              "atk",
+                              "def",
+                              "spd",
+                              "critRate",
+                              "critDmg",
+                              "res",
+                              "acc"
+                            ]
+                          },
+                          "flat": {
+                            "default": 0,
+                            "type": "number",
+                            "minimum": -500,
+                            "maximum": 5000
+                          },
+                          "pct": {
+                            "default": 0,
+                            "type": "number",
+                            "minimum": -100,
+                            "maximum": 100
+                          },
+                          "condition": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetShielded"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetCrowdControlled"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetHpBelow"
+                                  },
+                                  "pct": {
+                                    "type": "number",
+                                    "minimum": 1,
+                                    "maximum": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "pct"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetMaxHpAbove"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "selfHpBelow"
+                                  },
+                                  "pct": {
+                                    "type": "number",
+                                    "minimum": 1,
+                                    "maximum": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "pct"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "perOwnDebuff"
+                                  },
+                                  "maxStacks": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "maxStacks"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "perLivingEnemy"
+                                  },
+                                  "maxStacks": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "maxStacks"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "selfHasNoBuffs"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "aoeSkill"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "mode"
+                                  },
+                                  "mode": {
+                                    "type": "string",
+                                    "enum": [
+                                      "arena"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "mode"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "stat",
+                          "flat",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "damageDealt"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": -100,
+                            "maximum": 100
+                          },
+                          "condition": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetShielded"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetCrowdControlled"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetHpBelow"
+                                  },
+                                  "pct": {
+                                    "type": "number",
+                                    "minimum": 1,
+                                    "maximum": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "pct"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetMaxHpAbove"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "selfHpBelow"
+                                  },
+                                  "pct": {
+                                    "type": "number",
+                                    "minimum": 1,
+                                    "maximum": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "pct"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "perOwnDebuff"
+                                  },
+                                  "maxStacks": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "maxStacks"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "perLivingEnemy"
+                                  },
+                                  "maxStacks": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "maxStacks"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "selfHasNoBuffs"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "aoeSkill"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "mode"
+                                  },
+                                  "mode": {
+                                    "type": "string",
+                                    "enum": [
+                                      "arena"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "mode"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "damageTaken"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": -100,
+                            "maximum": 100
+                          },
+                          "condition": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetShielded"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetCrowdControlled"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetHpBelow"
+                                  },
+                                  "pct": {
+                                    "type": "number",
+                                    "minimum": 1,
+                                    "maximum": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "pct"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetMaxHpAbove"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "selfHpBelow"
+                                  },
+                                  "pct": {
+                                    "type": "number",
+                                    "minimum": 1,
+                                    "maximum": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "pct"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "perOwnDebuff"
+                                  },
+                                  "maxStacks": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "maxStacks"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "perLivingEnemy"
+                                  },
+                                  "maxStacks": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "maxStacks"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "selfHasNoBuffs"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "aoeSkill"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "mode"
+                                  },
+                                  "mode": {
+                                    "type": "string",
+                                    "enum": [
+                                      "arena"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "mode"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "lifesteal"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 100
+                          },
+                          "condition": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetShielded"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetCrowdControlled"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetHpBelow"
+                                  },
+                                  "pct": {
+                                    "type": "number",
+                                    "minimum": 1,
+                                    "maximum": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "pct"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "targetMaxHpAbove"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "selfHpBelow"
+                                  },
+                                  "pct": {
+                                    "type": "number",
+                                    "minimum": 1,
+                                    "maximum": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "pct"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "perOwnDebuff"
+                                  },
+                                  "maxStacks": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "maxStacks"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "perLivingEnemy"
+                                  },
+                                  "maxStacks": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "maxStacks"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "selfHasNoBuffs"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "aoeSkill"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "mode"
+                                  },
+                                  "mode": {
+                                    "type": "string",
+                                    "enum": [
+                                      "arena"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "mode"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "onKill"
+                          },
+                          "stat": {
+                            "type": "string",
+                            "enum": [
+                              "hp",
+                              "atk",
+                              "def",
+                              "spd",
+                              "critRate",
+                              "critDmg",
+                              "res",
+                              "acc"
+                            ]
+                          },
+                          "flat": {
+                            "default": 0,
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 500
+                          },
+                          "maxStacks": {
+                            "default": 1,
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10
+                          },
+                          "shieldPctMaxHp": {
+                            "default": 0,
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "flat",
+                          "maxStacks",
+                          "shieldPctMaxHp"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "battleStartShield"
+                          },
+                          "pctMaxHp": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 100
+                          },
+                          "turns": {
+                            "default": 2,
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 6
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pctMaxHp",
+                          "turns"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "cooldownProc"
+                          },
+                          "chance": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "minDamagePctMaxHp": {
+                            "default": 0,
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "chance",
+                          "minDamagePctMaxHp"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "healing"
+                          },
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "dealt",
+                              "received",
+                              "shieldReceived"
+                            ]
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": -100,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "mode",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "redirect"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 50
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "counterProc"
+                          },
+                          "trigger": {
+                            "type": "string",
+                            "enum": [
+                              "heavyHit",
+                              "allyCrowdControlled"
+                            ]
+                          },
+                          "chance": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "hpLostPct": {
+                            "default": 25,
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "trigger",
+                          "chance",
+                          "hpLostPct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "counterDamage"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": -100,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "protectionBonus"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "cleanseProc"
+                          },
+                          "chance": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "count": {
+                            "default": 1,
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 3
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "chance",
+                          "count"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "turnMeterProc"
+                          },
+                          "trigger": {
+                            "type": "string",
+                            "enum": [
+                              "ownBuffExpired",
+                              "ownDebuffExpired",
+                              "allyDied",
+                              "debuffsLandedInTurn"
+                            ]
+                          },
+                          "chance": {
+                            "default": 1,
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": -100,
+                            "maximum": 100
+                          },
+                          "target": {
+                            "default": "self",
+                            "type": "string",
+                            "enum": [
+                              "self",
+                              "team"
+                            ]
+                          },
+                          "threshold": {
+                            "default": 1,
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 6
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "trigger",
+                          "chance",
+                          "pct",
+                          "target",
+                          "threshold"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "debuffChance"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": -50,
+                            "maximum": 50
+                          },
+                          "hardCcOnly": {
+                            "default": false,
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct",
+                          "hardCcOnly"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "setBonusAmplify"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "a1Ramp"
+                          },
+                          "pctPerUse": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 20
+                          },
+                          "maxPct": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pctPerUse",
+                          "maxPct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "firstStrike"
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "pct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "statusDuration"
+                          },
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "ownDebuffs",
+                              "allyBuffs"
+                            ]
+                          },
+                          "chance": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "turns": {
+                            "default": 1,
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 2
+                          },
+                          "excludeHardCc": {
+                            "default": false,
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "mode",
+                          "chance",
+                          "turns",
+                          "excludeHardCc"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "bonusDamageMaxHp"
+                          },
+                          "chance": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "pct": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 50
+                          },
+                          "bossPct": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 50
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "chance",
+                          "pct",
+                          "bossPct"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "lastStand"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "stacks": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "minFloor": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                }
+              },
+              "required": [
+                "key",
+                "name",
+                "description",
+                "rarity",
+                "bonuses",
+                "effects",
+                "stacks",
+                "minFloor"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "depthTiers": {
+            "default": [],
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 64,
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 48
+                },
+                "floor": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                },
+                "rewards": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                }
+              },
+              "required": [
+                "key",
+                "name",
+                "floor",
+                "rewards"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "key",
+          "sortOrder",
+          "name",
+          "lore",
+          "tagline",
+          "backgroundAsset",
+          "unlockLevel",
+          "runsPerDay",
+          "floors",
+          "forks",
+          "rooms",
+          "boons",
+          "depthTiers"
+        ],
+        "additionalProperties": false
+      },
       "DeleteContentEntryResponse": {
         "type": "object",
         "properties": {
@@ -1838,6 +3411,7 @@
               "tutorialStep",
               "soundCue",
               "expedition",
+              "deepRun",
               "gameConfig"
             ]
           },
@@ -1899,6 +3473,7 @@
               "tutorialStep",
               "soundCue",
               "expedition",
+              "deepRun",
               "gameConfig"
             ]
           },
@@ -2614,6 +4189,8 @@
                     "trialsBeaten",
                     "worldBossStrike",
                     "worldBossDamage",
+                    "deepRunFinished",
+                    "deepRunDepth",
                     "titanDamage"
                   ]
                 },
@@ -3285,6 +4862,7 @@
               "tutorialStep",
               "soundCue",
               "expedition",
+              "deepRun",
               "gameConfig"
             ]
           },
@@ -3504,6 +5082,7 @@
               "tutorialStep",
               "soundCue",
               "expedition",
+              "deepRun",
               "gameConfig"
             ]
           },
@@ -5149,6 +6728,8 @@
                     "trialsBeaten",
                     "worldBossStrike",
                     "worldBossDamage",
+                    "deepRunFinished",
+                    "deepRunDepth",
                     "titanDamage"
                   ]
                 },
@@ -5410,6 +6991,8 @@
                     "trialsBeaten",
                     "worldBossStrike",
                     "worldBossDamage",
+                    "deepRunFinished",
+                    "deepRunDepth",
                     "titanDamage"
                   ]
                 },
@@ -5667,6 +7250,7 @@
               "tutorialStep",
               "soundCue",
               "expedition",
+              "deepRun",
               "gameConfig"
             ]
           },
@@ -7697,7 +9281,8 @@
               "tutorial",
               "titan",
               "trial",
-              "worldBoss"
+              "worldBoss",
+              "deepRun"
             ]
           },
           "parentKey": {
@@ -8484,6 +10069,8 @@
                   "trialsBeaten",
                   "worldBossStrike",
                   "worldBossDamage",
+                  "deepRunFinished",
+                  "deepRunDepth",
                   "titanDamage"
                 ]
               },
@@ -9529,6 +11116,7 @@
                 "tutorial",
                 "sounds",
                 "expeditions",
+                "deep-runs",
                 "config"
               ]
             }
@@ -9721,6 +11309,7 @@
                 "tutorial",
                 "sounds",
                 "expeditions",
+                "deep-runs",
                 "config"
               ]
             }
@@ -9948,6 +11537,7 @@
                 "tutorial",
                 "sounds",
                 "expeditions",
+                "deep-runs",
                 "config"
               ]
             }
@@ -10158,6 +11748,7 @@
                 "tutorial",
                 "sounds",
                 "expeditions",
+                "deep-runs",
                 "config"
               ]
             }
@@ -10359,6 +11950,7 @@
                 "tutorial",
                 "sounds",
                 "expeditions",
+                "deep-runs",
                 "config"
               ]
             }

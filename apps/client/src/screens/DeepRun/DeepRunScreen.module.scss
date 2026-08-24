@@ -1,0 +1,462 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding-bottom: $space-4;
+}
+
+.note {
+  margin: 0 0 $space-2;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.9rem;
+}
+
+.run {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.tagline {
+  margin: 0;
+  color: $parchment;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+.idle,
+.descent {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.facts {
+  display: flex;
+  margin: 0;
+  flex-wrap: wrap;
+  gap: $space-4;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  dt {
+    color: $parchment-dim;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    color: $parchment;
+    font-family: $font-mono;
+    font-size: 1.05rem;
+  }
+}
+
+.blocked {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+// ── How deep ───────────────────────────────────────────────────────────────
+
+.floor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.floorNumber {
+  color: $accent-soft;
+  font-family: $font-mono;
+  font-size: 1.15rem;
+}
+
+.floorOf {
+  color: $parchment-dim;
+  font-size: 0.85rem;
+}
+
+.floorTrack {
+  overflow: hidden;
+  height: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.floorFill {
+  height: 100%;
+  background: linear-gradient(90deg, $accent-soft, $gold);
+  transition: width 300ms ease-out;
+}
+
+// ── The party ──────────────────────────────────────────────────────────────
+
+.party {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: $space-2;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  list-style: none;
+}
+
+.member {
+  display: grid;
+  align-items: center;
+  padding: $space-1 $space-2;
+  background: rgba(0, 0, 0, 0.24);
+  column-gap: $space-2;
+  grid-template-areas: 'face name pct' 'face bar bar';
+  grid-template-columns: auto 1fr auto;
+
+  &[data-down='yes'] {
+    opacity: 0.5;
+  }
+}
+
+.member > :first-child {
+  grid-area: face;
+}
+
+.memberName {
+  overflow: hidden;
+  color: $parchment;
+  font-size: 0.82rem;
+  grid-area: name;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberPct {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  grid-area: pct;
+}
+
+.memberBar {
+  overflow: hidden;
+  height: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  grid-area: bar;
+}
+
+.memberFill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(180deg, #7fbf5a, #4d8a34);
+}
+
+.memberDown {
+  color: $blood;
+  font-size: 0.75rem;
+  grid-area: bar;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// ── The build so far ───────────────────────────────────────────────────────
+
+.held {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+.heldLabel {
+  color: $parchment-dim;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.heldList {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+
+  li {
+    padding: 2px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.3);
+    color: $parchment;
+    font-size: 0.78rem;
+  }
+
+  li[data-rarity='rare'] {
+    border-color: rgba(90, 150, 220, 0.5);
+  }
+
+  li[data-rarity='epic'] {
+    border-color: rgba(170, 110, 220, 0.5);
+  }
+
+  li[data-rarity='legendary'] {
+    border-color: rgba(201, 162, 39, 0.65);
+    color: $gold-soft;
+  }
+}
+
+// ── The fork ───────────────────────────────────────────────────────────────
+
+.sectionTitle {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.75rem;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.doors {
+  display: grid;
+  gap: $space-2;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.door {
+  display: flex;
+  flex-direction: column;
+  padding: $space-2;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  gap: 6px;
+  text-align: left;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    border-color: $accent-soft;
+    background: rgba(229, 177, 132, 0.08);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+
+  &[data-kind='elite'] {
+    border-color: rgba(125, 31, 26, 0.6);
+  }
+
+  &[data-kind='rest'] {
+    border-color: rgba(127, 191, 90, 0.4);
+  }
+
+  &[data-kind='cache'] {
+    border-color: rgba(201, 162, 39, 0.45);
+  }
+}
+
+.doorKind {
+  color: $parchment-dim;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.doorName {
+  color: $accent-soft;
+  font-size: 1rem;
+}
+
+.doorText {
+  color: $parchment-dim;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.doorWaves {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.doorWave {
+  color: $parchment;
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.doorGain {
+  color: #7fbf5a;
+  font-size: 0.8rem;
+}
+
+// ── The offer ──────────────────────────────────────────────────────────────
+
+.boons {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.boonRow {
+  display: grid;
+  gap: $space-2;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.boonCard {
+  display: flex;
+  flex-direction: column;
+  padding: $space-3 $space-2;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.32);
+  cursor: pointer;
+  gap: 6px;
+  text-align: left;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    border-color: $gold;
+    background: rgba(201, 162, 39, 0.1);
+  }
+
+  &[data-rarity='epic'] {
+    border-color: rgba(170, 110, 220, 0.45);
+  }
+
+  &[data-rarity='legendary'] {
+    border-color: rgba(201, 162, 39, 0.6);
+  }
+}
+
+.boonName {
+  color: $gold-soft;
+  font-size: 1.02rem;
+}
+
+.boonRarity {
+  color: $parchment-dim;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.boonText {
+  color: $parchment;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+// ── Out ────────────────────────────────────────────────────────────────────
+
+.resume {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+.retire {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+.retireNote {
+  color: $parchment-dim;
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rung {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  padding: 4px $space-2;
+  border-left: 3px solid transparent;
+  background: rgba(0, 0, 0, 0.2);
+  gap: $space-2;
+
+  &[data-reached='yes'] {
+    border-left-color: $gold;
+    background: rgba(201, 162, 39, 0.08);
+  }
+}
+
+.rungFloor {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.rungName {
+  color: $parchment;
+  font-size: 0.88rem;
+}
+
+// ── Picking a party, and coming back up ────────────────────────────────────
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.pickerGrid {
+  display: grid;
+  overflow-y: auto;
+  max-height: 26rem;
+  gap: $space-2;
+  grid-template-columns: repeat(auto-fill, minmax($card-champion, 1fr));
+}
+
+.pickerActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+}
+
+.outcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-3;
+  text-align: center;
+}
+
+.outcomeFloor {
+  margin: 0;
+  color: $accent-soft;
+  font-size: 1.2rem;
+}
+
+.outcomeTier {
+  margin: 0;
+  color: $gold-soft;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+}

@@ -17,6 +17,7 @@ export type ScreenId =
   | 'arena'
   | 'titan'
   | 'worldBoss'
+  | 'deepRun'
   | 'trials'
   | 'expeditions'
   | 'champions'
@@ -142,6 +143,18 @@ export const SCREENS: readonly ScreenDefinition[] = [
       'It comes up at the end of the week and the whole Vale turns out. One health bar, everybody’s damage on it, and a chest for everyone who helped if the Vale actually gets through it.',
     unlock: 'worldBoss',
     lockedHint: 'Opens at level 18',
+    inDock: true,
+  },
+  {
+    id: 'deepRun',
+    label: 'The Sunken Stair',
+    icon: 'nav-deeprun',
+    glyph: 'glyph-broken-shackle',
+    art: 'hero-voidguard',
+    blurb:
+      'Twelve floors down, and your relics stay at the top of them. Four champions, one boon at a time, and every wound they take stays taken.',
+    unlock: 'deepRun',
+    lockedHint: 'Opens at level 20',
     inDock: true,
   },
   {

@@ -258,6 +258,47 @@ hint }`. The fight runs through the ordinary battle routes, so playback, Auto, t
 ladder and a reload mid-fight all work with no second implementation — and a fifth trial is
 an Admin edit rather than a release.
 
+### 9.2e The Sunken Stair — the Deep Run (C10f)
+
+Every other mode in Mistvale measures what an account has **assembled**. This one takes the
+assembly away. Four champions go twelve floors down at their own levels and ranks with **no
+relics**, and the build that gets them deep is put together inside the run out of whatever
+boons the Stair happens to offer — one after each room, chosen from three. It is the third
+answer to "what does a finished account do": Trials ask about play, the Wurm asks about
+everybody, and this asks whether you can build something out of what you are given.
+
+Two rules make it a rogue-lite rather than a dungeon with a longer corridor, and both are
+about **cost** rather than difficulty:
+
+- **Damage carries between floors.** A fight won badly is still a wound, so a quiet landing
+  is a real choice against a reliquary, and attrition — rather than any one room — is the
+  thing that actually ends a descent.
+- **A fallen champion stays fallen.** Nothing is lost outside the run: the roster is
+  untouched, and a champion who died on floor nine is fine at the top of the stairs. But
+  inside the descent the party thins, and the last floors are fought with what is left.
+
+A third rule is why it needed no engine work at all: **a boon is a bag of flat stat bonuses
+and mastery effects** — the same resolved-effect vocabulary the mastery trees already hand
+the engine. Anything a mastery can do, a boon can do, and `battle.ts` has never heard of a
+descent. The engine gained exactly one field, `startHpPct`, so a unit can begin a fight
+already hurt.
+
+- **Doors and boon offers cannot be re-rolled.** Both are drawn from the run's own seed with
+  a nonce that moves only when something is *taken*, so refusing an offer and asking again
+  returns the same three. A rogue-lite whose offers re-roll for free has no decisions in it.
+- **A descent pays for the depth it reached**, once, however it ended. Walking out on floor
+  nine is worth exactly what dying on floor nine is worth, so there is never a reason to
+  throw a party away rather than retire it.
+- **A room is a stage** in every sense the engine cares about, so a descent's fights reuse
+  playback, Auto, the speed ladder and resume-after-reload untouched. It simply lives in a
+  pool the run draws from rather than on a map anybody walks.
+- **Everything a run is made of lives on one row**, because a descent spans battles and
+  somebody who closes the tab on floor 7 has to find floor 7 when they come back.
+
+`deepRun` is the twenty-sixth content type. The Sunken Stair ships with eleven rooms across
+three depth bands, seventeen boons over five rarities and a four-rung depth ladder — and a
+second stair, a fortieth boon or a different ladder are all Admin edits.
+
 ### 9.3 Arena (async PvP) + Hall of Valor
 Classic arena: 4v4 vs snapshot **defense teams**; tokens cap 10, +1/hour (source-faithful), opponent offer list with refresh; Elo-lite rating → tiers **Bronze I-III, Silver I-III, Gold I-III, Platinum**; per-win **Valor Medals** (amount scales with tier) + weekly tier chest (reset Monday). **AI bots seed every band** (never an empty ladder; natural names with no bot marker — owner-approved; admin-managed). **Hall of Valor**: spend Valor Medals on permanent account-wide element-keyed stat bonuses (per element × stat, 10 levels — the Great Hall analog), doubling as the long-term arena sink.
 
@@ -297,7 +338,7 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 
 ## 12. Account & unlock cadence
 
-Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · **L18 the Wurm Wakes** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
+Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · **L18 the Wurm Wakes** · **L20 the Sunken Stair** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
 
 ## 13. Fairness & EA posture
 No payments in EA (crystals fully earnable; "premium" is a pacing currency, not a paywall). Real odds displayed. Bots never take top-10 leaderboard slots at week end (auto-yield rule). Single account per player expected but not enforced beyond rate limits. All balance changes publish-logged → visible "balance updated" badges (champion `balance_version`).

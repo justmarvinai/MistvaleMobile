@@ -5,6 +5,39 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — The Sunken Stair: a descent your relics do not come on
+
+Last of the seven. Every other mode in Mistvale measures what an account has assembled; this
+one takes the assembly away. Four champions go twelve floors down at their own levels and
+ranks with **no relics**, and the build that gets them deep is put together inside the run
+out of whatever the Stair offers — one boon after each room, chosen from three.
+
+Two rules do the work, and both are about cost rather than difficulty:
+
+- **Damage carries between floors.** A fight won badly is still a wound, which is what makes
+  a quiet landing worth as much as a reliquary, and what makes attrition rather than any one
+  room the thing that ends a descent.
+- **A champion who falls stays fallen** for the rest of the run. Nothing is lost outside it —
+  your roster is untouched — but the party thins, and the last floors are fought with
+  whatever is still standing.
+
+A third is why it needed no engine work at all: a boon is a bag of stat bonuses and **mastery
+effects**, the same vocabulary the mastery trees already speak. Anything a mastery can do, a
+boon can do. Seventeen ship, from a flat +2,500 health to *The Stair Remembers* — twenty per
+cent off everything that hits you and twenty per cent onto everything you throw.
+
+- **Offers cannot be re-rolled.** Doors and boons are drawn from the run's own seed with a
+  nonce that moves only when something is *taken*, so refusing an offer and asking again
+  returns the same three.
+- **A descent pays for the depth it reached**, once, however it ended — so walking out on
+  floor nine is worth exactly what dying on floor nine is worth, and there is never a reason
+  to throw a party away rather than retire it.
+- **A run survives a reload.** Everything a descent is made of lives on one row, because it
+  spans battles and somebody who closes the tab on floor 7 has to find floor 7.
+
+`deepRun` is a twenty-sixth content type: the Sunken Stair ships with eleven rooms across
+three depth bands, seventeen boons and a four-rung depth ladder, all of it an Admin edit.
+
 ### Added — The Wurm Wakes: one health bar, the whole Vale
 
 Fifth of the seven, and the first thing in Mistvale that two accounts can touch at once.

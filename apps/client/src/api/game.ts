@@ -25,6 +25,8 @@ import type {
   Loadout,
   LoadoutPlan,
   Titan,
+  DeepRunOutcome,
+  DeepRunView,
   TrialsOverview,
   WorldBossClaimResult,
   WorldBossView,
@@ -393,6 +395,37 @@ export const gameApi = {
 
   /** Every Titan, its ladder, the keys left today, and this account's own record. */
   titan: () => api.get<{ titan: Titan }>(ROUTES.titan.overview).then((data) => data.titan),
+
+  // ── The Deep Run ──────────────────────────────────────────────────────────
+
+  /** The descent: what is left standing, what has been taken, what is behind the doors. */
+  deepRun: () =>
+    api.get<{ deepRun: DeepRunView }>(ROUTES.deepRun.state).then((data) => data.deepRun),
+
+  beginDeepRun: (runKey: string, championIds: readonly string[], actionId: string) =>
+    api
+      .post<{ deepRun: DeepRunView }>(ROUTES.deepRun.begin(runKey), { championIds, actionId })
+      .then((data) => data.deepRun),
+
+  /**
+   * Opens a door. A fighting room answers with the battle it started, in the same request —
+   * two calls would leave a window where the run says it is in a battle and none exists.
+   */
+  enterDeepRunRoom: (runKey: string, roomKey: string, actionId: string) =>
+    api.post<{ deepRun: DeepRunView; paid: Record<string, number>; battle: BattleView | null }>(
+      ROUTES.deepRun.enter(runKey),
+      { roomKey, actionId },
+    ),
+
+  takeDeepRunBoon: (runKey: string, boonKey: string, actionId: string) =>
+    api
+      .post<{ deepRun: DeepRunView }>(ROUTES.deepRun.boon(runKey), { boonKey, actionId })
+      .then((data) => data.deepRun),
+
+  retireDeepRun: (runKey: string, actionId: string) =>
+    api.post<{ deepRun: DeepRunView; outcome: DeepRunOutcome }>(ROUTES.deepRun.retire(runKey), {
+      actionId,
+    }),
 
   // ── The world boss ────────────────────────────────────────────────────────
 

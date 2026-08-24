@@ -32,6 +32,12 @@ export interface Unlock {
  * more than one feature. The celebration queues them rather than picking a winner.
  */
 const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> = Object.freeze({
+  deepRun: {
+    screen: 'deepRun',
+    title: 'The Sunken Stair',
+    blurb:
+      'Twelve floors under the Vale, and your relics stay at the top of them. Four champions go down with nothing but their own levels, and what carries them is whatever the Stair offers on the way — one boon at a time, and every wound they take stays taken.',
+  },
   worldBoss: {
     screen: 'worldBoss',
     title: 'The Wurm Wakes',
