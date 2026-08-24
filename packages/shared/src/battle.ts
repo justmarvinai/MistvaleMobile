@@ -196,6 +196,8 @@ export function multiBattleRefusal(mode: BattleMode): string | null {
       return 'A Titan is fought a key at a time, and a key is one run.';
     case 'worldBoss':
       return 'The Wurm is struck a strike at a time, and a strike is one run.';
+    case 'deepRun':
+      return 'A descent is walked one room at a time.';
     case 'arena':
       return 'An arena attack is one fight against one warden.';
     default:

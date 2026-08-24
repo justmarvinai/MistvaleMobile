@@ -5,6 +5,7 @@ import {
   championDefSchema,
   dungeonDefSchema,
   enemyDefSchema,
+  deepRunDefSchema,
   expeditionDefSchema,
   factionDefSchema,
   gameConfigEntrySchema,
@@ -66,6 +67,7 @@ export const contentBundleSchema = z.object({
   tutorialSteps: z.array(tutorialStepDefSchema),
   soundCues: z.array(soundCueDefSchema),
   expeditions: z.array(expeditionDefSchema),
+  deepRuns: z.array(deepRunDefSchema),
   /** Flattened to a plain map — the client only ever reads values. */
   config: z.record(z.string(), gameConfigEntrySchema.shape.value),
 });

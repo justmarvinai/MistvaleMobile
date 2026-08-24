@@ -90,6 +90,7 @@ export const BATTLE_MODES = [
   'titan',
   'trial',
   'worldBoss',
+  'deepRun',
 ] as const;
 export type BattleMode = (typeof BATTLE_MODES)[number];
 

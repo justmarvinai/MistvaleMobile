@@ -38,6 +38,16 @@ export interface ChampionEntry {
    * `bonuses`, which is what keeps the champion screen's numbers and the engine's the same.
    */
   masteries?: readonly MasteryEffect[];
+  /**
+   * Health to start the fight on, as a percentage of maximum. Absent is full.
+   *
+   * Exists for the Deep Run, where damage carries between floors and a fight opened at
+   * three-quarters health is the whole cost of the fight before it. Expressed as a
+   * percentage rather than a number because the champion's maximum is assembled *here* —
+   * boons and levels move it — and a stored absolute would be against a maximum that no
+   * longer applies.
+   */
+  startHpPct?: number;
 }
 
 /** One enemy as a stage's wave describes it. */
@@ -188,6 +198,15 @@ export function buildTeam(
       isBoss: false,
       boss: { almightyImmunity: false, tmReductionImmune: false },
     });
+    // A champion who walked into this fight already hurt. Clamped to at least one point:
+    // a unit that starts dead is a unit the fight has to special-case everywhere, and a
+    // party with nobody standing should never have been sent in.
+    if (entry.startHpPct !== undefined && entry.startHpPct < 100) {
+      unit.hp = Math.max(
+        1,
+        Math.min(unit.maxHp, Math.round((unit.maxHp * entry.startHpPct) / 100)),
+      );
+    }
     if (entry.masteries && entry.masteries.length > 0) {
       unit.masteries = entry.masteries;
       unit.masteryState = {

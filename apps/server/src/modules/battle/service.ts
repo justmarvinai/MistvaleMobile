@@ -34,6 +34,7 @@ import {
   type StageDef,
   type TitanRun,
   type WorldBossStrike,
+  type DeepRunOutcome,
 } from '@mistvale/shared';
 import { battleSessions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
@@ -47,6 +48,7 @@ import { arenaConfigFrom } from '../arena/rating';
 import * as depths from '../depths/service';
 import * as titan from '../titan/service';
 import * as worldboss from '../worldboss/service';
+import * as deeprun from '../deeprun/service';
 import * as gear from '../gear/service';
 import { borrowedTeam, PresetTeamError, stageSeed } from './preset';
 import * as mastery from '../mastery/service';
@@ -147,6 +149,12 @@ export interface RewardSummary {
    */
   worldBoss: WorldBossStrike | null;
   /**
+   * What a finished descent was worth: how deep it got, whether it reached the bottom, and
+   * the rung that paid. Null for every other mode, and null on the floors of a run that is
+   * still going — a descent pays once, at the end.
+   */
+  deepRun: DeepRunOutcome | null;
+  /**
    * The day's first victory in this mode, paid automatically. Empty once it has been
    * earned today, or in a mode the config pays nothing for.
    */
@@ -184,6 +192,7 @@ const NO_REWARDS: RewardSummary = {
   arena: null,
   titan: null,
   worldBoss: null,
+  deepRun: null,
   vaultOverflow: gear.NO_OVERFLOW,
 };
 
@@ -308,12 +317,23 @@ export async function assembleEntries(
    * attacker's bonuses to the defender's team.
    */
   hallOwnerId: string,
+  /**
+   * Leaves the relics behind.
+   *
+   * The Deep Run's one rule: four champions go down at their own levels and ranks with
+   * nothing they were wearing. Everything else about them still counts — masteries, the
+   * Hall, imprint and standing — because "no relics" is the rule that was asked for and
+   * stripping the rest would make it a Trial with your own champions.
+   */
+  options: { withoutGear?: boolean } = {},
 ): Promise<ChampionEntry[]> {
   const snapshot = ctx.content.current();
-  const equipped = await gear.gearByChampion(
-    tx,
-    owned.map((member) => member.id),
-  );
+  const equipped = options.withoutGear
+    ? new Map<string, never[]>()
+    : await gear.gearByChampion(
+        tx,
+        owned.map((member) => member.id),
+      );
   const gearContext = gear.gearContextFrom(snapshot.bundle);
   const masteryNodes = mastery.nodesFrom(ctx.content);
 
@@ -380,6 +400,58 @@ export async function assembleEntries(
 }
 
 /**
+ * A Deep Run room, shaped as the stage the battle machinery expects.
+ *
+ * A room *is* a stage in every sense the engine cares about — waves, a cost, star rules — it
+ * simply is not authored as one, because it lives in a pool the descent draws from rather
+ * than on a map anybody walks. Synthesising one here is what lets a descent's fights reuse
+ * `start`, `act`, playback, Auto, the speed ladder and resume-after-reload without a second
+ * implementation of any of them, and it is why `battle_sessions.stage_key` still names
+ * something real: the room.
+ *
+ * It pays nothing and records no clear. What a descent is worth is the depth it reached,
+ * paid once when the run ends.
+ */
+function roomAsStage(ctx: BattleContext, roomKey: string): StageDef | undefined {
+  for (const def of ctx.content.current().bundle.deepRuns) {
+    const room = def.rooms.find((entry) => entry.key === roomKey);
+    if (!room) continue;
+    return {
+      key: room.key,
+      sortOrder: 0,
+      mode: 'deepRun',
+      parentKey: def.key,
+      number: 1,
+      difficulty: 'normal',
+      energyCost: 0,
+      waves: room.waves,
+      rewards: {
+        silverMin: 0,
+        silverMax: 0,
+        playerXp: 0,
+        championXp: 0,
+        drops: {
+          gearChance: 0,
+          gearRankMin: 1,
+          gearRankMax: 1,
+          gearRarityWeights: {},
+          gearSlots: [],
+          gearSetKeys: [],
+          items: [],
+        },
+      },
+      // Stars mean nothing here — a descent is scored on depth — so they are set where they
+      // cannot be earned rather than left to imply a hard-won floor went badly.
+      starRules: { noDeaths: true, maxTurns: 1 },
+      firstClearRewards: {},
+      unlock: {},
+      presetTeam: [],
+    };
+  }
+  return undefined;
+}
+
+/**
  * Starts a battle.
  *
  * Spends energy and creates the session in one transaction, so a crash between the two
@@ -388,7 +460,8 @@ export async function assembleEntries(
 export async function start(ctx: BattleContext, options: StartOptions): Promise<BattleView> {
   const { champions, enemies, stages } = contentMaps(ctx.content);
 
-  const stage = stages.get(options.stageKey);
+  const stage =
+    options.mode === 'deepRun' ? roomAsStage(ctx, options.stageKey) : stages.get(options.stageKey);
   if (!stage) throw AppError.notFound(`No stage "${options.stageKey}".`);
   // Practice is a *lens* on a stage rather than a kind of stage: it re-fights a campaign
   // stage or a dungeon floor at no cost for no reward, so it is the one mode that does not
@@ -480,7 +553,19 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
 
     const entries = borrowed
       ? borrowedTeamFor(ctx, stage, champions, scaling)
-      : await assembleEntries(tx, ctx, owned, champions, scaling, options.playerId);
+      : await assembleEntries(tx, ctx, owned, champions, scaling, options.playerId, {
+          // The Deep Run's one rule, applied at the only place it can be: the assembly.
+          withoutGear: options.mode === 'deepRun',
+        });
+
+    // A descent's fight is the ordinary one with two things folded in that only exist
+    // inside a run: the boons taken so far, and the health the party is carrying. Both are
+    // read from the run rather than sent by the client, because both are state the server
+    // owns — and the boons reach the engine as stat bonuses and mastery effects, the
+    // vocabulary it already speaks, so it needs to know nothing about descents.
+    if (options.mode === 'deepRun') {
+      await deeprun.dressForTheDescent(tx, ctx.content, options.playerId, stage.parentKey, entries);
+    }
 
     // Energy: derived from the clock, so an idle account costs nothing to keep current.
     const now = new Date();
@@ -1198,7 +1283,67 @@ async function settleFinished(
   if (row.mode === 'arena') return settleArena(tx, ctx, row, state.outcome, playerId);
   if (row.mode === 'titan') return settleTitan(tx, ctx, row, events, playerId);
   if (row.mode === 'worldBoss') return settleWorldBoss(tx, ctx, row, events, playerId);
+  if (row.mode === 'deepRun') return settleDeepRun(tx, ctx, row, state, playerId);
   return settle(tx, ctx, row, state, playerId);
+}
+
+/**
+ * Settles one floor of a Deep Run.
+ *
+ * Pays nothing, which is the point: a descent is scored on **depth**, once, when it ends.
+ * What this does is write the fight's cost back into the run — the health each champion
+ * finished on, and anybody who fell — and then either advance the descent or close it out
+ * because nobody is left standing.
+ *
+ * The run ends here rather than in the route because a wipe is a *battle* outcome: whoever
+ * is watching the fight is the one who needs to be told, and a run left open until the next
+ * read would let a wiped party walk through another door.
+ */
+async function settleDeepRun(
+  tx: Tx,
+  ctx: BattleContext,
+  row: { stageKey: string },
+  state: BattleState,
+  playerId: string,
+): Promise<RewardSummary> {
+  const stage = roomAsStage(ctx, row.stageKey);
+  // Un-published mid-descent. The fight is over and cannot be filed against a run whose
+  // rooms no longer exist; saying nothing beats guessing which descent it belonged to.
+  if (!stage) return { ...NO_REWARDS };
+  const runKey = stage.parentKey;
+
+  const floor = await deeprun.settleFloor(tx, ctx.content, playerId, runKey, state);
+  if (!floor) return { ...NO_REWARDS };
+
+  if (!floor.wiped && !floor.bottom) return { ...NO_REWARDS };
+
+  const outcome = await deeprun.endRun(
+    tx,
+    ctx.content,
+    playerId,
+    runKey,
+    floor.wiped ? 'wiped' : 'completed',
+    new Date(),
+  );
+  const granted =
+    Object.keys(outcome.rewards).length > 0
+      ? await rewards.grant(tx, playerId, outcome.rewards, `deepRun:${runKey}`)
+      : null;
+
+  // One descent is two reports: it happened, and it got this deep. The depth is a
+  // *threshold* — a mission asking for floor 10 wants a run that reached it rather than
+  // ten runs that reached floor 1.
+  await meta.track(tx, ctx, playerId, [
+    { type: 'deepRunFinished', facts: { runKey } },
+    { type: 'deepRunDepth', amount: outcome.floor, facts: { runKey } },
+  ]);
+
+  return {
+    ...NO_REWARDS,
+    bonus: outcome.rewards,
+    levelsGained: granted?.levelsGained ?? 0,
+    deepRun: outcome,
+  };
 }
 
 /**
@@ -1367,6 +1512,7 @@ async function settle(
     arena: null,
     titan: null,
     worldBoss: null,
+    deepRun: null,
   };
 }
 

@@ -10,6 +10,7 @@ import { LOGIN_TRACKS } from './data/login';
 import { NEWS_POSTS } from './data/news';
 import { SOUND_CUES } from './data/sounds';
 import { EXPEDITIONS } from './data/expeditions';
+import { DEEP_RUNS } from './data/deeprun';
 import { TITAN_DUNGEONS, TITAN_ENEMIES, TITAN_SKILLS, TITAN_STAGES } from './data/titan';
 import { TRIAL_ENEMIES, TRIAL_SKILLS, TRIAL_STAGES } from './data/trials';
 import { WORLD_BOSS_DUNGEONS, WORLD_BOSS_ENEMIES, WORLD_BOSS_STAGES } from './data/worldboss';
@@ -76,6 +77,7 @@ export function buildSeedContent(): SeedContent[] {
     gearStat: GEAR_STATS.map((data) => ({ key: data.key, data })),
     item: ITEMS.map((data) => ({ key: data.key, data })),
     expedition: EXPEDITIONS.map((data) => ({ key: data.key, data })),
+    deepRun: DEEP_RUNS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
     dungeon: [...DUNGEONS, ...TITAN_DUNGEONS, ...WORLD_BOSS_DUNGEONS].map((data) => ({
       key: data.key,

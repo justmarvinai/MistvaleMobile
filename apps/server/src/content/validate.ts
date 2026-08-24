@@ -6,12 +6,14 @@ import {
   STATUS_ENGINE_TYPES,
   isValidBaseRank,
   rewardItemKeys,
+  deepRunProblems,
   titanRuleProblems,
   worldBossRuleProblems,
   type ContentIssue,
   type ContentType,
   type ContentValidationResult,
   type Rarity,
+  type DeepRunDef,
   type TitanRules,
   type WorldBossRules,
 } from '@mistvale/shared';
@@ -635,6 +637,44 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
         });
       }
     }
+  }
+
+  // ── Deep Runs ─────────────────────────────────────────────────────────────
+  //
+  // A descent is content all the way down: the rooms, the boons, the depth ladder. What
+  // publish has to protect is the thing a schema cannot see — a floor with fewer rooms in
+  // band than there are doors is a descent that *stalls*, and it stalls for the player who
+  // is already on floor seven rather than for the operator who published it.
+  for (const [key, entity] of parsed.get('deepRun') ?? []) {
+    const def = entity as DeepRunDef;
+    for (const problem of deepRunProblems(def)) {
+      errors.push({
+        severity: 'error',
+        contentType: 'deepRun',
+        key,
+        path: 'rooms',
+        message: problem,
+      });
+    }
+    def.rooms.forEach((room, index) => {
+      room.waves.forEach((wave, waveIndex) => {
+        wave.forEach((unit, slot) => {
+          reference(
+            {
+              contentType: 'deepRun',
+              key,
+              path: `rooms.${index}.waves.${waveIndex}.${slot}`,
+            },
+            'enemy',
+            unit.enemyKey,
+          );
+        });
+      });
+      rewardMap({ contentType: 'deepRun', key, path: `rooms.${index}.rewards` }, room.rewards);
+    });
+    def.depthTiers.forEach((tier, index) => {
+      rewardMap({ contentType: 'deepRun', key, path: `depthTiers.${index}.rewards` }, tier.rewards);
+    });
   }
 
   const titanStagesByKeep = new Map<string, number>();

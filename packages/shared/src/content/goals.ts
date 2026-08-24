@@ -89,6 +89,10 @@ export const GOAL_TYPES = [
   'worldBossStrike',
   /** Cumulative damage to a world boss this wake. A *threshold*, like the Titan's. */
   'worldBossDamage',
+  /** One Deep Run finished, however it ended. */
+  'deepRunFinished',
+  /** The deepest floor a Deep Run has ever reached. A *threshold*, like the Titan's damage. */
+  'deepRunDepth',
   /**
    * The most damage ever done to a Titan. A *threshold* goal, and it has to be: a mission
    * asking for half a million damage means one run that did it, never fifty that added up.
@@ -135,6 +139,8 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   trialsBeaten: 'highest',
   worldBossStrike: 'count',
   worldBossDamage: 'highest',
+  deepRunFinished: 'count',
+  deepRunDepth: 'highest',
   titanRun: 'count',
   titanDamage: 'highest',
 });
@@ -175,6 +181,8 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   trialsBeaten: [],
   worldBossStrike: ['dungeonKey'],
   worldBossDamage: ['dungeonKey'],
+  deepRunFinished: ['runKey'],
+  deepRunDepth: ['runKey'],
   titanRun: ['dungeonKey'],
   titanDamage: ['dungeonKey'],
 });

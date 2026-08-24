@@ -162,6 +162,24 @@ export const ROUTES = {
      */
     overview: '/trials',
   },
+  deepRun: {
+    /**
+     * The descent: what is left standing, what has been taken, and what is behind the doors.
+     *
+     * A fight inside a run is an ordinary battle (`mode: 'deepRun'`) through the battle
+     * routes, so playback, Auto, the speed ladder and a reload mid-fight all work here
+     * without a second implementation of any of them.
+     */
+    state: '/deep-run',
+    /** Begins a descent. Spends one, whatever happens to it afterwards. */
+    begin: (key: string) => `/deep-run/${encodeURIComponent(key)}/begin`,
+    /** Opens one of the doors on this floor. A fight answers with the battle. */
+    enter: (key: string) => `/deep-run/${encodeURIComponent(key)}/enter`,
+    /** Takes one of the boons offered, and rolls the next floor's doors. */
+    boon: (key: string) => `/deep-run/${encodeURIComponent(key)}/boon`,
+    /** Walks out with what has been earned, rather than being carried out. */
+    retire: (key: string) => `/deep-run/${encodeURIComponent(key)}/retire`,
+  },
   worldBoss: {
     /**
      * The wake: the shared pool, the board, your own contribution and the ladder.

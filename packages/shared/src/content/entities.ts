@@ -18,6 +18,7 @@ import {
   skillUpgradeSchema,
   targetingSchema,
 } from './effects';
+import { masteryEffectSchema } from './masteries';
 
 /**
  * Content entity contracts.
@@ -505,6 +506,7 @@ export const STAGE_MODES = [
   'titan',
   'trial',
   'worldBoss',
+  'deepRun',
 ] as const;
 
 // ── The Depths ──────────────────────────────────────────────────────────────
@@ -642,6 +644,127 @@ export const worldBossRulesSchema = z.object({
   claimGraceDays: z.number().int().min(0).max(14).default(3),
 });
 export type WorldBossRules = z.infer<typeof worldBossRulesSchema>;
+
+// ── The Deep Run ────────────────────────────────────────────────────────────
+
+/**
+ * What a room in a Deep Run is.
+ *
+ * `fight` and `elite` are battles; the difference is that an elite is harder and pays a
+ * better boon, so the fork at every floor is a real bet rather than a coin toss. `rest`
+ * mends the party, which only means something because damage carries between floors, and
+ * `cache` pays materials instead.
+ */
+export const DEEP_RUN_ROOM_KINDS = ['fight', 'elite', 'rest', 'cache'] as const;
+export type DeepRunRoomKind = (typeof DEEP_RUN_ROOM_KINDS)[number];
+
+export const deepRunRoomSchema = z.object({
+  key: contentKeySchema,
+  name: z.string().min(1).max(48),
+  kind: z.enum(DEEP_RUN_ROOM_KINDS),
+  /** The line on the door, which is all a player has to choose on. */
+  description: z.string().max(200).default(''),
+  /** The band of floors this room may be drawn for, inclusive. */
+  minFloor: z.number().int().min(1).max(60).default(1),
+  maxFloor: z.number().int().min(1).max(60).default(60),
+  /**
+   * The opposition, for `fight` and `elite`.
+   *
+   * Levels are absolute rather than scaled by depth, so an operator sees exactly what is
+   * behind a door. Depth is expressed by *which rooms are in band*, not by a hidden curve.
+   */
+  waves: z.array(z.array(waveUnitSchema).min(1).max(4)).max(3).default([]),
+  /** How much of each champion's maximum health a `rest` gives back. */
+  healPct: z.number().min(0).max(100).default(0),
+  /** What a `cache` pays. Rooms that are not caches leave it empty. */
+  rewards: z.record(z.string(), z.number()).default({}),
+  /** How many boons are offered after this room. Zero for rooms that offer none. */
+  boonsOffered: z.number().int().min(0).max(4).default(3),
+  /** Weight in the draw for its band. Higher is commoner. */
+  weight: z.number().min(0.1).max(20).default(1),
+});
+export type DeepRunRoom = z.infer<typeof deepRunRoomSchema>;
+
+/**
+ * A boon: what a run's build is made of.
+ *
+ * The whole reason the Deep Run works without new engine code. A boon is a bag of flat stat
+ * bonuses plus **mastery effects** — the same resolved-effect vocabulary the mastery trees
+ * already hand the engine — so anything a mastery can do, a boon can do, and the engine
+ * needs to know nothing about Deep Runs at all.
+ */
+export const deepRunBoonSchema = z.object({
+  key: contentKeySchema,
+  name: z.string().min(1).max(48),
+  description: z.string().max(200).default(''),
+  /** Commons are the filler, legendaries are the run-defining ones. Drives the draw. */
+  rarity: z.enum(RARITIES).default('common'),
+  /**
+   * Flat stat additions, applied to every champion still standing.
+   *
+   * The range has to cover health, which works at a different scale from everything else —
+   * a champion carries fifteen thousand of it and eight speed. One bound for all eight
+   * stats is looser than a per-stat one would be, and that is the right trade: the tight
+   * version would be a table nobody could read, and a boon of +20,000 speed is a mistake
+   * `pnpm sim` would find in a second.
+   */
+  bonuses: z.partialRecord(z.enum(STATS), z.number().min(-5000).max(20_000)).default({}),
+  /** Conditional effects and procs, handed to the engine exactly as masteries are. */
+  effects: z.array(masteryEffectSchema).max(4).default([]),
+  /** May be taken more than once, stacking. Most cannot. */
+  stacks: z.boolean().default(false),
+  /** The floor band this boon may be offered in. */
+  minFloor: z.number().int().min(1).max(60).default(1),
+});
+export type DeepRunBoon = z.infer<typeof deepRunBoonSchema>;
+
+/** A depth worth reaching, and what reaching it pays. Paid once per run, at the deepest. */
+export const deepRunTierSchema = z.object({
+  key: contentKeySchema,
+  name: z.string().min(1).max(48),
+  floor: z.number().int().min(1).max(60),
+  rewards: z.record(z.string(), z.number()),
+});
+export type DeepRunTier = z.infer<typeof deepRunTierSchema>;
+
+/**
+ * The Deep Run — a descent your relics do not come on.
+ *
+ * Every other mode in Mistvale measures what an account has *assembled*. This one takes the
+ * assembly away: four champions go down at their own levels and ranks with **no relics**,
+ * and the build that gets them deep is put together inside the run, out of whatever boons
+ * the descent happens to offer. It is the third answer to "what does a finished account do"
+ * — Trials ask about play, the Wurm asks about everybody, and this asks whether you can
+ * build something out of what you are given.
+ *
+ * Two rules make it a rogue-lite rather than a dungeon with a longer corridor:
+ *
+ *  - **Damage carries between floors.** A fight won at a cost is still a cost, so a rest is
+ *    a real choice against a treasure room and attrition is the thing that actually ends a
+ *    run.
+ *  - **A fallen champion stays fallen.** Not for the account — nothing is lost outside the
+ *    run — but for the rest of the descent, so the party thins and the last floors are
+ *    fought with what is left.
+ */
+export const deepRunDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(64),
+  lore: z.string().max(2000).default(''),
+  tagline: z.string().max(120).default(''),
+  backgroundAsset: z.string().max(64).default(''),
+  unlockLevel: z.number().int().min(1).max(60).default(1),
+  /** Descents a day. Spent when a run *begins*, so a bad run costs one. */
+  runsPerDay: z.number().int().min(1).max(10).default(2),
+  /** How deep a complete descent goes. Reaching the bottom ends the run in triumph. */
+  floors: z.number().int().min(2).max(60).default(12),
+  /** How many doors are offered at each floor. */
+  forks: z.number().int().min(2).max(4).default(3),
+  rooms: z.array(deepRunRoomSchema).min(1).max(80),
+  boons: z.array(deepRunBoonSchema).min(1).max(80),
+  /** Ascending by floor. Publish validation refuses an out-of-order or empty ladder. */
+  depthTiers: z.array(deepRunTierSchema).max(12).default([]),
+});
+export type DeepRunDef = z.infer<typeof deepRunDefSchema>;
+export type DeepRunDefInput = z.input<typeof deepRunDefSchema>;
 
 export const dungeonDefSchema = contentMetaSchema.extend({
   name: z.string().min(1).max(64),

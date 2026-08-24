@@ -63,6 +63,7 @@ const EMPTY_BUNDLE_TYPES = {
   tutorialSteps: 'tutorialStep',
   soundCues: 'soundCue',
   expeditions: 'expedition',
+  deepRuns: 'deepRun',
 } as const satisfies Record<string, ContentType>;
 
 export class ContentCache {

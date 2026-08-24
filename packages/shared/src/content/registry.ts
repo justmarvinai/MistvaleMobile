@@ -21,6 +21,7 @@ import {
   summonPoolDefSchema,
   stageDefSchema,
   soundCueDefSchema,
+  deepRunDefSchema,
   expeditionDefSchema,
   tutorialStepDefSchema,
   statusDefSchema,
@@ -60,6 +61,7 @@ export const CONTENT_TYPES = [
   'tutorialStep',
   'soundCue',
   'expedition',
+  'deepRun',
   'gameConfig',
 ] as const;
 
@@ -249,6 +251,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: [],
     inBundle: true,
   },
+  deepRun: {
+    label: 'Deep Runs',
+    path: 'deep-runs',
+    schema: deepRunDefSchema,
+    references: [],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -284,6 +293,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'tutorialStep',
   'soundCue',
   'expedition',
+  'deepRun',
   'gameConfig',
 ];
 

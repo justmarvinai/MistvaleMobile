@@ -344,8 +344,71 @@ export const playerWorldBoss = pgTable(
   ],
 );
 
+/**
+ * One descent, live or finished.
+ *
+ * The only *resumable* state in the game besides a battle, and unlike a battle it spans
+ * several: a run is a dozen floors, and a player who closes the tab on floor 7 must find
+ * floor 7 when they come back. So everything a descent is made of lives on the row — the
+ * party's health, who has fallen, the boons taken, the doors currently open, the boons
+ * currently offered — rather than being recomputed from anything.
+ *
+ * `seed` is what makes it honest. Doors and boon offers are drawn from the run's own seeded
+ * stream rather than from `Math.random`, so a descent replays identically and an offer
+ * cannot be re-rolled by refusing it and asking again. `offer_nonce` counts the draws taken
+ * so far, which is what turns one seed into a sequence rather than one number.
+ */
+export const playerDeepRuns = pgTable(
+  'player_deep_runs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    /** `deep_run_defs` key. */
+    runKey: text('run_key').notNull(),
+    seed: integer('seed').notNull(),
+    /** How many draws have been taken from the seed, so each is a fresh one. */
+    offerNonce: integer('offer_nonce').notNull().default(0),
+
+    status: text('status').notNull().default('active'),
+    /** `choosingDoor` · `inBattle` · `choosingBoon` · `ended`. */
+    phase: text('phase').notNull().default('choosingDoor'),
+    floor: integer('floor').notNull().default(1),
+    deepest: integer('deepest').notNull().default(0),
+
+    /** `[{ championId, hpPct, alive }]` — the party as it stands, health carried forward. */
+    party: jsonb('party').notNull().default([]).$type<
+      { championId: string; hpPct: number; alive: boolean }[]
+    >(),
+    /** Boon keys taken, in order. A boon that stacks appears more than once. */
+    boons: jsonb('boons').notNull().default([]).$type<string[]>(),
+    /** Room keys currently behind the doors. */
+    doors: jsonb('doors').notNull().default([]).$type<string[]>(),
+    /** Boon keys currently on offer. */
+    boonOffer: jsonb('boon_offer').notNull().default([]).$type<string[]>(),
+    /** The room being fought, so a resumed battle knows what it was for. */
+    currentRoom: text('current_room'),
+    battleId: uuid('battle_id'),
+
+    /** What the run paid when it ended. Empty while it is still going. */
+    rewards: jsonb('rewards').notNull().default({}).$type<Record<string, number>>(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    endedAt: timestamp('ended_at', { withTimezone: true }),
+  },
+  (table) => [
+    // At most one live descent per account per run, enforced rather than assumed: two would
+    // mean two sets of doors and a battle that could be filed against either.
+    uniqueIndex('player_deep_runs_active_key')
+      .on(table.playerId, table.runKey)
+      .where(sql`status = 'active'`),
+    index('player_deep_runs_player_idx').on(table.playerId, table.startedAt),
+  ],
+);
+
 export type StageProgressRow = typeof stageProgress.$inferSelect;
 export type ChapterRewardRow = typeof chapterRewards.$inferSelect;
 export type TitanRecordRow = typeof titanRecords.$inferSelect;
 export type WorldBossWakeRow = typeof worldBossWakes.$inferSelect;
+export type PlayerDeepRunRow = typeof playerDeepRuns.$inferSelect;
 export type PlayerWorldBossRow = typeof playerWorldBoss.$inferSelect;

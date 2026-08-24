@@ -95,6 +95,7 @@ export interface UnlockFlags {
   expeditions: boolean;
   trials: boolean;
   worldBoss: boolean;
+  deepRun: boolean;
 }
 
 /** Account level at which each feature unlocks. Mirrored in game_config from P1. */
@@ -124,6 +125,10 @@ export const UNLOCK_LEVELS: Readonly<Record<keyof UnlockFlags, number>> = Object
   // you have been practising on alone all week, and meeting it the other way round would
   // give away the joke.
   worldBoss: 18,
+  // The last thing the game opens, and the only one that asks a question the rest of it has
+  // spent sixty levels answering the other way round: what are these champions worth with
+  // none of the relics you found for them?
+  deepRun: 20,
 });
 
 export function computeUnlocks(level: number): UnlockFlags {
