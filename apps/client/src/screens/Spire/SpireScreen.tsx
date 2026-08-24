@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { MutableRefObject } from 'react';
 import type { SpireFloor } from '@mistvale/shared';
 import { Button } from '@/ui/Button/Button';
 import { Empty } from '@/ui/Empty/Empty';
@@ -9,7 +10,6 @@ import { Panel } from '@/ui/Panel/Panel';
 import { Rewards } from '@/ui/Rewards/Rewards';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
 import { useContentStore } from '@/state/contentStore';
-import { useNavStore } from '@/state/navStore';
 import { firstSpire, useSpireStore } from '@/state/spireStore';
 import { TeamSelect } from '../Battle/TeamSelect';
 import styles from './SpireScreen.module.scss';
@@ -35,7 +35,10 @@ export function SpireScreen(): JSX.Element {
   const collected = useSpireStore((store) => store.collected);
   const dismiss = useSpireStore((store) => store.dismiss);
   const bundle = useContentStore((store) => store.bundle);
-  const enterFrom = useNavStore((store) => store.enterFrom);
+
+  const loadError = useSpireStore((store) => store.error);
+
+  const tower = firstSpire(overview);
 
   const [chosen, setChosen] = useState<SpireFloor | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +50,30 @@ export function SpireScreen(): JSX.Element {
     void load();
   }, [load]);
 
-  const tower = firstSpire(overview);
+  /**
+   * Puts the floor a key can be spent on in front of the player.
+   *
+   * The tower is drawn top floor first so that climbing reads as going *up*, which is right
+   * — and it means a fresh climb opens on floors 30 down to 23, with the one row carrying a
+   * button thirty rows below the fold. A browser found it: the screen looked finished and
+   * had nothing on it to press.
+   *
+   * `scrollTop` on the tower's own container rather than `scrollIntoView`, which bubbles to
+   * every scrollable ancestor — the first cut used it and took the *page* with it, so the
+   * title bar and the standing strip scrolled off and the landings ran under the dock. The
+   * tower has its own scroller; only it should move.
+   *
+   * Keyed on the floor so it re-centres after a climb rather than on every render.
+   */
+  const currentFloor = tower?.highestFloor ?? 0;
+  const towerRef = useRef<HTMLElement | null>(null);
+  const currentRow = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const column = towerRef.current;
+    const row = currentRow.current;
+    if (!column || !row) return;
+    column.scrollTop = row.offsetTop - column.clientHeight / 2 + row.clientHeight / 2;
+  }, [currentFloor, loaded]);
 
   const stages = useMemo(
     () => new Map((bundle?.stages ?? []).map((stage) => [stage.key, stage])),
@@ -71,28 +97,22 @@ export function SpireScreen(): JSX.Element {
     }
   };
 
-  if (loaded && !tower) {
-    return (
-      <div className={styles.screen}>
-        <Heading tagline="Thirty floors, and no two of them want the same team.">
-          The Mistspire
-        </Heading>
-        <Empty
-          glyph="glyph-rockets"
-          title="The stair is dark"
-          message={loading ? 'Reading the tower…' : 'No tower is published. An operator adds one.'}
-        />
-      </div>
-    );
-  }
-
+  // Three states with no tower, and they are *not* the same thing — which is the lesson the
+  // QA pass wrote down about the blank battlefield: an empty screen has to say which of its
+  // causes it is, or a screenshot of it is not a diagnosis. A failed read said "no tower is
+  // published" here until a browser found it, which is a wrong answer rather than a vague one.
   if (!tower) {
+    const [title, message] = loadError
+      ? ['The tower could not be read', loadError]
+      : !loaded || loading
+        ? ['Reading the tower…', 'One moment.']
+        : ['The stair is dark', 'No tower is published. An operator adds one.'];
     return (
       <div className={styles.screen}>
         <Heading tagline="Thirty floors, and no two of them want the same team.">
           The Mistspire
         </Heading>
-        <Empty glyph="glyph-rockets" title="Reading the tower…" message="One moment." />
+        <Empty glyph="glyph-rockets" title={title} message={message} />
       </div>
     );
   }
@@ -184,18 +204,13 @@ export function SpireScreen(): JSX.Element {
       </div>
 
       <div className={styles.body}>
-        <section className={styles.tower} aria-label="Floors">
+        <section className={styles.tower} aria-label="Floors" ref={towerRef}>
           {descending.map((floor) => (
             <FloorRow
               key={floor.stageKey}
               floor={floor}
-              onClimb={() => {
-                // Set on the way *in*, not on the way out: the picker navigates to the
-                // fight itself, so by the time the battle mounts this screen is gone and
-                // "Back" would otherwise land on the Haven.
-                enterFrom('battle', 'spire');
-                setChosen(floor);
-              }}
+              rowRef={floor.current ? currentRow : undefined}
+              onClimb={() => setChosen(floor)}
               disabled={busy}
             />
           ))}
@@ -247,9 +262,11 @@ export function SpireScreen(): JSX.Element {
       </div>
 
       {/* The picker reads the ward off the stage itself and refuses an illegal team there,
-          so nothing about it needs passing down. It also navigates to the fight on its own,
-          which is why there is no `onStarted` here — `enterFrom` is set on the way in so
-          "back" from a floor comes back to the tower rather than to the Haven. */}
+          so nothing about it needs passing down. It navigates to the fight on its own with
+          `setScreen`, which records the screen it left — so "Back to the Mistspire" works
+          with nothing here to arrange it. The first cut called `enterFrom` on the Climb
+          press to arrange it anyway, and `enterFrom` *navigates*: pressing Climb jumped
+          straight to an empty battle screen reading "No battle in progress." */}
       {chosenStage && (
         <TeamSelect
           stage={chosenStage}
@@ -259,6 +276,10 @@ export function SpireScreen(): JSX.Element {
             perDay: tower.keysPerDay,
             turnCap: chosenStage.starRules.maxTurns,
             noun: 'key',
+            // Its own sentence, because a floor is attempts-limited *and* scored on the
+            // clear — the two facts the Titan happens to combine. Says plainly that a
+            // failed attempt is free, which is the mode's whole bargain.
+            summary: `${chosenStage.waves.length} wave${chosenStage.waves.length === 1 ? '' : 's'} · the key is spent only if you win`,
           }}
           onClose={() => setChosen(null)}
         />
@@ -289,10 +310,13 @@ function FloorRow({
   floor,
   onClimb,
   disabled,
+  rowRef,
 }: {
   floor: SpireFloor;
   onClimb: () => void;
   disabled: boolean;
+  /** Set on the one floor a key can be spent on, so the screen can open there. */
+  rowRef?: MutableRefObject<HTMLElement | null>;
 }): JSX.Element {
   const classes = [
     styles.floor,
@@ -305,7 +329,11 @@ function FloorRow({
     .join(' ');
 
   return (
-    <article className={classes} data-mv-highlight={floor.current ? 'spire-current' : undefined}>
+    <article
+      ref={rowRef}
+      className={classes}
+      data-mv-highlight={floor.current ? 'spire-current' : undefined}
+    >
       <span className={styles.number} aria-hidden="true">
         {floor.floor}
       </span>

@@ -93,7 +93,8 @@
   flex-direction: column;
   gap: 2px;
   /* Thirty rows is more than a screen. Its own scroller rather than the page's, so the
-     standing strip and the landings stay put while the tower is read. */
+     standing strip and the landings stay put while the tower is read — and so the screen
+     can open on the one floor with a button on it without moving the page (`SpireScreen`). */
   max-height: 60vh;
   overflow-y: auto;
   padding-right: $space-1;
@@ -191,6 +192,12 @@
   flex-direction: column;
   gap: $space-2;
   min-width: 0;
+  /* Its own scroller, matching the tower's, so the two columns are the same height and
+     neither drags the page. Six landing cards are taller than a viewport, and a column that
+     grows past the fold puts its last card under the dock. */
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: $space-1;
 }
 
 .asideTitle {

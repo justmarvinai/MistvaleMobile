@@ -1,4 +1,4 @@
-import type { ChampionDef, RosterChampion } from '@mistvale/shared';
+import { ROLE_NAMES, type ChampionDef, type RosterChampion } from '@mistvale/shared';
 import { ChampionCard as FuiChampionCard } from '@/fui/components/ChampionCard.ts';
 import { FuiSlotted } from '@/fui/react';
 import { useContentStore } from '../../state/contentStore';
@@ -86,7 +86,9 @@ export function ChampionCard({
         maxLevel: champion.levelCap,
         ...(def?.element ? { affinity: def.element } : {}),
         ...(def?.role ? { role: ROLE_GLYPH[def.role] ?? 'glyph-crossed-swords' } : {}),
-        ...(def?.role ? { roleLabel: def.role } : {}),
+        // The word rather than the key: `hp` reads as "Hp" in a tooltip otherwise, which
+        // is what the roster screen has always called "Health" two clicks away.
+        ...(def?.role ? { roleLabel: ROLE_NAMES[def.role] ?? def.role } : {}),
         power: champion.power,
         // The padlock is the library's own overlay and means the same thing here: this
         // one is protected and cannot be fed away.

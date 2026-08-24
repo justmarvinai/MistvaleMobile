@@ -112,22 +112,52 @@ export function teamRestrictionFailure(
 }
 
 /**
+ * What the game calls a role, an element and a rarity in front of a player.
+ *
+ * Here rather than on a screen because three places draw a ward's sentence — the server's
+ * refusal, the tower's floor rows and the team chooser — and a browser found the cost of
+ * not having it: capitalising the key gave "Hp champions" and "Defense champions" on a
+ * floor, while the roster screen two clicks away said "Health" and "Defence".
+ */
+export const ROLE_NAMES: Readonly<Record<string, string>> = Object.freeze({
+  attack: 'Attack',
+  defense: 'Defence',
+  hp: 'Health',
+  support: 'Support',
+});
+
+export const ELEMENT_NAMES: Readonly<Record<string, string>> = Object.freeze({
+  ember: 'Ember',
+  tide: 'Tide',
+  verdant: 'Verdant',
+  mist: 'Mist',
+});
+
+export const RARITY_NAMES: Readonly<Record<string, string>> = Object.freeze({
+  common: 'Common',
+  uncommon: 'Uncommon',
+  rare: 'Rare',
+  epic: 'Epic',
+  legendary: 'Legendary',
+});
+
+/**
  * How a ward reads on the door.
  *
- * Takes the display names it needs rather than looking them up, because the same sentence
- * is drawn by a client holding the content bundle and by a server holding the cache, and a
- * lookup written twice is a lookup that disagrees once.
+ * A faction's name has to be looked up in content and is passed in; everything else is an
+ * enum the game already has words for, so this owns the naming rather than asking each
+ * caller to capitalise a key and get "Hp champions".
  */
-export function restrictionLabel(restriction: TeamRestriction, displayName: string): string {
+export function restrictionLabel(restriction: TeamRestriction, factionName?: string): string {
   switch (restriction.kind) {
     case 'element':
-      return `${displayName} champions`;
+      return `${ELEMENT_NAMES[restriction.value] ?? restriction.value} champions`;
     case 'faction':
-      return displayName;
+      return factionName ?? restriction.value;
     case 'role':
-      return `${displayName} champions`;
+      return `${ROLE_NAMES[restriction.value] ?? restriction.value} champions`;
     case 'minRarity':
-      return `${displayName} or better`;
+      return `${RARITY_NAMES[restriction.value] ?? restriction.value} or better`;
   }
 }
 

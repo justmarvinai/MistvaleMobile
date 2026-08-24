@@ -67,6 +67,15 @@ export interface AttemptCost {
   turnCap: number;
   /** Singular, lower case: "key", "strike". */
   noun: string;
+  /**
+   * What this fight *is*, in one line, replacing the energy-and-silver summary.
+   *
+   * Needed because "attempts rather than energy" and "paid for damage rather than for a
+   * clear" turned out to be two different facts, and the first cut of this prop assumed
+   * they were one. A browser found it on a Mistspire floor, which costs a key and is very
+   * much scored on clearing: the picker told the player it was "paid for the damage you do".
+   */
+  summary?: string;
 }
 
 const MAX_SLOTS = 4;
@@ -76,16 +85,11 @@ const MAX_SLOTS = 4;
  *
  * The server has the same function against its cache (`spire/service.wardLabel`); this is
  * the client's half, and both defer to shared `restrictionLabel` so the phrasing is written
- * once. Elements, roles and rarities are capitalised rather than looked up, because there
- * is no `element` entity holding "Tide" and inventing one to hold four strings would be a
- * content type nobody edits.
+ * once. Only a faction needs content — the rest are enums shared has words for.
  */
 function wardPhrase(ward: TeamRestriction, factions: readonly FactionDef[] | undefined): string {
-  if (ward.kind === 'faction') {
-    const faction = factions?.find((candidate) => candidate.key === ward.value);
-    return restrictionLabel(ward, faction?.name ?? ward.value);
-  }
-  return restrictionLabel(ward, ward.value.charAt(0).toUpperCase() + ward.value.slice(1));
+  if (ward.kind !== 'faction') return restrictionLabel(ward);
+  return restrictionLabel(ward, factions?.find((candidate) => candidate.key === ward.value)?.name);
 }
 
 export function TeamSelect({
@@ -289,7 +293,8 @@ export function TeamSelect({
       <div className={styles.body}>
         <p className={styles.summary}>
           {attempts
-            ? `One wave · ${attempts.turnCap} turns · paid for the damage you do`
+            ? (attempts.summary ??
+              `One wave · ${attempts.turnCap} turns · paid for the damage you do`)
             : `${stage.waves.length} waves · ${stage.energyCost} energy · ${stage.rewards.silverMin}–${stage.rewards.silverMax} silver`}
         </p>
 

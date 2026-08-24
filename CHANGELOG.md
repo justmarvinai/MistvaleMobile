@@ -42,6 +42,20 @@ Depths' deepest floors do.
 
 ### Fixed
 
+- **Six defects a browser found and 1,665 tests did not**, all in the Mistspire's own client
+  half: pressing **Climb** jumped straight to an empty battle screen reading "No battle in
+  progress" (`enterFrom` *navigates*, and `setScreen` already records where it came from, so
+  the call was both unnecessary and the bug); the one floor carrying a button opened thirty
+  rows below the fold, because the tower is drawn top-floor-first and nothing scrolled to
+  the climbable one; scrolling to it with `scrollIntoView` then took the **page** with it,
+  since it bubbles to every scrollable ancestor; a failed read said "No tower is published.
+  An operator adds one", which is a wrong diagnosis rather than a vague one; the team chooser
+  told a player a floor was "paid for the damage you do" — the Titan's sentence on a stage
+  scored by clearing; and a ward read "Only **Hp** champions may climb" where the roster
+  screen two clicks away has always said "Health".
+- Role names moved into shared (`ROLE_NAMES`, `ELEMENT_NAMES`, `RARITY_NAMES`) so the ward's
+  sentence, the roster's filter and the champion card's tooltip are one table. That also
+  fixed a pre-existing one: **every champion card in the game** showed "Role: Hp" on hover.
 - `/battles/multi` refuses a Mistspire floor, which is stated once in `multiBattleRefusal`
   beside the Titan and the world boss.
 - The Depths hub excludes the tower. Thirty floors and a boss at the bottom is exactly what

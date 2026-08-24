@@ -158,19 +158,17 @@ export async function bestEverFloor(
 /**
  * How a ward reads on the door, using content's own display names.
  *
- * A faction's name comes from the faction entity; the other three are enum values the game
- * capitalises for itself, because there is no `element` entity holding "Tide" and inventing
- * one to hold four strings would be a content type nobody edits.
+ * A faction's name comes from the faction entity; the other three are enum values whose
+ * words live in shared (`ROLE_NAMES` and friends), because there is no `element` entity
+ * holding "Tide" and inventing one to hold four strings would be a content type nobody
+ * edits — but capitalising the key gives "Hp champions", which a browser found.
  */
 export function wardLabel(content: ContentCache, restriction: TeamRestriction): string {
-  if (restriction.kind === 'faction') {
-    const faction = content
-      .current()
-      .bundle.factions.find((candidate) => candidate.key === restriction.value);
-    return restrictionLabel(restriction, faction?.name ?? restriction.value);
-  }
-  const capitalised = restriction.value.charAt(0).toUpperCase() + restriction.value.slice(1);
-  return restrictionLabel(restriction, capitalised);
+  if (restriction.kind !== 'faction') return restrictionLabel(restriction);
+  const faction = content
+    .current()
+    .bundle.factions.find((candidate) => candidate.key === restriction.value);
+  return restrictionLabel(restriction, faction?.name);
 }
 
 /**
