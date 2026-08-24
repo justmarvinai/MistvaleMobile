@@ -5,12 +5,15 @@ import {
   simulateColdOpen,
   simulateStage,
   simulateTitan,
+  simulateTrial,
+  simulateTrialOnAuto,
   starterKeys,
   withCollection,
   withRelics,
   type LoadedContent,
   type StageResult,
   type TeamSpec,
+  type TrialSolution,
 } from './sim';
 
 /**
@@ -34,6 +37,67 @@ import {
  * so a small run is an indication, not a verdict.
  */
 const RUNS = Number(process.env.SIM_RUNS ?? 2_000);
+
+/**
+ * The line each trial is authored around — the answer key.
+ *
+ * A trial is a puzzle with a specific solution, so the only honest way to know its par is
+ * fair is to play that solution and see it land. These are not a general "good player":
+ * no single policy solves four different puzzles, which is the point of there being four.
+ *
+ * It lives in the balance tool and never ships to a client. What a player is given is the
+ * hint on the trial's own card, which says what the shape of the answer is and not what
+ * the answer is.
+ */
+const TRIAL_SOLUTIONS: Readonly<Record<string, TrialSolution>> = {
+  // Break the counter with the cheap two-hit openers, then spend everything in the window
+  // the broken shield leaves open. Reversing those two is the whole trap.
+  trial_warded_coil: {
+    focus: ['trial_warded_coil'],
+    prefer: [
+      'anuria_a1_twinshot',
+      'bracken_puck_a1_pinprick',
+      'ashka_torchhand_a1_torchslash',
+      'cantor_maelis_a1_dirge_note',
+    ],
+    avoid: [],
+    whenExposed: [
+      'anuria_a3_arrowstorm',
+      'cantor_maelis_a3_drowning_chorus',
+      'bracken_puck_a3_briar_dance',
+      'ashka_torchhand_a2_cinder_rush',
+      'anuria_a2_wardens_aim',
+      'cantor_maelis_a2_undertow_hymn',
+      'bracken_puck_a2_hourthief',
+    ],
+  },
+  // Everything spent on the wall is handed straight back. Kill the mender first, and it is
+  // an ordinary fight against three things that cannot heal.
+  trial_mending_fen: { focus: ['trial_fen_mender'], prefer: [], avoid: [] },
+  // The hatchlings never stop coming and they hit like the thing that called them. Killing
+  // them is a treadmill; the crown is the only health bar that stays down.
+  trial_brood_crown: { focus: ['trial_brood_crown'], prefer: [], avoid: [] },
+  // Its armour makes a blow worth almost nothing and its answer makes one worth less than
+  // that. The poison on the cheap openers is the whole clock, and the big skills are a way
+  // of hitting it — which is the one thing that does not work.
+  trial_standing_stone: {
+    focus: ['trial_standing_stone'],
+    prefer: [
+      'maruan_a1_thornlash',
+      'old_gharssa_a1_venom_spit',
+      'szarran_coilfather_a1_coil_bite',
+      'briar_knight_a2_bramble_mantle',
+      'briar_knight_a1_thorn_guard',
+    ],
+    avoid: [
+      'maruan_a3_verdant_ruin',
+      'old_gharssa_a3_mire_bloom',
+      'szarran_coilfather_a2_broodmire',
+      'szarran_coilfather_a3_venom_crown',
+      'szarran_coilfather_a4_the_coil_closes',
+    ],
+  },
+};
 
 interface Gate {
   name: string;
@@ -460,6 +524,51 @@ function main(): void {
         detail: 'with the top rung still above what a built team typically manages',
         passed: built.medianDamage < top.damage,
         measured: `${built.medianDamage.toLocaleString()} vs ${top.damage.toLocaleString()}`,
+      });
+    }
+  }
+
+  // ── Gate 3e: a trial is a puzzle, and a puzzle has to be both ────────────
+  //
+  // Two things have to be true of every trial, and they pull against each other. It has to
+  // be **fair** — the line it is authored around comes in at or under par — and it has to
+  // be a **puzzle** — pressing Auto does not. A trial that fails the first is a wall; one
+  // that fails the second is a stage with a longer name.
+  //
+  // Neither is sampled, because there is nothing to sample: a trial's battle seed is its
+  // own stage key (`battle.start`), so every account opens the identical fight and one run
+  // is the whole distribution. What is measured here is exactly what a player will see.
+  const trials = [...content.stages.values()]
+    .filter((stage) => stage.mode === 'trial')
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+
+  if (trials.length > 0) {
+    console.log('\nTrials — the same fight for everybody, played two ways');
+    for (const stage of trials) {
+      const par = stage.trial?.parTurns ?? 0;
+      const solution = TRIAL_SOLUTIONS[stage.key];
+      const auto = simulateTrialOnAuto(content, stage.key);
+      const solved = solution ? simulateTrial(content, stage.key, solution) : null;
+
+      console.log(
+        `  ${(stage.trial?.name ?? stage.key).padEnd(20)} par ${String(par).padStart(3)} · ` +
+          `auto ${auto.won ? 'won' : 'lost'} in ${auto.turns} · ` +
+          (solved ? `the line ${solved.won ? 'won' : 'lost'} in ${solved.turns}` : 'NO LINE'),
+      );
+
+      gates.push({
+        name: `trial-fair-${stage.key}`,
+        detail: `${stage.trial?.name ?? stage.key}: the authored line wins it inside par`,
+        passed: solved !== null && solved.won && solved.turns <= par,
+        measured: solved
+          ? `${solved.won ? 'won' : 'lost'} in ${solved.turns} vs par ${par}`
+          : 'no line authored for this trial',
+      });
+      gates.push({
+        name: `trial-puzzle-${stage.key}`,
+        detail: `${stage.trial?.name ?? stage.key}: and auto-battle does not`,
+        passed: !auto.won || auto.turns > par,
+        measured: `auto ${auto.won ? `won in ${auto.turns}` : 'lost'} vs par ${par}`,
       });
     }
   }

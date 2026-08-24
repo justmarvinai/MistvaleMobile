@@ -167,6 +167,50 @@ A Titan is a `dungeon` entity of kind `titan` with a `titan` block (cap, keys, l
 single `titan`-mode stage, so a second one is an Admin edit rather than a release. It is
 excluded from the Depths hub, which is about floors and clears — neither of which it has.
 
+### 9.2c Trials (C10d)
+
+The one mode where **what you own does not matter**. A trial hands the player four champions
+they do not have, at a fixed level, in fixed relics, against a fixed enemy — and the same
+dice. Nothing about the account changes any of it, so the only variable left is the play:
+which skill, on which target, on which turn.
+
+It exists to answer a collection game's oldest problem from both ends at once. A player who
+has out-farmed the content has nothing interesting left to do with it; a player who has
+farmed nothing has nothing to do at all. A trial is the same fight for both of them, which
+is why it opens early (level 9) and never closes.
+
+- **Par, not a clear.** Every trial carries a turn count to beat. Clearing is the easy half;
+  the bonus is for clearing *well*, and it is paid **once** — the first attempt that comes in
+  at or under par. A later run that also lands inside par pays nothing, because the puzzle
+  was already solved. What is stored is the account's best turn count, which `stage_progress`
+  has carried since P6a — a trial needs no table of its own.
+- **The same dice for everybody.** A trial's battle seed is its own **stage key** rather than
+  a fresh roll, so every attempt by every account opens the identical fight. That is what
+  makes a par a measure of play rather than of luck, and it is why holding Auto until the
+  crits fall well is not a strategy.
+- **Nothing is spent.** No energy, no keys, no attempt limit. Multi-battle refuses a trial
+  outright: a puzzle with one right answer, farmed ten at a time, would produce ten identical
+  clears and pay for none of them.
+- **Each one teaches one thing**, and each is built on a boss mechanic the engine has had
+  since P6 and the game had never obliged anybody to use. Four ship: *The Warded Coil*
+  (a hit-counter shield — cheap multi-hit openers break it, and the window it leaves is when
+  the big skills come out), *The Mending Fen* (a mender behind a wall — everything spent
+  anywhere else is handed straight back), *The Brood Crown* (two lethal hatchlings a turn,
+  forever — the crown is the only health bar that stays down) and *The Standing Stone*
+  (retaliation on every wound it feels, and a poison is not a wound).
+- **The pars are measured, not guessed.** `pnpm sim` fights every trial twice — once on the
+  engine's own auto-battle, once on the line the puzzle is authored around — and gates both
+  halves: the line comes in inside par, and Auto does not. A trial whose par Auto can reach is
+  a stage with a longer name; one whose par the line cannot reach is a wall. Two further
+  puzzles were designed, measured and **cut** for failing the second gate, which is the gate
+  doing its job.
+
+A trial is an ordinary stage of a new `trial` mode carrying a `presetTeam` (P9b's machinery,
+which the cold open already needed) and a `trial` block of `{ name, parTurns, parRewards,
+hint }`. The fight runs through the ordinary battle routes, so playback, Auto, the speed
+ladder and a reload mid-fight all work with no second implementation — and a fifth trial is
+an Admin edit rather than a release.
+
 ### 9.3 Arena (async PvP) + Hall of Valor
 Classic arena: 4v4 vs snapshot **defense teams**; tokens cap 10, +1/hour (source-faithful), opponent offer list with refresh; Elo-lite rating → tiers **Bronze I-III, Silver I-III, Gold I-III, Platinum**; per-win **Valor Medals** (amount scales with tier) + weekly tier chest (reset Monday). **AI bots seed every band** (never an empty ladder; natural names with no bot marker — owner-approved; admin-managed). **Hall of Valor**: spend Valor Medals on permanent account-wide element-keyed stat bonuses (per element × stat, 10 levels — the Great Hall analog), doubling as the long-term arena sink.
 
@@ -206,7 +250,7 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 
 ## 12. Account & unlock cadence
 
-Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · L9 Chronicle · **L10 The Depths (springs)** · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · L16+ deep floors pacing. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
+Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
 
 ## 13. Fairness & EA posture
 No payments in EA (crystals fully earnable; "premium" is a pacing currency, not a paywall). Real odds displayed. Bots never take top-10 leaderboard slots at week end (auto-yield rule). Single account per player expected but not enforced beyond rate limits. All balance changes publish-logged → visible "balance updated" badges (champion `balance_version`).

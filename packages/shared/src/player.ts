@@ -93,6 +93,7 @@ export interface UnlockFlags {
   masteries: boolean;
   titan: boolean;
   expeditions: boolean;
+  trials: boolean;
 }
 
 /** Account level at which each feature unlocks. Mirrored in game_config from P1. */
@@ -114,6 +115,10 @@ export const UNLOCK_LEVELS: Readonly<Record<keyof UnlockFlags, number>> = Object
   // Late enough that sending two champions away is a real cost rather than a lock-out:
   // a roster of four cannot afford it, and that is the point of the feature.
   expeditions: 11,
+  // Early: a trial hands the team over, so it is one of the few things in the game a small
+  // account can do *well*. Gating it late would waste the one mode that does not care how
+  // much has been farmed.
+  trials: 9,
 });
 
 export function computeUnlocks(level: number): UnlockFlags {

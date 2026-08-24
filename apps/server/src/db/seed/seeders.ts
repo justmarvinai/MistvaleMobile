@@ -11,6 +11,7 @@ import { NEWS_POSTS } from './data/news';
 import { SOUND_CUES } from './data/sounds';
 import { EXPEDITIONS } from './data/expeditions';
 import { TITAN_DUNGEONS, TITAN_ENEMIES, TITAN_SKILLS, TITAN_STAGES } from './data/titan';
+import { TRIAL_ENEMIES, TRIAL_SKILLS, TRIAL_STAGES } from './data/trials';
 import { TUTORIAL_STAGES, TUTORIAL_STEPS } from './data/tutorial';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
@@ -48,6 +49,7 @@ export function buildSeedContent(): SeedContent[] {
       ...ENEMY_SKILLS,
       ...DEPTHS_SKILLS,
       ...TITAN_SKILLS,
+      ...TRIAL_SKILLS,
     ].map((data) => ({
       key: data.key,
       data,
@@ -58,7 +60,7 @@ export function buildSeedContent(): SeedContent[] {
       key: data.key,
       data,
     })),
-    enemy: [...ENEMIES, ...DEPTHS_ENEMIES, ...TITAN_ENEMIES].map((data) => ({
+    enemy: [...ENEMIES, ...DEPTHS_ENEMIES, ...TITAN_ENEMIES, ...TRIAL_ENEMIES].map((data) => ({
       key: data.key,
       data,
     })),
@@ -69,12 +71,16 @@ export function buildSeedContent(): SeedContent[] {
     expedition: EXPEDITIONS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
     dungeon: [...DUNGEONS, ...TITAN_DUNGEONS].map((data) => ({ key: data.key, data })),
-    stage: [...CAMPAIGN_STAGES, ...DEPTHS_STAGES, ...TUTORIAL_STAGES, ...TITAN_STAGES].map(
-      (data) => ({
-        key: data.key,
-        data,
-      }),
-    ),
+    stage: [
+      ...CAMPAIGN_STAGES,
+      ...DEPTHS_STAGES,
+      ...TUTORIAL_STAGES,
+      ...TITAN_STAGES,
+      ...TRIAL_STAGES,
+    ].map((data) => ({
+      key: data.key,
+      data,
+    })),
     summonPool: SUMMON_POOLS.map((data) => ({ key: data.key, data })),
     shop: SHOPS.map((data) => ({ key: data.key, data })),
     mastery: MASTERIES.map((data) => ({ key: data.key, data })),

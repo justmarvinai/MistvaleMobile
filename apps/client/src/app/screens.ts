@@ -16,6 +16,7 @@ export type ScreenId =
   | 'depths'
   | 'arena'
   | 'titan'
+  | 'trials'
   | 'expeditions'
   | 'champions'
   | 'relics'
@@ -128,6 +129,18 @@ export const SCREENS: readonly ScreenDefinition[] = [
       'One enormous thing, two keys a day, and a ladder of chests for how much of it you moved. The fight worth optimising rather than clearing.',
     unlock: 'titan',
     lockedHint: 'Opens at level 16',
+    inDock: true,
+  },
+  {
+    id: 'trials',
+    label: 'Trials',
+    icon: 'nav-trials',
+    glyph: 'glyph-arcane-symbol',
+    art: 'icon-rune-stone',
+    blurb:
+      'Four champions you do not own, against an enemy nobody else gets a different version of. The only thing being measured here is how you play it.',
+    unlock: 'trials',
+    lockedHint: 'Opens at level 9',
     inDock: true,
   },
   {

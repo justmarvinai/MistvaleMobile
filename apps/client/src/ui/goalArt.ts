@@ -22,6 +22,7 @@ const GOAL_GLYPH: Readonly<Record<GoalType, string>> = Object.freeze({
   gearUpgrade: 'glyph-hammer-hit',
   gearReforge: 'glyph-spell-casting',
   expeditionClaim: 'glyph-eagle-staff',
+  trialsBeaten: 'glyph-broken-shackle',
   gearEquip: 'glyph-ribcage-armor',
   gearLevel: 'glyph-arcane-symbol',
   championLevelUp: 'glyph-magic-feather',

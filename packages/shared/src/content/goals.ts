@@ -80,6 +80,12 @@ export const GOAL_TYPES = [
   /** An expedition collected. The party came home; what they brought is separate. */
   'expeditionClaim',
   /**
+   * A trial solved inside its par. A *threshold* on the count of trials beaten, so a
+   * mission asking for three is satisfied by holding three rather than by watching them
+   * arrive — and a re-run of one already solved cannot count twice.
+   */
+  'trialsBeaten',
+  /**
    * The most damage ever done to a Titan. A *threshold* goal, and it has to be: a mission
    * asking for half a million damage means one run that did it, never fifty that added up.
    * Filter: `dungeonKey`.
@@ -122,6 +128,7 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   claimAllDailies: 'count',
   championObtained: 'count',
   expeditionClaim: 'count',
+  trialsBeaten: 'highest',
   titanRun: 'count',
   titanDamage: 'highest',
 });
@@ -159,6 +166,7 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   claimAllDailies: [],
   championObtained: ['rarity'],
   expeditionClaim: [],
+  trialsBeaten: [],
   titanRun: ['dungeonKey'],
   titanDamage: ['dungeonKey'],
 });

@@ -5,6 +5,36 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Trials: the same fight for everybody
+
+Fourth of the seven, and the only mode in Mistvale where **what you own does not matter**.
+
+A trial hands you four champions you do not have, at a level you may not have reached, in
+relics you did not roll, against a fixed enemy — and the same dice. The battle seed is the
+stage's own key, so every attempt by every account opens the identical fight. What separates
+a good attempt from a bad one is the play: which skill, on which target, on which turn.
+
+- **Par, not a clear.** Clearing a trial is the easy half. Every trial carries a turn count
+  to beat, and beating it pays **once** — the first attempt that comes in at or under it.
+  A re-run that also lands inside par pays nothing, because the puzzle was already solved.
+- **Nothing is spent.** No energy, no keys, no attempt limit. A trial cannot be farmed —
+  multi-battle refuses it outright — and it cannot be lost, only not yet solved.
+- **Four puzzles, four lessons**, each built on a boss mechanic the engine has had since P6
+  and the game had never made anybody use. *The Warded Coil* counts blows rather than damage,
+  and leaves a window when it is broken. *The Mending Fen* hands back everything you spend
+  anywhere but on the mender. *The Brood Crown* calls two more every turn and will always
+  out-call you. *The Standing Stone* answers every wound it feels, and a poison is not a
+  wound.
+- **The pars are measured rather than guessed.** `pnpm sim` fights every trial twice — once
+  on the engine's own auto-battle, once on the line the puzzle is authored around — and
+  gates both halves: the line comes in inside par, and Auto does not. Two further puzzles
+  were designed, measured and cut for failing the second gate.
+
+A trial is an ordinary stage of a new `trial` mode, so playback, Auto, the speed ladder and
+a reload mid-fight all work with no second implementation of any of them, and a fifth trial
+is an Admin edit rather than a release. Trials open at account level 9 — deliberately early,
+since it is the one mode a small account can do *well*.
+
 ### Added — Expeditions: work that is not a fight
 
 Third of the seven. Every other system in Mistvale asks about four champions; this is the

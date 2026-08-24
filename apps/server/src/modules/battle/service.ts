@@ -45,7 +45,7 @@ import { arenaConfigFrom } from '../arena/rating';
 import * as depths from '../depths/service';
 import * as titan from '../titan/service';
 import * as gear from '../gear/service';
-import { borrowedTeam, PresetTeamError } from './preset';
+import { borrowedTeam, PresetTeamError, stageSeed } from './preset';
 import * as mastery from '../mastery/service';
 import * as meta from '../meta/progress';
 import * as quests from '../meta/quests';
@@ -121,6 +121,14 @@ export interface RewardSummary {
   /** Chapter star-chest tiers this clear crossed. */
   chestTiers: number[];
   /**
+   * True when this run was the first to solve a trial inside its par (C10d).
+   *
+   * Its own flag rather than something read out of `bonus`, because the results screen has
+   * a different thing to say about it — "you beat par" is the sentence the whole mode
+   * exists for, and a par with no rewards behind it would otherwise be silent.
+   */
+  beatPar: boolean;
+  /**
    * What a Titan run was worth: the damage, the rung it reached, and whether it beat the
    * account's own record. Null for every other mode — a Titan is the only fight in the
    * game paid for how far it got rather than for whether it was won.
@@ -159,6 +167,7 @@ const NO_REWARDS: RewardSummary = {
   firstClear: false,
   bonus: {},
   chestTiers: [],
+  beatPar: false,
   firstWin: {},
   arena: null,
   titan: null,
@@ -367,10 +376,13 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     throw new AppError('VALIDATION', `Stage "${options.stageKey}" is not a ${options.mode} stage.`);
   }
 
-  // The cold open is the one fight where the player brings nobody: the stage carries the
-  // team, because it happens before the account owns a champion at all. Anything the
-  // client sends is ignored rather than refused — there is nothing it could usefully say.
-  const borrowed = stage.mode === 'tutorial';
+  // Two kinds of fight where the player brings nobody, for opposite reasons. The cold open
+  // borrows because it happens before the account owns a champion at all; a **trial**
+  // borrows because everybody should get the *same* four champions against the same enemy,
+  // so what is measured is the play rather than the account. Either way the stage carries
+  // the team, and anything the client sends is ignored rather than refused — there is
+  // nothing it could usefully say.
+  const borrowed = stage.mode === 'tutorial' || stage.mode === 'trial';
   if (borrowed) {
     if (stage.presetTeam.length === 0) {
       throw new AppError('CONTENT_STALE', `Stage "${options.stageKey}" has nobody to fight with.`);
@@ -411,9 +423,11 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // The unlock chain has been authored in content since P1; this is where it finally
     // binds. Checked against the same rule the campaign map greys stages out with, so a
     // player is never shown an open door the server will slam.
-    if (borrowed) {
+    if (options.mode === 'tutorial') {
       // Nothing to gate: it is the first thing that happens, and the tutorial's own
-      // position is what decides whether it is offered at all.
+      // position is what decides whether it is offered at all. A **trial** borrows its team
+      // the same way and is gated all the same — it is ordinary published content with an
+      // unlock chain, and the screen greys out exactly what this refuses.
     } else if (options.mode !== 'practice') {
       await assertStageOpen(tx, ctx, player, stage, stages);
     } else if (!(await progress.hasCleared(tx, options.playerId, stage.key))) {
@@ -500,7 +514,13 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
 
     // A seed drawn from the process CSPRNG, not the battle's own stream: a player must
     // not be able to predict a fight from a previous one's replay.
-    const seed = randomSeed();
+    //
+    // A **trial** is the one exception, and deliberately so: its seed is the stage key, so
+    // every attempt by every account opens the *same fight* — the same crits, the same
+    // resists, the same order of play. That is what turns a par into a measure of play
+    // rather than of luck, and it is why re-rolling a trial by holding Auto until the dice
+    // fall well is not a strategy: there are no dice left to fall.
+    const seed = options.mode === 'trial' ? stageSeed(stage.key) : randomSeed();
     const rules = engineRules(ctx.content, options.mode);
     const battleConfig = titanConfigFor(ctx, config, options.mode, stage.key);
     const opened = createBattle(
@@ -906,6 +926,12 @@ export async function runMany(
     // produce an empty summary.
     throw new AppError('VALIDATION', 'That kind of fight cannot be run in a batch.');
   }
+  if (options.mode === 'trial') {
+    // A trial is a puzzle with one right answer and a par to beat. Farming it ten at a
+    // time would produce ten identical clears and pay for none of them — the bonus is a
+    // one-off — so it is refused rather than allowed to look like it did something.
+    throw new AppError('VALIDATION', 'A trial is solved once, not farmed.');
+  }
   if (stage.mode !== options.mode) {
     throw new AppError('VALIDATION', `Stage "${options.stageKey}" is not a ${options.mode} stage.`);
   }
@@ -1187,6 +1213,17 @@ async function settle(
       ? []
       : [{ type: 'dungeonClear' as const, facts: { dungeonKey: stage.parentKey } }]),
     ...(stage.energyCost > 0 ? [{ type: 'useEnergy' as const, amount: stage.energyCost }] : []),
+    // How many trials this account has now solved inside par — a threshold, so a re-run of
+    // one already beaten cannot count twice and a mission set after the fact still
+    // completes. Reported only when this run moved the number.
+    ...(cleared.beatPar
+      ? [
+          {
+            type: 'trialsBeaten' as const,
+            amount: await progress.trialsBeaten(tx, playerId, ctx.content),
+          },
+        ]
+      : []),
     // Stars held in this chapter, as a threshold rather than as a gain: "3★ chapter 2" is
     // satisfied by the total standing there now, so re-clearing a stage for a better star
     // cannot double-count, and a mission set after the fact still completes.
@@ -1217,6 +1254,7 @@ async function settle(
     firstClear: cleared.firstClear,
     bonus: cleared.bonus,
     chestTiers: cleared.chestTiers,
+    beatPar: cleared.beatPar,
     firstWin,
     arena: null,
     titan: null,

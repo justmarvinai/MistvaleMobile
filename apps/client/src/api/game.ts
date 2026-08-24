@@ -25,6 +25,7 @@ import type {
   Loadout,
   LoadoutPlan,
   Titan,
+  TrialsOverview,
   TitanRun,
   MultiBattleRequest,
   MultiBattleResult,
@@ -390,6 +391,15 @@ export const gameApi = {
 
   /** Every Titan, its ladder, the keys left today, and this account's own record. */
   titan: () => api.get<{ titan: Titan }>(ROUTES.titan.overview).then((data) => data.titan),
+
+  /**
+   * Every trial, its par, and this account's best.
+   *
+   * A read only. A trial is fought through `startBattle` with `mode: 'trial'`, which is why
+   * playback, Auto, the speed ladder and a reload mid-fight all work there for free.
+   */
+  trials: () =>
+    api.get<{ trials: TrialsOverview }>(ROUTES.trials.overview).then((data) => data.trials),
 
   // ── The Arena ─────────────────────────────────────────────────────────────
 

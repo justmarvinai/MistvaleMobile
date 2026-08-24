@@ -28,10 +28,16 @@ export interface Unlock {
 /**
  * The copy, one entry per flag.
  *
- * Two flags open at level 8 and two at 14, so a single level can hand over more than one
- * thing — the celebration queues them rather than picking a winner.
+ * Three levels hand over two things at once — 8, 9 and 14 — so a single level-up can open
+ * more than one feature. The celebration queues them rather than picking a winner.
  */
 const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> = Object.freeze({
+  trials: {
+    screen: 'trials',
+    title: 'Trials',
+    blurb:
+      'Four champions you have never owned, at a strength you have not reached, against something authored to be a puzzle rather than a wall. Nothing you have farmed counts here — everybody is handed the same fight, and the only question is how few turns you can finish it in.',
+  },
   expeditions: {
     screen: 'expeditions',
     title: 'Expeditions',

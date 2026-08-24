@@ -172,6 +172,14 @@ export interface ClearOutcome {
    * way the campaign map counts them. `0` outside the campaign.
    */
   chapterStars: number;
+  /**
+   * True when this clear was the first ever to come in at or under a trial's par (C10d).
+   *
+   * Decided from the *previous* best rather than from the new one, so the bonus is paid
+   * exactly once — the run that solves the puzzle — and never again by a re-run that also
+   * happens to land inside the limit. Always false outside a trial.
+   */
+  beatPar: boolean;
 }
 
 /**
@@ -191,6 +199,14 @@ export async function recordClear(
   stars: number,
 ): Promise<ClearOutcome> {
   const now = new Date();
+
+  // Read before the upsert, because "did this run beat par for the first time" is a
+  // question about what the record *was*. Afterwards it is unanswerable: the upsert has
+  // already folded the new turn count into `bestTurns`.
+  const [previous] = await tx
+    .select({ bestTurns: stageProgress.bestTurns })
+    .from(stageProgress)
+    .where(and(eq(stageProgress.playerId, playerId), eq(stageProgress.stageKey, stage.key)));
 
   const [row] = await tx
     .insert(stageProgress)
@@ -223,6 +239,14 @@ export async function recordClear(
   const bonus: Record<string, number> = {};
   if (firstClear) mergeRewards(bonus, stage.firstClearRewards);
 
+  // A trial's par: paid the first time a clear lands at or under it, and never again.
+  const par = stage.trial?.parTurns;
+  const beatPar =
+    par !== undefined &&
+    turns <= par &&
+    (previous?.bestTurns === null || previous?.bestTurns === undefined || previous.bestTurns > par);
+  if (beatPar) mergeRewards(bonus, stage.trial?.parRewards ?? {});
+
   // Totalled once and used twice: the chest tiers are cut against it, and the goal engine
   // is told the standing so a mission asking for "3★ chapter 2" is satisfied by the total
   // rather than by having watched every star arrive.
@@ -233,7 +257,39 @@ export async function recordClear(
     await payRewards(tx, playerId, bonus, `progress:${stage.key}`, knownItem(content));
   }
 
-  return { stars: row.stars, firstClear, bonus, chestTiers, chapterStars: chapterTotal };
+  return { stars: row.stars, firstClear, bonus, chestTiers, chapterStars: chapterTotal, beatPar };
+}
+
+/**
+ * How many trials this account has solved inside par (C10d).
+ *
+ * Counted from `stage_progress` against the *published* pars rather than stored, because
+ * the par is content: an operator who loosens one should find yesterday's runs already
+ * counted, and one who tightens it should not have to hunt down a stored flag that has
+ * become a lie.
+ */
+export async function trialsBeaten(
+  tx: Parameters<Parameters<Database['transaction']>[0]>[0],
+  playerId: string,
+  content: ContentCache,
+): Promise<number> {
+  const pars = new Map(
+    content
+      .current()
+      .bundle.stages.filter((stage) => stage.mode === 'trial' && stage.trial)
+      .map((stage) => [stage.key, stage.trial!.parTurns]),
+  );
+  if (pars.size === 0) return 0;
+
+  const rows = await tx
+    .select({ stageKey: stageProgress.stageKey, bestTurns: stageProgress.bestTurns })
+    .from(stageProgress)
+    .where(and(eq(stageProgress.playerId, playerId), eq(stageProgress.mode, 'trial')));
+
+  return rows.filter((row) => {
+    const par = pars.get(row.stageKey);
+    return par !== undefined && row.bestTurns !== null && row.bestTurns <= par;
+  }).length;
 }
 
 /**

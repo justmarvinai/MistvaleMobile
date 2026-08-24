@@ -17,6 +17,7 @@ import * as events from './events';
 import * as expeditions from './expeditions';
 import * as login from './login';
 import * as missions from './missions';
+import * as trials from './trials';
 import * as tutorial from './tutorial';
 import * as quests from './quests';
 import { keyParam, idParam } from '../../lib/params';
@@ -184,6 +185,19 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
     const state = await expeditions.stateFor(ctx(), warden.id, warden.level, new Date());
     request.log.info({ playerId: warden.id, runId: id }, 'expedition recalled');
     return reply.send(apiSuccess({ championIds, expeditions: state }, app.content.rev));
+  });
+
+  // ── Trials (C10d) ─────────────────────────────────────────────────────────
+
+  /**
+   * A read and nothing else. A trial is fought through the ordinary battle routes, which
+   * is the whole reason it needs no second implementation of playback, Auto, the speed
+   * ladder or a reload mid-fight.
+   */
+  app.get(ROUTES.trials.overview, async (request, reply) => {
+    const warden = requireWarden(request);
+    const view = await trials.overview(ctx(), warden.id, warden.level);
+    return reply.send(apiSuccess({ trials: view }, app.content.rev));
   });
 
   // ── The tutorial ──────────────────────────────────────────────────────────

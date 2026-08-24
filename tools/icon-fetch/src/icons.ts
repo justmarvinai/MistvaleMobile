@@ -116,6 +116,7 @@ export const ICONS = {
   },
   'nav-chronicle': { group: 'nav', name: 'open-book', use: 'Chronicle (collection)' },
   'nav-valor': { group: 'nav', name: 'stone-stack', use: 'Hall of Valor' },
+  'nav-trials': { group: 'nav', name: 'maze', use: 'Trials' },
 
   // ── Portraits — stand-ins for art that does not exist yet ─────────────────────────────
   //

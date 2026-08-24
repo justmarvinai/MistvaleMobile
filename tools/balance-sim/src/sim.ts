@@ -13,7 +13,7 @@ import {
   type StatusDef,
 } from '@mistvale/shared';
 import { buildSeedContent } from '@mistvale/server/seeds';
-import { borrowedTeam } from '@mistvale/server/battle-preset';
+import { borrowedTeam, stageSeed } from '@mistvale/server/battle-preset';
 import { gearEconomyFrom, gearTablesFrom } from '@mistvale/server/gear-math';
 import {
   advance,
@@ -24,6 +24,8 @@ import {
   combatConfigFrom,
   createBattle,
   deriveStats,
+  type BattleState,
+  type BattleUnit,
   type ChampionEntry,
 } from '@mistvale/engine';
 import type { Stat } from '@mistvale/shared';
@@ -364,6 +366,193 @@ export function simulateColdOpen(
     winsWithin: (limit) => winningTurns.filter((turns) => turns <= limit).length / runs,
     msPerRun: elapsed / runs,
   };
+}
+
+/**
+ * A trial, fought once. The seed is the stage key, exactly as the server does it.
+ *
+ * There is nothing to average here and that is the point: a trial's seed comes from its own
+ * key (`battle.start`), so every account opens the identical fight. One run *is* the
+ * distribution, and the number it produces is the number every player will see.
+ */
+export interface TrialResult {
+  stageKey: string;
+  won: boolean;
+  turns: number;
+  /** Health left on the boss when the fight ended, as a fraction. 0 on a win. */
+  bossHpLeft: number;
+}
+
+/**
+ * The line of play a trial is authored around, as data.
+ *
+ * A trial is a puzzle with a specific answer, so proving one is fair means playing that
+ * answer and seeing it come in under par. Which is what this is: not a general-purpose
+ * good player — no such policy exists that solves five different puzzles — but the
+ * intended solution, written down where a gate can run it.
+ *
+ * It lives in the balance tool rather than in the game because it is the answer key.
+ */
+export interface TrialSolution {
+  /** Enemies to concentrate on, best first, by enemy key. Anything else is a fallback. */
+  focus: string[];
+  /** Skills to reach for the moment they are off cooldown, best first. */
+  prefer: string[];
+  /** Skills the solution never spends. Empty means anything goes. */
+  avoid: string[];
+  /**
+   * Used instead of `prefer` while the focused boss's hit-counter shield is down.
+   *
+   * Not a special case for one trial but the general truth about that mechanic: a shield
+   * eats blows whole regardless of size, so cheap multi-hit skills break it and the
+   * expensive ones are held for the window it is broken. A solution to a shielded boss
+   * that does not change gear between the two states is not a solution, it is patience.
+   */
+  whenExposed?: string[];
+  /**
+   * Spend a turn on something other than a blow when nothing in `prefer` is ready.
+   *
+   * The one thing a player can do that auto-battle never does: *not attack*. Against an
+   * enemy that answers every hit it takes, the cheapest turn is a shield or a heal, and a
+   * poke with an A1 costs more than it deals. Without this the policy falls through to the
+   * A1 exactly as the engine's own brain does, which is why a counter-punisher cannot be
+   * measured any other way.
+   */
+  patient?: boolean;
+}
+
+/** The engine's own auto-battle, expressed as the absence of a solution. */
+const AUTO_BATTLE: TrialSolution | null = null;
+
+function chooseTarget(
+  state: BattleState,
+  solution: TrialSolution,
+): { side: 'enemy'; slot: number } | undefined {
+  const alive = state.enemies.filter((unit) => unit.alive);
+  if (alive.length === 0) return undefined;
+
+  for (const key of solution.focus) {
+    const wanted = alive.find((unit) => unit.defKey === key);
+    if (wanted) return { side: 'enemy', slot: wanted.ref.slot };
+  }
+  // Nothing the solution named is still standing: take whatever is closest to falling, so
+  // a fallback never spreads damage across a field it cannot finish.
+  const weakest = alive.reduce((best, unit) => (unit.hp < best.hp ? unit : best), alive[0]!);
+  return { side: 'enemy', slot: weakest.ref.slot };
+}
+
+function chooseSkill(
+  unit: BattleUnit,
+  solution: TrialSolution,
+  exposed: boolean,
+  skills: ReadonlyMap<string, SkillDef>,
+): string {
+  const ready = unit.skills.filter((skill) => (unit.cooldowns[skill] ?? 0) <= 0);
+  if (ready.length === 0) return unit.skills[0]!;
+
+  const wanted = exposed && solution.whenExposed ? solution.whenExposed : solution.prefer;
+  for (const key of wanted) {
+    if (ready.includes(key)) return key;
+  }
+
+  const allowed = ready.filter((key) => !solution.avoid.includes(key));
+  const offensive = allowed.filter((key) => skills.get(key)?.targeting.side === 'enemy');
+
+  if (solution.patient) {
+    // Nothing worth spending is up, so take the best thing that is not a blow.
+    const quiet = allowed.filter((key) => skills.get(key)?.targeting.side !== 'enemy');
+    if (quiet.length > 0) return quiet.at(-1)!;
+  }
+
+  // Otherwise the biggest thing that actually points at the enemy. Taking the highest slot
+  // outright would spend a turn re-buffing whenever a support skill happened to sit above a
+  // damage one, which is precisely the waste a focused player does not commit.
+  return offensive.at(-1) ?? allowed.at(-1) ?? ready[0]!;
+}
+
+/**
+ * Fights one trial: with the engine's auto-battle when `solution` is null, or with the
+ * authored line when it is not.
+ *
+ * Stepped rather than auto-resolved so the solution can answer each decision, which is the
+ * only way to measure what *play* is worth on a stage designed to be about play.
+ */
+export function simulateTrial(
+  content: LoadedContent,
+  stageKey: string,
+  solution: TrialSolution | null,
+): TrialResult {
+  const stage = content.stages.get(stageKey);
+  if (!stage) throw new Error(`No stage "${stageKey}" in the seeds.`);
+  if (stage.presetTeam.length === 0) {
+    throw new Error(`Trial "${stageKey}" carries no team to fight with.`);
+  }
+
+  const combat = combatConfigFrom(content.config);
+  const scaling = championScalingFrom(content.config);
+  const rules = buildRules(stage.mode, content.skills, content.statuses);
+  const gear = {
+    tables: gearTablesFrom({
+      gearStats: content.gearStats,
+      gearSlots: content.gearSlots,
+      gearSets: content.gearSets,
+    }),
+    economy: gearEconomyFrom(content.config),
+  };
+  const entries = borrowedTeam(stage, content.champions, scaling, gear);
+  const skillsByKey = new Map(content.skills.map((skill) => [skill.key, skill]));
+
+  // The server's own trial seed, not a run counter: a gate that measures a different fight
+  // from the one players get measures nothing.
+  const { state } = createBattle(
+    {
+      seed: stageSeed(stage.key),
+      mode: stage.mode,
+      allies: buildTeam(entries, scaling, stage.mode),
+      waves: buildStageWaves(stage, content.enemies),
+    },
+    rules,
+    combat,
+  );
+
+  for (let step = 0; step < 4000 && !state.finished; step += 1) {
+    if (!solution) {
+      advance(state, rules, combat, { auto: true });
+      continue;
+    }
+    advance(state, rules, combat, { auto: false });
+    const waiting = state.awaiting;
+    if (!waiting || state.finished) continue;
+    const unit = state.allies[waiting.slot];
+    if (!unit?.alive) continue;
+
+    const target = chooseTarget(state, solution);
+    // A boss with a hit-counter shield is only hurtable once the counter is empty, so the
+    // line of play changes at that moment. Read off the engine's own bookkeeping rather
+    // than counted here, because a second count is a second thing to be wrong.
+    const focused = target ? state.enemies.find((e) => e.ref.slot === target.slot) : undefined;
+    const exposed = Boolean(focused?.boss.hitShield) && (focused?.bossState?.shieldHits ?? 0) <= 0;
+    advance(state, rules, combat, {
+      auto: false,
+      action: {
+        skill: chooseSkill(unit, solution, exposed, skillsByKey),
+        ...(target ? { target } : {}),
+      },
+    });
+  }
+
+  const boss = state.enemies.find((unit) => unit.isBoss) ?? state.enemies[0];
+  return {
+    stageKey,
+    won: state.outcome === 'victory',
+    turns: state.turn,
+    bossHpLeft: boss && boss.maxHp > 0 ? Math.max(0, boss.hp) / boss.maxHp : 0,
+  };
+}
+
+/** Fought on Auto — the baseline a par has to be out of reach of. */
+export function simulateTrialOnAuto(content: LoadedContent, stageKey: string): TrialResult {
+  return simulateTrial(content, stageKey, AUTO_BATTLE);
 }
 
 /** The starter champions a new account chooses between (CONTENT_PLAN §7). */

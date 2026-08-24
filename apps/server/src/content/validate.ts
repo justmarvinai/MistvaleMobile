@@ -736,9 +736,11 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       rewards: { drops?: { items?: { itemKey: string }[]; gearSetKeys?: string[] } };
       firstClearRewards?: Record<string, number>;
       presetTeam?: { championKey: string; relics?: { setKey: string }[] }[];
+      trial?: { parTurns: number; parRewards?: Record<string, number> };
     };
 
     rewardMap({ contentType: 'stage', key, path: 'firstClearRewards' }, stage.firstClearRewards);
+    rewardMap({ contentType: 'stage', key, path: 'trial.parRewards' }, stage.trial?.parRewards);
 
     if (stage.mode === 'campaign') {
       reference(
@@ -775,19 +777,20 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       }
     }
 
-    // A borrowed team belongs to the cold open and nowhere else. On any other stage it
-    // would be a roster the player never chose, silently replacing the one they did — so
-    // it is refused here rather than ignored at runtime, where nobody would see it.
+    // A borrowed team belongs to the cold open and to a trial, and nowhere else. On any
+    // other stage it would be a roster the player never chose, silently replacing the one
+    // they did — so it is refused here rather than ignored at runtime, where nobody would
+    // see it.
     const presetTeam = stage.presetTeam ?? [];
-    if (stage.mode === 'tutorial') {
+    const borrows = stage.mode === 'tutorial' || stage.mode === 'trial';
+    if (borrows) {
       if (presetTeam.length === 0) {
         errors.push({
           severity: 'error',
           contentType: 'stage',
           key,
           path: 'presetTeam',
-          message:
-            'A tutorial stage is fought with the team it carries, and this one carries nobody.',
+          message: `A ${stage.mode} stage is fought with the team it carries, and this one carries nobody.`,
         });
       }
     } else if (presetTeam.length > 0) {
@@ -796,7 +799,29 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
         contentType: 'stage',
         key,
         path: 'presetTeam',
-        message: `Only a tutorial stage brings its own team; this one is ${stage.mode}. The player's team is the only team here.`,
+        message: `Only a tutorial or trial stage brings its own team; this one is ${stage.mode}. The player's team is the only team here.`,
+      });
+    }
+
+    // A par is what makes a trial a trial, and it is meaningless anywhere else — a campaign
+    // stage carrying one would publish a bonus nothing pays.
+    if (stage.mode === 'trial') {
+      if (!stage.trial) {
+        errors.push({
+          severity: 'error',
+          contentType: 'stage',
+          key,
+          path: 'trial',
+          message: 'A trial needs a par to beat. Without one there is nothing to solve.',
+        });
+      }
+    } else if (stage.trial) {
+      errors.push({
+        severity: 'error',
+        contentType: 'stage',
+        key,
+        path: 'trial',
+        message: `Only a trial stage carries a par; this one is ${stage.mode}.`,
       });
     }
 

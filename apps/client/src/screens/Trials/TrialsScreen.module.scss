@@ -1,0 +1,153 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding-bottom: $space-4;
+}
+
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.tally {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  white-space: nowrap;
+
+  strong {
+    color: $gold;
+    font-family: $font-mono;
+  }
+}
+
+.note {
+  margin: 0 0 $space-2;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.9rem;
+}
+
+.trials {
+  display: grid;
+  gap: $space-3;
+  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.hint {
+  margin: 0;
+  color: $parchment;
+  font-size: 0.92rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.team {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: $space-1;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+}
+
+.member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.memberName {
+  color: $parchment;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.memberRank {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.68rem;
+}
+
+.score {
+  display: flex;
+  margin: 0;
+  gap: $space-4;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  dt {
+    color: $parchment-dim;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    font-family: $font-mono;
+    font-size: 1.05rem;
+  }
+}
+
+.par {
+  color: $accent-soft;
+}
+
+.best {
+  color: $parchment;
+}
+
+.beat {
+  color: $gold;
+}
+
+.pays {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+.paysLabel {
+  color: $parchment-dim;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.status {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.blocked {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.85rem;
+  font-style: italic;
+}

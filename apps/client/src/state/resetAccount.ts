@@ -3,6 +3,7 @@ import { useBattleStore } from './battleStore';
 import { useCampaignStore } from './campaignStore';
 import { useDepthsStore } from './depthsStore';
 import { useTitanStore } from './titanStore';
+import { useTrialStore } from './trialStore';
 import { useExpeditionStore } from './expeditionStore';
 import { useLoadoutSetStore } from './loadoutSetStore';
 import { useEventStore } from './eventStore';
@@ -49,6 +50,7 @@ export function resetAccountState(): void {
   useCampaignStore.getState().reset();
   useDepthsStore.getState().reset();
   useTitanStore.getState().reset();
+  useTrialStore.getState().reset();
   useExpeditionStore.getState().reset();
   useLoadoutSetStore.getState().reset();
   useEventStore.getState().reset();

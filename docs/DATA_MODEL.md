@@ -306,6 +306,16 @@ Stock is rolled per player and **stored**, not derived on read: what a player is
 ### `dungeon_progress` — **not built; deliberately**
 A floor *is* a stage, so its clear is already a `stage_progress` row with `parent_key` set to the dungeon. "Deepest floor" is the largest floor number among those rows and "clears" is their sum, both derived on read. A second table would be the same fact written twice, and the second copy is the one that drifts.
 
+### `player_trials` — **not built; deliberately**
+A trial *is* a stage, so an attempt's result is already a `stage_progress` row: `best_turns`
+is the number the mode is scored on, and it has been there since P6a. Whether a trial has
+been **beaten** is that number compared against the published `parTurns` — read rather than
+stored, so an operator who loosens a par finds yesterday's attempts already counted, and one
+who tightens it does not have to hunt down a stored flag that has become a lie. Whether the
+par *bonus* has been paid is not stored either: `recordClear` reads the previous best before
+its own upsert, and pays only when that previous best was outside par. Two records of one
+fight would mean one of them was the stale one.
+
 ### `gear_loadouts`
 `player_id, name, gear_ids jsonb, from_champion_id`, unique on `(player_id, name)`.
 

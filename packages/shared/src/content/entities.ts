@@ -503,6 +503,7 @@ export const STAGE_MODES = [
   'proving',
   'tutorial',
   'titan',
+  'trial',
 ] as const;
 
 // ── The Depths ──────────────────────────────────────────────────────────────
@@ -621,6 +622,37 @@ export const presetChampionSchema = z.object({
 });
 export type PresetChampion = z.infer<typeof presetChampionSchema>;
 
+/**
+ * A trial's par, and what beating it is worth.
+ *
+ * Kept as its own block rather than folded into `starRules` because they answer different
+ * questions: stars are how *well* a stage went and are re-earned on every run, while par is
+ * a one-time puzzle solved. Overloading the first with the second would make a trial's
+ * bonus re-payable by a sloppy re-run that happened to land inside the limit.
+ */
+export const trialRulesSchema = z.object({
+  /**
+   * What the trial is called.
+   *
+   * It lives here rather than on the stage because a stage has never had a name — a
+   * campaign stage is `4-3` and a Depths floor is a depth, both derived from where they
+   * sit. A trial sits nowhere: it is one authored puzzle, and a puzzle needs a name.
+   */
+  name: z.string().min(1).max(48),
+  /** Clear at or under this many turns to earn the bonus. */
+  parTurns: z.number().int().min(1).max(60),
+  /** Paid once, the first time a clear comes in at or under par. */
+  parRewards: z.record(z.string(), z.number()).default({}),
+  /**
+   * The trick, in a sentence, shown before the fight.
+   *
+   * A puzzle nobody can see the shape of is a puzzle nobody attempts twice. This is the
+   * nudge — never the solution.
+   */
+  hint: z.string().max(240).default(''),
+});
+export type TrialRules = z.infer<typeof trialRulesSchema>;
+
 export const stageDefSchema = contentMetaSchema.extend({
   mode: z.enum(STAGE_MODES),
   /** Chapter or dungeon this stage belongs to. */
@@ -690,15 +722,26 @@ export const stageDefSchema = contentMetaSchema.extend({
   /**
    * The team this stage is fought with, when the player does not bring one.
    *
-   * Only `tutorial` stages use it, and publish validation refuses it anywhere else. The
-   * cold open is a fight with three champions nobody owns yet — that is the whole point of
-   * it, and the alternative was minting a roster to confiscate two-thirds of ten minutes
-   * later. Borrowing the team from content instead means nothing is created, nothing is
-   * taken back, and the opening fight is authored the way every other fight is.
+   * Used by `tutorial` and `trial` stages, and publish validation refuses it anywhere else.
+   * The cold open is a fight with three champions nobody owns yet — that is the whole point
+   * of it, and the alternative was minting a roster to confiscate two-thirds of ten minutes
+   * later. A **trial** borrows a team for a different reason: everybody gets the same four
+   * champions against the same enemy, so what is being measured is the *play* rather than
+   * the account. Borrowing from content means nothing is created and nothing is taken back,
+   * and both fights are authored the way every other fight is.
    *
    * Empty on every other stage, where the player's own team is the only team.
    */
   presetTeam: z.array(presetChampionSchema).max(4).default([]),
+  /**
+   * What makes a trial a trial: a turn count to beat.
+   *
+   * Required on a `trial` stage and refused everywhere else. The par is the whole point —
+   * clearing is the easy half, and the bonus is for clearing *well*. Paid once, the first
+   * time a clear comes in at or under par, so a trial is a puzzle to solve rather than a
+   * stage to farm.
+   */
+  trial: trialRulesSchema.optional(),
 });
 export type StageDef = z.infer<typeof stageDefSchema>;
 

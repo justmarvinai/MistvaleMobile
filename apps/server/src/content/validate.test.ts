@@ -559,7 +559,31 @@ describe('validateContentSet', () => {
         withStage(coldOpen({ key: 'c99_s1_normal', mode: 'campaign', energyCost: 4 })),
       );
       expect(result.ok).toBe(false);
-      expect(result.errors.some((error) => /Only a tutorial stage/.test(error.message))).toBe(true);
+      expect(
+        result.errors.some((error) => /Only a tutorial or trial stage/.test(error.message)),
+      ).toBe(true);
+    });
+
+    it('refuses a trial that carries no par — the par is what makes it a trial', () => {
+      const result = validateContentSet(
+        withStage(coldOpen({ key: 'trial_x', mode: 'trial', energyCost: 0 })),
+      );
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((error) => /needs a par/.test(error.message))).toBe(true);
+    });
+
+    it('refuses a par on a stage that is not a trial', () => {
+      const result = validateContentSet(
+        withStage(
+          coldOpen({
+            trial: { name: 'Not a trial', parTurns: 10, parRewards: {}, hint: '' },
+          }),
+        ),
+      );
+      expect(result.ok).toBe(false);
+      expect(
+        result.errors.some((error) => /Only a trial stage carries a par/.test(error.message)),
+      ).toBe(true);
     });
 
     it('refuses a borrowed champion nobody published', () => {

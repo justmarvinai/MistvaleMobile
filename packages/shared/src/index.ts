@@ -6,6 +6,7 @@ export * from './auth';
 export * from './player';
 export * from './expedition';
 export * from './readiness';
+export * from './trial';
 export * from './standing';
 export * from './gear';
 export * from './loadout';

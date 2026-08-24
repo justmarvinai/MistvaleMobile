@@ -152,6 +152,16 @@ export const ROUTES = {
      */
     recall: (id: string) => `/expeditions/${encodeURIComponent(id)}/recall`,
   },
+  trials: {
+    /**
+     * Every trial, its par, and this account's best.
+     *
+     * A read only: a trial is an ordinary battle (`mode: 'trial'`) through the battle
+     * routes, so playback, Auto, the speed ladder and a reload mid-fight all work here
+     * without a second implementation of any of them.
+     */
+    overview: '/trials',
+  },
   titan: {
     /**
      * Every Titan, its ladder, the keys left today and this account's own record.

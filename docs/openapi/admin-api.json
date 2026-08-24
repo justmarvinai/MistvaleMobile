@@ -2470,6 +2470,7 @@
                     "championObtained",
                     "titanRun",
                     "expeditionClaim",
+                    "trialsBeaten",
                     "titanDamage"
                   ]
                 },
@@ -5002,6 +5003,7 @@
                     "championObtained",
                     "titanRun",
                     "expeditionClaim",
+                    "trialsBeaten",
                     "titanDamage"
                   ]
                 },
@@ -5260,6 +5262,7 @@
                     "championObtained",
                     "titanRun",
                     "expeditionClaim",
+                    "trialsBeaten",
                     "titanDamage"
                   ]
                 },
@@ -7545,7 +7548,8 @@
               "springs",
               "proving",
               "tutorial",
-              "titan"
+              "titan",
+              "trial"
             ]
           },
           "parentKey": {
@@ -7912,6 +7916,43 @@
               ],
               "additionalProperties": false
             }
+          },
+          "trial": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 48
+              },
+              "parTurns": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 60
+              },
+              "parRewards": {
+                "default": {},
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              "hint": {
+                "default": "",
+                "type": "string",
+                "maxLength": 240
+              }
+            },
+            "required": [
+              "name",
+              "parTurns",
+              "parRewards",
+              "hint"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -8292,6 +8333,7 @@
                   "championObtained",
                   "titanRun",
                   "expeditionClaim",
+                  "trialsBeaten",
                   "titanDamage"
                 ]
               },
