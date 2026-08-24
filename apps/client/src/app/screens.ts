@@ -16,6 +16,7 @@ export type ScreenId =
   | 'depths'
   | 'arena'
   | 'titan'
+  | 'worldBoss'
   | 'trials'
   | 'expeditions'
   | 'champions'
@@ -129,6 +130,18 @@ export const SCREENS: readonly ScreenDefinition[] = [
       'One enormous thing, two keys a day, and a ladder of chests for how much of it you moved. The fight worth optimising rather than clearing.',
     unlock: 'titan',
     lockedHint: 'Opens at level 16',
+    inDock: true,
+  },
+  {
+    id: 'worldBoss',
+    label: 'The Wurm Wakes',
+    icon: 'nav-worldboss',
+    glyph: 'glyph-cursed-eye',
+    art: 'blood-cursed-beast',
+    blurb:
+      'It comes up at the end of the week and the whole Vale turns out. One health bar, everybody’s damage on it, and a chest for everyone who helped if the Vale actually gets through it.',
+    unlock: 'worldBoss',
+    lockedHint: 'Opens at level 18',
     inDock: true,
   },
   {

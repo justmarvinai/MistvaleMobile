@@ -167,6 +167,53 @@ A Titan is a `dungeon` entity of kind `titan` with a `titan` block (cap, keys, l
 single `titan`-mode stage, so a second one is an Admin edit rather than a release. It is
 excluded from the Depths hub, which is about floors and clears — neither of which it has.
 
+### 9.2d The Wurm Wakes — the world boss (C10e)
+
+The same creature as the Solo Titan, and that is the whole idea. All week the Valewurm lies
+under the vale and wardens go down alone to find out how much of it they can move; at the
+weekend it comes up, and the question changes from *how far can I get* to **how far can we
+get**. One health pool, everybody's damage on it, and a chest for everybody who helped if
+the vale actually gets through it.
+
+It is the only genuinely **shared mutable state** in Mistvale. Every other number in the
+game belongs to one account; this one belongs to the server, and the damage a warden does on
+Friday is still gone when somebody else opens the game on Sunday. That is what makes the
+world feel populated without a guild, a chat, a raid group, a schedule to keep with anybody,
+or a WebSocket — the only social act available is turning up, and the only evidence anybody
+else exists is that the bar moved while you were away.
+
+- **The ladder is cumulative, not per run.** A Titan pays the rung a *run* reached; a wake
+  pays each rung once, against everything an account has done to it all week. The Titan
+  rewards the best hour you had; the Wurm rewards turning up. It is the **reliable** payout,
+  which matters because felling it is not guaranteed.
+- **The felling chest is flat and shared.** If the pool empties before the wake closes,
+  everybody who struck it takes the same chest — the last blow and a single Friday strike
+  are worth exactly the same. Anything scaled here would turn "did we get it?" back into
+  "did I do enough?", which is the question every other mode already asks.
+- **Overkill stays on the striker.** Damage past the last point of the pool is kept on their
+  own total, because capping it would dock precisely the run that did the most for
+  everybody.
+- **Strikes, not energy.** Three a day, spent when the fight opens and gone whatever happens
+  to it. The resource the mode limits is *attempts*: a shared bar you could farm down with a
+  big enough energy bar would make felling it a question of who had the most energy.
+- **Your battle is not the kill.** A strike is fifty turns against something authored to
+  outlast anybody, so it is still standing in *your* fight when the turn cap runs out. What
+  falls is the shared bar, which is a different number on a different screen — and the
+  screen says so.
+
+**No bots strike it.** The Arena has bots because a ladder needs opponents and a synthetic
+one is still a real fight; a fabricated line on this board would be a lie about who was
+here, and a bar that moved on its own would be a lie about what a strike is worth. If the
+vale is too small to fell it, it is not felled — and the ladder does not care. `maxHp` is the
+number an operator moves as the population grows, and it is content like everything else.
+
+Mechanically it is a `dungeon` of kind `worldBoss` carrying a `worldBoss` block (schedule,
+pool, cap, strikes a day, ladder, felling chest, claim grace) plus one `worldBoss`-mode
+stage — the Titan's arrangement exactly, so a second world boss is an Admin edit. The wake is
+derived from the clock by the same scheduler timed events use, so there is **no cron**: the
+row is created lazily by whoever gets there first, and last week's contribution row simply
+stops matching when the anchor moves on.
+
 ### 9.2c Trials (C10d)
 
 The one mode where **what you own does not matter**. A trial hands the player four champions
@@ -250,7 +297,7 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 
 ## 12. Account & unlock cadence
 
-Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
+Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · **L18 the Wurm Wakes** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
 
 ## 13. Fairness & EA posture
 No payments in EA (crystals fully earnable; "premium" is a pacing currency, not a paywall). Real odds displayed. Bots never take top-10 leaderboard slots at week end (auto-yield rule). Single account per player expected but not enforced beyond rate limits. All balance changes publish-logged → visible "balance updated" badges (champion `balance_version`).

@@ -1,0 +1,291 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding-bottom: $space-4;
+}
+
+.note {
+  margin: 0 0 $space-2;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.notice {
+  margin: 0;
+  color: $gold-soft;
+  font-size: 0.9rem;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.9rem;
+}
+
+.boss {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.tagline {
+  margin: 0;
+  color: $parchment;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+// ── The shared bar ─────────────────────────────────────────────────────────
+// Drawn first and drawn big. It is the only number on this screen that belongs to
+// everybody, and it is the reason the screen exists.
+
+.pool {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.poolTrack {
+  position: relative;
+  overflow: hidden;
+  height: 26px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.poolFill {
+  height: 100%;
+  background: linear-gradient(180deg, $blood 0%, #a8302a 45%, $blood 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: width 320ms ease-out;
+}
+
+.pool[data-felled='yes'] .poolFill {
+  background: linear-gradient(180deg, $gold-soft 0%, $gold 50%, #8a6d10 100%);
+}
+
+.poolNumbers {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-2;
+}
+
+.poolPct {
+  color: $accent-soft;
+  font-family: $font-mono;
+  font-size: 1.15rem;
+}
+
+.poolLeft {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.85rem;
+}
+
+.crowd {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.88rem;
+
+  strong {
+    color: $parchment;
+    font-family: $font-mono;
+  }
+}
+
+// ── Your part in it ────────────────────────────────────────────────────────
+
+.strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: $space-3;
+}
+
+.yours {
+  display: flex;
+  margin: 0;
+  flex-wrap: wrap;
+  gap: $space-4;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  dt {
+    color: $parchment-dim;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    color: $parchment;
+    font-family: $font-mono;
+    font-size: 1.05rem;
+  }
+}
+
+.blocked {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+.next {
+  margin: 0;
+  color: $accent-soft;
+  font-size: 0.88rem;
+
+  strong {
+    color: $gold-soft;
+  }
+}
+
+.spoils {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: $space-2;
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  background: rgba(201, 162, 39, 0.08);
+  gap: $space-3;
+}
+
+.spoilsTitle {
+  display: block;
+  margin-bottom: 4px;
+  color: $gold-soft;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// ── The ladder ─────────────────────────────────────────────────────────────
+
+.ladder {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.rung {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-2;
+  border-left: 3px solid transparent;
+  background: rgba(0, 0, 0, 0.22);
+  gap: $space-3;
+
+  &[data-state='ready'] {
+    border-left-color: $gold;
+    background: rgba(201, 162, 39, 0.09);
+  }
+
+  &[data-state='claimed'] {
+    opacity: 0.62;
+    border-left-color: rgba(201, 162, 39, 0.4);
+  }
+}
+
+.rungText {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: $space-2;
+}
+
+.rungName {
+  color: $parchment;
+  font-size: 0.95rem;
+}
+
+.rungAt {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.8rem;
+}
+
+.rungDone,
+.rungLocked {
+  color: $parchment-dim;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+// ── The board ──────────────────────────────────────────────────────────────
+
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.boardTitle {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.75rem;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.boardList {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+
+  li {
+    display: grid;
+    align-items: baseline;
+    padding: 4px $space-2;
+    background: rgba(0, 0, 0, 0.2);
+    gap: $space-2;
+    grid-template-columns: 2.2rem 1fr auto;
+
+    &[data-you='yes'] {
+      background: rgba(229, 177, 132, 0.12);
+
+      .boardName {
+        color: $accent-soft;
+      }
+    }
+  }
+}
+
+.boardRank {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.85rem;
+}
+
+.boardName {
+  overflow: hidden;
+  color: $parchment;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boardDamage {
+  color: $gold-soft;
+  font-family: $font-mono;
+  font-size: 0.9rem;
+}

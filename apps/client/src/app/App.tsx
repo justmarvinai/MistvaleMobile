@@ -10,6 +10,7 @@ import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { DepthsScreen } from '@/screens/Depths/DepthsScreen';
 import { ExpeditionsScreen } from '../screens/Expeditions/ExpeditionsScreen';
 import { TrialsScreen } from '../screens/Trials/TrialsScreen';
+import { WorldBossScreen } from '../screens/WorldBoss/WorldBossScreen';
 import { TitanScreen } from '@/screens/Titan/TitanScreen';
 import { ArenaScreen } from '@/screens/Arena/ArenaScreen';
 import { QuestsScreen } from '@/screens/Quests/QuestsScreen';
@@ -173,6 +174,8 @@ function screenForMode(mode: string): ScreenId {
       return 'titan';
     case 'trial':
       return 'trials';
+    case 'worldBoss':
+      return 'worldBoss';
     case 'tutorial':
       return 'haven';
     default:
@@ -310,6 +313,8 @@ function GameShell() {
               <DepthsScreen />
             ) : screen === 'titan' ? (
               <TitanScreen />
+            ) : screen === 'worldBoss' ? (
+              <WorldBossScreen />
             ) : screen === 'trials' ? (
               <TrialsScreen />
             ) : screen === 'expeditions' ? (

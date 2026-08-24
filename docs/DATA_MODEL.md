@@ -306,6 +306,41 @@ Stock is rolled per player and **stored**, not derived on read: what a player is
 ### `dungeon_progress` — **not built; deliberately**
 A floor *is* a stage, so its clear is already a `stage_progress` row with `parent_key` set to the dungeon. "Deepest floor" is the largest floor number among those rows and "clears" is their sum, both derived on read. A second table would be the same fact written twice, and the second copy is the one that drifts.
 
+### `world_boss_wakes` — the one shared row
+
+`dungeon_key, anchor, max_hp, damage_taken, felled_at, felled_by, strikes, wardens`, unique
+on `(dungeon_key, anchor)`.
+
+**The only genuinely shared mutable state in the schema.** Every other table is partitioned
+by player; this one belongs to the server, and it is what makes a world boss a world boss.
+
+`damage_taken` counts **up** rather than `hp_remaining` counting down, and that is
+load-bearing rather than stylistic. A strike is then `damage_taken = damage_taken + $1` — one
+atomic statement, no read-modify-write, no clamp, and no lock held across a battle — so two
+strikes landing at the same instant both count. That is the whole concurrency story, and the
+reason one shared row is safe on a one-core box with no Redis. Whether the boss has fallen is
+that number against `max_hp`, **read rather than stored**; `felled_at` records only *when*,
+and is set under a `felled_at is null` guard so the second strike to arrive on an already
+empty pool cannot overwrite the first.
+
+`max_hp` is copied onto the row when the wake opens rather than read from content on every
+strike, so an operator retuning the boss mid-week moves *next* week's bar rather than the one
+wardens are already looking at. A bar that jumps is a bar nobody trusts.
+
+The row is created **lazily**, by whoever gets there first, with `on conflict do nothing`
+followed by a re-read. There is no job that opens one: the wake is derived from the clock by
+the same scheduler timed events use, so a server that was down all weekend comes back correct.
+
+### `player_world_boss`
+
+`player_id, dungeon_key, anchor, damage, strikes, claimed_tiers jsonb, spoils_claimed`,
+unique on `(player_id, dungeon_key, anchor)` and indexed on `(dungeon_key, anchor, damage)` —
+which *is* the board, read backwards.
+
+A row per **wake** rather than a record per account, because the contribution ladder is
+cumulative across the wake. Last week's row simply stops matching when the anchor moves on,
+so a weekly reset needs no job and loses no history.
+
 ### `player_trials` — **not built; deliberately**
 A trial *is* a stage, so an attempt's result is already a `stage_progress` row: `best_turns`
 is the number the mode is scored on, and it has been there since P6a. Whether a trial has

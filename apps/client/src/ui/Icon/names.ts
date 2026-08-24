@@ -63,6 +63,7 @@ export const ICON_NAMES = [
   'nav-titan',
   'nav-trials',
   'nav-valor',
+  'nav-worldboss',
   // buff
   'buff-ally-protection',
   'buff-atk-up',

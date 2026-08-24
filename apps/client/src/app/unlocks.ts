@@ -32,6 +32,12 @@ export interface Unlock {
  * more than one feature. The celebration queues them rather than picking a winner.
  */
 const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> = Object.freeze({
+  worldBoss: {
+    screen: 'worldBoss',
+    title: 'The Wurm Wakes',
+    blurb:
+      'The thing you have been going down to alone comes up at the end of the week, and the whole Vale turns out for it. One health bar, everybody’s damage on it, and whatever you take off stays off — so what you manage on Friday is still gone when somebody else arrives on Sunday.',
+  },
   trials: {
     screen: 'trials',
     title: 'Trials',

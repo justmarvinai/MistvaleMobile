@@ -1939,7 +1939,8 @@
               "relic",
               "proving",
               "springs",
-              "titan"
+              "titan",
+              "worldBoss"
             ]
           },
           "lore": {
@@ -2071,6 +2072,146 @@
               "turnCap",
               "keysPerDay",
               "tiers"
+            ],
+            "additionalProperties": false
+          },
+          "worldBoss": {
+            "type": "object",
+            "properties": {
+              "schedule": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "window"
+                      },
+                      "startsAt": {
+                        "type": "string"
+                      },
+                      "endsAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "startsAt",
+                      "endsAt"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "weekly"
+                      },
+                      "startWeekday": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 6
+                      },
+                      "durationDays": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 7
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "startWeekday",
+                      "durationDays"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "maxHp": {
+                "type": "integer",
+                "minimum": 1000,
+                "maximum": 100000000000
+              },
+              "turnCap": {
+                "default": 50,
+                "type": "integer",
+                "minimum": 5,
+                "maximum": 200
+              },
+              "attemptsPerDay": {
+                "default": 3,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "tiers": {
+                "default": [],
+                "maxItems": 12,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 64,
+                      "pattern": "^[a-z][a-z0-9_]*$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 48
+                    },
+                    "damage": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000000000
+                    },
+                    "rewards": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "name",
+                    "damage",
+                    "rewards"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "fellingRewards": {
+                "default": {},
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              "claimGraceDays": {
+                "default": 3,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 14
+              }
+            },
+            "required": [
+              "schedule",
+              "maxHp",
+              "turnCap",
+              "attemptsPerDay",
+              "tiers",
+              "fellingRewards",
+              "claimGraceDays"
             ],
             "additionalProperties": false
           }
@@ -2471,6 +2612,8 @@
                     "titanRun",
                     "expeditionClaim",
                     "trialsBeaten",
+                    "worldBossStrike",
+                    "worldBossDamage",
                     "titanDamage"
                   ]
                 },
@@ -5004,6 +5147,8 @@
                     "titanRun",
                     "expeditionClaim",
                     "trialsBeaten",
+                    "worldBossStrike",
+                    "worldBossDamage",
                     "titanDamage"
                   ]
                 },
@@ -5263,6 +5408,8 @@
                     "titanRun",
                     "expeditionClaim",
                     "trialsBeaten",
+                    "worldBossStrike",
+                    "worldBossDamage",
                     "titanDamage"
                   ]
                 },
@@ -7549,7 +7696,8 @@
               "proving",
               "tutorial",
               "titan",
-              "trial"
+              "trial",
+              "worldBoss"
             ]
           },
           "parentKey": {
@@ -8334,6 +8482,8 @@
                   "titanRun",
                   "expeditionClaim",
                   "trialsBeaten",
+                  "worldBossStrike",
+                  "worldBossDamage",
                   "titanDamage"
                 ]
               },

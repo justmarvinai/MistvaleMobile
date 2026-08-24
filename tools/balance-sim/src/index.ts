@@ -320,10 +320,13 @@ function main(): void {
   // fully levelled team, or the treadmill has no end — but it is allowed to be hard,
   // which is why the bar there is lower.
   for (const dungeon of [...content.dungeons.values()].sort((a, b) => a.sortOrder - b.sortOrder)) {
-    // A Titan is a `dungeon` entity because that is where everything else about it fits,
-    // but "does the deepest floor fall" is not a question about it: it is authored so
-    // that nobody clears it. Its own gates are below.
-    if (dungeon.kind === 'titan') continue;
+    // A Titan and a world boss are `dungeon` entities because that is where everything else
+    // about them fits, but "does the deepest floor fall" is not a question about either:
+    // both are authored so that nobody clears them. The Titan's own gates are below; the
+    // world boss's pool is a *shared* number and so is not a thing one simulated team can
+    // be measured against at all — what it is worth is a live population, which no
+    // simulation has.
+    if (dungeon.kind === 'titan' || dungeon.kind === 'worldBoss') continue;
     const floors = dungeonFloors(content, dungeon.key);
     const first = floors[0];
     const deepest = floors[floors.length - 1];
@@ -524,6 +527,80 @@ function main(): void {
         detail: 'with the top rung still above what a built team typically manages',
         passed: built.medianDamage < top.damage,
         measured: `${built.medianDamage.toLocaleString()} vs ${top.damage.toLocaleString()}`,
+      });
+    }
+  }
+
+  // ── Gate 3d-ii: the world boss needs a crowd, and pays a newcomer ───────
+  //
+  // A shared pool cannot be simulated — what empties it is a live population, and no
+  // simulation has one. What *can* be checked is the two ends of the arithmetic the pool
+  // was sized against, and both are claims the seed makes in prose:
+  //
+  //  - **It takes more than one warden.** A fully built account spending every strike of a
+  //    whole wake must not get through the bar alone, or the mode is a Titan with a longer
+  //    name and the felling chest is a solo reward.
+  //  - **A newcomer's first day is worth something.** The bottom rung has to be inside a
+  //    single day's strikes from a modest account, or turning up pays nothing and the
+  //    ladder — which is the *reliable* payout — only exists for accounts already finished.
+  const wakeKeep = [...content.dungeons.values()].find(
+    (dungeon) => dungeon.kind === 'worldBoss' && dungeon.worldBoss,
+  );
+  const wakeStage = wakeKeep
+    ? [...content.stages.values()].find(
+        (stage) => stage.mode === 'worldBoss' && stage.parentKey === wakeKeep.key,
+      )
+    : undefined;
+  if (wakeKeep?.worldBoss && wakeStage) {
+    const rules = wakeKeep.worldBoss;
+    const strikesInAWake =
+      rules.attemptsPerDay * (rules.schedule.kind === 'weekly' ? rules.schedule.durationDays : 1);
+    const wakeRuns = Math.max(20, Math.round(RUNS / 40));
+
+    const builtStrike = simulateTitan(
+      content,
+      wakeStage.key,
+      withCollection(
+        content,
+        withRelics(
+          content,
+          parTeam(content).map((member) => ({ ...member, level: 60, rank: 6, ascension: 6 })),
+        ),
+      ),
+      rules.turnCap,
+      wakeRuns,
+    );
+    const freshStrike = simulateTitan(
+      content,
+      wakeStage.key,
+      parTeam(content).map((member) => ({ ...member, level: 30, rank: 4, ascension: 0 })),
+      rules.turnCap,
+      wakeRuns,
+    );
+
+    const soloWake = builtStrike.medianDamage * strikesInAWake;
+    console.log(`\nThe Wurm Wakes — ${wakeStage.key}, ${rules.turnCap}-turn cap`);
+    console.log(
+      `  one strike: fresh ${freshStrike.medianDamage.toLocaleString()} · ` +
+        `built ${builtStrike.medianDamage.toLocaleString()} · ` +
+        `a built warden's whole wake ${soloWake.toLocaleString()} of ${rules.maxHp.toLocaleString()}`,
+    );
+
+    gates.push({
+      name: 'worldboss-needs-a-crowd',
+      detail: `${strikesInAWake} strikes from one fully built warden do not empty the pool`,
+      passed: soloWake < rules.maxHp,
+      measured: `${soloWake.toLocaleString()} vs ${rules.maxHp.toLocaleString()}`,
+    });
+
+    const bottom = [...rules.tiers].sort((a, b) => a.damage - b.damage)[0];
+    if (bottom) {
+      const freshDay = freshStrike.medianDamage * rules.attemptsPerDay;
+      gates.push({
+        name: 'worldboss-entry-pays',
+        detail: `and a modest account reaches the bottom rung on its first day (${rules.attemptsPerDay} strikes)`,
+        passed: freshDay >= bottom.damage,
+        measured: `${freshDay.toLocaleString()} vs ${bottom.damage.toLocaleString()}`,
       });
     }
   }

@@ -166,3 +166,39 @@ export function canSkipBattle(mode: BattleMode, clearedBefore: boolean): boolean
   if (mode === 'arena') return true;
   return clearedBefore;
 }
+
+/**
+ * Why a mode cannot be run in a batch, or null when it can.
+ *
+ * One list, read by `battle.runMany` and by the team picker, so the button a player does
+ * not see and the request the server refuses are the same rule. It exists because they had
+ * already disagreed: `runMany` knew about practice and the tutorial and **not about the
+ * Titan**, which meant `/battles/multi` could run Titan stages without going anywhere near
+ * `spendKey` — an attempts-limited mode farmed for free at zero energy, reporting a
+ * `battleWin` to the goal engine every time.
+ *
+ * Two kinds of mode are on the list, for two different reasons:
+ *
+ *  - **Nothing to repeat.** Practice and the cold open cost nothing and pay nothing, and a
+ *    trial is a puzzle whose bonus is a one-off. Ten runs would produce one empty summary.
+ *  - **Attempts are the resource.** A Titan and a world boss are limited by how many times
+ *    you may swing, not by how much energy you have. A batch is a way of swinging more
+ *    times, which is the one thing those modes are built to stop.
+ */
+export function multiBattleRefusal(mode: BattleMode): string | null {
+  switch (mode) {
+    case 'practice':
+    case 'tutorial':
+      return 'That kind of fight cannot be run in a batch.';
+    case 'trial':
+      return 'A trial is solved once, not farmed.';
+    case 'titan':
+      return 'A Titan is fought a key at a time, and a key is one run.';
+    case 'worldBoss':
+      return 'The Wurm is struck a strike at a time, and a strike is one run.';
+    case 'arena':
+      return 'An arena attack is one fight against one warden.';
+    default:
+      return null;
+  }
+}

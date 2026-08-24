@@ -115,7 +115,12 @@ export function TitanScreen(): JSX.Element {
         <TeamSelect
           stage={fighting.stage}
           title={keeps.get(fighting.standing.dungeonKey)?.name ?? 'The Titan'}
-          titan={fighting.standing}
+          attempts={{
+            left: fighting.standing.keysLeft,
+            perDay: fighting.standing.keysPerDay,
+            turnCap: fighting.standing.turnCap,
+            noun: 'key',
+          }}
           onClose={() => {
             setFighting(null);
             void load();

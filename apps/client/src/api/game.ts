@@ -26,6 +26,8 @@ import type {
   LoadoutPlan,
   Titan,
   TrialsOverview,
+  WorldBossClaimResult,
+  WorldBossView,
   TitanRun,
   MultiBattleRequest,
   MultiBattleResult,
@@ -391,6 +393,18 @@ export const gameApi = {
 
   /** Every Titan, its ladder, the keys left today, and this account's own record. */
   titan: () => api.get<{ titan: Titan }>(ROUTES.titan.overview).then((data) => data.titan),
+
+  // ── The world boss ────────────────────────────────────────────────────────
+
+  /** The wake: the shared pool, the board, and this account's own contribution. */
+  worldBoss: () =>
+    api.get<{ worldBoss: WorldBossView }>(ROUTES.worldBoss.state).then((data) => data.worldBoss),
+
+  claimWorldBossTier: (dungeonKey: string, tierKey: string, actionId: string) =>
+    api.post<WorldBossClaimResult>(ROUTES.worldBoss.claim(dungeonKey), { tierKey, actionId }),
+
+  claimWorldBossSpoils: (dungeonKey: string, actionId: string) =>
+    api.post<WorldBossClaimResult>(ROUTES.worldBoss.spoils(dungeonKey), { actionId }),
 
   /**
    * Every trial, its par, and this account's best.

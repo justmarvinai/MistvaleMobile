@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { MultiBattleResult, StageDef, TitanStanding } from '@mistvale/shared';
+import { multiBattleRefusal } from '@mistvale/shared';
+import type { BattleMode, MultiBattleResult, StageDef } from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
@@ -41,26 +42,40 @@ import { Opposition } from './Opposition';
  * stale squad but never an impossible one.
  */
 
+/**
+ * A fight paid for in **attempts** rather than energy.
+ *
+ * Two modes work this way and the picker has to say so twice — how the fight is shaped
+ * ("one wave, fifty turns, paid for the damage you do") and what pressing the button
+ * spends. It was a `titan` prop until the world boss wanted the identical two sentences
+ * with one noun changed, which is the moment a special case becomes a shape.
+ */
+export interface AttemptCost {
+  left: number;
+  perDay: number;
+  turnCap: number;
+  /** Singular, lower case: "key", "strike". */
+  noun: string;
+}
+
 const MAX_SLOTS = 4;
 
 export function TeamSelect({
   stage,
   title,
-  titan,
+  attempts,
   onClose,
 }: {
   stage: StageDef;
   /** Heading for the modal; defaults to the stage's own number. */
   title?: string;
   /**
-   * The Titan's standing, when this is a Titan run.
+   * What an attempt costs, when the fight is paid for in attempts rather than energy.
    *
-   * A Titan is the one fight paid for in *keys* rather than energy, cannot be farmed, and
-   * has no clear to practise — so the three lines about cost, farming and practice are
-   * about something else here. Passed in rather than looked up, so the picker stays a
-   * picker and the Titan screen stays the one place that knows about keys.
+   * Passed in rather than looked up, so the picker stays a picker and the Titan and world
+   * boss screens stay the only places that know about keys and strikes.
    */
-  titan?: TitanStanding;
+  attempts?: AttemptCost;
   onClose: () => void;
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
@@ -116,7 +131,7 @@ export function TeamSelect({
 
   // A Titan costs a key rather than energy, so the energy bar has nothing to say about
   // whether the button works — but a spent allowance does.
-  const affordable = titan ? titan.keysLeft > 0 : energy >= stage.energyCost;
+  const affordable = attempts ? attempts.left > 0 : energy >= stage.energyCost;
   /** Whoever stands in the last wave, if it is somebody worth warning about. */
   const boss = stageBoss(stage, bundle?.enemies);
   const picked = team.length > 0;
@@ -134,6 +149,10 @@ export function TeamSelect({
     ),
   );
   const canFarm = multi.unlocked && multi.runsLeftToday > 0 && picked && affordable && !busy;
+  // The same list the server refuses a batch with, so a button that would be refused is
+  // never drawn. `attempts` stays a separate prop because it also silences the *energy*
+  // line; this is only about farming.
+  const batchRefusal = multiBattleRefusal(stage.mode as BattleMode);
 
   const toggle = (id: string): void => {
     setEdits(
@@ -196,8 +215,8 @@ export function TeamSelect({
     <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose} size="wide">
       <div className={styles.body}>
         <p className={styles.summary}>
-          {titan
-            ? `One wave · ${titan.turnCap} turns · paid for the damage you do`
+          {attempts
+            ? `One wave · ${attempts.turnCap} turns · paid for the damage you do`
             : `${stage.waves.length} waves · ${stage.energyCost} energy · ${stage.rewards.silverMin}–${stage.rewards.silverMax} silver`}
         </p>
 
@@ -283,8 +302,8 @@ export function TeamSelect({
 
         <div className={styles.actions}>
           <span className={styles.cost}>
-            {titan
-              ? `Costs one key — ${titan.keysLeft} of ${titan.keysPerDay} left today`
+            {attempts
+              ? `Costs one ${attempts.noun} — ${attempts.left} of ${attempts.perDay} left today`
               : affordable
                 ? `Costs ${stage.energyCost} energy — you have ${energy}`
                 : `Needs ${stage.energyCost} energy — you have ${energy}`}
@@ -294,7 +313,7 @@ export function TeamSelect({
           </Button>
         </div>
 
-        {multi.unlocked && !titan && (
+        {multi.unlocked && !attempts && !batchRefusal && (
           <div className={styles.farm}>
             <span className={styles.farmLabel}>
               Farm without watching — {multi.runsLeftToday} of {multi.dailyCap} runs left today

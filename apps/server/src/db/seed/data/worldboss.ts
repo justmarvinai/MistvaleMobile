@@ -95,54 +95,59 @@ export const WORLD_BOSS_DUNGEONS: DungeonDefInput[] = [
       // hour along with the dailies rather than at some midnight of its own.
       schedule: { kind: 'weekly', startWeekday: 5, durationDays: 3 },
 
-      // **The number to move as the vale fills up.** A fully-built warden manages a little
-      // over 200k in a fifty-turn strike (measured — the Titan's `pnpm sim` gates), and gets
-      // three strikes a day across a three-day wake, so nine strikes is roughly two million
-      // from one very good account. Twelve million is therefore "about six built wardens, or
-      // rather more middling ones, all turning up" — reachable for a small live population
-      // and out of reach for one person, which is the point.
-      maxHp: 12_000_000,
+      // **The number to move as the vale fills up**, and it is measured rather than guessed.
+      // `pnpm sim` fights this very stage: a fully built warden manages about 181,000 in a
+      // fifty-turn strike and a modest one about 6,700, and a wake allows nine strikes — so
+      // one very good account contributes roughly 1.6 million and one modest account roughly
+      // 60,000. Eight million is therefore "about five built wardens, or a rather larger
+      // crowd of ordinary ones, all turning up": out of reach for one person, which is the
+      // whole point, and reachable for a small live population, which is the other half of
+      // it. `worldboss-needs-a-crowd` gates the first half.
+      maxHp: 8_000_000,
       turnCap: 50,
       attemptsPerDay: 3,
 
-      // Cumulative across the wake, not per strike. The bottom rung is one honest strike
-      // from a modest account, so nobody who turns up leaves with nothing; the top is
-      // roughly a built account's whole weekend.
+      // Cumulative across the wake, not per strike, and cut against the same measurements
+      // the pool is. The bottom rung is **one day's strikes from a modest account** — about
+      // 20,000 — so somebody who turns up on Friday and never comes back has still earned
+      // something; the second is that account's whole wake. The top sits just above what a
+      // fully built warden manages across a wake, so it is a genuine stretch for the best
+      // account in the vale rather than a formality.
       tiers: [
         {
           key: 'wake_t1',
           name: 'First Blood on the Coil',
-          damage: 50_000,
+          damage: 18_000,
           rewards: { silver: 30_000, emblem_bronze: 3 },
         },
         {
           key: 'wake_t2',
           name: 'The Vale Answers',
-          damage: 200_000,
+          damage: 75_000,
           rewards: { silver: 70_000, emblem_silver: 2, xp_brew: 3 },
         },
         {
           key: 'wake_t3',
           name: 'Scale and Splinter',
-          damage: 600_000,
+          damage: 250_000,
           rewards: { silver: 140_000, emblem_silver: 4, essence_pure: 2, crystals: 40 },
         },
         {
           key: 'wake_t4',
           name: 'Down to the Root',
-          damage: 1_500_000,
+          damage: 600_000,
           rewards: { silver: 240_000, emblem_gold: 2, waking_shard: 2, crystals: 75 },
         },
         {
           key: 'wake_t5',
           name: 'Lanternbreaker',
-          damage: 3_000_000,
+          damage: 1_100_000,
           rewards: { silver: 400_000, emblem_gold: 4, waking_shard: 4, crystals: 125 },
         },
         {
           key: 'wake_t6',
           name: 'Wurmbane of the Vale',
-          damage: 5_000_000,
+          damage: 1_800_000,
           rewards: {
             silver: 650_000,
             emblem_gold: 6,

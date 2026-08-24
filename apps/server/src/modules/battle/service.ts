@@ -23,6 +23,7 @@ import {
   type ArenaResult,
   type BattleMode,
   canSkipBattle,
+  multiBattleRefusal,
   type ChampionDef,
   type EnemyDef,
   type GearInstance,
@@ -966,17 +967,12 @@ export async function runMany(
 
   const stage = stages.get(options.stageKey);
   if (!stage) throw AppError.notFound(`No stage "${options.stageKey}".`);
-  if (options.mode === 'practice' || options.mode === 'tutorial') {
-    // Both cost nothing and pay nothing; repeating either would spend an allowance to
-    // produce an empty summary.
-    throw new AppError('VALIDATION', 'That kind of fight cannot be run in a batch.');
-  }
-  if (options.mode === 'trial') {
-    // A trial is a puzzle with one right answer and a par to beat. Farming it ten at a
-    // time would produce ten identical clears and pay for none of them — the bonus is a
-    // one-off — so it is refused rather than allowed to look like it did something.
-    throw new AppError('VALIDATION', 'A trial is solved once, not farmed.');
-  }
+  // Which modes a batch may not run is stated once in `multiBattleRefusal` and read here
+  // and by the picker, because the two had already disagreed: this list used to know about
+  // practice and the cold open and not about the Titan, so `/battles/multi` could run Titan
+  // stages without touching `spendKey` — an attempts-limited mode farmed for free.
+  const refusal = multiBattleRefusal(options.mode);
+  if (refusal) throw new AppError('VALIDATION', refusal);
   if (stage.mode !== options.mode) {
     throw new AppError('VALIDATION', `Stage "${options.stageKey}" is not a ${options.mode} stage.`);
   }
@@ -1231,14 +1227,7 @@ async function settleWorldBoss(
   // longer exists; saying so beats inventing a wake to put it in.
   if (!keep) return { ...NO_REWARDS };
 
-  const strike = await worldboss.settleStrike(
-    tx,
-    ctx.content,
-    playerId,
-    keep,
-    events,
-    new Date(),
-  );
+  const strike = await worldboss.settleStrike(tx, ctx.content, playerId, keep, events, new Date());
   if (!strike) return { ...NO_REWARDS };
 
   // One strike is two reports: it happened, and the account's total for the wake now

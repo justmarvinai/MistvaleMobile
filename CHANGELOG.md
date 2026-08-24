@@ -5,6 +5,51 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — The Wurm Wakes: one health bar, the whole Vale
+
+Fifth of the seven, and the first thing in Mistvale that two accounts can touch at once.
+
+It is the **same creature** as the Solo Titan. All week the Valewurm is a wall you go down to
+alone to find out how far you get. At the weekend it comes up, and the question becomes how
+far *we* get: one health pool shared by everybody on the server, everyone's damage on the
+same bar, and whatever you take off stays off. What you manage on Friday is still gone when
+somebody else arrives on Sunday — nobody has to be online at the same time as anybody.
+
+- **The contribution ladder is counted across the whole wake**, not per strike, and each
+  rung is collected once. That is the reliable payout, and what it rewards is turning up.
+- **If the Vale gets through the bar, everybody who struck it takes the same chest** — the
+  last blow and one Friday strike are worth exactly the same. Anything scaled would turn
+  "did we get it?" back into "did I do enough?", which every other mode already asks. It is a
+  bonus rather than the point, so a quiet week is still worth turning up to.
+- **Overkill stays on the striker's total.** Capping it would dock precisely the run that did
+  the most for everybody.
+- **Three strikes a day**, spent when the fight opens. The resource the mode limits is
+  attempts: a shared bar farmable with a big enough energy bar would make felling it a
+  question of who had the most energy.
+- **Your battle is not the kill.** A strike is fifty turns against something authored to
+  outlast anybody, so it is still standing in your fight at the end. What falls is the shared
+  bar, and the screen says so.
+
+There is **no guild, no chat, no raid group and nothing to schedule** — the only social act
+is turning up, and the only evidence anybody else exists is the bar moving while you were
+away and ten names on a board. And **no bots strike it**: a fabricated line would be a lie
+about who was here. If the Vale is too small to fell it, it is not felled, and the ladder does
+not care; the pool is content an operator raises as the population grows.
+
+There is no cron either. The wake is derived from the clock by the scheduler timed events
+already used, and the shared row is created by whoever gets there first — so a server down
+all weekend comes back correct, and last week's contribution stops counting the moment the
+anchor moves.
+
+### Fixed — a Titan could be farmed through multi-battle
+
+`/battles/multi` refused practice runs and the cold open and had never been told about the
+Titan, whose keys are only spent when a fight *opens* — so a batch ran Titan stages without
+touching the allowance at all, at zero energy, reporting a won battle to the goal engine every
+time. Which modes may not be batched is now stated once, in `multiBattleRefusal`, and read by
+both the server and the team picker, so the button a player does not see and the request the
+server refuses are the same rule.
+
 ### Added — Trials: the same fight for everybody
 
 Fourth of the seven, and the only mode in Mistvale where **what you own does not matter**.
