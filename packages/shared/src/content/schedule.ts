@@ -81,6 +81,34 @@ export function eventWindowAt(
 }
 
 /**
+ * The game-day the next occurrence opens on, for a schedule that is not running.
+ *
+ * "It is not awake" is a true thing to say and a useless one. A world boss asleep until
+ * Friday should say Friday — a player who knows when to come back comes back, and one who
+ * does not is being asked to check every day until something happens.
+ *
+ * Returns null for a one-off that has already been and gone: there is no next time, and
+ * inventing one would be worse than the silence.
+ */
+export function nextWindowStart(
+  schedule: EventSchedule,
+  today: string,
+  weekday: number,
+  now: Date,
+): string | null {
+  if (schedule.kind === 'window') {
+    const startsAt = Date.parse(schedule.startsAt);
+    if (!Number.isFinite(startsAt) || now.getTime() >= startsAt) return null;
+    return schedule.startsAt.slice(0, 10);
+  }
+
+  // Weekly: days forward to the next start weekday. Zero would mean today, which only
+  // happens when today's occurrence has already been ruled out — so it is a full week off.
+  const forward = (schedule.startWeekday - weekday + 7) % 7;
+  return addDays(today, forward === 0 ? 7 : forward);
+}
+
+/**
  * The game-day an event's *claim* window shuts on — the last day it ran, plus a grace.
  *
  * Points stop the moment the event ends, but milestones already earned stay claimable for

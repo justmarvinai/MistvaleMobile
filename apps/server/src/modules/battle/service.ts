@@ -32,6 +32,7 @@ import {
   type MultiBattleStopReason,
   type StageDef,
   type TitanRun,
+  type WorldBossStrike,
 } from '@mistvale/shared';
 import { battleSessions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
@@ -44,6 +45,7 @@ import * as ladder from '../arena/ladder';
 import { arenaConfigFrom } from '../arena/rating';
 import * as depths from '../depths/service';
 import * as titan from '../titan/service';
+import * as worldboss from '../worldboss/service';
 import * as gear from '../gear/service';
 import { borrowedTeam, PresetTeamError, stageSeed } from './preset';
 import * as mastery from '../mastery/service';
@@ -135,6 +137,15 @@ export interface RewardSummary {
    */
   titan: TitanRun | null;
   /**
+   * What a strike against a world boss did: its damage, this account's running total for
+   * the wake, and where the shared pool now stands. Null for every other mode.
+   *
+   * Nothing here is a payout. A wake's ladder is claimed on its own screen, because a rung
+   * is about the week rather than about this fight — which is exactly what separates a
+   * world boss from the Titan it looks like.
+   */
+  worldBoss: WorldBossStrike | null;
+  /**
    * The day's first victory in this mode, paid automatically. Empty once it has been
    * earned today, or in a mode the config pays nothing for.
    */
@@ -171,6 +182,7 @@ const NO_REWARDS: RewardSummary = {
   firstWin: {},
   arena: null,
   titan: null,
+  worldBoss: null,
   vaultOverflow: gear.NO_OVERFLOW,
 };
 
@@ -210,10 +222,18 @@ function titanConfigFor(
   mode: string,
   stageKey: string,
 ): ReturnType<typeof combatConfigFrom> {
-  if (mode !== 'titan') return config;
+  if (mode !== 'titan' && mode !== 'worldBoss') return config;
   const stage = contentMaps(ctx.content).stages.get(stageKey);
-  const keep = stage ? titan.keepForStage(ctx.content, stage) : null;
-  return keep ? { ...config, maxTurns: keep.rules.turnCap } : config;
+  if (!stage) return config;
+  // Two modes, one rule: a fight against something authored to outlast you ends on its own
+  // cap rather than on the engine's runaway guard. The world boss borrows it wholesale,
+  // because a strike against a shared pool is a Titan run with the pool moved off the
+  // account.
+  const cap =
+    mode === 'titan'
+      ? titan.keepForStage(ctx.content, stage)?.rules.turnCap
+      : worldboss.keepForStage(ctx.content, stage)?.rules.turnCap;
+  return cap ? { ...config, maxTurns: cap } : config;
 }
 
 function assertTeamShape(team: readonly string[]): void {
@@ -492,11 +512,39 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       );
     }
 
+    // A world boss is the same bargain with the pool moved off the account: strikes a day
+    // rather than energy, spent when the fight opens. It also refuses a wake that is asleep
+    // or already felled — checked here rather than at the end, so nobody spends an evening
+    // on a boss that fell while they were choosing a team.
+    if (options.mode === 'worldBoss') {
+      const wake = worldboss.keepForStage(ctx.content, stage);
+      if (!wake) {
+        throw new AppError('CONTENT_STALE', `Stage "${stage.key}" has no world boss behind it.`);
+      }
+      await worldboss.spendStrike(
+        tx,
+        ctx.content,
+        {
+          playerId: options.playerId,
+          level: player.level,
+          dailyCounters: player.dailyCounters,
+          dailyCountersDay: player.dailyCountersDay,
+        },
+        wake,
+        now,
+      );
+    }
+
     // Practice re-fights are free by design (GAME_DESIGN §15 — the sandbox), and so is the
     // cold open — a fight before the account has spent anything cannot cost energy it has
     // not been shown yet.
     const cost =
-      options.mode === 'practice' || options.mode === 'titan' || borrowed ? 0 : stage.energyCost;
+      options.mode === 'practice' ||
+      options.mode === 'titan' ||
+      options.mode === 'worldBoss' ||
+      borrowed
+        ? 0
+        : stage.energyCost;
     if (energy.value < cost) {
       throw new AppError('ENERGY_LOW', 'Not enough energy for that stage.');
     }
@@ -588,15 +636,14 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
     // lost. Settled here rather than left `active` with `finished` state, which is a fight
     // the player could neither act in nor be paid for.
     const summary = openingState.finished
-      ? options.mode === 'titan'
-        ? await settleTitan(tx, ctx, row, openingEvents, options.playerId)
-        : await settle(
-            tx,
-            ctx,
-            { ...row, teamIds: (row.teamIds as string[]) ?? [] },
-            openingState,
-            options.playerId,
-          )
+      ? await settleFinished(
+          tx,
+          ctx,
+          { ...row, teamIds: (row.teamIds as string[]) ?? [] },
+          openingState,
+          openingEvents,
+          options.playerId,
+        )
       : null;
     if (summary) {
       await tx
@@ -729,18 +776,14 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
 
     let summary: RewardSummary | null = (row.rewards as RewardSummary | null) ?? null;
     if (finished) {
-      summary =
-        row.mode === 'arena'
-          ? await settleArena(tx, ctx, row, result.state.outcome, options.playerId)
-          : row.mode === 'titan'
-            ? await settleTitan(tx, ctx, row, events, options.playerId)
-            : await settle(
-                tx,
-                ctx,
-                { ...row, teamIds: (row.teamIds as string[]) ?? [] },
-                result.state,
-                options.playerId,
-              );
+      summary = await settleFinished(
+        tx,
+        ctx,
+        { ...row, teamIds: (row.teamIds as string[]) ?? [] },
+        result.state,
+        events,
+        options.playerId,
+      );
     }
 
     await tx
@@ -810,7 +853,9 @@ export async function retreat(
         ? await settleArena(tx, ctx, row, 'retreat', playerId)
         : row.mode === 'titan'
           ? await settleTitan(tx, ctx, row, events, playerId)
-          : null;
+          : row.mode === 'worldBoss'
+            ? await settleWorldBoss(tx, ctx, row, events, playerId)
+            : null;
 
     await tx
       .update(battleSessions)
@@ -1138,6 +1183,80 @@ function intConfig(
 }
 
 /**
+ * Sends a finished fight to whichever settlement its mode wants.
+ *
+ * One dispatcher rather than a ternary repeated at each of the three places a battle can
+ * end (the opening resolving itself, a turn finishing it, a retreat). Those three had
+ * already drifted once — the retreat path knew about the Arena and the Titan and nothing
+ * else — and each new mode was another chance for one of them to be forgotten. A mode that
+ * settles differently is now a case here and nowhere else.
+ */
+async function settleFinished(
+  tx: Tx,
+  ctx: BattleContext,
+  row: { id: string; seed: number; mode: string; stageKey: string; teamIds: string[] },
+  state: BattleState,
+  events: readonly BattleEvent[],
+  playerId: string,
+): Promise<RewardSummary | null> {
+  if (row.mode === 'arena') return settleArena(tx, ctx, row, state.outcome, playerId);
+  if (row.mode === 'titan') return settleTitan(tx, ctx, row, events, playerId);
+  if (row.mode === 'worldBoss') return settleWorldBoss(tx, ctx, row, events, playerId);
+  return settle(tx, ctx, row, state, playerId);
+}
+
+/**
+ * Settles a strike against a world boss.
+ *
+ * Two things happen and neither is a payout: the damage is folded into the shared pool and
+ * into this account's own total for the wake. The contribution ladder is **claimed** on the
+ * screen rather than paid here, because a rung is about the week rather than about this
+ * fight — which is the difference between a wake and a Titan run.
+ *
+ * Like a Titan, it settles on **any ending**: victory, defeat, the turn cap and a retreat
+ * all did the damage they did, and there is nothing for a forfeit to protect when damage
+ * only ever accumulates.
+ */
+async function settleWorldBoss(
+  tx: Tx,
+  ctx: BattleContext,
+  row: { stageKey: string },
+  events: readonly BattleEvent[],
+  playerId: string,
+): Promise<RewardSummary> {
+  const { stages } = contentMaps(ctx.content);
+  const stage = stages.get(row.stageKey);
+  const keep = stage ? worldboss.keepForStage(ctx.content, stage) : null;
+  // Un-published mid-fight. The strike is over and cannot be filed against a boss that no
+  // longer exists; saying so beats inventing a wake to put it in.
+  if (!keep) return { ...NO_REWARDS };
+
+  const strike = await worldboss.settleStrike(
+    tx,
+    ctx.content,
+    playerId,
+    keep,
+    events,
+    new Date(),
+  );
+  if (!strike) return { ...NO_REWARDS };
+
+  // One strike is two reports: it happened, and the account's total for the wake now
+  // stands here. The damage one is a *threshold* — a mission asking for a million wants a
+  // week that reached it, not fifty strikes that add up to it twice.
+  await meta.track(tx, ctx, playerId, [
+    { type: 'worldBossStrike', facts: { dungeonKey: keep.dungeon.key } },
+    {
+      type: 'worldBossDamage',
+      amount: strike.totalDamage,
+      facts: { dungeonKey: keep.dungeon.key },
+    },
+  ]);
+
+  return { ...NO_REWARDS, worldBoss: strike };
+}
+
+/**
  * Pays out a finished battle.
  *
  * Only a victory pays. Silver is rolled from the battle's own seed, so a replay of the
@@ -1258,6 +1377,7 @@ async function settle(
     firstWin,
     arena: null,
     titan: null,
+    worldBoss: null,
   };
 }
 

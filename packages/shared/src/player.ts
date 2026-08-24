@@ -94,6 +94,7 @@ export interface UnlockFlags {
   titan: boolean;
   expeditions: boolean;
   trials: boolean;
+  worldBoss: boolean;
 }
 
 /** Account level at which each feature unlocks. Mirrored in game_config from P1. */
@@ -119,6 +120,10 @@ export const UNLOCK_LEVELS: Readonly<Record<keyof UnlockFlags, number>> = Object
   // account can do *well*. Gating it late would waste the one mode that does not care how
   // much has been farmed.
   trials: 9,
+  // After the Valewurm, and deliberately: the creature that wakes at the weekend is the one
+  // you have been practising on alone all week, and meeting it the other way round would
+  // give away the joke.
+  worldBoss: 18,
 });
 
 export function computeUnlocks(level: number): UnlockFlags {

@@ -162,6 +162,20 @@ export const ROUTES = {
      */
     overview: '/trials',
   },
+  worldBoss: {
+    /**
+     * The wake: the shared pool, the board, your own contribution and the ladder.
+     *
+     * A read plus two claims. A strike is an ordinary battle (`mode: 'worldBoss'`) through
+     * the battle routes, so playback, Auto, the speed ladder and a reload mid-fight all
+     * work here without a second implementation of any of them.
+     */
+    state: '/world-boss',
+    /** One rung of the contribution ladder, claimed once per wake. */
+    claim: (key: string) => `/world-boss/${encodeURIComponent(key)}/claim`,
+    /** The felling chest — what everybody who struck it gets when it actually falls. */
+    spoils: (key: string) => `/world-boss/${encodeURIComponent(key)}/spoils`,
+  },
   titan: {
     /**
      * Every Titan, its ladder, the keys left today and this account's own record.

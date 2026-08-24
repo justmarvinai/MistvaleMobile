@@ -278,6 +278,74 @@ export const titanRecords = pgTable(
   (table) => [uniqueIndex('titan_records_player_dungeon_key').on(table.playerId, table.dungeonKey)],
 );
 
+/**
+ * One wake of a world boss, and the **only shared mutable row in the game**.
+ *
+ * Every other table in Mistvale is partitioned by player. This one is the vale's: the
+ * damage a warden did on Tuesday is still gone when somebody else opens the game on Friday,
+ * which is the entire feature.
+ *
+ * `damage_taken` rather than `hp_remaining`, and that is load-bearing. It only ever goes
+ * up, so a strike is `damage_taken = damage_taken + $1` — a single atomic statement with no
+ * read-modify-write, no clamping race, and no lock held across a battle. Whether the boss
+ * has fallen is that number against `max_hp`, read rather than stored; `felled_at` records
+ * *when* for the screen, and is set by the strike that crossed the line.
+ */
+export const worldBossWakes = pgTable(
+  'world_boss_wakes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** `dungeon_defs` key of the boss. */
+    dungeonKey: text('dungeon_key').notNull(),
+    /** The occurrence, as the game-day it woke on — the event scheduler's own anchor. */
+    anchor: text('anchor').notNull(),
+    /** Copied from content when the wake opens, so a retune mid-week cannot move the bar. */
+    maxHp: bigint('max_hp', { mode: 'number' }).notNull(),
+    damageTaken: bigint('damage_taken', { mode: 'number' }).notNull().default(0),
+    /** Set by the strike that emptied the pool. Null while it still stands. */
+    felledAt: timestamp('felled_at', { withTimezone: true }),
+    felledBy: uuid('felled_by').references(() => players.id, { onDelete: 'set null' }),
+    /** How many strikes it has taken, and by how many distinct wardens. */
+    strikes: integer('strikes').notNull().default(0),
+    wardens: integer('wardens').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('world_boss_wakes_key').on(table.dungeonKey, table.anchor)],
+);
+
+/**
+ * What one account did to one wake.
+ *
+ * The ladder is cumulative across the wake rather than per-run, which is what makes this a
+ * row per *wake* rather than a record per account: last week's row simply stops matching
+ * when the anchor moves on, so a weekly reset needs no job and loses no history.
+ */
+export const playerWorldBoss = pgTable(
+  'player_world_boss',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    dungeonKey: text('dungeon_key').notNull(),
+    anchor: text('anchor').notNull(),
+    damage: bigint('damage', { mode: 'number' }).notNull().default(0),
+    strikes: integer('strikes').notNull().default(0),
+    /** Contribution rungs already collected. Each is claimable once per wake. */
+    claimedTiers: jsonb('claimed_tiers').notNull().default([]).$type<string[]>(),
+    /** Whether the felling chest has been collected — only ever true on a felled wake. */
+    spoilsClaimed: boolean('spoils_claimed').notNull().default(false),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('player_world_boss_key').on(table.playerId, table.dungeonKey, table.anchor),
+    // The board is "top damage for this wake", which is exactly this index read backwards.
+    index('player_world_boss_board_idx').on(table.dungeonKey, table.anchor, table.damage),
+  ],
+);
+
 export type StageProgressRow = typeof stageProgress.$inferSelect;
 export type ChapterRewardRow = typeof chapterRewards.$inferSelect;
 export type TitanRecordRow = typeof titanRecords.$inferSelect;
+export type WorldBossWakeRow = typeof worldBossWakes.$inferSelect;
+export type PlayerWorldBossRow = typeof playerWorldBoss.$inferSelect;

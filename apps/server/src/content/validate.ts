@@ -7,11 +7,13 @@ import {
   isValidBaseRank,
   rewardItemKeys,
   titanRuleProblems,
+  worldBossRuleProblems,
   type ContentIssue,
   type ContentType,
   type ContentValidationResult,
   type Rarity,
   type TitanRules,
+  type WorldBossRules,
 } from '@mistvale/shared';
 
 /**
@@ -636,10 +638,18 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
   }
 
   const titanStagesByKeep = new Map<string, number>();
+  const worldBossStagesByKeep = new Map<string, number>();
   for (const [, entity] of parsed.get('stage') ?? []) {
     const stage = entity as { mode: string; parentKey: string };
-    if (stage.mode !== 'titan') continue;
-    titanStagesByKeep.set(stage.parentKey, (titanStagesByKeep.get(stage.parentKey) ?? 0) + 1);
+    if (stage.mode === 'titan') {
+      titanStagesByKeep.set(stage.parentKey, (titanStagesByKeep.get(stage.parentKey) ?? 0) + 1);
+    }
+    if (stage.mode === 'worldBoss') {
+      worldBossStagesByKeep.set(
+        stage.parentKey,
+        (worldBossStagesByKeep.get(stage.parentKey) ?? 0) + 1,
+      );
+    }
   }
 
   for (const [key, entity] of parsed.get('dungeon') ?? []) {
@@ -650,6 +660,7 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       bossEnemyKey?: string;
       openDays: number[];
       titan?: TitanRules;
+      worldBoss?: WorldBossRules;
     };
 
     // A Titan is the one dungeon kind whose rules are the mode. Without them there is no
@@ -698,6 +709,64 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
         key,
         path: 'titan',
         message: `Titan rules belong to a titan keep; this one is ${dungeon.kind}. They would be read by nothing.`,
+      });
+    }
+
+    // A world boss is the Titan's rule applied to a shared pool, and it is refused on the
+    // same terms: without the block there is no schedule to wake on, no pool to empty and
+    // no ladder to pay, so the whole mode is missing rather than merely mis-tuned.
+    if (dungeon.kind === 'worldBoss') {
+      if (!dungeon.worldBoss) {
+        errors.push({
+          severity: 'error',
+          contentType: 'dungeon',
+          key,
+          path: 'worldBoss',
+          message:
+            'A world boss needs its rules: when it wakes, how much health the vale has to get through, and what contributing pays.',
+        });
+      } else {
+        for (const problem of worldBossRuleProblems(dungeon.worldBoss)) {
+          errors.push({
+            severity: 'error',
+            contentType: 'dungeon',
+            key,
+            path: 'worldBoss.tiers',
+            message: problem,
+          });
+        }
+        rewardMap(
+          { contentType: 'dungeon', key, path: 'worldBoss.fellingRewards' },
+          dungeon.worldBoss.fellingRewards,
+        );
+        dungeon.worldBoss.tiers.forEach((tier, index) => {
+          rewardMap(
+            { contentType: 'dungeon', key, path: `worldBoss.tiers.${index}.rewards` },
+            tier.rewards,
+          );
+        });
+      }
+
+      const stages = worldBossStagesByKeep.get(key) ?? 0;
+      if (stages !== 1) {
+        errors.push({
+          severity: 'error',
+          contentType: 'dungeon',
+          key,
+          path: 'worldBoss',
+          message:
+            stages === 0
+              ? 'A world boss needs exactly one `worldBoss` stage to be struck on, and has none.'
+              : `A world boss is one fight; this keep has ${stages} worldBoss stages.`,
+        });
+      }
+    } else if (dungeon.worldBoss) {
+      errors.push({
+        severity: 'error',
+        contentType: 'dungeon',
+        key,
+        path: 'worldBoss',
+        message: `World boss rules belong to a worldBoss keep; this one is ${dungeon.kind}. They would be read by nothing.`,
       });
     }
 

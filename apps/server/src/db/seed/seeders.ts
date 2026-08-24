@@ -12,6 +12,7 @@ import { SOUND_CUES } from './data/sounds';
 import { EXPEDITIONS } from './data/expeditions';
 import { TITAN_DUNGEONS, TITAN_ENEMIES, TITAN_SKILLS, TITAN_STAGES } from './data/titan';
 import { TRIAL_ENEMIES, TRIAL_SKILLS, TRIAL_STAGES } from './data/trials';
+import { WORLD_BOSS_DUNGEONS, WORLD_BOSS_ENEMIES, WORLD_BOSS_STAGES } from './data/worldboss';
 import { TUTORIAL_STAGES, TUTORIAL_STEPS } from './data/tutorial';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
@@ -60,7 +61,13 @@ export function buildSeedContent(): SeedContent[] {
       key: data.key,
       data,
     })),
-    enemy: [...ENEMIES, ...DEPTHS_ENEMIES, ...TITAN_ENEMIES, ...TRIAL_ENEMIES].map((data) => ({
+    enemy: [
+      ...ENEMIES,
+      ...DEPTHS_ENEMIES,
+      ...TITAN_ENEMIES,
+      ...TRIAL_ENEMIES,
+      ...WORLD_BOSS_ENEMIES,
+    ].map((data) => ({
       key: data.key,
       data,
     })),
@@ -70,13 +77,17 @@ export function buildSeedContent(): SeedContent[] {
     item: ITEMS.map((data) => ({ key: data.key, data })),
     expedition: EXPEDITIONS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
-    dungeon: [...DUNGEONS, ...TITAN_DUNGEONS].map((data) => ({ key: data.key, data })),
+    dungeon: [...DUNGEONS, ...TITAN_DUNGEONS, ...WORLD_BOSS_DUNGEONS].map((data) => ({
+      key: data.key,
+      data,
+    })),
     stage: [
       ...CAMPAIGN_STAGES,
       ...DEPTHS_STAGES,
       ...TUTORIAL_STAGES,
       ...TITAN_STAGES,
       ...TRIAL_STAGES,
+      ...WORLD_BOSS_STAGES,
     ].map((data) => ({
       key: data.key,
       data,

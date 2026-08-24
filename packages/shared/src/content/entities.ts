@@ -504,6 +504,7 @@ export const STAGE_MODES = [
   'tutorial',
   'titan',
   'trial',
+  'worldBoss',
 ] as const;
 
 // ── The Depths ──────────────────────────────────────────────────────────────
@@ -521,7 +522,7 @@ export const STAGE_MODES = [
  * keys, and the damage tiers — and its single floor is fought with keys rather than energy
  * and paid on any ending rather than on a victory.
  */
-export const DUNGEON_KINDS = ['relic', 'proving', 'springs', 'titan'] as const;
+export const DUNGEON_KINDS = ['relic', 'proving', 'springs', 'titan', 'worldBoss'] as const;
 export type DungeonKind = (typeof DUNGEON_KINDS)[number];
 
 /**
@@ -557,6 +558,91 @@ export const titanRulesSchema = z.object({
 });
 export type TitanRules = z.infer<typeof titanRulesSchema>;
 
+/**
+ * When an event runs.
+ *
+ * `window` is a one-off between two instants — what an operator schedules for a launch
+ * weekend. `weekly` repeats forever from a weekday, measured in **game-days**, so it turns
+ * over at the same reset hour as everything else and needs no timezone arithmetic of its
+ * own. Recurring is what makes the EA calendar tend itself: with a handful of players and
+ * nobody running live-ops, an event that has to be re-scheduled by hand every fortnight is
+ * an event that stops happening.
+ */
+export const eventScheduleSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('window'),
+    /** ISO instants. The event is live between them, inclusive of the start. */
+    startsAt: z.string(),
+    endsAt: z.string(),
+  }),
+  z.object({
+    kind: z.literal('weekly'),
+    /** `0` = Sunday, matching `gameDay().weekday` and the Springs rotation. */
+    startWeekday: z.number().int().min(0).max(6),
+    /** How many game-days it runs for, starting on that weekday. */
+    durationDays: z.number().int().min(1).max(7),
+  }),
+]);
+export type EventSchedule = z.infer<typeof eventScheduleSchema>;
+
+// Declared here rather than down with the events it was written for, because the world
+// boss's wake is scheduled by the same rule and a Zod schema cannot reference a `const`
+// that has not been evaluated yet. One scheduler, two features, one place it is defined.
+
+/**
+ * One rung of a world boss's contribution ladder.
+ *
+ * The same shape as a Titan's tier and a different question. A Titan pays its rung **every
+ * run**, because the run is the achievement; a world boss pays each rung **once per wake**,
+ * against the damage an account has done to it *all week*. That is what makes the two modes
+ * different things to do with the same creature: one rewards the best hour you had, the
+ * other rewards turning up.
+ */
+export const worldBossTierSchema = z.object({
+  key: contentKeySchema,
+  name: z.string().min(1).max(48),
+  /** Cumulative damage this rung wants, across the whole wake. */
+  damage: z.number().int().min(1).max(1_000_000_000),
+  rewards: z.record(z.string(), z.number()),
+});
+export type WorldBossTier = z.infer<typeof worldBossTierSchema>;
+
+/**
+ * What makes a world boss a world boss: **one health pool, shared by everybody**.
+ *
+ * It is the only genuinely shared mutable state in Mistvale. Every other number in the
+ * game belongs to one account; this one belongs to the server, and the whole feature is
+ * what that does to how a fight feels — your damage is on the same bar as everyone else's,
+ * and the bar is either emptied together or not at all.
+ *
+ * It is deliberately **not** a guild, a chat or a raid group. There is no social layer to
+ * build, nothing to schedule with anybody, and no WebSocket: the bar is read when a screen
+ * asks for it, exactly like energy and the arena's tokens.
+ */
+export const worldBossRulesSchema = z.object({
+  /** When it wakes. Reuses the event scheduler, so a weekly wake needs no cron. */
+  schedule: eventScheduleSchema,
+  /** The shared pool for one wake. Everyone's damage comes off this one number. */
+  maxHp: z.number().int().min(1_000).max(100_000_000_000),
+  /** Turns a strike lasts before it sees you off. Overrides `combat.maxTurns`. */
+  turnCap: z.number().int().min(5).max(200).default(50),
+  /** Strikes a day. Spent when the fight opens, restored by the daily rollover. */
+  attemptsPerDay: z.number().int().min(1).max(20).default(3),
+  /** Ascending by damage. Publish validation refuses an out-of-order or empty ladder. */
+  tiers: z.array(worldBossTierSchema).max(12).default([]),
+  /**
+   * What everybody who struck it gets if it actually falls.
+   *
+   * The point of the mode in one field: a reward nobody can earn alone, paid to everybody
+   * who helped, however little. It is a bonus rather than the main payout — the ladder is
+   * that — because a server too small to fell it must still be worth turning up to.
+   */
+  fellingRewards: z.record(z.string(), z.number()).default({}),
+  /** Days after the wake closes that rewards already earned can still be collected. */
+  claimGraceDays: z.number().int().min(0).max(14).default(3),
+});
+export type WorldBossRules = z.infer<typeof worldBossRulesSchema>;
+
 export const dungeonDefSchema = contentMetaSchema.extend({
   name: z.string().min(1).max(64),
   kind: z.enum(DUNGEON_KINDS),
@@ -586,6 +672,11 @@ export const dungeonDefSchema = contentMetaSchema.extend({
    * (publish validation), because the three numbers here are the whole of the mode.
    */
   titan: titanRulesSchema.optional(),
+  /**
+   * What makes a world boss a world boss. Required on a `worldBoss` keep and refused on
+   * every other kind (publish validation), the same way `titan` is.
+   */
+  worldBoss: worldBossRulesSchema.optional(),
 });
 export type DungeonDef = z.infer<typeof dungeonDefSchema>;
 
@@ -954,32 +1045,7 @@ export type MissionDef = z.infer<typeof missionDefSchema>;
  * (docs/ARCHITECTURE.md §5.1).
  */
 
-/**
- * When an event runs.
- *
- * `window` is a one-off between two instants — what an operator schedules for a launch
- * weekend. `weekly` repeats forever from a weekday, measured in **game-days**, so it turns
- * over at the same reset hour as everything else and needs no timezone arithmetic of its
- * own. Recurring is what makes the EA calendar tend itself: with a handful of players and
- * nobody running live-ops, an event that has to be re-scheduled by hand every fortnight is
- * an event that stops happening.
- */
-export const eventScheduleSchema = z.discriminatedUnion('kind', [
-  z.object({
-    kind: z.literal('window'),
-    /** ISO instants. The event is live between them, inclusive of the start. */
-    startsAt: z.string(),
-    endsAt: z.string(),
-  }),
-  z.object({
-    kind: z.literal('weekly'),
-    /** `0` = Sunday, matching `gameDay().weekday` and the Springs rotation. */
-    startWeekday: z.number().int().min(0).max(6),
-    /** How many game-days it runs for, starting on that weekday. */
-    durationDays: z.number().int().min(1).max(7),
-  }),
-]);
-export type EventSchedule = z.infer<typeof eventScheduleSchema>;
+// `eventScheduleSchema` is declared further up, beside the world boss that shares it.
 
 /**
  * One way of earning points.

@@ -85,6 +85,10 @@ export const GOAL_TYPES = [
    * arrive — and a re-run of one already solved cannot count twice.
    */
   'trialsBeaten',
+  /** One strike against a world boss. The wake it belongs to is a filter. */
+  'worldBossStrike',
+  /** Cumulative damage to a world boss this wake. A *threshold*, like the Titan's. */
+  'worldBossDamage',
   /**
    * The most damage ever done to a Titan. A *threshold* goal, and it has to be: a mission
    * asking for half a million damage means one run that did it, never fifty that added up.
@@ -129,6 +133,8 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   championObtained: 'count',
   expeditionClaim: 'count',
   trialsBeaten: 'highest',
+  worldBossStrike: 'count',
+  worldBossDamage: 'highest',
   titanRun: 'count',
   titanDamage: 'highest',
 });
@@ -167,6 +173,8 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   championObtained: ['rarity'],
   expeditionClaim: [],
   trialsBeaten: [],
+  worldBossStrike: ['dungeonKey'],
+  worldBossDamage: ['dungeonKey'],
   titanRun: ['dungeonKey'],
   titanDamage: ['dungeonKey'],
 });
