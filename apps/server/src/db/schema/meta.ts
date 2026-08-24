@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import type { ExpeditionFavourState } from '@mistvale/shared';
 import { players } from './accounts';
 
 /**
@@ -182,3 +183,32 @@ export type PlayerQuestRow = typeof playerQuests.$inferSelect;
 export type PlayerMissionRow = typeof playerMissions.$inferSelect;
 export type PlayerEventRow = typeof playerEvents.$inferSelect;
 export type LoginClaimRow = typeof loginClaims.$inferSelect;
+
+/**
+ * A party of champions sent away, and what they will bring back (C10c).
+ *
+ * The party is a jsonb array rather than a join table: it is read and written whole and
+ * never queried a member at a time, and "which champions are away" is one indexed read of
+ * this table rather than a join nothing else would want.
+ *
+ * **`rewards` is fixed at dispatch, not computed at claim.** The favours a party met were
+ * true when it left; a content edit six hours later must not quietly change what somebody
+ * was promised for a decision they already made.
+ */
+export const playerExpeditions = pgTable(
+  'player_expeditions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    expeditionKey: text('expedition_key').notNull(),
+    championIds: jsonb('champion_ids').notNull().default([]).$type<string[]>(),
+    rewards: jsonb('rewards').notNull().default({}).$type<Record<string, number>>(),
+    favours: jsonb('favours').notNull().default([]).$type<ExpeditionFavourState[]>(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    readyAt: timestamp('ready_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [index('player_expeditions_player').on(table.playerId)],
+);
+export type PlayerExpeditionRow = typeof playerExpeditions.$inferSelect;

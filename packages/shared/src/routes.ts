@@ -136,6 +136,22 @@ export const ROUTES = {
     /** The dungeon list with today's rotation and how deep the player has been. */
     overview: '/depths',
   },
+  expeditions: {
+    /** Every expedition, what is in flight, and which champions are away. */
+    state: '/expeditions',
+    /** `/expeditions/:key/dispatch` — send a party. */
+    dispatch: (key: string) => `/expeditions/${encodeURIComponent(key)}/dispatch`,
+    /** `/expeditions/:id/claim` — collect a finished one; the party comes home. */
+    claim: (id: string) => `/expeditions/${encodeURIComponent(id)}/claim`,
+    /**
+     * `/expeditions/:id/recall` — bring them back early, for nothing.
+     *
+     * Exists because a misclick otherwise costs twelve hours of a champion, and because
+     * a player who suddenly needs that champion for an arena run should be able to choose
+     * to lose the yield rather than be locked out of the game they are playing.
+     */
+    recall: (id: string) => `/expeditions/${encodeURIComponent(id)}/recall`,
+  },
   titan: {
     /**
      * Every Titan, its ladder, the keys left today and this account's own record.

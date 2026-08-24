@@ -732,6 +732,51 @@ export type ItemDef = z.infer<typeof itemDefSchema>;
  * Everything the design docs mark as tunable lives here rather than in code, so balance
  * changes are an Admin edit and a publish — never a deploy (CLAUDE.md hard rules).
  */
+// ── Expeditions (C10c) ──────────────────────────────────────────────────────
+
+/**
+ * One thing an expedition asks of the party it is sent with.
+ *
+ * Meeting a favour raises the whole yield by its percentage. This is what turns a timer
+ * into a decision: a broad roster meets more favours, so "who can I spare" and "who fits"
+ * pull against each other, and owning eight good champions beats owning four.
+ *
+ * `kind` names what is being asked about and `value` is read against it — a faction key,
+ * an element, a role, or a rarity. A favour naming something that does not exist is simply
+ * never met, which costs the yield rather than the expedition.
+ */
+export const expeditionFavourSchema = z.object({
+  kind: z.enum(['faction', 'element', 'role', 'rarity']),
+  value: z.string().min(1).max(48),
+  /** Added to the yield when at least one champion in the party matches. */
+  bonusPct: z.number().min(0).max(500),
+});
+export type ExpeditionFavour = z.infer<typeof expeditionFavourSchema>;
+
+/**
+ * A place champions can be sent, and what they bring back.
+ *
+ * The reward is **deterministic**: a timer with a random payout is worse than a timer with
+ * a legible one, because a player cannot decide between two expeditions they cannot price.
+ * What varies is the party — favours met multiply the base.
+ */
+export const expeditionDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(48),
+  /** Where they are going, in a sentence. */
+  description: z.string().max(400).default(''),
+  /** How long they are gone. */
+  hours: z.number().int().min(1).max(48),
+  /** How many champions it takes. Sent together, back together. */
+  partySize: z.number().int().min(1).max(4),
+  unlockLevel: z.number().int().min(1).max(100).default(1),
+  /** Currencies and items, by key, before favours. */
+  rewards: z.record(z.string(), z.number()).default({}),
+  favours: z.array(expeditionFavourSchema).max(6).default([]),
+  icon: z.string().max(64).default(''),
+});
+export type ExpeditionDef = z.infer<typeof expeditionDefSchema>;
+export type ExpeditionDefInput = z.input<typeof expeditionDefSchema>;
+
 export const gameConfigEntrySchema = z.object({
   key: z.string().min(2).max(64),
   value: z.union([

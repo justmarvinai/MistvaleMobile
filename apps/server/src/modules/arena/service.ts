@@ -30,6 +30,7 @@ import * as rewards from '../rewards/service';
 import * as roster from '../roster/service';
 import * as hall from './hall';
 import { accountBonusFor, accountBonusesFor } from '../roster/account';
+import { assertAvailable } from '../meta/expeditions';
 import {
   assertUnlocked,
   config,
@@ -375,6 +376,10 @@ export async function setDefence(
     assertUnlocked(player.level, ctx);
 
     await ensureState(tx, playerId, ctx);
+    // A defence is a *snapshot* taken now, so a champion set here and then sent away keeps
+    // defending — but it must be here to be set. Away means unavailable at the moment of
+    // choosing, which is the honest reading of both rules (C10c).
+    await assertAvailable(tx, playerId, team);
     const owned = await roster.findOwned(tx, playerId, team);
     if (owned.length !== team.length) {
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
@@ -466,6 +471,8 @@ export async function attack(
     }
 
     // Both sides, each with its own Hall of Valor.
+    // Attacking is fielding, so the same rule as a campaign fight.
+    await assertAvailable(tx, options.playerId, options.team);
     const attackers = await roster.findOwned(tx, options.playerId, options.team);
     if (attackers.length !== options.team.length) {
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');

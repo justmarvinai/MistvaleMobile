@@ -9,6 +9,7 @@ import { EVENTS } from './data/events';
 import { LOGIN_TRACKS } from './data/login';
 import { NEWS_POSTS } from './data/news';
 import { SOUND_CUES } from './data/sounds';
+import { EXPEDITIONS } from './data/expeditions';
 import { TITAN_DUNGEONS, TITAN_ENEMIES, TITAN_SKILLS, TITAN_STAGES } from './data/titan';
 import { TUTORIAL_STAGES, TUTORIAL_STEPS } from './data/tutorial';
 import { GAME_CONFIG, ITEMS } from './data/config';
@@ -65,6 +66,7 @@ export function buildSeedContent(): SeedContent[] {
     gearSlot: GEAR_SLOTS.map((data) => ({ key: data.key, data })),
     gearStat: GEAR_STATS.map((data) => ({ key: data.key, data })),
     item: ITEMS.map((data) => ({ key: data.key, data })),
+    expedition: EXPEDITIONS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
     dungeon: [...DUNGEONS, ...TITAN_DUNGEONS].map((data) => ({ key: data.key, data })),
     stage: [...CAMPAIGN_STAGES, ...DEPTHS_STAGES, ...TUTORIAL_STAGES, ...TITAN_STAGES].map(

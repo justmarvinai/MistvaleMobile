@@ -16,6 +16,7 @@ export type ScreenId =
   | 'depths'
   | 'arena'
   | 'titan'
+  | 'expeditions'
   | 'champions'
   | 'relics'
   | 'mistgate'
@@ -127,6 +128,18 @@ export const SCREENS: readonly ScreenDefinition[] = [
       'One enormous thing, two keys a day, and a ladder of chests for how much of it you moved. The fight worth optimising rather than clearing.',
     unlock: 'titan',
     lockedHint: 'Opens at level 16',
+    inDock: true,
+  },
+  {
+    id: 'expeditions',
+    label: 'Expeditions',
+    icon: 'nav-missions',
+    glyph: 'glyph-eagle-staff',
+    art: 'crest-gilded-crown',
+    blurb:
+      'Send champions somewhere that is not a fight. They are gone for hours and cannot be fielded while they are — which is what makes a wide roster worth having.',
+    unlock: 'expeditions',
+    lockedHint: 'Opens at level 11',
     inDock: true,
   },
   {

@@ -5,6 +5,7 @@ import {
   championDefSchema,
   dungeonDefSchema,
   enemyDefSchema,
+  expeditionDefSchema,
   factionDefSchema,
   gameConfigEntrySchema,
   gearSetDefSchema,
@@ -64,6 +65,7 @@ export const contentBundleSchema = z.object({
   newsPosts: z.array(newsPostDefSchema),
   tutorialSteps: z.array(tutorialStepDefSchema),
   soundCues: z.array(soundCueDefSchema),
+  expeditions: z.array(expeditionDefSchema),
   /** Flattened to a plain map — the client only ever reads values. */
   config: z.record(z.string(), gameConfigEntrySchema.shape.value),
 });

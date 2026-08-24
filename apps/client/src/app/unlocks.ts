@@ -32,6 +32,12 @@ export interface Unlock {
  * thing — the celebration queues them rather than picking a winner.
  */
 const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> = Object.freeze({
+  expeditions: {
+    screen: 'expeditions',
+    title: 'Expeditions',
+    blurb:
+      'There is work in the Vale that is not a fight, and champions who are not fighting today can do it. They are gone for hours and cannot be fielded while they are — which is the cost, and the reason a wide roster is worth having.',
+  },
   loginCalendar: {
     screen: 'calendar',
     title: 'The Calendar',

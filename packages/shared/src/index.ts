@@ -4,6 +4,7 @@ export * from './errors';
 export * from './api';
 export * from './auth';
 export * from './player';
+export * from './expedition';
 export * from './readiness';
 export * from './standing';
 export * from './gear';

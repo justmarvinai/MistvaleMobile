@@ -357,6 +357,15 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Multiplier per purchase already made. At 25,000 and 1.3 the fifteenth and last slab costs about 984,000 and the whole ceiling costs about 4.2M — expensive on purpose, since the alternative to buying room is pressing sell.',
   ),
 
+  // ── Expeditions (C10c) ────────────────────────────────────────────────────
+  entry(
+    'expedition.slots',
+    3,
+    'progression',
+    'Expeditions at once',
+    'How many parties may be out together. Three against a roster of ten means the long one is a real commitment — raise it and expeditions stop costing anything, which is the only thing that makes them interesting.',
+  ),
+
   // ── Imprint and Standing (C10b) ───────────────────────────────────────────
   entry(
     'progression.imprintCopies',

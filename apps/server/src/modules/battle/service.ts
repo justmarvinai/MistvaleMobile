@@ -54,6 +54,7 @@ import * as chronicle from '../summon/service';
 import * as rewards from '../rewards/service';
 import * as roster from '../roster/service';
 import { accountBonusFor, accountBonusesFor } from '../roster/account';
+import { assertAvailable } from '../meta/expeditions';
 
 /**
  * Battles, server-side.
@@ -433,6 +434,10 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
           (await progress.hasCleared(tx, options.playerId, stage.key))),
     );
 
+    // A champion on an expedition cannot be sent into a fight — that unavailability is the
+    // whole reason expeditions cost anything (C10c). Checked before the energy is spent, so
+    // a refusal never bills for a battle that did not start.
+    if (!borrowed) await assertAvailable(tx, options.playerId, options.team);
     const owned = borrowed ? [] : await roster.findOwned(tx, options.playerId, options.team);
     if (!borrowed && owned.length !== options.team.length) {
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');
@@ -945,6 +950,8 @@ export async function runMany(
 
     await assertStageOpen(tx, ctx, player, stage, stages);
 
+    // Farming ten runs at once is still fielding a team, so the same rule applies.
+    await assertAvailable(tx, options.playerId, options.team);
     const owned = await roster.findOwned(tx, options.playerId, options.team);
     if (owned.length !== options.team.length) {
       throw new AppError('VALIDATION', 'That team includes a champion you do not own.');

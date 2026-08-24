@@ -5,6 +5,39 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Expeditions: work that is not a fight
+
+Third of the seven. Every other system in Mistvale asks about four champions; this is the
+one that asks about the fifth and sixth.
+
+Send a party somewhere for four, eight or twelve hours and they bring back silver, dust,
+essence and brews. **They are unavailable while they are gone** — that is not a side effect,
+it is the feature. A party that leaves cannot be sent into a battle, set as an arena
+defence, fed away as food or released, so sending two costs you two you cannot field, and
+owning eight good champions becomes better than owning four.
+
+- **Away means unavailable, not untouchable.** An away champion can still be levelled,
+  ranked, ascended and re-geared. They are working, not gone, and blocking investment would
+  be friction with no design behind it.
+- **Favours make it a puzzle rather than a timer.** Each expedition asks for a faction, a
+  breath, a role or a rarity, and every one the party meets raises the whole yield. The
+  party that meets the most is rarely the party you would field — the Long Survey asks for
+  all four breaths at once, which only a broad roster can staff.
+- **The reward is deterministic**, and fixed at dispatch rather than computed at claim: a
+  timer whose payout is a dice roll is a timer nobody can price, and the favours a party met
+  were true when it left.
+- **Recall brings them back early for nothing**, because a misclick should not cost twelve
+  hours of a champion — but a *finished* run cannot be recalled, since that would throw away
+  what it earned.
+
+The picker prices the party as it is being chosen, running the same two pure functions the
+server dispatches with. An away champion is drawn greyed with an "Away" tag rather than
+hidden, because a picker that quietly omitted a champion would look like the roster had lost
+one.
+
+Three expeditions ship, `expedition` is a twenty-fifth content type, and every number —
+hours, party size, rewards, favours, how many may run at once — is editable in Admin.
+
 ### Added — Imprint and Standing: what a collection is worth
 
 Two of the seven, and one pass because both answer the same question — what does a

@@ -21,6 +21,7 @@ import {
   summonPoolDefSchema,
   stageDefSchema,
   soundCueDefSchema,
+  expeditionDefSchema,
   tutorialStepDefSchema,
   statusDefSchema,
 } from './entities';
@@ -58,6 +59,7 @@ export const CONTENT_TYPES = [
   'newsPost',
   'tutorialStep',
   'soundCue',
+  'expedition',
   'gameConfig',
 ] as const;
 
@@ -240,6 +242,13 @@ export const CONTENT_REGISTRY: Readonly<Record<ContentType, ContentTypeMeta>> = 
     references: [],
     inBundle: true,
   },
+  expedition: {
+    label: 'Expeditions',
+    path: 'expeditions',
+    schema: expeditionDefSchema,
+    references: [],
+    inBundle: true,
+  },
   gameConfig: {
     label: 'Game config',
     path: 'config',
@@ -274,6 +283,7 @@ export const CONTENT_LOAD_ORDER: readonly ContentType[] = [
   'newsPost',
   'tutorialStep',
   'soundCue',
+  'expedition',
   'gameConfig',
 ];
 

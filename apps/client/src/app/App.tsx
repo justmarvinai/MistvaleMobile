@@ -8,6 +8,7 @@ import { HavenScreen } from '@/screens/Haven/HavenScreen';
 import { CampaignScreen } from '@/screens/Campaign/CampaignScreen';
 import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { DepthsScreen } from '@/screens/Depths/DepthsScreen';
+import { ExpeditionsScreen } from '../screens/Expeditions/ExpeditionsScreen';
 import { TitanScreen } from '@/screens/Titan/TitanScreen';
 import { ArenaScreen } from '@/screens/Arena/ArenaScreen';
 import { QuestsScreen } from '@/screens/Quests/QuestsScreen';
@@ -306,6 +307,8 @@ function GameShell() {
               <DepthsScreen />
             ) : screen === 'titan' ? (
               <TitanScreen />
+            ) : screen === 'expeditions' ? (
+              <ExpeditionsScreen />
             ) : screen === 'arena' ? (
               <ArenaScreen />
             ) : screen === 'battle' ? (

@@ -92,6 +92,7 @@ export interface UnlockFlags {
   provingGrounds: boolean;
   masteries: boolean;
   titan: boolean;
+  expeditions: boolean;
 }
 
 /** Account level at which each feature unlocks. Mirrored in game_config from P1. */
@@ -110,6 +111,9 @@ export const UNLOCK_LEVELS: Readonly<Record<keyof UnlockFlags, number>> = Object
   provingGrounds: 14,
   masteries: 14,
   titan: 16,
+  // Late enough that sending two champions away is a real cost rather than a lock-out:
+  // a roster of four cannot afford it, and that is the point of the feature.
+  expeditions: 11,
 });
 
 export function computeUnlocks(level: number): UnlockFlags {

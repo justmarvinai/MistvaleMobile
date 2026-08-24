@@ -1,0 +1,179 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding-bottom: $space-4;
+}
+
+.note {
+  margin: 0 0 $space-2;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.slots {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+
+  strong {
+    color: $gold;
+    font-family: $font-mono;
+  }
+}
+
+.running,
+.offers {
+  display: grid;
+  gap: $space-3;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+}
+
+.runCard,
+.offerCard {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.when {
+  margin: 0;
+  color: $accent-soft;
+  font-family: $font-mono;
+  font-size: 0.95rem;
+}
+
+.description {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.terms {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 0.85rem;
+}
+
+/* Favours as chips. A met one is lit; an unmet one is still shown, because what the
+   expedition *wants* is as useful as what this party happens to give it. */
+.favours {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+  list-style: none;
+
+  li {
+    padding: 2px $space-2;
+    border: 1px solid rgba($parchment-dim, 0.25);
+    color: $parchment-dim;
+    font-size: 0.75rem;
+    text-transform: capitalize;
+
+    &[data-met='true'] {
+      border-color: $accent;
+      background: rgba($accent, 0.15);
+      color: $accent-soft;
+    }
+  }
+}
+
+.runActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  gap: $space-2;
+}
+
+.blocked {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+/* ── The party picker ─────────────────────────────────────────────────────── */
+
+.pickerBody {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  padding: $space-2 $space-3;
+  border: 1px solid rgba($accent, 0.3);
+  background: rgba(0, 0, 0, 0.2);
+  gap: $space-1;
+}
+
+.previewLabel {
+  color: $accent;
+  font-family: $font-display;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  max-height: 26rem;
+  gap: $space-2;
+  grid-template-columns: repeat(auto-fill, $card-champion);
+  overflow-y: auto;
+}
+
+/* An away champion is drawn and refused rather than hidden — a picker that omitted one
+   would look like the roster had lost a champion. */
+.slot {
+  position: relative;
+}
+
+.awayTag {
+  position: absolute;
+  top: 46%;
+  left: 0;
+  right: 0;
+  padding: 3px 0;
+  background: rgba(0, 0, 0, 0.75);
+  color: $accent-soft;
+  font-family: $font-display;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.slot[data-away='true'] {
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.pickerActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $space-2;
+}
+
+.notice {
+  margin: 0;
+  color: $accent-soft;
+  font-size: 0.9rem;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.9rem;
+}

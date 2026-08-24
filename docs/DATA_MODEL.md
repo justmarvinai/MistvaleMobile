@@ -268,6 +268,17 @@ Three of those are worth their own sentence:
 | reforges smallint default 0 | how many substat rerolls this relic has had (C10a). Stored rather than counted from `economy_log`, because the price of the next reroll is built on it and the log is prunable (P8i) — a pruned month must not make every old relic cheap to reroll again |
 | source, obtained_at | |
 
+### `player_expeditions`
+| column | notes |
+|---|---|
+| id, player_id (indexed) | |
+| expedition_key | |
+| champion_ids jsonb | the party, read and written whole. A jsonb array rather than a join table: nothing ever queries a party one member at a time, and "which champions are away" is one indexed read of this table rather than a join nothing else wants |
+| rewards jsonb, favours jsonb | **fixed at dispatch, not computed at claim** — the favours a party met were true when it left, and a content edit six hours later must not change what somebody was promised for a decision they already made |
+| started_at, ready_at | `ready` is decided by comparing `ready_at` to the *server's* clock on every read; the client is never asked |
+
+A row exists only while a party is out or waiting to be collected. Claiming deletes it inside the paying transaction, so the row **is** the receipt and a double-tap that got past the row lock finds nothing rather than paying twice. Recalling deletes it and pays nothing.
+
 ### `champion_imprints`
 | column | notes |
 |---|---|

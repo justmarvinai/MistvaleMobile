@@ -19,6 +19,7 @@ import { AppError } from '../../lib/errors';
 import { championXpToNextLevel, grant, grantItems, itemQuantities } from '../rewards/service';
 import { levelCapForRank } from './service';
 import { track } from '../meta/progress';
+import { assertAvailable } from '../meta/expeditions';
 
 /**
  * The four ladders a champion climbs: level, rank, ascension and skills.
@@ -710,6 +711,10 @@ async function lockFood(
   if (rows.length !== unique.length) {
     throw AppError.notFound('One of those champions is not yours.');
   }
+
+  // A champion on an expedition is *working*, not free to be eaten. Checked here because
+  // this is the single funnel both feeding and rank-up food pass through (C10c).
+  await assertAvailable(tx, playerId, unique);
 
   const protectedRow = rows.find((row) => row.locked || row.favourite);
   if (protectedRow) {

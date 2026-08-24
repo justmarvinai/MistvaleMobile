@@ -77,6 +77,8 @@ export const GOAL_TYPES = [
   'championObtained',
   /** A Titan key spent — the run is the activity, whatever it managed. Filter: `dungeonKey`. */
   'titanRun',
+  /** An expedition collected. The party came home; what they brought is separate. */
+  'expeditionClaim',
   /**
    * The most damage ever done to a Titan. A *threshold* goal, and it has to be: a mission
    * asking for half a million damage means one run that did it, never fifty that added up.
@@ -119,6 +121,7 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   questClaim: 'count',
   claimAllDailies: 'count',
   championObtained: 'count',
+  expeditionClaim: 'count',
   titanRun: 'count',
   titanDamage: 'highest',
 });
@@ -155,6 +158,7 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   questClaim: ['period'],
   claimAllDailies: [],
   championObtained: ['rarity'],
+  expeditionClaim: [],
   titanRun: ['dungeonKey'],
   titanDamage: ['dungeonKey'],
 });

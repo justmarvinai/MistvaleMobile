@@ -232,6 +232,13 @@
       "when": 1787085701000,
       "tag": "0032_champion_imprints",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1787085702000,
+      "tag": "0033_expeditions",
+      "breakpoints": true
     }
   ]
 }

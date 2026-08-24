@@ -2,6 +2,8 @@ import type { FastifyPluginAsync } from 'fastify';
 import {
   ROUTES,
   apiSuccess,
+  claimExpeditionRequestSchema,
+  dispatchExpeditionRequestSchema,
   eventClaimRequestSchema,
   loginClaimRequestSchema,
   tutorialAdvanceRequestSchema,
@@ -12,11 +14,12 @@ import {
 } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
 import * as events from './events';
+import * as expeditions from './expeditions';
 import * as login from './login';
 import * as missions from './missions';
 import * as tutorial from './tutorial';
 import * as quests from './quests';
-import { keyParam } from '../../lib/params';
+import { keyParam, idParam } from '../../lib/params';
 
 /**
  * The checklist.
@@ -119,6 +122,68 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
       );
     }
     return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  // ── Expeditions (C10c) ────────────────────────────────────────────────────
+
+  /**
+   * A required player *level* rather than just an id, because expeditions are unlocked
+   * content and the offers a screen shows depend on it. Read from the request's own player
+   * row, which the auth preHandler has already loaded.
+   */
+  const requireWarden = (request: {
+    player?: { id: string; level: number } | null;
+  }): { id: string; level: number } => {
+    const player = request.player;
+    if (!player) throw AppError.authRequired();
+    return player;
+  };
+
+  app.get(ROUTES.expeditions.state, async (request, reply) => {
+    const warden = requireWarden(request);
+    const state = await expeditions.stateFor(ctx(), warden.id, warden.level, new Date());
+    return reply.send(apiSuccess({ expeditions: state }, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.expeditions.dispatch, 'key'), async (request, reply) => {
+    const warden = requireWarden(request);
+    const key = keyParam(request);
+    const body = dispatchExpeditionRequestSchema.parse(request.body);
+
+    const state = await expeditions.dispatch(
+      ctx(),
+      warden.id,
+      warden.level,
+      key,
+      body.championIds,
+      new Date(),
+    );
+    request.log.info(
+      { playerId: warden.id, expeditionKey: key, party: body.championIds.length },
+      'expedition dispatched',
+    );
+    return reply.send(apiSuccess({ expeditions: state }, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.expeditions.claim), async (request, reply) => {
+    const warden = requireWarden(request);
+    const id = idParam(request);
+    claimExpeditionRequestSchema.parse(request.body);
+
+    const now = new Date();
+    const outcome = await expeditions.claim(ctx(), warden.id, id, now);
+    const state = await expeditions.stateFor(ctx(), warden.id, warden.level, now);
+    return reply.send(apiSuccess({ ...outcome, state }, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.expeditions.recall), async (request, reply) => {
+    const warden = requireWarden(request);
+    const id = idParam(request);
+
+    const championIds = await expeditions.recall(ctx(), warden.id, id);
+    const state = await expeditions.stateFor(ctx(), warden.id, warden.level, new Date());
+    request.log.info({ playerId: warden.id, runId: id }, 'expedition recalled');
+    return reply.send(apiSuccess({ championIds, expeditions: state }, app.content.rev));
   });
 
   // ── The tutorial ──────────────────────────────────────────────────────────

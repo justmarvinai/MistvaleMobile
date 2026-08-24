@@ -61,6 +61,8 @@ import type {
   ReforgeQuote,
   ReforgeResult,
   Stat,
+  ExpeditionClaimResult,
+  ExpeditionState,
 } from '@mistvale/shared';
 import { ROUTES } from '@mistvale/shared';
 import type { BattleEvent, BattleState, UnitRef } from '@mistvale/engine';
@@ -359,6 +361,32 @@ export const gameApi = {
   /** Forges several relics toward a level in one run. */
   upgradeMany: (ids: readonly string[], toLevel: number, actionId: string) =>
     api.post<BulkUpgradeResult>(ROUTES.gear.upgradeMany, { ids, toLevel, actionId }),
+
+  // ── Expeditions ───────────────────────────────────────────────────────────
+
+  expeditions: () =>
+    api
+      .get<{ expeditions: ExpeditionState }>(ROUTES.expeditions.state)
+      .then((data) => data.expeditions),
+
+  dispatchExpedition: (key: string, championIds: readonly string[], actionId: string) =>
+    api
+      .post<{ expeditions: ExpeditionState }>(ROUTES.expeditions.dispatch(key), {
+        championIds,
+        actionId,
+      })
+      .then((data) => data.expeditions),
+
+  claimExpedition: (id: string, actionId: string) =>
+    api.post<ExpeditionClaimResult>(ROUTES.expeditions.claim(id), { actionId }),
+
+  recallExpedition: (id: string) =>
+    api
+      .post<{ championIds: string[]; expeditions: ExpeditionState }>(
+        ROUTES.expeditions.recall(id),
+        {},
+      )
+      .then((data) => data.expeditions),
 
   /** Every Titan, its ladder, the keys left today, and this account's own record. */
   titan: () => api.get<{ titan: Titan }>(ROUTES.titan.overview).then((data) => data.titan),
