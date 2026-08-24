@@ -1,5 +1,7 @@
 import {
   CONTENT_REGISTRY,
+  RARITIES,
+  championMeets,
   type CampaignChapterDef,
   type ChampionDef,
   type DungeonDef,
@@ -11,6 +13,7 @@ import {
   type SkillDef,
   type StageDef,
   type StatusDef,
+  type TeamRestriction,
 } from '@mistvale/shared';
 import { buildSeedContent } from '@mistvale/server/seeds';
 import { borrowedTeam, stageSeed } from '@mistvale/server/battle-preset';
@@ -265,6 +268,51 @@ export function simulateStage(
     winsWithin: (limit) => winningTurns.filter((turns) => turns <= limit).length / runs,
     msPerRun: elapsed / runs,
   };
+}
+
+/**
+ * The best four champions a *ward* allows, at a given investment.
+ *
+ * The Mistspire's whole balance question is not "can a good team clear floor 27" — it is
+ * **"can the four best `hp`-role champions in the game clear floor 27"**, which is a very
+ * different question and the only one worth gating. A ward the account's actual best four
+ * happen to satisfy is not a ward; a ward only an impossible team could pass is a wall.
+ *
+ * "Best" is by rarity then by raw offence, which is a crude proxy and deliberately so: a
+ * real player picks by kit, and a gate that passes with a crudely-picked team passes
+ * comfortably with a thoughtfully-picked one. Returns fewer than four only when content
+ * cannot supply them, which publish validation already refuses.
+ */
+export function wardedTeam(
+  content: LoadedContent,
+  restriction: TeamRestriction,
+  level: number,
+  rank: number,
+  ascension: number,
+): TeamSpec[] {
+  const eligible = [...content.champions.values()]
+    .filter((def) => !def.isFood)
+    .filter((def) =>
+      championMeets(restriction, {
+        key: def.key,
+        name: def.name,
+        factionKey: def.factionKey,
+        element: def.element,
+        role: def.role,
+        rarity: def.rarity,
+      }),
+    )
+    .sort((a, b) => {
+      const byRarity = RARITIES.indexOf(b.rarity) - RARITIES.indexOf(a.rarity);
+      if (byRarity !== 0) return byRarity;
+      return b.baseStats.atk + b.baseStats.hp / 10 - (a.baseStats.atk + a.baseStats.hp / 10);
+    });
+  return eligible.slice(0, 4).map((def) => ({
+    championKey: def.key,
+    level,
+    rank,
+    ascension,
+  }));
 }
 
 /** What a scripted fight looked like, beyond whether it was won. */

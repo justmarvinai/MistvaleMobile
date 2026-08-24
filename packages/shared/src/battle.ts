@@ -198,6 +198,8 @@ export function multiBattleRefusal(mode: BattleMode): string | null {
       return 'The Wurm is struck a strike at a time, and a strike is one run.';
     case 'deepRun':
       return 'A descent is walked one room at a time.';
+    case 'spire':
+      return 'A floor of the Mistspire is climbed once, and the next one is a different team.';
     case 'arena':
       return 'An arena attack is one fight against one warden.';
     default:

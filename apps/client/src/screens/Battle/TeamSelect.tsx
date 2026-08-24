@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { multiBattleRefusal } from '@mistvale/shared';
-import type { BattleMode, MultiBattleResult, StageDef } from '@mistvale/shared';
+import {
+  championMeets,
+  multiBattleRefusal,
+  restrictionLabel,
+  teamRestrictionFailure,
+} from '@mistvale/shared';
+import type {
+  BattleMode,
+  FactionDef,
+  MultiBattleResult,
+  StageDef,
+  TeamRestriction,
+} from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
@@ -59,6 +70,23 @@ export interface AttemptCost {
 }
 
 const MAX_SLOTS = 4;
+
+/**
+ * How a ward reads on the door, using content's own names for a faction.
+ *
+ * The server has the same function against its cache (`spire/service.wardLabel`); this is
+ * the client's half, and both defer to shared `restrictionLabel` so the phrasing is written
+ * once. Elements, roles and rarities are capitalised rather than looked up, because there
+ * is no `element` entity holding "Tide" and inventing one to hold four strings would be a
+ * content type nobody edits.
+ */
+function wardPhrase(ward: TeamRestriction, factions: readonly FactionDef[] | undefined): string {
+  if (ward.kind === 'faction') {
+    const faction = factions?.find((candidate) => candidate.key === ward.value);
+    return restrictionLabel(ward, faction?.name ?? ward.value);
+  }
+  return restrictionLabel(ward, ward.value.charAt(0).toUpperCase() + ward.value.slice(1));
+}
 
 export function TeamSelect({
   stage,
@@ -129,13 +157,58 @@ export function TeamSelect({
     [bundle],
   );
 
+  /**
+   * A warded floor's rule, and who on the current team fails it.
+   *
+   * Read off the **stage** rather than passed in, because the ward is a property of the
+   * floor and the picker already holds the floor. Checked here as well as on the server for
+   * the reason every client-side check in this game exists: to say *no* before anything is
+   * spent, in a sentence, rather than to decide anything.
+   */
+  const ward = stage.teamRestriction;
+  const wardLabelText = ward ? wardPhrase(ward, bundle?.factions) : null;
+  const meetsWard = (championKey: string): boolean => {
+    if (!ward) return true;
+    const def = championsByKey.get(championKey);
+    if (!def) return false;
+    return championMeets(ward, {
+      key: def.key,
+      name: def.name,
+      factionKey: def.factionKey,
+      element: def.element,
+      role: def.role,
+      rarity: def.rarity,
+    });
+  };
+  const wardFailure =
+    ward && wardLabelText
+      ? teamRestrictionFailure(
+          ward,
+          team
+            .map((id) => roster.find((owned) => owned.id === id))
+            .filter((owned): owned is NonNullable<typeof owned> => owned !== undefined)
+            .map((owned) => {
+              const def = championsByKey.get(owned.championKey);
+              return {
+                key: owned.championKey,
+                name: def?.name ?? owned.championKey,
+                factionKey: def?.factionKey ?? '',
+                element: def?.element ?? '',
+                role: def?.role ?? '',
+                rarity: def?.rarity ?? ('common' as const),
+              };
+            }),
+          wardLabelText,
+        )
+      : null;
+
   // A Titan costs a key rather than energy, so the energy bar has nothing to say about
   // whether the button works — but a spent allowance does.
   const affordable = attempts ? attempts.left > 0 : energy >= stage.energyCost;
   /** Whoever stands in the last wave, if it is somebody worth warning about. */
   const boss = stageBoss(stage, bundle?.enemies);
   const picked = team.length > 0;
-  const canStart = picked && affordable && !busy;
+  const canStart = picked && affordable && !busy && wardFailure === null;
 
   // What a batch could actually manage right now: energy, today's allowance and the
   // per-press cap, whichever runs out first. The server checks all three again — this
@@ -220,6 +293,15 @@ export function TeamSelect({
             : `${stage.waves.length} waves · ${stage.energyCost} energy · ${stage.rewards.silverMin}–${stage.rewards.silverMax} silver`}
         </p>
 
+        {/* The ward, first and in words, because it decides which of the cards below are
+            even worth reading. A player who scrolls a roster of thirty and then finds out
+            four of them were never eligible has been made to do the work twice. */}
+        {wardLabelText && (
+          <p className={styles.ward}>
+            <strong>Warded.</strong> Only {wardLabelText} may climb this floor.
+          </p>
+        )}
+
         {/* Who is on the other side, wave by wave. Content has named every enemy of every
             stage since P2 and the only screen that ever read them was the fight itself —
             by which point the energy is spent and the team is locked. */}
@@ -286,14 +368,27 @@ export function TeamSelect({
           // affinity or power, and those are the three things the choice turns on.
           <div className={styles.roster}>
             {roster.map((owned) => (
-              <ChampionCard
+              <div
                 key={owned.id}
-                champion={owned}
-                def={championsByKey.get(owned.championKey)}
-                selectable
-                selected={team.includes(owned.id)}
-                onOpen={() => toggle(owned.id)}
-              />
+                className={meetsWard(owned.championKey) ? undefined : styles.barred}
+                title={
+                  meetsWard(owned.championKey)
+                    ? undefined
+                    : `The ward turns them back — only ${wardLabelText} may climb.`
+                }
+              >
+                <ChampionCard
+                  champion={owned}
+                  def={championsByKey.get(owned.championKey)}
+                  selectable
+                  selected={team.includes(owned.id)}
+                  // Dimmed rather than removed. A ward is a puzzle about a roster, and a
+                  // roster with the wrong half hidden cannot be reasoned about — the answer
+                  // to "who else could I bring" is usually somebody you had forgotten you
+                  // had. Picking one is still allowed; starting with one is not.
+                  onOpen={() => toggle(owned.id)}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -312,6 +407,10 @@ export function TeamSelect({
             {busy ? 'Starting…' : 'Into the mist'}
           </Button>
         </div>
+
+        {/* The same sentence the server would answer with, said before anything is spent.
+            `teamRestrictionFailure` is shared, so these are one sentence rather than two. */}
+        {wardFailure && <p className={styles.wardFailure}>{wardFailure}</p>}
 
         {multi.unlocked && !attempts && !batchRefusal && (
           <div className={styles.farm}>

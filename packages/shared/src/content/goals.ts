@@ -93,6 +93,15 @@ export const GOAL_TYPES = [
   'deepRunFinished',
   /** The deepest floor a Deep Run has ever reached. A *threshold*, like the Titan's damage. */
   'deepRunDepth',
+  /** One floor of the Mistspire cleared. Filter: `dungeonKey`. */
+  'spireFloor',
+  /**
+   * The highest floor of the Mistspire this climb has reached. A *threshold*, because a
+   * mission asking for floor ten means having got there rather than ten floors added up —
+   * and the climb resets monthly, so a cumulative count would quietly reward re-climbing.
+   * Filter: `dungeonKey`.
+   */
+  'spireHeight',
   /**
    * The most damage ever done to a Titan. A *threshold* goal, and it has to be: a mission
    * asking for half a million damage means one run that did it, never fifty that added up.
@@ -141,6 +150,8 @@ export const GOAL_ACCUMULATION: Readonly<Record<GoalType, 'count' | 'highest'>> 
   worldBossDamage: 'highest',
   deepRunFinished: 'count',
   deepRunDepth: 'highest',
+  spireFloor: 'count',
+  spireHeight: 'highest',
   titanRun: 'count',
   titanDamage: 'highest',
 });
@@ -183,6 +194,8 @@ export const GOAL_FILTERS: Readonly<Record<GoalType, readonly string[]>> = Objec
   worldBossDamage: ['dungeonKey'],
   deepRunFinished: ['runKey'],
   deepRunDepth: ['runKey'],
+  spireFloor: ['dungeonKey'],
+  spireHeight: ['dungeonKey'],
   titanRun: ['dungeonKey'],
   titanDamage: ['dungeonKey'],
 });

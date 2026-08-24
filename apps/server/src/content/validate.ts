@@ -2,18 +2,26 @@ import {
   CONTENT_LOAD_ORDER,
   CONTENT_REGISTRY,
   EFFECT_COMPONENT_TYPES,
+  ELEMENTS,
   RANK_RANGE_BY_RARITY,
+  RARITIES,
+  ROLES,
   STATUS_ENGINE_TYPES,
   isValidBaseRank,
   rewardItemKeys,
   deepRunProblems,
+  restrictionSupply,
+  spireRuleProblems,
   titanRuleProblems,
+  WARD_MIN_SUPPLY,
   worldBossRuleProblems,
   type ContentIssue,
   type ContentType,
   type ContentValidationResult,
   type Rarity,
   type DeepRunDef,
+  type SpireRules,
+  type TeamRestriction,
   type TitanRules,
   type WorldBossRules,
 } from '@mistvale/shared';
@@ -679,8 +687,9 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
 
   const titanStagesByKeep = new Map<string, number>();
   const worldBossStagesByKeep = new Map<string, number>();
+  const spireFloorsByKeep = new Map<string, Set<number>>();
   for (const [, entity] of parsed.get('stage') ?? []) {
-    const stage = entity as { mode: string; parentKey: string };
+    const stage = entity as { mode: string; parentKey: string; number: number };
     if (stage.mode === 'titan') {
       titanStagesByKeep.set(stage.parentKey, (titanStagesByKeep.get(stage.parentKey) ?? 0) + 1);
     }
@@ -690,7 +699,38 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
         (worldBossStagesByKeep.get(stage.parentKey) ?? 0) + 1,
       );
     }
+    if (stage.mode === 'spire') {
+      let floors = spireFloorsByKeep.get(stage.parentKey);
+      if (!floors) {
+        floors = new Set<number>();
+        spireFloorsByKeep.set(stage.parentKey, floors);
+      }
+      floors.add(stage.number);
+    }
   }
+
+  // Every champion in the game, in the shape a ward is judged against. Built once, because
+  // the supply check below runs per warded floor and the roster is read the same way each
+  // time. Food is carried rather than filtered here so `restrictionSupply` owns that rule.
+  const allChampions = [...(parsed.get('champion') ?? [])].map(([championKey, entity]) => {
+    const champion = entity as {
+      name: string;
+      factionKey: string;
+      element: string;
+      role: string;
+      rarity: string;
+      isFood?: boolean;
+    };
+    return {
+      key: championKey,
+      name: champion.name,
+      factionKey: champion.factionKey,
+      element: champion.element,
+      role: champion.role,
+      rarity: champion.rarity as Rarity,
+      isFood: champion.isFood ?? false,
+    };
+  });
 
   for (const [key, entity] of parsed.get('dungeon') ?? []) {
     const dungeon = entity as {
@@ -701,6 +741,8 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       openDays: number[];
       titan?: TitanRules;
       worldBoss?: WorldBossRules;
+      spire?: SpireRules;
+      floors: number;
     };
 
     // A Titan is the one dungeon kind whose rules are the mode. Without them there is no
@@ -810,6 +852,62 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       });
     }
 
+    // The Mistspire, on the same terms as the other two: without the block there are no
+    // keys to spend and no landings to pay, so the tower is a stack of stages rather than
+    // a mode. Its own extra rule is that the floors have to be *contiguous from one* —
+    // a climb is walked in order, so a gap at floor 7 is a tower nobody can finish.
+    if (dungeon.kind === 'spire') {
+      if (!dungeon.spire) {
+        errors.push({
+          severity: 'error',
+          contentType: 'dungeon',
+          key,
+          path: 'spire',
+          message:
+            'A spire needs its rules: its keys a day, how often a keeper stands in the way, and the landings a climb pays at.',
+        });
+      } else {
+        for (const problem of spireRuleProblems(dungeon.spire, dungeon.floors)) {
+          errors.push({
+            severity: 'error',
+            contentType: 'dungeon',
+            key,
+            path: 'spire.landings',
+            message: problem,
+          });
+        }
+        dungeon.spire.landings.forEach((landing, index) => {
+          rewardMap(
+            { contentType: 'dungeon', key, path: `spire.landings.${index}.rewards` },
+            landing.rewards,
+          );
+        });
+      }
+
+      const floors = spireFloorsByKeep.get(key) ?? new Set<number>();
+      const missing: number[] = [];
+      for (let floor = 1; floor <= dungeon.floors; floor += 1) {
+        if (!floors.has(floor)) missing.push(floor);
+      }
+      if (missing.length > 0) {
+        errors.push({
+          severity: 'error',
+          contentType: 'dungeon',
+          key,
+          path: 'floors',
+          message: `A climb is walked in order, so every floor needs a stage. Missing: ${missing.slice(0, 8).join(', ')}${missing.length > 8 ? `, and ${missing.length - 8} more` : ''}.`,
+        });
+      }
+    } else if (dungeon.spire) {
+      errors.push({
+        severity: 'error',
+        contentType: 'dungeon',
+        key,
+        path: 'spire',
+        message: `Spire rules belong to a spire; this one is ${dungeon.kind}. They would be read by nothing.`,
+      });
+    }
+
     dungeon.setKeys.forEach((setKey, index) => {
       reference({ contentType: 'dungeon', key, path: `setKeys.${index}` }, 'gearSet', setKey);
     });
@@ -846,6 +944,7 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       firstClearRewards?: Record<string, number>;
       presetTeam?: { championKey: string; relics?: { setKey: string }[] }[];
       trial?: { parTurns: number; parRewards?: Record<string, number> };
+      teamRestriction?: TeamRestriction;
     };
 
     rewardMap({ contentType: 'stage', key, path: 'firstClearRewards' }, stage.firstClearRewards);
@@ -932,6 +1031,61 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
         path: 'trial',
         message: `Only a trial stage carries a par; this one is ${stage.mode}.`,
       });
+    }
+
+    // A ward is the Mistspire's whole mechanic, and the one piece of content in the game
+    // that can be **authored into an impossibility that looks fine in the editor**: a floor
+    // warded to a faction with three champions in it is a floor no account can ever field a
+    // team for, and nothing about the entity says so. This is the check that catches it, and
+    // it is the reason a ward is validated against the roster rather than against itself.
+    //
+    // Mistvale's own numbers are why it is not hypothetical: 37 champions over eight
+    // factions, and three of those factions hold two or three champions each.
+    if (stage.teamRestriction) {
+      if (stage.mode !== 'spire') {
+        errors.push({
+          severity: 'error',
+          contentType: 'stage',
+          key,
+          path: 'teamRestriction',
+          message: `Only a spire floor is warded; this one is ${stage.mode}. A stage that quietly locked out half a roster would be a difficulty spike with no explanation on it.`,
+        });
+      }
+      // A faction ward names published content, so it is a reference; the other three name
+      // enum values the schema cannot check because `value` is one field serving four kinds.
+      const ward = stage.teamRestriction;
+      const vocabulary: Record<string, readonly string[]> = {
+        element: ELEMENTS,
+        role: ROLES,
+        minRarity: RARITIES,
+      };
+      const allowed = vocabulary[ward.kind];
+      if (ward.kind === 'faction') {
+        reference(
+          { contentType: 'stage', key, path: 'teamRestriction.value' },
+          'faction',
+          ward.value,
+        );
+      } else if (allowed && !allowed.includes(ward.value)) {
+        errors.push({
+          severity: 'error',
+          contentType: 'stage',
+          key,
+          path: 'teamRestriction.value',
+          message: `"${ward.value}" is not ${ward.kind === 'minRarity' ? 'a rarity' : `a ${ward.kind}`}. Expected one of: ${allowed.join(', ')}.`,
+        });
+      }
+
+      const supply = restrictionSupply(ward, allChampions);
+      if (supply < WARD_MIN_SUPPLY) {
+        errors.push({
+          severity: 'error',
+          contentType: 'stage',
+          key,
+          path: 'teamRestriction',
+          message: `This floor wards to "${ward.value}", which ${supply === 0 ? 'no champion' : `only ${supply} champion${supply === 1 ? '' : 's'}`} in the game satisfies. A team of ${WARD_MIN_SUPPLY} could never be fielded for it.`,
+        });
+      }
     }
 
     presetTeam.forEach((member, index) => {

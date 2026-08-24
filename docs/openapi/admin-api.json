@@ -3515,7 +3515,8 @@
               "proving",
               "springs",
               "titan",
-              "worldBoss"
+              "worldBoss",
+              "spire"
             ]
           },
           "lore": {
@@ -3787,6 +3788,71 @@
               "tiers",
               "fellingRewards",
               "claimGraceDays"
+            ],
+            "additionalProperties": false
+          },
+          "spire": {
+            "type": "object",
+            "properties": {
+              "keysPerDay": {
+                "default": 5,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "bossEvery": {
+                "default": 10,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30
+              },
+              "landings": {
+                "default": [],
+                "maxItems": 12,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 64,
+                      "pattern": "^[a-z][a-z0-9_]*$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 48
+                    },
+                    "floor": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 60
+                    },
+                    "rewards": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "name",
+                    "floor",
+                    "rewards"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "keysPerDay",
+              "bossEvery",
+              "landings"
             ],
             "additionalProperties": false
           }
@@ -4191,6 +4257,8 @@
                     "worldBossDamage",
                     "deepRunFinished",
                     "deepRunDepth",
+                    "spireFloor",
+                    "spireHeight",
                     "titanDamage"
                   ]
                 },
@@ -6730,6 +6798,8 @@
                     "worldBossDamage",
                     "deepRunFinished",
                     "deepRunDepth",
+                    "spireFloor",
+                    "spireHeight",
                     "titanDamage"
                   ]
                 },
@@ -6993,6 +7063,8 @@
                     "worldBossDamage",
                     "deepRunFinished",
                     "deepRunDepth",
+                    "spireFloor",
+                    "spireHeight",
                     "titanDamage"
                   ]
                 },
@@ -9282,7 +9354,8 @@
               "titan",
               "trial",
               "worldBoss",
-              "deepRun"
+              "deepRun",
+              "spire"
             ]
           },
           "parentKey": {
@@ -9686,6 +9759,30 @@
               "hint"
             ],
             "additionalProperties": false
+          },
+          "teamRestriction": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "element",
+                  "faction",
+                  "role",
+                  "minRarity"
+                ]
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 48
+              }
+            },
+            "required": [
+              "kind",
+              "value"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -10071,6 +10168,8 @@
                   "worldBossDamage",
                   "deepRunFinished",
                   "deepRunDepth",
+                  "spireFloor",
+                  "spireHeight",
                   "titanDamage"
                 ]
               },

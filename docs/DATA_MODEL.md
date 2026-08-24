@@ -326,6 +326,27 @@ The partial unique index is the "one descent at a time" rule made structural rat
 checked: two live runs would mean two sets of doors and a battle that could be filed against
 either.
 
+### `player_spire_climbs`
+
+`player_id, dungeon_key, anchor, highest_floor, claimed_landings jsonb, clears`, unique on
+`(player_id, dungeon_key, anchor)`.
+
+`highest_floor` is the **whole** of a climb's state, and that is not a shortcut: the Mistspire
+is walked in order, so "floor N is open" is exactly `highest >= N-1` and "floor N is cleared"
+is exactly `highest >= N`. A per-floor record would be a second source of truth for a question
+one integer already answers, and it is the one that would go stale.
+
+`anchor` is the game-day's `YYYY-MM`, which is how the **monthly reset needs no job and no
+column to clear**: next month simply does not match this row, and the climb starts at zero
+because there is nothing there yet. Exactly how last week's `player_world_boss` row retires.
+
+Nothing survives the reset except by aggregate: "highest floor ever" is `max(highest_floor)`
+across every anchor, read on demand rather than kept on the player row — it is bragging rather
+than gating, since a tower you re-enter halfway up is a tower with no first floor.
+
+Advancing uses `greatest(highest_floor, n)` rather than an assignment, so two settlements
+racing on a retried request can never walk a climb backwards.
+
 ### `world_boss_wakes` — the one shared row
 
 `dungeon_key, anchor, max_hp, damage_taken, felled_at, felled_by, strikes, wardens`, unique

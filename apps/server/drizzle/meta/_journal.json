@@ -253,6 +253,13 @@
       "when": 1787085704000,
       "tag": "0035_deep_run",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1787085705000,
+      "tag": "0036_spire",
+      "breakpoints": true
     }
   ]
 }

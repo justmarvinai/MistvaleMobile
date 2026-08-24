@@ -219,6 +219,7 @@ criteria of its own, and it does not gate P9e or P10.
 | **C8** | The campaign map without its own window — no frame, no second background, markers at a size a desktop can read · the speed ladder settled at **×1 · ×2 · ×4** (×4 on the Normal campaign) with `ui/SpeedLadder` drawing the rung an account has *not* earned and what opens it | ✅ |
 | **C9** | Five, from the improvement list: **a fight that moves** (hit impacts, swings, casts, deaths — item 14) ✅ · **the Solo Titan** (the Valewurm — item 1) ✅ · **relic loadouts and bulk relic actions** (items 5 and 6) ✅ · **roster filter and sort** (item 7) ✅ · **a "what's ready" card on the Haven** (item 8) ✅ | ✅ |
 | **C10** | Seven the owner picked out of the 2026-08-24 feature list, all built in full — **the batch is closed**: **Reforge** ✅ (a relic substat rerolled, paid for by dismantling the vault overflow that made it a problem) · **Imprint** and **Standing** ✅ (a duplicate is a permanent bonus to every copy; breadth of collection pays a little to everybody) · **Expeditions** ✅ (champions sent away for hours, and unavailable while gone) · **Trials** ✅ (a fixed enemy, a loaned team, the same dice for everybody, ranked by turns) · **The Wurm Wakes** ✅ (a weekly world boss on one shared HP pool — a populated world with no social layer and no WebSockets) · **The Deep Run** ✅ (four champions, no relics, a branching descent, one of three boons after each fight, one life) | ✅ done |
+| **C11** | **The Mistspire** ✅ — thirty floors, nine of them **warded** to one element, faction, role or rarity floor, so the tower is the one mode that pays for a *broad* roster rather than a deep one (ROADMAP improvement #2's stated reason). Keys spent on a clear rather than an attempt; the climb resets with the calendar month and needs no job. Publish validation refuses a ward fewer than four champions in the game could satisfy — which is why **Faction Trials** (#3) is *not* built: three of Mistvale's eight factions hold two or three champions, so faction-locked crypts need a champion pass first, and that is the owner's call. | ✅ done |
 
 **Backlog carried out of a batch rather than done in it.** Two items, and they are the same
 question wearing different clothes — both are parked on the owner's instruction, and both want
@@ -249,10 +250,19 @@ engine, the goal DSL and the events framework already do most of the work*.
    answer rather than gear. Leaned on exactly what was predicted — `dungeon` stages,
    `BossCard` and the chapter chests' reward shape — plus a `titan` block on the keep and a
    `pnpm sim` gate so the ladder is priced against measured damage. See GAME_DESIGN §9.2b.
-2. **The Mistspire** — the parked tower, but the reason to want it is that no mode yet
-   rewards *breadth*: the Arena and the campaign are both won with one good team.
-3. **Faction Trials** — the other breadth pressure, and the one that gives the eight
-   factions a mechanical meaning rather than a visual one.
+2. ~~**The Mistspire**~~ — **Done — C11.** Thirty floors, nine of them warded to one
+   element, faction, role or rarity floor, so the only team allowed up is four champions who
+   meet the ward. Keys are spent on a *clear* rather than an attempt, and the climb resets
+   with the calendar month off the game-day's `YYYY-MM` — no job, no column to clear. Its
+   wards are measured rather than assumed: `pnpm sim` fights each one with the best four
+   champions that ward allows, which is the only version of the question worth asking.
+3. **Faction Trials** — **blocked on content, not code** (found in C11). A faction-locked
+   crypt needs four champions of that faction, and three of Mistvale's eight hold fewer:
+   Thornweald Court has 3, Runebound Halls and The Drowned Choir have 2 each. Three of eight
+   crypts would be unclearable by everybody, forever. The Mistspire's ward-supply validation
+   now refuses exactly this at publish, so the door is shut rather than open and broken —
+   but the feature needs a **champion pass** first, which is a design decision for the owner
+   rather than a build task. Element and role wards work today and C11 ships nine of them.
 4. **The Vale Pass** — a season with a reward track. Parked as a large item, but P8's goal
    engine, `event` content, the ladder rail and `ui/Ledger` are between them most of it.
 

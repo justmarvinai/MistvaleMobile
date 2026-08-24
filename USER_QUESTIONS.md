@@ -80,3 +80,31 @@ files to `assets/` (simple, but the master is then the display size); or serve t
 nginx's `image_filter` (no build dep, but it costs CPU on the box the budget is about).
 
 Nothing is blocked either way — the game works today, it is only heavier than it should be.
+
+## Q8 — Enemy `stars` decide nothing (raised 2026-08-24, C11)
+
+Every enemy line on every stage carries a `stars` value: the seed authors it, publish
+validation accepts it, and the Admin editor shows it. **The engine never reads it.**
+`scaleEnemyStats(def, level)` in `packages/engine/src/setup.ts` takes the def and the level
+and computes from `baseStats`, `growth` and `anchorLevel` alone; `stars` is carried into
+`EnemyEntry` and dropped. Found while tuning the Mistspire, when raising a floor's stars
+from 3 to 6 changed nothing measurable.
+
+So an operator has one difficulty lever where they believe they have two, and 3,123 of the
+game's 3,452 authored enemy units (90%) wear a rating that means nothing.
+
+**Why it is a question rather than a fix.** Honouring the field is a one-line change —
+scale by the same `champion.rankMultipliers` ladder ranks already use, so ★6 is 1.0 and
+★3 is 0.68 — but every enemy today effectively fights at ★6. Applying the ladder would make
+**90% of the game's fights easier in one commit**, which is a balance decision about the
+whole game rather than a bug fix, and not one to make as a side effect of adding a tower.
+
+**Recommended default: honour it, and re-tune against `pnpm sim`.** The authored numbers
+already describe the curve their authors intended — chapter 1 at ★1–2, the Depths' deepest
+floors at ★6 — so the field going live would mostly *restore* an intended difficulty ramp
+that has been flat since P3. The sim's 51 gates are what would say whether the campaign
+still holds; the ones to watch are `chapter-N-boss` and `normal-wall`.
+
+**If the answer is no**, the honest alternative is to delete the field rather than leave it:
+a number in the editor that changes nothing is worse than no number, because an operator
+will eventually use it to fix something and it will not work.

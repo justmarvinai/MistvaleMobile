@@ -96,6 +96,7 @@ export interface UnlockFlags {
   trials: boolean;
   worldBoss: boolean;
   deepRun: boolean;
+  spire: boolean;
 }
 
 /** Account level at which each feature unlocks. Mirrored in game_config from P1. */
@@ -129,6 +130,11 @@ export const UNLOCK_LEVELS: Readonly<Record<keyof UnlockFlags, number>> = Object
   // spent sixty levels answering the other way round: what are these champions worth with
   // none of the relics you found for them?
   deepRun: 20,
+  // Above the Depths and below the world boss. The Mistspire is about *breadth* — some of
+  // its floors are warded to one element, one faction or one role — and a tower that asks
+  // who else you have is pointless to an account whose answer is "nobody". Sixteen is
+  // roughly where a roster starts having somebody else.
+  spire: 16,
 });
 
 export function computeUnlocks(level: number): UnlockFlags {

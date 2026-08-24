@@ -5,6 +5,49 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the Mistspire (C11)
+
+Thirty floors, and the first thing in Mistvale that pays for a **broad** roster rather than
+a deep one. Every other mode is won by one good team — the campaign is, the Arena is, a
+Depths keep is one good team per element — so the honest answer to "is this thirty-eighth
+champion worth keeping" has been *no* for most of the roster.
+
+A **warded floor** is the answer. Nine of the thirty name an element, a faction, a role or a
+rarity floor, and the only team allowed up is four champions who meet it. One excellent
+ember team reaches floor nine and stops; the Tide support nearly fed away last week is the
+way past it. The ward is on the floor, on the team chooser, and enforced at the start of the
+fight, and all three read the same sentence out of `teamRestrictionFailure`.
+
+Two rules make it a tower rather than a long dungeon. **A key is spent on a clear, not on an
+attempt** — the source game's Faction Wars rule rather than its tower's — so a warded floor
+can be attacked all evening with a different four each time and cost nothing until it falls;
+a floor that has to be solved should be free to fail at. And **the climb resets with the
+month**: the anchor is the game-day's `YYYY-MM`, so there is no job and nothing to clear —
+next month simply finds no row.
+
+Publish validation gained the rule that could not have been reasoned out: a ward is checked
+against the **whole roster**, and one fewer than four champions could satisfy is refused.
+That is not hypothetical — Mistvale has 37 champions over eight factions and three of those
+factions hold two or three, so a floor warded to the Drowned Choir would publish cleanly,
+look right in the editor, and be unclearable by every account forever.
+
+The tower is **measured, not guessed**. `pnpm sim` fights every warded floor with the best
+four champions that ward allows, at the floor's own level, and gates that each one falls —
+because "can a good team clear floor 27" is not the question; "can the four best hp-role
+champions in the game clear floor 27" is. It also gates that the tower climbs: 36 turns near
+the top against 5 near the bottom. Two content faults came out of those measurements — the
+keepers were ordered weakest-at-the-top, and a lone boss is one target focused fire deletes,
+so floor 30 fell in four turns. Keepers climb by weight now and bring escorts, as the
+Depths' deepest floors do.
+
+### Fixed
+
+- `/battles/multi` refuses a Mistspire floor, which is stated once in `multiBattleRefusal`
+  beside the Titan and the world boss.
+- The Depths hub excludes the tower. Thirty floors and a boss at the bottom is exactly what
+  a keep looks like, so the hub would have offered a descent the spire's own key and
+  floor-order rules refuse.
+
 ### Added — The Sunken Stair: a descent your relics do not come on
 
 Last of the seven. Every other mode in Mistvale measures what an account has assembled; this

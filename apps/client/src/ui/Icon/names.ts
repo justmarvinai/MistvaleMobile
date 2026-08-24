@@ -51,6 +51,7 @@ export const ICON_NAMES = [
   'nav-champions',
   'nav-chronicle',
   'nav-deeprun',
+  'nav-spire',
   'nav-depths',
   'nav-events',
   'nav-haven',

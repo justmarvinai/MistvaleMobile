@@ -507,6 +507,7 @@ export const STAGE_MODES = [
   'trial',
   'worldBoss',
   'deepRun',
+  'spire',
 ] as const;
 
 // ── The Depths ──────────────────────────────────────────────────────────────
@@ -524,7 +525,14 @@ export const STAGE_MODES = [
  * keys, and the damage tiers — and its single floor is fought with keys rather than energy
  * and paid on any ending rather than on a victory.
  */
-export const DUNGEON_KINDS = ['relic', 'proving', 'springs', 'titan', 'worldBoss'] as const;
+export const DUNGEON_KINDS = [
+  'relic',
+  'proving',
+  'springs',
+  'titan',
+  'worldBoss',
+  'spire',
+] as const;
 export type DungeonKind = (typeof DUNGEON_KINDS)[number];
 
 /**
@@ -644,6 +652,74 @@ export const worldBossRulesSchema = z.object({
   claimGraceDays: z.number().int().min(0).max(14).default(3),
 });
 export type WorldBossRules = z.infer<typeof worldBossRulesSchema>;
+
+// ── The Mistspire ───────────────────────────────────────────────────────────
+
+/**
+ * What a warded floor asks of the team that climbs it.
+ *
+ * One restriction, never two. Two would let an operator author "ember **and** support",
+ * which the roster may have nobody at all for — and a floor no team can pass is a wall
+ * rather than a puzzle. One is always satisfiable if the game holds four champions
+ * matching it, which is a rule publish validation can actually check.
+ *
+ * `minRarity` is a floor rather than an exact match: "Rare or better" asks for investment,
+ * where "exactly Rare" would ask a player to *un*-invest, which is not a thing to reward.
+ */
+export const TEAM_RESTRICTION_KINDS = ['element', 'faction', 'role', 'minRarity'] as const;
+export type TeamRestrictionKind = (typeof TEAM_RESTRICTION_KINDS)[number];
+
+export const teamRestrictionSchema = z.object({
+  kind: z.enum(TEAM_RESTRICTION_KINDS),
+  /** An element, faction key, role, or the rarity floor — read against `kind`. */
+  value: z.string().min(1).max(48),
+});
+export type TeamRestriction = z.infer<typeof teamRestrictionSchema>;
+
+/**
+ * One landing of the Mistspire — a floor reached, paid once per climb.
+ *
+ * The same shape as a Titan's rung and a chapter's star chest, and a third question again:
+ * a Titan pays every run, a world boss pays once per wake against a total, and a landing
+ * pays once per *climb* for having got that high. The climb resets with the month, so the
+ * ladder is a monthly project rather than a one-off.
+ */
+export const spireLandingSchema = z.object({
+  key: contentKeySchema,
+  name: z.string().min(1).max(48),
+  floor: z.number().int().min(1).max(60),
+  rewards: z.record(z.string(), z.number()),
+});
+export type SpireLanding = z.infer<typeof spireLandingSchema>;
+
+/**
+ * What makes the Mistspire the Mistspire.
+ *
+ * The tower exists because nothing else in Mistvale rewards *breadth*: the campaign and the
+ * Arena are both won with one good team, so a thirty-eighth champion is worth less than a
+ * relic. A warded floor is the answer — it names an element, a faction, a role or a rarity
+ * floor, and four champions who meet it are the only team allowed up. A player with one
+ * excellent ember team is stopped at the first tide ward, and the champion they nearly fed
+ * away last week is the way past it.
+ *
+ * The keys rule is the source game's Faction Wars rule rather than its tower's, and
+ * deliberately: keys are spent **on a clear**, so a failed attempt at a ward costs nothing.
+ * A floor that has to be solved should be free to attempt and expensive to pass, or the
+ * mode teaches people to look the answer up rather than work it out.
+ */
+export const spireRulesSchema = z.object({
+  /** Keys a day. Spent on a *clear* rather than an attempt, so losing is free. */
+  keysPerDay: z.number().int().min(1).max(20).default(5),
+  /**
+   * Every Nth floor is a keeper's floor. Display only — the floor's waves decide the
+   * fight — but the screen draws the tower from it, so it is a rule rather than a hint.
+   * Zero means no boss floors at all.
+   */
+  bossEvery: z.number().int().min(0).max(30).default(10),
+  /** Ascending by floor. Publish validation refuses an out-of-order ladder. */
+  landings: z.array(spireLandingSchema).max(12).default([]),
+});
+export type SpireRules = z.infer<typeof spireRulesSchema>;
 
 // ── The Deep Run ────────────────────────────────────────────────────────────
 
@@ -800,6 +876,11 @@ export const dungeonDefSchema = contentMetaSchema.extend({
    * every other kind (publish validation), the same way `titan` is.
    */
   worldBoss: worldBossRulesSchema.optional(),
+  /**
+   * What makes a tower a tower. Required on a `spire` and refused on every other kind
+   * (publish validation), the same way `titan` and `worldBoss` are.
+   */
+  spire: spireRulesSchema.optional(),
 });
 export type DungeonDef = z.infer<typeof dungeonDefSchema>;
 
@@ -956,6 +1037,19 @@ export const stageDefSchema = contentMetaSchema.extend({
    * stage to farm.
    */
   trial: trialRulesSchema.optional(),
+  /**
+   * What a warded floor asks of the team, on the floors that ask anything.
+   *
+   * Lives on the stage rather than on the spire because it is a property of *this floor* —
+   * the door says it, the team chooser refuses against it, and the server checks it at the
+   * start of the fight. A spire whose wards lived on the keep would need a floor-number
+   * lookup in three places to answer one question.
+   *
+   * Allowed on `spire` floors and refused everywhere else (publish validation), because a
+   * campaign stage that quietly locked out half a roster would be a difficulty spike with
+   * no explanation on it.
+   */
+  teamRestriction: teamRestrictionSchema.optional(),
 });
 export type StageDef = z.infer<typeof stageDefSchema>;
 

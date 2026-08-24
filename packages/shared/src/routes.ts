@@ -204,6 +204,18 @@ export const ROUTES = {
      */
     overview: '/titan',
   },
+  spire: {
+    /**
+     * The Mistspire: the tower, the climb this month, the keys left and the landings.
+     *
+     * A read plus one claim. A floor is an ordinary battle (`mode: 'spire'`) through the
+     * battle routes, so playback, Auto, the speed ladder and a reload mid-fight all work
+     * here without a second implementation of any of them.
+     */
+    state: '/spire',
+    /** One landing of the climb, collected once per month. */
+    claim: (key: string) => `/spire/${encodeURIComponent(key)}/claim`,
+  },
   arena: {
     /** State, offers and the token meter in one read — what the hub renders from. */
     state: '/arena',

@@ -91,6 +91,7 @@ export const BATTLE_MODES = [
   'trial',
   'worldBoss',
   'deepRun',
+  'spire',
 ] as const;
 export type BattleMode = (typeof BATTLE_MODES)[number];
 

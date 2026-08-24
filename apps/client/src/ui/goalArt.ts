@@ -27,6 +27,8 @@ const GOAL_GLYPH: Readonly<Record<GoalType, string>> = Object.freeze({
   worldBossDamage: 'glyph-exploding-bomb',
   deepRunFinished: 'glyph-cursed-eye',
   deepRunDepth: 'glyph-spiked-cleaver',
+  spireFloor: 'glyph-shield-block',
+  spireHeight: 'glyph-rockets',
   gearEquip: 'glyph-ribcage-armor',
   gearLevel: 'glyph-arcane-symbol',
   championLevelUp: 'glyph-magic-feather',

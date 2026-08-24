@@ -19,6 +19,7 @@ import { arenaRoutes } from './modules/arena/routes';
 import { depthsRoutes } from './modules/depths/routes';
 import { titanRoutes } from './modules/titan/routes';
 import { worldBossRoutes } from './modules/worldboss/routes';
+import { spireRoutes } from './modules/spire/routes';
 import { deepRunRoutes } from './modules/deeprun/routes';
 import { questRoutes } from './modules/meta/routes';
 import { mailRoutes } from './modules/mail/routes';
@@ -109,6 +110,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await api.register(depthsRoutes);
       await api.register(titanRoutes);
       await api.register(worldBossRoutes);
+      await api.register(spireRoutes);
       await api.register(deepRunRoutes);
       await api.register(arenaRoutes);
       await api.register(questRoutes);

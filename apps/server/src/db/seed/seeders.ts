@@ -14,6 +14,7 @@ import { DEEP_RUNS } from './data/deeprun';
 import { TITAN_DUNGEONS, TITAN_ENEMIES, TITAN_SKILLS, TITAN_STAGES } from './data/titan';
 import { TRIAL_ENEMIES, TRIAL_SKILLS, TRIAL_STAGES } from './data/trials';
 import { WORLD_BOSS_DUNGEONS, WORLD_BOSS_ENEMIES, WORLD_BOSS_STAGES } from './data/worldboss';
+import { SPIRE_DUNGEONS, SPIRE_STAGES } from './data/spire';
 import { TUTORIAL_STAGES, TUTORIAL_STEPS } from './data/tutorial';
 import { GAME_CONFIG, ITEMS } from './data/config';
 import { GEAR_STATS } from './data/gear-stats';
@@ -79,10 +80,12 @@ export function buildSeedContent(): SeedContent[] {
     expedition: EXPEDITIONS.map((data) => ({ key: data.key, data })),
     deepRun: DEEP_RUNS.map((data) => ({ key: data.key, data })),
     campaignChapter: CAMPAIGN_CHAPTERS.map((data) => ({ key: data.key, data })),
-    dungeon: [...DUNGEONS, ...TITAN_DUNGEONS, ...WORLD_BOSS_DUNGEONS].map((data) => ({
-      key: data.key,
-      data,
-    })),
+    dungeon: [...DUNGEONS, ...TITAN_DUNGEONS, ...WORLD_BOSS_DUNGEONS, ...SPIRE_DUNGEONS].map(
+      (data) => ({
+        key: data.key,
+        data,
+      }),
+    ),
     stage: [
       ...CAMPAIGN_STAGES,
       ...DEPTHS_STAGES,
@@ -90,6 +93,7 @@ export function buildSeedContent(): SeedContent[] {
       ...TITAN_STAGES,
       ...TRIAL_STAGES,
       ...WORLD_BOSS_STAGES,
+      ...SPIRE_STAGES,
     ].map((data) => ({
       key: data.key,
       data,

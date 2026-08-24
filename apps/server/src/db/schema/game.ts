@@ -407,9 +407,48 @@ export const playerDeepRuns = pgTable(
   ],
 );
 
+/**
+ * One account's climb of one tower, for one month.
+ *
+ * `highest_floor` is the whole of the climb's state, and that is not a shortcut: the
+ * Mistspire is walked in order, so "floor N is open" is exactly "highest >= N-1" and
+ * "floor N is cleared" is exactly "highest >= N". A per-floor record would be a second
+ * source of truth for a question one integer already answers, and the one that goes stale.
+ *
+ * The row is keyed on a `YYYY-MM` anchor, so the monthly reset needs no job and no column
+ * to clear: next month simply does not match this row, and the climb starts at zero
+ * because there is nothing there yet. Exactly how last week's world-boss row retires.
+ *
+ * `best_ever_floor` is the one thing that survives the reset, and it is deliberately not
+ * used for gating anything — it is what the tower says about you rather than what it lets
+ * you skip, because a tower you re-enter halfway up is a tower with no first floor.
+ */
+export const playerSpireClimbs = pgTable(
+  'player_spire_climbs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    dungeonKey: text('dungeon_key').notNull(),
+    /** The climb this is — the game-day's `YYYY-MM`. */
+    anchor: text('anchor').notNull(),
+    highestFloor: integer('highest_floor').notNull().default(0),
+    /** Landings already collected. Each is claimable once per climb. */
+    claimedLandings: jsonb('claimed_landings').notNull().default([]).$type<string[]>(),
+    /** Keys spent this climb, for the screen's "what have I done this month" line. */
+    clears: integer('clears').notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('player_spire_climbs_key').on(table.playerId, table.dungeonKey, table.anchor),
+  ],
+);
+
 export type StageProgressRow = typeof stageProgress.$inferSelect;
 export type ChapterRewardRow = typeof chapterRewards.$inferSelect;
 export type TitanRecordRow = typeof titanRecords.$inferSelect;
 export type WorldBossWakeRow = typeof worldBossWakes.$inferSelect;
 export type PlayerDeepRunRow = typeof playerDeepRuns.$inferSelect;
 export type PlayerWorldBossRow = typeof playerWorldBoss.$inferSelect;
+export type PlayerSpireClimbRow = typeof playerSpireClimbs.$inferSelect;

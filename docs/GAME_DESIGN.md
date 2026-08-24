@@ -299,6 +299,57 @@ already hurt.
 three depth bands, seventeen boons over five rarities and a four-rung depth ladder — and a
 second stair, a fortieth boon or a different ladder are all Admin edits.
 
+### 9.2f The Mistspire — the tower that asks who else you have (C11)
+
+Every other mode in Mistvale is won by **one good team**. The campaign is; the Arena is; a
+Depths keep is one good team per element; the Titan is one good team plus a multi-hitter. So
+the honest answer to "is this thirty-eighth champion worth keeping" has been *no* for most of
+the roster — and a game about collecting champions in which most champions are food is a game
+arguing with itself. The Mistspire exists to change that answer.
+
+**Thirty floors, climbed in order, one at a time.** Every tenth floor is a keeper's. Nine of
+the thirty are **warded**: the door names an element, a faction, a role or a rarity floor,
+and the only team allowed up is four champions who meet it. A player with one excellent ember
+team reaches floor nine and stops. The Tide support they nearly fed away last week is the way
+past it. That is the whole design, and every other rule serves it.
+
+The wards ship ordered by how much of the roster satisfies them — ember (eleven champions in
+the game) at floor three, `hp` (six) at floor twenty-seven — so the tower gets harder in the
+dimension it is *about* as well as in its numbers.
+
+**Keys are spent on a clear, not on an attempt.** This is the source game's Faction Wars rule
+rather than its tower's, and it is deliberate: a floor that has to be *solved* should be free
+to fail at. Charging for attempts teaches people to look the answer up instead of working it
+out, which is the opposite of what a puzzle mode is for. Five keys a day against thirty floors
+makes a full climb six days of turning up at the very least.
+
+**The climb resets with the calendar month.** The anchor is the game-day's `YYYY-MM`, so
+there is no job, no cron and no column to clear — next month simply finds no row and the climb
+starts at floor zero, exactly as last week's world-boss contribution row retires. The highest
+floor ever reached survives the reset and gates nothing: a tower you re-enter halfway up is a
+tower with no first floor.
+
+**Floors pay little; landings pay.** A floor pays about what a campaign stage of its level
+does, because a climber has spent a key rather than energy and should not feel they farmed at
+a loss — but a tower whose floors paid well would be farmed for the floors, and each floor can
+be cleared exactly once a month. The six **landings** are the reason to climb, paid once per
+climb for having got that high.
+
+**What publish validation knows that an operator cannot see.** A ward is checked against the
+whole roster, and one that fewer than four non-food champions could ever satisfy is refused.
+This is not hypothetical: Mistvale has 37 champions over eight factions, and Thornweald Court
+holds three while Runebound Halls and The Drowned Choir hold two each. A floor warded to the
+Drowned Choir would publish cleanly, look correct in the editor, and be unclearable by every
+account forever. It is also the reason **Faction Trials are not built** — faction-locked
+content needs a champion pass first.
+
+**Measured rather than guessed.** `pnpm sim` fights every warded floor with the best four
+champions that ward allows, at the floor's own level, and gates that each falls. "Can a good
+team clear floor 27" is not the question a ward poses; "can the four best hp-role champions in
+the game clear floor 27" is. A second gate holds the tower's shape — the deep wards take
+roughly seven times the turns the shallow ones do.
+
+
 ### 9.3 Arena (async PvP) + Hall of Valor
 Classic arena: 4v4 vs snapshot **defense teams**; tokens cap 10, +1/hour (source-faithful), opponent offer list with refresh; Elo-lite rating → tiers **Bronze I-III, Silver I-III, Gold I-III, Platinum**; per-win **Valor Medals** (amount scales with tier) + weekly tier chest (reset Monday). **AI bots seed every band** (never an empty ladder; natural names with no bot marker — owner-approved; admin-managed). **Hall of Valor**: spend Valor Medals on permanent account-wide element-keyed stat bonuses (per element × stat, 10 levels — the Great Hall analog), doubling as the long-term arena sink.
 

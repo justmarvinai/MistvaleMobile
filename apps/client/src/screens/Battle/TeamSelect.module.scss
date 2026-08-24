@@ -198,6 +198,42 @@
   font-size: 0.85rem;
 }
 
+/* ── Warded floors (the Mistspire) ──────────────────────────────────────── */
+
+.ward {
+  margin: 0;
+  padding: $space-2 $space-3;
+  border-left: 3px solid $accent;
+  background: rgba(0, 0, 0, 0.26);
+  color: $accent;
+  font-size: 0.9rem;
+
+  strong {
+    color: $gold;
+  }
+}
+
+.wardFailure {
+  margin: 0;
+  color: $danger;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* A champion the ward turns back. Dimmed and desaturated rather than removed, because a
+   ward is a puzzle about a roster and a roster with half of it hidden cannot be reasoned
+   about — the answer to "who else could I bring" is usually somebody you had forgotten
+   you had. Still clickable; the refusal is on the start button, in a sentence. */
+.barred {
+  opacity: 0.34;
+  filter: grayscale(0.85);
+  transition: opacity 120ms ease;
+
+  &:hover {
+    opacity: 0.6;
+  }
+}
+
 .empty {
   color: $muted;
   font-size: 0.85rem;

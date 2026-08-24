@@ -4,6 +4,7 @@ import {
   loadContent,
   simulateColdOpen,
   simulateStage,
+  wardedTeam,
   simulateTitan,
   simulateTrial,
   simulateTrialOnAuto,
@@ -37,6 +38,16 @@ import {
  * so a small run is an indication, not a verdict.
  */
 const RUNS = Number(process.env.SIM_RUNS ?? 2_000);
+
+/**
+ * Runs per Mistspire floor.
+ *
+ * A twelfth of the campaign's, because the tower fights **forty-two** stages a pass — the
+ * two unwarded ends plus nine wards, each with its own team — and a win-rate gate at 0.8
+ * does not need two thousand samples to be sound. Enough to separate "reliably" from
+ * "sometimes", which is all the gate claims.
+ */
+const SPIRE_RUNS = Math.max(30, Math.round(RUNS / 12));
 
 /**
  * The line each trial is authored around — the answer key.
@@ -601,6 +612,117 @@ function main(): void {
         detail: `and a modest account reaches the bottom rung on its first day (${rules.attemptsPerDay} strikes)`,
         passed: freshDay >= bottom.damage,
         measured: `${freshDay.toLocaleString()} vs ${bottom.damage.toLocaleString()}`,
+      });
+    }
+  }
+
+  // ── Gate 3d-iii: the Mistspire's wards are climbable ────────────────────
+  //
+  // The tower's balance question is not "can a good team clear floor 27" — a good team can
+  // clear anything. It is **"can the four best `hp`-role champions in the game clear floor
+  // 27"**, because that is the only team the ward allows, and a ward only an impossible
+  // team could pass is a wall rather than a puzzle.
+  //
+  // So every warded floor is fought by a team built *from the ward itself* — the best four
+  // eligible champions, at the investment an account climbing that high plausibly has —
+  // and the gate is that it wins. This is the one measurement that could not be reasoned
+  // out: whether the `hp` role, which has six champions in the whole game and none of them
+  // built to kill anything, can take down floor 27 inside its turn limit.
+  //
+  // The unwarded ends are checked too, and in the other direction: floor 1 has to be
+  // clearable by a beginner, and floor 30 must not be.
+  const spires = [...content.dungeons.values()].filter((dungeon) => dungeon.kind === 'spire');
+  for (const spire of spires) {
+    const floors = [...content.stages.values()]
+      .filter((stage) => stage.mode === 'spire' && stage.parentKey === spire.key)
+      .sort((a, b) => a.number - b.number);
+    if (floors.length === 0) continue;
+
+    console.log(`\n${spire.name} — ${floors.length} floors, ${SPIRE_RUNS} runs a floor`);
+
+    // The ends of the tower — floor 1 is climbable, floor 30 is a wall to a beginner and
+    // falls to a finished account — are **not** gated here. The generic dungeon loop above
+    // asks exactly those three questions of every keep with floors, this one included, from
+    // a fixture tied to the dungeon's own unlock level. Repeating them under different
+    // names would be three more gates saying the same thing, and the one that drifted would
+    // be the one nobody reconciled.
+    //
+    // What is gated here is what only the Mistspire has: the wards.
+    const wardTurns: { floor: number; turns: number }[] = [];
+    for (const floor of floors) {
+      const ward = floor.teamRestriction;
+      if (!ward) continue;
+      // The investment an account at that height plausibly has: the tower is thirty floors
+      // over a month, so a mid-tower ward meets a mid-built team and a late one a nearly
+      // finished one. Deliberately **without** `withCollection` — a player who has just
+      // levelled four hp-role champions to climb one floor does not have them imprinted.
+      // At the floor's **own** level rather than at a guess about the calendar. A ward is
+      // a fair fight or it is not, and "fair" means the four champions it allows, levelled
+      // to what is standing in front of them. The first cut used `25 + floor`, which put a
+      // level-28 team on a level-15 floor and reported every ward as a walkover.
+      const level = Math.max(...floor.waves.flat().map((unit) => unit.level));
+      const rank = Math.min(6, 3 + Math.floor(level / 12));
+      const ascension = Math.min(6, Math.floor(level / 10));
+      const bare = wardedTeam(content, ward, level, rank, ascension);
+      // Two teams, for the same reason a trial is fought twice. **Geared** is somebody who
+      // went and built the four champions the ward wants — they must get through, or the
+      // ward is a wall. **Bare** is the same four pulled off the bench and levelled but
+      // never geared, which is what a player does the first time a ward stops them — and
+      // they must *not* get through, or the ward asked for nothing and the tower is a
+      // corridor with signs on it.
+      const geared = withRelics(content, bare);
+      const gearedRun =
+        bare.length === 4
+          ? simulateStage(content, floor.key, geared, SPIRE_RUNS)
+          : { winRate: 0, medianTurns: Number.NaN };
+      const bareRun =
+        bare.length === 4
+          ? simulateStage(content, floor.key, bare, SPIRE_RUNS, 5_000)
+          : { winRate: 1, medianTurns: Number.NaN };
+      wardTurns.push({ floor: floor.number, turns: gearedRun.medianTurns });
+      console.log(
+        `  floor ${String(floor.number).padStart(2)} warded ${(ward.kind + '=' + ward.value).padEnd(20)} ` +
+          `geared ${String((gearedRun.winRate * 100).toFixed(0)).padStart(3)}% in ${String(gearedRun.medianTurns).padStart(2)} turns · ` +
+          `ungeared ${String((bareRun.winRate * 100).toFixed(0)).padStart(3)}%`,
+      );
+      gates.push({
+        name: `spire-ward-climbable-f${floor.number}`,
+        detail: `floor ${floor.number} (${ward.kind} ${ward.value}) falls to four built champions the ward allows`,
+        passed: bare.length === 4 && gearedRun.winRate >= 0.8,
+        measured:
+          bare.length === 4
+            ? `${(gearedRun.winRate * 100).toFixed(0)}% won`
+            : `only ${bare.length} champions qualify`,
+      });
+      // Deliberately **not** gated on the ungeared team losing. Every campaign gate in this
+      // game is at 100% too: Mistvale is tuned so that a team levelled to the content beats
+      // the content, and demanding otherwise here would quietly make the tower the hardest
+      // thing in the game. What the Mistspire asks for is *breadth* — four levelled hp-role
+      // champions is already a large ask — so the gear check is reported, not enforced.
+      if (bare.length === 4 && bareRun.winRate > 0.9 && gearedRun.medianTurns <= 3) {
+        console.log(
+          `      note: floor ${floor.number} is a formality at this investment (${gearedRun.medianTurns} turns)`,
+        );
+      }
+    }
+
+    // A tower has to *climb*. Per-floor turn counts vary with which four champions a ward
+    // happens to allow — Mistvale's tide champions are simply better than its mist ones,
+    // and that is a fact about the roster rather than a tuning error — so the gate is on
+    // the shape of the whole tower rather than on any one floor of it.
+    const shallow = wardTurns.filter((entry) => entry.floor <= 10);
+    const deep = wardTurns.filter((entry) => entry.floor >= 20);
+    if (shallow.length > 0 && deep.length > 0) {
+      const mean = (rows: typeof wardTurns) =>
+        rows.reduce((sum, row) => sum + (Number.isFinite(row.turns) ? row.turns : 0), 0) /
+        rows.length;
+      const low = mean(shallow);
+      const high = mean(deep);
+      gates.push({
+        name: 'spire-climbs-in-difficulty',
+        detail: 'the tower is meaningfully harder at the top than at the bottom',
+        passed: high >= low * 3,
+        measured: `${high.toFixed(0)} turns near the top vs ${low.toFixed(0)} near the bottom`,
       });
     }
   }

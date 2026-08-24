@@ -32,6 +32,12 @@ export interface Unlock {
  * more than one feature. The celebration queues them rather than picking a winner.
  */
 const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> = Object.freeze({
+  spire: {
+    screen: 'spire',
+    title: 'The Mistspire',
+    blurb:
+      'A watchtower above the mist line with twenty-seven floors nobody built. The wards on its stairs are old and particular — some let only Tide champions past, some only a defender, some only the Hollowborn — so the tower is the one place in the Vale that asks who else you have rather than who is best.',
+  },
   deepRun: {
     screen: 'deepRun',
     title: 'The Sunken Stair',

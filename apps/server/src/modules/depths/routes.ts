@@ -34,13 +34,18 @@ export const depthsRoutes: FastifyPluginAsync = async (app) => {
     const floorNumbers = new Map(bundle.stages.map((stage) => [stage.key, stage.number]));
     const reached = await depths.standings(app.db, playerId, floorNumbers);
 
-    // Titans and world bosses are not keeps in the Depths sense — no floors, no rotation,
-    // no clears — and each has its own screen. Filtered here rather than at the seed so both
-    // can go on using the `dungeon` content type, which is where every other thing about
-    // them fits. A kind added without a home here would quietly appear on the hub with a
-    // floor count of one and nothing behind it, so the list is a *deny*-list on purpose.
+    // Titans, world bosses and the Mistspire are not keeps in the Depths sense and each has
+    // its own screen. Filtered here rather than at the seed so all three can go on using the
+    // `dungeon` content type, which is where every other thing about them fits. A kind added
+    // without a home here would quietly appear on the hub with somebody else's floor count
+    // and no way in, so the list is a *deny*-list on purpose.
+    //
+    // The tower is the one that would have looked most plausible: thirty floors and a boss
+    // at the bottom of the list is exactly what a keep looks like, and the hub would have
+    // offered a "descend" that the spire's own key and floor-order rules refuse.
     const keeps = bundle.dungeons.filter(
-      (dungeon) => dungeon.kind !== 'titan' && dungeon.kind !== 'worldBoss',
+      (dungeon) =>
+        dungeon.kind !== 'titan' && dungeon.kind !== 'worldBoss' && dungeon.kind !== 'spire',
     );
 
     const dungeons: DungeonStanding[] = keeps.map((dungeon) => {

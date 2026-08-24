@@ -35,6 +35,7 @@ import {
   type TitanRun,
   type WorldBossStrike,
   type DeepRunOutcome,
+  type SpireClimb,
 } from '@mistvale/shared';
 import { battleSessions, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
@@ -49,6 +50,7 @@ import * as depths from '../depths/service';
 import * as titan from '../titan/service';
 import * as worldboss from '../worldboss/service';
 import * as deeprun from '../deeprun/service';
+import * as spire from '../spire/service';
 import * as gear from '../gear/service';
 import { borrowedTeam, PresetTeamError, stageSeed } from './preset';
 import * as mastery from '../mastery/service';
@@ -155,6 +157,16 @@ export interface RewardSummary {
    */
   deepRun: DeepRunOutcome | null;
   /**
+   * What clearing a floor of the Mistspire did to the climb: how high it now stands, the
+   * key it cost, and any landings it brought into reach. Null for every other mode, and
+   * null on a *lost* floor — a defeat costs nothing, which is the tower's own rule.
+   *
+   * The landings are named rather than paid. They are collected on the tower's own screen,
+   * because a floor's rewards already land in the results modal and a second bag of loot
+   * inside the same modal reads as a bug.
+   */
+  spire: SpireClimb | null;
+  /**
    * The day's first victory in this mode, paid automatically. Empty once it has been
    * earned today, or in a mode the config pays nothing for.
    */
@@ -193,6 +205,7 @@ const NO_REWARDS: RewardSummary = {
   titan: null,
   worldBoss: null,
   deepRun: null,
+  spire: null,
   vaultOverflow: gear.NO_OVERFLOW,
 };
 
@@ -595,6 +608,48 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         },
         keep,
         now,
+      );
+    }
+
+    // The Mistspire refuses three things and spends nothing: a tower the account has not
+    // reached, a floor that is not the next one up, and a day with no keys left. The key
+    // itself comes off on the **clear** (`settleSpire`), because a warded floor is a puzzle
+    // and a puzzle you are charged to attempt is one people look the answer up for.
+    if (options.mode === 'spire') {
+      const tower = spire.keepForStage(ctx.content, stage);
+      if (!tower) {
+        throw new AppError('CONTENT_STALE', `Stage "${stage.key}" has no tower behind it.`);
+      }
+      await spire.assertFloorOpen(
+        tx,
+        ctx.content,
+        {
+          playerId: options.playerId,
+          level: player.level,
+          dailyCounters: player.dailyCounters,
+          dailyCountersDay: player.dailyCountersDay,
+        },
+        tower,
+        stage,
+        now,
+      );
+      // The ward, checked against the champions actually being fielded. Last of the three,
+      // because "you have no keys" and "that floor is not next" are true whoever is on the
+      // team, and being told to fix the team first would be advice about the wrong thing.
+      spire.assertTeamMeetsWard(
+        ctx.content,
+        stage,
+        owned.map((entry) => {
+          const def = champions.get(entry.championKey);
+          return {
+            key: entry.championKey,
+            name: def?.name ?? entry.championKey,
+            factionKey: def?.factionKey ?? '',
+            element: def?.element ?? '',
+            role: def?.role ?? '',
+            rarity: def?.rarity ?? 'common',
+          };
+        }),
       );
     }
 
@@ -1284,7 +1339,58 @@ async function settleFinished(
   if (row.mode === 'titan') return settleTitan(tx, ctx, row, events, playerId);
   if (row.mode === 'worldBoss') return settleWorldBoss(tx, ctx, row, events, playerId);
   if (row.mode === 'deepRun') return settleDeepRun(tx, ctx, row, state, playerId);
+  if (row.mode === 'spire') return settleSpire(tx, ctx, row, state, playerId);
   return settle(tx, ctx, row, state, playerId);
+}
+
+/**
+ * Settles one floor of the Mistspire.
+ *
+ * A floor is an ordinary stage, so the ordinary settlement pays it — silver, experience,
+ * drops, stars, the lot. What is added here is the *climb*: the key comes off and the
+ * tower advances, and both only on a **win**.
+ *
+ * That last part is the mode's rule rather than an implementation detail. A warded floor
+ * is a puzzle about which four champions to bring, and a puzzle you are charged to attempt
+ * is one people look the answer up for instead of working out. So a defeat leaves the key,
+ * the climb and the row exactly as they were, and the same ward can be attacked all evening
+ * with a different four each time.
+ */
+async function settleSpire(
+  tx: Tx,
+  ctx: BattleContext,
+  row: { id: string; seed: number; mode: string; stageKey: string; teamIds: string[] },
+  state: BattleState,
+  playerId: string,
+): Promise<RewardSummary | null> {
+  const summary = await settle(tx, ctx, row, state, playerId);
+  if (!summary || state.outcome !== 'victory') return summary;
+
+  const stage = contentMaps(ctx.content).stages.get(row.stageKey);
+  const keep = stage ? spire.keepForStage(ctx.content, stage) : null;
+  // Un-published mid-fight. The floor still pays what it paid; there is simply no tower
+  // left to advance, and taking the whole result down over it would be the worse answer.
+  if (!stage || !keep) return summary;
+
+  const climber = await spire.contextFor(tx, playerId);
+  const climb = await spire.settleClear(tx, ctx.content, climber, keep, stage, new Date());
+  summary.spire = climb;
+
+  // Reported here rather than in `settle` because the height is not known until the climb
+  // has moved. The floor count is a plain increment; the height is a *threshold*, because
+  // the climb resets monthly and a cumulative count would quietly pay for re-climbing the
+  // same ten floors every month.
+  if (climb.advanced) {
+    await meta.track(tx, ctx, playerId, [
+      { type: 'spireFloor', facts: { dungeonKey: keep.dungeon.key } },
+      {
+        type: 'spireHeight',
+        amount: climb.highestFloor,
+        facts: { dungeonKey: keep.dungeon.key },
+      },
+    ]);
+  }
+  return summary;
 }
 
 /**
@@ -1513,6 +1619,7 @@ async function settle(
     titan: null,
     worldBoss: null,
     deepRun: null,
+    spire: null,
   };
 }
 

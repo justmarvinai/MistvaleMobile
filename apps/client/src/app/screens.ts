@@ -18,6 +18,7 @@ export type ScreenId =
   | 'titan'
   | 'worldBoss'
   | 'deepRun'
+  | 'spire'
   | 'trials'
   | 'expeditions'
   | 'champions'
@@ -155,6 +156,18 @@ export const SCREENS: readonly ScreenDefinition[] = [
       'Twelve floors down, and your relics stay at the top of them. Four champions, one boon at a time, and every wound they take stays taken.',
     unlock: 'deepRun',
     lockedHint: 'Opens at level 20',
+    inDock: true,
+  },
+  {
+    id: 'spire',
+    label: 'The Mistspire',
+    icon: 'nav-spire',
+    glyph: 'glyph-rockets',
+    art: 'icon-rune-stone',
+    blurb:
+      'Thirty floors, and no two of them want the same team. Some are warded — only champions of one element, one faction or one role may climb — so the tower is the one place a broad roster beats a deep one.',
+    unlock: 'spire',
+    lockedHint: 'Opens at level 16',
     inDock: true,
   },
   {

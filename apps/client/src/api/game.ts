@@ -29,6 +29,7 @@ import type {
   DeepRunView,
   TrialsOverview,
   WorldBossClaimResult,
+  SpireOverview,
   WorldBossView,
   TitanRun,
   MultiBattleRequest,
@@ -438,6 +439,22 @@ export const gameApi = {
 
   claimWorldBossSpoils: (dungeonKey: string, actionId: string) =>
     api.post<WorldBossClaimResult>(ROUTES.worldBoss.spoils(dungeonKey), { actionId }),
+
+  // ── The Mistspire ─────────────────────────────────────────────────────────
+
+  /**
+   * The tower: its floors, their wards, the keys left today and this month's climb.
+   *
+   * A read plus one claim. A floor is fought through `startBattle` with `mode: 'spire'`,
+   * which is why playback, Auto, the speed ladder and a reload mid-fight all work for free.
+   */
+  spire: () => api.get<{ spire: SpireOverview }>(ROUTES.spire.state).then((data) => data.spire),
+
+  claimSpireLanding: (dungeonKey: string, landingKey: string, actionId: string) =>
+    api.post<{ rewards: Record<string, number>; spire: SpireOverview }>(
+      ROUTES.spire.claim(dungeonKey),
+      { landingKey, actionId },
+    ),
 
   /**
    * Every trial, its par, and this account's best.
