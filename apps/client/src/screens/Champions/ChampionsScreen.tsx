@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { RARITIES, type RosterChampion } from '@mistvale/shared';
+import { RARITIES } from '@mistvale/shared';
 import { CollectionProgress } from '@/fui/components/CollectionProgress.ts';
 import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
 import { Toggle } from '@/fui/components/Toggle.ts';
@@ -12,6 +12,15 @@ import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 import styles from './ChampionsScreen.module.scss';
 import { Heading } from '@/ui/Heading/Heading';
 import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
+import { Button } from '../../ui/Button/Button';
+import {
+  NO_FILTER,
+  applyRoster,
+  isNarrowed,
+  rosterFacets,
+  type RosterFilter,
+  type SortKey,
+} from './rosterFilter';
 
 /**
  * The roster.
@@ -21,8 +30,6 @@ import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
  * jobs this screen has — finding a champion to invest in, and finding food to feed it.
  */
 
-type SortKey = 'power' | 'level' | 'rarity' | 'name';
-
 const SORTS: { key: SortKey; label: string }[] = [
   { key: 'power', label: 'Power' },
   { key: 'level', label: 'Level' },
@@ -30,7 +37,12 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'name', label: 'Name' },
 ];
 
-const RARITY_ORDER = ['legendary', 'epic', 'rare', 'uncommon', 'common'];
+const ROLE_LABELS: Readonly<Record<string, string>> = Object.freeze({
+  attack: 'Attack',
+  defense: 'Defence',
+  hp: 'Health',
+  support: 'Support',
+});
 
 export function ChampionsScreen(): JSX.Element {
   const champions = useRosterStore((state) => state.champions);
@@ -39,8 +51,11 @@ export function ChampionsScreen(): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
 
   const [sort, setSort] = useState<SortKey>('power');
-  const [hideFood, setHideFood] = useState(false);
+  const [filter, setFilter] = useState<RosterFilter>(NO_FILTER);
   const [selected, setSelected] = useState<string | null>(null);
+
+  const narrow = <K extends keyof RosterFilter>(key: K, value: RosterFilter[K]): void =>
+    setFilter((current) => ({ ...current, [key]: value }));
 
   useEffect(() => {
     void load();
@@ -51,31 +66,18 @@ export function ChampionsScreen(): JSX.Element {
     [bundle],
   );
 
-  const visible = useMemo(() => {
-    const list = champions.filter(
-      (champion) => !hideFood || !defs.get(champion.championKey)?.isFood,
-    );
+  const visible = useMemo(
+    () => applyRoster(champions, defs, filter, sort),
+    [champions, defs, filter, sort],
+  );
 
-    const rank = (champion: RosterChampion): number =>
-      RARITY_ORDER.indexOf(defs.get(champion.championKey)?.rarity ?? 'common');
+  /** Only what the account actually holds — see `rosterFacets`. */
+  const facets = useMemo(() => rosterFacets(champions, defs), [champions, defs]);
 
-    return [...list].sort((a, b) => {
-      switch (sort) {
-        case 'level':
-          return b.rank - a.rank || b.level - a.level;
-        case 'rarity':
-          return rank(a) - rank(b) || b.power - a.power;
-        case 'name':
-          return (defs.get(a.championKey)?.name ?? '').localeCompare(
-            defs.get(b.championKey)?.name ?? '',
-          );
-        default:
-          // Favourites float regardless of sort: they are the champions a player is
-          // actively working on, and hunting for them in a full roster is a chore.
-          return Number(b.favourite) - Number(a.favourite) || b.power - a.power;
-      }
-    });
-  }, [champions, defs, hideFood, sort]);
+  const factionNames = useMemo(
+    () => new Map((bundle?.factions ?? []).map((faction) => [faction.key, faction.name])),
+    [bundle],
+  );
 
   const foodCount = champions.filter((c) => defs.get(c.championKey)?.isFood).length;
 
@@ -151,11 +153,121 @@ export function ChampionsScreen(): JSX.Element {
             of={Toggle}
             className={styles.toggle}
             options={{
-              checked: hideFood,
+              checked: filter.hideFood,
               label: `Hide food (${foodCount})`,
             }}
-            on={{ 'toggle:change': (checked) => setHideFood(Boolean(checked)) }}
+            on={{ 'toggle:change': (checked) => narrow('hideFood', Boolean(checked)) }}
           />
+        </div>
+
+        {/* Thirty-seven champions is past what a flat grid serves, and this screen has two
+            jobs — find somebody to invest in, find food to feed them — which are both
+            searches. The five the owner's list named (2026-08-22), the element UI_UX §3 has
+            specified since P0 — the filter a Depths team is chosen by — and the name box
+            that answers "where is Anuria" faster than any of them. */}
+        <div className={styles.filters} role="group" aria-label="Narrow the roster">
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Name</span>
+            <input
+              className={styles.search}
+              type="search"
+              value={filter.search}
+              placeholder="Anuria"
+              onChange={(event) => narrow('search', event.target.value)}
+            />
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Faction</span>
+            <select
+              className={styles.select}
+              value={filter.factionKey}
+              onChange={(event) => narrow('factionKey', event.target.value)}
+            >
+              <option value="any">Any</option>
+              {facets.factionKeys.map((key) => (
+                <option key={key} value={key}>
+                  {factionNames.get(key) ?? key}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Element</span>
+            <select
+              className={styles.select}
+              value={filter.element}
+              onChange={(event) => narrow('element', event.target.value as RosterFilter['element'])}
+            >
+              <option value="any">Any</option>
+              {facets.elements.map((element) => (
+                <option key={element} value={element}>
+                  {element[0]!.toUpperCase() + element.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Rarity</span>
+            <select
+              className={styles.select}
+              value={filter.rarity}
+              onChange={(event) => narrow('rarity', event.target.value as RosterFilter['rarity'])}
+            >
+              <option value="any">Any</option>
+              {facets.rarities.map((rarity) => (
+                <option key={rarity} value={rarity}>
+                  {rarity[0]!.toUpperCase() + rarity.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Role</span>
+            <select
+              className={styles.select}
+              value={filter.role}
+              onChange={(event) => narrow('role', event.target.value as RosterFilter['role'])}
+            >
+              <option value="any">Any</option>
+              {facets.roles.map((role) => (
+                <option key={role} value={role}>
+                  {ROLE_LABELS[role] ?? role}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.check}>
+            <input
+              type="checkbox"
+              checked={filter.notAtCap}
+              onChange={(event) => narrow('notAtCap', event.target.checked)}
+            />
+            <span>Not at cap</span>
+          </label>
+
+          <label className={styles.check}>
+            <input
+              type="checkbox"
+              checked={filter.bare}
+              onChange={(event) => narrow('bare', event.target.checked)}
+            />
+            <span>Wearing nothing</span>
+          </label>
+
+          <span className={styles.count}>
+            {visible.length} of {champions.length}
+          </span>
+
+          {isNarrowed(filter) && (
+            <Button size="sm" variant="ghost" onClick={() => setFilter(NO_FILTER)}>
+              Reset
+            </Button>
+          )}
         </div>
 
         {loading && champions.length === 0 ? (
@@ -164,15 +276,15 @@ export function ChampionsScreen(): JSX.Element {
           <p className={styles.empty}>
             {champions.length === 0
               ? 'No champions yet. Choose a starter in the Haven.'
-              : 'Nothing matches that filter.'}
+              : 'Nothing matches that. Reset the filters to see the whole roll.'}
           </p>
         ) : (
           <div className={styles.grid}>
-            {visible.map((champion) => (
+            {visible.map(({ champion, def }) => (
               <ChampionCard
                 key={champion.id}
                 champion={champion}
-                def={defs.get(champion.championKey)}
+                def={def}
                 onOpen={() => setSelected(champion.id)}
               />
             ))}

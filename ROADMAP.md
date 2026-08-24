@@ -217,7 +217,7 @@ criteria of its own, and it does not gate P9e or P10.
 | **C6** | Champion progression rebuilt to the source game's shape: **the star track belongs to the rarity** (Commons never move, Uncommon/Rare to ★5, Epic/Legendary to ★6), level caps 20/20/30/40/50/60 with a rank-up resetting to level 1, **Mistbrew** as the one XP consumable, and **awakening** as a fourth ladder paid in Waking Shards out of the deep Depths · the champion sheet as four ladders that each say which gate is shut · the sheet finally reading what the player is holding | ✅ |
 | **C7** | Two rules about watching a fight: **Skip only on a stage already beaten** (decided when the fight opens, since the clear it may itself record would otherwise answer the question), and **playback ×1–×4** with ×3 earned by the campaign on Normal and ×4 on Brutal | ✅ |
 | **C8** | The campaign map without its own window — no frame, no second background, markers at a size a desktop can read · the speed ladder settled at **×1 · ×2 · ×4** (×4 on the Normal campaign) with `ui/SpeedLadder` drawing the rung an account has *not* earned and what opens it | ✅ |
-| **C9** | Five, from the improvement list: **a fight that moves** (hit impacts, swings, casts, deaths — item 14) ✅ · **the Solo Titan** (the Valewurm — item 1) ✅ · **relic loadouts and bulk relic actions** (items 5 and 6) ✅ · roster filter and sort · a "what's ready" card on the Haven | ◐ in progress |
+| **C9** | Five, from the improvement list: **a fight that moves** (hit impacts, swings, casts, deaths — item 14) ✅ · **the Solo Titan** (the Valewurm — item 1) ✅ · **relic loadouts and bulk relic actions** (items 5 and 6) ✅ · **roster filter and sort** (item 7) ✅ · **a "what's ready" card on the Haven** (item 8) ✅ | ✅ |
 
 **Backlog carried out of a batch rather than done in it.** Two items, and they are the same
 question wearing different clothes — both are parked on the owner's instruction, and both want
@@ -264,11 +264,24 @@ engine, the goal DSL and the events framework already do most of the work*.
 6. ~~**Bulk relic actions**~~ — **Done — C9.** Rarity, set and "unforged only" narrow the
    grid; **Select these N** takes what is on screen; and the selection forges to a level in
    one run that stops cleanly on an empty purse.
-7. **Roster filter and sort** — by faction, rarity, role, "not at cap", "wearing nothing".
-   Thirty-seven champions is already past what a flat grid serves.
-8. **A "what is ready" card on the Haven** — quests claimable, arena tokens full, today's
-   spring, multi-battle left. Every one of those numbers is already on the player snapshot;
-   nothing on the Haven says any of them.
+7. ~~**Roster filter and sort**~~ — **Done — C9.** Name, faction, rarity and role, plus
+   the two that answer a question rather than describe a champion: "not at cap" (below the
+   *rank's* ceiling, so a ★4 at 40 is finished until it ranks up) and "wearing nothing".
+   Food hides behind its own switch. The pickers offer only what the account holds, in the
+   grid's own rarity order, and the count says "9 of 37" so a filter is never mistaken for
+   an empty roster. `applyRoster` is pure and tested, because a stale definition must
+   narrow a roster rather than break it. Element was not on the owner's list but has been in
+   UI_UX §3 since P0, and it is the filter a Depths team is chosen by.
+8. ~~**A "what is ready" card on the Haven**~~ — **Done — C9.** The day's gift, claimable
+   errands, Path steps and event rungs, arena tokens, unspent Titan keys, today's springs
+   and farm runs left — carried on `readiness`, computed with the snapshot the shell already
+   re-fetches, so the card costs no round trips and cannot disagree with the dock pip beside
+   it. A row appears **only when it is actionable** and the card is not drawn at all when
+   nothing is: collecting is listed before spending, and a full token bar is marked urgent
+   because it is the one thing on the card that gets worse while ignored. "Actionable" means
+   the *unlock* rather than the number — the farm allowance is counted from registration, so
+   reading it straight offered a level-1 warden thirty runs of a feature five levels away
+   (`e2e/roster.spec.ts` caught it).
 9. **Relic compare on equip** — the preview endpoint returns the delta already; the screen
    shows the candidate rather than the difference.
 

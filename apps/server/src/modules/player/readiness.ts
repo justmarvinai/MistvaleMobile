@@ -1,0 +1,82 @@
+import { eq } from 'drizzle-orm';
+import { UNLOCK_LEVELS, titanCounter, type Readiness, NO_READINESS } from '@mistvale/shared';
+import { arenaState } from '../../db/schema/index';
+import type { Database } from '../../db/client';
+import type { ContentCache } from '../../content/cache';
+import { countersFor, remaining } from '../../lib/daily-counters';
+import { arenaConfigFrom, computeTokens } from '../arena/rating';
+import * as depths from '../depths/service';
+import * as titan from '../titan/service';
+
+/**
+ * What is waiting, gathered onto the snapshot the shell already re-fetches.
+ *
+ * Three numbers a player wants before they decide anything, and each one lived somewhere
+ * the Haven could not see it. Computed here rather than fetched by a card, for the same
+ * reason the dock pips are: the server computes, the client displays, and nothing polls
+ * (UI_UX §1.3). A card built from three lazy stores would show an empty Haven to anybody
+ * who had not yet opened the Arena — which is everybody, on the screen they land on.
+ *
+ * **Everything is null or empty below its unlock**, so the card draws what a player has
+ * rather than a row of zeroes about things they have never seen. And the cost is one
+ * indexed row: the keys come off the player row the request already holds, and the springs
+ * are pure arithmetic over content and the clock.
+ */
+export async function readinessFor(
+  db: Database,
+  content: ContentCache,
+  player: {
+    id: string;
+    level: number;
+    createdAt: Date;
+    dailyCounters: Record<string, number>;
+    dailyCountersDay: string | null;
+  },
+  now: Date,
+): Promise<Readiness> {
+  const bundle = content.current().bundle;
+  const readiness: Readiness = { ...NO_READINESS };
+
+  if (player.level >= UNLOCK_LEVELS.arena) {
+    const [standing] = await db
+      .select({ tokens: arenaState.tokens, updatedAt: arenaState.tokensUpdatedAt })
+      .from(arenaState)
+      .where(eq(arenaState.playerId, player.id));
+    const config = arenaConfigFrom(bundle.config);
+    // An account that has never fought reads as a full bar rather than as nothing: the
+    // tokens exist from the moment the Arena opens, and the row is written on first use.
+    const tokens = standing
+      ? computeTokens({ value: standing.tokens, updatedAt: standing.updatedAt }, config, now)
+      : { value: config.tokenCap, cap: config.tokenCap };
+    readiness.arenaTokens = { value: tokens.value, cap: tokens.cap };
+  }
+
+  if (player.level >= UNLOCK_LEVELS.titan) {
+    const counters = countersFor(player, bundle.config, now);
+    // Across every published Titan, because the card is about *whether to go down* rather
+    // than about which keep — and there is one today.
+    let left = 0;
+    let cap = 0;
+    for (const keep of titan.keeps(content)) {
+      if (player.level < keep.dungeon.unlockLevel) continue;
+      left += remaining(counters, titanCounter(keep.dungeon.key), keep.rules.keysPerDay);
+      cap += keep.rules.keysPerDay;
+    }
+    if (cap > 0) readiness.titanKeys = { value: left, cap };
+  }
+
+  if (player.level >= UNLOCK_LEVELS.springs) {
+    const context = depths.contextFor(player, bundle.config, now);
+    readiness.springsInGrace = context.rotation.inGrace;
+    readiness.openSprings = bundle.dungeons
+      .filter(
+        (dungeon) =>
+          dungeon.kind === 'springs' &&
+          player.level >= dungeon.unlockLevel &&
+          depths.openToday(dungeon, context.rotation),
+      )
+      .map((dungeon) => dungeon.key);
+  }
+
+  return readiness;
+}

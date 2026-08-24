@@ -20,6 +20,7 @@
 | GET `/player/starters` | The champions flagged `starter` in content — what a new account chooses between. |
 | POST `/player/starter` | `{championKey}` → grants the chosen starter. Idempotent: a player who already owns champions is left alone. |
 | PATCH `/player/settings` | Audio/gfx/preferences jsonb (schema-validated). |
+| GET `/player` | Adds `readiness` — what is waiting, for the Haven's card: `arenaTokens` and `titanKeys` as `{value,cap}` meters (each **null below its unlock level**, so a card draws what the account has rather than a row of zeroes about things it has never seen), the `openSprings` keys, and `springsInGrace` for the new-account period that opens all of them at once. Computed on the read the shell already re-fetches after every action, so a summary card needs no round trips of its own and cannot disagree with the dock badges beside it. The grace is a field because "every spring I know of is open" and "a grace is running" are not the same fact — springs an operator authors open every day would otherwise be reported as a deadline forever. |
 
 ### Champions & gear
 | GET `/player` | Adds `battleSpeeds` — the playback multipliers this account has earned (×1, ×2, ×4; ×4 for the campaign finished on Normal). Server-computed because the gate is progress; the multiplier itself is animation and is not policed. |

@@ -22,6 +22,7 @@ import * as mailService from '../mail/service';
 import * as missions from '../meta/missions';
 import * as progress from '../progress/service';
 import * as quests from '../meta/quests';
+import { readinessFor } from './readiness';
 
 /**
  * Player snapshot and settings.
@@ -92,6 +93,10 @@ export const playerRoutes: FastifyPluginAsync = async (app) => {
               now,
             ),
           },
+          // What is waiting, on the read the shell already makes — the same reasoning the
+          // dock pips follow, and the reason the Haven's card needs no round trips of its
+          // own. Everything in it is null or empty below its unlock.
+          readiness: await readinessFor(app.db, app.content, player, now),
           settings: { ...DEFAULT_PLAYER_SETTINGS, ...player.settings },
           serverTime: now.toISOString(),
         },

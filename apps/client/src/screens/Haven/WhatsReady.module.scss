@@ -1,0 +1,78 @@
+@use '../../styles/tokens' as *;
+
+/* What is waiting, on the screen a player lands on. See WhatsReady.tsx.
+
+   Sits above the rail rather than beside it — B1's rule is that a screen is the feature,
+   and the Haven's feature is the rail. This is a short list that is empty most mornings,
+   so it costs the rail nothing when there is nothing to say. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  border: 1px solid $edge;
+  background: rgb(0 0 0 / 22%);
+}
+
+.title {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $muted;
+}
+
+.rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Each row is the way to the thing it names — a card that says "3 to claim" and cannot be
+   pressed is a card that adds a click rather than saving one. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-1 $space-2;
+  border: 1px solid $edge;
+  background: $panel-inset;
+  color: $parchment;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $accent;
+  }
+
+  /* The things that are being *wasted* rather than merely available: a claimable reward
+     sitting uncollected, or a token bar that has stopped regenerating. */
+  &[data-urgent='true'] {
+    border-color: $accent;
+
+    .value {
+      color: $accent;
+    }
+  }
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  color: $muted;
+}
+
+.label {
+  color: $muted;
+}
+
+.value {
+  font-family: $font-mono;
+  color: $parchment;
+}

@@ -9,6 +9,8 @@ import {
   type MultiBattleState,
   type PlayerSettings,
   type PlayerSummary,
+  type Readiness,
+  NO_READINESS,
   type UnlockFlags,
 } from '@mistvale/shared';
 import { api } from '@/api/client';
@@ -39,6 +41,8 @@ interface PlayerSnapshot {
   title: string | null;
   multiBattle: MultiBattleState;
   badges: DockBadges;
+  /** What is waiting — arena tokens, Titan keys, today's springs. */
+  readiness: Readiness;
   settings: PlayerSettings;
   serverTime: string;
 }
@@ -91,6 +95,8 @@ interface PlayerState {
   multiBattle: MultiBattleState;
   /** What is waiting to be collected, per dock destination. */
   badges: DockBadges;
+  /** What is waiting, for the Haven's card. Empty until the first snapshot lands. */
+  readiness: Readiness;
   settings: PlayerSettings;
   loading: boolean;
   /** Difference between server and client clocks, so countdowns stay honest. */
@@ -108,6 +114,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   title: null,
   multiBattle: NO_MULTI_BATTLE,
   badges: NO_BADGES,
+  readiness: NO_READINESS,
   settings: DEFAULT_PLAYER_SETTINGS,
   loading: false,
   clockSkewMs: 0,
@@ -131,6 +138,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         title: snapshot.title ?? null,
         multiBattle: snapshot.multiBattle ?? NO_MULTI_BATTLE,
         badges: snapshot.badges ?? NO_BADGES,
+        readiness: snapshot.readiness ?? NO_READINESS,
         settings: { ...DEFAULT_PLAYER_SETTINGS, ...snapshot.settings },
         clockSkewMs: serverTime + latencyAllowance - Date.now(),
         loading: false,
@@ -170,6 +178,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       title: null,
       multiBattle: NO_MULTI_BATTLE,
       badges: NO_BADGES,
+      readiness: NO_READINESS,
       settings: DEFAULT_PLAYER_SETTINGS,
       loading: false,
       clockSkewMs: 0,

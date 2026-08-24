@@ -15,7 +15,69 @@
   align-items: center;
   justify-content: space-between;
   gap: $space-3;
+  margin-bottom: $space-2;
+}
+
+/* The five filters the owner's list named, plus the name box. Wraps rather than squashing:
+   a select narrowed to 60px is a select nobody can read the options of. */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-2;
   margin-bottom: $space-3;
+  padding-bottom: $space-2;
+  border-bottom: 1px solid $edge;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+}
+
+.fieldLabel {
+  color: $muted;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* The browser's own controls, dressed. A painted dropdown is a component the library does
+   not have, and a hand-built one is a listbox with keyboard support to get wrong — where
+   the native control already has all of it and only wants the theme's colours. */
+.select,
+.search {
+  padding: 3px $space-1;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $parchment;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.select {
+  cursor: pointer;
+}
+
+.search {
+  width: 8rem;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  color: $muted;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.count {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  margin-left: auto;
 }
 
 .grid {

@@ -12,6 +12,7 @@ import {
   type ScreenId,
 } from '@/app/screens';
 import { StarterChoice } from './StarterChoice';
+import { WhatsReady } from './WhatsReady';
 import { useTip } from '@/ui/Tooltip/useTooltip';
 import styles from './HavenScreen.module.scss';
 
@@ -92,6 +93,11 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
       >
         The Haven
       </Heading>
+
+      {/* Above the rail rather than beside it: B1's rule is that a screen is the feature,
+          and the Haven's feature is the rail. This draws nothing at all when there is
+          nothing waiting, which is most mornings. */}
+      <WhatsReady onNavigate={onNavigate} />
 
       <Rail label="Locations" className={styles.rail}>
         {stations.map((screen) => (

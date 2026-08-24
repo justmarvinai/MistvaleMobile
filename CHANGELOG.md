@@ -5,6 +5,41 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — a roster you can search, and a Haven that says what is waiting
+
+Two of the five things on the owner's list (2026-08-22), both about finding what you came for.
+
+**The roster narrows.** Thirty-seven champions past a flat grid, and the two jobs the screen
+has — find somebody to invest in, find food to feed them — are both searches. Name, faction,
+element, rarity and role, plus the two that answer a question rather than describe a champion:
+**Not at cap** (below their *rank's* ceiling, so a ★4 at 40 is finished until it ranks up —
+the ones food would help) and **Wearing nothing** (the ones a loadout is for). Food hides
+behind its own switch. The pickers offer only what the account holds, in the grid's own
+rarity order — a dropdown that says Common first while the grid puts Legendary first is two
+answers to one question — and the count says "9 of 37" so a filter can never be mistaken for
+an empty roster. A champion whose definition has gone stale is kept in the grid — it is a
+copy the player owns — but cannot satisfy a filter about its definition.
+
+**The Haven says what is waiting.** A warden coming back after a day wants four or five
+things answered before they decide anything, and every one of them was already computed
+somewhere the Haven could not see it: the day's gift, errands and Path steps and event rungs
+to claim, arena tokens, unspent Titan keys, which spring is open, farm runs left. It rides on
+the snapshot the shell already re-fetches, so the card costs no round trips and cannot
+disagree with the pip on the tile it points at.
+
+- **A row appears only when it is actionable.** A card that says "0 quests, 0 keys, 0 runs"
+  every morning is one a player stops reading by the second week. With nothing waiting the
+  card is not drawn at all — and "actionable" means the *unlock*, not the number: the farm
+  allowance is counted from the day an account registers, so reading it without the unlock
+  offered a brand-new warden thirty runs of a feature five levels away.
+- **Collecting comes before spending**, because collecting is free and instant.
+- **A full token bar is marked urgent** — it is the one thing on the card that gets *worse*
+  while it is ignored, having stopped regenerating.
+- A new account has every spring open at once, so during the grace period the row says the
+  grace is running rather than reciting five names. The **server** says whether one is —
+  a client counting "every spring I know of is open" would promise a deadline forever to an
+  operator who simply authored them open every day.
+
 ### Added — relic loadouts, and acting on a filter instead of a click per relic
 
 Moving a build was nine unequips, nine equips and nine things to remember — the small change
