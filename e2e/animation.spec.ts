@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   chooseStarter,
+  goToScreen,
   openCampaignStage,
   pickTeam,
   registerRaw,
@@ -26,10 +27,7 @@ import {
  */
 
 async function enterStageOne(page: Page): Promise<void> {
-  await page
-    .getByRole('button', { name: /^campaign$/i })
-    .first()
-    .click();
+  await goToScreen(page, 'Campaign');
   await openCampaignStage(page);
   const dialog = page.getByRole('dialog', { name: /stage 1/i });
   await pickTeam(dialog);

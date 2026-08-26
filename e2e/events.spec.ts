@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { dockEntry, leaveTutorial, placeCard } from './support';
 
 /**
  * Timed events, in a real browser.
@@ -22,7 +22,9 @@ test.describe('events', () => {
     test.slow();
     await register(page, 'e2ev', 'Unfeted');
 
-    const station = page.getByRole('button', { name: /events/i }).first();
+    // Two presses since C12: the dock holds hubs, and a place is a card on one.
+    await dockEntry(page, 'Events').click();
+    const station = placeCard(page, 'Events');
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
     // The hint is *read*, not hovered: a station says when it opens in visible text under

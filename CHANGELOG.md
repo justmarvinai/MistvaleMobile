@@ -5,6 +5,39 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the frame scrolls, not the shell (C12c)
+
+**Two game modes could not be clicked.** On the Battle hub at 1920×1080 the top bar scrolled
+off the top of the window and the dock came to rest across the middle of the page, in front
+of the Mistspire and Trials cards — which were then behind the navigation and unreachable.
+
+The cause is one line that was never written: `main` is the frame every screen is drawn in,
+and nothing said what should happen when a screen was taller than it. So the overflow went
+to the *document*, and the document scrolls the whole shell. It survived C12 because it
+needs a screen taller than the frame, and a hub is the first screen in the game that grows
+freely with its content rather than managing its own scrolling. The frame owns the scroll
+now, and `e2e/visible.spec.ts` fails against the old stylesheet by 628 pixels.
+
+**The hubs fit and fill.** Battle holds eight cards, which at the default page ceiling is
+three columns and three rows — the last one past the bottom of the frame. Hubs are wide now,
+so eight is four columns and two rows on one screen. Cards in a row are one height rather
+than ragged, the blurb clamp went from three lines to four because two of the registry's own
+sentences did not fit in three, and a hub with fewer cards than the frame is tall centres
+them instead of drawing one row against the top with six hundred pixels of nothing under it.
+
+**A screen is titled what the card that opens it says.** Pressing **Roster** landed on a page
+headed "Your Champions", and pressing **Quests** landed on one headed "Errands" — which is
+also the name of the hub holding it. Both now agree with their card.
+
+### Fixed — the browser suite runs again (C12c)
+
+C12a replaced the Haven's twelve per-mode station boards with the six hubs, and about thirty
+call sites across twenty specs still pressed "Campaign", "Arena", "Calendar" as if they were
+stations. The suite had been red from that commit onward and nothing said so, because
+`pnpm verify` does not run Playwright — the gate that was green is not the gate that covers
+navigation. Every one of them goes through `goToScreen` or `dockEntry` + `placeCard` now, so
+a future rearrangement is one edit to `HUB_OF` rather than thirty.
+
 ### Changed — an enemy's star rating decides something (C13, Q8)
 
 **⚠ Release step: run `SEED.sh --replace stage` (DEPLOYMENT_OPERATIONS §5).** This changes a

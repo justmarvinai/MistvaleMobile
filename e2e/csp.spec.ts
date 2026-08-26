@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   PASSWORD,
   chooseStarter,
+  goToScreen,
   leaveTutorial,
   openCampaignStage,
   pickTeam,
@@ -156,10 +157,7 @@ test.describe('the site security policy', () => {
       await leaveTutorial(page);
       await chooseStarter(page);
 
-      await page
-        .getByRole('button', { name: /^campaign$/i })
-        .first()
-        .click();
+      await goToScreen(page, 'Campaign');
       await openCampaignStage(page, '1-1');
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
       await pickTeam(teamDialog);

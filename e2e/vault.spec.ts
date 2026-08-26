@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { registerRaw } from './support';
+import { goToScreen, registerRaw } from './support';
 
 /**
  * The relic vault has a ceiling now (Q5, answered 2026-08-18).
@@ -26,10 +26,7 @@ test.describe('the vault', () => {
     await starter.getByRole('button', { name: /stand together/i }).click();
     await expect(starter).toBeHidden({ timeout: 15_000 });
 
-    await page
-      .getByRole('button', { name: /^relics$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Relics');
 
     // The count is loose relics over the cap, not everything owned — equipped relics live
     // on a champion, which is what makes equipping a way to make room. The meter says so in
@@ -54,10 +51,7 @@ test.describe('the vault', () => {
     await starter.getByRole('button', { name: /stand together/i }).click();
     await expect(starter).toBeHidden({ timeout: 15_000 });
 
-    await page
-      .getByRole('button', { name: /^relics$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Relics');
     const buy = page.getByRole('button', { name: /buy 50 slots/i });
     await expect(buy).toBeVisible({ timeout: 15_000 });
     await buy.click();

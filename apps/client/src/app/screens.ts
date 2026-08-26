@@ -128,6 +128,10 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'battleHub',
+    // A hub is the game's Game Modes screen and it wants the pixels: at the default
+    // ceiling the Battle hub's eight cards are three columns and three rows, so the last
+    // row falls past the bottom of the frame. Four columns fit it on one screen.
+    width: 'wide',
     label: 'Battle',
     icon: 'nav-battle',
     glyph: 'glyph-sword-clash',
@@ -138,6 +142,10 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'championsHub',
+    // A hub is the game's Game Modes screen and it wants the pixels: at the default
+    // ceiling the Battle hub's eight cards are three columns and three rows, so the last
+    // row falls past the bottom of the frame. Four columns fit it on one screen.
+    width: 'wide',
     label: 'Champions',
     icon: 'nav-champions',
     glyph: 'glyph-cloaked-figure',
@@ -147,6 +155,10 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'errandsHub',
+    // A hub is the game's Game Modes screen and it wants the pixels: at the default
+    // ceiling the Battle hub's eight cards are three columns and three rows, so the last
+    // row falls past the bottom of the frame. Four columns fit it on one screen.
+    width: 'wide',
     label: 'Errands',
     icon: 'nav-quests',
     glyph: 'glyph-burning-scroll',

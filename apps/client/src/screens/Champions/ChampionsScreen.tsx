@@ -157,7 +157,7 @@ export function ChampionsScreen(): JSX.Element {
           </ScreenInfo>
         }
       >
-        Your Champions
+        Your Roster
       </Heading>
 
       <div>

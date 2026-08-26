@@ -76,6 +76,74 @@ test.describe('no page scrolls sideways', () => {
   }
 });
 
+/**
+ * The frame scrolls; the window does not (C12c).
+ *
+ * The other half of the rule above, and the one that shipped broken. A screen taller than
+ * the frame had nowhere to scroll, so the *document* scrolled instead — which on the Battle
+ * hub at 1920×1080 took the top bar off the top of the window and left the dock lying
+ * across the middle of the page, in front of the last two cards. The Mistspire and Trials
+ * were behind it and could not be clicked at all.
+ *
+ * It survived C12 because nothing in the suite had a screen tall enough to overflow: every
+ * screen before the hubs managed its own scrolling internally, and the assertion everybody
+ * would reach for — "is the card visible" — passes on a card the dock is sitting on top of.
+ *
+ * So the check is about the *chrome*: whatever a screen does, the top bar and the dock stay
+ * where they are. Run at a deliberately short window so the content is guaranteed to
+ * overflow rather than relying on how many modes happen to be in the game this month.
+ */
+test.describe('the shell stays put', () => {
+  test('when a screen is taller than the window', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 620 });
+    await registerRaw(page, 'e2eshell', 'Anchored');
+    await chooseStarter(page);
+
+    await dockEntry(page, 'Campaign').click();
+    const dock = page.getByRole('navigation');
+    await expect(dock).toBeVisible();
+
+    const frame = page.locator('main');
+    await expect(frame).toHaveCount(1);
+    // The hub has to actually overflow, or the rest of this proves nothing.
+    const overflows = await frame.evaluate((el) => el.scrollHeight > el.clientHeight + 2);
+    expect(overflows, 'the Battle hub should overflow a 620px window').toBe(true);
+
+    const before = await dock.boundingBox();
+    // Scrolled the way a player scrolls: a wheel over the content, which moves whichever
+    // ancestor will move. Calling `scrollTo` on the frame instead proves nothing — when the
+    // frame is the box that *cannot* scroll, the call is a no-op and everything stays
+    // exactly where the assertions below want it. That is the version of this test that
+    // passed against the bug it was written for.
+    await page.mouse.move(640, 400);
+    for (let i = 0; i < 8; i += 1) await page.mouse.wheel(0, 200);
+    await page.waitForTimeout(400);
+
+    // The document itself never scrolls. If it does, the shell went with it.
+    const documentScroll = await page.evaluate(
+      () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    );
+    expect(documentScroll, 'the window scrolled instead of the frame').toBeLessThanOrEqual(0);
+
+    const after = await dock.boundingBox();
+    expect(after?.y, 'the dock moved when the frame scrolled').toBeCloseTo(before?.y ?? -1, 0);
+    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+
+    // And the last card of the tallest hub ends up clear of the dock rather than behind it.
+    // Asserted as geometry rather than by pressing it, because the last card is `Trials`
+    // and a fresh account has not unlocked it — a locked card navigates nowhere, so a
+    // click would prove nothing either way. What the bug did was leave it *underneath* the
+    // navigation, which is a position rather than a state.
+    const last = placeCard(page, 'Trials');
+    const card = await last.boundingBox();
+    const bar = await dock.boundingBox();
+    expect(card, 'the last hub card has no box').not.toBeNull();
+    expect(card!.y + card!.height, 'the last card is behind the dock').toBeLessThanOrEqual(
+      (bar?.y ?? 0) + 1,
+    );
+  });
+});
+
 test.describe('what a player can actually see', () => {
   test('the battle screen shows its fight and its controls', async ({ page }) => {
     test.slow();
@@ -90,10 +158,7 @@ test.describe('what a player can actually see', () => {
     await starter.getByRole('button', { name: /stand together/i }).click();
     await expect(starter).toBeHidden({ timeout: 15_000 });
 
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
     await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
@@ -140,10 +205,7 @@ test.describe('what a player can actually see', () => {
     await starter.getByRole('button', { name: /stand together/i }).click();
     await expect(starter).toBeHidden({ timeout: 15_000 });
 
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
     await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
@@ -191,10 +253,7 @@ test.describe('what a player can actually see', () => {
     // Relics, because the vault is where the mismatch showed and an empty vault proves
     // nothing. A stage does not always drop one, so it is farmed until it does.
     for (let run = 0; run < 4; run += 1) {
-      await page
-        .getByRole('button', { name: /^campaign$/i })
-        .first()
-        .click();
+      await goToScreen(page, 'Campaign');
       await openCampaignStage(page, '1-1');
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
       await pickTeam(teamDialog);
@@ -398,10 +457,7 @@ test.describe('what a player can actually see', () => {
     await setSimpleBattlefield(page);
     await dismissUnlocks(page);
 
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
     await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
@@ -433,10 +489,7 @@ test.describe('what a player can actually see', () => {
     await registerRaw(page, 'e2ewave', 'Waver');
     await chooseStarter(page);
 
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
     await openCampaignStage(page, '1-1');
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
     await pickTeam(teamDialog);
@@ -479,10 +532,7 @@ test.describe('what a player can actually see', () => {
       await registerRaw(page, `e2epx${art[0]}`, `Pix${art[0]}`);
       await chooseStarter(page);
 
-      await page
-        .getByRole('button', { name: /^campaign$/i })
-        .first()
-        .click();
+      await goToScreen(page, 'Campaign');
       await openCampaignStage(page, '1-1');
       const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
       await pickTeam(teamDialog);

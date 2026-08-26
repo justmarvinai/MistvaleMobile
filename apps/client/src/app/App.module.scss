@@ -30,11 +30,37 @@
   display: flex;
   flex-direction: column;
 
+  /* The frame scrolls its content; the window scrolls nothing (C12c).
+
+     `min-height: 0` above lets this box be shorter than what is in it, and until now
+     nothing said what should happen when it was — so a screen taller than the frame
+     overflowed and the *document* scrolled instead. That takes the whole shell with it:
+     on the Battle hub at 1920×1080 the top bar scrolled off the top and the dock came to
+     rest across the middle of the page, over the last two cards, which were then
+     unclickable because the dock was in front of them. Two game modes, reachable only by
+     scrolling the navigation out of the way first.
+
+     It survived C12 because it needs a screen *taller than the frame*, and the hub is the
+     first screen in the game that grows freely with its content instead of managing its
+     own scrolling. `overflow-x` is hidden rather than auto because a stray sub-pixel would
+     otherwise park a scrollbar under every screen; nothing that must escape this box is
+     laid out inside it — modals portal and tooltips are appended to `document.body`. */
+  overflow-y: auto;
+  overflow-x: hidden;
+
   > * {
     width: 100%;
     max-width: $page-max;
     margin-inline: auto;
-    min-height: 0;
+    /* At least the frame, and free to grow past it (C12c).
+
+       It was `min-height: 0`, which let a screen be shrunk to nothing and meant a screen
+       shorter than the window had no "rest of the page" to arrange itself in — so the
+       Champions hub drew one row of cards against the top with six hundred pixels of
+       nothing beneath, which is the exact complaint the restructure exists to answer. A
+       screen taller than this still grows and the frame scrolls it, because the rule is a
+       floor rather than a height. */
+    min-height: 100%;
   }
 
   /* A screen that wants the pixels: the vault's grid, the roster, the shelves. */

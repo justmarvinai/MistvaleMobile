@@ -190,11 +190,36 @@
   color: $parchment-dim;
   font-size: 0.95rem;
   line-height: 1.55;
-  /* Three lines then clamp. Every blurb in the registry fits in two or three at this
-     width; the clamp is a floor under a longer one somebody writes later, so one wordy
-     place cannot make its whole row taller than the rest. */
+  /* Four lines then clamp — a ceiling under a blurb somebody writes very long later,
+     rather than the trim it was at three. Two of the registry's own sentences did not fit
+     in three at this width, so The Wurm Wakes and The Mistspire both ended mid-clause on
+     the one screen whose entire job is telling a player what a place is for. */
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ── The page of them ───────────────────────────────────────────────────────
+
+   Two things the shared `CardGrid` deliberately does not do, because they are true of a
+   hub and not of a list of relics.
+
+   **The cards are one height per row.** `CardGrid` aligns to `start`, so a card with a
+   four-line sentence stood taller than the one beside it and a row of destinations had a
+   ragged bottom edge. A menu of places is tiles; tiles are the same size.
+
+   **The grid sits in the middle of what is left.** Battle holds eight cards and fills the
+   frame; Champions holds three and used to draw one row at the top of a 1080px window with
+   six hundred pixels of nothing under it — the owner's "so much empty space", reintroduced
+   by the very screen that was meant to answer it. Centring is the honest fix rather than
+   growing three cards to 700px tall: the row is capped, and the space is shared above and
+   below it instead of all falling to the bottom. */
+.places {
+  flex: 1;
+  align-items: stretch;
+  align-content: center;
+  /* A floor and a ceiling. Without the ceiling a hub with one row would stretch that row
+     to the whole frame, which is a 700px card holding a picture and two lines. */
+  grid-auto-rows: minmax(15rem, 22rem);
 }

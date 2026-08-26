@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { dockEntry, leaveTutorial, placeCard } from './support';
 
 /**
  * The Arena, in a real browser.
@@ -28,7 +28,9 @@ test.describe('the Arena', () => {
     await register(page, 'e2ea', 'Hopeful');
 
     // Visible, named, and out of reach — ambition a player can see is the point.
-    const station = page.getByRole('button', { name: /arena/i }).first();
+    // Two presses since C12: the dock holds hubs, and a place is a card on one.
+    await dockEntry(page, 'Arena').click();
+    const station = placeCard(page, 'Arena');
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
     // The hint is *read*, not hovered: a station says when it opens in visible text under

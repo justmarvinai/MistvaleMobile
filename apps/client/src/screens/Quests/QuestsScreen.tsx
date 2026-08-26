@@ -130,7 +130,7 @@ export function QuestsScreen(): JSX.Element {
           </ScreenInfo>
         }
       >
-        Errands
+        Quests
       </Heading>
 
       <div className={styles.main}>

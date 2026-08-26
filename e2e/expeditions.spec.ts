@@ -45,7 +45,9 @@ test.describe('expeditions', () => {
       .getByRole('button', { name: /^haven$/i })
       .first()
       .click();
-    const board = page.getByRole('button', { name: /expeditions/i }).first();
+    // Two presses since C12: the dock holds hubs, and a place is a card on one.
+    await dockEntry(page, 'Expeditions').click();
+    const board = placeCard(page, 'Expeditions');
     await expect(board).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/level 11/i).first()).toBeVisible();
   });

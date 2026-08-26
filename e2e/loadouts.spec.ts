@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, leaveTutorial, registerRaw } from './support';
+import { chooseStarter, goToScreen, leaveTutorial, registerRaw } from './support';
 
 /**
  * Saved relic sets, and acting on a filter instead of on a click per relic.
@@ -22,10 +22,7 @@ test.describe('the vault’s bulk actions', () => {
     await leaveTutorial(page);
     await chooseStarter(page);
 
-    await page
-      .getByRole('button', { name: /^relics$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Relics');
     await expect(page.getByRole('heading', { name: /^the vault$/i })).toBeVisible({
       timeout: 15_000,
     });

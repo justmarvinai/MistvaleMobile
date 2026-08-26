@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial, resolveBattle } from './support';
+import { dismissUnlocks, goToScreen, leaveTutorial, resolveBattle } from './support';
 
 /**
  * The loop, in a real browser.
@@ -45,10 +45,7 @@ test.describe('the campaign loop', () => {
     await expect(starterDialog).toBeHidden({ timeout: 15_000 });
 
     // ── Into the campaign ─────────────────────────────────────────────────
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
 
     // The vale first: twelve markers, and the chapter behind one of them.
     await expect(page.locator('.fui-map__node[data-id="chapter_01"]')).toBeVisible({
@@ -124,10 +121,7 @@ test.describe('the campaign loop', () => {
     await starterDialog.getByRole('button', { name: /stand together/i }).click();
     await expect(starterDialog).toBeHidden({ timeout: 15_000 });
 
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
     await expect(page.locator('.fui-map__node[data-id="chapter_01"]')).toContainText(
       /1\. Veilwood Fringe/,
       { timeout: 15_000 },

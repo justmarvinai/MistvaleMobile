@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   dismissUnlocks,
+  goToScreen,
   leaveTutorial,
   openCampaignStage,
   pickTeam,
@@ -96,10 +97,7 @@ test.describe('the management loop', () => {
         break;
       }
       runs += 1;
-      await page
-        .getByRole('button', { name: /^campaign$/i })
-        .first()
-        .click();
+      await goToScreen(page, 'Campaign');
       // The campaign opens on the vale — twelve chapter markers — and the chapter is a page
       // behind one of them, so what proves the screen arrived is the chapter's *name* on the
       // map rather than a heading that only the chapter page has.
@@ -136,10 +134,7 @@ test.describe('the management loop', () => {
     ).toBeGreaterThan(0);
 
     // ── The vault ─────────────────────────────────────────────────────────
-    await page
-      .getByRole('button', { name: /^relics$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Relics');
     // The vault is open from level 1 — the forge inside it is what level 3 unlocks.
     await expect(page.getByRole('button', { name: /^forge$/i }).first()).toBeVisible({
       timeout: 15_000,

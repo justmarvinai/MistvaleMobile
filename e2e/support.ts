@@ -366,10 +366,7 @@ export async function openCampaignStage(page: Page, label = '1-1'): Promise<void
  * board, the units and the HUD are all up.
  */
 export async function enterStageOneOne(page: Page): Promise<void> {
-  await page
-    .getByRole('button', { name: /^campaign$/i })
-    .first()
-    .click();
+  await goToScreen(page, 'Campaign');
   await openCampaignStage(page);
   const dialog = page.getByRole('dialog', { name: /stage 1/i });
   await pickTeam(dialog);

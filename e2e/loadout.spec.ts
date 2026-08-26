@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import {
   chooseStarter,
   dismissUnlocks,
+  goToScreen,
   openCampaignStage,
   registerRaw,
   resolveBattle,
@@ -29,10 +30,7 @@ test.describe('the game remembers', () => {
     await chooseStarter(page);
 
     // ── Fight 1-1 with a team the player picks by hand ────────────────────
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
     await openCampaignStage(page, '1-1');
 
     const first = page.getByRole('dialog', { name: /stage 1/i });
@@ -83,10 +81,7 @@ test.describe('the game remembers', () => {
     await page.reload();
     await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible({ timeout: 30_000 });
     await dismissUnlocks(page);
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
     await openCampaignStage(page, '1-1');
     const third = page.getByRole('dialog', { name: /stage 1/i });
     await expect(third.locator('[data-filled="true"]'), 'the team survives a reload').toHaveCount(

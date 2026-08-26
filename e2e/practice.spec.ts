@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   dismissUnlocks,
+  goToScreen,
   leaveTutorial,
   openCampaignStage,
   pickTeam,
@@ -54,10 +55,7 @@ test.describe('the practice sandbox', () => {
     await starterDialog.getByRole('button', { name: /stand together/i }).click();
     await expect(starterDialog).toBeHidden({ timeout: 15_000 });
 
-    await page
-      .getByRole('button', { name: /^campaign$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Campaign');
     // The campaign opens on the vale — twelve chapter markers — and the chapter is a page
     // behind one of them, so what proves the screen arrived is the chapter's *name* on the
     // map rather than a heading that only the chapter page has.

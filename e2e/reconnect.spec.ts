@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial, openCampaignStage, pickTeam } from './support';
+import { goToScreen, leaveTutorial, openCampaignStage, pickTeam } from './support';
 
 /**
  * A fight the player walked out of, and came back to.
@@ -41,10 +41,7 @@ async function intoAFight(page: Page, account: string): Promise<void> {
   await starter.getByRole('button', { name: /stand together/i }).click();
   await expect(starter).toBeHidden({ timeout: 15_000 });
 
-  await page
-    .getByRole('button', { name: /^campaign$/i })
-    .first()
-    .click();
+  await goToScreen(page, 'Campaign');
   await openCampaignStage(page, '1-1');
   const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
   await pickTeam(teamDialog);

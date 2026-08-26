@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, registerRaw } from './support';
+import { chooseStarter, goToScreen, registerRaw } from './support';
 
 /**
  * The mill, in a real browser.
@@ -25,10 +25,7 @@ test.describe('the mill', () => {
     await registerRaw(page, 'e2emill', 'Grinder');
     await chooseStarter(page);
 
-    await page
-      .getByRole('button', { name: /^relics$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Relics');
 
     const capacity = page.getByRole('group', { name: /vault capacity/i });
     await expect(capacity).toBeVisible({ timeout: 15_000 });
@@ -51,10 +48,7 @@ test.describe('the mill', () => {
     await registerRaw(page, 'e2emill2', 'Novice');
     await chooseStarter(page);
 
-    await page
-      .getByRole('button', { name: /^relics$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Relics');
     await expect(page.getByText(/the forge opens at account level 3/i)).toBeVisible({
       timeout: 15_000,
     });

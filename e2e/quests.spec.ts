@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { dockEntry, leaveTutorial, placeCard } from './support';
 
 /**
  * The checklist, in a real browser.
@@ -26,7 +26,9 @@ test.describe('quests', () => {
     test.slow();
     await register(page, 'e2qs', 'Listless');
 
-    const station = page.getByRole('button', { name: /quests/i }).first();
+    // Two presses since C12: the dock holds hubs, and a place is a card on one.
+    await dockEntry(page, 'Quests').click();
+    const station = placeCard(page, 'Quests');
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
     // The hint is *read*, not hovered: a station says when it opens in visible text under

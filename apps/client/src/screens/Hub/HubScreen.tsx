@@ -45,10 +45,10 @@ export function HubScreen({
   const places = screensInHub(hub);
 
   return (
-    <Page>
+    <Page width="wide">
       <Heading tagline={definition?.blurb ?? ''}>{definition?.label ?? 'Places'}</Heading>
 
-      <CardGrid min="hub">
+      <CardGrid min="hub" className={styles.places}>
         {places.map((place) => (
           <Destination
             key={place.id}

@@ -1,5 +1,13 @@
 import { expect, test, type Page } from '@playwright/test';
-import { dismissUnlocks, leaveTutorial, openCampaignStage, resolveBattle } from './support';
+import {
+  dismissUnlocks,
+  dockEntry,
+  goToScreen,
+  leaveTutorial,
+  openCampaignStage,
+  placeCard,
+  resolveBattle,
+} from './support';
 
 /**
  * The login calendar, in a real browser.
@@ -21,7 +29,9 @@ test.describe('the login calendar', () => {
     test.slow();
     await register(page, 'e2ec', 'Newcome');
 
-    const station = page.getByRole('button', { name: /calendar/i }).first();
+    // Two presses since C12: the dock holds hubs, and a place is a card on one.
+    await dockEntry(page, 'Calendar').click();
+    const station = placeCard(page, 'Calendar');
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
     // The hint is *read*, not hovered: a station says when it opens in visible text under
@@ -46,11 +56,8 @@ test.describe('the login calendar', () => {
     expect(before.calendar.days).toHaveLength(30);
     expect(before.welcome.days).toHaveLength(7);
 
-    // The dock is no longer shrouded, and the screen draws the tracks.
-    await page
-      .getByRole('button', { name: /calendar/i })
-      .first()
-      .click();
+    // The card is no longer shrouded, and the screen draws the tracks.
+    await goToScreen(page, 'Calendar');
     await expect(page.getByText(/a warden’s first week/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/day 1 is waiting/i).first()).toBeVisible();
 
@@ -140,10 +147,7 @@ interface CalendarView {
 
 /** Clears 1-1 on auto — the shortest honest route to account level 2. */
 async function winFirstStage(page: Page): Promise<void> {
-  await page
-    .getByRole('button', { name: /^campaign$/i })
-    .first()
-    .click();
+  await goToScreen(page, 'Campaign');
   // The campaign opens on the vale — twelve chapter markers — and the chapter is a page
   // behind one of them, so what proves the screen arrived is the chapter's *name* on the
   // map rather than a heading that only the chapter page has.
