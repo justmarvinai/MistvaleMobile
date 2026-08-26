@@ -207,3 +207,26 @@
     flex-basis: 7rem;
   }
 }
+
+/* On a handset the chip is a *portrait* and nothing else (C12).
+
+   The 900px rule above drops the two XP numbers, which is enough for a tablet and not for
+   a phone: at 430px the name, the power and the bar were still asking for room the currency
+   rail also wanted, and the two drew on top of each other — the level ring, the energy
+   count and the clock all overlapping in the same forty pixels.
+
+   The portrait and the level on its corner are the parts that still *say* something at this
+   size; the name is on the profile panel one tap away, and the experience bar is a thing to
+   read rather than a thing to act on. */
+@media (max-width: 560px) {
+  .body {
+    display: none;
+  }
+
+  .chip {
+    /* Just the face, so the currency rail beside it has the rest. */
+    flex: none;
+    min-width: 0;
+    gap: 0;
+  }
+}

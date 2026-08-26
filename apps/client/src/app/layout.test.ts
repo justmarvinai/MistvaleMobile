@@ -104,6 +104,36 @@ describe('card grids', () => {
     });
   }
 
+  /**
+   * A dialog's width is a preference, not a floor.
+   *
+   * Six dialog bodies carried `min-width: 30rem` — wider than a phone, so on a handset the
+   * modal overflowed and the overflow landed as controls stacked *under* each other. The
+   * starter dialog's confirm button sat beneath a champion card at 430px, which is a game
+   * a new player on a phone cannot start. B2 chased exactly this on the team chooser and
+   * called it "the bugged window"; the pattern survived in six other files.
+   *
+   * `min(30rem, 100%)` keeps the desktop number and lets a narrow window have what it has.
+   */
+  it('do not floor a dialog wider than a phone', () => {
+    const offenders: string[] = [];
+    for (const path of stylesheets(root)) {
+      if (path.includes(`${'fui'}/`)) continue;
+      for (const line of readFileSync(path, 'utf8').split('\n')) {
+        const match = /min-width:\s*([0-9.]+)rem\s*;/.exec(line);
+        // 24rem is 384px — comfortably inside the narrowest handset the PWA targets. Below
+        // that a floor is a chip or a button rather than a panel, and is not the bug.
+        if (match && Number(match[1]) >= 24) {
+          offenders.push(`${path.slice(root.length + 1)}: ${line.trim()}`);
+        }
+      }
+    }
+    expect(
+      offenders,
+      'a width wider than a phone must be a preference — use min(Nrem, 100%)',
+    ).toEqual([]);
+  });
+
   it('stretch rather than leaving phantom columns', () => {
     const offenders: string[] = [];
     for (const path of stylesheets(root)) {

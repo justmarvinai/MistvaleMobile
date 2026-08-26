@@ -93,3 +93,27 @@
     height: 32px;
   }
 }
+
+/* On a handset the bar scrolls rather than the page (C12).
+
+   The rail carries five currencies and four tool buttons, and at 430px they do not fit — so
+   the bar overflowed and took the *document* with it, which is the one thing a narrow window
+   must never do: a page that scrolls sideways makes every screen behind it feel broken, and
+   the thing that has slipped off the edge is usually the thing you were reaching for.
+
+   Scrolling the bar itself keeps all of it reachable and leaves the page still. The bar's
+   painted leather is a background on this same element, so it goes on filling the width
+   while its contents slide underneath. */
+@media (max-width: 560px) {
+  .bar {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    /* No visible scrollbar across a painted bar — the overflow fade at the edge is the
+       affordance, the same one `ui/Rail` uses. */
+    scrollbar-width: none;
+  }
+
+  .bar::-webkit-scrollbar {
+    display: none;
+  }
+}

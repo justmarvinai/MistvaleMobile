@@ -33,6 +33,49 @@ import { decodePng, litFraction, meanColour } from './pixels';
  * the day the champions stop appearing.
  */
 
+/**
+ * A page must never scroll sideways (C12).
+ *
+ * The rule the owner's mobile-support ask reduces to, and the one thing a narrow window
+ * cannot be allowed to do: a document that scrolls horizontally makes every screen behind
+ * it feel broken, and the thing that has slipped off the edge is usually the thing being
+ * reached for. Two real defects were found this way at 430px — a starter dialog with a
+ * `min-width` wider than the phone, whose confirm button ended up *underneath* a champion
+ * card, and a top bar carrying nine controls that took the document with it.
+ *
+ * Measured at a handset, a small tablet and a desktop, because the failure is a *width*
+ * rather than a device.
+ */
+test.describe('no page scrolls sideways', () => {
+  for (const [name, viewport] of [
+    ['a handset', { width: 430, height: 932 }],
+    ['a small tablet', { width: 1024, height: 768 }],
+    ['a desktop', { width: 1920, height: 1080 }],
+  ] as const) {
+    test(`on ${name}`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await registerRaw(page, 'e2ewidth', 'Fitter');
+      await chooseStarter(page);
+
+      // The Haven, then each hub — the pages every account can reach without unlocks.
+      for (const hub of ['Battle', 'Champions', 'Errands'] as const) {
+        await page
+          .getByRole('navigation')
+          .getByRole('button', { name: new RegExp(`^${hub}`, 'i') })
+          .click();
+        await page.waitForTimeout(400);
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(
+          overflow,
+          `${hub} overflows by ${overflow}px at ${viewport.width}px`,
+        ).toBeLessThanOrEqual(0);
+      }
+    });
+  }
+});
+
 test.describe('what a player can actually see', () => {
   test('the battle screen shows its fight and its controls', async ({ page }) => {
     test.slow();

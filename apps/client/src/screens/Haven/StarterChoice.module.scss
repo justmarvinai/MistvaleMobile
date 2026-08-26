@@ -4,7 +4,11 @@
   display: flex;
   flex-direction: column;
   gap: $space-3;
-  min-width: 26rem;
+  /* `min()` rather than a bare floor: this is the width the dialog *wants*, and a
+     430px phone does not have it. A hard `min-width` here overflows the modal, and
+     the overflow lands as controls stacked underneath each other — the "bugged
+     window" B2 chased on the team chooser, which was this same line (C12). */
+  min-width: min(26rem, 100%);
 }
 
 .intro {

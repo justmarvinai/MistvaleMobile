@@ -46,6 +46,18 @@ it. With six there is room for a real target and a readable word: 30px glyphs, 0
 labels, 60px rows, all behind a `min-width: 900px` so the landscape-phone PWA still gets the
 pack's own numbers.
 
+**Mobile still works, and two things stopping it were found by looking.** The owner asked
+for desktop-first *while still supporting mobile*, so the restructure was driven at 430px as
+well as 1920px — and at 430px a new account could not start the game. The starter dialog
+carried `min-width: 26rem`, wider than the phone, so the modal overflowed and its confirm
+button ended up **underneath a champion card**; five other dialogs had the same line. And the
+top bar's nine controls took the *document* with them, which is the one thing a narrow window
+must never do. Dialog widths are `min(Nrem, 100%)` now — a preference rather than a floor —
+the top bar scrolls itself instead of the page, and the profile chip is a portrait alone
+below 560px, where its name and experience bar were drawing on top of the currency rail.
+Both patterns are guarded: a unit test refuses a dialog floor wider than a phone, and the
+browser suite measures horizontal overflow on every hub at three widths.
+
 ### Fixed
 
 - A tutorial step pointing at `dock:depths` follows the screen into the hub that now holds
