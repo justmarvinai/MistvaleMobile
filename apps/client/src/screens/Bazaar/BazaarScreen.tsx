@@ -80,9 +80,14 @@ export function BazaarScreen(): JSX.Element {
 
   if (!stock) {
     return (
-      <Panel>
-        <p className={styles.empty}>{loadError ?? 'Finding the traders…'}</p>
-      </Panel>
+      <div className={styles.screen}>
+        <Heading tagline="What the traders brought this time, and how long they mean to stay.">
+          The Bazaar
+        </Heading>
+        <Panel>
+          <p className={styles.empty}>{loadError ?? 'Finding the traders…'}</p>
+        </Panel>
+      </div>
     );
   }
 
@@ -98,8 +103,13 @@ export function BazaarScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      {/* The shop's own name and description, rather than a second pair beside them: the
+          panel below used to repeat both verbatim, so the screen said "The Bazaar" twice
+          and its one sentence twice, a hundred pixels apart. Read from content for the
+          reason the Spire's title is — an operator who renames the shop has renamed the
+          screen, and there is one place to do it. */}
       <Heading
-        tagline="What the traders brought this time, and how long they mean to stay."
+        tagline={stock.description}
         actions={
           <ScreenInfo title="The Bazaar" label="About the Bazaar">
             <p>
@@ -115,16 +125,11 @@ export function BazaarScreen(): JSX.Element {
           </ScreenInfo>
         }
       >
-        The Bazaar
+        {stock.name}
       </Heading>
 
       <div className={styles.body}>
         <header className={styles.head}>
-          <div className={styles.headWho}>
-            <h2 className={styles.title}>{stock.name}</h2>
-            <p className={styles.blurb}>{stock.description}</p>
-          </div>
-
           {/* The two crystal actions used to live in a panel down the right-hand side, in a
               column that cost the stalls a fifth of the screen to hold two buttons. They
               belong to the rotation, so they sit with the clock that runs it. */}

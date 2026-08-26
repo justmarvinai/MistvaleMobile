@@ -20,13 +20,9 @@
 .head {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: $space-3;
   flex-wrap: wrap;
-}
-
-.headWho {
-  min-width: 0;
 }
 
 .headActions {
@@ -34,22 +30,6 @@
   align-items: center;
   gap: $space-3;
   flex-wrap: wrap;
-}
-
-.title {
-  margin: 0;
-  color: $parchment;
-  font-family: $font-display;
-  font-size: 1.15rem;
-  font-weight: normal;
-}
-
-.blurb {
-  margin: 2px 0 0;
-  max-width: 34rem;
-  color: $muted;
-  font-size: 0.82rem;
-  line-height: 1.6;
 }
 
 .timer {
@@ -71,11 +51,21 @@
   letter-spacing: 1px;
 }
 
+/* The stalls sit in the middle of the room rather than against the top of it (C12c).
+
+   Four offers were a 240px row at the top of a 1080px window with six hundred pixels of
+   nothing under it. Centring is the whole fix, and *not* stretching is the part worth
+   writing down: the first attempt grew the rows to fill the space, and all that did was
+   move the emptiness inside the cards — a relic preview with a hundred and fifty pixels of
+   bare panel under it looks worse than a short card with room around it. A shop with four
+   things in it is a shop with four things in it; what it should not look like is a page
+   that forgot to finish. Buying a shelf adds a stall and the rows simply grow into it. */
 .slots {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-  gap: $space-2;
-  align-content: start;
+  gap: $space-3;
+  align-content: center;
+  flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding-right: $space-2;

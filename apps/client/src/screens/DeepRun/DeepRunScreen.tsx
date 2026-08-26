@@ -127,8 +127,17 @@ export function DeepRunScreen(): JSX.Element {
       {error && <p className={styles.error}>{error}</p>}
 
       {view.runs.map((run) => (
-        <Panel key={run.runKey} title={run.name} variant="hero" className={styles.run}>
-          <p className={styles.tagline}>{run.tagline}</p>
+        // Named only when there is more than one. The screen is a list and its title is the
+        // registry's label, which today is the name of the only descent published — so the
+        // panel said "The Sunken Stair" a hundred pixels under "THE SUNKEN STAIR", with the
+        // identical sentence under both.
+        <Panel
+          key={run.runKey}
+          {...(view.runs.length > 1 ? { title: run.name } : {})}
+          variant="hero"
+          className={styles.run}
+        >
+          {view.runs.length > 1 && <p className={styles.tagline}>{run.tagline}</p>}
 
           {run.phase === null ? (
             <div className={styles.idle}>

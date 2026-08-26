@@ -29,6 +29,28 @@ them instead of drawing one row against the top with six hundred pixels of nothi
 headed "Your Champions", and pressing **Quests** landed on one headed "Errands" — which is
 also the name of the hub holding it. Both now agree with their card.
 
+### Fixed — four screens said their own name twice (C12c)
+
+The Bazaar, the Valewurm, the Wurm Wakes and the Sunken Stair each printed their name and
+their tagline as the screen title, and again on the panel a hundred pixels below it — on the
+Sunken Stair the identical sentence, word for word. B1's rule is that a screen is the
+feature and not the feature and a column about it; this was the feature and a second copy of
+its own heading.
+
+Three of them are structurally a **list** whose title is the registry's label, which today is
+the name of the only entry published — so the card names itself only when there is more than
+one to tell apart, and a second Titan or a second descent makes the names load-bearing again
+without anything being re-cut. The Bazaar has exactly one shop, so its title reads the shop's
+own name and description straight from content, the way the Mistspire's does: an operator who
+renames it has renamed the screen, in one place.
+
+The Bazaar's stalls also **sit in the middle of the room rather than against the top of it**.
+Four offers were a 240px row at the top of a 1080px window with six hundred pixels of nothing
+under it. The first attempt grew the rows to fill that space and all it did was move the
+emptiness *inside* the cards — a relic preview with a hundred and fifty pixels of bare panel
+under it looks worse than a short card with room around it. A shop with four things in it is
+a shop with four things in it; what it should not look like is a page that forgot to finish.
+
 ### Fixed — the Haven is a place again (C12c)
 
 **Pressing Haven showed you the navigation you had just pressed.** The camp's rail was

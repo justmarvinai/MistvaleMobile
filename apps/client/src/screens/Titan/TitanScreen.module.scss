@@ -29,10 +29,18 @@
   gap: $space-3;
 }
 
+/* Art, then the way in — and the name between them only when there is more than one Titan
+   to tell apart (`TitanScreen.tsx`).
+
+   Packed left rather than spread, which was the first attempt: `space-between` put the key
+   count and the Go Down button against the right edge of a 1440px page, as far from the
+   art as the screen allows, which is the opposite of a hero block. A wider gap is what the
+   missing title was really contributing. When a second Titan does exist its `flex: 1`
+   title holds the two apart again and this rule stays correct. */
 .head {
   display: flex;
   align-items: center;
-  gap: $space-3;
+  gap: $space-6;
 }
 
 /* Key art rather than an icon: this is the one thing on the screen, and a 24px glyph

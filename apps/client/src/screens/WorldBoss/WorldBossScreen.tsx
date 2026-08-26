@@ -135,6 +135,10 @@ export function WorldBossScreen(): JSX.Element {
         <BossPanel
           key={boss.dungeonKey}
           boss={boss}
+          // Only when there is more than one. The screen is a list and its title is the
+          // registry's label, which today is the name of the only wake published — so the
+          // panel repeated it, and the tagline under it, a hundred pixels lower.
+          named={view.bosses.length > 1}
           busy={busy}
           onStrike={() => setStriking(boss)}
           onClaimTier={(tierKey, tierName) =>
@@ -194,6 +198,7 @@ function sayDay(day: string): string {
 /** Everything about one boss: the shared bar, your part in it, and the board. */
 function BossPanel({
   boss,
+  named,
   busy,
   onStrike,
   onClaimTier,
@@ -202,6 +207,8 @@ function BossPanel({
   boss: WorldBossStanding;
   busy: boolean;
   onStrike: () => void;
+  /** Whether this panel has to say its own name — false when the screen title already did. */
+  named: boolean;
   onClaimTier: (tierKey: string, tierName: string) => void;
   onClaimSpoils: () => void;
 }): JSX.Element {
@@ -219,8 +226,8 @@ function BossPanel({
   const spoilsReady = boss.felled && boss.yourDamage > 0 && !boss.fellingClaimed;
 
   return (
-    <Panel title={boss.name} variant="hero" className={styles.boss}>
-      <p className={styles.tagline}>{boss.tagline}</p>
+    <Panel {...(named ? { title: boss.name } : {})} variant="hero" className={styles.boss}>
+      {named && <p className={styles.tagline}>{boss.tagline}</p>}
 
       {/* The bar first and biggest: it is the only thing on this screen that is ours
           rather than mine, and watching it move while you were away is the whole feature. */}

@@ -69,8 +69,15 @@ export function TitanScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
+      {/* One Titan's own words, when there is one; the mode's otherwise. The card below
+          stops naming itself in that case, so neither is said twice. */}
       <Heading
-        tagline="It cannot be beaten. It can be measured."
+        tagline={
+          titans.length === 1
+            ? (keeps.get(titans[0]!.dungeonKey)?.tagline ??
+              'It cannot be beaten. It can be measured.')
+            : 'They cannot be beaten. They can be measured.'
+        }
         actions={
           <ScreenInfo title="The Valewurm" label="How a Titan works">
             <p>
@@ -103,6 +110,13 @@ export function TitanScreen(): JSX.Element {
             <Keep
               key={standing.dungeonKey}
               keep={keep}
+              // Only when there is more than one. The screen is a *list* of Titans and its
+              // title is the registry's label, which today is the name of the only one
+              // published — so a card that named itself said "The Valewurm" a hundred
+              // pixels under "THE VALEWURM", with the same sentence under both. A second
+              // Titan makes the names load-bearing again, and this says so rather than
+              // hard-coding either answer.
+              named={titans.length > 1}
               standing={standing}
               boss={enemies?.find((enemy) => enemy.key === keep.bossEnemyKey)}
               onFight={() => setFighting({ stage, standing })}
@@ -133,11 +147,14 @@ export function TitanScreen(): JSX.Element {
 
 function Keep({
   keep,
+  named,
   standing,
   boss,
   onFight,
 }: {
   keep: DungeonDef;
+  /** Whether this card has to say its own name — false when the screen title already did. */
+  named: boolean;
   standing: TitanStanding;
   boss: { name: string; bossMechanics?: unknown } | undefined;
   onFight: () => void;
@@ -158,10 +175,12 @@ function Keep({
           style={{ backgroundImage: `var(--fui-img-${dungeonArt(keep.key, keep.kind)})` }}
           aria-hidden="true"
         />
-        <div className={styles.title}>
-          <h2 className={styles.name}>{keep.name}</h2>
-          <p className={styles.tagline}>{keep.tagline}</p>
-        </div>
+        {named && (
+          <div className={styles.title}>
+            <h2 className={styles.name}>{keep.name}</h2>
+            <p className={styles.tagline}>{keep.tagline}</p>
+          </div>
+        )}
         <div className={styles.entry}>
           <span className={styles.keys} data-spent={standing.keysLeft === 0}>
             {standing.open
