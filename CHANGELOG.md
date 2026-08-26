@@ -5,6 +5,47 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — an enemy's star rating decides something (C13, Q8)
+
+**⚠ Release step: run `SEED.sh --replace stage` (DEPLOYMENT_OPERATIONS §5).** This changes a
+*nested* field — `stage.waves[].stars` — on 252 already-published campaign stages, and a plain
+seed only ever adds. Without the replace the code ships and every live campaign stage keeps
+the rating it was published with, which is the wrong one.
+
+Every enemy line on every stage has carried a `stars` value since P2 — 3,452 of them across
+409 stages. The seed authored it, publish validation accepted it, the Admin editor showed it,
+and **the engine never read it**: `scaleEnemyStats` took a def and a level and computed from
+`baseStats`, `growth` and `anchorLevel` alone. So an operator had one difficulty lever where
+the editor promised two, and eighty-nine balance gates and 176 engine tests all passed over the
+top of it. Raised as Q8 rather than fixed on the spot, because 90% of the corpus is authored
+below ★6 and honouring the field would have made most of the game easier in one commit — a
+balance decision about the whole game rather than a side effect of adding a tower.
+
+It is honoured now, on **the same `champion.rankMultipliers` ladder a champion's rank climbs**,
+so ★6 is 1.00 and an enemy's authored `baseStats` *are* its six-star stats. Only HP, ATK and
+DEF move: **speed, crit and resistance are flat at every rung by design**, because speed decides
+turn order before anything else resolves and every boss in the game is built on a turn count —
+a hit shield's window, a mender's cooldown, the Titan's fifty-turn cap. A rating that also moved
+speed would have retuned all of it at once.
+
+**The campaign was on the wrong scale, and the sim is what said so.** It was the only content in
+the game not authored on the ★1–6 ladder — 1/2/3 for Normal/Hard/Brutal, chosen while the field
+was inert, where the Depths, the Spire, the Deep Run and the tutorial all already ran 3→6. Read
+literally that meant *the whole campaign at 42–68% of what it was tuned to be*, and `brutal-wall`
+failed exactly as it should have: 89.6% of teams fresh off Normal walked straight through Brutal
+12-7. The scale moved to **4/5/6** and the shape did not — Brutal is the full-strength creature,
+Hard and Normal are its lesser versions, which is what that seed's own comment has said since P2.
+Brutal is byte-for-byte what it was; Normal and Hard are 0.79× and 0.90×. All 89 gates pass.
+
+**An omitted rating now reads as ★6, not ★1.** The schema default was ★1, which cost nothing
+while the field was inert and would now hand out a 58% nerf for leaving a box empty in Admin.
+An unset rating has to mean "as authored".
+
+The guard is `packages/engine/src/setup.test.ts`: ten cases that fail if the argument is ever
+dropped again. Nothing existing would have caught it — the golden replays build their units
+directly rather than through a stage's waves, which is why five goldens and 176 tests were
+green over an inert field for eight phases.
+
 ### Changed — the shell, restructured (C12)
 
 The owner's brief: *"make menus, frames and infos not so overwhelming — restructure the UI,

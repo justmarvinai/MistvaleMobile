@@ -15,7 +15,9 @@
 
 **Stat pipeline (order is normative):** `base(level, rank, ascension)` → `+ flat gear` → `+ %-gear on base` → `+ set bonuses` → `+ Hall of Valor (element-keyed)` → `+ masteries` → `+ aura` → *battle-time* `× buffs/debuffs`. Base growth: per-champion anchors in `champion_defs.base_stats` are values at ★6/60/Asc6; level curve geometric (⚙ exponent), rank multiplier table ⚙ (★1 ≈ 0.42 … ★6 = 1.00), ascension +2% primaries per level ⚙.
 
-**Enemies** follow the same convention from the other end: `enemy_defs.base_stats` are the values at `anchor_level` (default 60), and a stage scales them by `growth ^ (level − anchor_level)`. Authoring at the tier you can picture and deriving the rest is what keeps one lizard archetype serving chapter 1 and chapter 12.
+**Enemies** follow the same convention from the other end: `enemy_defs.base_stats` are the values at `anchor_level` (default 60) **and at ★6**, and a stage scales them by `growth ^ (level − anchor_level) × rankMultipliers[stars]` — the same rank ladder champions climb, so ★6 is 1.00 and ★1 is ≈0.42. Authoring at the tier you can picture and deriving the rest is what keeps one lizard archetype serving chapter 1 and chapter 12; the rating is the second lever, and it is what makes a Brutal trash mob a different creature from the Normal one rather than the same one at a higher level.
+
+Only HP/ATK/DEF move with the rating. **SPD, C.RATE, C.DMG and RES are flat at every rung by design**: speed decides turn order before anything else resolves, and every boss in the game is built on a turn count (a hit shield's window, a mender's cooldown, the Titan's fifty-turn cap), so a rating that also moved speed would retune all of it at once. An omitted `stars` on a wave line reads as **★6**, because an unset rating has to mean "as authored". *(The field was carried into the engine and dropped from P2 until C13 — see the `scaleEnemyStats` header for what that cost.)*
 
 **Power score** (informational only): `HP/30 + ATK×2 + DEF×2 + SPD×8 + C.RATE×6 + C.DMG×3 + RES×2 + ACC×2 + Σ gearLevel×15` ⚙.
 

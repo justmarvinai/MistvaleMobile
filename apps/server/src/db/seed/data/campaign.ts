@@ -375,26 +375,37 @@ function buildStage(plan: ChapterPlan, stageNumber: number, difficulty: Difficul
     return Math.max(1, Math.round(minLevel + span * Math.min(1, progress)));
   };
 
-  // Elite tier: a wave unit's stars are its stat budget, so a Brutal trash mob is a
-  // genuinely different creature from the Normal one rather than the same one at a
-  // higher level (docs/CONTENT_PLAN_EA01.md §2 — "Elite variants").
-  const stars = difficulty === 'brutal' ? 3 : difficulty === 'hard' ? 2 : 1;
+  // Elite tier, on the ladder the engine actually reads (C13 / Q8).
+  //
+  // A wave unit's stars are its stat budget, so a Brutal trash mob is a genuinely
+  // different creature from the Normal one rather than the same one at a higher level
+  // (docs/CONTENT_PLAN_EA01.md §2 — "Elite variants"). That intent is unchanged; what
+  // moves is the scale it is written on.
+  //
+  // These were 1 / 2 / 3, chosen while `scaleEnemyStats` ignored `stars` altogether, so
+  // nothing could tell that the campaign was the only content in the game not authored on
+  // the ★1–6 ladder — the Depths, the Spire, the Deep Run and the tutorial all already
+  // ran 3→6. Now that the field is read, ★6 is full strength and an enemy's authored
+  // anchor stats *are* its six-star stats, so the old numbers meant "the whole campaign at
+  // 42–68% of what it was tuned to be". Brutal is the full-strength creature; Hard and
+  // Normal are its lesser versions, which is what the line above has always said.
+  const stars = difficulty === 'brutal' ? 6 : difficulty === 'hard' ? 5 : 4;
 
   const waves: StageDefInput['waves'] = isBoss
     ? [
         composition(plan, stageNumber, 0).map((enemyKey, slot) => ({
           enemyKey,
           level: levelAt(0),
-          stars: Math.min(3, stars + 1),
+          stars: Math.min(6, stars + 1),
           slot,
         })),
         composition(plan, stageNumber, 1).map((enemyKey, slot) => ({
           enemyKey,
           level: levelAt(1),
-          stars: Math.min(3, stars + 1),
+          stars: Math.min(6, stars + 1),
           slot,
         })),
-        [{ enemyKey: plan.bossKey, level: maxLevel, stars: 3, slot: 1 }],
+        [{ enemyKey: plan.bossKey, level: maxLevel, stars: 6, slot: 1 }],
       ]
     : [0, 1, 2].map((waveIndex) =>
         composition(plan, stageNumber, waveIndex).map((enemyKey, slot) => ({

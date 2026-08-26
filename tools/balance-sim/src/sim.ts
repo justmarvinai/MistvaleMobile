@@ -243,7 +243,7 @@ export function simulateStage(
 
   for (let run = 0; run < runs; run += 1) {
     const allies = buildTeam(entries, scaling, mode);
-    const waves = buildStageWaves(stage, content.enemies);
+    const waves = buildStageWaves(stage, content.enemies, scaling);
     const { state } = createBattle({ seed: seedBase + run, mode, allies, waves }, rules, combat);
     advance(state, rules, combat, { auto: true });
 
@@ -367,7 +367,7 @@ export function simulateColdOpen(
 
   for (let run = 0; run < runs; run += 1) {
     const allies = buildTeam(entries, scaling, stage.mode);
-    const waves = buildStageWaves(stage, content.enemies);
+    const waves = buildStageWaves(stage, content.enemies, scaling);
     const { state } = createBattle(
       { seed: seedBase + run, mode: stage.mode, allies, waves },
       rules,
@@ -557,7 +557,7 @@ export function simulateTrial(
       seed: stageSeed(stage.key),
       mode: stage.mode,
       allies: buildTeam(entries, scaling, stage.mode),
-      waves: buildStageWaves(stage, content.enemies),
+      waves: buildStageWaves(stage, content.enemies, scaling),
     },
     rules,
     combat,
@@ -708,7 +708,7 @@ export function simulateTitan(
 
   for (let run = 0; run < runs; run += 1) {
     const allies = buildTeam(entries, scaling, 'titan');
-    const waves = buildStageWaves(stage, content.enemies);
+    const waves = buildStageWaves(stage, content.enemies, scaling);
     const opened = createBattle(
       { seed: seedBase + run, mode: 'titan', allies, waves },
       rules,

@@ -1939,7 +1939,7 @@
                           "maximum": 100
                         },
                         "stars": {
-                          "default": 1,
+                          "default": 6,
                           "type": "integer",
                           "minimum": 1,
                           "maximum": 6
@@ -9406,7 +9406,7 @@
                     "maximum": 100
                   },
                   "stars": {
-                    "default": 1,
+                    "default": 6,
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 6

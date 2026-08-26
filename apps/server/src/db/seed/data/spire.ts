@@ -90,12 +90,11 @@ function bandFor(floor: number): number {
 /**
  * Stars climb with the floor, as they do on every other stage in the game.
  *
- * Authored honestly and currently **inert**: the engine's `scaleEnemyStats` takes a def and
- * a level and never looks at `stars`, so this number decides nothing today — on this stage
- * or on any of the other 379. That is a pre-existing defect rather than this tower's, and
- * it is raised as an open question rather than fixed here, because 90% of the game's enemy
- * units are authored below ★6 and making the field real would make most of the game easier
- * in one commit. Written correctly so that a decision to honour it needs no re-authoring.
+ * Written when the field was **inert** — `scaleEnemyStats` took a def and a level and never
+ * looked at `stars`, on this stage or on any of the other 379 — and written on the real
+ * ★1–6 ladder anyway, so that a decision to honour it would need no re-authoring here.
+ * That decision is C13 (Q8, answered 2026-08-26) and this needed no re-authoring: ★6 is full
+ * strength and a keeper is ★6, so the top of the tower is exactly what it was measured at.
  */
 function starsFor(floor: number): number {
   return Math.min(6, 3 + Math.floor(floor / 8));
@@ -106,8 +105,9 @@ function starsFor(floor: number): number {
  *
  * One near the bottom, two in the middle, three at the top — the same shape a campaign
  * chapter uses, and the reason the top of the tower is a fight rather than a formality.
- * The alternative levers do not exist here: enemy stats are anchored at level 60 so a
- * level-60 floor gets exactly the base stats and no more, and `stars` is inert (above).
+ * It is the lever that carries the climb because the other two barely move: enemy stats are
+ * anchored at level 60, so a level-60 floor gets exactly the base stats and no more, and
+ * the star band above spans 0.68→1.00 across thirty floors.
  */
 function wavesInFloor(floor: number): number {
   if (floor <= 10) return 1;

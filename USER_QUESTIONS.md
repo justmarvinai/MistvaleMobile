@@ -4,7 +4,9 @@
 
 ## Open questions
 
-**None.** Q7 was answered on 2026-08-21 and is in the decision record below. Q4 and Q5 were both answered on 2026-08-18 and are in the decision record below.
+**Q6 only** — champion avatars ship at full resolution (§ below), which is a size question rather than a
+blocking one. Q8 was answered on 2026-08-26, Q7 on 2026-08-21, Q4 and Q5 on 2026-08-18; all four are in
+the decision record below.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
@@ -57,6 +59,12 @@ Each has a phase and a default, so none of them blocks anything. Listed here so 
 | Q2 | Whether the Summon Surge ladder is sized right | **Recommendation taken: leave the point weights as seeded.** One Radiant pull tops the ladder outright, and that is the point — "the Radiant I finally pulled finished the event" is a good evening, and sizing the top rung to a Radiant instead would put it out of reach of everyone who never sees one, which at EA is most people. | `db/seed/data/events.ts`, ECONOMY_BALANCE §11 |
 | Q3 | How much the cold-open battle should borrow | **Recommendation taken: a `tutorial`-mode stage carrying a preset team.** The battle mode already existed in the enum and nothing used it; a stage now carries the roster it is fought with, so the opening fight is content like every other fight. No energy, no rewards, no stage progress, and nothing minted into the roster to be taken back afterwards. | GAME_DESIGN §9.4, CONTENT_PLAN §7, DATA_MODEL §stage |
 
+## Decision record (owner answers, 2026-08-26)
+
+| # | Question | Answer | Where it lives now |
+|---|---|---|---|
+| Q8 | Whether an enemy's `stars` should decide anything | **Recommendation taken: honour it, and re-tune against `pnpm sim`** ("As you recommend"). `scaleEnemyStats` scales HP/ATK/DEF by the same `champion.rankMultipliers` ladder a champion's rank climbs, so ★6 is 1.00 and an enemy's authored `base_stats` *are* its six-star stats. SPD, crit and RES stay flat at every rung — speed decides turn order before anything else resolves, and every boss in the game is built on a turn count. Making the field real exposed a second fault it had been hiding: **the campaign was the only content in the game not authored on the ★1–6 ladder**, running 1/2/3 for Normal/Hard/Brutal while the Depths, the Spire, the Deep Run and the tutorial all already ran 3→6 — so read literally it meant "the whole campaign at 42–68% of what it was tuned to be", and `brutal-wall` was the gate that said so (89.6% of teams fresh off Normal walked through Brutal 12-7). The scale moved to 4/5/6 and the shape did not: Brutal is the full-strength creature, Hard and Normal are its lesser versions, which is what that seed's own comment had said since P2. All 89 gates pass. The wave-line default moved from ★1 to ★6 in the same commit, because an unset rating has to mean "as authored" and ★1 would hand out a 58% nerf for leaving a box empty in Admin. | COMBAT_SYSTEM §2, `packages/engine/src/setup.ts` + `setup.test.ts`, `db/seed/data/campaign.ts` |
+
 ## Q6 — Champion avatars ship at full resolution (raised 2026-08-19, D9)
 
 **The measurement.** The eight published avatars are 1.3–2.2 MB each, 1254×1254, and the
@@ -80,31 +88,3 @@ files to `assets/` (simple, but the master is then the display size); or serve t
 nginx's `image_filter` (no build dep, but it costs CPU on the box the budget is about).
 
 Nothing is blocked either way — the game works today, it is only heavier than it should be.
-
-## Q8 — Enemy `stars` decide nothing (raised 2026-08-24, C11)
-
-Every enemy line on every stage carries a `stars` value: the seed authors it, publish
-validation accepts it, and the Admin editor shows it. **The engine never reads it.**
-`scaleEnemyStats(def, level)` in `packages/engine/src/setup.ts` takes the def and the level
-and computes from `baseStats`, `growth` and `anchorLevel` alone; `stars` is carried into
-`EnemyEntry` and dropped. Found while tuning the Mistspire, when raising a floor's stars
-from 3 to 6 changed nothing measurable.
-
-So an operator has one difficulty lever where they believe they have two, and 3,123 of the
-game's 3,452 authored enemy units (90%) wear a rating that means nothing.
-
-**Why it is a question rather than a fix.** Honouring the field is a one-line change —
-scale by the same `champion.rankMultipliers` ladder ranks already use, so ★6 is 1.0 and
-★3 is 0.68 — but every enemy today effectively fights at ★6. Applying the ladder would make
-**90% of the game's fights easier in one commit**, which is a balance decision about the
-whole game rather than a bug fix, and not one to make as a side effect of adding a tower.
-
-**Recommended default: honour it, and re-tune against `pnpm sim`.** The authored numbers
-already describe the curve their authors intended — chapter 1 at ★1–2, the Depths' deepest
-floors at ★6 — so the field going live would mostly *restore* an intended difficulty ramp
-that has been flat since P3. The sim's 51 gates are what would say whether the campaign
-still holds; the ones to watch are `chapter-N-boss` and `normal-wall`.
-
-**If the answer is no**, the honest alternative is to delete the field rather than leave it:
-a number in the editor that changes nothing is worse than no number, because an operator
-will eventually use it to fix something and it will not work.

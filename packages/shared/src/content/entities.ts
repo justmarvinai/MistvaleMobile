@@ -492,7 +492,19 @@ export type CampaignChapterDef = z.infer<typeof campaignChapterDefSchema>;
 export const waveUnitSchema = z.object({
   enemyKey: contentKeySchema,
   level: z.number().int().min(1).max(100),
-  stars: z.number().int().min(1).max(6).default(1),
+  /**
+   * The unit's rating, and its stat budget.
+   *
+   * Scales hp/atk/def by the same `champion.rankMultipliers` ladder a champion's rank does
+   * (C13 / Q8), so ★6 is full strength and an enemy's authored `baseStats` *are* its
+   * six-star stats. Speed, crit and resistance are flat at every rating by design — see
+   * `scaleEnemyStats`.
+   *
+   * Defaults to ★6 rather than ★1 for that reason: an omitted rating has to mean "as
+   * authored". It read as ★1 for as long as the field was inert, which cost nothing then
+   * and would now be a 58% nerf handed out for leaving a box empty.
+   */
+  stars: z.number().int().min(1).max(6).default(6),
   /** Battlefield position 0–3. */
   slot: z.number().int().min(0).max(3),
 });

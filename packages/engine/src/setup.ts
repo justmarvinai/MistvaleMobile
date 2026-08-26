@@ -9,7 +9,7 @@ import type {
   StatusDef,
 } from '@mistvale/shared';
 import type { ChampionScalingConfig } from './config';
-import { deriveStats } from './stats';
+import { clamp, deriveStats } from './stats';
 import type { BattleRules, BattleUnit, Side } from './types';
 
 /**
@@ -105,14 +105,40 @@ function makeUnit(params: {
   };
 }
 
-/** Enemy stats at a level, scaled from the archetype's authored anchor. */
-function scaleEnemyStats(def: EnemyDef, level: number): Record<Stat, number> {
+/**
+ * Enemy stats at a level and a star rating, scaled from the archetype's authored anchor.
+ *
+ * **`stars` was read by nothing until C13** (Q8, answered by the owner 2026-08-26). It has
+ * been authored on every enemy line of every stage since P2 — 3,452 of them across 409
+ * stages — validated at publish, and shown in the Admin editor, and `scaleEnemyStats` took
+ * a def and a level and computed from `baseStats`, `growth` and `anchorLevel` alone. So an
+ * operator had one difficulty lever where they believed they had two, and the curve their
+ * authoring described was flat.
+ *
+ * It scales by the **same ladder a champion's rank does** (`champion.rankMultipliers`), so
+ * ★6 is 1.0 and the anchor stats are the six-star stats — which is what they always were in
+ * practice, since every enemy fought at full strength. Anything authored below ★6 is now
+ * weaker than it was, which is the whole of the change and the reason it needed an owner's
+ * answer rather than a commit: 90% of the corpus is below ★6.
+ *
+ * Only the three stats a rank scales are touched. Speed, crit and resistance are flat on an
+ * enemy by design — a ★1 goblin that also acted less often would compound the change in a
+ * way no author asked for, and every boss built on a turn count would move.
+ */
+function scaleEnemyStats(
+  def: EnemyDef,
+  level: number,
+  stars: number,
+  scaling: ChampionScalingConfig,
+): Record<Stat, number> {
   const anchor = def.baseStats;
   const factor = Math.pow(def.growth, level - def.anchorLevel);
+  const top = scaling.rankMultipliers.length;
+  const starFactor = scaling.rankMultipliers[clamp(stars, 1, top) - 1] ?? 1;
   const stats = emptyStats();
-  stats.hp = Math.max(1, Math.round(anchor.hp * factor));
-  stats.atk = Math.max(1, Math.round(anchor.atk * factor));
-  stats.def = Math.max(1, Math.round(anchor.def * factor));
+  stats.hp = Math.max(1, Math.round(anchor.hp * factor * starFactor));
+  stats.atk = Math.max(1, Math.round(anchor.atk * factor * starFactor));
+  stats.def = Math.max(1, Math.round(anchor.def * factor * starFactor));
   stats.spd = anchor.spd;
   stats.critRate = anchor.critRate ?? 15;
   stats.critDmg = anchor.critDmg ?? 50;
@@ -132,6 +158,7 @@ function scaleEnemyStats(def: EnemyDef, level: number): Record<Stat, number> {
 function bossFlagsFor(
   def: EnemyDef,
   level: number,
+  scaling: ChampionScalingConfig,
   enemies?: ReadonlyMap<string, EnemyDef>,
 ): BattleUnit['boss'] {
   const mechanics = def.bossMechanics;
@@ -157,7 +184,10 @@ function bossFlagsFor(
               name: summonDef.name,
               element: summonDef.element,
               level,
-              stats: scaleEnemyStats(summonDef, level),
+              // Six stars: a summon is named by the boss's mechanic rather than by a wave
+              // line, so there is no authored rating to honour and inventing one would be
+              // a balance change nobody asked for. Full strength, as it has always been.
+              stats: scaleEnemyStats(summonDef, level, scaling.rankMultipliers.length, scaling),
               skills: summonDef.skills,
               isBoss: false,
               boss: { almightyImmunity: false, tmReductionImmune: false },
@@ -272,6 +302,7 @@ function applyAura(
  */
 export function buildWave(
   entries: readonly EnemyEntry[],
+  scaling: ChampionScalingConfig,
   enemies?: ReadonlyMap<string, EnemyDef>,
 ): BattleUnit[] {
   return entries.map((entry) =>
@@ -282,10 +313,10 @@ export function buildWave(
       name: entry.def.name,
       element: entry.def.element,
       level: entry.level,
-      stats: scaleEnemyStats(entry.def, entry.level),
+      stats: scaleEnemyStats(entry.def, entry.level, entry.stars, scaling),
       skills: entry.def.skills,
       isBoss: entry.def.isBoss,
-      boss: bossFlagsFor(entry.def, entry.level, enemies),
+      boss: bossFlagsFor(entry.def, entry.level, scaling, enemies),
     }),
   );
 }
@@ -294,6 +325,7 @@ export function buildWave(
 export function buildStageWaves(
   stage: StageDef,
   enemies: ReadonlyMap<string, EnemyDef>,
+  scaling: ChampionScalingConfig,
 ): BattleUnit[][] {
   return stage.waves.map((wave) => {
     const entries: EnemyEntry[] = [];
@@ -304,7 +336,7 @@ export function buildStageWaves(
       if (!def) continue;
       entries.push({ def, level: unit.level, stars: unit.stars, slot: unit.slot });
     }
-    return buildWave(entries, enemies);
+    return buildWave(entries, scaling, enemies);
   });
 }
 
