@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { registerRaw } from './support';
+import { goToScreen, registerRaw } from './support';
 
 /**
  * What a player sees when a screen throws.
@@ -38,10 +38,7 @@ test.describe('a screen that breaks', () => {
       });
     });
 
-    await page
-      .getByRole('button', { name: /^champions$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Roster');
 
     const fallback = page.getByRole('alert');
     await expect(fallback).toBeVisible({ timeout: 15_000 });
@@ -58,10 +55,7 @@ test.describe('a screen that breaks', () => {
     await expect(page.getByRole('alert')).toHaveCount(0);
 
     // And walking back in re-mounts it, now that the endpoint is honest again.
-    await page
-      .getByRole('button', { name: /^champions$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Roster');
     await expect(page.getByRole('button', { name: /lv \d+/i }).first()).toBeVisible({
       timeout: 15_000,
     });

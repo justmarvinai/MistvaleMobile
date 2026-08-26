@@ -111,21 +111,30 @@ function Destination({
         </span>
       )}
 
-      {unlocked && waiting > 0 && (
-        <span className={styles.pip} aria-label={`${waiting} waiting`}>
-          {waiting}
-        </span>
-      )}
-
       <span className={styles.body}>
         <span className={styles.name}>
           <Icon name={screen.icon} size={22} />
           {screen.label}
         </span>
-        <span className={styles.blurb}>
-          {unlocked ? screen.blurb : (screen.lockedHint ?? 'Not yet open to you.')}
-        </span>
+        {/* A locked place keeps its sentence and gains a line under it, rather than trading
+            one for the other. "Opens at level 16" says when and never why, and why is the
+            whole reason a shrouded card is still on the screen (UI_UX §2) — a player who
+            cannot go yet is exactly the one deciding whether to care. */}
+        <span className={styles.blurb}>{screen.blurb}</span>
+        {!unlocked && (
+          <span className={styles.gate}>{screen.lockedHint ?? 'Not yet open to you.'}</span>
+        )}
       </span>
+
+      {/* After the body, not before it — the pip is absolutely positioned so the order
+          changes nothing on screen, and it changes everything in the accessible name: with
+          the pip first, the one card that always has a claim on it announced itself as
+          "2 waiting Calendar …" and could not be found by its own name. */}
+      {unlocked && waiting > 0 && (
+        <span className={styles.pip} aria-label={`${waiting} waiting`}>
+          {waiting}
+        </span>
+      )}
     </button>
   );
 }

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { PASSWORD, unique, leaveTutorial } from './support';
+import { PASSWORD, goToScreen, havenBoard, leaveTutorial, unique } from './support';
 
 /**
  * A brand-new account, on every screen it can reach.
@@ -15,8 +15,8 @@ import { PASSWORD, unique, leaveTutorial } from './support';
  * in the specs that own each feature.
  */
 
-/** Every dock destination a level-1 account can actually open. */
-const OPEN_AT_LEVEL_ONE = ['Haven', 'Campaign', 'Champions', 'Relics', 'Mistgate'] as const;
+/** Every destination a level-1 account can actually open. */
+const OPEN_AT_LEVEL_ONE = ['Haven', 'Campaign', 'Roster', 'Relics', 'Mistgate'] as const;
 
 /** Shrouded at level 1 — the mist-teasers, which must say when they open rather than sulk. */
 const SHROUDED_AT_LEVEL_ONE = [
@@ -39,7 +39,7 @@ test.describe('a brand-new account', () => {
     await arrive(page);
 
     for (const label of OPEN_AT_LEVEL_ONE) {
-      await page.getByRole('button', { name: label, exact: true }).first().click();
+      await goToScreen(page, label);
       // Something rendered, and it is not an error. `alert` is what every screen in the
       // client uses to report a failure, so its absence is the assertion that matters.
       await expect(page.getByRole('main')).not.toBeEmpty();
@@ -52,12 +52,14 @@ test.describe('a brand-new account', () => {
     await arrive(page);
 
     for (const { label, level } of SHROUDED_AT_LEVEL_ONE) {
-      const tile = page.getByRole('button', { name: label, exact: true }).first();
+      // The camp's own board rather than a dock item: the dock is six hubs since C12 and
+      // carries no per-place entry to shroud, while the Haven draws every destination and
+      // is the screen a fresh account is standing on.
+      const tile = havenBoard(page, label);
       await expect(tile, label).toHaveAttribute('aria-disabled', 'true');
-      // A locked door that does not say when it opens is just a locked door. This one is
-      // the *dock* item, which still carries a native `title` — the Haven's stations moved
-      // to painted tooltips and say it in visible text instead.
-      await expect(tile, label).toHaveAttribute('title', new RegExp(`level ${level}`, 'i'));
+      // A locked door that does not say when it opens is just a locked door — and it says
+      // it in visible text rather than a native `title`, which a phone can never reach.
+      await expect(tile, label).toContainText(new RegExp(`level ${level}`, 'i'));
     }
   });
 
@@ -86,11 +88,11 @@ test.describe('a brand-new account', () => {
 
     // Nothing has dropped yet, and the copy has to say where relics come from rather than
     // leaving a blank grid.
-    await page.getByRole('button', { name: 'Relics', exact: true }).first().click();
+    await goToScreen(page, 'Relics');
     await expect(page.getByRole('main')).toContainText(/no relics yet/i);
 
     // The map is drawn but nothing on it has been cleared.
-    await page.getByRole('button', { name: 'Campaign', exact: true }).first().click();
+    await goToScreen(page, 'Campaign');
     await expect(page.getByRole('main')).toContainText(/veilwood fringe/i);
 
     await expect(page.getByRole('alert')).toHaveCount(0);

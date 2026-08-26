@@ -1,16 +1,12 @@
 import { usePlayerStore } from '@/state/playerStore';
 import { useRosterStore } from '@/state/rosterStore';
 import { Heading } from '@/ui/Heading/Heading';
+import { HIGHLIGHT_ATTR } from '../../app/highlight';
 import { Icon } from '@/ui/Icon/Icon';
 import { Panel } from '@/ui/Panel/Panel';
 import { Rail } from '@/ui/Rail/Rail';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
-import {
-  DOCK_SCREENS,
-  isScreenUnlocked,
-  type ScreenDefinition,
-  type ScreenId,
-} from '@/app/screens';
+import { PLACES, isScreenUnlocked, type ScreenDefinition, type ScreenId } from '@/app/screens';
 import { StarterChoice } from './StarterChoice';
 import { WhatsReady } from './WhatsReady';
 import { useTip } from '@/ui/Tooltip/useTooltip';
@@ -35,11 +31,12 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
   const champions = useRosterStore((state) => state.champions);
   const unlocks = usePlayerStore((state) => state.unlocks);
 
-  // The camp's stations are the dock's destinations, minus the Haven itself — the same
-  // predicate rather than a second list, because a deny-list of "not haven, not settings"
-  // silently adopts every screen added later. It had already adopted `battle`, which put a
-  // tile in the camp that walked into a battle screen with no battle behind it.
-  const stations = DOCK_SCREENS.filter((screen) => screen.id !== 'haven');
+  // Every place, not the dock's six (C12c). The old line filtered `DOCK_SCREENS`, which was
+  // the whole game while the dock held nineteen destinations and became the same six the
+  // dock already draws the moment C12 made them hubs — a home screen showing you the
+  // navigation you just pressed. `PLACES` is the registry's own answer to "somewhere a
+  // player goes", so the camp is one press from anywhere and the dock stays six wide.
+  const stations = PLACES;
 
   return (
     <div className={styles.screen}>
@@ -157,6 +154,9 @@ function Station({
       data-locked={!unlocked}
       onClick={() => unlocked && onNavigate()}
       aria-disabled={!unlocked}
+      // The same key a hub card carries, so a tutorial step that says "go to the campaign"
+      // has something to circle whichever of the two routes the player is standing on.
+      {...{ [HIGHLIGHT_ATTR]: `place:${screen.id}` }}
     >
       {/* The art, as a background rather than an `<img>`: FantasyUIs addresses its
           artwork by id through a custom property, so a station drawn with a different

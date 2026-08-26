@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, dockEntry, placeCard, registerRaw } from './support';
+import { chooseStarter, dockEntry, havenBoard, placeCard, registerRaw } from './support';
 
 /**
  * Expeditions, in a real browser.
@@ -45,9 +45,11 @@ test.describe('expeditions', () => {
       .getByRole('button', { name: /^haven$/i })
       .first()
       .click();
-    // Two presses since C12: the dock holds hubs, and a place is a card on one.
-    await dockEntry(page, 'Expeditions').click();
-    const board = placeCard(page, 'Expeditions');
+    // No navigation: the Haven is where a fresh account lands and its rail draws every
+    // place in the vale, so the board is already on screen. Pressing the dock first is
+    // worse than unnecessary — the starter dialog is modal at this exact moment and eats
+    // the click, which is a 270-second timeout rather than a failure.
+    const board = havenBoard(page, 'Expeditions');
     await expect(board).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/level 11/i).first()).toBeVisible();
   });

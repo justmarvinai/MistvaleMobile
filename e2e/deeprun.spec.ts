@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, dockEntry, placeCard, registerRaw } from './support';
+import { chooseStarter, dockEntry, havenBoard, placeCard, registerRaw } from './support';
 
 /**
  * The Deep Run, in a real browser.
@@ -33,7 +33,11 @@ test.describe('the deep run', () => {
       .getByRole('button', { name: /^haven$/i })
       .first()
       .click();
-    const board = page.getByRole('button', { name: /the sunken stair/i }).first();
+    // No navigation: the Haven is where a fresh account lands and its rail draws every
+    // place in the vale, so the board is already on screen. Pressing the dock first is
+    // worse than unnecessary — the starter dialog is modal at this exact moment and eats
+    // the click, which is a 270-second timeout rather than a failure.
+    const board = havenBoard(page, 'The Sunken Stair');
     await expect(board).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/level 20/i).first()).toBeVisible();
   });

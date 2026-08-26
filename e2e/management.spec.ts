@@ -6,6 +6,7 @@ import {
   openCampaignStage,
   pickTeam,
   resolveBattle,
+  unique,
 } from './support';
 
 /**
@@ -18,10 +19,6 @@ import {
  */
 
 const password = 'a-good-long-password';
-
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
 
 /**
  * Two retries, for one honestly random step, sized against the measured odds.
@@ -148,10 +145,7 @@ test.describe('the management loop', () => {
     await expect(capacity.getByText(/^\d+ \/ \d+$/)).toBeVisible();
 
     // ── Equip it from the champion screen ─────────────────────────────────
-    await page
-      .getByRole('button', { name: /^champions$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Roster');
 
     await page
       .getByRole('button', { name: /lv \d+/i })

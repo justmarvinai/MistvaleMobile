@@ -49,10 +49,7 @@ test.describe('saved relic sets', () => {
     await leaveTutorial(page);
     await chooseStarter(page);
 
-    await page
-      .getByRole('button', { name: /^champions$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Roster');
     // A champion card's one stable accessible name is the sentence it composes about
     // itself, and "Lv n of m" is the part of it every champion has.
     const roster = page.getByRole('button', { name: /lv \d+ of \d+/i });

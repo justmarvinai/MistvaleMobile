@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   DOCK_SCREENS,
+  PLACES,
   SCREENS,
   hubFor,
   isHub,
@@ -54,6 +55,37 @@ describe('the dock', () => {
       for (const member of screensInHub(hub)) {
         expect(isHub(member.id), `${member.id} is a hub inside ${hub}`).toBe(false);
       }
+    }
+  });
+});
+
+describe('the Haven', () => {
+  it('is not the dock in bigger boxes', () => {
+    // The camp's rail filtered `DOCK_SCREENS`, which was the whole game while the dock held
+    // nineteen destinations — and became the dock's own six the moment C12 made them hubs,
+    // so pressing Haven showed a player the navigation they had just pressed. Nothing said
+    // so, because the filter stayed correct and only its input moved underneath it.
+    const docked = new Set(DOCK_SCREENS.map((screen) => screen.id));
+    const beyond = PLACES.filter((place) => !docked.has(place.id));
+    expect(beyond.length, 'the camp offers nothing the dock does not').toBeGreaterThan(8);
+  });
+
+  it('holds places rather than rooms that hold places', () => {
+    for (const place of PLACES) {
+      expect(isHub(place.id), `${place.id} is a hub`).toBe(false);
+      expect(place.id, 'the camp is not a place in itself').not.toBe('haven');
+    }
+  });
+
+  it('is one press from every destination', () => {
+    // The rule the two views divide on: the dock is the index and the Haven is the place.
+    const takeovers: ScreenId[] = ['battle', 'mail'];
+    for (const screen of SCREENS) {
+      if (isHub(screen.id) || screen.id === 'haven' || takeovers.includes(screen.id)) continue;
+      expect(
+        PLACES.some((place) => place.id === screen.id),
+        `${screen.id} is nowhere in the camp`,
+      ).toBe(true);
     }
   });
 });

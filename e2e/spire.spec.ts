@@ -31,11 +31,10 @@ test.describe('the mistspire', () => {
     await registerRaw(page, 'e2espire2', 'Novice');
     await chooseStarter(page);
 
-    await page
-      .getByRole('button', { name: /^haven$/i })
-      .first()
-      .click();
-    const board = page.getByRole('button', { name: /the mistspire/i }).first();
+    // The Haven's rail is the scenic route; the Battle hub is the direct one. Both draw a
+    // card for the tower, and this is about what the card *says* rather than where it is.
+    await dockEntry(page, 'The Mistspire').click();
+    const board = placeCard(page, 'The Mistspire');
     await expect(board).toBeVisible({ timeout: 15_000 });
     // The board says what the tower *asks for* — a broad roster — rather than only its
     // name, because "Mistspire" tells a new player nothing about why they would go.

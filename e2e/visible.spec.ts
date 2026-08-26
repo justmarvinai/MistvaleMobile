@@ -2,16 +2,16 @@ import { expect, test, type Page } from '@playwright/test';
 import {
   chooseStarter,
   dismissUnlocks,
+  dockEntry,
   enterStageOneOne,
   expectOnTop,
+  goToScreen,
   openCampaignStage,
   pickTeam,
+  placeCard,
   registerRaw,
   resolveBattle,
   setSimpleBattlefield,
-  dockEntry,
-  goToScreen,
-  placeCard,
 } from './support';
 import { decodePng, litFraction, meanColour } from './pixels';
 
@@ -371,10 +371,7 @@ test.describe('what a player can actually see', () => {
     await starter.getByRole('button', { name: /stand together/i }).click();
     await expect(starter).toBeHidden({ timeout: 15_000 });
 
-    await page
-      .getByRole('button', { name: /^champions$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Roster');
     await expect(page.getByRole('button', { name: /lv \d+/i }).first()).toBeVisible({
       timeout: 15_000,
     });

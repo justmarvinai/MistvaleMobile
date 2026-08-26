@@ -1,12 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   dismissUnlocks,
-  dockEntry,
   goToScreen,
+  havenBoard,
   leaveTutorial,
   openCampaignStage,
-  placeCard,
   resolveBattle,
+  unique,
 } from './support';
 
 /**
@@ -20,18 +20,16 @@ import {
 
 const password = 'a-good-long-password';
 
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
-
 test.describe('the login calendar', () => {
   test('is a shrouded promise until the account has grown into it', async ({ page }) => {
     test.slow();
     await register(page, 'e2ec', 'Newcome');
 
-    // Two presses since C12: the dock holds hubs, and a place is a card on one.
-    await dockEntry(page, 'Calendar').click();
-    const station = placeCard(page, 'Calendar');
+    // No navigation: the Haven is where a fresh account lands and its rail draws every
+    // place in the vale, so the board is already on screen. Pressing the dock first is
+    // worse than unnecessary — the starter dialog is modal at this exact moment and eats
+    // the click, which is a 270-second timeout rather than a failure.
+    const station = havenBoard(page, 'Calendar');
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
     // The hint is *read*, not hovered: a station says when it opens in visible text under
@@ -55,6 +53,10 @@ test.describe('the login calendar', () => {
     const before = await readCalendar(page);
     expect(before.calendar.days).toHaveLength(30);
     expect(before.welcome.days).toHaveLength(7);
+
+    // Levelling to 2 is what opens the calendar, so the celebration for opening it is on
+    // screen — and it is modal, so the dock press below is eaten rather than refused.
+    await dismissUnlocks(page);
 
     // The card is no longer shrouded, and the screen draws the tracks.
     await goToScreen(page, 'Calendar');

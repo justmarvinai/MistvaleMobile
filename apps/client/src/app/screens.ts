@@ -427,6 +427,26 @@ export function isHub(id: ScreenId): id is HubId {
 }
 
 /**
+ * Every place a player can walk to, in registry order.
+ *
+ * The Haven's rail draws these, and it is deliberately **not** `DOCK_SCREENS`. Before C12
+ * those were the same list — the dock held all nineteen destinations — so the camp could
+ * filter the dock and get the whole game. When the dock became six hubs the camp silently
+ * became five boards showing the six destinations the dock already shows, which is a home
+ * screen with nothing of its own to be: pressing Haven gave you the dock again, in bigger
+ * boxes. Nothing said so, because the filter was still correct and only its input had moved.
+ *
+ * So the two are different views on purpose. **The dock is the index and the Haven is the
+ * place**: one press to any destination from the camp, two from the bar. A place is a
+ * screen a player *goes to* — a hub's member, or a dock entry that is not a hub — which
+ * leaves out the hubs themselves, the Haven, and the takeovers entered from inside a flow.
+ */
+export const PLACES = SCREENS.filter(
+  (screen) =>
+    screen.group !== undefined || (screen.inDock && !isHub(screen.id) && screen.id !== 'haven'),
+);
+
+/**
  * What a hub holds, in the order it is drawn.
  *
  * Derived from the registry rather than listed a second time: a screen names the hub it

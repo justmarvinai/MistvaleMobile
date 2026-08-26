@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { leaveTutorial, unique } from './support';
 
 /**
  * Mail and news, in a real browser.
@@ -11,10 +11,6 @@ import { leaveTutorial } from './support';
  */
 
 const password = 'a-good-long-password';
-
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
 
 test.describe('mail and news', () => {
   test('opens an empty satchel from the top bar and says so plainly', async ({ page }) => {

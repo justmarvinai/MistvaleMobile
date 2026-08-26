@@ -1,5 +1,6 @@
+import { highlightCandidates } from '../apps/client/src/app/highlight';
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial, resolveBattle } from './support';
+import { leaveTutorial, resolveBattle, unique } from './support';
 
 /**
  * The first hour, in a real browser.
@@ -15,10 +16,6 @@ import { leaveTutorial, resolveBattle } from './support';
  */
 
 const password = 'a-good-long-password';
-
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
 
 test.describe('the tutorial', () => {
   test('opens on the Wardenmaster and the fight he is pointing at', async ({ page }) => {
@@ -254,9 +251,18 @@ test.describe('the tutorial', () => {
         node.getAttribute('data-mv-highlight'),
       ),
     );
-    // The dock the script sends people around, and the modal step three points at.
-    expect(marked).toContain('dock:campaign');
-    expect(marked).toContain('dock:depths');
+    // The places the script sends people to, and the modal step three points at.
+    //
+    // Asked through `highlightCandidates` rather than for the literal key, because that is
+    // what the overlay itself asks: the shipped script says `dock:campaign`, the campaign
+    // lost its dock slot in C12, and the lookup falls back to the hub that now holds it and
+    // to the card on that hub. Asserting the literal attribute would be asserting the
+    // navigation of one particular month, and it would fail on a script that is still
+    // correct — which is exactly what it did.
+    for (const key of ['dock:campaign', 'dock:depths']) {
+      const resolves = highlightCandidates(key).some((candidate) => marked.includes(candidate));
+      expect(resolves, `${key} points at nothing on this screen`).toBe(true);
+    }
     expect(marked).toContain('modal:starter-choice');
   });
 

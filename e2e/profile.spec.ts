@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { leaveTutorial, unique } from './support';
 
 /**
  * The public profile card, in a real browser.
@@ -11,10 +11,6 @@ import { leaveTutorial } from './support';
  */
 
 const password = 'a-good-long-password';
-
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
 
 test.describe('the profile card', () => {
   test('opens from the top-bar chip, and offers the owner their four', async ({ page }) => {

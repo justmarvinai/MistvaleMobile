@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { leaveTutorial, unique } from './support';
 
 /**
  * The Mistgate and the Chronicle, in a real browser.
@@ -17,10 +17,6 @@ import { leaveTutorial } from './support';
  */
 
 const password = 'a-good-long-password';
-
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
 
 test.describe('the Mistgate', () => {
   test('shows a warden the real odds, and refuses a pull they cannot pay for', async ({ page }) => {

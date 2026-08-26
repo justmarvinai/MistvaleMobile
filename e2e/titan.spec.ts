@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { leaveTutorial, registerRaw } from './support';
+import { havenBoard, leaveTutorial, registerRaw } from './support';
 
 /**
  * The Solo Titan, in a real browser.
@@ -22,7 +22,11 @@ test.describe('the Valewurm', () => {
     await registerRaw(page, 'e2etitan', 'Titanward');
     await leaveTutorial(page);
 
-    const station = page.getByRole('button', { name: /valewurm/i }).first();
+    // No navigation: the Haven is where a fresh account lands and its rail draws every
+    // place in the vale, so the board is already on screen. Pressing the dock first is
+    // worse than unnecessary — the starter dialog is modal at this exact moment and eats
+    // the click, which is a 270-second timeout rather than a failure.
+    const station = havenBoard(page, 'The Valewurm');
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
     await expect(station).toContainText(/level 16/i);
@@ -73,7 +77,11 @@ test.describe('the Valewurm', () => {
     // A locked station keeps its board and its line — seeing what is coming is part of the
     // pull forward (UI_UX §2) — and it is *disabled* rather than merely inert, so a player
     // is told the door is shut instead of pressing something that quietly does nothing.
-    const station = page.getByRole('button', { name: /valewurm/i }).first();
+    // No navigation: the Haven is where a fresh account lands and its rail draws every
+    // place in the vale, so the board is already on screen. Pressing the dock first is
+    // worse than unnecessary — the starter dialog is modal at this exact moment and eats
+    // the click, which is a 270-second timeout rather than a failure.
+    const station = havenBoard(page, 'The Valewurm');
     await expect(station).toContainText(/keys a day/i);
     await expect(station).toBeDisabled();
     await expect(page.getByRole('heading', { name: /^the valewurm$/i })).toHaveCount(0);

@@ -223,3 +223,11 @@
      to the whole frame, which is a 700px card holding a picture and two lines. */
   grid-auto-rows: minmax(15rem, 22rem);
 }
+
+/* The unlock line on a shrouded card — under the sentence rather than instead of it. */
+.gate {
+  color: $accent-soft;
+  font-family: $font-mono;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}

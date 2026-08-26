@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { havenBoard, leaveTutorial, unique } from './support';
 
 /**
  * The Depths, in a real browser.
@@ -18,17 +18,17 @@ import { leaveTutorial } from './support';
 
 const password = 'a-good-long-password';
 
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
-
 test.describe('the Depths', () => {
   test('are a shrouded promise to a warden who has not earned them', async ({ page }) => {
     test.slow();
     await register(page, 'e2ed', 'Delver');
 
     // Visible, named, and out of reach — ambition a player can see is the point.
-    const station = page.getByRole('button', { name: /the depths/i }).first();
+    // No navigation: the Haven is where a fresh account lands and its rail draws every
+    // place in the vale, so the board is already on screen. Pressing the dock first is
+    // worse than unnecessary — the starter dialog is modal at this exact moment and eats
+    // the click, which is a 270-second timeout rather than a failure.
+    const station = havenBoard(page, 'The Depths');
     await expect(station).toBeVisible({ timeout: 15_000 });
     await expect(station).toHaveAttribute('aria-disabled', 'true');
     // The hint is *read*, not hovered: a station says when it opens in visible text under

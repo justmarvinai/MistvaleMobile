@@ -29,6 +29,46 @@ them instead of drawing one row against the top with six hundred pixels of nothi
 headed "Your Champions", and pressing **Quests** landed on one headed "Errands" — which is
 also the name of the hub holding it. Both now agree with their card.
 
+### Fixed — the Haven is a place again (C12c)
+
+**Pressing Haven showed you the navigation you had just pressed.** The camp's rail was
+`DOCK_SCREENS` minus the Haven itself — which was the whole game while the dock held
+nineteen destinations, and became the dock's own six the moment C12 made them hubs. Nothing
+said so, because the filter stayed correct and only its input moved underneath it.
+
+The two are different views on purpose now: **the dock is the index and the Haven is the
+place**. `PLACES` is the registry's own answer to "somewhere a player goes" — a hub's
+member, or a dock entry that is not a hub — so the camp is one press from any of the
+eighteen destinations while the dock stays six wide. A unit test refuses a camp that offers
+nothing the dock does not.
+
+With it, two things the restored rail turned up:
+
+- **A shrouded card says why as well as when.** A locked place traded its sentence for
+  "Opens at level 16", which says when and never why — and why is the whole reason a
+  shrouded card is still on the screen. It keeps both now.
+- **The drag hint landed on the dock.** `ui/Rail` hung it at `bottom: -1.4rem`, outside its
+  own box, which is fine while something sits below and wrong when the rail is the last
+  thing in a full-height column. The room is reserved inside the rail now, and only when
+  there is a hint to put in it.
+
+### Fixed — a card announces its name before its badge (C12c)
+
+A hub card rendered its "n waiting" pip before its body, so the one card that always has a
+claim on it announced itself as *"2 waiting Calendar A reward for every day…"*. The pip is
+absolutely positioned, so moving it after the body changes nothing on screen and puts the
+place's name back at the front of what a screen reader says.
+
+### Fixed — a test name that was not unique (C12c)
+
+`unique('Lanternbearer')` appended a timestamp and let the field truncate whatever hung
+over. A profile name is capped at 16 characters, so thirteen of those were the readable
+prefix and three were the slowest-moving digits of the timestamp — two runs a few minutes
+apart produced the same name, and the world-boss spec failed as *"that profile name is
+already taken"* thirty seconds in. The entropy is what survives now and the prefix is what
+gets trimmed. Thirteen specs had their own copy of the helper; they share the one in
+`support.ts`.
+
 ### Fixed — the browser suite runs again (C12c)
 
 C12a replaced the Haven's twelve per-mode station boards with the six hubs, and about thirty

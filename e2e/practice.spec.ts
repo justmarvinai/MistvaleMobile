@@ -6,6 +6,7 @@ import {
   openCampaignStage,
   pickTeam,
   resolveBattle,
+  unique,
 } from './support';
 
 /**
@@ -24,10 +25,6 @@ import {
  */
 
 const password = 'a-good-long-password';
-
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
 
 test.describe('the practice sandbox', () => {
   test('appears once a stage is cleared, and costs nothing when it is used', async ({ page }) => {

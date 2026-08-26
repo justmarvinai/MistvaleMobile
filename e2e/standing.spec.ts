@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, registerRaw } from './support';
+import { chooseStarter, goToScreen, registerRaw } from './support';
 
 /**
  * Imprint and Standing, in a real browser.
@@ -25,10 +25,7 @@ test.describe('a collection', () => {
     await registerRaw(page, 'e2estand', 'Collector');
     await chooseStarter(page);
 
-    await page
-      .getByRole('button', { name: /^champions$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Roster');
 
     // Standing is words rather than an action, so it lives behind the title bar's info
     // button — the rule every screen has followed since B1.
@@ -47,10 +44,7 @@ test.describe('a collection', () => {
     await registerRaw(page, 'e2estand2', 'Novice');
     await chooseStarter(page);
 
-    await page
-      .getByRole('button', { name: /^champions$/i })
-      .first()
-      .click();
+    await goToScreen(page, 'Roster');
     await page.getByText('Anuria', { exact: true }).first().click();
 
     const sheet = page.getByRole('dialog');

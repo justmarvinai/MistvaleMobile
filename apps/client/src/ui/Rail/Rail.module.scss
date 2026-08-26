@@ -133,12 +133,22 @@
    the player to drag sideways was still under a row with nothing off the edge of it.
 
    Absolutely placed under the track rather than in flow: the rail root is a three-column
-   row (arrow, track, arrow), so a fourth child in flow would sit *beside* the end arrow. */
+   row (arrow, track, arrow), so a fourth child in flow would sit *beside* the end arrow.
+
+   It used to hang *outside* the rail at `bottom: -1.4rem`, which is fine while something
+   sits below and wrong the moment the rail is the last thing in a full-height column — on
+   the Haven it landed on the dock, so the one instruction the camp gives was written across
+   the navigation. The room is reserved inside the rail's own box now, and only when there
+   is a hint to put in it. */
+.rail[data-overflows='true'] {
+  padding-bottom: 1.6rem;
+}
+
 .hint {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -1.4rem;
+  bottom: 0;
   margin: 0;
   text-align: center;
   font-size: 12px;

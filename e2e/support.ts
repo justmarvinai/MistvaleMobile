@@ -11,9 +11,21 @@ import { expect, type Locator, type Page } from '@playwright/test';
 
 export const PASSWORD = 'a-good-long-password';
 
-/** A name nothing else in the suite will collide with, however parallel it gets. */
+/**
+ * A name nothing else in the suite will collide with, however parallel it gets.
+ *
+ * The entropy goes at the end and the *prefix* is what gets trimmed, because a profile name
+ * is capped at 16 characters and the field truncates as it is typed. The old version
+ * appended the suffix to the whole prefix and let the browser cut whatever hung over — so
+ * `unique('Lanternbearer')` was thirteen readable characters and three of timestamp, and
+ * two runs a few minutes apart produced the same name. It failed as "that profile name is
+ * already taken", thirty seconds into a spec about the world boss.
+ */
+const NAME_MAX = 16;
+
 export function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+  const tail = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+  return `${prefix.slice(0, Math.max(1, NAME_MAX - tail.length))}${tail}`;
 }
 
 /**
@@ -100,7 +112,13 @@ export const HUB_OF: Readonly<Record<string, string>> = Object.freeze({
 /** The dock button for a screen, or for the hub that now holds it. */
 export function dockEntry(page: Page, label: string): Locator {
   const hub = HUB_OF[label] ?? label;
-  return page.getByRole('navigation').getByRole('button', { name: new RegExp(`^${hub}$`, 'i') });
+  // Anchored at the start rather than exact: a dock entry with something waiting carries
+  // its badge into the accessible name, so `^Errands$` misses the one screen that always
+  // has a claim on it — the reason the calendar spec timed out rather than failed.
+  return page
+    .getByRole('navigation')
+    .getByRole('button', { name: new RegExp(`^${hub}\\b`, 'i') })
+    .first();
 }
 
 /**
@@ -110,6 +128,22 @@ export function dockEntry(page: Page, label: string): Locator {
  * sentence saying when the place opens rather than a tooltip a phone cannot reach.
  */
 export function placeCard(page: Page, label: string): Locator {
+  return page.getByRole('button', { name: new RegExp(`^${label}\\b`, 'i') }).first();
+}
+
+/**
+ * A board on the Haven's rail — the camp's own card for a place.
+ *
+ * The Haven draws every destination again since C12c (it had briefly drawn the dock's six,
+ * which is the navigation a player just pressed), and it is the screen a fresh account
+ * lands on. So a spec about what a *locked* destination says needs no navigation at all —
+ * and must not attempt any, because the starter dialog is modal at that moment and eats
+ * the press, which reads as a timeout rather than a failure.
+ *
+ * Same shape as `placeCard` on purpose: a place's board and a place's hub card are the same
+ * button with the same name, drawn in two rooms.
+ */
+export function havenBoard(page: Page, label: string): Locator {
   return page.getByRole('button', { name: new RegExp(`^${label}\\b`, 'i') }).first();
 }
 

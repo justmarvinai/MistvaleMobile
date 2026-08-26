@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, goToScreen, leaveTutorial, resolveBattle } from './support';
+import { dismissUnlocks, goToScreen, leaveTutorial, resolveBattle, unique } from './support';
 
 /**
  * The loop, in a real browser.
@@ -13,10 +13,6 @@ import { dismissUnlocks, goToScreen, leaveTutorial, resolveBattle } from './supp
  */
 
 const password = 'a-good-long-password';
-
-function unique(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-}
 
 test.describe('the campaign loop', () => {
   test('a new warden picks a champion, fights a stage and is paid for it', async ({ page }) => {
