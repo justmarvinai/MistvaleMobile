@@ -29,7 +29,7 @@
 .offers {
   display: grid;
   gap: $space-3;
-  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(23rem, 1fr));
 }
 
 .runCard,

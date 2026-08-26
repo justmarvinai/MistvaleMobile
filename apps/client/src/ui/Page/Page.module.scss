@@ -1,0 +1,80 @@
+@use '../../styles/tokens' as *;
+
+/**
+ * The page column.
+ *
+ * `margin-inline: auto` is doing the real work. Before C12 every screen was a block that
+ * grew to whatever the window was and then simply stopped filling — so on a wide desktop
+ * the content sat against the left edge with a third of the screen empty beside it, which
+ * is the thing the owner pointed at.
+ */
+.page {
+  width: 100%;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  min-height: 0;
+}
+
+.default {
+  max-width: $page-max;
+}
+
+.narrow {
+  max-width: $page-narrow;
+}
+
+.wide {
+  max-width: $page-wide;
+}
+
+/* No ceiling at all: the campaign map and the battlefield are scenes rather than columns,
+   and a scene that centres inside a rule leaves letterboxing on both sides. */
+.full {
+  max-width: none;
+}
+
+/* A page that fills the frame rather than growing with its content — for a screen whose
+   own children scroll (a tower, a long grid) rather than the page. */
+.fills {
+  flex: 1;
+  min-height: 0;
+}
+
+/**
+ * A grid of cards that shares out the space it is given.
+ *
+ * `auto-fit` rather than `auto-fill`: with `fill`, a row of three cards in a 1440px page
+ * leaves phantom empty tracks and the cards stay at their minimum — which is exactly the
+ * squeezed look this exists to fix. With `fit`, the tracks collapse and the three real
+ * cards grow to share the row.
+ */
+.grid {
+  display: grid;
+  gap: $space-4;
+  align-items: start;
+}
+
+.gridCard {
+  grid-template-columns: repeat(auto-fit, minmax($card-min, 1fr));
+}
+
+.gridProse {
+  grid-template-columns: repeat(auto-fit, minmax($card-min-prose, 1fr));
+}
+
+.gridHub {
+  grid-template-columns: repeat(auto-fit, minmax($card-min-hub, 1fr));
+}
+
+/* Below the narrowest card floor there is no grid to speak of — one column, and the card
+   is as wide as the phone. Written as a floor rather than a breakpoint so it holds for a
+   narrow desktop window as well as for a handset. */
+@media (max-width: 560px) {
+  .gridCard,
+  .gridProse,
+  .gridHub {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, registerRaw } from './support';
+import { chooseStarter, registerRaw, goToScreen } from './support';
 
 /**
  * Feeding a champion, in a real browser.
@@ -45,10 +45,7 @@ test.describe('feeding a champion', () => {
     await expect(reveal).toBeHidden({ timeout: 15_000 });
 
     // ── The picker ────────────────────────────────────────────────────────
-    await page
-      .getByRole('navigation')
-      .getByRole('button', { name: /^champions/i })
-      .click();
+    await goToScreen(page, 'Roster');
     // Counted before the picker opens: it holds champion cards of its own, and they would
     // be counted too.
     const roster = () => page.getByRole('button', { name: /lv \d+ of \d+/i });

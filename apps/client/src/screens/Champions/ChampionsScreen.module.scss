@@ -83,7 +83,7 @@
 .grid {
   display: grid;
   /* 150px is the painted card's own width; a narrower track overflows it. */
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, $card-champion);
   gap: $space-2;
   align-content: start;
   max-height: 100%;

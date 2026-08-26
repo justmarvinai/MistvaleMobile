@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, registerRaw } from './support';
+import { chooseStarter, dockEntry, placeCard, registerRaw } from './support';
 
 /**
  * The Deep Run, in a real browser.
@@ -18,9 +18,11 @@ test.describe('the deep run', () => {
     await registerRaw(page, 'e2estair', 'Delver');
     await chooseStarter(page);
 
-    const entry = page.getByRole('navigation').getByRole('button', { name: /the sunken stair/i });
+    // Two presses now: the dock holds hubs, and the place is a card on one (C12).
+    await dockEntry(page, 'The Sunken Stair').click();
+    const entry = placeCard(page, 'The Sunken Stair');
     await expect(entry).toBeVisible({ timeout: 15_000 });
-    await expect(entry).toBeDisabled();
+    await expect(entry).toHaveAttribute('aria-disabled', 'true');
   });
 
   test('says what it is for on an account that cannot go down yet', async ({ page }) => {

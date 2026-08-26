@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial } from './support';
+import { dockEntry, goToScreen, leaveTutorial, placeCard } from './support';
 
 /**
  * The Phase P0 exit criterion, exercised for real: a visitor registers, lands in the
@@ -75,20 +75,18 @@ test.describe('account lifecycle', () => {
     // Energy starts at the level-1 cap.
     await expect(page.getByText('/20')).toBeVisible();
 
-    // Locked destinations are visible but refuse navigation.
-    const arenaDockItem = page.getByRole('navigation').getByRole('button', { name: /Arena/ });
-    await expect(arenaDockItem).toHaveAttribute('aria-disabled', 'true');
+    // Locked destinations are visible but refuse navigation — on their hub's page since
+    // C12, which is also where the sentence saying when they open now lives.
+    await dockEntry(page, 'Arena').click();
+    await expect(placeCard(page, 'Arena')).toHaveAttribute('aria-disabled', 'true');
 
     // An unlocked destination navigates.
-    await page
-      .getByRole('navigation')
-      .getByRole('button', { name: /Champions/ })
-      .click();
+    await goToScreen(page, 'Roster');
     // Scoped to the screen. An unscoped heading locator also matches the painted tooltip
     // still open under the cursor that just clicked the dock — the library gives it
     // `role="tooltip"` and an `h3` inside — so "the Champions heading" has to mean the
     // one belonging to the screen rather than any element with that name on the page.
-    await expect(page.getByRole('main').getByRole('heading', { name: /Champions/ })).toBeVisible();
+    await expect(page.getByRole('main').getByRole('heading', { name: /Roster/ })).toBeVisible();
 
     // Keyboard shortcut returns to the Haven (dock slot 1).
     await page.keyboard.press('1');

@@ -56,7 +56,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
   gap: $space-2;
   /* The vault can hold hundreds; the dialog cannot. Its own scroll rather than the body's,
      so the worn piece and its two buttons stay put while the candidates move. */

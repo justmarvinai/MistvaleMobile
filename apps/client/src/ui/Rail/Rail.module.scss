@@ -125,3 +125,24 @@
 .rail[data-overflows='false'] .arrow {
   display: none;
 }
+
+/* The drag hint, shown only when the track actually overflows (`Rail.tsx`).
+
+   Moved here from the Haven in C12, along with the decision about *whether* to show it:
+   the camp went from twelve boards to five, every one of them fitted, and the line telling
+   the player to drag sideways was still under a row with nothing off the edge of it.
+
+   Absolutely placed under the track rather than in flow: the rail root is a three-column
+   row (arrow, track, arrow), so a fourth child in flow would sit *beside* the end arrow. */
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1.4rem;
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $muted-deep;
+}

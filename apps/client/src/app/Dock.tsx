@@ -1,7 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { BottomNav } from '@/fui/components/BottomNav.ts';
 import { useFui } from '@/fui/react';
-import { DOCK_SCREENS, isScreenUnlocked, type ScreenId } from './screens';
+import { DOCK_SCREENS, isHub, isScreenUnlocked, screensInHub, type ScreenId } from './screens';
 import { usePlayerStore, type DockBadges } from '@/state/playerStore';
 import { HIGHLIGHT_ATTR } from './highlight';
 import styles from './Dock.module.scss';
@@ -22,6 +22,26 @@ import styles from './Dock.module.scss';
  * Pips come off the player snapshot rather than a poll: the shell re-fetches it after
  * every action, which is exactly when something becomes claimable (UI_UX §1.3).
  */
+/**
+ * How many things are waiting behind a dock slot.
+ *
+ * A hub has no claimable list of its own — quests, missions, events and the calendar are
+ * all *inside* Errands now — so a hub that read its own badge would read zero forever, and
+ * the pip that tells somebody their daily chest is ready would have disappeared in C12.
+ * It sums what its members are holding instead, and skips a member the account has not
+ * unlocked: a locked screen's badge is a promise about somebody else's account.
+ */
+function waitingIn(
+  id: ScreenId,
+  badges: DockBadges,
+  unlocks: Parameters<typeof isScreenUnlocked>[1],
+): number {
+  if (!isHub(id)) return badges[id as keyof DockBadges] ?? 0;
+  return screensInHub(id)
+    .filter((member) => isScreenUnlocked(member, unlocks))
+    .reduce((total, member) => total + (badges[member.id as keyof DockBadges] ?? 0), 0);
+}
+
 export function Dock({
   current,
   onNavigate,
@@ -34,7 +54,7 @@ export function Dock({
 
   const items = DOCK_SCREENS.map((screen) => {
     const unlocked = isScreenUnlocked(screen, unlocks);
-    const waiting = unlocked ? (badges[screen.id as keyof DockBadges] ?? 0) : 0;
+    const waiting = unlocked ? waitingIn(screen.id, badges, unlocks) : 0;
     return {
       id: screen.id,
       label: screen.label,

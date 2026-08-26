@@ -127,7 +127,7 @@
   display: grid;
   /* Wide enough for four faces in a row and for the painted Challenge button, which is a
      9-sliced asset with a minimum of its own — at 16rem it hung out over the next card. */
-  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
   gap: $space-2;
 }
 

@@ -68,6 +68,60 @@ export async function registerRaw(page: Page, account: string, profile: string):
 }
 
 /**
+ * Walks to a screen the way a player does, through its hub if it has one (C12).
+ *
+ * Before C12 every destination had a dock slot and a spec pressed it directly. Now the dock
+ * holds six entries and sixteen screens live on three hub pages, so "go to the Depths" is
+ * two presses — and a spec that still knew about one would be testing a navigation the game
+ * no longer has.
+ *
+ * Named by the *label the player reads* rather than by screen id, because that is what a
+ * spec can actually assert on and what a rename would want to break.
+ */
+export const HUB_OF: Readonly<Record<string, string>> = Object.freeze({
+  Campaign: 'Battle',
+  'The Depths': 'Battle',
+  Arena: 'Battle',
+  'The Valewurm': 'Battle',
+  'The Wurm Wakes': 'Battle',
+  'The Sunken Stair': 'Battle',
+  'The Mistspire': 'Battle',
+  Trials: 'Battle',
+  Roster: 'Champions',
+  Relics: 'Champions',
+  Chronicle: 'Champions',
+  Quests: 'Errands',
+  Missions: 'Errands',
+  Events: 'Errands',
+  Calendar: 'Errands',
+  Expeditions: 'Errands',
+});
+
+/** The dock button for a screen, or for the hub that now holds it. */
+export function dockEntry(page: Page, label: string): Locator {
+  const hub = HUB_OF[label] ?? label;
+  return page.getByRole('navigation').getByRole('button', { name: new RegExp(`^${hub}$`, 'i') });
+}
+
+/**
+ * The card for a place on its hub page — what a locked destination's shroud is now on.
+ *
+ * The dock used to carry that state; a hub card carries it now, and with room for the
+ * sentence saying when the place opens rather than a tooltip a phone cannot reach.
+ */
+export function placeCard(page: Page, label: string): Locator {
+  return page.getByRole('button', { name: new RegExp(`^${label}\\b`, 'i') }).first();
+}
+
+/** Presses through to a screen: its hub, then its card. One press if it is in the dock. */
+export async function goToScreen(page: Page, label: string): Promise<void> {
+  await dockEntry(page, label).click();
+  if (HUB_OF[label]) {
+    await placeCard(page, label).click();
+  }
+}
+
+/**
  * Takes the first starter on offer, and waits for the dialog to close.
  *
  * `registerRaw` deliberately stops before the choice, but a spec that wants the *shell*

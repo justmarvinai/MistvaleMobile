@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, registerRaw } from './support';
+import { chooseStarter, dockEntry, placeCard, registerRaw } from './support';
 
 /**
  * Expeditions, in a real browser.
@@ -25,11 +25,13 @@ test.describe('expeditions', () => {
     await registerRaw(page, 'e2eexp', 'Dispatcher');
     await chooseStarter(page);
 
-    const entry = page.getByRole('navigation').getByRole('button', { name: /^expeditions$/i });
+    // Two presses now: the dock holds hubs, and the place is a card on one (C12).
+    await dockEntry(page, 'Expeditions').click();
+    const entry = placeCard(page, 'Expeditions');
     await expect(entry).toBeVisible({ timeout: 15_000 });
     // Shrouded rather than hidden: a locked station keeps its board and says when it opens,
     // which is the rule every other station follows.
-    await expect(entry).toBeDisabled();
+    await expect(entry).toHaveAttribute('aria-disabled', 'true');
   });
 
   test('say what they are for on an account that cannot run one yet', async ({ page }) => {

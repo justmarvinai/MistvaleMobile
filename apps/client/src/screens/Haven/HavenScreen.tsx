@@ -99,7 +99,11 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
           nothing waiting, which is most mornings. */}
       <WhatsReady onNavigate={onNavigate} />
 
-      <Rail label="Locations" className={styles.rail}>
+      <Rail
+        label="Locations"
+        className={styles.rail}
+        hint="Drag the camp sideways to see every place in the vale."
+      >
         {stations.map((screen) => (
           <Station
             key={screen.id}
@@ -109,8 +113,6 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
           />
         ))}
       </Rail>
-
-      <p className={styles.hint}>Drag the camp sideways to see every place in the vale.</p>
     </div>
   );
 }

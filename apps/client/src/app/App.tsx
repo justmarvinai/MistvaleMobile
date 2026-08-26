@@ -5,6 +5,7 @@ import { usePreferences } from './usePreferences';
 import { ToastHost } from '@/ui/Toast/Toast';
 import { AuthScreen } from '@/screens/Auth/AuthScreen';
 import { HavenScreen } from '@/screens/Haven/HavenScreen';
+import { HubScreen } from '@/screens/Hub/HubScreen';
 import { CampaignScreen } from '@/screens/Campaign/CampaignScreen';
 import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { DepthsScreen } from '@/screens/Depths/DepthsScreen';
@@ -32,7 +33,14 @@ import { SettingsModal } from '@/screens/Settings/SettingsModal';
 import { useSessionStore } from '@/state/sessionStore';
 import { usePlayerStore } from '@/state/playerStore';
 import { useContentStore } from '@/state/contentStore';
-import { DOCK_SCREENS, SCREENS, isScreenUnlocked, type ScreenId } from './screens';
+import {
+  DOCK_SCREENS,
+  SCREENS,
+  dockSlotFor,
+  isHub,
+  isScreenUnlocked,
+  type ScreenId,
+} from './screens';
 import { useNavStore } from '@/state/navStore';
 import { useTutorialStore } from '@/state/tutorialStore';
 import { useLoadoutStore } from '@/state/loadoutStore';
@@ -189,6 +197,55 @@ function screenForMode(mode: string): ScreenId {
   }
 }
 
+/**
+ * Which screen is on, as a lookup rather than a chain of twenty ternaries.
+ *
+ * It *was* the chain, and it was the thing the "add more stuff must stay cheap" rule was
+ * written against: every mode C10 and C11 added meant one more `: screen === 'x' ? (` in
+ * the middle of the shell, and a screen registered but not branched showed the placeholder
+ * — which is exactly how `settings` sat in the registry for nine phases unreachable.
+ *
+ * The three hubs share one component and are matched by `isHub`, so a fourth hub is a
+ * registry entry and nothing here.
+ */
+const SCREEN_VIEWS: Partial<Record<ScreenId, () => JSX.Element>> = {
+  campaign: CampaignScreen,
+  depths: DepthsScreen,
+  titan: TitanScreen,
+  worldBoss: WorldBossScreen,
+  deepRun: DeepRunScreen,
+  spire: SpireScreen,
+  trials: TrialsScreen,
+  expeditions: ExpeditionsScreen,
+  arena: ArenaScreen,
+  battle: BattleScreen,
+  champions: ChampionsScreen,
+  relics: RelicsScreen,
+  bazaar: BazaarScreen,
+  mistgate: MistgateScreen,
+  chronicle: ChronicleScreen,
+  quests: QuestsScreen,
+  missions: MissionsScreen,
+  events: EventsScreen,
+  calendar: CalendarScreen,
+  mail: MailScreen,
+};
+
+function ScreenView({
+  screen,
+  onNavigate,
+}: {
+  screen: ScreenId;
+  onNavigate: (id: ScreenId) => void;
+}): JSX.Element | null {
+  if (screen === 'haven') return <HavenScreen onNavigate={onNavigate} />;
+  if (isHub(screen)) return <HubScreen hub={screen} onNavigate={onNavigate} />;
+  const View = SCREEN_VIEWS[screen];
+  if (View) return <View />;
+  const definition = SCREENS.find((entry) => entry.id === screen);
+  return definition ? <PlaceholderScreen screen={definition} /> : null;
+}
+
 /** The signed-in game shell: resource bar, current screen, navigation dock. */
 function GameShell() {
   const screen = useNavStore((state) => state.screen);
@@ -306,61 +363,19 @@ function GameShell() {
           />
         </ErrorBoundary>
 
-        <main className={styles.content}>
+        {/* The width the screen asks for, off the registry — see `App.module.scss`. A
+            screen that says nothing gets the everyday column. */}
+        <main className={styles.content} data-width={definition?.width ?? 'default'}>
           {/* Keyed by screen so walking to another room clears a failure rather than
               carrying it. A screen that throws leaves the dock and the top bar alive,
               which is the difference between "this room is broken" and "the game is". */}
           <ErrorBoundary key={screen} area={definition?.label ?? screen}>
-            {screen === 'haven' ? (
-              <HavenScreen onNavigate={navigate} />
-            ) : screen === 'campaign' ? (
-              <CampaignScreen />
-            ) : screen === 'depths' ? (
-              <DepthsScreen />
-            ) : screen === 'titan' ? (
-              <TitanScreen />
-            ) : screen === 'worldBoss' ? (
-              <WorldBossScreen />
-            ) : screen === 'deepRun' ? (
-              <DeepRunScreen />
-            ) : screen === 'spire' ? (
-              <SpireScreen />
-            ) : screen === 'trials' ? (
-              <TrialsScreen />
-            ) : screen === 'expeditions' ? (
-              <ExpeditionsScreen />
-            ) : screen === 'arena' ? (
-              <ArenaScreen />
-            ) : screen === 'battle' ? (
-              <BattleScreen />
-            ) : screen === 'champions' ? (
-              <ChampionsScreen />
-            ) : screen === 'relics' ? (
-              <RelicsScreen />
-            ) : screen === 'bazaar' ? (
-              <BazaarScreen />
-            ) : screen === 'mistgate' ? (
-              <MistgateScreen />
-            ) : screen === 'chronicle' ? (
-              <ChronicleScreen />
-            ) : screen === 'quests' ? (
-              <QuestsScreen />
-            ) : screen === 'missions' ? (
-              <MissionsScreen />
-            ) : screen === 'events' ? (
-              <EventsScreen />
-            ) : screen === 'calendar' ? (
-              <CalendarScreen />
-            ) : screen === 'mail' ? (
-              <MailScreen />
-            ) : definition ? (
-              <PlaceholderScreen screen={definition} />
-            ) : null}
+            <ScreenView screen={screen} onNavigate={navigate} />
           </ErrorBoundary>
         </main>
 
         {/* A fight takes the whole screen: leaving it is a deliberate act, not a tab away. */}
-        {screen !== 'battle' && <Dock current={screen} onNavigate={navigate} />}
+        {screen !== 'battle' && <Dock current={dockSlotFor(screen)} onNavigate={navigate} />}
       </div>
 
       {/* Under the modals and over the screens: a wipe belongs to the navigation, not to

@@ -90,6 +90,33 @@ $space-6: 32px;
 $space-7: 48px;
 $space-8: 64px;
 
+// ── Layout (C12 — desktop-first) ──────────────────────────────────────────────
+//
+// Mistvale is played on a desktop and dressed like a phone game, and until C12 it was laid
+// out like one too: every screen was a left-aligned column that simply stopped, so a 2000px
+// window drew three 270px cards and thirteen hundred pixels of nothing. These are the
+// ceilings a page grows to before it stops growing and centres — which is the whole of the
+// fix, because content that centres reads as *composed* where content that stops reads as
+// broken.
+//
+/** The default. Wide enough for three comfortable cards, narrow enough to scan in one look. */
+$page-max: 1440px;
+/** For a screen that is mostly words — the Chronicle, a news post, a long brief. */
+$page-narrow: 1040px;
+/** For a screen that wants every pixel it can have — the campaign map, the vault's grid. */
+$page-wide: 1800px;
+
+// Card floors, and they are floors rather than fixed widths: a grid built on `minmax($card,
+// 1fr)` fits as many as it can and then *shares the rest out*, so a card is never squeezed
+// and never marooned. Desktop-first means these are the widths at which a card is
+// comfortable rather than the widths at which its text merely fits.
+/** A card carrying a title, a few chips and a button. */
+$card-min: 320px;
+/** One carrying a paragraph — an expedition's brief, a mode's description. */
+$card-min-prose: 380px;
+/** A hub's destination card: art, a name and a line about what the place is for. */
+$card-min-hub: 400px;
+
 // ── Motion (docs/UI_UX_DESIGN.md §1.2) ─────────────────────────────────────────
 $duration-instant: 80ms;
 $duration-fast: 120ms;

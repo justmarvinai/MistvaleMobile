@@ -28,12 +28,23 @@ export interface RailProps {
   label: string;
   children: React.ReactNode;
   className?: string;
+  /**
+   * A line telling the player they can drag, shown **only when there is somewhere to drag
+   * to**.
+   *
+   * It lives here rather than beside the rail because whether it is true is the rail's own
+   * business — and C12 proved the point: reducing the Haven from twelve boards to five made
+   * every one of them fit, and the camp went on saying "drag the camp sideways to see every
+   * place in the vale" underneath a row with nothing off the edge of it. An instruction that
+   * is false is worse than no instruction.
+   */
+  hint?: string;
 }
 
 /** How far the arrow buttons and the arrow keys move, when there is nothing to snap to. */
 const FALLBACK_STEP = 240;
 
-export function Rail({ label, children, className }: RailProps): JSX.Element {
+export function Rail({ label, children, className, hint }: RailProps): JSX.Element {
   // The node in state rather than a ref: the arrows render from what it measures, so the
   // first paint after mount has to be the one that knows whether the rail overflows.
   const [track, setTrack] = useState<HTMLDivElement | null>(null);
@@ -254,6 +265,9 @@ export function Rail({ label, children, className }: RailProps): JSX.Element {
       >
         <span aria-hidden="true" />
       </button>
+
+      {/* Only when there is somewhere to drag to — see `hint` above. */}
+      {hint && edges.overflows && <p className={styles.hint}>{hint}</p>}
     </div>
   );
 }

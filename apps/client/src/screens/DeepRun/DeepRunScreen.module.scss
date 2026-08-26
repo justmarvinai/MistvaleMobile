@@ -430,7 +430,7 @@
   overflow-y: auto;
   max-height: 26rem;
   gap: $space-2;
-  grid-template-columns: repeat(auto-fill, minmax($card-champion, 1fr));
+  grid-template-columns: repeat(auto-fill, $card-champion);
 }
 
 .pickerActions {

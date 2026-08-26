@@ -9,6 +9,9 @@ import {
   registerRaw,
   resolveBattle,
   setSimpleBattlefield,
+  dockEntry,
+  goToScreen,
+  placeCard,
 } from './support';
 import { decodePng, litFraction, meanColour } from './pixels';
 
@@ -170,11 +173,9 @@ test.describe('what a player can actually see', () => {
     }
 
     let measured = 0;
-    for (const screen of ['Campaign', 'Champions', 'Relics']) {
-      const nav = page
-        .getByRole('navigation')
-        .getByRole('button', { name: new RegExp(`^${screen}`, 'i') })
-        .first();
+    for (const screen of ['Campaign', 'Roster', 'Relics']) {
+      await dockEntry(page, screen).click();
+      const nav = placeCard(page, screen);
       // A screen still shrouded for a young account is not a screen to measure.
       if ((await nav.getAttribute('aria-disabled')) === 'true') continue;
       await nav.click();
@@ -325,10 +326,7 @@ test.describe('what a player can actually see', () => {
     // rework: the shell's icons are the library's painted art and its glyph masks now, and
     // the card's are too, so the sprite's remaining job is the symbols inside a sheet — the
     // lock, the favourite mark, a relic slot's silhouette.
-    await page
-      .getByRole('navigation')
-      .getByRole('button', { name: /Champions/ })
-      .click();
+    await goToScreen(page, 'Roster');
     await page
       .getByRole('button', { name: /lv \d+/i })
       .first()

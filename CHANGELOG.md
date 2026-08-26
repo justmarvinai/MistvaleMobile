@@ -5,6 +5,59 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the shell, restructured (C12)
+
+The owner's brief: *"make menus, frames and infos not so overwhelming — restructure the UI,
+cleaner, modern, less overcrowded"*, with Raid's Game Modes screen as the reference, the
+Expeditions screen as the example of wasted space, and **desktop-first while keeping the
+gacha-RPG feel**.
+
+**Nineteen dock entries became six.** Every fighting mode is behind **Battle**, every
+champion screen behind **Champions**, every claimable list behind **Errands**; the Haven,
+the Mistgate and the Bazaar stay one press away. A hub is one page of large painted cards —
+art, a name, and the sentence saying what the place is *for*, which on a 20px dock glyph
+lived only in a tooltip a phone could never open. One component serves all three, because a
+hub is entirely a view of the registry: a screen names the hub it belongs to and that is the
+only place the grouping is written, so adding a mode is still one registry entry.
+
+The registry now refuses to let a screen be reachable twice or not at all — the first is a
+destination a player must be told about twice, and the second is how `settings` sat
+unreachable in the registry for nine phases.
+
+**Screens are laid out for the display they are played on.** Mistvale is a desktop game
+dressed like a phone game and it was *laid out* like one: a screen grew to the window and
+then stopped filling, so a 1920px display drew three 270px cards against the left edge with
+a third of the screen empty beside them. Content now has a ceiling and centres, and which
+ceiling comes off the registry — `wide` for the vault and the roster, `full` for the vale
+and the battlefield, which are pictures rather than columns.
+
+**And ten card grids were quietly broken in the same way.** They were written
+`repeat(auto-fill, minmax(19rem, 1fr))` — but `auto-fill` keeps the empty tracks a row could
+hold, so the `1fr` written right beside it, the instruction to *stretch*, was shared out
+among columns that do not exist. Three expedition cards in a wide window stayed at their
+minimum with the leftover space parked in phantom tracks. `auto-fit` collapses them, and the
+Expeditions cards went from 270px to 470px with no other change. A test reads the
+stylesheets and refuses the pattern, and the four grids of *fixed-width* library cards use
+fixed tracks now — stretching those would reintroduce the bug D9 spent four attempts on.
+
+**The dock is sized for a desktop.** It was the library's phone defaults — a 20px glyph
+under an 11px label, cut so nine fit across a handset — and Mistvale put nineteen through
+it. With six there is room for a real target and a readable word: 30px glyphs, 0.95rem
+labels, 60px rows, all behind a `min-width: 900px` so the landscape-phone PWA still gets the
+pack's own numbers.
+
+### Fixed
+
+- A tutorial step pointing at `dock:depths` follows the screen into the hub that now holds
+  it, rather than the script being re-cut — so the same key keeps meaning "the way to the
+  Depths" however the navigation is arranged later.
+- The Haven stopped telling players to *"drag the camp sideways to see every place in the
+  vale"* under a row with nothing off the edge of it. `ui/Rail` owns the hint now and shows
+  it only when the track overflows, because an instruction that is false is worse than none.
+- `App` picks its screen from a lookup rather than a chain of twenty ternaries — the thing
+  the "adding content stays cheap" rule was written against, and how an unbranched screen
+  silently showed the placeholder.
+
 ### Added — the Mistspire (C11)
 
 Thirty floors, and the first thing in Mistvale that pays for a **broad** roster rather than

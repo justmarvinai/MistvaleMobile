@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, registerRaw } from './support';
+import { chooseStarter, dockEntry, placeCard, registerRaw } from './support';
 
 /**
  * Trials, in a real browser.
@@ -21,9 +21,11 @@ test.describe('trials', () => {
     await registerRaw(page, 'e2etrial', 'Solver');
     await chooseStarter(page);
 
-    const entry = page.getByRole('navigation').getByRole('button', { name: /^trials$/i });
+    // Two presses now: the dock holds hubs, and the place is a card on one (C12).
+    await dockEntry(page, 'Trials').click();
+    const entry = placeCard(page, 'Trials');
     await expect(entry).toBeVisible({ timeout: 15_000 });
-    await expect(entry).toBeDisabled();
+    await expect(entry).toHaveAttribute('aria-disabled', 'true');
   });
 
   test('say what they are for on an account that cannot attempt one yet', async ({ page }) => {

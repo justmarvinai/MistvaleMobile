@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, registerRaw } from './support';
+import { chooseStarter, dockEntry, placeCard, registerRaw } from './support';
 
 /**
  * The Mistspire, in a real browser.
@@ -20,9 +20,11 @@ test.describe('the mistspire', () => {
     await registerRaw(page, 'e2espire', 'Climber');
     await chooseStarter(page);
 
-    const entry = page.getByRole('navigation').getByRole('button', { name: /the mistspire/i });
+    // Two presses now: the dock holds hubs, and the place is a card on one (C12).
+    await dockEntry(page, 'The Mistspire').click();
+    const entry = placeCard(page, 'The Mistspire');
     await expect(entry).toBeVisible({ timeout: 15_000 });
-    await expect(entry).toBeDisabled();
+    await expect(entry).toHaveAttribute('aria-disabled', 'true');
   });
 
   test('says what it is for on an account that cannot climb yet', async ({ page }) => {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { hubFor, type ScreenId } from './screens';
 
 /**
  * The screen-element registry the tutorial points at.
@@ -81,11 +82,36 @@ export function useHighlightRect(key: string): HighlightBox | null {
   return box;
 }
 
+/**
+ * The keys worth trying for one target, in order.
+ *
+ * A step naming `dock:depths` means *the way to the Depths*, and C12 moved that way: the
+ * Depths is inside the Battle hub now and has no dock slot of its own. Rather than re-cut
+ * the script — which would strand every operator who writes the obvious key next year —
+ * the lookup falls back to the hub that holds it, and then to the hub's own card.
+ *
+ * Exported for its test, and pure: it is a list of selectors rather than a measurement.
+ */
+export function highlightCandidates(key: string): string[] {
+  const candidates = [key];
+  const screen = key.startsWith('dock:') ? key.slice('dock:'.length) : null;
+  if (screen) {
+    const hub = hubFor(screen as ScreenId);
+    // The dock button for the hub that holds it, then the hub's own card on that page —
+    // so the same key points at the right thing whichever of the two the player is looking
+    // at, which is what makes it a *way there* rather than a coordinate.
+    if (hub) candidates.push(`dock:${hub}`, `place:${screen}`);
+  }
+  return candidates;
+}
+
 function measure(key: string): HighlightBox | null {
   // Escaped, because a key comes from content and content is edited by an operator: a
   // quote in a highlight key must produce "nothing to point at" rather than a thrown
   // selector, which would take the whole overlay down with it.
-  const node = document.querySelector(`[${ATTRIBUTE}="${CSS.escape(key)}"]`);
+  const node = highlightCandidates(key)
+    .map((candidate) => document.querySelector(`[${ATTRIBUTE}="${CSS.escape(candidate)}"]`))
+    .find((found) => found !== null);
   const rect = node?.getBoundingClientRect();
   // A node laid out to nothing is not on screen in any useful sense; pointing at a
   // zero-size box would cut a hole in the middle of the dim.

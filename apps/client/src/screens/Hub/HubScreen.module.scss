@@ -1,0 +1,200 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+/* ── A destination ──────────────────────────────────────────────────────────
+
+   The same painted language as the Haven's stations — the theme's backdrop, the place's
+   own artwork, a gloom so text is readable over anything, the library's frame over the lot
+   — laid out *landscape* rather than portrait.
+
+   That difference is the point. A Haven station is a tall board in a rail you drag through;
+   a hub card sits in a grid on a desktop, where width is the thing there is plenty of. Art
+   across the top and the words beneath it lets the blurb be a real sentence at a real size
+   instead of the clamped line a 170px board could hold. */
+
+.card {
+  @include interactive;
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  /* No fixed width: the grid shares the row out (`ui/Page`), so a card is as wide as its
+     share and every card in a row is the same width. A fixed width here is exactly the bug
+     D9 chased through four attempts — a rigid card in a stretched holder. */
+  width: 100%;
+  min-height: 15rem;
+  padding: $space-5;
+  overflow: hidden;
+  color: $parchment;
+  text-align: left;
+  transition:
+    transform $duration-base $ease-out,
+    filter $duration-base $ease-out;
+
+  @include motion-safe {
+    animation: rise $duration-base $ease-out backwards;
+
+    @for $i from 1 through 10 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 35}ms;
+      }
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-style: solid;
+    border-width: var(--fui-bw-bg-tall);
+    border-image-source: var(--fui-img-bg-tall);
+    border-image-slice: var(--fui-slice-bg-tall) fill;
+    border-image-repeat: stretch;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-style: solid;
+    border-width: var(--fui-bw-frame-tall);
+    border-image-source: var(--fui-img-frame-tall);
+    border-image-slice: var(--fui-slice-frame-tall);
+    border-image-repeat: stretch;
+    pointer-events: none;
+  }
+
+  &:hover:not([data-locked='true']) {
+    transform: translateY(-5px);
+    filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
+  }
+
+  &:hover:not([data-locked='true']) .art {
+    transform: scale(1.05);
+    filter: brightness(1.12) saturate(1.05);
+  }
+
+  &:hover:not([data-locked='true']) .name {
+    color: $accent-soft;
+  }
+
+  &:active:not([data-locked='true']) {
+    transform: translateY(-2px);
+  }
+
+  &[data-locked='true'] {
+    cursor: default;
+  }
+
+  &[data-locked='true'] .art {
+    filter: grayscale(0.85) brightness(0.5);
+  }
+
+  &[data-locked='true'] .name,
+  &[data-locked='true'] .blurb {
+    color: $parchment-dim;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.art {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  /* Landscape rather than the station's square: a wide card with a square picture in it is
+     mostly picture, and the sentence underneath is what a hub is *for*. */
+  aspect-ratio: 21 / 9;
+  min-height: 0;
+  background-image: var(--mv-place-art);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform-origin: center 45%;
+  transition:
+    transform $duration-base $ease-out,
+    filter $duration-base $ease-out;
+}
+
+.gloom {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  height: 62%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.72) 72%);
+  pointer-events: none;
+}
+
+.seal {
+  position: absolute;
+  top: $space-5;
+  right: $space-5;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  color: $parchment-dim;
+  pointer-events: none;
+}
+
+.pip {
+  position: absolute;
+  top: $space-4;
+  right: $space-4;
+  z-index: 4;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: $danger;
+  color: #fff;
+  font-family: $font-mono;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.body {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-width: 0;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  transition: color $duration-fast $ease-out;
+}
+
+.blurb {
+  color: $parchment-dim;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  /* Three lines then clamp. Every blurb in the registry fits in two or three at this
+     width; the clamp is a floor under a longer one somebody writes later, so one wordy
+     place cannot make its whole row taller than the rest. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -41,7 +41,7 @@
 .trials {
   display: grid;
   gap: $space-3;
-  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(23rem, 1fr));
 }
 
 .card {

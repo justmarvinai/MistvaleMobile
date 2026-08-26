@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, registerRaw } from './support';
+import { chooseStarter, registerRaw, goToScreen } from './support';
 
 /**
  * Narrowing a roster, and a Haven that stays quiet.
@@ -39,10 +39,7 @@ test.describe('the roster', () => {
     await reveal.getByRole('button', { name: /take them in/i }).click();
     await expect(reveal).toBeHidden({ timeout: 15_000 });
 
-    await page
-      .getByRole('navigation')
-      .getByRole('button', { name: /^champions/i })
-      .click();
+    await goToScreen(page, 'Roster');
 
     const filters = page.getByRole('group', { name: /narrow the roster/i });
     await expect(filters).toBeVisible({ timeout: 15_000 });

@@ -19,4 +19,32 @@
   min-height: 0;
   position: relative;
   padding: $space-4 $space-5;
+  /* The screen's own column, centred (C12).
+  
+     Mistvale is played on a desktop and was laid out like a phone: a screen grew to the
+     window and then stopped filling, so a 2000px display drew three 300px cards against the
+     left edge with a third of the screen empty beside them. The ceiling is here rather than
+     in each screen for the same reason the padding above is — a screen added next year is
+     composed without remembering to be — and which ceiling comes off the registry, so a
+     screen says what shape it is once, where its name and its icon are already decided. */
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    width: 100%;
+    max-width: $page-max;
+    margin-inline: auto;
+    min-height: 0;
+  }
+
+  /* A screen that wants the pixels: the vault's grid, the roster, the shelves. */
+  &[data-width='wide'] > * {
+    max-width: $page-wide;
+  }
+
+  /* A scene rather than a column — the vale, the battlefield. A picture that centres
+     inside a rule is a picture with letterboxing. */
+  &[data-width='full'] > * {
+    max-width: none;
+  }
 }

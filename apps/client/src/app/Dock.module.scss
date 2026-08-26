@@ -39,3 +39,55 @@
   opacity: 0.7;
   pointer-events: none;
 }
+
+/* ── Desktop sizing (C12) ───────────────────────────────────────────────────
+
+   The library's `BottomNav` is cut for a phone: a 20px glyph over an 11px label, sized so
+   nine of them fit across a handset. Mistvale put *nineteen* destinations through it, and
+   the result was the wall of unreadable pictograms the owner called overwhelming.
+
+   Halving the count to six is the first half of the answer and this is the second: with a
+   third of the entries there is room for each to be a real target with a real word under
+   it. Everything here is scale — the rail, the lift, the tinting and the badge are still
+   the library's, which is the rule the design rework settled on (the library owns chrome).
+
+   Written as a floor that *grows*, not a fixed size: the same dock has to work on the
+   landscape phone the PWA is going to, where the library's own numbers are right. Below
+   the breakpoint nothing here applies and the pack's defaults stand. */
+
+@media (min-width: 900px) {
+  .dock :global(.fui-bottomnav) {
+    padding-block: $space-2;
+  }
+
+  .dock :global(.fui-bottomnav__item) {
+    gap: $space-1;
+    padding-block: $space-2;
+    /* Comfortably past the 44px touch minimum, and wide enough that "The Wurm Wakes" is a
+       label rather than an ellipsis. */
+    min-width: 96px;
+    min-height: 60px;
+  }
+
+  .dock :global(.fui-bottomnav__label) {
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+  }
+
+  .dock :global(.fui-bottomnav__glyph) {
+    width: 30px;
+    height: 30px;
+  }
+
+  .dock :global(.fui-bottomnav__badge) {
+    min-width: 22px;
+    height: 22px;
+    font-size: 0.8rem;
+  }
+
+  .hotkey {
+    font-size: 11px;
+    top: 5px;
+    right: 8px;
+  }
+}
