@@ -3,6 +3,7 @@ import type { GearInstance, GearPreview, GearSlot } from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
 import { gameApi } from '../../api/game';
+import { useContentStore } from '../../state/contentStore';
 import { useInventoryStore } from '../../state/inventoryStore';
 import { RelicCard } from '../Relics/RelicCard';
 import { Forge } from '../Relics/Forge';
@@ -11,6 +12,7 @@ import { usePlayerStore } from '../../state/playerStore';
 import styles from './RelicPicker.module.scss';
 import { statLabel } from '../../ui/statLabels';
 import { RELIC_SLOT_LABEL, relicGlyph } from '../../ui/relicArt';
+import { describeSetChange, setChanges } from '../../ui/setChange';
 import { Slot } from '@/fui/components/Slot.ts';
 import { Fui } from '@/fui/react';
 
@@ -37,6 +39,7 @@ export function RelicPicker({
   onClose: () => void;
   onChanged: () => Promise<void> | void;
 }): JSX.Element {
+  const bundle = useContentStore((state) => state.bundle);
   const gear = useInventoryStore((state) => state.gear);
   const loadInventory = useInventoryStore((state) => state.load);
 
@@ -219,6 +222,37 @@ export function RelicPicker({
                 );
               })}
             </ul>
+
+            {/* Why the numbers moved, when the reason is a set.
+
+                The deltas above have always been right and always been unexplained: a
+                relic that costs a hundred and forty attack because it broke a four-piece
+                set looks exactly like a worse relic, and the one thing a player needs to
+                know before pressing Equip is which of those it is. Named rather than
+                measured — the arithmetic is already in the line above it. */}
+            {setChanges(preview.before.setBonuses, preview.after.setBonuses).map((change) => (
+              <p
+                key={change.setKey}
+                className={styles.setChange}
+                data-sign={change.after >= change.before ? 'up' : 'down'}
+              >
+                {describeSetChange(change)}
+                {change.description && <span className={styles.setWhat}>{change.description}</span>}
+              </p>
+            ))}
+
+            {/* And what comes off. The slot's own panel shows the worn piece, but by the
+                time a candidate is selected the eye is down here, and "equip" is really
+                "swap" — a player who cannot see both halves is guessing at one of them. */}
+            {preview.replaces && (
+              <p className={styles.replaces}>
+                Takes off{' '}
+                {bundle?.gearSets.find((set) => set.key === preview.replaces!.setKey)?.name ??
+                  preview.replaces.setKey}{' '}
+                · {RELIC_SLOT_LABEL[preview.replaces.slot]} +{preview.replaces.level}
+              </p>
+            )}
+
             <div className={styles.power}>
               Power {preview.before.power.toLocaleString()} →{' '}
               <strong>{preview.after.power.toLocaleString()}</strong>

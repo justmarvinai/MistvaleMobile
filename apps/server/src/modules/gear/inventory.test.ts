@@ -420,6 +420,47 @@ describe.skipIf(!dbUp)('the management loop', () => {
       expect(preview.replaces.id).toBe(worn.id);
       expect(preview.after.total.atk).toBeGreaterThan(preview.before.total.atk);
     });
+
+    /**
+     * The half the title above has always promised and never checked.
+     *
+     * A set bonus is the reason a swap's numbers move in a direction the relic's own lines
+     * do not explain — take the second Ironroot piece off and the champion loses a bonus
+     * neither relic mentions. The client names that now (`ui/setChange`), and it can only
+     * do so honestly if both sides of the preview carry their complete copies. Asserted
+     * here rather than in the browser because a fresh account cannot farm two pieces of one
+     * set on demand: the drop is a coin flip, and a spec that waited for one would be a
+     * coin flip wearing a green tick.
+     */
+    it('names the set that a swap would break, on both sides', async () => {
+      const champion = await chooseStarter();
+      // One complete copy of a two-piece set: a weapon and a helm of the same set.
+      const weapon = await giveGear({ setKey: 'ironroot', slot: 'weapon' });
+      const helm = await giveGear({ setKey: 'ironroot', slot: 'helm' });
+      for (const piece of [weapon, helm]) {
+        await as({
+          method: 'POST',
+          url: apiPath(ROUTES.gear.equip(piece.id)),
+          payload: { championId: champion.id },
+        });
+      }
+
+      const intruder = await giveGear({ setKey: 'wolfsfang', slot: 'weapon' });
+      const response = await as({
+        method: 'GET',
+        url: `${apiPath(ROUTES.gear.preview(intruder.id))}?championId=${champion.id}`,
+      });
+      expect(response.statusCode, response.body).toBe(200);
+
+      const preview = response.json().data.preview;
+      const copies = (side: { setBonuses: { setKey: string; copies: number }[] }, key: string) =>
+        side.setBonuses.find((bonus) => bonus.setKey === key)?.copies ?? 0;
+
+      expect(copies(preview.before, 'ironroot'), 'the set was not on to begin with').toBe(1);
+      expect(copies(preview.after, 'ironroot'), 'the swap should have broken it').toBe(0);
+      // And the lone intruder completes nothing, which is what makes the trade a real one.
+      expect(copies(preview.after, 'wolfsfang')).toBe(0);
+    });
   });
 
   // ── Champions ────────────────────────────────────────────────────────────

@@ -89,6 +89,37 @@
   }
 }
 
+/* A set gained or broken, named under the numbers it explains. */
+.setChange {
+  margin: 0 0 $space-1;
+  font-size: 0.85rem;
+
+  &[data-sign='up'] {
+    color: $success;
+  }
+
+  &[data-sign='down'] {
+    color: $danger;
+  }
+}
+
+/* What the bonus actually does — beside the name rather than under it, because a player
+   who already knows the set does not need the sentence and should not have to read past
+   it to reach the power line. */
+.setWhat {
+  margin-left: $space-2;
+  color: $muted;
+  font-size: 0.8rem;
+}
+
+/* The piece being displaced. Quiet: it is context for the change above, not the change. */
+.replaces {
+  margin: 0 0 $space-2;
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+}
+
 .power {
   color: $muted;
   font-size: 0.85rem;

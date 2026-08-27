@@ -296,8 +296,15 @@ engine, the goal DSL and the events framework already do most of the work*.
    the *unlock* rather than the number — the farm allowance is counted from registration, so
    reading it straight offered a level-1 warden thirty runs of a feature five levels away
    (`e2e/roster.spec.ts` caught it).
-9. **Relic compare on equip** — the preview endpoint returns the delta already; the screen
-   shows the candidate rather than the difference.
+9. ~~**Relic compare on equip**~~ — **Done — C14**, and the item's own wording was stale:
+   the screen had shown the difference since P4. What it had never shown is *why* the
+   difference happened. A swap that breaks a set moves the numbers in a direction neither
+   relic's lines explain — `C.RATE −2` on the screen, a whole set bonus gone underneath —
+   so the preview names it (**Breaks Hawkeye · C.RATE +12%**) and says what comes off.
+   Counted in complete copies rather than pieces, because "you still have Truestrike" is
+   true and useless when a six-piece set drops from two copies to one. Nothing new is
+   fetched: `replaces` and both sides' `setBonuses` had been on the response since P4 and no
+   screen had ever drawn them.
 
 **Structural gaps**
 

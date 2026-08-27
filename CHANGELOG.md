@@ -5,6 +5,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — a swap says what it costs, not just what it changes (C14)
+
+Selecting a candidate relic has always shown the real stat difference, server-computed, set
+bonuses included in the arithmetic. What it never said is **why** the numbers moved — and
+the reason is usually a set. Take the second Ironroot piece off and the champion loses a
+bonus neither relic mentions; on the screen that read as `C.RATE −2`, which looks like a
+rounding error and is actually a whole set bonus gone.
+
+The preview names it now: **Breaks Hawkeye · C.RATE +12%**, in red, under the deltas it
+explains — and *"Takes off Hawkeye · Weapon +16"*, because equipping is really swapping and
+by the time a candidate is selected the worn piece is out of eye-line. Counted in **complete
+copies** rather than pieces, which is the only honest way to describe a six-piece set going
+from two copies to one: "you still have Truestrike" is true and useless.
+
+Nothing new is fetched — `replaces` and both sides' `setBonuses` have been on the preview
+response since P4 and no screen had ever drawn them. `ui/setChange` is the pure diff and has
+six cases; the server test that had promised "set bonus included" in its title since P4 now
+actually asserts it, on both sides of a swap that breaks a copy.
+
+
 ### Fixed — the frame scrolls, not the shell (C12c)
 
 **Two game modes could not be clicked.** On the Battle hub at 1920×1080 the top bar scrolled
