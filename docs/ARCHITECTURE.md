@@ -232,7 +232,7 @@ createBattle(setup: BattleSetup, contentView: ContentView, seed: number): Battle
 | API latency (p95, on-box) | < 100 ms; battle action < 50 ms + engine < 20 ms | 6–22 ms p95 across the hot reads; engine 0.06 ms/run (`pnpm sim`) |
 | Client first load (cold) | < 1.5 MB JS gz, < 2.5 s to login screen on desktop broadband | **322 KB JS gz** (pixi 160 · index 118 · react 44) — D9, with the whole FantasyUIs layer in it |
 | Painted UI art (FantasyUIs) | no stated budget; measured so there is one | **1.2 MB on the login screen, 1.7 MB through the Haven, 1.9 MB after four screens.** PNGs, so already compressed — gzip does nothing for them |
-| Champion avatar art | **over budget — see USER_QUESTIONS Q6** | 8 avatars, **14 MB published**, 1.3–2.2 MB each at 1254×1254, drawn at 150px. Opening the roster pulls ~9 MB |
+| Champion avatar art | within budget since C16 | 8 avatars, **2.0 MB published** — delivered at 1254×1254 and published at 320px, twice the largest place any is drawn (150px on a champion card, 44px on an arena portrait). Was 14 MB, which was Q6 |
 | Content bundle | < 500 KB gzipped | 708 KB raw → **80 KB gzipped** by nginx (`gzip_types` covers `application/json`) |
 | Battle scene | 60 fps at ×2 zoom on integrated graphics | — |
 | Concurrent players | comfortably 100+ (design intent: dozens) | — |
@@ -240,10 +240,11 @@ createBattle(setup: BattleSetup, contentView: ContentView, seed: number): Battle
 The two art rows are D9's, re-measured after the design rework (D0–D8) with every painted
 asset in place. The JS answer is the reassuring one: the entire component library, its theme
 and the twenty-odd Mistvale primitives built on it cost **20 KB gzipped** — 302 KB to 322 KB
-against a 1.5 MB budget. The art is where the weight went, and only one half of it is a
-problem: the library's own PNGs are small and load per screen, while the champion avatars are
-full-resolution source files published untouched. That is a content-pipeline gap rather than a
-design one, and it is Q6.
+against a 1.5 MB budget. The art is where the weight went, and one half of it was a real
+problem: the library's own PNGs are small and load per screen, while the champion avatars
+were full-resolution source files published untouched — 14 MB of a 15 MB tree. That was a
+content-pipeline gap rather than a design one, which is why the fix belonged in `pnpm assets`
+and not in a component: C16 resizes on publish and the tree is 2.0 MB (ASSET_GUIDE §build).
 
 Measured on the dev box against the published EA seed, `/api/player` `/api/content` `/api/player/champions` `/api/player/gear` `/api/quests` `/api/player/progress` at 40 samples each. Everything is an order of magnitude inside its budget, so P10d spent its effort on correctness rather than tuning. Two notes worth keeping:
 
