@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the champion avatars are a tenth of the download (C16, Q6)
+
+The eight painted avatars are delivered at 1254×1254 and the game draws them at 150px on a
+champion card and 44px on an arena portrait. Published byte-for-byte, they were **14 MB of
+the 15 MB sprite tree** — on the 1-core target box, the largest single thing a player
+downloads by an order of magnitude, and growing with every champion that gets a face.
+
+They go out at **320px** now, twice the largest place any of them is drawn, and the tree is
+**2.0 MB**. `assets/` keeps the masters exactly as delivered.
+
+**The interesting part is that it needed nothing installed.** Q6 sat open for eight days
+because the obvious fix was `sharp`, and a native module that has to build on the VPS is a
+locked-stack decision rather than a tidy-up. The avatars are PNG, Node ships zlib, and a PNG
+is a zlib stream with five per-row filters in front of it — `tools/asset-sync/src/png.ts`
+decodes, area-averages and re-encodes one in about 130 ms, and the whole `pnpm assets` run
+still finishes in 2.4 seconds.
+
+Two encoder choices are measured rather than assumed, and the first cut guessed one of them
+wrong: row filters are worth **17%** on a shrunk painting, not the "couple of percent" the
+comment claimed — while trying all five per row and keeping the best, which is what a real
+encoder does, buys a further **0.4 KB**. So every row is Paeth and none of them shop around.
+Dropping the alpha channel on a fully opaque avatar is another 20 KB, checked per file
+because the next avatar delivered may have a soft edge.
+
+Downscaling is **alpha-weighted**, which is the defect that would otherwise have shipped:
+averaging colour straight across a transparent edge drags the black stored in the invisible
+pixels into the fringe, and a cut-out champion comes out with a dark outline.
+
+
 ### Changed — the player's card, rebuilt to the owner's reference (C15)
 
 The owner's second reference (2026-08-27) is the panel this genre puts in the corner of its

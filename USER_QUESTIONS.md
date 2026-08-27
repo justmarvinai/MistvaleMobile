@@ -4,9 +4,8 @@
 
 ## Open questions
 
-**Q6 only** — champion avatars ship at full resolution (§ below), which is a size question rather than a
-blocking one. Q8 was answered on 2026-08-26, Q7 on 2026-08-21, Q4 and Q5 on 2026-08-18; all four are in
-the decision record below.
+**None.** Q6 and Q8 were answered on 2026-08-27 and 2026-08-26, Q7 on 2026-08-21, Q4 and Q5 on
+2026-08-18; all of them are in the decision record below.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
@@ -59,32 +58,15 @@ Each has a phase and a default, so none of them blocks anything. Listed here so 
 | Q2 | Whether the Summon Surge ladder is sized right | **Recommendation taken: leave the point weights as seeded.** One Radiant pull tops the ladder outright, and that is the point — "the Radiant I finally pulled finished the event" is a good evening, and sizing the top rung to a Radiant instead would put it out of reach of everyone who never sees one, which at EA is most people. | `db/seed/data/events.ts`, ECONOMY_BALANCE §11 |
 | Q3 | How much the cold-open battle should borrow | **Recommendation taken: a `tutorial`-mode stage carrying a preset team.** The battle mode already existed in the enum and nothing used it; a stage now carries the roster it is fought with, so the opening fight is content like every other fight. No energy, no rewards, no stage progress, and nothing minted into the roster to be taken back afterwards. | GAME_DESIGN §9.4, CONTENT_PLAN §7, DATA_MODEL §stage |
 
+## Decision record (owner answers, 2026-08-27)
+
+| # | Question | Answer | Where it lives now |
+|---|---|---|---|
+| Q6 | Whether to downscale the champion avatars at publish | **Recommendation taken** ("do all the things you still have in plan, how you recommend"), **and the recommendation turned out to be wrong about the hard part.** Q6 said this needed `sharp` — a native module that has to build on the VPS, which is why it sat open for eight days. The avatars are **PNG**, Node ships zlib, and a PNG is a zlib stream with five per-row filters in front of it: `tools/asset-sync/src/png.ts` decodes, area-averages and re-encodes one in about 130 ms with **nothing installed**. The sprite tree went from **15 MB to 2.0 MB** and `pnpm assets` still finishes in 2.4 seconds. Two encoder choices were measured rather than assumed, and the first cut guessed one of them wrong: row filters are worth **17%** on a shrunk painting, not the "couple of percent" the comment claimed, while trying all five per row and keeping the best buys a further 0.4 KB — so every row is Paeth and none of them shop around. Dropping the alpha channel on a fully opaque avatar is another 20 KB, checked per file rather than assumed. Downscaling is **alpha-weighted**, because averaging colour straight across a transparent edge drags black into the fringe and outlines a cut-out champion. `assets/` keeps the masters untouched; only avatars are resized, since an idle frame is 4 KB and drawn at its own size. | ASSET_GUIDE §1, `tools/asset-sync/src/png.ts` + `png.test.ts` |
+
 ## Decision record (owner answers, 2026-08-26)
 
 | # | Question | Answer | Where it lives now |
 |---|---|---|---|
 | Q8 | Whether an enemy's `stars` should decide anything | **Recommendation taken: honour it, and re-tune against `pnpm sim`** ("As you recommend"). `scaleEnemyStats` scales HP/ATK/DEF by the same `champion.rankMultipliers` ladder a champion's rank climbs, so ★6 is 1.00 and an enemy's authored `base_stats` *are* its six-star stats. SPD, crit and RES stay flat at every rung — speed decides turn order before anything else resolves, and every boss in the game is built on a turn count. Making the field real exposed a second fault it had been hiding: **the campaign was the only content in the game not authored on the ★1–6 ladder**, running 1/2/3 for Normal/Hard/Brutal while the Depths, the Spire, the Deep Run and the tutorial all already ran 3→6 — so read literally it meant "the whole campaign at 42–68% of what it was tuned to be", and `brutal-wall` was the gate that said so (89.6% of teams fresh off Normal walked through Brutal 12-7). The scale moved to 4/5/6 and the shape did not: Brutal is the full-strength creature, Hard and Normal are its lesser versions, which is what that seed's own comment had said since P2. All 89 gates pass. The wave-line default moved from ★1 to ★6 in the same commit, because an unset rating has to mean "as authored" and ★1 would hand out a 58% nerf for leaving a box empty in Admin. | COMBAT_SYSTEM §2, `packages/engine/src/setup.ts` + `setup.test.ts`, `db/seed/data/campaign.ts` |
 
-## Q6 — Champion avatars ship at full resolution (raised 2026-08-19, D9)
-
-**The measurement.** The eight published avatars are 1.3–2.2 MB each, 1254×1254, and the
-game draws them at 150px on a champion card and 44px on an arena portrait. `pnpm assets`
-copies them from `assets/` byte-for-byte, so opening the roster pulls roughly **9 MB**. On
-the 1-core/4 GB target box that is the largest single thing a player downloads, by an order
-of magnitude, and it grows with every champion that gets art.
-
-**Why it is not already fixed.** Downscaling at publish time needs an image library, and
-there is none in the toolchain — no `sharp`, no ImageMagick, no PIL. Adding `sharp` means a
-native module that has to build on the VPS, which is a locked-stack decision rather than
-mine to take quietly.
-
-**Recommended default:** add `sharp` to `tools/asset-sync` and have `pnpm assets` publish
-each avatar at 320px (2× the largest place it is drawn), leaving `assets/` untouched as the
-master. That is ~40 KB per avatar instead of ~2 MB, needs no change to any screen, and the
-source art stays exactly as delivered.
-
-**Alternatives if a native dep is unwelcome:** downscale once by hand and commit the smaller
-files to `assets/` (simple, but the master is then the display size); or serve them through
-nginx's `image_filter` (no build dep, but it costs CPU on the box the budget is about).
-
-Nothing is blocked either way — the game works today, it is only heavier than it should be.

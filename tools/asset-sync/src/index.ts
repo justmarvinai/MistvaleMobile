@@ -2,6 +2,7 @@ import { mkdir, readFile, readdir, rm, rmdir, writeFile } from 'node:fs/promises
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { decode, downscale, encode } from './png';
 
 /**
  * `pnpm assets` — publishes the unit sprites the client renders.
@@ -16,6 +17,15 @@ import { fileURLToPath } from 'node:url';
  * a content field that could drift.
  *
  * `--check` verifies the published tree is current without writing, for CI.
+ *
+ * **Avatars are published smaller than they are delivered** (Q6). The exports are
+ * 1254×1254 and the game draws them at 150px on a champion card and 44px on an arena
+ * portrait, so the eight of them were 14 MB of the 15 MB sprite tree — on a 1-core box, the
+ * largest single thing a player downloads by an order of magnitude, growing with every
+ * champion that gets a face. They go out at 320px, which is twice the largest place any of
+ * them is drawn, and `assets/` keeps the masters untouched. Nothing else is resized: an
+ * idle frame is 4 KB and drawn at its own size, and shrinking one would be a change to how
+ * the game looks rather than to what it weighs.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -141,6 +151,40 @@ async function publishFile(from: string, to: string): Promise<string> {
   return to;
 }
 
+/**
+ * The longest side an avatar is published at.
+ *
+ * Twice the largest place one is drawn (150px on a champion card), so it still has pixels
+ * to spare on a high-density display and none to waste anywhere else.
+ */
+const AVATAR_MAX_SIDE = 320;
+
+/**
+ * Publishes an image at a ceiling on its longest side, re-encoding it on the way.
+ *
+ * Compares the bytes it *would* write rather than the source's, which is what keeps the
+ * `publishFile` contract: an unchanged master must not touch the published file, or the
+ * dev server's watcher fires on every start. `encode` is deterministic for exactly this
+ * reason.
+ *
+ * A file it cannot read is a hard error rather than a silent copy: an avatar published at
+ * full size would be a 2 MB regression nobody would notice until the next budget pass.
+ */
+async function publishImage(from: string, to: string, maxSide: number): Promise<string> {
+  const source = await readFile(from);
+  let wanted: Buffer;
+  try {
+    wanted = encode(downscale(decode(source), maxSide));
+  } catch (cause) {
+    throw new Error(
+      `cannot resize ${from}: ${cause instanceof Error ? cause.message : String(cause)}`,
+    );
+  }
+  const existing = await readFile(to).catch(() => null);
+  if (!existing || !existing.equals(wanted)) await writeFile(to, wanted);
+  return to;
+}
+
 /** Copies one unit's sprites, normalising the names the client will ask for. */
 async function publishUnit(entry: UnitManifestEntry): Promise<string[]> {
   const source = join(sourceRoot, entry.basePath);
@@ -164,7 +208,9 @@ async function publishUnit(entry: UnitManifestEntry): Promise<string[]> {
     const avatars = (await readdir(source)).filter(
       (name) => isPng(name) && name.toLowerCase().includes('avatar'),
     );
-    written.push(await publishFile(join(source, avatars[0]!), join(target, 'avatar.png')));
+    written.push(
+      await publishImage(join(source, avatars[0]!), join(target, 'avatar.png'), AVATAR_MAX_SIDE),
+    );
   }
   return written;
 }

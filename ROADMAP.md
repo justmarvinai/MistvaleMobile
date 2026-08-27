@@ -316,8 +316,11 @@ engine, the goal DSL and the events framework already do most of the work*.
 
 **Debts worth paying**
 
-12. **Q6 — the champion avatars.** 14 MB published at 1254px and drawn at 150, against a
-    budget written for a 1-core box.
+12. ~~**Q6 — the champion avatars.**~~ **Done — C16.** 14 MB published at 1254px and drawn
+    at 150; **2.0 MB** now, published at 320. The item sat open because the fix "needed"
+    `sharp` and a native module on the VPS is a stack decision — which was simply wrong: the
+    avatars are PNG, Node ships zlib, and a PNG is a zlib stream with five per-row filters
+    in front of it. `tools/asset-sync/src/png.ts` is the whole dependency.
 13. **A2's balance sandbox** (Admin) — until it exists, retuning a stage is a deploy rather
     than an edit, which quietly undercuts "content is data".
 14. ~~**Battle presentation** — hit reactions and skill impact frames.~~ **Done — C9.** The
