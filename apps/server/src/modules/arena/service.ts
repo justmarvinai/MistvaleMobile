@@ -588,6 +588,10 @@ export async function attack(
       events: openingEvents,
       rewards,
       canSkip: true,
+      contributions: battle.contributionTable(
+        openingState.finished ? 'finished' : 'active',
+        openingEvents,
+      ),
     };
   });
 }

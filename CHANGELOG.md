@@ -5,6 +5,56 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the result screen says what your champions did (C21)
+
+Every fight in Mistvale ends the same way: four champions, a wall of numbers that scrolls
+past in three seconds, and a screen that says whether the wall fell over. What it never
+said was **which of the four was carrying it** — which is the question a player retunes a
+team on, and the one the event log has been able to answer since P3 with nothing asking it.
+
+Beside the result card there is a table now: one row per champion you fielded, with
+**damage, healing and shielding**. It is drawn on every mode and on every ending — a
+campaign clear, an Arena loss, a Depths floor, a Valewurm run, a fight walked out of.
+
+**Three figures and never a total.** They are three different kinds of work, and adding
+them produces a number that means nothing. Each column's bar is scaled against the biggest
+figure **in its own column**, so 40,000 damage and 4,000 healing are both a full bar — they
+are answering different questions. A column nobody filled is not drawn at all.
+
+**Shielding is there because leaving it out would have been a lie about nine champions.**
+Mistvale has nine who shield and never heal, and a two-column table would have reported a
+third of the support roster as having done nothing all fight. That needed one engine
+change: `shieldGained` carries a `source` now, the way `heal` always has, because a table
+cannot attribute what the log does not say.
+
+**Your side only** — the owner's rule. The fold takes a side and the Admin battle inspector
+will want the other one, but this is a report on the team you brought rather than a
+breakdown of the enemy's health bar.
+
+The rules about what counts are the interesting part, and they are the Titan's rules
+because it is the same question asked once per champion instead of once per run:
+
+- A blow a **shield ate** still counts. The shield is the target's answer to the hit, not
+  grounds for pretending it missed — and a boss hit-shield reports the whole blow as
+  `absorbed` with `amount: 0`, which would otherwise read as a champion doing nothing.
+- **Overkill stays on the striker**, which is the engine's own figure and the rule the
+  world boss states out loud.
+- Damage that came **back onto your own side** — a reflect, a retaliation, a poison you are
+  wearing — is not work the party did, and counting it would credit whoever happened to be
+  standing in front of it.
+- **Healing is what was actually restored**; the engine has already clamped an overheal
+  away, so it never claims more than it did.
+
+It is folded out of the event log **by the engine, on the server** (`contributions` in
+`packages/engine`), and only once the fight is finished. The browser holds the same log and
+could add it up, which is exactly why it does not: the numbers a player is shown about a
+fight are the engine's numbers, the way loot and stars and rating are. Nothing is stored —
+the log on the row *is* the record, and a second copy could only ever go stale.
+
+`battle.contributionTable` is the one place that decides when the table appears, because
+five different places build a `BattleView` — `start`, `step`, `retreat`, `toView` and the
+Arena's own attack — and each of them was otherwise free to disagree.
+
 ### Changed — the Mistgate is a place, and the pull says what it was worth (C20)
 
 **The gate.** Four pools is the one real choice this screen offers, and it was answered

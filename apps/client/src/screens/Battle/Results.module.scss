@@ -9,3 +9,24 @@
 .result {
   z-index: calc(#{$z-modal} + var(--mv-layer-depth, 0));
 }
+
+/* Card and scoreboard, side by side.
+
+   `.result` is the library's own root (the React bridge merges a className onto it), and
+   the pack lays it out as a centring flex box with one child. A second child needs the box
+   to become a row with room between them — written here rather than in `ResultScreen.css`,
+   which is vendored and would be overwritten by the next `pnpm fui:vendor`.
+
+   It wraps below 1100px, where two columns would squeeze the card under its own ornament,
+   and the card keeps its place first in the reading order either way. */
+.result {
+  flex-wrap: wrap;
+  gap: $space-5;
+  align-content: center;
+
+  /* The library's card has no `flex` of its own, so it would stretch beside a wider
+     sibling. Its width is the pack's number and stays the pack's number. */
+  :global(.fui-result__card) {
+    flex: none;
+  }
+}

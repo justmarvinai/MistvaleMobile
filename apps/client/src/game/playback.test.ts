@@ -547,7 +547,12 @@ describe('effects', () => {
 
     applyEvent(
       view,
-      ev('shieldGained', { target: { side: 'ally', slot: 0 }, amount: 200, turns: 2 }),
+      ev('shieldGained', {
+        source: { side: 'ally', slot: 1 },
+        target: { side: 'ally', slot: 0 },
+        amount: 200,
+        turns: 2,
+      }),
       statusKind,
     );
     expect(view.allies[0]?.impulse).toBe('shield');

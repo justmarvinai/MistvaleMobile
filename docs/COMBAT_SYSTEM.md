@@ -160,6 +160,16 @@ Priority: forced openers → highest-slot skill off cooldown whose hint passes (
 ## 13. Determinism, replay, audit
 `BattleState` pure data; `advance(state, rng)` pure; xoshiro128** seeded per battle (seed persisted) ⇒ byte-identical replays. The seed is drawn from the process CSPRNG so a player cannot predict a fight from a previous one — with **one deliberate exception**: a `trial` takes its seed from its *stage key*, so every attempt by every account opens the identical fight. That is what makes a trial's par a measure of play rather than of luck (GAME_DESIGN §9.2c). The event log (ARCHITECTURE §6.4) is the only client contract — every floater/bar/animation derives from events carrying full payloads; the client computes no game math. Golden-replay tests pin behavior; intentional changes regenerate goldens in reviewed commits.
 
+Because the log is the whole record of a fight, anything a screen wants to say *about* the
+fight is a fold of it rather than a second copy kept alongside. Two exist: `damageDealtTo`
+(the Titan's payout and the world boss's strike) and `contributions` (what each champion on
+a side did, for the result screen). Both add a shield-eaten blow to the HP it took, since
+`amount` is what reached health and `absorbed` is what a shield swallowed; both leave out
+damage landing back on the striker's own side; and neither clamps overkill, because
+`amount` is the engine's figure and the world boss's rule is that overkill stays on the
+striker. `shieldGained` carries a `source` for the same reason `heal` does — attribution
+that is not in the log cannot be recovered from it.
+
 ## 14. Initial tuning targets (balance-sim gates, enforced in CI)
 - Chosen starter (lvl 1, tutorial gear) clears 1-1…1-3 Normal on auto ≥95%.
 - At par recommended power, each of the twelve chapter bosses falls ≥70% on auto (Normal).

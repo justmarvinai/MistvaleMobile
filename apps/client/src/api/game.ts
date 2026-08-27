@@ -71,7 +71,7 @@ import type {
   ExpeditionState,
 } from '@mistvale/shared';
 import { ROUTES } from '@mistvale/shared';
-import type { BattleEvent, BattleState, UnitRef } from '@mistvale/engine';
+import type { BattleEvent, BattleState, UnitContribution, UnitRef } from '@mistvale/engine';
 import { api } from './client';
 
 /**
@@ -158,6 +158,14 @@ export interface BattleView {
    * server refuses the unbounded auto that Skip sends either way.
    */
   canSkip: boolean;
+  /**
+   * What each champion on your side did, once the fight is over — empty until then.
+   *
+   * The server's fold of its own event log, not the client's. The browser holds the same
+   * log and could add it up, which is exactly why it does not: the numbers a player is
+   * shown about a fight are the engine's numbers, the way loot and stars and rating are.
+   */
+  contributions: UnitContribution[];
 }
 
 export const gameApi = {

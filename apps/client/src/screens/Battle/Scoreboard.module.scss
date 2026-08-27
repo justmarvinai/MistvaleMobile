@@ -1,0 +1,155 @@
+@use '../../styles/tokens' as *;
+
+/* What your four did, beside the result card.
+
+   Mistvale's own element rather than the library's: `ResultScreen` takes label/value stats
+   and reward chips, and a four-row table with portraits and per-column bars is not a shape
+   it models. The rule from the design rework applies as written — the library owns the
+   chrome, and where React owns the content the element stays ours. */
+
+.board {
+  position: relative;
+  z-index: 1;
+  width: min(34rem, 92vw);
+  padding: $space-4;
+  background: rgba(12, 10, 16, 0.72);
+  border: 1px solid $edge;
+  /* Rises with the card rather than after it: two staggered entrances on one screen read
+     as the second one arriving late. */
+  animation: board-rise 520ms $ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board {
+    animation: none;
+  }
+}
+
+@keyframes board-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.head {
+  margin: 0 0 $space-3;
+  color: $parchment-dim;
+  font-family: $font-display;
+  font-size: 0.9rem;
+  font-weight: normal;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead th {
+    padding-bottom: $space-2;
+    color: $muted;
+    font-size: 0.66rem;
+    font-weight: normal;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid $edge;
+  }
+
+  tbody tr + tr th,
+  tbody tr + tr td {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* A champion who went down is dimmed rather than struck through: their numbers still
+     count, and they earned them before they fell. */
+  tbody tr[data-fell='true'] .name {
+    color: $muted;
+  }
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-2 $space-2 0;
+  text-align: left;
+  font-weight: normal;
+}
+
+thead .who {
+  display: table-cell;
+}
+
+.face {
+  flex: none;
+}
+
+.name {
+  color: $parchment;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fell {
+  flex: none;
+  color: $danger;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Bar above, figure below — the bar answers "who carried" at a glance and the figure
+   answers "by how much" for anyone who wants it. */
+.figure {
+  padding: $space-2 0 $space-2 $space-3;
+  min-width: 6.5rem;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.bar {
+  display: block;
+  height: 5px;
+  margin-bottom: 3px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  /* Each column against its own biggest figure, never against the other columns: forty
+     thousand damage and four thousand healing are both a full bar, which is right —
+     they are answers to different questions. */
+  transition: width $duration-base $ease-out;
+
+  &[data-kind='damage'] {
+    background: $danger;
+  }
+  &[data-kind='healing'] {
+    background: $success;
+  }
+  &[data-kind='shielding'] {
+    background: $rarity-rare;
+  }
+}
+
+.value {
+  display: block;
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 0.82rem;
+  line-height: 1.1;
+
+  /* A zero is a real answer and stays legible, but it should not read as loudly as a
+     figure somebody earned. */
+  &[data-zero='true'] {
+    color: $muted-deep;
+  }
+}

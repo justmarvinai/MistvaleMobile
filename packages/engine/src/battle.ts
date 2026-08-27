@@ -745,6 +745,7 @@ function runComponent(
       outcome.instance.shield = Math.max(outcome.instance.shield ?? 0, scaled);
       emit(ctx, {
         type: 'shieldGained',
+        source: caster.ref,
         target: target.ref,
         amount: scaled,
         turns: component.turns,
@@ -986,7 +987,7 @@ function runKillRewards(ctx: Ctx, killer: BattleUnit): void {
     if (!outcome.applied) return;
     const amount = Math.round((killer.maxHp * reward.shieldPctMaxHp) / 100);
     outcome.instance.shield = Math.max(outcome.instance.shield ?? 0, amount);
-    emit(ctx, { type: 'shieldGained', target: killer.ref, amount, turns: 2 });
+    emit(ctx, { type: 'shieldGained', source: killer.ref, target: killer.ref, amount, turns: 2 });
   }
 }
 
@@ -1408,7 +1409,13 @@ export function createBattle(
     if (!outcome.applied) continue;
     const amount = Math.round((unit.maxHp * rule.pctMaxHp) / 100);
     outcome.instance.shield = amount;
-    emit(ctx, { type: 'shieldGained', target: unit.ref, amount, turns: rule.turns });
+    emit(ctx, {
+      type: 'shieldGained',
+      source: unit.ref,
+      target: unit.ref,
+      amount,
+      turns: rule.turns,
+    });
   }
 
   state.rngState = rng.getState();

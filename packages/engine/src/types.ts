@@ -211,7 +211,22 @@ export type BattleEvent =
       amount: number;
       remainingHp: number;
     }
-  | { id: number; type: 'shieldGained'; target: UnitRef; amount: number; turns: number }
+  | {
+      id: number;
+      type: 'shieldGained';
+      /**
+       * Who put it up, or null when nothing did.
+       *
+       * Present for the same reason `heal` carries one: a shield is work somebody did, and
+       * the contribution table cannot attribute what the log does not say. Self-shields —
+       * First Stand at the bell, the on-kill mastery — carry the holder's own ref, because
+       * that is who provided the protection.
+       */
+      source: UnitRef | null;
+      target: UnitRef;
+      amount: number;
+      turns: number;
+    }
   | {
       id: number;
       type: 'statusApplied';
@@ -292,6 +307,29 @@ export interface UnitSnapshot {
   stats: Readonly<Record<Stat, number>>;
   skills: readonly string[];
   isBoss: boolean;
+}
+
+/**
+ * What one unit did for its side over a whole fight.
+ *
+ * Folded out of the event log by `contributions`, which is where the rules about what
+ * counts are written down. Three separate figures and never a total: damage, healing and
+ * shielding are different kinds of work, and adding them would produce a number that means
+ * nothing.
+ */
+export interface UnitContribution {
+  ref: UnitRef;
+  /** `champion_defs` or `enemy_defs` key, so a caller can find the art and the name. */
+  defKey: string;
+  name: string;
+  /** Dealt to the other side, shield-absorbed blows and overkill included. */
+  damage: number;
+  /** Actually restored — the engine has already clamped an overheal away. */
+  healing: number;
+  /** Shield granted, whether or not anything was ever thrown at it. */
+  shielding: number;
+  /** Whether they went down at any point. */
+  fell: boolean;
 }
 
 /** What one `advance` produced. */

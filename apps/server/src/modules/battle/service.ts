@@ -6,6 +6,7 @@ import {
   buildTeam,
   championScalingFrom,
   combatConfigFrom,
+  contributions,
   createBattle,
   createRng,
   deriveStats,
@@ -16,6 +17,7 @@ import {
   type BattleState,
   type ChampionEntry,
   type ChampionScalingConfig,
+  type UnitContribution,
 } from '@mistvale/engine';
 import {
   UNLOCK_LEVELS,
@@ -109,6 +111,19 @@ export interface BattleView {
    * battle is about to record.
    */
   canSkip: boolean;
+  /**
+   * What each of the player's champions did, once the fight is over.
+   *
+   * Folded out of the event log by the engine (`contributions`) rather than stored, which
+   * is what keeps it honest: the log is the whole record of the fight and the row already
+   * holds all of it, so a tally computed from anything else could only ever be a second
+   * opinion. Empty while the battle is still running — the results screen is the only
+   * thing that asks, and folding a growing log on every turn would be work nobody reads.
+   *
+   * The player's side only, which is the owner's rule: this is a report on the team you
+   * brought, not a breakdown of the enemy's health bar.
+   */
+  contributions: UnitContribution[];
 }
 
 export interface RewardSummary {
@@ -803,6 +818,10 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       events: openingEvents,
       rewards: summary,
       canSkip,
+      contributions: contributionTable(
+        openingState.finished ? 'finished' : 'active',
+        openingEvents,
+      ),
     };
   });
 }
@@ -951,6 +970,7 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
       events,
       rewards: summary,
       canSkip: row.canSkip,
+      contributions: contributionTable(finished ? 'finished' : 'active', events),
     };
   });
 }
@@ -1021,6 +1041,7 @@ export async function retreat(
       events,
       rewards: summary,
       canSkip: row.canSkip,
+      contributions: contributionTable('finished', events),
     };
   });
 }
@@ -1812,6 +1833,24 @@ export function starsFor(stage: StageDef, state: BattleState): number {
 }
 
 /** Exported for the Arena, which opens battles of its own through the same table. */
+/**
+ * The contribution table a finished view carries, and nothing while the fight is going on.
+ *
+ * One rule in one place: five different places build a `BattleView` — `start`, `step`,
+ * `retreat`, `toView` and the Arena's own attack — and each of them would otherwise be
+ * free to disagree about when the table appears. It is folded rather than stored because
+ * the event log on the row *is* the record, and a second copy could only ever go stale.
+ *
+ * The player's side only, which is the owner's rule: this reports on the team you brought,
+ * not on the enemy's health bar.
+ */
+export function contributionTable(
+  status: string,
+  events: readonly BattleEvent[],
+): UnitContribution[] {
+  return status === 'finished' ? contributions(events, 'ally') : [];
+}
+
 export function toView(row: typeof battleSessions.$inferSelect): BattleView {
   return {
     id: row.id,
@@ -1823,6 +1862,7 @@ export function toView(row: typeof battleSessions.$inferSelect): BattleView {
     events: row.events as BattleEvent[],
     rewards: (row.rewards as RewardSummary | null) ?? null,
     canSkip: row.canSkip,
+    contributions: contributionTable(row.status, row.events as BattleEvent[]),
   };
 }
 

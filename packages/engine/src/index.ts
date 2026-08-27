@@ -80,6 +80,8 @@ export {
 
 export { advance, createBattle, retreat, type BattleSetup } from './battle';
 
+export { contributions } from './contribution';
+
 export type {
   BattleAction,
   BattleEvent,
@@ -95,6 +97,7 @@ export type {
   Side,
   StatusInstance,
   StepResult,
+  UnitContribution,
   UnitRef,
   UnitSnapshot,
 } from './types';

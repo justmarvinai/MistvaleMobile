@@ -16,6 +16,7 @@ import { rewardTip } from '../../ui/Tooltip/tips';
 import type { TooltipOptions } from '@/fui/components/Tooltip.ts';
 import { useBattleStore } from '../../state/battleStore';
 import { useContentStore } from '../../state/contentStore';
+import { Scoreboard } from './Scoreboard';
 import styles from './Results.module.scss';
 
 /**
@@ -32,6 +33,12 @@ import styles from './Results.module.scss';
  * It is not a `Modal`, but it joins the same overlay stack (P10b): the screen underneath
  * is still live, an unlock celebration can still open over it, and whichever is on top has
  * to be the one that owns the keyboard.
+ *
+ * Beside the card sits `Scoreboard`, which is ours rather than the library's: `ResultScreen`
+ * models label/value stats and reward chips, and a table of four champions with a bar per
+ * column is not a shape it has. It is portalled *into* the library's own root so the two
+ * are laid out together — the root is a centring flex box, so making it a row is one rule
+ * in this screen's stylesheet rather than an edit to a vendored file.
  */
 
 const DIFFICULTY_LABELS: Readonly<Record<string, string>> = Object.freeze({
@@ -75,6 +82,9 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
 
   const outcome = battle?.outcome ?? 'defeat';
   const rewards = battle?.rewards ?? null;
+  // Every mode, won or lost or walked away from — the owner's rule. The server sends it
+  // only on a finished fight, so an empty list is the honest "nothing to report yet".
+  const contributions = battle?.contributions ?? [];
   const won = outcome === 'victory';
   // A sandbox fight pays nothing on purpose, so a reward table of zeroes would read as a
   // bug rather than as the deal the player took.
@@ -303,6 +313,10 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
     <>
       <div ref={ref} style={{ display: 'contents' }} />
       <ChipTips host={instance?.el ?? null} tips={chipTips} />
+      {/* Into the library's root, so the card and the table are siblings the same flex box
+          lays out. Rendered only once the component exists, which is the render after the
+          first — the same shape `ChipTips` needs and for the same reason. */}
+      {instance ? createPortal(<Scoreboard rows={contributions} />, instance.el) : null}
     </>,
     document.body,
   );
