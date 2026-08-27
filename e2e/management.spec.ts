@@ -193,10 +193,8 @@ test.describe('the management loop', () => {
     await expect(detail.getByText(/^\+\d/).first()).toBeVisible({ timeout: 15_000 });
     expect(powerBefore).toBeGreaterThan(0);
 
-    await detail
-      .getByRole('button', { name: /close|×/i })
-      .first()
-      .click();
+    // Nothing to close: the sheet is a pane beside the roll since C19, not a dialog over
+    // the screen, so it never covered the dock the next step reads.
 
     // ── The Bazaar waits until level 5 ────────────────────────────────────
     // A fresh warden is nowhere near it, and that is the point: the dock shows it as a
