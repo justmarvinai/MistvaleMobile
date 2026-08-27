@@ -7,7 +7,7 @@ import { Slot } from '@/fui/components/Slot.ts';
 import { Fui } from '@/fui/react';
 import { relicArt, relicGlyph } from '../../ui/relicArt';
 import { skillArt } from '../../ui/skillArt';
-import { statLabel } from '../../ui/statLabels';
+import { statLabel } from '../../ui/labels';
 import { setEffect } from '../../ui/setEffect';
 import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';

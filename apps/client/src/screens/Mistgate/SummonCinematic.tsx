@@ -7,6 +7,7 @@ import { useLayer } from '../../ui/Modal/stack';
 import { useContentStore } from '../../state/contentStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { championArt } from '../../ui/championArt';
+import { rarityLabel } from '../../ui/labels';
 import { ChampionIdle } from '../../ui/ChampionIdle/ChampionIdle';
 import { useSummonStore } from '../../state/summonStore';
 import {
@@ -54,14 +55,21 @@ import styles from './SummonCinematic.module.scss';
 
 type Phase = 'charge' | 'climb' | 'break' | 'cards' | 'herald' | 'done';
 
-/** What a rarity is called in a sentence, for the herald's one line of text. */
-const RARITY_WORD: Readonly<Record<string, string>> = Object.freeze({
-  common: 'Common',
-  uncommon: 'Uncommon',
-  rare: 'Rare',
-  epic: 'Epic',
-  legendary: 'Legendary',
-});
+/**
+ * What the pull is worth, as the sentence it deserves.
+ *
+ * The summary used to read "4 new · 10 summoned" in small grey text under the cards, which
+ * is the *receipt* rather than the news. An Epic or a Legendary is the thing that happened
+ * and it should be the largest words on the screen; below that the honest headline is how
+ * many came out, because a ×10 of commons is a ×10 of commons and dressing it up is the
+ * one thing a gacha screen must not do.
+ */
+function headline(best: string, count: number): string {
+  if (best === 'legendary') return 'A Legendary answered';
+  if (best === 'epic') return 'An Epic answered';
+  if (count === 1) return 'One out of the mist';
+  return `${count} out of the mist`;
+}
 
 export function SummonCinematic({
   onAgain,
@@ -218,6 +226,7 @@ export function SummonCinematic({
     setPhase('done');
   };
 
+  const newCount = results.filter((result) => result.isNew).length;
   const again = lastPull;
   const againBanner = again ? banners.find((banner) => banner.key === again.poolKey) : undefined;
   const canAgain = Boolean(again && againBanner && againBanner.sigilsHeld >= again.count);
@@ -274,7 +283,7 @@ export function SummonCinematic({
           <div className={styles.pillar} aria-hidden="true" />
           <div className={styles.rays} aria-hidden="true" />
           <ChampionIdle art={spriteFor(heraldCard.championKey)} className={styles.heraldArt} />
-          <p className={styles.heraldRarity}>{RARITY_WORD[heraldCard.rarity]}</p>
+          <p className={styles.heraldRarity}>{rarityLabel(heraldCard.rarity)}</p>
           <p className={styles.heraldName}>{nameOf(heraldCard.championKey)}</p>
           {heraldCard.isNew && <p className={styles.heraldNew}>New to the Chronicle</p>}
         </div>
@@ -339,21 +348,32 @@ export function SummonCinematic({
       <div className={styles.controls}>
         {finished ? (
           <>
-            <span className={styles.summary} data-rarity={best}>
-              {results.filter((result) => result.isNew).length} new · {results.length} summoned
-            </span>
-            {/* Still a real pull through the same endpoint, spending the same sigils —
-                what it saves is closing a cinematic to press the button behind it. */}
-            {again && (
-              <Button variant="secondary" disabled={!canAgain || pulling} onClick={onAgain}>
-                {pulling
-                  ? 'Calling…'
-                  : canAgain
-                    ? `Summon ×${again.count} again`
-                    : 'No sigils left'}
-              </Button>
-            )}
-            <Button onClick={dismiss}>Take them in</Button>
+            <div className={styles.summary}>
+              <p className={styles.headline} data-rarity={best}>
+                {headline(best, results.length)}
+              </p>
+              <p className={styles.tally}>
+                {newCount > 0
+                  ? `${newCount} new to the Chronicle · ${results.length} summoned`
+                  : `${results.length} summoned · all duplicates`}
+              </p>
+            </div>
+            <div className={styles.buttons}>
+              {/* Still a real pull through the same endpoint, spending the same sigils —
+                  what it saves is closing a cinematic to press the button behind it.
+                  Drawn only when it can be pressed: a permanently disabled button reads
+                  as something broken, where the sentence that replaces it says which of
+                  the two reasons it is. */}
+              {again &&
+                (canAgain ? (
+                  <Button variant="secondary" disabled={pulling} onClick={onAgain}>
+                    {pulling ? 'Calling…' : `Summon ×${again.count} again`}
+                  </Button>
+                ) : (
+                  <span className={styles.spent}>Not enough sigils for another ×{again.count}</span>
+                ))}
+              <Button onClick={dismiss}>Take them in</Button>
+            </div>
           </>
         ) : ready ? (
           <Button variant="ghost" onClick={skip}>

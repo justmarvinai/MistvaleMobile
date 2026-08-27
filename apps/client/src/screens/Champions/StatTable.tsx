@@ -1,5 +1,5 @@
 import type { ChampionStats, Stat } from '@mistvale/shared';
-import { STAT_ORDER, statLabel } from '../../ui/statLabels';
+import { STAT_ORDER, statLabel } from '../../ui/labels';
 import { useTip } from '../../ui/Tooltip/useTooltip';
 import { statTip } from '../../ui/Tooltip/tips';
 import styles from './StatTable.module.scss';

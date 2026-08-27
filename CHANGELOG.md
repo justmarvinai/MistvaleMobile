@@ -5,6 +5,59 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the Mistgate is a place, and the pull says what it was worth (C20)
+
+**The gate.** Four pools is the one real choice this screen offers, and it was answered
+with four 40px text tabs carrying a name and a count. They are **painted boards** now —
+each with its own rune, its count at a size worth reading, and the line that actually
+decides the choice, which is **how good the pool gets**. That line is a *range* rather
+than a ceiling, and the reason is the seed's own rates: three of the four pools can
+produce a Legendary, so "up to Legendary" is true on three boards and separates nothing.
+The floor is the half that does — the Radiant sigil cannot give you a Rare, which is the
+whole reason to save one. Gleaming and Mistwoven still read alike, correctly: their rates
+are identical and only the champions behind them differ.
+
+Both halves are **derived from the published rates** (`ui/sigilArt`'s `poolRange`) rather
+than authored, so a hand-written tier can never disagree with the odds panel one press
+away, and a fifth pool added in Admin gets a range without a code change.
+
+The gate itself is the sigil's **own art**, lit and breathing, with the rings turning
+around it. They used to turn around a radial gradient, which at any size reads as a
+spinner that has stopped. Its glow, its rim and the rail's selected board all take the
+pool's colour from one custom property.
+
+**Mercy is on every gate.** The clock was filtered to epic and legendary — right for the
+Radiant sigil, and it left the other three with no clock at all. The Faded pool tops out
+at Rare, and rare mercy is exactly what somebody pulling on it is counting; the pool's own
+best two are watched now (`clockRarities`).
+
+**The summon buttons say what they cost.** They read "Summon ×1" with the price in a
+sentence underneath, which is the wrong way round — the count is the obvious half and the
+price is the decision. It is on the plate now, with the ×10's guarantee beside it.
+
+**The reveal.** The room stays lit for the payoff: the tint went out the moment the gate
+broke, so ten cards landed on a flat near-black void and the colour the whole wind-up had
+been building to was spent on the wind-up. Champion **names wrap** rather than truncating
+— the library clamps a card's name to one line with an ellipsis, which is right in a
+roster, where the card is a way in to a sheet that says the name in full, and wrong here,
+where the card is the whole answer and half a ×10 came back as "Sskarn Broodli…". And the
+summary is the **news** rather than the receipt: what happened, at the size it happened,
+with the counts underneath. A ×10 of brood-kin is still a ×10 of brood-kin — the headline
+never claims otherwise.
+
+The **Again** button is drawn only when it can be pressed. A permanently disabled "No
+sigils left" reads as something broken; the sentence that replaces it says which of the
+two reasons it is.
+
+**The odds dialog stopped saying its own name twice** — "Faded Sigil — odds & mercy" over
+a panel headed "Odds & Mercy", which is the fault C12c cleared out of four other screens
+and this one had kept.
+
+`ui/labels.ts` (was `statLabels.ts`) is where a rarity is named now, alongside the stats.
+The Mistgate alone kept two private copies of that map; they agreed, which is the argument
+rather than against it — hand-kept copies agreeing is luck, and a sixth rarity is what
+would break it.
+
 ### Changed — the roster is the screen this genre actually uses (C19)
 
 The owner's six, from a batch of Raid screenshots.

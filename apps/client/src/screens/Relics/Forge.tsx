@@ -9,7 +9,7 @@ import { usePlayerStore } from '../../state/playerStore';
 import { RelicCard } from './RelicCard';
 import styles from './Forge.module.scss';
 import { highlightable } from '../../app/highlight';
-import { statLabel } from '../../ui/statLabels';
+import { statLabel } from '../../ui/labels';
 
 /**
  * The upgrade forge.

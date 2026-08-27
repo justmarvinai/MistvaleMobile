@@ -1,6 +1,6 @@
 import type { SummonBanner } from '@mistvale/shared';
-import { Panel } from '../../ui/Panel/Panel';
 import { useContentStore } from '../../state/contentStore';
+import { rarityLabel } from '../../ui/labels';
 import styles from './OddsPanel.module.scss';
 
 /**
@@ -12,15 +12,11 @@ import styles from './OddsPanel.module.scss';
  *
  * `effectiveChance` is the number that matters and the one shown largest: a player owed
  * an Epic should be able to watch the odds climb.
+ *
+ * It draws no frame of its own. The dialog holding it is titled with the pool's name and
+ * "odds & mercy", and a panel underneath repeating the second half of that was the screen
+ * saying its own name twice — the fault C12c cleared out of four other screens.
  */
-
-const RARITY_LABEL: Record<string, string> = {
-  common: 'Common',
-  uncommon: 'Uncommon',
-  rare: 'Rare',
-  epic: 'Epic',
-  legendary: 'Legendary',
-};
 
 const ORDER = ['legendary', 'epic', 'rare', 'uncommon', 'common'];
 
@@ -42,7 +38,7 @@ export function OddsPanel({
   const rarities = ORDER.filter((rarity) => (banner.rates[rarity] ?? 0) > 0);
 
   return (
-    <Panel title="Odds & Mercy">
+    <div className={styles.panel}>
       <table className={styles.rates}>
         <thead>
           <tr>
@@ -59,7 +55,7 @@ export function OddsPanel({
             const boosted = now > base + 1e-9;
             return (
               <tr key={rarity} data-rarity={rarity}>
-                <th scope="row">{RARITY_LABEL[rarity] ?? rarity}</th>
+                <th scope="row">{rarityLabel(rarity)}</th>
                 <td>{percent(base)}</td>
                 <td className={boosted ? styles.boosted : undefined}>{percent(now)}</td>
               </tr>
@@ -75,7 +71,7 @@ export function OddsPanel({
             return (
               <div key={state.rarity} className={styles.pityRow}>
                 <div className={styles.pityHead}>
-                  <span>{RARITY_LABEL[state.rarity] ?? state.rarity} mercy</span>
+                  <span>{rarityLabel(state.rarity)} mercy</span>
                   <span className={styles.pitySince}>{state.since} since</span>
                 </div>
                 <div
@@ -84,7 +80,7 @@ export function OddsPanel({
                   aria-valuemin={0}
                   aria-valuemax={state.after}
                   aria-valuenow={Math.min(state.since, state.after)}
-                  aria-label={`${RARITY_LABEL[state.rarity]} mercy progress`}
+                  aria-label={`${rarityLabel(state.rarity)} mercy progress`}
                 >
                   <span
                     style={{
@@ -112,7 +108,7 @@ export function OddsPanel({
           {ORDER.filter((rarity) => (banner.contents[rarity]?.length ?? 0) > 0).map((rarity) => (
             <section key={rarity}>
               <h4 className={styles.contentsHead} data-rarity={rarity}>
-                {RARITY_LABEL[rarity] ?? rarity}
+                {rarityLabel(rarity)}
                 <span className={styles.contentsCount}>
                   {banner.contents[rarity]?.length} · {percent(banner.rates[rarity] ?? 0)} split
                   evenly
@@ -125,6 +121,6 @@ export function OddsPanel({
           ))}
         </div>
       )}
-    </Panel>
+    </div>
   );
 }

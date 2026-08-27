@@ -5,7 +5,7 @@ import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';
 import { usePlayerStore } from '../../state/playerStore';
 import { itemCount, useInventoryStore } from '../../state/inventoryStore';
-import { statLabel } from '../../ui/statLabels';
+import { statLabel } from '../../ui/labels';
 import { RelicCard } from './RelicCard';
 import styles from './Reforge.module.scss';
 

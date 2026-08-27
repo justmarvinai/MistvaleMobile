@@ -3,7 +3,7 @@ import { ArtifactCard } from '@/fui/components/ArtifactCard.ts';
 import { Fui } from '@/fui/react';
 import { useContentStore } from '../../state/contentStore';
 import { relicArt, relicGlyph } from '../../ui/relicArt';
-import { statLabel } from '../../ui/statLabels';
+import { statLabel } from '../../ui/labels';
 import { relicTip } from '../../ui/Tooltip/tips';
 import styles from './RelicCard.module.scss';
 

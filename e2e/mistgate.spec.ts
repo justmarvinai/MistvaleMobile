@@ -31,14 +31,36 @@ test.describe('the Mistgate', () => {
 
     const gleaming = page.getByRole('tab', { name: /gleaming sigil/i });
     await expect(gleaming).toBeVisible({ timeout: 15_000 });
+
+    // ── Which gate is worth a sigil ───────────────────────────────────────
+    // The rail's whole job, and the one thing four text tabs carrying a name and a count
+    // never said. It is a *range* rather than a ceiling because three of the four pools
+    // can produce a Legendary: "up to Legendary" is true on three boards and decides
+    // nothing, so the floor is the half that separates them.
+    await expect(gleaming).toHaveAccessibleName(/rare\s*–\s*legendary/i);
+    await expect(page.getByRole('tab', { name: /faded sigil/i })).toHaveAccessibleName(
+      /common\s*–\s*rare/i,
+    );
+    await expect(page.getByRole('tab', { name: /radiant sigil/i })).toHaveAccessibleName(
+      /epic\s*–\s*legendary/i,
+    );
+
+    // Mercy is on *every* gate. The clock used to be filtered to epic and legendary, which
+    // is right for the Radiant sigil and left the other three blank — the Faded pool tops
+    // out at Rare, and rare mercy is exactly what somebody pulling on it is counting. The
+    // gate opens on Faded, so this is read before anything is clicked.
+    await expect(page.getByText(/rare mercy/i)).toBeVisible();
+
     await gleaming.click();
 
-    // A ×10's guarantee is stated up front, on the gate itself.
-    await expect(page.getByText(/guarantees at least one rare/i)).toBeVisible();
+    // A ×10's guarantee is stated on the button that spends the ten, beside what it costs.
+    const tenPull = page.getByRole('button', { name: /summon ×10/i });
+    await expect(tenPull).toHaveAccessibleName(/10 gleaming sigils/i);
+    await expect(tenPull).toHaveAccessibleName(/1 rare guaranteed/i);
 
     // Three Gleaming Sigils came with the welcome grant — enough for ×1, not for ×10.
     await expect(page.getByText(/3 gleaming sigils held/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /summon ×10/i })).toBeDisabled();
+    await expect(tenPull).toBeDisabled();
 
     // Mercy is on the gate itself, not only behind a click. A player who can watch the
     // clock tick is a player who can decide whether to spend, which is the whole argument
@@ -46,6 +68,7 @@ test.describe('the Mistgate', () => {
     await expect(page.getByText(/20 more without one/i).first()).toBeVisible();
 
     // ── The published rates ───────────────────────────────────────────────
+    // The dialog is about whichever gate is showing, which is Gleaming from here on.
     // One click from the gate, and the way to them is *worded*: the odds moved out of a
     // permanent right-hand column so the gate could have the screen, and a lowercase "i"
     // would have been the wrong door for numbers a player is entitled to find.
@@ -89,11 +112,18 @@ test.describe('the Mistgate', () => {
     // Skip works during the wind-up as well as during the cards, which is the case that
     // matters — the cinematic opens the moment the button is pressed, over the round trip.
     await reveal.getByRole('button', { name: /^skip$/i }).click();
-    await expect(reveal.getByText(/10 summoned/i)).toBeVisible({ timeout: 15_000 });
 
-    // Another pull is one press away rather than three, and it goes quiet rather than
-    // lying when there is nothing left to spend: ten sigils bought exactly one ×10.
-    await expect(reveal.getByRole('button', { name: /no sigils left/i })).toBeDisabled();
+    // The summary says what happened before it says how many. A ×10 of brood-kin is a ×10
+    // of brood-kin — the headline never claims otherwise — but "4 new · 10 summoned" in
+    // grey under the cards was the receipt standing in for the news.
+    await expect(reveal.getByText(/out of the mist/i)).toBeVisible({ timeout: 15_000 });
+    await expect(reveal.getByText(/10 summoned/i)).toBeVisible();
+
+    // Another pull is one press away rather than three — and when there is nothing left to
+    // spend it says so in words rather than as a button that can never be pressed. Ten
+    // sigils bought exactly one ×10, so this is that case.
+    await expect(reveal.getByRole('button', { name: /summon ×10 again/i })).toHaveCount(0);
+    await expect(reveal.getByText(/not enough sigils for another ×10/i)).toBeVisible();
 
     await reveal.getByRole('button', { name: /take them in/i }).click();
     await expect(reveal).toBeHidden();

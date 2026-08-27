@@ -1,5 +1,5 @@
 import type { GearSetDef } from '@mistvale/shared';
-import { statLabel } from './statLabels';
+import { statLabel } from './labels';
 
 /**
  * A relic set's bonus as one readable line — the same numbers the engine applies.

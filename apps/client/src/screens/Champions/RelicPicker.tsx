@@ -10,7 +10,7 @@ import { Forge } from '../Relics/Forge';
 import { Reforge } from '../Relics/Reforge';
 import { usePlayerStore } from '../../state/playerStore';
 import styles from './RelicPicker.module.scss';
-import { statLabel } from '../../ui/statLabels';
+import { statLabel } from '../../ui/labels';
 import { RELIC_SLOT_LABEL, relicGlyph } from '../../ui/relicArt';
 import { describeSetChange, setChanges } from '../../ui/setChange';
 import { Slot } from '@/fui/components/Slot.ts';

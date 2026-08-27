@@ -6,7 +6,7 @@ import type {
   RosterChampion,
 } from '@mistvale/shared';
 import type { TooltipOptions } from '@/fui/components/Tooltip.ts';
-import { statLabel } from '../statLabels';
+import { statLabel } from '../labels';
 import { RELIC_SLOT_LABEL } from '../relicArt';
 
 /**

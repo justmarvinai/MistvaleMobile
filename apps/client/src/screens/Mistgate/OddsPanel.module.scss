@@ -1,5 +1,13 @@
 @use '../../styles/tokens' as *;
 
+/* No frame of its own: the dialog around it is already a painted panel with the pool's
+   name on it, and a second one inside was where the screen said "odds & mercy" twice. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
 .rates {
   width: 100%;
   border-collapse: collapse;

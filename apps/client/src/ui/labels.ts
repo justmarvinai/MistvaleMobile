@@ -1,7 +1,7 @@
-import type { Stat } from '@mistvale/shared';
+import type { Rarity, Stat } from '@mistvale/shared';
 
 /**
- * What each stat is called on screen.
+ * What the game's closed sets are called on screen.
  *
  * One map, because a player reads the same eight stats on a relic card, in the stat table
  * and in a set bonus, and "C.RATE" in one place with "CRITRATE" in another reads as two
@@ -35,3 +35,25 @@ export const STAT_ORDER: readonly Stat[] = [
   'res',
   'acc',
 ];
+
+/**
+ * What each rarity is called on screen.
+ *
+ * Here for the same reason the stat names are: a rarity is read on a relic, in a pull, on
+ * the published odds table and in a mercy clock, and the Mistgate alone kept two private
+ * copies of it. They agreed, which is the argument rather than against it — hand-kept
+ * copies agreeing is luck, and a sixth rarity is what would break it. Exhaustive on
+ * `Rarity`, so that one cannot ship unnamed.
+ */
+const RARITY_LABEL: Readonly<Record<Rarity, string>> = Object.freeze({
+  common: 'Common',
+  uncommon: 'Uncommon',
+  rare: 'Rare',
+  epic: 'Epic',
+  legendary: 'Legendary',
+});
+
+/** The screen name for a rarity. Falls back to the key, for content we do not know. */
+export function rarityLabel(rarity: string): string {
+  return RARITY_LABEL[rarity as Rarity] ?? rarity;
+}

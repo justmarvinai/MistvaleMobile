@@ -312,6 +312,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'mistgate',
+    width: 'wide',
     label: 'Mistgate',
     icon: 'nav-mistgate',
     glyph: 'glyph-spirit-vortex',
