@@ -308,26 +308,39 @@ export async function leaveResults(page: Page): Promise<void> {
  * `elementFromPoint` asks the browser the question a player asks. Returning an ancestor
  * counts — a label inside the button that was clicked is the button as far as anyone is
  * concerned.
+ *
+ * It takes a locator as readily as a selector, and that is worth having: the thing most
+ * likely to be covered is a *button*, buttons are found by their name rather than by a
+ * class, and a covered button otherwise announces itself as a thirty-second click timeout
+ * with the offending element named only in the trace. Asserting it here turns that into
+ * one sentence at the line that cares.
  */
-export async function expectOnTop(page: Page, selector: string, label = selector): Promise<void> {
-  const result = await page.evaluate((sel) => {
-    const element = document.querySelector(sel);
-    if (!element) return { ok: false, why: 'not in the DOM' };
-    const box = element.getBoundingClientRect();
-    if (box.width === 0 || box.height === 0) return { ok: false, why: 'zero-sized' };
+export async function expectOnTop(
+  page: Page,
+  target: string | Locator,
+  label?: string,
+): Promise<void> {
+  const at = typeof target === 'string' ? page.locator(target).first() : target;
+  const named = label ?? (typeof target === 'string' ? target : 'the element');
 
-    const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
-    if (!hit) return { ok: false, why: 'nothing at its centre' };
-    if (element.contains(hit) || hit.contains(element)) return { ok: true, why: '' };
+  const result = await at
+    .evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      if (box.width === 0 || box.height === 0) return { ok: false, why: 'zero-sized' };
 
-    const covering = hit as HTMLElement;
-    return {
-      ok: false,
-      why: `covered by <${covering.tagName.toLowerCase()} class="${covering.className}">`,
-    };
-  }, selector);
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      if (!hit) return { ok: false, why: 'nothing at its centre' };
+      if (element.contains(hit) || hit.contains(element)) return { ok: true, why: '' };
 
-  if (!result.ok) throw new Error(`${label} is not visible to a player: ${result.why}`);
+      const covering = hit as HTMLElement;
+      return {
+        ok: false,
+        why: `covered by <${covering.tagName.toLowerCase()} class="${covering.className}">`,
+      };
+    })
+    .catch(() => ({ ok: false, why: 'not in the DOM' }));
+
+  if (!result.ok) throw new Error(`${named} is not visible to a player: ${result.why}`);
 }
 
 /**

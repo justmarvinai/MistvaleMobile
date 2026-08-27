@@ -5,6 +5,34 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the tutorial covered the one button it was asking for (C17)
+
+The cold open is the only battle in Mistvale with no map behind it, so the empty battle
+screen offers it: a title, a line, and **Meet them on the road**. That panel centred itself
+in the screen — and for the whole of that step the Wardenmaster's card is fixed across the
+bottom of the viewport, so the panel put its only button underneath him.
+
+It was never a near miss. A click lands on an element's *centre*, so the button stayed
+half-visible and completely unpressable, and the very first thing a new account is told to
+do was the one thing the tutorial was covering.
+
+The panel is anchored **high** now rather than centred — top-anchored rather than lifted by
+some fraction of the viewport, because the card's height is content: an operator rewriting
+the step's body in Admin makes it taller, and below 720px the portrait goes and it grows
+again, so any number reserving room for it would be a guess about text somebody else owns.
+Measured at six window sizes from 1920×1080 down to 430×932, the button is topmost at its
+own centre in all of them.
+
+With it, the same blank screen stopped drawing two states at once: an offer to start the
+opening fight and a notice that no fight is running are different things, and stacking them
+put "Back" — the way *out* of the tutorial — under the tutorial's own card as well.
+
+`expectOnTop` takes a locator as well as a selector now, which is what the guard needed:
+the thing most likely to be covered is a button, buttons are found by their name rather
+than by a class, and a covered button otherwise announces itself as a thirty-second click
+timeout with the offending element named only in the trace. It now fails in one sentence —
+*covered by `<span class="_who_…">`* — at the line that cares.
+
 ### Changed — the champion avatars are a tenth of the download (C16, Q6)
 
 The eight painted avatars are delivered at 1254×1254 and the game draws them at 150px on a

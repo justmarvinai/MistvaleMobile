@@ -115,7 +115,19 @@
 }
 
 /* ── The cold open ──────────────────────────────────────────────────────────────
-   The one battle in the game with no map behind it, so the empty screen offers it. */
+   The one battle in the game with no map behind it, so the empty screen offers it.
+
+   **High rather than centred**, and that is a bug fix rather than a preference: for the
+   whole of this step the Wardenmaster's card is fixed across the bottom of the viewport,
+   and a panel that centres itself in an otherwise empty screen puts its only button under
+   him. It was never a near miss either — a click lands on an element's *centre*, so the
+   moment the card's top edge crossed that point the step became unpressable, and the one
+   thing the tutorial was asking for was the one thing it covered.
+
+   Top-anchored rather than lifted by some fraction of the viewport, because the card's
+   height is content: an operator rewriting this step's body in Admin makes it taller, and
+   below 720px the portrait goes and it grows again. Any number reserving room for it would
+   be a guess about text somebody else owns. */
 
 .coldOpen {
   position: relative;
@@ -124,7 +136,7 @@
   flex-direction: column;
   align-items: center;
   gap: $space-3;
-  margin: auto;
+  margin: $space-7 auto auto;
   max-width: 420px;
   padding: $space-5;
   text-align: center;

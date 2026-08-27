@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { DEFAULT_SPEED_UNLOCKS, clampSpeed, type SkillDef } from '@mistvale/shared';
+import { DEFAULT_SPEED_UNLOCKS, clampSpeed, type SkillDef, type StageDef } from '@mistvale/shared';
 import type { UnitRef } from '@mistvale/engine';
 import { ActionBar } from '@/fui/components/ActionBar.ts';
 import { BattleControls } from '@/fui/components/BattleControls.ts';
@@ -79,6 +79,7 @@ export function BattleScreen(): JSX.Element {
 
   const bundle = useContentStore((state) => state.bundle);
   const back = useNavStore((state) => state.back);
+  const coldOpenStage = useColdOpenStage();
   const refreshPlayer = usePlayerStore((state) => state.refresh);
 
   /**
@@ -409,9 +410,14 @@ export function BattleScreen(): JSX.Element {
   if (!battle) {
     return (
       <div className={styles.screen}>
-        <ColdOpen />
-        <p className={styles.hint}>No battle in progress.</p>
-        <Button onClick={leave}>Back</Button>
+        {coldOpenStage ? (
+          <ColdOpen stage={coldOpenStage} />
+        ) : (
+          <>
+            <p className={styles.hint}>No battle in progress.</p>
+            <Button onClick={leave}>Back</Button>
+          </>
+        )}
       </div>
     );
   }
@@ -665,24 +671,32 @@ function sameRef(a: UnitRef, b: UnitRef): boolean {
 }
 
 /**
- * The way into the cold open.
+ * Whether the empty battle screen is standing in for the cold open, and on which stage.
  *
  * The opening fight is the only battle in the game that is not started from a map — there
  * is no map yet, and no team to bring. So the empty battle screen offers it, but *only*
  * while the tutorial is actually waiting on it: the check is the step's own goal naming a
  * `tutorial` stage, which means an operator who re-cuts the script moves this button with
  * it, and a player past that step never sees it again.
+ *
+ * A hook rather than a component that returns null, because the *screen* has to know: an
+ * offer to start the opening fight and a notice that no fight is running are two different
+ * states of the same blank screen, and drawing both stacked the way out of the tutorial
+ * underneath the tutorial's own card.
  */
-function ColdOpen(): JSX.Element | null {
+function useColdOpenStage(): StageDef | null {
   const step = useTutorialStore(currentStep);
-  const startBattle = useBattleStore((state) => state.startBattle);
-  const busy = useBattleStore((state) => state.busy);
   const bundle = useContentStore((state) => state.bundle);
-
   const goal = step?.goal;
   const stageKey = goal?.type === 'stageClear' ? String(goal.filters.stageKey ?? '') : '';
   const stage = bundle?.stages.find((entry) => entry.key === stageKey);
-  if (!stage || stage.mode !== 'tutorial') return null;
+  return stage && stage.mode === 'tutorial' ? stage : null;
+}
+
+function ColdOpen({ stage }: { stage: StageDef }): JSX.Element {
+  const step = useTutorialStore(currentStep);
+  const startBattle = useBattleStore((state) => state.startBattle);
+  const busy = useBattleStore((state) => state.busy);
 
   return (
     <div className={styles.coldOpen}>

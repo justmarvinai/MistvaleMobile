@@ -1,6 +1,6 @@
 import { highlightCandidates } from '../apps/client/src/app/highlight';
 import { expect, test, type Page } from '@playwright/test';
-import { leaveTutorial, resolveBattle, unique } from './support';
+import { expectOnTop, leaveTutorial, resolveBattle, unique } from './support';
 
 /**
  * The first hour, in a real browser.
@@ -30,7 +30,13 @@ test.describe('the tutorial', () => {
 
     // Step one is a fight, so the overlay took the player to it — and the battle screen
     // offers the only door into a battle nobody brings a team to.
-    await expect(page.getByRole('button', { name: /meet them on the road/i })).toBeVisible();
+    const door = page.getByRole('button', { name: /meet them on the road/i });
+    await expect(door).toBeVisible();
+    // And it is pressable, which is a different question. The Wardenmaster's card is fixed
+    // across the bottom of the viewport for the whole of this step; the panel offering the
+    // fight used to centre itself into him, so the one button the tutorial was asking for
+    // was the one the tutorial covered. `toBeVisible` had nothing to say about that.
+    await expectOnTop(page, door, 'the way into the cold open');
     // Nothing can be continued past yet: the fight has not happened.
     await expect(overlay.getByRole('button', { name: /not yet|go and do it/i })).toBeDisabled();
   });
