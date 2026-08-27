@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
+  championSheet,
   dismissUnlocks,
   goToScreen,
   leaveTutorial,
@@ -151,7 +152,8 @@ test.describe('the management loop', () => {
       .getByRole('button', { name: /lv \d+/i })
       .first()
       .click();
-    const detail = page.getByRole('dialog').last();
+    // The sheet is the roster's right-hand pane since C19, not a dialog over it.
+    const detail = championSheet(page);
     await expect(detail.getByRole('tab', { name: /relics/i })).toBeVisible({ timeout: 15_000 });
 
     const powerBefore = Number(
