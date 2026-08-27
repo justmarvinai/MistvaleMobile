@@ -7,6 +7,14 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
   error?: string;
   hint?: ReactNode;
   icon?: ReactNode;
+  /**
+   * A control inside the well, after the input — a password reveal, a clear button.
+   *
+   * Inside rather than beside it because the well is one painted 9-slice and a button
+   * parked next to it reads as a second field. Whatever goes here must be focusable and
+   * named, since it is in the tab order between this field and the next.
+   */
+  action?: ReactNode;
 }
 
 /**
@@ -16,7 +24,7 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
  * stays readable once it has content, and errors are wired up via `aria-describedby`.
  */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, error, hint, icon, id, ...rest },
+  { label, error, hint, icon, action, id, ...rest },
   ref,
 ) {
   const generatedId = useId();
@@ -43,6 +51,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
         />
+        {action}
       </div>
 
       {hint && !error && (

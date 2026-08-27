@@ -93,3 +93,33 @@
   font-size: 12px;
   color: $danger;
 }
+
+/* A control living inside the well — the password reveal, today.
+
+   Sized to the input's own height so the well does not grow around it, and quiet until it
+   is wanted: this is a control somebody reaches for once, and a bright button inside every
+   password field would be the loudest thing on the screen. */
+.action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0 $space-1;
+  background: none;
+  border: none;
+  color: $muted;
+  cursor: pointer;
+  transition: color $duration-fast $ease-out;
+
+  &:hover,
+  &:focus-visible {
+    color: $accent;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 1px;
+  }
+}

@@ -1,9 +1,18 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
+const { version } = JSON.parse(
+  readFileSync(fileURLToPath(new URL('../../package.json', import.meta.url)), 'utf8'),
+) as { version: string };
+
 export default defineConfig({
   plugins: [react()],
+  // The build the player is looking at, on the title screen. Read from the workspace root
+  // rather than the client's own package so one release number covers the whole repo, and
+  // baked in at build time because the login screen renders before any request is made.
+  define: { __MISTVALE_VERSION__: JSON.stringify(version) },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

@@ -1,3 +1,9 @@
+/* The title screen.
+
+   Three layers and a column: the vale, a slow fog over it, a vignette, and everything a
+   player reads stacked down the middle. Nothing here is a `Panel` except the form itself —
+   a title screen wants art with words on it, not a page of boxes. */
+
 .screen {
   position: relative;
   z-index: $z-content;
@@ -7,16 +13,189 @@
   justify-content: center;
   gap: $space-6;
   min-height: 100%;
+  padding: $space-6 $space-5 0;
   overflow-y: auto;
+}
+
+/* ── The vale ───────────────────────────────────────────────────────────────────
+   `fixed` rather than `absolute`, and above the shared Pixi canvas rather than behind it:
+   `PixiStage` is mounted once at the root with an opaque wrapper, so a backdrop underneath
+   it would never be seen. Being inside `.screen` — which has a `z-index` and therefore its
+   own stacking context — is what covers the canvas: the whole screen is at `$z-content` and
+   the canvas is at `$z-stage`. So the layers below number themselves *within* this screen,
+   and the first cut's `$z-stage + 1` put the painting on top of its own form. */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Painted in before the picture lands and still there if it never does — the published
+     tree is generated output, so a deploy that skipped `pnpm assets` shows a lit horizon
+     rather than a black page with a form on it. */
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(120, 78, 44, 0.5), transparent 62%),
+    linear-gradient(180deg, $ground 0%, $ground-deep 100%);
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  background: center / cover no-repeat;
+  opacity: 0;
+  transition: opacity 900ms $ease-out;
+
+  /* A very slow drift, so the door to the game is not a still photograph. Scaled up first
+     so the pan never exposes an edge. */
+  @include motion-safe {
+    animation: drift 48s $ease-in-out infinite alternate;
+  }
+}
+
+.shown {
+  opacity: 1;
+}
+
+@keyframes drift {
+  from {
+    transform: scale(1.06) translate(-1%, -0.6%);
+  }
+  to {
+    transform: scale(1.12) translate(1%, 0.6%);
+  }
+}
+
+/* Mist across the middle distance, which is the one thing the painting cannot do: it is a
+   still, and this game is named after weather. Two wide, very soft bands at different
+   speeds — enough to read as movement at the edge of vision and never enough to notice. */
+.fog {
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(60% 26% at 30% 62%, rgba(214, 226, 235, 0.16), transparent 70%),
+    radial-gradient(70% 22% at 72% 74%, rgba(198, 214, 226, 0.13), transparent 72%);
+
+  @include motion-safe {
+    animation: roll 72s linear infinite;
+  }
+}
+
+@keyframes roll {
+  from {
+    transform: translateX(-6%);
+  }
+  to {
+    transform: translateX(6%);
+  }
+}
+
+/* What makes light text readable on a bright painting.
+
+   Three passes, and the third is the one the first cut was missing. The radial darkens the
+   edges and the linear weights the foot — between them the *centre* stays clear, which is
+   exactly where the title goes, and this painting's centre is a lit sky. The tagline came
+   out as grey-on-white and the ornament under it all but vanished.
+
+   So there is a soft column of shade down the middle as well: wide enough that the words
+   sit in it at any window size, soft enough that it reads as weather rather than a box, and
+   independent of the picture — a different backdrop tomorrow does not put the type back at
+   the mercy of whatever happens to be behind it. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(46% 62% at 50% 44%, rgba(4, 6, 10, 0.62), transparent 78%),
+    radial-gradient(ellipse at 50% 38%, transparent 30%, rgba(4, 6, 10, 0.66) 100%),
+    linear-gradient(
+      180deg,
+      rgba(4, 6, 10, 0.62) 0%,
+      rgba(4, 6, 10, 0.22) 34%,
+      rgba(4, 6, 10, 0.9) 100%
+    );
+}
+
+/* ── The column ─────────────────────────────────────────────────────────────── */
+
+.stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-6;
+  width: 100%;
+  max-width: 460px;
+  margin: auto;
+
+  @include motion-safe {
+    animation: settle $duration-slow $ease-out backwards;
+  }
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  text-align: center;
+}
+
+/* The name, at title-screen size. `clamp` rather than a breakpoint because this is one
+   word and it should be as large as the window allows — 40px on a handset, 76px on a
+   desktop, and it never wraps because there is nothing to wrap.
+
+   Two shadows: a tight black one so every stroke has an edge against the sky behind it, and
+   a wide warm one that reads as the lantern light the vale is lit by. */
+.wordmark {
+  margin: 0;
+  font-family: $font-display;
+  font-size: clamp(40px, 7vw, 76px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  /* The trailing letter-space pushes the word off centre by half a space. */
+  text-indent: 0.16em;
+  text-transform: uppercase;
+  color: $parchment;
+  text-shadow:
+    0 2px 2px rgba(4, 6, 10, 0.9),
+    0 0 34px rgba(214, 148, 88, 0.55);
+}
+
+.tagline {
+  margin: 0;
+  font-size: clamp(13px, 1.5vw, 16px);
+  letter-spacing: 0.05em;
+  color: $parchment;
+  text-shadow:
+    0 1px 2px rgba(4, 6, 10, 1),
+    0 0 16px rgba(4, 6, 10, 0.9);
+}
+
+/* A hairline with a lozenge on it — the one piece of ornament on the screen, and the thing
+   that separates a game's title from a website's masthead. Drawn rather than painted
+   because it has to be exactly as wide as the column and no piece of 9-slice art is. */
+.rule {
+  position: relative;
+  width: min(320px, 70%);
+  height: 1px;
+  margin-top: $space-2;
+  background: linear-gradient(90deg, transparent, $accent 22%, $accent 78%, transparent);
+  box-shadow: 0 1px 3px rgba(4, 6, 10, 0.9);
+}
+
+.diamond {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  background: $accent;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 0 10px 2px rgba(214, 148, 88, 0.55);
 }
 
 .card {
   width: 100%;
-  max-width: 420px;
-
-  @include motion-safe {
-    animation: settle $duration-slow $ease-out 60ms backwards;
-  }
 }
 
 /* The library's segmented control paints itself; all this adds is the gap to the form. */
@@ -30,19 +209,70 @@
   gap: $space-4;
 }
 
-.note {
-  margin-top: $space-4;
-  padding-top: $space-3;
-  border-top: 1px solid $edge;
+/* Worded rather than an eye — see the component for why. Sized and coloured like the field's
+   own hint so it reads as part of the well rather than a second control competing with the
+   submit button.
+
+   It stays in the tab order. The first cut took it out, on the reasoning that it is a mouse
+   convenience and a keyboard user meets it on the way to *Enter the vale* — which is exactly
+   backwards: somebody typing a password they cannot see, on a game with no reset link, is
+   the person who most needs to check it. One extra Tab is the whole cost. */
+.reveal {
+  flex: none;
+  padding: 0 $space-2;
+  min-height: 32px;
+  background: none;
+  border: none;
+  font-family: $font-display;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $muted;
+  cursor: pointer;
+  transition: color $duration-fast $ease-out;
+
+  &:hover {
+    color: $accent;
+  }
+
+  &:focus-visible {
+    color: $accent;
+    outline: 2px solid $accent;
+    outline-offset: 1px;
+  }
+}
+
+/* ── The foot ───────────────────────────────────────────────────────────────────
+   The build and the one sentence a player needs to know before they choose a password. Both
+   quiet, both at the bottom, which is where every game in this genre puts them. */
+.foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $space-2 $space-4;
+  width: 100%;
+  max-width: 1080px;
+  padding: $space-5 0 $space-4;
   font-size: 12px;
-  line-height: 1.6;
-  color: $muted-deep;
-  text-align: center;
+  color: $parchment-dim;
+  text-shadow: 0 1px 3px rgba(4, 6, 10, 0.95);
+}
+
+.build {
+  font-family: $font-mono;
+  letter-spacing: 0.04em;
+}
+
+.note {
+  text-align: right;
 }
 
 @keyframes settle {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
 }

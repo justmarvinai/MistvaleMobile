@@ -18,6 +18,7 @@ apps/client/public/sprites/
 # source is committed, the published tree is built.
 apps/client/public/audio/
 apps/client/public/portraits/
+apps/client/public/scenery/
 
 # tool caches
 .cache/

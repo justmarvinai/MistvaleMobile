@@ -119,7 +119,7 @@ async function arrive(page: Page, options: { starter?: boolean } = {}): Promise<
   await page.getByRole('tab', { name: 'New warden' }).click();
   await page.getByLabel('Account name').fill(unique('e2new'));
   await page.getByLabel('Profile name').fill(unique('Fresh'));
-  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Take up the lantern' }).click();
   await leaveTutorial(page);
 

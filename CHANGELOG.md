@@ -5,6 +5,39 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the title screen (C18)
+
+The first thing anybody sees was a 420px form floating in a dark brown void: correct,
+accessible, and unmistakably a web page. It is the shape this genre settled on for a reason
+now — the owner's own painted key art across the whole window, the game's name over it at a
+size that means something, and the form as a panel low in the composition. The art does the
+work; the panel only has to be legible on top of it.
+
+Three things went with it, and none of them are decoration on a game with **no e-mail
+address**: the last account name is remembered (it is the only handle a returning player
+has), the password can be **shown** (typing one blind with no reset link is a trap), and
+**Caps Lock** says so. The build number is on the screen, which is where every game in this
+genre puts it and what an operator asks for first.
+
+### Added — `pnpm assets` resizes JPEGs (C18)
+
+The backdrop is the owner's `haven_campaign.jpg`: **2752×1536 and 2.7 MB**, drawn behind a
+vignette on a window no wider than 1920. C16 solved exactly this for the champion avatars and
+could not help here — a JPEG is a quantised DCT bitstream rather than a filtered zlib one, and
+nothing about the two formats is shared below the pixel buffer. Re-encoding to PNG is not the
+way out either: these are painted scenes, thousands of distinct colours with no flat regions,
+which is the case PNG is worst at — the same picture costs about three times as much as a PNG
+at *half* the resolution.
+
+So `tools/asset-sync/src/jpeg.ts` is a baseline JPEG codec, decode and encode, with **no
+dependencies** — the same answer C16 found for PNG, and Node ships zlib for neither half of
+this one. The three painted backdrops go from **8.4 MB to 764 KB**, and the Wardenmaster's
+portrait — delivered at 2048² and drawn at 260px — from 578 KB to 68 KB.
+
+Progressive, arithmetic-coded, 12-bit and CMYK files are refused **by name** rather than
+mis-decoded, which is `png.ts`'s rule and the one that matters: a resizer that silently
+produces a wrong picture is worse than one that stops.
+
 ### Fixed — the tutorial covered the one button it was asking for (C17)
 
 The cold open is the only battle in Mistvale with no map behind it, so the empty battle

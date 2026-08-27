@@ -22,7 +22,7 @@ test.describe('the campaign loop', () => {
     await page.getByRole('tab', { name: 'New warden' }).click();
     await page.getByLabel('Account name').fill(unique('e2e'));
     await page.getByLabel('Profile name').fill(unique('Warden'));
-    await page.getByLabel('Password').fill(password);
+    await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
 
     // Out of the tutorial: this spec is about what comes after it.
@@ -102,7 +102,7 @@ test.describe('the campaign loop', () => {
     await page.getByRole('tab', { name: 'New warden' }).click();
     await page.getByLabel('Account name').fill(unique('e2e'));
     await page.getByLabel('Profile name').fill(unique('Warden'));
-    await page.getByLabel('Password').fill(password);
+    await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
 
     // Out of the tutorial: this spec is about what comes after it.

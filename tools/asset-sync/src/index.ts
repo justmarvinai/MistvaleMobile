@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { decode, downscale, encode } from './png';
+import { decode as decodeJpeg, encode as encodeJpeg } from './jpeg';
 
 /**
  * `pnpm assets` — publishes the unit sprites the client renders.
@@ -56,7 +57,32 @@ interface MediaSet {
   /** Published under `apps/client/public/<to>`. */
   to: string;
   extensions: readonly string[];
+  /**
+   * When set, images in this set are resized to this ceiling on their longest side rather
+   * than copied. Audio is never touched — a track is streamed, not decoded into a texture,
+   * and re-encoding one would be a quality decision this tool has no business making.
+   */
+  maxSide?: number;
 }
+
+/**
+ * The longest side an avatar is published at.
+ *
+ * Twice the largest place one is drawn (150px on a champion card), so it still has pixels
+ * to spare on a high-density display and none to waste anywhere else.
+ */
+const AVATAR_MAX_SIDE = 320;
+
+/**
+ * The longest side a painted backdrop is published at.
+ *
+ * These are full-bleed scenery behind a vignette, so the ceiling is the widest window the
+ * game is played in rather than a multiple of anything it is drawn at. 1600 covers a 1440
+ * desktop outright and a 1920 one at the far side of a `cover` fit, where the picture is
+ * already scaled and soft; the difference is invisible and the file is a tenth of the size.
+ * The masters are 2752 wide and about 2.8 MB apiece.
+ */
+const SCENERY_MAX_SIDE = 1600;
 
 const AUDIO = ['.mp3', '.ogg', '.m4a', '.wav'] as const;
 const IMAGES = ['.png', '.webp', '.jpg', '.jpeg'] as const;
@@ -74,7 +100,21 @@ const MEDIA: readonly MediaSet[] = [
     to: 'audio/tutorial',
     extensions: AUDIO,
   },
-  { label: 'portraits', from: 'ui/misc_avatars', to: 'portraits', extensions: IMAGES },
+  {
+    label: 'portraits',
+    from: 'ui/misc_avatars',
+    to: 'portraits',
+    extensions: IMAGES,
+    // The Wardenmaster is delivered at 2048² and stands 260px wide in the tutorial card.
+    maxSide: 640,
+  },
+  {
+    label: 'scenery',
+    from: 'ui/backgrounds/haven_bgs',
+    to: 'scenery',
+    extensions: IMAGES,
+    maxSide: SCENERY_MAX_SIDE,
+  },
 ];
 
 const publicRoot = resolve(repoRoot, 'apps/client/public');
@@ -152,14 +192,6 @@ async function publishFile(from: string, to: string): Promise<string> {
 }
 
 /**
- * The longest side an avatar is published at.
- *
- * Twice the largest place one is drawn (150px on a champion card), so it still has pixels
- * to spare on a high-density display and none to waste anywhere else.
- */
-const AVATAR_MAX_SIDE = 320;
-
-/**
  * Publishes an image at a ceiling on its longest side, re-encoding it on the way.
  *
  * Compares the bytes it *would* write rather than the source's, which is what keeps the
@@ -171,18 +203,29 @@ const AVATAR_MAX_SIDE = 320;
  * full size would be a 2 MB regression nobody would notice until the next budget pass.
  */
 async function publishImage(from: string, to: string, maxSide: number): Promise<string> {
-  const source = await readFile(from);
-  let wanted: Buffer;
+  const wanted = resize(from, await readFile(from), maxSide);
+  const existing = await readFile(to).catch(() => null);
+  if (!existing || !existing.equals(wanted)) await writeFile(to, wanted);
+  return to;
+}
+
+/**
+ * One image, re-encoded at a ceiling on its longest side.
+ *
+ * The format is the file's own. Re-encoding a painted JPEG as PNG triples it — thousands of
+ * distinct colours with no flat regions is the case PNG is worst at — and a sprite with an
+ * alpha channel cannot become a JPEG at all.
+ */
+function resize(from: string, source: Buffer, maxSide: number): Buffer {
+  const jpeg = /\.jpe?g$/i.test(from);
   try {
-    wanted = encode(downscale(decode(source), maxSide));
+    const bitmap = downscale(jpeg ? decodeJpeg(source) : decode(source), maxSide);
+    return jpeg ? encodeJpeg(bitmap) : encode(bitmap);
   } catch (cause) {
     throw new Error(
       `cannot resize ${from}: ${cause instanceof Error ? cause.message : String(cause)}`,
     );
   }
-  const existing = await readFile(to).catch(() => null);
-  if (!existing || !existing.equals(wanted)) await writeFile(to, wanted);
-  return to;
 }
 
 /** Copies one unit's sprites, normalising the names the client will ask for. */
@@ -264,11 +307,24 @@ async function publishMedia(set: MediaSet, files: MediaFile[]): Promise<void> {
   const target = join(publicRoot, set.to);
   await mkdir(target, { recursive: true });
   const keep = new Set<string>();
-  for (const file of files) keep.add(await publishFile(file.from, file.to));
+  for (const file of files) {
+    keep.add(
+      set.maxSide === undefined
+        ? await publishFile(file.from, file.to)
+        : await publishImage(file.from, file.to, set.maxSide),
+    );
+  }
   await prune(target, keep);
 }
 
-/** True when every file is published byte-for-byte and nothing extra sits beside it. */
+/**
+ * True when every file is published as this set asks and nothing extra sits beside it.
+ *
+ * For a copied set that is a byte comparison against the master. For a *resized* one it has
+ * to be a comparison against what the resizer would produce, which means decoding and
+ * re-encoding on `--check` as well — the master and the published file are deliberately
+ * different files, so comparing them would report every resized set as permanently stale.
+ */
 async function mediaIsCurrent(set: MediaSet, files: MediaFile[]): Promise<boolean> {
   const target = join(publicRoot, set.to);
   if (files.length === 0) {
@@ -281,7 +337,8 @@ async function mediaIsCurrent(set: MediaSet, files: MediaFile[]): Promise<boolea
   for (const file of files) {
     const name = file.to.slice(target.length + 1);
     if (!published.delete(name)) return false;
-    const [wanted, actual] = await Promise.all([readFile(file.from), readFile(file.to)]);
+    const [source, actual] = await Promise.all([readFile(file.from), readFile(file.to)]);
+    const wanted = set.maxSide === undefined ? source : resize(file.from, source, set.maxSide);
     if (!wanted.equals(actual)) return false;
   }
   return published.size === 0;

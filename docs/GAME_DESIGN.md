@@ -340,8 +340,9 @@ whole roster, and one that fewer than four non-food champions could ever satisfy
 This is not hypothetical: Mistvale has 37 champions over eight factions, and Thornweald Court
 holds three while Runebound Halls and The Drowned Choir hold two each. A floor warded to the
 Drowned Choir would publish cleanly, look correct in the editor, and be unclearable by every
-account forever. It is also the reason **Faction Trials are not built** — faction-locked
-content needs a champion pass first.
+account forever. It is also what settled **Faction Trials**, which the owner
+dropped outright on 2026-08-27 (*"Ignore Faction Trials FULLY for now"*): faction-locked
+content would need a champion pass first, and that pass is not on the plan.
 
 **Measured rather than guessed.** `pnpm sim` fights every warded floor with the best four
 champions that ward allows, at the floor's own level, and gates that each falls. "Can a good
@@ -395,7 +396,7 @@ Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login
 No payments in EA (crystals fully earnable; "premium" is a pacing currency, not a paywall). Real odds displayed. Bots never take top-10 leaderboard slots at week end (auto-yield rule). Single account per player expected but not enforced beyond rate limits. All balance changes publish-logged → visible "balance updated" badges (champion `balance_version`).
 
 ## 14. Post-EA parked systems (architected-for, not built)
-**Warbands** (guilds) — first post-EA priority per the brief; ~~the Vale Titan (clan-boss analog)~~ **shipped solo in C9 as the Valewurm** (§9.2b), since the puzzle never needed a guild · **The Mistspire** (Doom-Tower-style ascending tower) · **Faction Trials** (faction-locked crypt ladders) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · Battle pass ("Vale Pass") · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
+**Warbands** (guilds) — first post-EA priority per the brief; ~~the Vale Titan (clan-boss analog)~~ **shipped solo in C9 as the Valewurm** (§9.2b), since the puzzle never needed a guild · **The Mistspire** (Doom-Tower-style ascending tower) · ~~Faction Trials~~ (faction-locked crypt ladders — **dropped by the owner 2026-08-27**; three of eight factions hold fewer than four champions, see §9.2d) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · Battle pass ("Vale Pass") · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
 
 ## 15. Approved additions (owner-approved 2026-08-16 — all in EA-0.1 scope)
 1. **Choice-based skill tomes** (vs the source's random books) — §7.

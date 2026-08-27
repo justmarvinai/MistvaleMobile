@@ -356,6 +356,6 @@ async function arrive(page: Page, account: string): Promise<void> {
   await page.getByRole('tab', { name: 'New warden' }).click();
   await page.getByLabel('Account name').fill(unique(account));
   await page.getByLabel('Profile name').fill(unique('Warden'));
-  await page.getByLabel('Password').fill(password);
+  await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Take up the lantern' }).click();
 }

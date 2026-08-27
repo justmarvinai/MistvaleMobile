@@ -74,7 +74,7 @@ export async function registerRaw(page: Page, account: string, profile: string):
   await page.getByRole('tab', { name: 'New warden' }).click();
   await page.getByLabel('Account name').fill(unique(account));
   await page.getByLabel('Profile name').fill(unique(profile));
-  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Take up the lantern' }).click();
   await leaveTutorial(page);
 }
@@ -308,6 +308,15 @@ export async function leaveResults(page: Page): Promise<void> {
  * `elementFromPoint` asks the browser the question a player asks. Returning an ancestor
  * counts — a label inside the button that was clicked is the button as far as anyone is
  * concerned.
+ *
+ * **One thing it cannot see, and it matters:** `elementFromPoint` ignores anything with
+ * `pointer-events: none`, so a decorative layer painted over the whole screen is invisible
+ * to this check — it reports the buried element as topmost. That makes this "can a player
+ * *click* it" rather than "can a player *see* it", which are the same question for a
+ * control and different questions for a picture. Where a non-interactive layer could be
+ * covering something, read pixels instead (`e2e/pixels.ts`); the title screen's guard in
+ * `visible.spec.ts` does exactly that, because its backdrop is `pointer-events: none` and
+ * this check passed happily with the painting drawn over the entire form.
  *
  * It takes a locator as readily as a selector, and that is worth having: the thing most
  * likely to be covered is a *button*, buttons are found by their name rather than by a

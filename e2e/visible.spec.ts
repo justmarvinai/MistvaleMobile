@@ -145,6 +145,62 @@ test.describe('the shell stays put', () => {
 });
 
 test.describe('what a player can actually see', () => {
+  /**
+   * The title screen, which is the one screen every player sees and nobody is signed in for.
+   *
+   * Its backdrop is published by `pnpm assets` into a **gitignored** tree, exactly like the
+   * champion sprites whose absence B2 found on the owner's box after ten phases of nobody
+   * noticing. This one would hide even better: the screen paints a lit gradient when the art
+   * is missing, on purpose, so a release that skipped `pnpm assets` looks *deliberate* rather
+   * than broken. The only way to tell is to ask whether the picture actually arrived.
+   */
+  test('the title screen draws its art and its form', async ({ page }) => {
+    await page.goto('/');
+
+    const enter = page.getByRole('button', { name: /enter the vale/i });
+    await expect(enter).toBeVisible({ timeout: 20_000 });
+
+    // 1. The backdrop actually arrived.
+    //
+    // It is published by `pnpm assets` into a **gitignored** tree, like the champion sprites
+    // whose absence B2 found on the owner's box after ten phases. This one hides better: the
+    // screen paints a lit gradient when the art is missing, on purpose, so a release that
+    // skipped `pnpm assets` looks deliberate rather than broken.
+    //
+    // Asked by decoding it rather than by fetching it, and that is the whole point — the
+    // QA pass found that a missing file answers **200 with the game's HTML** (`try_files`
+    // is right for a route and a lie about a file), and the dev server does the same. A
+    // status check passes against exactly the failure it is meant to catch; an HTML document
+    // does not decode as an image.
+    const art = await page.evaluate(
+      (src) =>
+        new Promise<number>((resolve) => {
+          const image = new Image();
+          image.onload = () => resolve(image.naturalWidth);
+          image.onerror = () => resolve(0);
+          image.src = src;
+        }),
+      '/scenery/haven_campaign.jpg',
+    );
+    expect(art, 'the title backdrop is published — run `pnpm assets`').toBeGreaterThan(0);
+
+    // 2. The form is drawn *over* it.
+    //
+    // `expectOnTop` cannot answer this and it is worth knowing why: `elementFromPoint`
+    // ignores anything with `pointer-events: none`, which the backdrop is, so it reports the
+    // wordmark as topmost while the painting covers it completely. That is a real gap in
+    // this file's own central tool — it answers "can a player click this", not "can a player
+    // see it" — so the one screen where a decorative layer sits over everything reads pixels
+    // instead. Measured: 28.5% of the wordmark's box is near-white as shipped, and 0.0% with
+    // the backdrop's stacking order set the way the first cut had it.
+    const wordmark = decodePng(await page.getByRole('heading', { name: 'Mistvale' }).screenshot());
+    expect(litFraction(wordmark, 150), 'the wordmark is painted, not buried').toBeGreaterThan(0.1);
+
+    // And the way in is reachable, which is the question `expectOnTop` is right for.
+    await expectOnTop(page, enter, 'the way in');
+    await expectOnTop(page, page.getByLabel('Account name', { exact: true }), 'the account field');
+  });
+
   test('the battle screen shows its fight and its controls', async ({ page }) => {
     test.slow();
     await registerRaw(page, 'e2evis', 'Seer');

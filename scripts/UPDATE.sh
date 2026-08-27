@@ -479,9 +479,17 @@ count_files() { [[ -d "$1" ]] && find "$1" -maxdepth 1 -type f | wc -l | tr -d '
 MUSIC_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/audio/music")"
 VOICE_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/audio/tutorial")"
 PORTRAIT_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/portraits")"
-log "media: ${MUSIC_COUNT} music, ${VOICE_COUNT} spoken lines, ${PORTRAIT_COUNT} portraits"
+SCENERY_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/scenery")"
+log "media: ${MUSIC_COUNT} music, ${VOICE_COUNT} spoken lines, ${PORTRAIT_COUNT} portraits, ${SCENERY_COUNT} scenery"
 if [[ "${MUSIC_COUNT}" == "0" && "${VOICE_COUNT}" == "0" && "${PORTRAIT_COUNT}" == "0" ]]; then
 	warn "this release carries no audio or portraits at all — if that is a surprise, run 'pnpm assets' in ${REPO_DIR}"
+fi
+# Counted rather than required, for the audio reason: a missing backdrop is a plainer title
+# screen and not a broken game — the screen paints a lit gradient in its place on purpose. But
+# it is named, because that fallback is *deliberately* presentable, which makes this the one
+# absence a player would never report and an operator would never notice.
+if [[ "${SCENERY_COUNT}" == "0" ]]; then
+	warn "no scenery in this release — the title screen falls back to a plain gradient. Run 'pnpm assets' in ${REPO_DIR} if that is a surprise"
 fi
 
 log "collecting build output"

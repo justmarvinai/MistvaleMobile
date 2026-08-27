@@ -55,7 +55,7 @@ test.describe('account lifecycle', () => {
     await page.getByRole('tab', { name: 'New warden' }).click();
     await page.getByLabel('Account name').fill(accountName);
     await page.getByLabel('Profile name').fill(profileName);
-    await page.getByLabel('Password').fill(password);
+    await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
 
     // Out of the tutorial: this spec is about what comes after it.
@@ -105,7 +105,7 @@ test.describe('account lifecycle', () => {
 
     // Sign back in with the same credentials.
     await page.getByLabel('Account name').fill(accountName);
-    await page.getByLabel('Password').fill(password);
+    await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Enter the vale' }).click();
     await expect(page.getByRole('heading', { name: 'The Haven' })).toBeVisible();
 
@@ -123,7 +123,7 @@ test.describe('account lifecycle', () => {
     await page.getByRole('tab', { name: 'New warden' }).click();
     await page.getByLabel('Account name').fill(accountName);
     await page.getByLabel('Profile name').fill(`Keep${uniqueSuffix().slice(0, 6)}`);
-    await page.getByLabel('Password').fill('a-good-long-password');
+    await page.getByLabel('Password', { exact: true }).fill('a-good-long-password');
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
 
     // Out of the tutorial: this spec is about what comes after it.
@@ -144,7 +144,7 @@ test.describe('account lifecycle', () => {
     await page.getByRole('tab', { name: 'New warden' }).click();
     await page.getByLabel('Account name').fill(accountName);
     await page.getByLabel('Profile name').fill(profileName);
-    await page.getByLabel('Password').fill('a-good-long-password');
+    await page.getByLabel('Password', { exact: true }).fill('a-good-long-password');
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
 
     // Out of the tutorial: this spec is about what comes after it.
@@ -155,7 +155,7 @@ test.describe('account lifecycle', () => {
 
     // Wrong password: the error lands on the password field.
     await page.getByLabel('Account name').fill(accountName);
-    await page.getByLabel('Password').fill('definitely-wrong-password');
+    await page.getByLabel('Password', { exact: true }).fill('definitely-wrong-password');
     await page.getByRole('button', { name: 'Enter the vale' }).click();
     await expect(page.getByRole('alert')).toContainText(/not right/i);
 
@@ -163,7 +163,7 @@ test.describe('account lifecycle', () => {
     await page.getByRole('tab', { name: 'New warden' }).click();
     await page.getByLabel('Account name').fill(accountName);
     await page.getByLabel('Profile name').fill(`Other${uniqueSuffix().slice(0, 6)}`);
-    await page.getByLabel('Password').fill('a-good-long-password');
+    await page.getByLabel('Password', { exact: true }).fill('a-good-long-password');
     await page.getByRole('button', { name: 'Take up the lantern' }).click();
 
     // No skip here: this registration is *meant* to fail, so there is no session to skip
