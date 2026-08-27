@@ -78,7 +78,12 @@ test.describe('a brand-new account', () => {
     await page.getByRole('button', { name: /your profile card/i }).click();
     // A card for somebody who has done nothing still has to be a card: a level, an arena
     // standing they have never fought for, and a furthest stage that is a dash.
-    await expect(page.getByRole('dialog')).toContainText(/level\s*1/i);
+    //
+    // The level is asked for by role and name rather than by scanning the dialog's text,
+    // because it is a numeral on the portrait rather than a labelled row (C15) — and
+    // because that is the stronger question anyway: "does this card *state* its level"
+    // rather than "does the string 'level 1' appear somewhere in it".
+    await expect(page.getByRole('img', { name: /level\s*1/i })).toBeVisible();
     await expect(page.getByRole('dialog')).toContainText(/unblooded/i);
   });
 

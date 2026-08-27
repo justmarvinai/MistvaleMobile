@@ -14,6 +14,7 @@ import styles from './ProfilePanel.module.scss';
 import { arenaTierEmblem } from '../../ui/arenaTier';
 import { championArt } from '../../ui/championArt';
 import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
+import { LevelDisc } from '../../ui/LevelDisc/LevelDisc';
 import { Portrait } from '../../ui/Portrait/Portrait';
 import { avatarFaces } from './faces';
 
@@ -160,22 +161,37 @@ function Card({ card }: { card: PublicProfile }): JSX.Element {
         {/* The face the warden chose, or their initial. The initial is not a placeholder
             waiting to be replaced — plenty of accounts will keep it — so it is drawn in the
             same frame rather than as a lesser version of one. */}
-        <div className={styles.avatar} data-rarity={face?.rarity ?? 'none'} aria-hidden="true">
+        <div className={styles.avatar} data-rarity={face?.rarity ?? 'none'}>
           {face ? (
             <Portrait
               src={championArt(face, bundle?.assets).portrait ?? null}
               name={face.name}
-              size={72}
+              size={104}
             />
           ) : (
-            card.profileName.charAt(0).toUpperCase()
+            <span aria-hidden="true">{card.profileName.charAt(0).toUpperCase()}</span>
           )}
+          {/* The same mark the top bar's chip wears, one size up. It is on the portrait
+              rather than in the facts row below for the reason the owner's reference has it
+              there — and because a level printed twice on one card is a level printed
+              once too often. Labelled, because on this card nothing else says it. */}
+          <LevelDisc level={card.level} size="lg" label={`Level ${card.level}`} />
         </div>
         <div className={styles.identityText}>
-          <span className={styles.name}>{card.profileName}</span>
+          {/* No name here: the dialog's own title bar is this card's name, and repeating it
+              four lines lower is the thing C12c went round four screens removing. */}
           {card.title && <span className={styles.title}>{card.title}</span>}
           <span className={styles.joined}>Warden since {joined}</span>
         </div>
+
+        {/* What the account has done, in the row with who it is rather than in a band under
+            it. Two painted boxes take the slack between the portrait and the rung, which is
+            where the card had a hand's width of nothing — and the level is not among them
+            any more, because it is on the portrait where the owner's reference puts it. */}
+        <dl className={styles.facts}>
+          <Fact label="Champions" value={`${card.championsOwned} / ${card.championsTotal}`} />
+          <Fact label="Furthest" value={card.furthestStage ?? '—'} note={`${card.stars}★`} />
+        </dl>
 
         {/* The rung, as an emblem rather than as a line in the facts list. It is the one
             fact on this card that ranks its owner against everybody else, and the same
@@ -196,12 +212,6 @@ function Card({ card }: { card: PublicProfile }): JSX.Element {
           <span className={styles.unblooded}>Unblooded</span>
         )}
       </div>
-
-      <dl className={styles.facts}>
-        <Fact label="Level" value={String(card.level)} />
-        <Fact label="Champions" value={`${card.championsOwned} / ${card.championsTotal}`} />
-        <Fact label="Furthest" value={card.furthestStage ?? '—'} note={`${card.stars}★`} />
-      </dl>
 
       <h3 className={styles.showcaseHeading}>Known for</h3>
       {card.showcase.length === 0 ? (

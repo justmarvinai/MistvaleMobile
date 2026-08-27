@@ -1,7 +1,7 @@
 import type { PlayerSummary } from '@mistvale/shared';
 import { StatBar } from '@/fui/components/StatBar.ts';
 import { Fui } from '@/fui/react';
-import { Icon } from '@/ui/Icon/Icon';
+import { LevelDisc } from '@/ui/LevelDisc/LevelDisc';
 import { Portrait } from '@/ui/Portrait/Portrait';
 import { championArt } from '@/ui/championArt';
 import { useContentStore } from '@/state/contentStore';
@@ -26,6 +26,19 @@ import styles from './ProfileChip.module.scss';
  * champion *key*, so it is drawn from the content bundle already in hand rather than
  * fetched. An account that has not chosen wears the crest with its initial on it, which is
  * where every account starts and a perfectly good place to stay.
+ *
+ * **The shape is the owner's second reference** (2026-08-27), and it moves three things:
+ * the level is a *disc on the corner of the portrait* rather than a tag tucked under it,
+ * the experience readout is a **percentage inside the bar** rather than two long figures
+ * beside it, and the power is a line of its own — labelled, in its own colour — rather
+ * than a chip crowding the name.
+ *
+ * The percentage is the interesting one. C5 put the numbers *outside* the bar for a good
+ * reason and wrote it down: "a readout drawn inside a 14px track is two figures nobody can
+ * read". Both halves of that were true, and both change here — the track is 26px now, and
+ * a percentage is one short token rather than `124,491 / 124,491`. The exact figures did
+ * not disappear; they moved to the tooltip, which is where a number you only want
+ * occasionally belongs.
  */
 export function ProfileChip({
   player,
@@ -86,7 +99,7 @@ export function ProfileChip({
     >
       <span className={styles.face} data-rarity={def?.rarity ?? 'none'}>
         {art ? (
-          <Portrait src={art.portrait ?? null} name={def?.name} size={54} />
+          <Portrait src={art.portrait ?? null} name={def?.name} size={76} />
         ) : (
           // No champion chosen: the account's own initial, which is what the top bar has
           // drawn since P0 and is still the honest answer for somebody who likes it.
@@ -94,19 +107,11 @@ export function ProfileChip({
             {player.profileName.charAt(0).toUpperCase()}
           </span>
         )}
-        <span className={styles.level}>{player.level}</span>
+        <LevelDisc level={player.level} />
       </span>
 
       <span className={styles.body}>
-        <span className={styles.nameRow}>
-          <span className={styles.name}>{player.profileName}</span>
-          {power > 0 && (
-            <span className={styles.power}>
-              <Icon name="stat-atk" size={13} />
-              {abbreviatePower(power)}
-            </span>
-          )}
-        </span>
+        <span className={styles.name}>{player.profileName}</span>
 
         <span className={styles.progress}>
           <Fui
@@ -116,8 +121,9 @@ export function ProfileChip({
               kind: 'xp',
               value: reading.capped ? 1 : player.xp,
               max: reading.capped ? 1 : player.xpToNextLevel,
-              // Both numbers are beside the bar where they have room; a readout drawn
-              // *inside* a 14px track is two figures nobody can read.
+              // The library's own readout is the two figures; Mistvale draws a percentage
+              // over the track instead, because that is what fits in a bar at this height
+              // and the figures are a hover away.
               readout: 'none',
               width: '100%',
               trail: false,
@@ -131,20 +137,18 @@ export function ProfileChip({
               bar.set(next.value ?? 0);
             }}
           />
-          <span className={styles.numbers}>
-            {reading.capped ? (
-              'Level cap'
-            ) : (
-              <>
-                {reading.have} / {reading.need}
-                <span className={styles.remaining}>
-                  {' '}
-                  · {(reading.remaining ?? 0).toLocaleString('en-US')} to Lv {player.level + 1}
-                </span>
-              </>
-            )}
+          {/* Over the track rather than inside the library's own readout slot: the bar is
+              one painted piece of art and the pack positions its figures for a phone. */}
+          <span className={styles.percent} aria-hidden="true">
+            {reading.capped ? 'MAX' : `${reading.percent}%`}
           </span>
         </span>
+
+        {power > 0 && (
+          <span className={styles.power}>
+            Power: <strong>{abbreviatePower(power)}</strong>
+          </span>
+        )}
       </span>
     </button>
   );

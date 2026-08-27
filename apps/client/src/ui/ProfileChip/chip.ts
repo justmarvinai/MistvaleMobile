@@ -15,6 +15,15 @@ export const POWER_TEAM = 4;
 export interface LevelReading {
   /** 0–1, for the bar. */
   fraction: number;
+  /**
+   * The same fraction as a whole number, for the readout *inside* the bar.
+   *
+   * Never 100 short of the cap. A player at 99.7% of a level rounds to 100 by any ordinary
+   * rule, and a bar that says it is finished when it is not is the one thing a progress
+   * readout must never do — so the last percent is held at 99 until the level actually
+   * turns over.
+   */
+  percent: number;
   /** What the bar's numbers say, already formatted. */
   have: string;
   need: string;
@@ -35,11 +44,13 @@ export interface LevelReading {
  */
 export function levelReading(player: PlayerSummary): LevelReading {
   if (player.xpToNextLevel <= 0) {
-    return { fraction: 1, have: '', need: '', remaining: null, capped: true };
+    return { fraction: 1, percent: 100, have: '', need: '', remaining: null, capped: true };
   }
   const have = Math.max(0, Math.min(player.xp, player.xpToNextLevel));
+  const fraction = have / player.xpToNextLevel;
   return {
-    fraction: have / player.xpToNextLevel,
+    fraction,
+    percent: fraction >= 1 ? 100 : Math.min(99, Math.round(fraction * 100)),
     have: have.toLocaleString('en-US'),
     need: player.xpToNextLevel.toLocaleString('en-US'),
     remaining: Math.max(0, player.xpToNextLevel - player.xp),

@@ -18,7 +18,9 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: $space-3;
+  /* Wide enough that the level disc, which hangs off the portrait's corner by twelve
+     pixels, still clears the name beside it. */
+  gap: $space-5;
   padding: $space-1 $space-3 $space-1 $space-2;
   text-align: left;
   color: $parchment;
@@ -40,8 +42,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 4rem;
-  height: 4rem;
+  width: 5.5rem;
+  height: 5.5rem;
   flex: none;
   background: rgba(12, 10, 9, 0.6);
   transition: filter $duration-fast $ease-out;
@@ -53,11 +55,15 @@
     position: absolute;
     inset: -3px;
     border-style: solid;
-    /* 12px rather than the theme's own 18: `border-image` scales the 36px corner art into
-       whatever width it is given, and at 18 the ornament eats a 56px portrait alive. */
-    border-width: 12px;
-    border-image-source: var(--fui-img-frame-sm-double);
-    border-image-slice: var(--fui-slice-frame-sm-double, 36 36 36 36);
+    /* 15px rather than the theme's own 18: `border-image` scales the 36px corner art into
+       whatever width it is given, and at 18 the ornament ate the old 64px portrait alive.
+       The face is 88px now, so the ornament can have three pixels back. */
+    border-width: 15px;
+    /* The bevel rather than the double line: the owner's reference frames the portrait in
+       something with weight and depth, and `frame-sm-double` is two hairlines that vanish
+       next to the rarity ring inside them. */
+    border-image-source: var(--fui-img-frame-sm-bevel);
+    border-image-slice: var(--fui-slice-frame-sm-bevel, 36 36 36 36);
     border-image-repeat: stretch;
     pointer-events: none;
   }
@@ -100,28 +106,10 @@
 
 .initial {
   font-family: $font-display;
-  font-size: 27px;
+  font-size: 36px;
   line-height: 1;
   color: $accent-soft;
   text-shadow: 0 1px 3px #000;
-}
-
-/* The numeral, on the corner of the portrait — the genre's own shape, and where a player
-   already looks for it. It reads as part of the frame rather than as a label beside it. */
-.level {
-  position: absolute;
-  right: -6px;
-  bottom: -6px;
-  z-index: 2;
-  min-width: 1.7rem;
-  padding: 1px 5px;
-  border: 1px solid rgba(194, 118, 74, 0.7);
-  background: rgba(12, 10, 9, 0.94);
-  font-family: $font-mono;
-  font-size: 14px;
-  line-height: 1.3;
-  text-align: center;
-  color: $accent-soft;
 }
 
 /* ── The lines ───────────────────────────────────────────────────────────── */
@@ -129,19 +117,12 @@
 .body {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.nameRow {
-  display: flex;
-  align-items: baseline;
-  gap: $space-3;
+  gap: 5px;
   min-width: 0;
 }
 
 .name {
-  @include display-text(20px);
+  @include display-text(26px);
   letter-spacing: 0.03em;
   color: $parchment;
   white-space: nowrap;
@@ -150,61 +131,106 @@
   transition: color $duration-fast $ease-out;
 }
 
-/* What the account is worth, beside the name and not under it: it is the second thing a
-   player looks at and the first thing they compare. */
+/* What the account is worth, on a line of its own under the bar.
+
+   It used to sit beside the name as an icon and a figure, which put the two things a
+   player compares — who you are and what you are worth — in one crowded row and gave the
+   number no room to be read. Labelled rather than glyphed, because "Power" is a word this
+   genre's players read faster than any icon, and the figure carries the colour so the eye
+   lands on the number rather than on the label in front of it. */
 .power {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  flex: none;
   font-family: $font-mono;
-  font-size: 13px;
-  color: $gold-soft;
+  font-size: 17px;
+  line-height: 1;
+  color: $muted;
+
+  strong {
+    font-weight: normal;
+    color: $gold-soft;
+  }
 }
 
+/* The bar and the figure written across it. `relative` so the percentage has something to
+   be centred in. */
 .progress {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: $space-2;
   min-width: 0;
 }
 
 /* `--fui-bar-h` is the library's own knob for bar height, and the theme sets it to 32px —
-   right for a boss's health, far too tall for a line under a name. Overriding the property
-   rather than the height keeps the track art, the well inset and the fill in proportion,
-   which setting `height` directly would not. */
+   right for a boss's health. Overriding the property rather than the height keeps the
+   track art, the well inset and the fill in proportion, which setting `height` would not.
+
+   26px is what lets the readout move *inside*: the previous cut was 14px and put the
+   figures beside the bar, which was the right call at that height and is not at this one. */
 .xpBar {
-  --fui-bar-h: 14px;
+  --fui-bar-h: 26px;
 
-  flex: 1 1 11rem;
-  min-width: 6rem;
-  max-width: 15rem;
+  flex: 1 1 auto;
+  min-width: 8rem;
+  max-width: 26rem;
 }
 
-.numbers {
-  flex: none;
-  color: $muted;
+/* The library's `xp` bar is the stamina art with `hue-rotate(255deg)` on it, which lands on
+   magenta — the one colour on the top bar that belongs to nothing else in Mistvale, and a
+   long way from the cool experience bar the owner's reference shows. The kind stays `xp`,
+   because that is what the bar *is* and what its data attribute should say; only the fill
+   art is Mistvale's choice, taken from the pack's own blue rather than invented. Scoped
+   here rather than in the vendored stylesheet, which the next `pnpm fui:vendor` overwrites.
+
+   Anchored on `.progress` — the wrapper — rather than on `.xpBar`, which is the pattern C8
+   used on the campaign map and for the reason that matters here: the React bridge merges a
+   `className` onto the component's *own* root, so `.xpBar` **is** the `.fui-bar` element
+   and a descendant selector starting from it matches nothing. Going through the wrapper
+   also clears the vendored rule's specificity, which a two-class selector does not. */
+.progress :global(.fui-bar[data-kind='xp'] .fui-bar__fill) {
+  border-image-source: var(--fui-bar-fill-mana-src);
+  filter: none;
+}
+
+/* The percentage, centred over the track.
+
+   `aria-hidden`, and deliberately: the bar itself is a `progressbar` with the real value on
+   it, so a screen reader that also read this would say the same fact twice in two units.
+   The exact figures live in the tooltip, which is the honest home for a number you want
+   occasionally rather than constantly. */
+.percent {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  text-align: center;
   font-family: $font-mono;
-  font-size: 11px;
+  font-size: 15px;
   line-height: 1;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+  letter-spacing: 0.04em;
+  color: $parchment;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
 }
 
-/* The half a player is actually counting down. */
-.remaining {
-  color: $accent-soft;
-}
-
-/* A narrow window keeps the face, the name and the bar; the running total and the
-   countdown are what a tooltip is for. */
+/* A narrow window keeps the whole shape and simply gives the bar less to work with — there
+   is nothing left on this chip that a phone should drop, which is the point of moving the
+   readout inside it. */
 @media (max-width: 900px) {
-  .numbers {
-    display: none;
+  .face {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .name {
+    font-size: 20px;
   }
 
   .xpBar {
-    flex-basis: 7rem;
+    min-width: 6rem;
+    max-width: 12rem;
   }
 }
 

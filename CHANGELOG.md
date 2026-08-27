@@ -5,6 +5,45 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the player's card, rebuilt to the owner's reference (C15)
+
+The owner's second reference (2026-08-27) is the panel this genre puts in the corner of its
+main screen, and it moves three things Mistvale had arranged differently:
+
+- **The level is a disc on the portrait's corner**, half on the art and half off, rather
+  than a boxed tag tucked under the frame. Round, because a level is one figure and a disc
+  stays balanced whether it holds 1 or 60 — the tag it replaces grew sideways with the
+  number and pulled the corner out of true.
+- **The experience readout is a percentage inside the bar.** C5 put the figures outside for
+  a good reason and wrote it down: *"a readout drawn inside a 14px track is two figures
+  nobody can read"*. Both halves of that change here — the track is 26px now, and `81%` is
+  one short token rather than `124,491 / 124,491`. The exact figures moved to the tooltip,
+  which is where a number you want occasionally belongs. It never rounds up to 100 short of
+  the cap: a bar that reads finished when the level has not turned over is the one thing a
+  progress readout must never do.
+- **Power is a line of its own** — labelled, with the figure carrying the colour — instead
+  of an icon and a number crowding the name.
+
+The portrait is 88px rather than 64, the name is 26px rather than 20, and the bar is the
+pack's own blue rather than the `xp` kind's magenta. That last one is a *theme* choice
+rather than a component edit: the library builds its experience bar by hue-rotating the
+stamina art 255°, and the kind stays `xp` because that is what the bar is — only the fill
+art is Mistvale's, taken from the pack's own palette rather than invented.
+
+**The profile card behind the chip got the same treatment**, and lost two duplications on
+the way: it printed the warden's name four lines under the dialog title that already said
+it, and printed the level in a facts row under a portrait that should have been wearing it.
+The facts moved up into the identity row, which had a hand's width of nothing across the
+middle of it.
+
+`ui/LevelDisc` is the shared mark, because it belongs to two portraits in two folders and
+two copies is how the two stop agreeing. Whether it is *announced* is the caller's business
+and that turned out to matter: on the chip the level is already in the button's accessible
+name, so a disc that also spoke would say it twice — and the first cut hid it on the card
+as well, which took the level off that card for a screen reader entirely. A browser spec
+caught it by asking the dialog for its level and finding none.
+
+
 ### Added — a swap says what it costs, not just what it changes (C14)
 
 Selecting a candidate relic has always shown the real stat difference, server-computed, set

@@ -1,0 +1,37 @@
+@use '../../styles/tokens' as *;
+
+/* The disc itself. Placement is the holder's business — see `LevelDisc.tsx`. */
+.disc {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid rgba(194, 118, 74, 0.85);
+  background: radial-gradient(circle at 38% 32%, #2c241d 0%, #120e0b 78%);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55);
+  font-family: $font-mono;
+  line-height: 1;
+  color: $accent-soft;
+  pointer-events: none;
+}
+
+/* On the top bar's chip, where the portrait is 88px. */
+.sm {
+  top: -10px;
+  right: -12px;
+  width: 2.3rem;
+  height: 2.3rem;
+  font-size: 17px;
+}
+
+/* On the profile card, where it is half again as big. */
+.lg {
+  top: -12px;
+  right: -14px;
+  width: 2.9rem;
+  height: 2.9rem;
+  font-size: 21px;
+}

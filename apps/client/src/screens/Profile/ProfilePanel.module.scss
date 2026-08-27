@@ -27,7 +27,8 @@
 .identity {
   display: flex;
   align-items: center;
-  gap: $space-3;
+  flex-wrap: wrap;
+  gap: $space-4;
 }
 
 /* The warden's face: the champion they chose, or their initial. Framed either way, and
@@ -39,14 +40,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 5rem;
-  height: 5rem;
+  width: 6.5rem;
+  height: 6.5rem;
   flex: none;
   background: $panel-inset;
   color: $gold;
   font-family: $font-display;
-  font-size: 2rem;
-  overflow: hidden;
+  font-size: 2.6rem;
+  /* Not hidden: the level disc hangs off the corner, and `overflow: hidden` on the box it
+     hangs from is how a mark placed outside a frame silently disappears. The portrait is
+     `object-fit: cover` inside anyway, so there is nothing else here to clip. */
+  overflow: visible;
 
   &::after {
     content: '';
@@ -167,11 +171,16 @@
 
 // ── What they have done ─────────────────────────────────────────────────────
 
+/* In the identity row now, taking the slack between the text and the rung. `flex: 1` with
+   a floor, so it fills a wide card and drops to its own line on a narrow one rather than
+   squeezing the portrait. */
 .facts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
   gap: $space-2;
   margin: 0;
+  flex: 1 1 16rem;
+  min-width: 0;
 }
 
 .fact {

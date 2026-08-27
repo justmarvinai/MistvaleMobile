@@ -40,6 +40,19 @@ function champion(power: number, id = String(power)): RosterChampion {
 }
 
 describe('levelReading', () => {
+  it('never says a hundred percent short of the cap', () => {
+    // The reason the readout moved *inside* the bar (C15): a percentage is one short token
+    // that fits in a tall track where "124,491 / 124,491" never could. It is also the one
+    // that can lie — 99.7% of a level rounds to 100 by any ordinary rule, and a bar that
+    // reads finished when the level has not turned over is worse than no readout at all.
+    expect(levelReading(player({ xp: 997, xpToNextLevel: 1000 })).percent).toBe(99);
+    expect(levelReading(player({ xp: 1000, xpToNextLevel: 1000 })).percent).toBe(100);
+    expect(levelReading(player({ xp: 0, xpToNextLevel: 1000 })).percent).toBe(0);
+    expect(levelReading(player({ xp: 810, xpToNextLevel: 1000 })).percent).toBe(81);
+    // And the cap is a hundred rather than a division by zero.
+    expect(levelReading(player({ xp: 0, xpToNextLevel: 0 })).percent).toBe(100);
+  });
+
   it('reads the fraction and both numbers off the span of the current level', () => {
     const reading = levelReading(player());
     expect(reading.fraction).toBeCloseTo(124 / 342);
