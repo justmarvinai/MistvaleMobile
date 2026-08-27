@@ -100,6 +100,7 @@
 .choices {
   display: grid;
   grid-template-columns: repeat(auto-fit, $card-champion);
+  align-items: start;
   justify-content: center;
   gap: $space-3;
   margin: 0;

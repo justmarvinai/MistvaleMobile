@@ -123,23 +123,44 @@
   font-weight: normal;
 }
 
-.offers {
-  display: grid;
-  /* Wide enough for four faces in a row and for the painted Challenge button, which is a
-     9-sliced asset with a minimum of its own — at 16rem it hung out over the next card. */
-  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
-  gap: $space-2;
-}
+/* **A list, one opponent to a row.**
 
-/* The card grows to its content. It used to be a fixed run of rows, which clipped the
-   fourth champion of every team — the one a player most wanted to see. */
-.offer {
+   It was a grid of `minmax(21rem, 1fr)` cards, which on a desktop is three or four across —
+   so every part of the decision was drawn at the size four columns leave: a 40px rung, a
+   0.75rem line of numbers and four 44px faces. The owner's note was simply that they are too
+   small to read, and the reference game answers it the same way: one wide row apiece.
+
+   Width bought back is spent on the things being compared. */
+.offers {
   display: flex;
   flex-direction: column;
   gap: $space-2;
+}
+
+/* Four columns, and the point of a grid rather than a flex row is that they line up *down*
+   the list: every opponent's name starts at the same x, every stake, every team, every
+   button. That alignment is most of what makes a list readable where a set of cards is not.
+
+   The team column takes the slack, so a window with room shows the four faces larger rather
+   than leaving a gap at the end of the row. */
+.offer {
+  display: grid;
+  grid-template-columns: minmax(12rem, 15rem) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $space-4;
   padding: $space-3;
   background: $panel-inset;
   border: 1px solid $edge;
+}
+
+/* Below a laptop the four columns become two rows: who and what it is worth on the first,
+   the team and the button on the second. Wrapping the *grid* rather than letting the
+   columns squeeze is what keeps the faces at a readable size on a narrow window. */
+@media (max-width: 1100px) {
+  .offer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: $space-2 $space-3;
+  }
 }
 
 .offerHead {
@@ -162,7 +183,7 @@
   border: none;
   color: $parchment;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   text-align: left;
   cursor: pointer;
 
@@ -173,14 +194,15 @@
 
 .offerMeta {
   color: $muted;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 
 /* Four faces in a row, and they fit: a fifth would wrap rather than overflow. */
 .team {
   display: flex;
   flex-wrap: wrap;
-  gap: $space-2;
+  justify-content: flex-start;
+  gap: $space-3;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -195,33 +217,28 @@
 
 .memberMeta {
   display: flex;
-  gap: 4px;
-  color: $muted;
+  gap: 5px;
+  color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.7rem;
+  font-size: 0.85rem;
 }
 
-/* Two columns with a real gap, and the stake stacked rather than strung out on one line.
-   As a single row with no minimum on either side, a wide Challenge button pushed the
-   "+19 / −13" underneath itself and the two drew on top of each other. */
+/* The button's own cell, at the end of the row. It keeps a minimum because the painted
+   plate is a 9-slice with one of its own — the C9 note — and a column that squeezed it
+   would put it back over its neighbour, which is the bug this row layout inherited. */
 .offerFoot {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $space-2;
+  justify-content: flex-end;
   min-width: 0;
-  margin-top: auto;
-  padding-top: $space-2;
-  border-top: 1px solid $edge;
 }
 
 .stakes {
   display: flex;
   flex-direction: column;
   flex: none;
-  line-height: 1.25;
+  line-height: 1.3;
   font-family: $font-mono;
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .gain {

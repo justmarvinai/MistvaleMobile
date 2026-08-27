@@ -24,7 +24,7 @@ import {
  * a roster that cannot be opened.
  */
 
-export type SortKey = 'power' | 'level' | 'rarity' | 'name';
+export type SortKey = 'power' | 'rank' | 'level' | 'rarity' | 'name';
 
 export interface RosterFilter {
   /** Substring of the champion's name, case-insensitively. Empty matches everything. */
@@ -127,8 +127,15 @@ export function applyRoster(
 
   const ordered = [...admitted].sort((a, b) => {
     switch (sort) {
-      case 'level':
+      // **Rank and level are different sorts**, and until C19 there was one of them wearing
+      // the other's name: `level` sorted by star rank first, which is the reference game's
+      // "By Rank" and not what a player asking for level wants. Both exist now, and each
+      // falls back to the other — two champions at the same rank are ordered by level, and
+      // two at the same level by rank.
+      case 'rank':
         return b.rank - a.rank || b.level - a.level;
+      case 'level':
+        return b.level - a.level || b.rank - a.rank;
       case 'rarity':
         return rank(a) - rank(b) || b.power - a.power;
       case 'name':

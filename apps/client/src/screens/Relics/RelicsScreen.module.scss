@@ -62,6 +62,62 @@
   }
 }
 
+/* The vault, in shelves — one per relic set (C19).
+
+   The scroll moved *here* from `.grid`: a shelf is a heading and a grid, and a hundred and
+   fifty relics have to scroll past all of them rather than each pile scrolling inside its
+   own box. */
+.shelves {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.shelf {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+/* The set's name, its size, and what it does — the last of which a relic card cannot say.
+   Sticky, so the pile a player has scrolled into is always labelled. */
+.shelfHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: $space-2 $space-3;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: $space-1 0;
+  background: linear-gradient(180deg, $ground 70%, rgba(18, 16, 13, 0));
+  border-bottom: 1px solid $edge;
+}
+
+.shelfName {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 1.05rem;
+  letter-spacing: 0.03em;
+  color: $accent-soft;
+}
+
+.shelfCount {
+  font-family: $font-mono;
+  font-size: 0.8rem;
+  color: $muted;
+}
+
+.shelfBonus {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: $parchment-dim;
+  text-align: right;
+}
+
 .grid {
   display: grid;
   /* Sized from the library's own card width (236px) rather than guessed: a column
@@ -69,8 +125,6 @@
   grid-template-columns: repeat(auto-fill, $card-artifact);
   gap: $space-2;
   align-content: start;
-  min-height: 0;
-  overflow-y: auto;
   padding-right: $space-2;
 }
 

@@ -431,6 +431,7 @@
   max-height: 26rem;
   gap: $space-2;
   grid-template-columns: repeat(auto-fill, $card-champion);
+  align-items: start;
 }
 
 .pickerActions {

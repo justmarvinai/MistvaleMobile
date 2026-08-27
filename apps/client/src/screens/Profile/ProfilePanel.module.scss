@@ -281,6 +281,7 @@
   /* Sized from the painted card's own fixed width, like every other grid that holds one —
      it cannot be stretched to a track, so the track is built from it. */
   grid-template-columns: repeat(auto-fill, $card-champion);
+  align-items: start;
   justify-content: center;
   max-height: 44vh;
   overflow-y: auto;

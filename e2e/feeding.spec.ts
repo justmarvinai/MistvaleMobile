@@ -45,6 +45,15 @@ test.describe('feeding a champion', () => {
     await expect(reveal).toBeHidden({ timeout: 15_000 });
 
     // ── The picker ────────────────────────────────────────────────────────
+    //
+    // Armed *before* the navigation. The roster selects its first champion on arrival since
+    // C19, so the sheet — and the read below — happen as the screen mounts rather than on a
+    // click; a listener set up afterwards has already missed it.
+    const readsItems = page.waitForRequest(
+      (request) => request.url().includes('/api/player/items'),
+      { timeout: 20_000 },
+    );
+
     await goToScreen(page, 'Roster');
     // Counted before the picker opens: it holds champion cards of its own, and they would
     // be counted too.
@@ -61,14 +70,12 @@ test.describe('feeding a champion', () => {
     // told they were short the whole amount of everything, brews they had just won
     // included. Asserted as the request rather than as a number, because what is held on a
     // fresh account is a drop roll and this is about the read happening at all.
-    const readsItems = page.waitForRequest(
-      (request) => request.url().includes('/api/player/items'),
-      { timeout: 15_000 },
-    );
-
-    // The strongest is the starter — the brood are food and sort below it.
-    await roster().first().click();
     await readsItems;
+
+    // The strongest is the starter — the brood are food and sort below it. Already the
+    // selected one, since the roll is sorted by rank; pressed anyway, because what this
+    // spec is about is feeding *that* champion and saying so beats relying on the default.
+    await roster().first().click();
 
     // The level ladder's own button. It said "Feed for experience" until the four ladders
     // landed and the words moved to the row above it.

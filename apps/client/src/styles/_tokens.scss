@@ -68,6 +68,15 @@ $blood: #7d1f1a; // the pack's glossy red — refusals, danger buttons
    matches it, or it draws wider than the card it belongs to. */
 $card-artifact: 236px;
 $card-champion: 150px;
+/* The roster's left rail and the card in it (C19). Three cards across at 108px with the
+   rail's own padding and gaps — the reference game's proportions, and fixed for the reason
+   every other card width here is fixed: the library scales a card from one number and a
+   stretched track is how it stops matching the column holding it. */
+$roll-card: 108px;
+$roll-rail: 380px;
+/* The Chronicle's shelf tile. Fixed, because the portrait inside it is a fixed-size
+   component and a stretched holder is how it ended up a 56px icon in a 300px box. */
+$tile-chronicle: 11rem;
 
 // ── Typography (no serif fonts, ever) ──────────────────────────────────────────
 $font-display: 'Pixelify Sans', 'Trebuchet MS', system-ui, sans-serif;

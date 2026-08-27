@@ -37,7 +37,6 @@
   min-height: 0;
   overflow-y: auto;
   padding-right: $space-2;
-  @include pixel-scrollbar;
 }
 
 /* One column under a laptop's width: the brief is worth reading, not worth squeezing the

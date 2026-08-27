@@ -16,6 +16,7 @@ import { highlightable } from '../../app/highlight';
 import { Heading } from '@/ui/Heading/Heading';
 import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 import { VaultMeter } from '../../ui/VaultMeter/VaultMeter';
+import { setEffect } from '../../ui/setEffect';
 
 /**
  * The relic vault.
@@ -107,6 +108,38 @@ export function RelicsScreen(): JSX.Element {
       (a, b) => b.rank - a.rank || b.level - a.level || a.slot.localeCompare(b.slot),
     );
   }, [gear, filter, refine]);
+
+  /**
+   * The vault, in shelves — one per relic set.
+   *
+   * A flat grid of a hundred and fifty relics is a wall, and the question a player is
+   * holding while they look at it is almost always about a *set*: how close am I to a
+   * second Ironroot, is this Hawkeye piece worth keeping, what can I sell. The reference
+   * game groups by set for that reason and so does this now.
+   *
+   * Ordered by how much of the set is in hand, largest first, because the pile worth
+   * looking at is the one that is nearly a set — and by name inside that, so the order
+   * is stable while relics come and go.
+   *
+   * The **sort inside a shelf is the one `visible` already applied**, which is why this
+   * groups rather than re-sorts: rank, then forge level, then slot.
+   */
+  const shelves = useMemo(() => {
+    const sets = new Map((bundle?.gearSets ?? []).map((set) => [set.key, set]));
+    const piles = new Map<string, GearInstance[]>();
+    for (const piece of visible) {
+      const pile = piles.get(piece.setKey);
+      if (pile) pile.push(piece);
+      else piles.set(piece.setKey, [piece]);
+    }
+    return [...piles.entries()]
+      .map(([key, pieces]) => ({ key, set: sets.get(key), pieces }))
+      .sort(
+        (a, b) =>
+          b.pieces.length - a.pieces.length ||
+          (a.set?.name ?? a.key).localeCompare(b.set?.name ?? b.key),
+      );
+  }, [visible, bundle]);
 
   /** The sets the account actually holds, so the picker is not sixteen names of nothing. */
   const heldSets = useMemo(() => {
@@ -416,52 +449,70 @@ export function RelicsScreen(): JSX.Element {
               : 'Nothing in that slot.'}
           </p>
         ) : (
-          <div className={styles.grid} {...highlightable('panel:relic-list')}>
-            {visible.map((piece) => (
-              <div key={piece.id} className={styles.entry}>
-                <RelicCard
-                  relic={piece}
-                  {...(wornBy(piece.equippedChampionId)
-                    ? { wornBy: wornBy(piece.equippedChampionId)! }
-                    : {})}
-                  selected={selection.includes(piece.id)}
-                  onSelect={() => toggle(piece.id)}
-                />
-                <div className={styles.entryActions}>
-                  <button
-                    type="button"
-                    className={styles.mini}
-                    onClick={() => setForging(piece)}
-                    disabled={piece.level >= 16 || !canForge}
-                    title={canForge ? undefined : 'The forge opens at account level 3'}
-                  >
-                    {piece.level >= 16 ? 'Maxed' : 'Forge'}
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.mini}
-                    onClick={() => setReforging(piece)}
-                    disabled={piece.substats.length === 0 || !canForge}
-                    title={
-                      canForge
-                        ? piece.substats.length === 0
-                          ? 'No substats to reforge'
-                          : undefined
-                        : 'The forge opens at account level 3'
-                    }
-                  >
-                    Reforge
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.mini}
-                    aria-pressed={piece.locked}
-                    onClick={() => void setLocked(piece.id, !piece.locked)}
-                  >
-                    {piece.locked ? 'Unlock' : 'Lock'}
-                  </button>
+          <div className={styles.shelves} {...highlightable('panel:relic-list')}>
+            {shelves.map((shelf) => (
+              <section key={shelf.key} className={styles.shelf}>
+                {/* The set's name, how many of it is in the vault, and what it does. The
+                    third is the part a flat grid could never say: a relic card carries its
+                    set's *name* and never its bonus, so "is this Hawkeye piece worth a
+                    slot" meant remembering sixteen of them. */}
+                <header className={styles.shelfHead}>
+                  <h3 className={styles.shelfName}>{shelf.set?.name ?? shelf.key}</h3>
+                  <span className={styles.shelfCount}>
+                    {shelf.pieces.length} of {shelf.set?.pieces ?? '?'}-piece
+                  </span>
+                  {shelf.set && <span className={styles.shelfBonus}>{setEffect(shelf.set)}</span>}
+                </header>
+
+                <div className={styles.grid}>
+                  {shelf.pieces.map((piece) => (
+                    <div key={piece.id} className={styles.entry}>
+                      <RelicCard
+                        relic={piece}
+                        {...(wornBy(piece.equippedChampionId)
+                          ? { wornBy: wornBy(piece.equippedChampionId)! }
+                          : {})}
+                        selected={selection.includes(piece.id)}
+                        onSelect={() => toggle(piece.id)}
+                      />
+                      <div className={styles.entryActions}>
+                        <button
+                          type="button"
+                          className={styles.mini}
+                          onClick={() => setForging(piece)}
+                          disabled={piece.level >= 16 || !canForge}
+                          title={canForge ? undefined : 'The forge opens at account level 3'}
+                        >
+                          {piece.level >= 16 ? 'Maxed' : 'Forge'}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.mini}
+                          onClick={() => setReforging(piece)}
+                          disabled={piece.substats.length === 0 || !canForge}
+                          title={
+                            canForge
+                              ? piece.substats.length === 0
+                                ? 'No substats to reforge'
+                                : undefined
+                              : 'The forge opens at account level 3'
+                          }
+                        >
+                          Reforge
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.mini}
+                          aria-pressed={piece.locked}
+                          onClick={() => void setLocked(piece.id, !piece.locked)}
+                        >
+                          {piece.locked ? 'Unlock' : 'Lock'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </section>
             ))}
           </div>
         )}

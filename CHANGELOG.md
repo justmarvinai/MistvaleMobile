@@ -5,6 +5,60 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the roster is the screen this genre actually uses (C19)
+
+The owner's six, from a batch of Raid screenshots.
+
+**The roster is three panes.** The roll down the left, the champion selected out of it
+filling the rest — their idle loop and their facts in the middle, their relics, skills,
+masteries and ladders to the right. **The first champion is selected when the screen
+opens**, so the roster is a place a player *is* rather than a menu they click through: it
+was a grid of cards that opened a full-screen dialog, which made looking at two champions
+four presses and comparing them impossible. Sortable by rank, level, rarity, power or name
+— and two of those were one: the old "Level" sort put star rank first, which is the
+reference game's *By Rank* and not what anybody asking for level wants.
+
+The rail draws the **same painted card** every picker in the game does, at 108px rather
+than 150 — the library scales a card from one number, so a smaller card is the same card
+and not a second, plainer component.
+
+**The Arena is a list.** One opponent to a row, four columns that line up down the page, and
+the width bought back spent on the things being compared: the rung 40→56px, the four faces
+44→72px, the name and the stake half again as large. It was a grid of `minmax(21rem, 1fr)`
+cards, which on a desktop is four across, and every part of the decision was drawn at the
+size four columns leave.
+
+**The vault is shelved by set** — sticky headers carrying the set's name, how much of it is
+in hand, and *what it does*, which a relic card has never been able to say. Ordered by pile
+size, so the set you are nearly finished with is at the top.
+
+**The Mistspire and Trials have their own art.** The small dock glyphs were already
+different (a falling tower against a maze); both screens carried `art: 'icon-rune-stone'`,
+and the hub card's art is the thing anybody looks at. A rock spire and a rune arch now, and
+Expeditions takes a compass rather than sharing the Arena's crown. The registry refuses two
+places sharing a picture.
+
+**Scrollbars are painted everywhere**, rather than the browser's own on every screen that
+was not one of the three using the `pixel-scrollbar` mixin.
+
+**The Chronicle's faces are one size and a readable one.** Its grid stretched its tiles to
+about 300px around a fixed 56px portrait, so every champion was a small icon adrift in a
+large box — and the handful with real art were all different sizes, because a still frame is
+64px and an avatar is 320.
+
+### Fixed — every champion grid in the game overlapped its own rows (C19)
+
+Found while building the roster's rail, and it is everywhere: `ChampionCard` is a `<button>`
+sized `width: var(--fui-champ-w); aspect-ratio: 3 / 4` with every part of its content
+absolutely positioned, so its *in-flow* contribution is about a third of the height it
+paints at. A grid stretches its items by default, the row track sized itself to that
+contribution, and **each row covered the bottom ninety pixels of the one above it** — the
+star rank, the champion's name and the power figure, on every row but the last.
+
+Eight grids: the roster, the food picker, both team pickers, the Deep Run, Expeditions, the
+profile showcase and the calendar. It survived because it needs *two rows* — a picker
+showing four champions is one row and looks perfect.
+
 ### Changed — the title screen (C18)
 
 The first thing anybody sees was a 420px form floating in a dark brown void: correct,

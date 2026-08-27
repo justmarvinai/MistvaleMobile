@@ -84,10 +84,10 @@ a {
   color: $parchment;
 }
 
-// Any scrollable region gets the pixel scrollbar treatment.
+// A scrollable region. Since C19 the scrollbar itself is painted for *every* element
+// further down this file, so this is only "make me scroll" now.
 .mv-scroll {
   overflow-y: auto;
-  @include pixel-scrollbar;
 }
 
 // Visually hidden but available to screen readers.
@@ -130,4 +130,63 @@ a {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────────────────────────
+   Every scrolling box in the game, painted rather than the browser's own.
+
+   The library ships this treatment as an opt-in `.fui-scroll` class, which is right for a
+   component kit and wrong for a game: Mistvale's own screens scroll in a dozen places —
+   the vault, the roster, a hub, the Chronicle's shelves, a champion's sheet — and each of
+   them would have to remember. So it goes on the elements themselves, once, and a screen
+   that scrolls simply looks like the rest of the game.
+
+   **The two syntaxes are mutually exclusive, not complementary**, and that is the whole
+   reason this is shaped the way it is. Setting `scrollbar-width` or `scrollbar-color` to
+   anything but `auto` makes Chromium ignore every `::-webkit-scrollbar-*` rule on the page
+   — so writing both, which is the obvious thing to do and what the first cut did, silently
+   throws away the painted one and leaves the thin default. Measured: no visible bar where
+   the game draws one now.
+
+   So the painted rules stand on their own, and the standard properties are behind a
+   `@supports` test for a selector only the WebKit engines understand. Firefox gets a bar in
+   the right colours; Chromium and Safari get the painted one.
+
+   Deliberately *not* on `.fui-scroll` itself — that class is vendored and the next vendor
+   run would overwrite an edit to it. This sits beside it and agrees with it. (It is also
+   worth knowing that `.fui-scroll` sets both, so the pack's own webkit rules are dead in
+   Chromium for the same reason. Not ours to fix, and the colours agree either way.) */
+
+@supports not selector(::-webkit-scrollbar-thumb) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: $accent-dim rgba(0, 0, 0, 0.35);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, $accent 0%, $accent-dim 100%);
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  /* Square, like everything else the game draws. The pack's own is rounded; Mistvale's
+     panels, wells and buttons are not, and a rounded scrollbar beside them is the one
+     "generic web page" edge the brief rules out. */
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, $accent-soft 0%, $accent 100%);
+}
+
+/* Where two scrollbars meet. Left unpainted it is a bright default square in the corner. */
+::-webkit-scrollbar-corner {
+  background: rgba(0, 0, 0, 0.4);
 }

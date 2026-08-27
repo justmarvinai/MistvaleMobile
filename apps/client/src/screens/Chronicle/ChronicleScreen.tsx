@@ -232,7 +232,7 @@ function Tile({
       data-rarity={def?.rarity ?? 'common'}
     >
       <span className={styles.portrait}>
-        <Portrait src={art} name={def?.name} size={56} />
+        <Portrait src={art} name={def?.name} size={CHRONICLE_PORTRAIT} />
         {affinity && (
           <span
             className={styles.affinity}
@@ -263,6 +263,16 @@ function Tile({
  * model, which has no face. Falling through to `Portrait`'s placeholder is the answer, and
  * asking for a URL that is not there first is not.
  */
+/**
+ * How large a face is drawn on a shelf.
+ *
+ * `$tile-chronicle` (11rem = 176px) less the tile's own padding. It is a number in two
+ * places because the library's `Portrait` sizes its frame in pixels and the tile sizes its
+ * track in CSS — and the two disagreeing is exactly the bug this fixed: a 56px portrait
+ * adrift in a tile that had stretched to three hundred.
+ */
+const CHRONICLE_PORTRAIT = 168;
+
 function artFor(
   def: ChampionDef | undefined,
   assets: readonly { key: string; basePath: string; avatarPath: string }[] | undefined,

@@ -118,11 +118,19 @@
   background: linear-gradient(90deg, $edge, transparent);
 }
 
+/* **Fixed tracks, not `minmax(…, 1fr)`.**
+   The third time this exact shape has been a bug (D9, C12, here). The tile stretched to the
+   row — six across a 1920 window made it about 300px wide — while the portrait inside it
+   was a fixed 56px component, so every champion in the Chronicle was a small icon adrift in
+   a large box, and the ones with real art were all different sizes because a still frame is
+   64px and an avatar is 320. The tile is the portrait's width now and the portrait is drawn
+   at it, so all thirty-seven read as one shelf. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, $tile-chronicle);
   gap: $space-2;
   align-content: start;
+  justify-content: start;
 }
 
 .entry {
@@ -193,6 +201,15 @@
   aspect-ratio: 1;
   background: $panel-inset;
   overflow: hidden;
+
+  /* The library's `Portrait` sizes its own frame, so the picture inside it is only as big
+     as the number it was given — the `width: 100%` below reaches the `img` and never the
+     box around it. Both are told the same size in the component; this keeps the frame
+     filling the tile whatever that size is. */
+  > * {
+    width: 100%;
+    height: 100%;
+  }
 
   img {
     width: 100%;

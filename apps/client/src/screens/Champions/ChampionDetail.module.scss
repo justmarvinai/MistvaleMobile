@@ -1,16 +1,38 @@
 @use '../../styles/tokens' as *;
 
+/* The sheet, as the roster's right-hand pane rather than a dialog over it (C19).
+
+   It owns its own scroll: the roll on the left is a long list and this is a long sheet, and
+   two columns that scroll together means neither can be read while the other is being used.
+   `min-height: 0` is what makes that work inside a grid — without it the pane grows to its
+   content and the *page* scrolls instead, which is C12c's finding one level down. */
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: $space-3;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.38));
+  border: 1px solid $edge;
+}
+
+/* The champion's name, which the dialog's own title bar used to carry. */
+.sheetName {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  color: $accent-soft;
+}
+
 .body {
   display: flex;
   flex-direction: column;
   gap: $space-3;
-  /* The *modal* owns the width — see the `width` prop at the call site. Setting it here
-     as well is what put the stat table and the skill rows out through the painted frame:
-     the dialog stayed at its 480px default while its content insisted on 736. */
   width: 100%;
   min-width: 0;
-  max-height: 76vh;
-  overflow-y: auto;
 }
 
 /* Two columns: the champion, and everything you can do to them.

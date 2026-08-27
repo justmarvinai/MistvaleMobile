@@ -73,6 +73,7 @@
      Forge and profile grids. */
   display: grid;
   grid-template-columns: repeat(auto-fill, $card-champion);
+  align-items: start;
   gap: $space-3;
   /* Four rows of cards before it scrolls, now that a card is a card. */
   max-height: 44vh;

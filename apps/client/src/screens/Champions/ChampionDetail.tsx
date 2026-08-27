@@ -8,7 +8,7 @@ import { Fui } from '@/fui/react';
 import { relicArt, relicGlyph } from '../../ui/relicArt';
 import { skillArt } from '../../ui/skillArt';
 import { statLabel } from '../../ui/statLabels';
-import { Modal } from '../../ui/Modal/Modal';
+import { setEffect } from '../../ui/setEffect';
 import { Button } from '../../ui/Button/Button';
 import { gameApi, newActionId } from '../../api/game';
 import { useContentStore } from '../../state/contentStore';
@@ -27,17 +27,6 @@ import { Icon } from '../../ui/Icon/Icon';
 import { ChampionIdle } from '../../ui/ChampionIdle/ChampionIdle';
 import { useTip } from '../../ui/Tooltip/useTooltip';
 import { emptySocketTip, relicTip } from '../../ui/Tooltip/tips';
-
-/** A set's bonus as one readable line — the same numbers the engine applies. */
-function setEffect(set: GearSetDef): string {
-  const { stat, pct, flat, chance, turns } = set.bonus;
-  const magnitude = pct != null ? `+${pct}%` : flat != null ? `+${flat}` : '';
-  const target = stat ? statLabel(stat) : '';
-  const odds = chance != null ? ` (${Math.round(chance * 100)}% chance)` : '';
-  const duration = turns != null ? ` for ${turns} turns` : '';
-  const head = [target, magnitude].filter(Boolean).join(' ');
-  return `${head || set.bonusType}${duration}${odds}`.trim();
-}
 
 /**
  * One champion, everything about it.
@@ -62,13 +51,19 @@ const SLOT_LABEL: Record<GearSlot, string> = {
   banner: 'Banner',
 };
 
-export function ChampionDetailModal({
-  championId,
-  onClose,
-}: {
-  championId: string;
-  onClose: () => void;
-}): JSX.Element {
+/**
+ * One champion, everything about it — as a *pane*, not a dialog.
+ *
+ * It was a full-screen modal opened by clicking a card in the roster grid. Since C19 the
+ * roster is the genre's own three-pane screen — the roll on the left, the champion in the
+ * middle and to the right — so this is rendered beside the list rather than over it, and
+ * the first champion is simply selected when the screen opens.
+ *
+ * That is the whole change: the content, the four ladders, the nine sockets and the tabs
+ * are what they were. What went is the `Modal` wrapper and the close button, because
+ * there is nothing to close any more — choosing another champion is the way out.
+ */
+export function ChampionSheet({ championId }: { championId: string }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
   const items = useInventoryStore((state) => state.items);
   // Every relic the account owns, not just this champion's: a loadout can name a piece
@@ -144,9 +139,9 @@ export function ChampionDetailModal({
 
   if (!detail || !def) {
     return (
-      <Modal open title="Champion" onClose={onClose} size="info">
+      <section className={styles.sheet} aria-label="Champion">
         <p className={styles.note}>{error ?? 'Reading the roll…'}</p>
-      </Modal>
+      </section>
     );
   }
 
@@ -212,11 +207,10 @@ export function ChampionDetailModal({
     'enemies/teritorial_lizard';
 
   return (
-    // Four ladders, nine relic slots, a four-column stat table *and* the champion standing
-    // beside all of it. 736 was already tight for the numbers alone — every row wrapped and
-    // the sheet read as a column of squeezed fragments — and the owner asked for the room.
-    // Capped against the viewport by the modal itself, so a small laptop gets what it has.
-    <Modal open title={def.name} onClose={onClose} size="full">
+    // Named for the champion it is about, which is how a spec asks for it and how a screen
+    // reader announces the region a player has just changed by pressing a card in the roll.
+    <section className={styles.sheet} aria-label={def.name}>
+      <h2 className={styles.sheetName}>{def.name}</h2>
       <div className={styles.body}>
         {/* Two columns: who they are on the left, everything you can do to them on the
             right. The split is the genre's own — this is the shape the reference game uses
@@ -515,7 +509,7 @@ export function ChampionDetailModal({
           }}
         />
       )}
-    </Modal>
+    </section>
   );
 }
 

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, goToScreen, registerRaw } from './support';
+import { championSheet, chooseStarter, goToScreen, registerRaw } from './support';
 
 /**
  * Imprint and Standing, in a real browser.
@@ -47,7 +47,7 @@ test.describe('a collection', () => {
     await goToScreen(page, 'Roster');
     await page.getByText('Anuria', { exact: true }).first().click();
 
-    const sheet = page.getByRole('dialog');
+    const sheet = championSheet(page);
     await expect(sheet.getByRole('columnheader', { name: /masteries/i })).toBeVisible({
       timeout: 15_000,
     });

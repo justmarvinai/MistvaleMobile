@@ -166,6 +166,58 @@ describe('card grids', () => {
     ).toEqual([]);
   });
 
+  it('never draws two places with the same picture', () => {
+    // The Mistspire and Trials sat side by side on the Battle hub wearing the same
+    // `icon-rune-stone`, which is what the owner reported as "the same icon" — the small
+    // dock glyphs were already different (`tower-fall` against `maze`), and the card's art
+    // is the thing anybody actually looks at.
+    //
+    // Scoped to `PLACES` on purpose. A hub and a screen *inside* it may share art — they
+    // are never on the same page, since the dock draws hubs without art and the Haven
+    // draws places without hubs — and forbidding that would be a rule about nothing.
+    const seen = new Map<string, ScreenId>();
+    const clashes: string[] = [];
+    for (const screen of PLACES) {
+      const owner = seen.get(screen.art);
+      if (owner) clashes.push(`${owner} and ${screen.id} both draw ${screen.art}`);
+      else seen.set(screen.art, screen.id);
+    }
+    expect(clashes, 'two destinations a player sees together must not look the same').toEqual([]);
+  });
+
+  it('never stretches a card that cannot stretch', () => {
+    // The library's `ChampionCard` is `width: var(--fui-champ-w); aspect-ratio: 3 / 4` with
+    // every part of its content absolutely positioned, so its in-flow contribution is about
+    // a third of the height it paints at. A grid stretches its items by default, the row
+    // track sized itself to that contribution, and **every champion grid in the game
+    // overlapped its own rows by ninety pixels** — hiding the star rank, the name and the
+    // power figure on every row but the last (C19).
+    //
+    // It hides in plain sight because it needs *two rows*: a picker showing four champions
+    // is one row and looks perfect. So this is a static check rather than a browser one —
+    // the shape is wrong whether or not a given screen happens to have enough champions in
+    // it today.
+    const offenders: string[] = [];
+    for (const path of stylesheets(root)) {
+      if (path.includes(`${'fui'}/`)) continue;
+      const source = readFileSync(path, 'utf8');
+      // Each rule block that sizes its tracks from a fixed card width must also say how its
+      // items align, or the default (`stretch`) fights the card's own aspect ratio.
+      for (const block of source.split('}')) {
+        if (!/grid-template-columns:[^;]*\$(card-champion|roll-card)/.test(block)) continue;
+        if (/align-items:\s*(start|flex-start)/.test(block)) continue;
+        if (/@include card-grid/.test(block)) continue;
+        offenders.push(
+          `${path.slice(root.length + 1)}: a fixed-height card grid without align-items: start`,
+        );
+      }
+    }
+    expect(
+      offenders,
+      'a grid of aspect-ratio cards must start-align them, or the rows overlap',
+    ).toEqual([]);
+  });
+
   it('stretch rather than leaving phantom columns', () => {
     const offenders: string[] = [];
     for (const path of stylesheets(root)) {

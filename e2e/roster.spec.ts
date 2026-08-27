@@ -41,6 +41,9 @@ test.describe('the roster', () => {
 
     await goToScreen(page, 'Roster');
 
+    // Behind a button since C19: the roll is a column beside the champion's sheet, and
+    // seven controls across it would leave no room for the champions they narrow.
+    await page.getByRole('button', { name: /^filters/i }).click();
     const filters = page.getByRole('group', { name: /narrow the roster/i });
     await expect(filters).toBeVisible({ timeout: 15_000 });
 

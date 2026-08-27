@@ -262,7 +262,7 @@ export function ArenaScreen(): JSX.Element {
                   <Fui
                     of={TierBadge}
                     className={styles.offerBadge}
-                    options={{ ...arenaTierEmblem(offer.tier), size: 40, compact: true }}
+                    options={{ ...arenaTierEmblem(offer.tier), size: 56, compact: true }}
                     attrs={{ title: ARENA_TIER_LABELS[offer.tier] }}
                   />
                   <div className={styles.offerWho}>
@@ -279,6 +279,13 @@ export function ArenaScreen(): JSX.Element {
                   </div>
                 </header>
 
+                {/* What the fight is worth, in its own column so the numbers line up down
+                    the list rather than sitting wherever each card's text ended. */}
+                <span className={styles.stakes}>
+                  <span className={styles.gain}>+{offer.ratingGain}</span>
+                  <span className={styles.loss}>{offer.ratingLoss}</span>
+                </span>
+
                 {/* Four faces rather than four names. What a player is deciding is whether
                     they can beat this team, and a wall of text in five cards side by side
                     is the one shape that cannot be compared at a glance. */}
@@ -291,7 +298,7 @@ export function ArenaScreen(): JSX.Element {
                         <Portrait
                           src={art.portrait ?? null}
                           name={championName(member.championKey)}
-                          size={44}
+                          size={72}
                         />
                         <span className={styles.memberMeta}>
                           {member.level}
@@ -303,15 +310,7 @@ export function ArenaScreen(): JSX.Element {
                 </ul>
 
                 <footer className={styles.offerFoot}>
-                  {/* The stake and the button were overlapping: the footer was a two-item
-                      row with no minimum on either, so a wide button pushed the numbers
-                      underneath itself. They are stacked columns now. */}
-                  <span className={styles.stakes}>
-                    <span className={styles.gain}>+{offer.ratingGain}</span>
-                    <span className={styles.loss}>{offer.ratingLoss}</span>
-                  </span>
                   <Button
-                    size="sm"
                     disabled={outOfTokens}
                     onClick={() => setAttacking(offer)}
                     title={outOfTokens ? 'No attack tokens left' : undefined}

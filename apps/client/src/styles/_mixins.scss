@@ -105,11 +105,17 @@
   }
 }
 
-/// Custom scrollbar matching the panel palette.
+/// A scrollbar in the panel palette, for one element.
+///
+/// **Rarely wanted now** — since C19 `global.scss` paints every scrollbar in the game, so
+/// an element that simply scrolls needs nothing. This is for the case where one has to look
+/// *different* from the rest, and it is kept because it is the honest place to write that.
+///
+/// Note that it deliberately does not set `scrollbar-width` or `scrollbar-color`: setting
+/// either to anything but `auto` makes Chromium ignore every `::-webkit-scrollbar-*` rule
+/// on the element, which is exactly the trap the global block documents. Firefox falls back
+/// to the page's own treatment, which is the right answer for a one-off anyway.
 @mixin pixel-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: $edge-bright $panel-inset;
-
   &::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -127,4 +133,28 @@
       background: $accent-dim;
     }
   }
+}
+
+/// A grid of fixed-width painted cards.
+///
+/// **`align-items: start` is the whole point of this mixin**, and it fixes a bug that was
+/// in every champion grid in the game (C19). The library's `ChampionCard` is a `<button>`
+/// sized `width: var(--fui-champ-w); aspect-ratio: 3 / 4`, and everything inside it is
+/// absolutely positioned — so its *in-flow* content contributes about a third of its real
+/// height. A grid stretches its items by default; the row track sized itself to that
+/// content contribution, the card then painted at its aspect ratio, and every row overlapped
+/// the one below it by ninety pixels. What that covered was the bottom of the card: the star
+/// rank, the name and the power figure, on every row but the last.
+///
+/// It is invisible until a grid has two rows in it, which is why it survived: a picker with
+/// four champions in it is one row, and the roster's own grid was the one place it showed.
+///
+/// `auto-fill` with a *fixed* track rather than `auto-fit` with `1fr` — the opposite of the
+/// rule for flexible cards (C12), because these cannot stretch at all.
+@mixin card-grid($width) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, $width);
+  align-items: start;
+  gap: $space-2;
+  align-content: start;
 }

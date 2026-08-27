@@ -298,6 +298,23 @@ export async function leaveResults(page: Page): Promise<void> {
 }
 
 /**
+ * The champion sheet — the roster's right-hand pane.
+ *
+ * It was a full-screen dialog opened by clicking a card, and specs asked for it as
+ * `getByRole('dialog')`. Since C19 the roster is a three-pane screen and the sheet is a
+ * region named for whoever is selected, so this is the one place that knows how to find it
+ * — the `goToScreen` lesson, one edit for the next rearrangement rather than a hunt.
+ */
+export function championSheet(page: Page): Locator {
+  // Named for the champion it is about, so it is found by its *shape* rather than by a name
+  // that changes with the selection: the one region on the screen carrying the tab strip.
+  return page
+    .getByRole('region')
+    .filter({ has: page.getByRole('tablist') })
+    .first();
+}
+
+/**
  * Asserts an element is not merely *in the layout* but actually on top at its own centre.
  *
  * Playwright's `toBeVisible` answers a CSS question — is it displayed, does it have a

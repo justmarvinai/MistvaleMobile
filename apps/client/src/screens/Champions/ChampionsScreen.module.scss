@@ -10,12 +10,64 @@
   min-height: 0;
 }
 
+/* ── The three panes ────────────────────────────────────────────────────────────
+   The roll on the left, the champion filling the rest. Two columns rather than three,
+   because the sheet is already two of its own — the portrait and their facts, then their
+   relics and ladders — so the screen reads as the genre's three panes and is built as the
+   two things that scroll independently.
+
+   `minmax(0, 1fr)` on the sheet and `min-height: 0` on both: a grid child's default minimum
+   is its content, so without these the pane grows past the row and the *page* scrolls,
+   which is C12c's finding one level down. */
+.panes {
+  display: grid;
+  grid-template-columns: $roll-rail minmax(0, 1fr);
+  gap: $space-4;
+  min-height: 0;
+}
+
+/* One column under about a laptop: the rail becomes a strip of champions above the sheet
+   rather than a column beside it, because 380px of rail plus a sheet that wants 700 is two
+   things that both need more. */
+@media (max-width: 1080px) {
+  .panes {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+}
+
+.roll {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-height: 0;
+  padding: $space-2;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.38));
+  border: 1px solid $edge;
+}
+
 .controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: $space-3;
-  margin-bottom: $space-2;
+  gap: $space-2;
+}
+
+.sortField {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Visible to a screen reader and to nobody else — the select's own label, which the
+   reference game's dropdown carries as a word and this carries as its chosen value. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* The five filters the owner's list named, plus the name box. Wraps rather than squashing:
@@ -48,6 +100,7 @@
    the native control already has all of it and only wants the theme's colours. */
 .select,
 .search {
+  width: 100%;
   padding: 3px $space-1;
   background: $panel-inset;
   border: 1px solid $edge;
@@ -62,6 +115,11 @@
 
 .search {
   width: 8rem;
+}
+
+.field .select,
+.field .search {
+  width: auto;
 }
 
 .check {
@@ -80,24 +138,19 @@
   margin-left: auto;
 }
 
+/* The roll itself. Fixed tracks from the card's own width — the third rule this file has
+   carried since D9 — at the rail's size rather than the grid's, so three fit across it. */
 .grid {
   display: grid;
-  /* 150px is the painted card's own width; a narrower track overflows it. */
-  grid-template-columns: repeat(auto-fill, $card-champion);
+  grid-template-columns: repeat(auto-fill, $roll-card);
+  grid-auto-rows: min-content;
+  align-items: start;
   gap: $space-2;
   align-content: start;
-  max-height: 100%;
+  justify-content: center;
+  min-height: 0;
   overflow-y: auto;
-  padding-right: $space-2;
-}
-
-/* The library paints both controls; this only says how they sit in the row. */
-.sorts {
-  flex: none;
-}
-
-.toggle {
-  flex: none;
+  padding-right: $space-1;
 }
 
 .collection {

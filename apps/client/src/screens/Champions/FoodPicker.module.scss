@@ -25,6 +25,7 @@
   /* 150px is the painted card's own width. At 8rem the track was 22px narrower than the
      thing in it, which is what made every row spill sideways. */
   grid-template-columns: repeat(auto-fill, $card-champion);
+  align-items: start;
   gap: $space-2;
   align-content: start;
   /* Enough for two full rows of the painted card plus the top of a third, which is the
@@ -33,7 +34,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: $space-2;
-  @include pixel-scrollbar;
 }
 
 .actions {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseStarter, goToScreen, leaveTutorial, registerRaw } from './support';
+import { championSheet, chooseStarter, goToScreen, leaveTutorial, registerRaw } from './support';
 
 /**
  * Saved relic sets, and acting on a filter instead of on a click per relic.
@@ -55,7 +55,7 @@ test.describe('saved relic sets', () => {
     const roster = page.getByRole('button', { name: /lv \d+ of \d+/i });
     await expect(roster.first()).toBeVisible({ timeout: 15_000 });
     await roster.first().click();
-    const sheet = page.getByRole('dialog');
+    const sheet = championSheet(page);
     await expect(sheet).toBeVisible({ timeout: 20_000 });
     await sheet.getByRole('tab', { name: /relics/i }).click();
 

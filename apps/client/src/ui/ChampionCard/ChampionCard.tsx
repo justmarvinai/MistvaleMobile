@@ -39,6 +39,7 @@ export function ChampionCard({
   onOpen,
   selectable,
   selected,
+  size,
   badge,
 }: {
   champion: RosterChampion;
@@ -47,6 +48,13 @@ export function ChampionCard({
   /** Renders as a picker rather than a link — used by the food and team choosers. */
   selectable?: boolean;
   selected?: boolean;
+  /**
+   * Card width in pixels. The library scales everything inside from it — the portrait, the
+   * star track, the level line, the type — so a smaller card is the *same* card rather than
+   * a second, plainer component. That is what lets the roster's rail (C19) and every picker
+   * in the game draw one champion one way.
+   */
+  size?: number;
   /**
    * A short mark over the card's corner, where the pick's *position* matters.
    *
@@ -90,6 +98,7 @@ export function ChampionCard({
         // is what the roster screen has always called "Health" two clicks away.
         ...(def?.role ? { roleLabel: ROLE_NAMES[def.role] ?? def.role } : {}),
         power: champion.power,
+        ...(size === undefined ? {} : { size }),
         // The padlock is the library's own overlay and means the same thing here: this
         // one is protected and cannot be fed away.
         ...(champion.locked ? { locked: true } : {}),

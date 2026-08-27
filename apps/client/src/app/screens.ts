@@ -248,7 +248,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
     label: 'The Mistspire',
     icon: 'nav-spire',
     glyph: 'glyph-rockets',
-    art: 'icon-rune-stone',
+    art: 'earth-rock-spire',
     blurb:
       'Thirty floors, and no two of them want the same team. Some are warded — only champions of one element, one faction or one role may climb — so the tower is the one place a broad roster beats a deep one.',
     unlock: 'spire',
@@ -261,7 +261,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
     label: 'Trials',
     icon: 'nav-trials',
     glyph: 'glyph-arcane-symbol',
-    art: 'icon-rune-stone',
+    art: 'earth-rune-arch',
     blurb:
       'Four champions you do not own, against an enemy nobody else gets a different version of. The only thing being measured here is how you play it.',
     unlock: 'trials',
@@ -274,7 +274,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
     label: 'Expeditions',
     icon: 'nav-missions',
     glyph: 'glyph-eagle-staff',
-    art: 'crest-gilded-crown',
+    art: 'tech-compass',
     blurb:
       'Send champions somewhere that is not a fight. They are gone for hours and cannot be fielded while they are — which is what makes a wide roster worth having.',
     unlock: 'expeditions',
@@ -284,7 +284,9 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'champions',
-    width: 'wide',
+    // Three panes need the window (C19) — a rail, a champion and everything you can do to
+    // them. `wide` capped it at 1800 and left the sheet squeezed on a 1920 display.
+    width: 'full',
     label: 'Roster',
     icon: 'nav-champions',
     glyph: 'glyph-cloaked-figure',
