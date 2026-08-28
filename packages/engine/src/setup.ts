@@ -1,3 +1,4 @@
+import { auraCoversMode } from '@mistvale/shared';
 import type {
   Aura,
   ChampionDef,
@@ -262,13 +263,10 @@ function applyAura(
   aura: Aura,
   mode: BattleRules['mode'],
 ): void {
-  const areaMatches =
-    aura.area === 'any' ||
-    (aura.area === 'campaign' &&
-      (mode === 'campaign' || mode === 'tutorial' || mode === 'practice')) ||
-    (aura.area === 'arena' && mode === 'arena') ||
-    (aura.area === 'depths' && (mode === 'dungeon' || mode === 'springs' || mode === 'proving'));
-  if (!areaMatches) return;
+  // Shared, because the team screen has to say whether this aura will do anything before
+  // the energy is spent — and a second copy of these four cases is a screen that can
+  // disagree with the fight it is describing.
+  if (!auraCoversMode(aura.area, mode)) return;
 
   const leader = entries[0]!.def;
   units.forEach((unit, index) => {

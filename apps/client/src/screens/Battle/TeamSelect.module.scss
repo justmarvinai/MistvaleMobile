@@ -144,6 +144,12 @@
   flex-wrap: wrap;
 }
 
+/* The cost on the left, the switch and the button together on the right — the reference
+   screen's shape, and the order the decision is actually made in. */
+.actions .cost {
+  margin-right: auto;
+}
+
 .farm,
 .practice {
   padding-top: $space-2;
@@ -239,4 +245,26 @@
   color: $muted;
   font-size: 0.85rem;
   line-height: 1.6;
+}
+
+/* Start on auto, beside the cost and the button.
+
+   The preference is `loadoutStore`'s, which the fight screen's own toggle already reads —
+   so this checkbox and that button are the same standing choice rather than two, and a
+   player who always autos never presses it again (B2). */
+.auto {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  color: $parchment-dim;
+  font-size: 0.82rem;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: $accent;
+    cursor: pointer;
+  }
 }

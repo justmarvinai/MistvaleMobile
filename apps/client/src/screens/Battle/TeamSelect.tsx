@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   championMeets,
   multiBattleRefusal,
@@ -25,17 +25,21 @@ import { MultiSummary } from './MultiSummary';
 import styles from './TeamSelect.module.scss';
 import { BossCard } from '../../ui/BossCard/BossCard';
 import { stageBoss } from '../../ui/BossCard/bossRules';
-import { Portrait } from '../../ui/Portrait/Portrait';
-import { championArt } from '../../ui/championArt';
-import { ChampionCard } from '../../ui/ChampionCard/ChampionCard';
 import { Opposition } from './Opposition';
+import { Lineup, MAX_SLOTS, leaderAura } from './Lineup';
 
 /**
  * Picking a team before a fight.
  *
  * Four slots, filled by clicking a champion. Slot one is the leader, whose aura applies —
  * which is why the order is the player's to choose rather than something we sort for them
- * (docs/UI_UX_DESIGN.md §3, screen 7).
+ * (docs/UI_UX_DESIGN.md §3, screen 7), and since C22 the screen finally *says* what that
+ * aura is.
+ *
+ * The layout is `Lineup`, shared with the Arena's picker: your four on the left, what is
+ * waiting on the right, the roster underneath. What stays here is everything about *cost* —
+ * energy against keys against strikes, the farm allowance, the practice sandbox — because
+ * that is three economies and a layout that knew them all would be where they get confused.
  *
  * Every map opens this: a campaign stage and a Depths floor are the same kind of thing, and
  * the mode the battle starts in is read off the stage rather than passed in, so a new mode
@@ -78,8 +82,6 @@ export interface AttemptCost {
   summary?: string;
 }
 
-const MAX_SLOTS = 4;
-
 /**
  * How a ward reads on the door, using content's own names for a faction.
  *
@@ -112,8 +114,6 @@ export function TeamSelect({
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
   const roster = useRosterStore((state) => state.champions);
-  const loadRoster = useRosterStore((state) => state.load);
-  const rosterLoading = useRosterStore((state) => state.loading);
   const energy = usePlayerStore((state) => state.player?.energy.value ?? 0);
   const multi = usePlayerStore((state) => state.multiBattle);
   const refreshPlayer = usePlayerStore((state) => state.refresh);
@@ -126,6 +126,8 @@ export function TeamSelect({
 
   const rememberedTeam = useLoadoutStore((state) => state.teamFor);
   const rememberTeam = useLoadoutStore((state) => state.remember);
+  const autoStart = useLoadoutStore((state) => state.auto);
+  const setAuto = useLoadoutStore((state) => state.setAuto);
 
   /**
    * The team the player has actually touched, or null while they have touched nothing.
@@ -138,10 +140,6 @@ export function TeamSelect({
   const [runs, setRuns] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<MultiBattleResult | null>(null);
-
-  useEffect(() => {
-    void loadRoster();
-  }, [loadRoster]);
 
   /**
    * What the dialog opens on: the last team sent into this mode.
@@ -285,187 +283,154 @@ export function TeamSelect({
     );
   }
 
+  const { aura, idle } = leaderAura(team, roster, championsByKey, bundle?.factions, stage.mode);
+  const teamPower = team
+    .map((id) => roster.find((owned) => owned.id === id)?.power ?? 0)
+    .reduce((sum, power) => sum + power, 0);
+
   return (
-    // 720 rather than the default 480. The body asked for a 30rem minimum inside a 480px
-    // panel, so the painted frame's own border and padding had nowhere to go and the
-    // action rows drew straight through it — which is the "bugged window" the owner saw.
-    <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose} size="wide">
-      <div className={styles.body}>
-        <p className={styles.summary}>
-          {attempts
-            ? (attempts.summary ??
-              `One wave · ${attempts.turnCap} turns · paid for the damage you do`)
-            : `${stage.waves.length} waves · ${stage.energyCost} energy · ${stage.rewards.silverMin}–${stage.rewards.silverMax} silver`}
-        </p>
+    // `full` rather than `wide`: the confrontation is two formations side by side with a
+    // roster under them, and at 1240 the two sides squeeze to a width where a champion card
+    // is a thumbnail. The layout stacks the sides below 1100px on its own.
+    <Modal open title={title ?? `Stage ${stage.number}`} onClose={onClose} size="full">
+      <Lineup
+        yours={{
+          label: 'Your team',
+          power: teamPower,
+          aura,
+          auraIdle: idle,
+          auraHint: 'Whoever stands in slot one brings their aura to the whole team.',
+        }}
+        theirs={{ label: 'What is waiting' }}
+        opposition={
+          <>
+            {/* Who is on the other side, wave by wave. Content has named every enemy of
+                every stage since P2 and the only screen that ever read them was the fight
+                itself — by which point the energy is spent and the team is locked. */}
+            <Opposition stage={stage} heading={false} />
 
-        {/* The ward, first and in words, because it decides which of the cards below are
-            even worth reading. A player who scrolls a roster of thirty and then finds out
-            four of them were never eligible has been made to do the work twice. */}
-        {wardLabelText && (
-          <p className={styles.ward}>
-            <strong>Warded.</strong> Only {wardLabelText} may climb this floor.
-          </p>
-        )}
+            {/* What the thing at the end *does* about being fought. Content has carried a
+                boss's mechanics since P6 and no screen had ever said what was in them, so a
+                keep meant to be a puzzle was a wall you lost to before guessing. On this
+                side of the field because it is a fact about them, not about you. */}
+            {boss && (
+              <BossCard
+                name={boss.name}
+                where={boss.archetype === 'warlord' ? 'Warlord' : 'Keeper of the deep'}
+                mechanics={boss.bossMechanics}
+              />
+            )}
+          </>
+        }
+        team={team}
+        onToggle={toggle}
+        {...(ward ? { eligible: meetsWard } : {})}
+        {...(wardLabelText
+          ? { barredReason: `The ward turns them back — only ${wardLabelText} may climb.` }
+          : {})}
+        notices={
+          <>
+            <p className={styles.summary}>
+              {attempts
+                ? (attempts.summary ??
+                  `One wave · ${attempts.turnCap} turns · paid for the damage you do`)
+                : `${stage.waves.length} waves · ${stage.energyCost} energy · ${stage.rewards.silverMin}–${stage.rewards.silverMax} silver`}
+            </p>
 
-        {/* Who is on the other side, wave by wave. Content has named every enemy of every
-            stage since P2 and the only screen that ever read them was the fight itself —
-            by which point the energy is spent and the team is locked. */}
-        <Opposition stage={stage} />
+            {/* The ward, in words, because it decides which of the cards below are even
+                worth reading. A player who scrolls a roster of thirty and then finds out
+                four of them were never eligible has been made to do the work twice. */}
+            {wardLabelText && (
+              <p className={styles.ward}>
+                <strong>Warded.</strong> Only {wardLabelText} may climb this floor.
+              </p>
+            )}
 
-        {/* What the thing at the end *does* about being fought. Content has carried a
-            boss's mechanics since P6 and no screen had ever said what was in them — so a
-            keep that is meant to be a puzzle was a wall you lost to before guessing. It is
-            here rather than in the fight because this is where the team is chosen. */}
-        {boss && (
-          <BossCard
-            name={boss.name}
-            where={boss.archetype === 'warlord' ? 'Warlord' : 'Keeper of the deep'}
-            mechanics={boss.bossMechanics}
-          />
-        )}
-
-        <div className={styles.slots}>
-          {Array.from({ length: MAX_SLOTS }, (_, index) => {
-            const id = team[index];
-            const owned = roster.find((entry) => entry.id === id);
-            const def = owned ? championsByKey.get(owned.championKey) : undefined;
-            return (
-              <button
-                key={index}
-                type="button"
-                className={styles.slot}
-                data-filled={Boolean(id)}
-                onClick={() => id && toggle(id)}
-                title={id ? 'Remove from the team' : 'Empty slot'}
-              >
-                {/* A face only when somebody is standing there. `Portrait` draws its own
-                    stand-in for a missing image, which is right for an art-pending champion
-                    and wrong for an empty slot — four hooded figures under "Leader — Slot 2
-                    — Slot 3 —" reads as a team that has already been picked. */}
-                {def ? (
-                  <Portrait
-                    src={championArt(def, bundle?.assets).portrait ?? null}
-                    name={def.name}
-                    size={40}
-                  />
-                ) : (
-                  <span className={styles.slotEmpty} aria-hidden="true" />
-                )}
-                <span className={styles.slotRole}>
-                  {index === 0 ? 'Leader' : `Slot ${index + 1}`}
-                </span>
-                <span className={styles.slotName}>{def?.name ?? '—'}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {rosterLoading && roster.length === 0 ? (
-          <p className={styles.empty}>Reading the roster…</p>
-        ) : roster.length === 0 ? (
-          <p className={styles.empty}>
-            You have no champions yet. Choose a starter from the Haven first.
-          </p>
-        ) : (
-          // The same painted card the roster draws, which is the point: a player choosing
-          // who to send should be looking at exactly what they looked at when they decided
-          // who was worth levelling. A name and a level in a row cannot say rarity,
-          // affinity or power, and those are the three things the choice turns on.
-          <div className={styles.roster}>
-            {roster.map((owned) => (
-              <div
-                key={owned.id}
-                className={meetsWard(owned.championKey) ? undefined : styles.barred}
-                title={
-                  meetsWard(owned.championKey)
-                    ? undefined
-                    : `The ward turns them back — only ${wardLabelText} may climb.`
-                }
-              >
-                <ChampionCard
-                  champion={owned}
-                  def={championsByKey.get(owned.championKey)}
-                  selectable
-                  selected={team.includes(owned.id)}
-                  // Dimmed rather than removed. A ward is a puzzle about a roster, and a
-                  // roster with the wrong half hidden cannot be reasoned about — the answer
-                  // to "who else could I bring" is usually somebody you had forgotten you
-                  // had. Picking one is still allowed; starting with one is not.
-                  onOpen={() => toggle(owned.id)}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {error && <p className={styles.error}>{error}</p>}
-
-        <div className={styles.actions}>
-          <span className={styles.cost}>
-            {attempts
-              ? `Costs one ${attempts.noun} — ${attempts.left} of ${attempts.perDay} left today`
-              : affordable
-                ? `Costs ${stage.energyCost} energy — you have ${energy}`
-                : `Needs ${stage.energyCost} energy — you have ${energy}`}
-          </span>
-          <Button onClick={() => void start(stage.mode)} disabled={!canStart}>
-            {busy ? 'Starting…' : 'Into the mist'}
-          </Button>
-        </div>
-
-        {/* The same sentence the server would answer with, said before anything is spent.
-            `teamRestrictionFailure` is shared, so these are one sentence rather than two. */}
-        {wardFailure && <p className={styles.wardFailure}>{wardFailure}</p>}
-
-        {multi.unlocked && !attempts && !batchRefusal && (
-          <div className={styles.farm}>
-            <span className={styles.farmLabel}>
-              Farm without watching — {multi.runsLeftToday} of {multi.dailyCap} runs left today
-            </span>
-            <div className={styles.stepper}>
-              <button
-                type="button"
-                className={styles.step}
-                onClick={() => setRuns((value) => Math.max(1, value - 1))}
-                disabled={runs <= 1}
-                aria-label="One fewer run"
-              >
-                −
-              </button>
-              <span className={styles.stepValue} aria-live="polite">
-                ×{Math.min(runs, maxRuns)}
+            {error && <p className={styles.error}>{error}</p>}
+          </>
+        }
+        footer={
+          <>
+            <div className={styles.actions}>
+              <span className={styles.cost}>
+                {attempts
+                  ? `Costs one ${attempts.noun} — ${attempts.left} of ${attempts.perDay} left today`
+                  : affordable
+                    ? `Costs ${stage.energyCost} energy — you have ${energy}`
+                    : `Needs ${stage.energyCost} energy — you have ${energy}`}
               </span>
-              <button
-                type="button"
-                className={styles.step}
-                onClick={() => setRuns((value) => Math.min(maxRuns, value + 1))}
-                disabled={runs >= maxRuns}
-                aria-label="One more run"
-              >
-                +
-              </button>
+              {/* Auto as a standing choice rather than a per-fight one, which is what
+                  `loadoutStore` has held since B2 — the fight screen's toggle and this
+                  checkbox are the same preference, so a player who always autos never
+                  presses it again. */}
+              <label className={styles.auto}>
+                <input
+                  type="checkbox"
+                  checked={autoStart}
+                  onChange={(event) => setAuto(event.target.checked)}
+                />
+                Start on auto
+              </label>
+              <Button onClick={() => void start(stage.mode)} disabled={!canStart}>
+                {busy ? 'Starting…' : 'Into the mist'}
+              </Button>
             </div>
-            <Button variant="ghost" onClick={() => void farm()} disabled={!canFarm}>
-              {busy ? 'Fighting…' : 'Send them in'}
-            </Button>
-          </div>
-        )}
 
-        {cleared && (
-          <div className={styles.practice}>
-            <span className={styles.practiceLabel}>
-              Practise it instead — no energy, no rewards, no risk.
-            </span>
-            <Button
-              variant="ghost"
-              onClick={() => void start('practice')}
-              disabled={!picked || busy}
-            >
-              Practise
-            </Button>
-          </div>
-        )}
-      </div>
+            {/* The same sentence the server would answer with, said before anything is
+                spent. `teamRestrictionFailure` is shared, so these are one sentence. */}
+            {wardFailure && <p className={styles.wardFailure}>{wardFailure}</p>}
+
+            {multi.unlocked && !attempts && !batchRefusal && (
+              <div className={styles.farm}>
+                <span className={styles.farmLabel}>
+                  Farm without watching — {multi.runsLeftToday} of {multi.dailyCap} runs left today
+                </span>
+                <div className={styles.stepper}>
+                  <button
+                    type="button"
+                    className={styles.step}
+                    onClick={() => setRuns((value) => Math.max(1, value - 1))}
+                    disabled={runs <= 1}
+                    aria-label="One fewer run"
+                  >
+                    −
+                  </button>
+                  <span className={styles.stepValue} aria-live="polite">
+                    ×{Math.min(runs, maxRuns)}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.step}
+                    onClick={() => setRuns((value) => Math.min(maxRuns, value + 1))}
+                    disabled={runs >= maxRuns}
+                    aria-label="One more run"
+                  >
+                    +
+                  </button>
+                </div>
+                <Button variant="ghost" onClick={() => void farm()} disabled={!canFarm}>
+                  {busy ? 'Fighting…' : 'Send them in'}
+                </Button>
+              </div>
+            )}
+
+            {cleared && (
+              <div className={styles.practice}>
+                <span className={styles.practiceLabel}>
+                  Practise it instead — no energy, no rewards, no risk.
+                </span>
+                <Button
+                  variant="ghost"
+                  onClick={() => void start('practice')}
+                  disabled={!picked || busy}
+                >
+                  Practise
+                </Button>
+              </div>
+            )}
+          </>
+        }
+      />
     </Modal>
   );
 }

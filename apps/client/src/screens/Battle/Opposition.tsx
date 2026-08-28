@@ -21,7 +21,20 @@ import styles from './Opposition.module.scss';
  * building for. Everything a chip cannot hold — the role, the affinity, what a boss does
  * about being fought — is on the hover.
  */
-export function Opposition({ stage }: { stage: StageDef }): JSX.Element | null {
+export function Opposition({
+  stage,
+  heading = true,
+}: {
+  stage: StageDef;
+  /**
+   * Whether to print its own title.
+   *
+   * Off inside the lineup, where the side of the field it sits on is already headed "What
+   * is waiting" — a panel repeating the banner above it is C12c's "says its own name
+   * twice", and adding this layout recreated that fault the same afternoon it was written.
+   */
+  heading?: boolean;
+}): JSX.Element | null {
   const bundle = useContentStore((state) => state.bundle);
 
   const enemies = useMemo(
@@ -33,7 +46,7 @@ export function Opposition({ stage }: { stage: StageDef }): JSX.Element | null {
 
   return (
     <section className={styles.opposition} aria-label="What you will face">
-      <h3 className={styles.title}>What is waiting</h3>
+      {heading && <h3 className={styles.title}>What is waiting</h3>}
       <div className={styles.waves}>
         {stage.waves.map((wave, index) => (
           <div key={index} className={styles.wave}>

@@ -332,6 +332,11 @@ export function ArenaScreen(): JSX.Element {
           blurb={`Costs one attack token. Win and you take ${attacking.ratingGain} rating; lose and you give up ${Math.abs(attacking.ratingLoss)}. Either way the token is spent.`}
           confirmLabel="Onto the sand"
           initial={rememberedTeam('arena', new Set(rosterIds.map((owned) => owned.id)))}
+          opponent={{
+            name: attacking.profileName,
+            power: attacking.power,
+            team: attacking.team,
+          }}
           busy={busy !== null}
           onConfirm={(team) => void attack(team)}
           onClose={() => setAttacking(null)}

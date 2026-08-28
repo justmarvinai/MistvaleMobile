@@ -190,3 +190,32 @@ export const auraSchema = z.object({
   area: z.enum(['any', 'campaign', 'arena', 'depths']).default('any'),
 });
 export type Aura = z.infer<typeof auraSchema>;
+
+/**
+ * Whether an aura's area covers the mode a fight is being fought in.
+ *
+ * Shared because two places need the same answer for different reasons: the engine applies
+ * the bonus (`setup.ts`, `applyAura`) and the team screen says whether it will. They were
+ * one rule written twice for about ten minutes, and the copy was already wrong — an aura
+ * scoped to the campaign also covers the **tutorial and the sandbox**, which a client
+ * reading the enum literally would never have guessed and a player would have seen as a
+ * leader whose aura the screen said was dead and the fight applied anyway.
+ *
+ * The four names are content's, and each covers what a player would call that place: the
+ * Depths is its three modes, and the campaign is the campaign plus the two things that are
+ * the campaign wearing another name.
+ */
+export function auraCoversMode(area: Aura['area'], mode: string): boolean {
+  switch (area) {
+    case 'any':
+      return true;
+    case 'campaign':
+      return mode === 'campaign' || mode === 'tutorial' || mode === 'practice';
+    case 'arena':
+      return mode === 'arena';
+    case 'depths':
+      return mode === 'dungeon' || mode === 'springs' || mode === 'proving';
+    default:
+      return false;
+  }
+}

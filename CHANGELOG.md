@@ -5,6 +5,49 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — setting a lineup is a confrontation, not a column (C22)
+
+The owner's reference (2026-08-28, Raid's Classic Arena screen): **your four on the left,
+what you are walking into on the right, the roster underneath.** Every place in the game
+that asks for a lineup draws it now — a campaign stage, a Depths floor, the Titan, the
+Wurm, a Mistspire floor, an Arena attack and the Arena defence — because they are one
+component (`screens/Battle/Lineup`) rather than the two pickers they were.
+
+What that fixes is not decoration. The picker was a single column — a line of summary, the
+opposition, the boss, four empty slots, thirty cards, the button — so **the two things a
+player is actually comparing were four hundred pixels apart and never on screen at once.**
+A team choice is a comparison, and a layout that cannot hold both sides is asking somebody
+to keep one of them in their head.
+
+Three things arrived with the layout, each of them data the game already had:
+
+- **The leader's aura, in words.** Content has carried one on every champion since P1 and
+  the engine has applied it on every fight since P3 — and no screen has ever said what it
+  was. So the whole reason slot one is the player's to choose has been invisible: the
+  champion standing there has been changing the team's stats silently, and the only way to
+  find out which one to put there was to read the seed. It is on both banners now, and an
+  aura that does **nothing in this fight** says so rather than being hidden, because an
+  Arena aura on a Depths floor is the exact mistake the line exists to prevent.
+- **Team power on each side**, so the two are comparable at all.
+- **The roster narrows**, with the roster screen's own controls (`rosterFilter`, C19) rather
+  than a second set of dropdowns that would drift — thirty cards and "who can I bring" is
+  the same question that screen already answers.
+
+**The Arena is the case the shape was invented for**, because it is the one fight where the
+other side is a real team rather than a wave: the defender's own four, their power beside
+yours, and **their leader's aura**. An attack is decided by whose aura is bigger about as
+often as by whose champions are, and the screen had never said either.
+
+`auraCoversMode` moved into `packages/shared` so the engine and the screen read one rule.
+They were the same rule written twice for about ten minutes, and the copy was **already
+wrong**: an aura scoped to the campaign also covers the tutorial and the sandbox, which
+nothing about the word "campaign" says — a client reading the enum literally would have
+told a player their leader's aura was dead in a fight that applied it.
+
+Two smaller things: **Start on auto** is on the footer beside the cost, reading the standing
+preference the fight screen's own toggle already uses (`loadoutStore`, B2), and a filled
+slot shows the champion's face, level and star rank where it used to show a name.
+
 ### Added — the result screen says what your champions did (C21)
 
 Every fight in Mistvale ends the same way: four champions, a wall of numbers that scrolls
