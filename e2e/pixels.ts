@@ -151,3 +151,33 @@ export function meanColour(bitmap: Bitmap): [number, number, number] {
   const pixels = bitmap.width * bitmap.height;
   return [r / pixels, g / pixels, b / pixels];
 }
+
+/**
+ * How much of two shots of the same box differ, as a fraction.
+ *
+ * The question this exists for is "does that layer actually reach the screen": shoot a
+ * region, hide one layer, shoot it again, and the difference is that layer's whole
+ * contribution. It is the only way to ask it about a `<canvas>` — `elementFromPoint`
+ * cannot answer, because every layer of the backdrop is `pointer-events: none` and it
+ * skips those (C18), and a screenshot of the canvas *element* is a screenshot of the
+ * region it occupies, including whatever is painted on top of it.
+ *
+ * The tolerance is per channel and deliberately loose. The backdrop drifts and a fight
+ * animates, so two shots a moment apart are never byte-identical even where nothing
+ * changed; six is comfortably above that and far below "a champion is standing here".
+ */
+export function differingFraction(a: Bitmap, b: Bitmap, tolerance = 6): number {
+  if (a.width !== b.width || a.height !== b.height) {
+    throw new Error(`cannot compare ${a.width}×${a.height} with ${b.width}×${b.height}`);
+  }
+  let differing = 0;
+  for (let at = 0; at < a.data.length; at += 4) {
+    for (let channel = 0; channel < 3; channel += 1) {
+      if (Math.abs((a.data[at + channel] ?? 0) - (b.data[at + channel] ?? 0)) > tolerance) {
+        differing += 1;
+        break;
+      }
+    }
+  }
+  return differing / (a.width * a.height);
+}

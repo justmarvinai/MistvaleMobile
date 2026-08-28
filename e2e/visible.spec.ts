@@ -13,7 +13,7 @@ import {
   resolveBattle,
   setSimpleBattlefield,
 } from './support';
-import { decodePng, litFraction, meanColour } from './pixels';
+import { decodePng, differingFraction, litFraction, meanColour } from './pixels';
 
 /**
  * The screens a player looks at, checked for being *lookable at*.
@@ -603,6 +603,45 @@ test.describe('what a player can actually see', () => {
   }
 
   /**
+   * Nothing is painted over the battlefield.
+   *
+   * This is the bug C23 shipped, and it is worth stating exactly, because reading the
+   * stylesheet does not reveal it and neither did any of the other guards. The tab
+   * paintings are two `position: absolute` layers, added *before* the canvas in source
+   * order — which looks like "behind it" and is not. CSS paints positioned descendants
+   * above non-positioned in-flow content whatever the order says, and the shared canvas was
+   * `position: static`, so the paintings went **over** the whole battlefield. Every fight in
+   * the game lost its champions and its enemies while the HUD, the party frames and the
+   * floating damage numbers — DOM, in a layer above all of it — carried on perfectly. It is
+   * the empty battlefield of B2 for the sixth time, from a direction nothing had covered.
+   *
+   * The measurement is the only one that can answer it. `expectOnTop` cannot: every layer
+   * back here is `pointer-events: none` and `elementFromPoint` skips those (C18). Reading
+   * pixels off the canvas cannot either — an element screenshot captures the region the
+   * element occupies, including whatever covers it, which is precisely how a wallpaper
+   * passes for a battlefield. So the canvas is *hidden* and the field shot again: what
+   * changed is exactly what the canvas was contributing, and nothing else can fake it.
+   *
+   * Measured: 86% of the field is the canvas's own paint as shipped, and 0.00% — not a
+   * rounding error, zero — with the canvas back to `position: static`.
+   */
+  test('the battlefield is not painted over by the room behind it', async ({ page }) => {
+    test.slow();
+    await registerRaw(page, 'e2ecov', 'Covr');
+    await chooseStarter(page);
+    await enterStageOneOne(page);
+
+    await expect(page.locator('.fui-actionbar [role="button"]').first()).toBeVisible({
+      timeout: 30_000,
+    });
+    // The sprites attach a frame or two after the board arrives, and the ground plate is
+    // drawn with them; polling rather than sleeping keeps this honest on a slow box.
+    await expect
+      .poll(async () => Math.round((await canvasContribution(page)) * 100), { timeout: 30_000 })
+      .toBeGreaterThan(20);
+  });
+
+  /**
    * The ground reaches the sides of the window.
    *
    * The scene *contains* its 960×540 design canvas rather than cropping it, which is the
@@ -682,16 +721,75 @@ test.describe('what a player can actually see', () => {
  * champions at this size cover a couple of percent of it, which is why the bar is set at
  * four parts in a thousand: comfortably above the ground plate's own variation, and far
  * below anything a drawn unit contributes.
+ *
+ * **The layers behind the canvas are hidden first**, and that is not tidiness. C23 put the
+ * owner's tab paintings back there, and a painting is bright everywhere — so this measure,
+ * which is "is anything on this canvas", started answering yes about a canvas drawing
+ * nothing at all. It went blind on the day the thing it exists to catch came back.
  */
 async function litOnTheField(page: Page): Promise<number> {
   const box = page.viewportSize() ?? { width: 1280, height: 720 };
-  const shot = await page.screenshot({
-    clip: {
-      x: 0,
-      y: Math.round(box.height * 0.3),
-      width: box.width,
-      height: Math.round(box.height * 0.45),
-    },
-  });
+  const shot = await withBackdropHidden(page, () =>
+    page.screenshot({
+      clip: {
+        x: 0,
+        y: Math.round(box.height * 0.3),
+        width: box.width,
+        height: Math.round(box.height * 0.45),
+      },
+    }),
+  );
   return litFraction(decodePng(shot));
+}
+
+/**
+ * Runs something with everything *behind* the shared canvas hidden, then puts it back.
+ *
+ * "Behind" is read off the DOM rather than named: the stage wrapper draws its layers in
+ * source order, so the canvas's earlier siblings are the ones underneath it. A measurement
+ * of what the canvas drew must not be able to read them.
+ */
+/**
+ * How much of the field the shared canvas is actually drawing.
+ *
+ * Shoot the middle band, hide the canvas, shoot it again: what differs is the canvas's own
+ * contribution, and a canvas that reaches the screen through nothing contributes zero.
+ */
+async function canvasContribution(page: Page): Promise<number> {
+  const box = page.viewportSize() ?? { width: 1280, height: 720 };
+  const clip = {
+    x: 0,
+    y: Math.round(box.height * 0.3),
+    width: box.width,
+    height: Math.round(box.height * 0.45),
+  };
+  const setCanvasHidden = (hidden: boolean) =>
+    page.evaluate((hide) => {
+      const canvas = document.querySelector('canvas');
+      if (canvas) canvas.style.visibility = hide ? 'hidden' : '';
+    }, hidden);
+
+  const withCanvas = decodePng(await page.screenshot({ clip }));
+  await setCanvasHidden(true);
+  const withoutCanvas = decodePng(await page.screenshot({ clip }));
+  await setCanvasHidden(false);
+  return differingFraction(withCanvas, withoutCanvas);
+}
+
+async function withBackdropHidden<T>(page: Page, run: () => Promise<T>): Promise<T> {
+  const toggle = (hidden: boolean) =>
+    page.evaluate((hide) => {
+      const canvas = document.querySelector('canvas');
+      const layers = Array.from(canvas?.parentElement?.children ?? []);
+      for (const layer of layers.slice(0, layers.indexOf(canvas as Element))) {
+        (layer as HTMLElement).style.visibility = hide ? 'hidden' : '';
+      }
+    }, hidden);
+
+  await toggle(true);
+  try {
+    return await run();
+  } finally {
+    await toggle(false);
+  }
 }

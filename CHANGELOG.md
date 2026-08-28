@@ -5,6 +5,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the champions were painted over (C23a)
+
+The tab paintings covered the battlefield. Every fight in the game — campaign, Arena, the
+Depths, the Valewurm, all of them — drew a full HUD, party frames, a turn counter and
+floating damage numbers over an empty field, because the two layers C23 added *behind* the
+shared canvas were painted **in front of** it.
+
+The cause is one line that was never written. Both new layers are `position: absolute`, and
+the canvas was `position: static` — and CSS paints positioned descendants above
+non-positioned in-flow content **whatever the source order says**. Putting the paintings
+before the canvas in the markup looks like "behind it" and is not. The canvas is
+`position: relative` now, which puts all four layers in one painting step where source
+order decides: wallpaper, wash, canvas, vignette.
+
+Two guards came out of it, and the second one matters more than the first:
+
+- **`the battlefield is not painted over by the room behind it`** shoots the field, hides
+  the canvas, and shoots it again — what changed is the canvas's own contribution, and a
+  covered canvas contributes nothing. Measured: **86% as shipped, 0.00% with the canvas back
+  to `static`.** Nothing else can ask this. `expectOnTop` cannot, because every layer of the
+  backdrop is `pointer-events: none` and `elementFromPoint` skips those (C18's lesson); and
+  reading pixels off the canvas cannot either, because an element screenshot captures the
+  region the element occupies **including whatever covers it** — which is exactly how a
+  wallpaper passes for a battlefield.
+- **The existing "the battlefield has bodies on it" went blind on the same day**, for that
+  second reason: it screenshots a band of the viewport and asks how much of it is brighter
+  than the ground, and a painting is bright everywhere. It hides the layers behind the
+  canvas before measuring now, so it answers about the canvas again rather than about the
+  room. Confirmed by mutation: with the canvas drawing nothing it reports 1 part in a
+  thousand against a bar of 4.
+
 ### Added — every tab has a room of its own (C23)
 
 The owner's six paintings (2026-08-28), one per dock tab: Combat, the Haven, Champions, the
