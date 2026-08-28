@@ -95,7 +95,7 @@ const DAILIES: QuestDef[] = [
     'Trade in the Bazaar',
     'Buy something from the Bazaar.',
     [goal('shopPurchase', 1)],
-    { energy_pack_small: 1 },
+    { energy: 40 },
     { unlockLevel: 5 },
   ),
   quest(
@@ -105,7 +105,7 @@ const DAILIES: QuestDef[] = [
     'Fight five arena battles.',
     // Fought, not won: the ladder decides whether you win, and a daily should not.
     [goal('arenaBattle', 5)],
-    { energy_pack_small: 1 },
+    { energy: 40 },
     { unlockLevel: 8 },
   ),
   quest(

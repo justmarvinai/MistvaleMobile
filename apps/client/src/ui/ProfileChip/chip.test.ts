@@ -13,6 +13,7 @@ function player(over: Partial<PlayerSummary> = {}): PlayerSummary {
     crystals: 0,
     valorMedals: 0,
     energy: { value: 0, cap: 0, regenSeconds: 180, nextTickAt: null, fullAt: null },
+    xpBoost: { until: null },
     rosterCapacity: 50,
     tutorialStep: 0,
     createdAt: '2026-01-01T00:00:00.000Z',

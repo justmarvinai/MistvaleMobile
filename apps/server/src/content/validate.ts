@@ -17,6 +17,8 @@ import {
   worldBossRuleProblems,
   type ContentIssue,
   type ContentType,
+  REWARD_SCALARS,
+  isRewardScalar,
   type ContentValidationResult,
   type Rarity,
   type DeepRunDef,
@@ -1238,6 +1240,20 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
       }
       if (offer.kind === 'champion') {
         reference({ contentType: 'shop', key, path: `${path}.refKey` }, 'champion', offer.refKey);
+      }
+      // A currency offer pays a *scalar* — silver, crystals, valor medals, energy, hours of
+      // XP boost — and there is no content entity to point at, so the reference check that
+      // guards the other kinds cannot help. Refused by name instead, because the failure it
+      // prevents is the worst kind a shop can have: an offer that takes the payment and
+      // grants nothing, with the player's crystals already gone.
+      if (offer.kind === 'currency' && !isRewardScalar(offer.refKey)) {
+        errors.push({
+          severity: 'error',
+          contentType: 'shop',
+          key,
+          path: `${path}.refKey`,
+          message: `"${offer.refKey}" is not something a currency offer can pay. Use one of: ${REWARD_SCALARS.join(', ')}.`,
+        });
       }
       if (offer.kind === 'gear') {
         if (!offer.gear) {

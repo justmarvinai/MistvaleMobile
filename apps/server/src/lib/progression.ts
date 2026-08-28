@@ -72,7 +72,7 @@ export function computeEnergy(params: {
   level: number;
   now: Date;
   regenSeconds?: number;
-}): { value: number; cap: number; state: EnergyState } {
+}): { value: number; cap: number; state: EnergyState; settledAt: Date } {
   const cap = energyCapForLevel(params.level);
   const regenSeconds = params.regenSeconds ?? ENERGY_REGEN_SECONDS;
   const elapsedSeconds = Math.max(
@@ -105,7 +105,27 @@ export function computeEnergy(params: {
     value,
     cap,
     state: { value, cap, regenSeconds, nextTickAt, fullAt },
+    settledAt: settledAt(params.now, elapsedSeconds, regenSeconds, value < cap),
   };
+}
+
+/**
+ * The instant the settled value was actually reached.
+ *
+ * Anything that *writes* energy — a grant, a level-up refill — has to stamp
+ * `energy_updated_at` alongside it, and stamping `now` throws away however far into the
+ * current tick the bar had got. Below the cap that is a real theft of up to three minutes
+ * every time a reward lands, which on a busy evening is several points; at or above it
+ * there is no tick to carry, because regeneration has stopped.
+ */
+function settledAt(
+  now: Date,
+  elapsedSeconds: number,
+  regenSeconds: number,
+  regenerating: boolean,
+): Date {
+  if (!regenerating || regenSeconds <= 0) return now;
+  return new Date(now.getTime() - (elapsedSeconds % regenSeconds) * 1000);
 }
 
 function clampLevel(level: number): number {

@@ -1,0 +1,44 @@
+@use '../../styles/tokens' as *;
+
+/* The lit tile and its countdown, sized to sit under the player's name without competing
+   with it. Two states and nothing between them: a boost is running or it is not. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  padding: 2px 6px;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $muted-deep;
+  line-height: 1;
+  transition:
+    color $duration-fast $ease-out,
+    border-color $duration-fast $ease-out,
+    background $duration-fast $ease-out;
+
+  &[data-active='true'] {
+    background: rgba(194, 118, 74, 0.18);
+    border-color: $accent;
+    color: $gold;
+    /* Lit rather than merely coloured: this is the one thing in the top bar that is
+       *running out*, and it should read as switched on from across the room. */
+    box-shadow:
+      0 0 10px -2px $accent-glow,
+      inset 0 0 12px -6px $accent-glow;
+  }
+}
+
+.mark {
+  font-family: $font-display;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Monospace so the last minute does not shuffle the badge's width once a second. */
+.clock {
+  font-family: $font-mono;
+  font-size: 0.66rem;
+  color: inherit;
+  opacity: 0.85;
+}

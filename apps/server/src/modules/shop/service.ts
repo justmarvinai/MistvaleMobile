@@ -8,7 +8,7 @@ import type { ContentCache } from '../../content/cache';
 import type { ShopStateRow } from '../../db/schema/inventory';
 import { AppError } from '../../lib/errors';
 import { track } from '../meta/progress';
-import { grant, grantItems } from '../rewards/service';
+import { grant, grantItems, payRewards } from '../rewards/service';
 import { createGear, rollBand, toDto, type GearContext } from '../gear/service';
 import { grantChampion } from '../roster/service';
 
@@ -396,6 +396,22 @@ export async function buy(
       const [gearRow] = await rowsById(tx, [slot.gearId]);
       if (!gearRow) throw AppError.notFound('That relic is gone.');
       result.gear = toDto(gearRow, context.gear);
+    } else if (offer.kind === 'currency') {
+      // `currency` has been a published offer kind since P4 with **no branch here**, so an
+      // offer authored with it took the payment and granted nothing — the one failure a
+      // shop must never have. Nothing in the seeds used it, so nobody was ever charged for
+      // it, and publish refuses a scalar it cannot pay now (`validate.ts`).
+      //
+      // Paid through `payRewards` rather than a bespoke grant, so a shop selling energy or
+      // hours of XP boost needs no more code than one selling silver: it is the same
+      // reward map every other content family pays.
+      await payRewards(
+        tx,
+        playerId,
+        { [offer.refKey]: offer.quantity },
+        `shop:${context.def.key}:${offer.key}`,
+      );
+      result.itemKey = offer.refKey;
     }
 
     slot.purchased = true;

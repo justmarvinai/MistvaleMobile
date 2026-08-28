@@ -23,6 +23,8 @@ const EXACT: Readonly<Record<string, string>> = Object.freeze({
   valorMedals: 'crest-gilded-crown',
   playerXp: 'rune-nova-star',
   championXp: 'rune-starfall',
+  energy: 'fire-golden-flame',
+  xpBoostHours: 'rune-starfall',
 });
 
 /** Item families, longest prefix first so a more specific rule can be added above. */

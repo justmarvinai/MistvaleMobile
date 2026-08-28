@@ -5,6 +5,75 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the XP boost (C24)
+
+A timer on the account that pays **+25% champion experience** in every fight that pays any
+— the boost this genre has had for a decade, and the owner's request (2026-08-28). Three
+rules make it the thing players recognise rather than a permanent buff wearing a clock:
+
+- **It is a duration, not a charge.** Nothing is spent to use it; only the wall clock counts
+  down. So the decision it creates is *when to play*, which is the whole point of an expiry.
+- **It extends rather than replaces.** Claiming a second boost while the first is still
+  running adds to it — the alternative punishes a player for claiming a reward at the wrong
+  moment.
+- **It is granted by content, not by code.** `xpBoostHours` is a reward scalar, so a quest,
+  a mission, an event rung, a login day, a mail attachment or a shop offer grants one by
+  writing `{ xpBoostHours: 24 }`. No mechanism of its own, nothing to add for the next
+  source. As seeded a newcomer earns **96 hours** across their first week.
+
+**A badge sits beside the player's name**, lit with a countdown while it runs and grey while
+it does not — both states on screen, because a badge that only appeared when active would
+teach nobody the boost exists. It reads the multiplier from the same `game_config` key the
+server pays by, so it cannot promise a percentage the payout does not honour.
+
+The multiplier is **read when the experience is paid**, not when the fight opened: a fight
+that outlasts its own boost pays the plain figure, which is the only rule a countdown can
+be true about. The result screen names what the server actually paid at rather than
+re-deriving it from a clock that has moved on.
+
+`grantChampionXp` takes the multiplier as a **required** argument, the way `assembleChampion`
+takes its fifth: there is one call site today, and a boost the second one forgot would be a
+feature that works everywhere except the mode somebody added last.
+
+### Added — energy can go past its cap, and the first days are full of it (C24)
+
+Two halves of one request. **The cap governs regeneration and nothing else**: the clock
+stops filling at it, and a reward goes straight past it and stays. That was already true of
+the derivation and had never been reachable, because **energy was not something content
+could pay at all** — `energy` is a reward scalar now, granted uncapped, and `players.energy`
+widened from `smallint` to `integer` to hold what the early game hands out.
+
+**The first hours and days are deliberately generous** (the owner: *"at least 2-3k energy
+overflow in the first couple of hours/days, so the early game is enjoyable and they have low
+downtimes"*). Measured rather than guessed, and pinned by a test: a first session banks
+**~1,830**, a first week **~4,160** — several hundred fights at 4–9 energy each. Then it
+tapers, which is the other half of the instruction: Path arc 3 pays 220 against arc 1's
+1,370, and the whole thirty-day calendar pays 420 against the welcome week's 2,250. The
+guard checks the floor *and* the taper, because either alone can be satisfied by a mistake.
+
+A grant **settles the bar before adding to it** and carries the unfinished part of the
+current tick, so a reward never quietly costs a player the three minutes they were part-way
+through. The top bar reads `2,437 / 20` above the cap — what is held against the line it
+passed — rather than substituting the value for the cap and calling a bank a full bar.
+
+### Fixed — a shop offer kind that took the payment and granted nothing (C24)
+
+`currency` has been a published offer kind since P4 with **no payout branch**: an offer
+authored with it in Admin would charge the crystals and hand over nothing. Nothing in the
+seeds used it, so nobody was ever charged — it was a trap waiting for the first operator to
+find it. It pays through `payRewards` now, which is also what lets the Bazaar sell energy
+with no further code, and publish refuses a `currency` offer naming something unpayable.
+
+### Changed — the two rations are retired (C24)
+
+`energy_pack_small` and `energy_pack_large` were consumables the game could never consume:
+the login calendar, the Path, quests, events and the Bazaar all handed them out, and no
+screen lists them and no route spends them. Every one of those payouts pays **energy
+directly** now, at the same worth or better, and the Bazaar's ration stall sells energy
+rather than an item that did nothing. The two items stay published for anybody still holding
+one — deleting a published item orphans their rows — and a test refuses any content that
+starts paying one again.
+
 ### Fixed — and then the paintings were behind an opaque sheet (C23b)
 
 Putting the canvas in front of the paintings (C23a, below) revealed the other half of the

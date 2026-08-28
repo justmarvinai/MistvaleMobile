@@ -1,6 +1,7 @@
 import type { PlayerSummary } from '@mistvale/shared';
 import { StatBar } from '@/fui/components/StatBar.ts';
 import { Fui } from '@/fui/react';
+import { BoostBadge } from '@/ui/BoostBadge/BoostBadge';
 import { LevelDisc } from '@/ui/LevelDisc/LevelDisc';
 import { Portrait } from '@/ui/Portrait/Portrait';
 import { championArt } from '@/ui/championArt';
@@ -90,66 +91,77 @@ export function ProfileChip({
   });
 
   return (
-    <button
-      ref={ref}
-      type="button"
-      className={styles.chip}
-      onClick={onOpenProfile}
-      aria-label={`Your profile card — ${player.profileName}, level ${player.level}`}
-    >
-      <span className={styles.face} data-rarity={def?.rarity ?? 'none'}>
-        {art ? (
-          <Portrait src={art.portrait ?? null} name={def?.name} size={76} />
-        ) : (
-          // No champion chosen: the account's own initial, which is what the top bar has
-          // drawn since P0 and is still the honest answer for somebody who likes it.
-          <span className={styles.initial} aria-hidden="true">
-            {player.profileName.charAt(0).toUpperCase()}
-          </span>
-        )}
-        <LevelDisc level={player.level} />
-      </span>
-
-      <span className={styles.body}>
-        <span className={styles.name}>{player.profileName}</span>
-
-        <span className={styles.progress}>
-          <Fui
-            of={StatBar}
-            className={styles.xpBar}
-            options={{
-              kind: 'xp',
-              value: reading.capped ? 1 : player.xp,
-              max: reading.capped ? 1 : player.xpToNextLevel,
-              // The library's own readout is the two figures; Mistvale draws a percentage
-              // over the track instead, because that is what fits in a bar at this height
-              // and the figures are a hover away.
-              readout: 'none',
-              width: '100%',
-              trail: false,
-            }}
-            attrs={{ 'aria-label': 'Experience toward the next level' }}
-            // Kept live rather than rebuilt: a bar reconstructed when the number changes
-            // restarts its fill from empty, which is the one thing a progress bar must not
-            // do at the moment it advances.
-            apply={(bar, next) => {
-              bar.setMax(next.max ?? 1);
-              bar.set(next.value ?? 0);
-            }}
-          />
-          {/* Over the track rather than inside the library's own readout slot: the bar is
-              one painted piece of art and the pack positions its figures for a phone. */}
-          <span className={styles.percent} aria-hidden="true">
-            {reading.capped ? 'MAX' : `${reading.percent}%`}
-          </span>
+    /*
+     * The badge is a **sibling** of the chip rather than a child of it, and that is not
+     * cosmetic: the chip is a `<button>` carrying its own `aria-label`, which replaces
+     * everything inside it for a screen reader — a badge nested there would be silently
+     * swallowed, taking the boost's whole state with it. Outside, it keeps its own name
+     * and its own tooltip, and neither has to fight the other for the hover.
+     */
+    <span className={styles.holder}>
+      <button
+        ref={ref}
+        type="button"
+        className={styles.chip}
+        onClick={onOpenProfile}
+        aria-label={`Your profile card — ${player.profileName}, level ${player.level}`}
+      >
+        <span className={styles.face} data-rarity={def?.rarity ?? 'none'}>
+          {art ? (
+            <Portrait src={art.portrait ?? null} name={def?.name} size={76} />
+          ) : (
+            // No champion chosen: the account's own initial, which is what the top bar has
+            // drawn since P0 and is still the honest answer for somebody who likes it.
+            <span className={styles.initial} aria-hidden="true">
+              {player.profileName.charAt(0).toUpperCase()}
+            </span>
+          )}
+          <LevelDisc level={player.level} />
         </span>
 
-        {power > 0 && (
-          <span className={styles.power}>
-            Power: <strong>{abbreviatePower(power)}</strong>
+        <span className={styles.body}>
+          <span className={styles.name}>{player.profileName}</span>
+
+          <span className={styles.progress}>
+            <Fui
+              of={StatBar}
+              className={styles.xpBar}
+              options={{
+                kind: 'xp',
+                value: reading.capped ? 1 : player.xp,
+                max: reading.capped ? 1 : player.xpToNextLevel,
+                // The library's own readout is the two figures; Mistvale draws a percentage
+                // over the track instead, because that is what fits in a bar at this height
+                // and the figures are a hover away.
+                readout: 'none',
+                width: '100%',
+                trail: false,
+              }}
+              attrs={{ 'aria-label': 'Experience toward the next level' }}
+              // Kept live rather than rebuilt: a bar reconstructed when the number changes
+              // restarts its fill from empty, which is the one thing a progress bar must not
+              // do at the moment it advances.
+              apply={(bar, next) => {
+                bar.setMax(next.max ?? 1);
+                bar.set(next.value ?? 0);
+              }}
+            />
+            {/* Over the track rather than inside the library's own readout slot: the bar is
+              one painted piece of art and the pack positions its figures for a phone. */}
+            <span className={styles.percent} aria-hidden="true">
+              {reading.capped ? 'MAX' : `${reading.percent}%`}
+            </span>
           </span>
-        )}
-      </span>
-    </button>
+
+          {power > 0 && (
+            <span className={styles.power}>
+              Power: <strong>{abbreviatePower(power)}</strong>
+            </span>
+          )}
+        </span>
+      </button>
+
+      <BoostBadge boost={player.xpBoost} />
+    </span>
   );
 }

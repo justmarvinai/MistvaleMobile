@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ACCOUNT_RANKS } from './enums';
+import type { XpBoostState } from './xpBoost';
 
 /**
  * Auth contracts: account name + password + profile name. No e-mail anywhere in
@@ -86,6 +87,8 @@ export interface PlayerSummary {
   crystals: number;
   valorMedals: number;
   energy: EnergyState;
+  /** The champion-XP boost: when it runs out, and what it is worth while it does. */
+  xpBoost: XpBoostState;
   rosterCapacity: number;
   tutorialStep: number;
   createdAt: string;
@@ -112,6 +115,14 @@ export interface EnergyState {
   fullAt: string | null;
 }
 
+/**
+ * Energy may sit **above** its cap.
+ *
+ * The cap governs regeneration and nothing else — the clock stops filling at it, and a
+ * reward does not (C24). So `value > cap` is an ordinary state, not a bug, and anything
+ * drawing this has to read it as "how many fights are in the bank" rather than as a
+ * percentage of something.
+ */
 /** Response of the auth endpoints and `GET /api/auth/me`. */
 export interface SessionResponse {
   account: AccountSummary;

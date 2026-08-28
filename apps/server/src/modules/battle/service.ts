@@ -21,7 +21,9 @@ import {
 } from '@mistvale/engine';
 import {
   UNLOCK_LEVELS,
+  boostedChampionXp,
   multiBattleResultSchema,
+  xpBoostMultiplier,
   type ArenaResult,
   type BattleMode,
   canSkipBattle,
@@ -129,7 +131,16 @@ export interface BattleView {
 export interface RewardSummary {
   silver: number;
   playerXp: number;
+  /** Champion XP actually paid, boost included — the figure the party really received. */
   championXp: number;
+  /**
+   * What the boost multiplied that by, or 1 when none was running.
+   *
+   * Reported rather than left to the client to work out from its own copy of the timer: a
+   * fight settled a second after the boost expired paid the plain figure, and a results
+   * screen reading a clock would claim otherwise. The server says what it paid.
+   */
+  xpBoost: number;
   stars: number;
   levelsGained: number;
   /** Relics the clear dropped, already owned by the player by the time this is read. */
@@ -207,6 +218,7 @@ const NO_REWARDS: RewardSummary = {
   silver: 0,
   playerXp: 0,
   championXp: 0,
+  xpBoost: 1,
   stars: 0,
   levelsGained: 0,
   gear: [],
@@ -1236,6 +1248,10 @@ export async function runMany(
     let silver = 0;
     let playerXp = 0;
     let championXp = 0;
+    // The highest multiplier any run in the batch paid at. A batch is fought in one
+    // transaction against one clock, so in practice every run shares it — but a boost that
+    // expires mid-batch must report the one that actually paid rather than the last.
+    let xpBoost = 1;
     let levelsGained = 0;
     let energySpent = 0;
 
@@ -1279,6 +1295,7 @@ export async function runMany(
         silver += summary.silver + (summary.bonus.silver ?? 0);
         playerXp += summary.playerXp + (summary.bonus.playerXp ?? 0);
         championXp += summary.championXp;
+        xpBoost = Math.max(xpBoost, summary.xpBoost);
         levelsGained += summary.levelsGained;
         droppedGear.push(...summary.gear);
         for (const [key, quantity] of Object.entries(summary.items)) {
@@ -1308,6 +1325,7 @@ export async function runMany(
       silver,
       playerXp,
       championXp,
+      xpBoost,
       levelsGained,
       gear: droppedGear,
       items,
@@ -1323,6 +1341,47 @@ export async function runMany(
 
     return result;
   });
+}
+
+/**
+ * The account's champion-XP boost right now, as a multiplier.
+ *
+ * Two facts, from two places that each own theirs: **how long** it runs is on the player
+ * row, and **what it is worth** is `game_config`, so the owner can move +25% to +50% for a
+ * weekend without a deploy and without touching anybody's timer. `xpBoostMultiplier` is
+ * the shared rule that combines them, which is also what the badge in the top bar reads —
+ * the server and the screen cannot disagree about whether a boost is running.
+ */
+async function xpBoostFor(
+  tx: Tx,
+  ctx: BattleContext,
+  playerId: string,
+  now: Date,
+): Promise<number> {
+  const [row] = await tx
+    .select({ until: players.xpBoostUntil })
+    .from(players)
+    .where(eq(players.id, playerId));
+  return xpBoostMultiplier(
+    row?.until ?? null,
+    numberConfig(ctx.content.current().bundle.config, 'progression.xpBoostMultiplier', 1.25),
+    now,
+  );
+}
+
+/**
+ * A game_config number that is allowed to be fractional, where `intConfig` is not.
+ *
+ * The XP boost multiplier is 1.25, and reading it through the integer helper would floor
+ * it to 1 — a boost that publishes cleanly, reads correctly in Admin and pays nothing.
+ */
+function numberConfig(
+  config: Readonly<Record<string, unknown>>,
+  key: string,
+  fallback: number,
+): number {
+  const value = config[key];
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
 /** A batch never retreats, so the engine's fourth outcome cannot reach a summary line. */
@@ -1571,7 +1630,23 @@ async function settle(
     rewards.battleSource(row.mode, row.stageKey),
   );
 
-  await rewards.grantChampionXp(tx, row.teamIds, stage.rewards.championXp, roster.levelCapForRank);
+  /**
+   * The champion-XP boost, read here and nowhere else.
+   *
+   * Read *now* rather than when the fight opened, because the boost is a wall clock and
+   * the honest question is what was running when the experience was paid — a fight that
+   * outlasts its own boost pays the plain figure, which is the rule every game in this
+   * genre uses and the only one a countdown on screen can be true about.
+   */
+  const boost = await xpBoostFor(tx, ctx, playerId, new Date());
+
+  await rewards.grantChampionXp(
+    tx,
+    row.teamIds,
+    stage.rewards.championXp,
+    roster.levelCapForRank,
+    boost,
+  );
 
   const drops = await rollDrops(tx, ctx, row, stage, playerId, lootRng);
 
@@ -1625,7 +1700,10 @@ async function settle(
   return {
     silver,
     playerXp: stage.rewards.playerXp,
-    championXp: stage.rewards.championXp,
+    // The boosted figure, because it is what the party actually received. The plain one is
+    // recoverable from `xpBoost` beside it, and the screen shows both.
+    championXp: boostedChampionXp(stage.rewards.championXp, boost),
+    xpBoost: boost,
     stars,
     levelsGained: granted.levelsGained,
     gear: drops.gear,

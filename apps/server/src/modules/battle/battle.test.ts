@@ -12,6 +12,7 @@ import {
   stageProgress,
 } from '../../db/schema/index';
 import { buildSeedContent } from '../../db/seed/seeders';
+import { championXpToNextLevel } from '../rewards/service';
 import * as contentRepo from '../../content/repo';
 import { validateAndNormalise, type ContentSet } from '../../content/validate';
 import {
@@ -348,6 +349,96 @@ describe.skipIf(!dbUp)('the game loop', () => {
       });
       return response.json().data.id as string;
     }
+
+    /**
+     * The champion-XP boost, on the one path in the game that pays champion experience.
+     *
+     * Asked against a real fight rather than against `boostedChampionXp`, because the unit
+     * test already proves the arithmetic and what could actually break here is the
+     * *wiring*: the timer read off the wrong row, the multiplier floored to 1 by an integer
+     * config reader, or a summary reporting the plain figure while the champions quietly
+     * received the boosted one.
+     */
+    const stageChampionXp = (): number => {
+      const stages = buildSeedContent().find((entry) => entry.contentType === 'stage');
+      const stage = stages?.entities.find((entity) => entity.key === 'c01_s1_normal');
+      const xp = (stage?.data as { rewards?: { championXp?: number } } | undefined)?.rewards
+        ?.championXp;
+      expect(xp, 'the fixture stage should pay champion XP').toBeGreaterThan(0);
+      return xp as number;
+    };
+
+    /** Experience a champion has earned in total, so a level-up cannot hide the gain. */
+    const totalChampionXp = (row: { level: number; xp: number }): number => {
+      let total = row.xp;
+      for (let level = 1; level < row.level; level += 1) total += championXpToNextLevel(level);
+      return total;
+    };
+
+    async function fightOnce(actionId: string, championId: string) {
+      const start = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.start),
+        payload: {
+          mode: 'campaign',
+          stageKey: 'c01_s1_normal',
+          team: [championId],
+          actionId: `start-${actionId}`,
+        },
+      });
+      expect(start.statusCode, start.body).toBe(200);
+      const finished = await as({
+        method: 'POST',
+        url: apiPath(ROUTES.battle.action(start.json().data.id as string)),
+        payload: { actionId: `auto-${actionId}`, auto: true },
+      });
+      expect(finished.statusCode, finished.body).toBe(200);
+      return finished.json().data;
+    }
+
+    const readChampion = async (id: string) => {
+      const [row] = await app.db
+        .select({ level: playerChampions.level, xp: playerChampions.xp })
+        .from(playerChampions)
+        .where(eq(playerChampions.id, id));
+      return row!;
+    };
+
+    it('pays boosted champion XP while the boost is running, and says so', async () => {
+      const champions = await chooseStarter();
+      const championId = champions[0]!.id;
+      await app.db
+        .update(players)
+        .set({ xpBoostUntil: new Date(Date.now() + 3_600_000) })
+        .where(eq(players.id, playerId));
+
+      const before = await readChampion(championId);
+      const view = await fightOnce('boost-0001', championId);
+      if (view.outcome !== 'victory') return; // A defeat pays nothing to assert about.
+
+      const boosted = Math.floor(stageChampionXp() * 1.25);
+      expect(view.rewards.xpBoost, 'the summary names the multiplier it paid at').toBe(1.25);
+      expect(view.rewards.championXp, 'and reports the boosted figure').toBe(boosted);
+
+      const earned = totalChampionXp(await readChampion(championId)) - totalChampionXp(before);
+      expect(earned, 'and the champion actually received it').toBe(boosted);
+    });
+
+    it('pays the plain figure once the boost has run out', async () => {
+      // Expiry is the wall clock and nothing else: a boost a second past its end is worth
+      // exactly what no boost is worth, which is the only rule a countdown can be true
+      // about.
+      const champions = await chooseStarter();
+      await app.db
+        .update(players)
+        .set({ xpBoostUntil: new Date(Date.now() - 1_000) })
+        .where(eq(players.id, playerId));
+
+      const view = await fightOnce('expired-0001', champions[0]!.id);
+      if (view.outcome !== 'victory') return;
+      expect(view.rewards.xpBoost).toBe(1);
+      expect(view.rewards.championXp).toBe(stageChampionXp());
+    });
 
     it('resolves the whole fight on auto and pays out a win', async () => {
       const battleId = await startFight();

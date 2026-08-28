@@ -24,6 +24,10 @@ const SCALAR_LABELS: Readonly<Record<string, string>> = Object.freeze({
   valorMedals: 'Valor Medals',
   playerXp: 'Experience',
   championXp: 'Champion XP',
+  energy: 'Energy',
+  // A duration rather than an amount, so the unit is part of the name: "24 XP Boost" reads
+  // as a quantity of nothing, where "24 Hours of XP Boost" says what arrived.
+  xpBoostHours: 'Hours of XP Boost',
 });
 
 /**

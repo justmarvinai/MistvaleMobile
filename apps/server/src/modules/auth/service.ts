@@ -261,6 +261,8 @@ export function toPlayerSummary(player: PlayerRow, now: Date): PlayerSummary {
     crystals: player.crystals,
     valorMedals: player.valorMedals,
     energy: energy.state,
+    // The timer only; what it is worth is config the client already holds.
+    xpBoost: { until: player.xpBoostUntil?.toISOString() ?? null },
     rosterCapacity: player.rosterCapacity,
     tutorialStep: player.tutorialStep,
     createdAt: player.createdAt.toISOString(),

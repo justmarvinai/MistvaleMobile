@@ -6,14 +6,22 @@
    all FantasyUIs art addressed by custom property, so the whole chip re-skins with the
    theme. */
 
+/* The chip and the boost badge beside it.
+
+   First on the bar. The pair is portalled onto the library's painted ground and so lands
+   after the currency rail in the DOM; the rail takes the slack with its own
+   `margin-left: auto`, so the order is all that has to be said — and saying it here keeps
+   the bar from having to know what any of this is called. */
+.holder {
+  order: -1;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  min-width: 0;
+}
+
 .chip {
   @include interactive;
-
-  /* First on the bar. The chip is portalled onto the library's painted ground and so lands
-     after the currency rail in the DOM; the rail takes the slack with its own
-     `margin-left: auto`, so the order is all that has to be said — and saying it here keeps
-     the bar from having to know what the chip's class is called. */
-  order: -1;
 
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

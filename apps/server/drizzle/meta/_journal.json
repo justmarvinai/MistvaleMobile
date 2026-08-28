@@ -260,6 +260,13 @@
       "when": 1787085705000,
       "tag": "0036_spire",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1787085706000,
+      "tag": "0037_xp_boost_and_energy_overflow",
+      "breakpoints": true
     }
   ]
 }

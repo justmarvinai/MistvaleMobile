@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { eq } from 'drizzle-orm';
 import { ROUTES, apiPath } from '@mistvale/shared';
 import { players } from '../../db/schema/index';
-import { energyCapForLevel, xpForNextLevel } from '../../lib/progression';
+import { ENERGY_REGEN_SECONDS, energyCapForLevel, xpForNextLevel } from '../../lib/progression';
 import {
   buildTestApp,
   extractSessionCookie,
@@ -71,6 +71,162 @@ describe.skipIf(!dbUp)('granting rewards', () => {
       .set({ energy: value, energyUpdatedAt: new Date() })
       .where(eq(players.id, id));
   };
+
+  /**
+   * Energy that is *paid* rather than waited for (C24).
+   *
+   * The owner's rule, and Raid's: the cap governs regeneration and nothing else, so a
+   * reward goes into the bar and straight past it. That overflow is what makes the first
+   * few days of an account playable — a newcomer banks thousands and spends them at their
+   * own pace instead of watching a twenty-point bar refill for a week.
+   */
+  describe('energy as a reward', () => {
+    it('pays into the bar and past the cap', async () => {
+      const id = await freshPlayer();
+      await drainTo(id, 5);
+
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { energy: 2_000 }, 'test:energy');
+      });
+
+      const after = await readPlayer(id);
+      expect(after.energy).toBe(2_005);
+      expect(after.energy, 'far past the cap, on purpose').toBeGreaterThan(
+        energyCapForLevel(after.level),
+      );
+    });
+
+    it('adds to an overfilled bar rather than replacing it', async () => {
+      const id = await freshPlayer();
+      await drainTo(id, 1_000);
+
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { energy: 500 }, 'test:energy');
+      });
+
+      expect((await readPlayer(id)).energy).toBe(1_500);
+    });
+
+    it('adds on top of a level-up refill rather than instead of it', async () => {
+      // The two used to be one block that returned early, so a reward carrying both a
+      // level and energy could only ever do one of them.
+      const id = await freshPlayer();
+      await drainTo(id, 0);
+
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { playerXp: xpForNextLevel(1), energy: 300 }, 'test:both');
+      });
+
+      const after = await readPlayer(id);
+      expect(after.level).toBe(2);
+      expect(after.energy).toBe(energyCapForLevel(2) + 300);
+    });
+
+    it('does not steal the tick a player was part-way through', async () => {
+      // Energy *is* the stored value plus elapsed time, so anything that writes it has to
+      // stamp when the value was reached. Stamping `now` would throw away however far into
+      // the current three minutes the bar had got — a small theft, on every reward.
+      const id = await freshPlayer();
+      const startedAt = new Date(Date.now() - (ENERGY_REGEN_SECONDS - 20) * 1000);
+      await app.db
+        .update(players)
+        .set({ energy: 3, energyUpdatedAt: startedAt })
+        .where(eq(players.id, id));
+
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { energy: 100 }, 'test:energy');
+      });
+
+      const after = await readPlayer(id);
+      expect(after.energy, 'no tick had completed, so the bar is 3 + 100').toBe(103);
+      const carried = Date.now() - after.energyUpdatedAt.getTime();
+      expect(carried / 1000, 'the unfinished tick is carried, not rounded away').toBeGreaterThan(
+        ENERGY_REGEN_SECONDS - 40,
+      );
+    });
+
+    it('records the grant in the economy log', async () => {
+      const id = await freshPlayer();
+      await app.db.transaction(async (tx) => {
+        const result = await grant(tx, id, { energy: 250 }, 'test:energy');
+        expect(result.applied.energy).toBe(250);
+      });
+    });
+
+    it('ignores a reward that would take energy away', async () => {
+      // A reward is a gift. A content typo that turned one into a charge pays nothing
+      // rather than draining a bar.
+      const id = await freshPlayer();
+      await drainTo(id, 40);
+
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { energy: -30 }, 'test:energy');
+      });
+
+      expect((await readPlayer(id)).energy).toBe(40);
+    });
+  });
+
+  /**
+   * The champion-XP boost: a timer on the account that any reward map can extend.
+   */
+  describe('the XP boost', () => {
+    it('starts a boost that was not running', async () => {
+      const id = await freshPlayer();
+      const before = Date.now();
+
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { xpBoostHours: 24 }, 'test:boost');
+      });
+
+      const until = (await readPlayer(id)).xpBoostUntil;
+      expect(until).not.toBeNull();
+      const hours = ((until as Date).getTime() - before) / 3_600_000;
+      expect(hours).toBeGreaterThan(23.9);
+      expect(hours).toBeLessThan(24.1);
+    });
+
+    it('extends one that is already running rather than replacing it', async () => {
+      // The rule a player notices: claiming a second boost on a Tuesday must not throw
+      // away the rest of Monday's.
+      const id = await freshPlayer();
+      const running = new Date(Date.now() + 6 * 3_600_000);
+      await app.db.update(players).set({ xpBoostUntil: running }).where(eq(players.id, id));
+
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { xpBoostHours: 12 }, 'test:boost');
+      });
+
+      const until = (await readPlayer(id)).xpBoostUntil as Date;
+      const added = (until.getTime() - running.getTime()) / 3_600_000;
+      expect(added).toBeGreaterThan(11.9);
+      expect(added).toBeLessThan(12.1);
+    });
+
+    it('starts from now when the old one has already run out', async () => {
+      const id = await freshPlayer();
+      await app.db
+        .update(players)
+        .set({ xpBoostUntil: new Date(Date.now() - 3_600_000) })
+        .where(eq(players.id, id));
+
+      const before = Date.now();
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { xpBoostHours: 3 }, 'test:boost');
+      });
+
+      const until = (await readPlayer(id)).xpBoostUntil as Date;
+      expect((until.getTime() - before) / 3_600_000).toBeGreaterThan(2.9);
+    });
+
+    it('leaves the timer alone when a reward carries no boost', async () => {
+      const id = await freshPlayer();
+      await app.db.transaction(async (tx) => {
+        await grant(tx, id, { silver: 100 }, 'test:silver');
+      });
+      expect((await readPlayer(id)).xpBoostUntil).toBeNull();
+    });
+  });
 
   it('fills the bar when the grant carries a level', async () => {
     const id = await freshPlayer();

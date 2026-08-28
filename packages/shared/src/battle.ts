@@ -54,7 +54,16 @@ export const multiBattleResultSchema = z.object({
   /** Everything the whole run earned, already granted. */
   silver: z.number().int(),
   playerXp: z.number().int(),
+  /** Champion XP actually paid — the boost, if one was running, is already in it. */
   championXp: z.number().int(),
+  /**
+   * What the champion-XP boost multiplied that by, or 1 for a fight with none running.
+   *
+   * On the result rather than derived from the player's timer, because the honest question
+   * is what *this fight* paid: one settled a second after the boost expired paid the plain
+   * figure, and a screen reading its own clock would claim otherwise.
+   */
+  xpBoost: z.number().default(1),
   levelsGained: z.number().int(),
   gear: z.array(gearInstanceSchema),
   items: z.record(z.string(), z.number().int()),

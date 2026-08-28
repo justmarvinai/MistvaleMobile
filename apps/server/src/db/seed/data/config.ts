@@ -226,6 +226,13 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Items handed over with the starter champion. A new warden should be able to reach the Mistgate on their first evening — ten Faded Sigils is a ×10 on the brood banner, which teaches the mechanic and stocks the first rank-up.',
   ),
   entry(
+    'progression.xpBoostMultiplier',
+    1.25,
+    'progression',
+    'XP boost multiplier',
+    'What champion experience is multiplied by while a warden’s XP boost is running. 1.25 is the +25% the boost promises; setting it to 1 turns the boost off without taking anybody’s timer away, which is what makes it safe to change on a live box. How long a boost runs is paid by content — any reward map can carry `xpBoostHours` — and is bounded at thirty days by a rule rather than by this.',
+  ),
+  entry(
     'progression.rosterCapacityDefault',
     60,
     'progression',
@@ -1112,16 +1119,35 @@ export const ITEMS: ItemDefInput[] = [
     82,
   ),
 
+  /*
+   * The two rations, kept published and **paid by nothing**.
+   *
+   * They were a consumable the game could never consume: five content families handed them
+   * out and the Bazaar sold one, and there has never been anywhere to use one — no
+   * inventory screen lists them and no route spends them. Since C24 energy is a reward in
+   * its own right, so every one of those payouts pays energy directly instead and these
+   * are referenced by no content at all.
+   *
+   * They stay in the seed because deleting a published item orphans the rows of anybody
+   * still holding one, and because the shape is the right one the day an inventory screen
+   * with a Use button exists. Until then they are inert on purpose rather than by accident.
+   */
   item(
     'energy_pack_small',
     'Traveller’s Ration',
     'consumable',
     'common',
-    'Restores 30 energy.',
+    'Restores 30 energy. Kept for accounts that still hold one; nothing pays these now.',
     90,
     { energy: 30 },
   ),
-  item('energy_pack_large', 'Warden’s Ration', 'consumable', 'rare', 'Restores 60 energy.', 91, {
-    energy: 60,
-  }),
+  item(
+    'energy_pack_large',
+    'Warden’s Ration',
+    'consumable',
+    'rare',
+    'Restores 60 energy. Kept for accounts that still hold one; nothing pays these now.',
+    91,
+    { energy: 60 },
+  ),
 ];

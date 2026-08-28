@@ -96,7 +96,7 @@ export const EVENTS: EventDef[] = [
     ],
     [
       milestone(400, { silver: 20_000 }),
-      milestone(1_000, { energy_pack_small: 2 }),
+      milestone(1_000, { energy: 90 }),
       milestone(1_800, { sigil_faded: 3 }),
       milestone(2_800, { tome_rare: 1, crystals: 30 }),
       milestone(4_200, { sigil_gleaming: 1 }),

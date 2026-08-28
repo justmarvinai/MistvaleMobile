@@ -187,7 +187,22 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
       };
     }
 
-    const stats: ResultStat[] = [{ label: 'Champion experience', value: rewards.championXp }];
+    // The boost is named on the line it changed rather than left for a player to notice
+    // in an arithmetic they cannot do: the figure beside it is already the boosted one, so
+    // without the label a boosted fight and a lucky one look identical. `xpBoost` is the
+    // multiplier the *server* actually paid at, which is why it is read from the result
+    // rather than from the badge's clock — a fight that outlasted its own boost paid the
+    // plain figure, and this line has to agree with the payout rather than with the timer.
+    const stats: ResultStat[] = [
+      {
+        label:
+          rewards.xpBoost > 1
+            ? `Champion experience · +${Math.round((rewards.xpBoost - 1) * 100)}% boost`
+            : 'Champion experience',
+        value: rewards.championXp,
+        ...(rewards.xpBoost > 1 ? { best: true } : {}),
+      },
+    ];
     if (rewards.levelsGained > 0) {
       stats.push({ label: 'Levels gained', value: rewards.levelsGained, best: true });
     }

@@ -8,6 +8,7 @@ export * from './expedition';
 export * from './readiness';
 export * from './trial';
 export * from './worldBoss';
+export * from './xpBoost';
 export * from './deepRun';
 export * from './spire';
 export * from './standing';

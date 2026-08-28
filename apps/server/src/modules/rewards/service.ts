@@ -1,5 +1,11 @@
 import { and, eq, gte, sql } from 'drizzle-orm';
-import { CURRENCIES, splitRewards, type Currency } from '@mistvale/shared';
+import {
+  CURRENCIES,
+  boostedChampionXp,
+  extendXpBoost,
+  splitRewards,
+  type Currency,
+} from '@mistvale/shared';
 import { economyLog, playerChampions, playerItems, players } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import { AppError } from '../../lib/errors';
@@ -28,6 +34,17 @@ export interface RewardBundle {
   playerXp?: number;
   /** Champion XP, split across the champions that fought. */
   championXp?: number;
+  /**
+   * Energy straight into the bar, **deliberately past the cap** (C24).
+   *
+   * The cap governs *regeneration* and nothing else: the clock stops filling at it, and a
+   * grant does not. That asymmetry is the whole of the overflow rule, and it is what lets
+   * the first week hand a new warden a few thousand points to spend at their own pace
+   * rather than a bar that is full by breakfast and wasted by lunch.
+   */
+  energy?: number;
+  /** Hours of champion-XP boost, extending whatever is already running. */
+  xpBoostHours?: number;
 }
 
 export interface GrantResult {
@@ -63,6 +80,7 @@ export async function grant(
       valorMedals: players.valorMedals,
       energy: players.energy,
       energyUpdatedAt: players.energyUpdatedAt,
+      xpBoostUntil: players.xpBoostUntil,
     })
     .from(players)
     .where(eq(players.id, playerId));
@@ -96,32 +114,62 @@ export async function grant(
   const now = new Date();
 
   /**
-   * A level-up fills the bar (ECONOMY_BALANCE.md §energy — "level-up: full-bar refill,
-   * overfill allowed"). Documented since P0 and not implemented until P10d: the reward
-   * path wrote the new level and left the energy column alone, so the promise the design
-   * makes about the pace of an early evening — level, keep playing — was never kept. A
-   * fresh account got its twenty energy at registration and then only the clock.
+   * Everything that moves the energy bar, decided in one place.
    *
-   * Written rather than derived because energy *is* the stored value plus elapsed time:
-   * stamping `energyUpdatedAt` alongside is what stops the refill decaying backwards.
-   * `Math.max` is the overfill rule — a bar already above the new cap, from a refill
-   * item, must not be trimmed by the good news of a level.
+   * Two things can move it here and they compose rather than compete, which is why they
+   * are not two blocks: a **level-up refills** to the new cap (ECONOMY_BALANCE §energy —
+   * "level-up: full-bar refill, overfill allowed"), and an **energy reward** is added on
+   * top of whatever is there, **past the cap on purpose** (C24). A grant that both levels
+   * the account and pays energy must do both, and the old shape — a refill block that
+   * returned early — could only do one.
+   *
+   * Written rather than derived because energy *is* the stored value plus elapsed time,
+   * so the settled value has to be stamped with the instant it was reached. `settledAt`
+   * carries the unfinished part of the current tick rather than rounding it away, which
+   * would otherwise cost a player up to three minutes of regeneration every time any
+   * reward at all landed.
+   *
+   * `Math.max` is the overfill rule: a bar already above the new cap must not be trimmed
+   * by the good news of a level.
    */
-  const refill =
-    progressed.levelsGained > 0
-      ? (() => {
-          const current = computeEnergy({
-            storedValue: player.energy,
-            updatedAt: player.energyUpdatedAt,
-            level: player.level,
-            now,
-          });
-          return {
-            energy: Math.max(current.value, energyCapForLevel(level)),
-            energyUpdatedAt: now,
-          };
-        })()
+  const energyGrant = Math.max(0, Math.floor(bundle.energy ?? 0));
+  const movesEnergy = progressed.levelsGained > 0 || energyGrant > 0;
+  const energyWrite = movesEnergy
+    ? (() => {
+        const current = computeEnergy({
+          storedValue: player.energy,
+          updatedAt: player.energyUpdatedAt,
+          level: player.level,
+          now,
+        });
+        const refilled =
+          progressed.levelsGained > 0
+            ? Math.max(current.value, energyCapForLevel(level))
+            : current.value;
+        return {
+          energy: refilled + energyGrant,
+          energyUpdatedAt: current.settledAt,
+        };
+      })()
+    : {};
+  if (energyGrant > 0) applied.energy = energyGrant;
+
+  /**
+   * The champion-XP boost, extended rather than replaced.
+   *
+   * A duration in the reward map — `{ xpBoostHours: 24 }` — so every content family that
+   * pays anything can pay this too, with no mechanism of its own. The ceiling is content
+   * as well, because an operator handing out a year of it by typo should produce a long
+   * boost and not a permanent one.
+   */
+  const boostHours = Math.max(0, bundle.xpBoostHours ?? 0);
+  const boostWrite =
+    boostHours > 0
+      ? {
+          xpBoostUntil: extendXpBoost(player.xpBoostUntil, boostHours, now),
+        }
       : {};
+  if (boostHours > 0) applied.xpBoostHours = boostHours;
 
   await tx
     .update(players)
@@ -131,7 +179,8 @@ export async function grant(
       valorMedals: wallet.valorMedals,
       level,
       xp,
-      ...refill,
+      ...energyWrite,
+      ...boostWrite,
       updatedAt: now,
     })
     .where(eq(players.id, playerId));
@@ -171,10 +220,23 @@ export async function grantChampionXp(
   championIds: readonly string[],
   totalXp: number,
   levelCapFor: (rank: number) => number,
+  /**
+   * The account's champion-XP boost, as a multiplier.
+   *
+   * **Required, and deliberately so.** There is one caller today and a boost that a second
+   * one forgot would be a feature that works everywhere except the mode somebody added
+   * last — the class of bug `assembleChampion`'s required fifth argument was introduced to
+   * make impossible (C10b). A default here would let a new call site silently disagree
+   * with the badge the player is looking at. Pass 1 for a payout the boost must not touch.
+   */
+  boost: number,
 ): Promise<{ championId: string; level: number; xp: number; levelsGained: number }[]> {
   if (championIds.length === 0 || totalXp <= 0) return [];
 
-  const each = Math.floor(totalXp / championIds.length);
+  // Boosted on the **total** rather than per champion, so four champions split the same
+  // pot they always did and the party's share of a boosted fight adds up to the figure
+  // the result screen shows. Rounding per head would lose up to three points a fight.
+  const each = Math.floor(boostedChampionXp(totalXp, boost) / championIds.length);
   if (each <= 0) return [];
 
   const results: { championId: string; level: number; xp: number; levelsGained: number }[] = [];

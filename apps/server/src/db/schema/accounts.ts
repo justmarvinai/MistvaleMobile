@@ -5,6 +5,7 @@ import {
   check,
   customType,
   index,
+  integer,
   jsonb,
   pgTable,
   smallint,
@@ -107,8 +108,26 @@ export const players = pgTable(
     level: smallint('level').notNull().default(1),
     xp: bigint('xp', { mode: 'number' }).notNull().default(0),
 
-    energy: smallint('energy').notNull().default(20),
+    /**
+     * The bar, which **may sit far above its cap**.
+     *
+     * `integer` rather than `smallint` since C24: energy is a payable reward now and the
+     * early game hands a new warden thousands of it, so the value a `smallint` could not
+     * hold is one an operator can author by accident in a single mail. Regeneration still
+     * stops at the cap; only grants go past it, and what is past it never drains faster
+     * (`computeEnergy`).
+     */
+    energy: integer('energy').notNull().default(20),
     energyUpdatedAt: timestamp('energy_updated_at', { withTimezone: true }).notNull().defaultNow(),
+
+    /**
+     * When the champion-XP boost runs out, or null if it has never been granted.
+     *
+     * One timestamp rather than a row per boost, because the account has exactly one and
+     * granting more of it moves this forward (`extendXpBoost`). A past value is simply an
+     * expired boost — nothing sweeps it, and nothing needs to.
+     */
+    xpBoostUntil: timestamp('xp_boost_until', { withTimezone: true }),
 
     silver: bigint('silver', { mode: 'number' }).notNull().default(0),
     crystals: bigint('crystals', { mode: 'number' }).notNull().default(0),

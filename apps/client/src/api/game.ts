@@ -116,7 +116,10 @@ export interface StarterChoice {
 export interface BattleRewards {
   silver: number;
   playerXp: number;
+  /** Champion XP actually paid — a boost, if one was running, is already in this figure. */
   championXp: number;
+  /** What the boost multiplied it by, or 1. The server's number, not the badge's clock. */
+  xpBoost: number;
   stars: number;
   levelsGained: number;
   /** Relics the clear dropped, already owned by the time the client reads this. */

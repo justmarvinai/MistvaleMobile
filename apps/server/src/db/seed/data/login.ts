@@ -57,7 +57,7 @@ const EPIC_SELECTOR = [
 
 const CALENDAR_DAYS: LoginTrackDay[] = [
   day(1, { silver: 3_000, playerXp: 100 }),
-  day(2, { energy_pack_small: 1 }),
+  day(2, { energy: 60 }),
   day(3, { silver: 4_000 }),
   day(4, { essence_pure: 1 }),
   day(5, { crystals: 20 }),
@@ -67,7 +67,7 @@ const CALENDAR_DAYS: LoginTrackDay[] = [
   day(9, { tome_rare: 1 }),
   day(10, { crystals: 25 }),
   day(11, { essence_pure: 2 }),
-  day(12, { energy_pack_small: 2 }),
+  day(12, { energy: 90 }),
   day(13, { emblem_bronze: 15 }),
   day(14, { sigil_gleaming: 2, silver: 6_000 }),
   day(15, { crystals: 30 }),
@@ -77,14 +77,14 @@ const CALENDAR_DAYS: LoginTrackDay[] = [
   day(19, { emblem_silver: 5 }),
   day(20, { crystals: 40 }),
   day(21, { sigil_mistwoven: 1, silver: 8_000 }),
-  day(22, { energy_pack_large: 1 }),
+  day(22, { energy: 120, xpBoostHours: 12 }),
   day(23, { silver: 9_000, playerXp: 400 }),
   day(24, { tome_epic: 1 }),
   day(25, { crystals: 50 }),
   day(26, { emblem_silver: 8 }),
   day(27, { essence_pure: 3 }),
   day(28, { sigil_mistwoven: 2, silver: 10_000 }),
-  day(29, { energy_pack_large: 2 }),
+  day(29, { energy: 150 }),
   day(30, { crystals: 150, playerXp: 1_000 }, { choices: EPIC_SELECTOR }),
 ];
 
@@ -99,13 +99,17 @@ const WELCOME_RELICS: LoginTrackDef['days'][number]['grants']['relics'] = [
 ];
 
 const WELCOME_DAYS: LoginTrackDay[] = [
-  day(1, { silver: 5_000, energy_pack_small: 1 }),
-  day(2, { sigil_faded: 3 }),
-  day(3, { silver: 6_000, essence_pure: 2 }),
-  day(4, { emblem_bronze: 20 }),
-  day(5, { crystals: 30, tome_rare: 1 }),
-  day(6, { silver: 8_000, energy_pack_large: 1 }),
-  day(7, { sigil_gleaming: 2, playerXp: 500 }, { relics: WELCOME_RELICS }),
+  day(1, { silver: 5_000, energy: 400 }),
+  day(2, { sigil_faded: 3, energy: 250 }),
+  day(3, { silver: 6_000, essence_pure: 2, energy: 250, xpBoostHours: 24 }),
+  day(4, { emblem_bronze: 20, energy: 300 }),
+  day(5, { crystals: 30, tome_rare: 1, energy: 300 }),
+  day(6, { silver: 8_000, energy: 350 }),
+  day(
+    7,
+    { sigil_gleaming: 2, playerXp: 500, energy: 400, xpBoostHours: 48 },
+    { relics: WELCOME_RELICS },
+  ),
 ];
 
 export const LOGIN_TRACKS: LoginTrackDef[] = [

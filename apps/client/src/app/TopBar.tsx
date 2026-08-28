@@ -1,10 +1,10 @@
-import { useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import type { EnergyState } from '@mistvale/shared';
 import { TopBar as FuiTopBar } from '@/fui/components/TopBar.ts';
 import { useFui } from '@/fui/react';
 import { ProfileChip } from '@/ui/ProfileChip/ProfileChip';
 import { useTooltip } from '@/ui/Tooltip/useTooltip';
+import { useClockMs } from '@/ui/useClock';
 import { usePlayerStore } from '@/state/playerStore';
 import { useProfileStore } from '@/state/profileStore';
 import { useSessionStore } from '@/state/sessionStore';
@@ -43,7 +43,7 @@ export function TopBar({
   // "now" — reading the wall clock a second time would let the bar say 3 and the counter
   // say 4 in the same frame — and reading it during render at all is impure, which is
   // exactly what `subscribeToClock` exists to avoid.
-  const now = useSyncExternalStore(subscribeToClock, clockSnapshot, () => 0);
+  const now = useClockMs();
   const energy = projectEnergy(player?.energy ?? EMPTY_ENERGY, now + clockSkewMs);
 
   // Hooks first, always: an early return above `useFui` would change the hook order
@@ -67,6 +67,12 @@ export function TopBar({
           art: 'fire-golden-flame',
           label: 'Energy',
           value: energy.value,
+          // The real cap, even when the value is forty times it. Energy may sit far above
+          // its cap since C24 — the cap governs regeneration and rewards go straight past
+          // it — and the honest reading is `2,437 / 20`: a player can see at a glance both
+          // what they are holding and how far past the line it is. Substituting the value
+          // for the cap makes the cell read `2,437 / 2,437 · Full`, which invents a cap
+          // that does not exist and calls a bank a full bar.
           max: energy.cap,
           refillIn: secondsToTick,
         },
@@ -130,27 +136,44 @@ export function TopBar({
   const silverCell = cells?.[1] ?? null;
   const crystalCell = cells?.[2] ?? null;
 
+  // Above the cap the three lines change what they are about. "3,412 / 61" invites a
+  // player to read a fraction that is not one, and "full again: now" is a strange thing to
+  // say to somebody holding forty times the bar — so a banked bar reports what it is worth
+  // and how much of it is above the line, and says nothing about a clock that has stopped.
+  const banked = energy.value > energy.cap;
   useTooltip(energyCell, {
     title: 'Energy',
-    subtitle: 'Spent to fight',
-    stats: [
-      { label: 'Now', value: `${energy.value} / ${energy.cap}`, tone: 'plain' },
-      {
-        label: energy.value >= energy.cap ? 'Full' : 'Next point',
-        value: energy.value >= energy.cap ? '—' : formatWait(secondsToTick),
-        tone: energy.value >= energy.cap ? 'good' : 'plain',
-      },
-      {
-        label: 'Full again',
-        value:
-          energy.value >= energy.cap
-            ? 'now'
-            : formatWait(secondsToTick + (energy.cap - energy.value - 1) * energy.regenSeconds),
-        tone: 'plain',
-      },
-    ],
+    subtitle: banked ? 'Banked past the cap' : 'Spent to fight',
+    stats: banked
+      ? [
+          { label: 'Held', value: energy.value.toLocaleString('en-US'), tone: 'good' },
+          { label: 'Bar', value: `${energy.cap}`, tone: 'plain' },
+          {
+            label: 'Above the cap',
+            value: (energy.value - energy.cap).toLocaleString('en-US'),
+            tone: 'good',
+          },
+        ]
+      : [
+          { label: 'Now', value: `${energy.value} / ${energy.cap}`, tone: 'plain' },
+          {
+            label: energy.value >= energy.cap ? 'Full' : 'Next point',
+            value: energy.value >= energy.cap ? '—' : formatWait(secondsToTick),
+            tone: energy.value >= energy.cap ? 'good' : 'plain',
+          },
+          {
+            label: 'Full again',
+            value:
+              energy.value >= energy.cap
+                ? 'now'
+                : formatWait(secondsToTick + (energy.cap - energy.value - 1) * energy.regenSeconds),
+            tone: 'plain',
+          },
+        ],
     flavor: 'Every stage, floor and keep costs energy. It comes back on its own, awake or not.',
-    hint: 'Levelling up refills the bar.',
+    hint: banked
+      ? 'Rewards go straight past the cap and stay there. Nothing above it drains away.'
+      : 'Levelling up refills the bar.',
   });
 
   useTooltip(silverCell, {
@@ -192,46 +215,6 @@ const EMPTY_ENERGY: EnergyState = {
   nextTickAt: null,
   fullAt: null,
 };
-
-/**
- * A one-second clock, exposed as an external store.
- *
- * The wall clock is exactly the kind of mutable outside value `useSyncExternalStore`
- * exists for; reading it during render directly would make rendering impure.
- *
- * The snapshot is a *cached* timestamp rather than `Date.now` itself. A getSnapshot that
- * returns a fresh value on every call has no fixed point — React compares consecutive
- * reads to decide whether to re-render, so an ever-changing snapshot is an infinite loop
- * with a warning in front of it. The tick updates the cache; every reader in one render
- * pass then sees the same instant, which is also what stops two components animating
- * against slightly different "now"s.
- *
- * One interval serves every subscriber, started with the first and stopped with the last.
- */
-let clockNow = Date.now();
-const clockListeners = new Set<() => void>();
-let clockTimer: number | null = null;
-
-function subscribeToClock(onChange: () => void): () => void {
-  clockListeners.add(onChange);
-  clockTimer ??= window.setInterval(() => {
-    clockNow = Date.now();
-    for (const listener of clockListeners) listener();
-  }, 1000);
-
-  return () => {
-    clockListeners.delete(onChange);
-    if (clockListeners.size === 0 && clockTimer !== null) {
-      window.clearInterval(clockTimer);
-      clockTimer = null;
-    }
-  };
-}
-
-/** The cached instant. Changes only when the tick fires. */
-function clockSnapshot(): number {
-  return clockNow;
-}
 
 /** A wait in the words a player would use, from a count of seconds. */
 function formatWait(seconds: number): string {

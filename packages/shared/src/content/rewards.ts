@@ -15,8 +15,20 @@ import { CURRENCIES, type Currency } from '../enums';
  * recognise. Content that paid a sigil would have validated, published, and paid nothing.
  */
 
-/** Keys that mean a wallet balance or account XP rather than an item. */
-export const REWARD_SCALARS = [...CURRENCIES, 'playerXp'] as const;
+/**
+ * Keys that mean a wallet balance, a bar, or a timer — anything but an item.
+ *
+ * Two of the five are not currencies at all, and both are here for the same reason: an
+ * operator has to be able to pay them from *any* reward map, because a quest, a mission,
+ * an event rung, a login day, a mail attachment and a shop offer all pay through this one
+ * shape and none of them should need a mechanism of its own.
+ *
+ *  - **`energy`** goes straight into the bar and is deliberately **not clamped to the
+ *    cap** — that overflow is the feature (C24, ECONOMY_BALANCE §energy).
+ *  - **`xpBoostHours`** is a *duration* rather than an amount: it extends the account's
+ *    champion-XP boost by that many hours from whenever it currently runs out.
+ */
+export const REWARD_SCALARS = [...CURRENCIES, 'playerXp', 'energy', 'xpBoostHours'] as const;
 export type RewardScalar = (typeof REWARD_SCALARS)[number];
 
 export function isRewardScalar(key: string): key is RewardScalar {

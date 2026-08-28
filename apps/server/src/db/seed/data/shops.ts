@@ -215,14 +215,19 @@ export const SHOPS: ShopDefInput[] = [
 
       // ── Convenience ────────────────────────────────────────────────────
       {
+        // Energy straight into the bar rather than a ration into a bag. The rations were a
+        // consumable nothing could consume — five content families paid them and the game
+        // had no way to use one — so this stall sold a crystal price for an item that did
+        // nothing at all. It goes past the cap like every other energy reward, which is
+        // what makes it worth buying: it is stock for tomorrow, not a top-up for now.
         key: 'rations',
-        kind: 'item',
+        kind: 'currency',
         name: 'Warden’s Ration',
         weight: 45,
         currency: 'crystals',
         price: 60,
-        refKey: 'energy_pack_large',
-        quantity: 1,
+        refKey: 'energy',
+        quantity: 60,
         dailyLimit: 2,
         minAccountLevel: 3,
         pricePerRank: 0,
