@@ -246,8 +246,15 @@ export function encode(bitmap: Bitmap): Buffer {
   ]);
 }
 
-/** Whether every pixel is fully opaque, and so whether the alpha channel earns its byte. */
-function isOpaque(bitmap: Bitmap): boolean {
+/**
+ * Whether every pixel is fully opaque.
+ *
+ * Two callers with the same question. `encode` asks whether the alpha channel earns its
+ * byte; the publisher asks whether a picture may be re-encoded as JPEG at all, since JPEG
+ * has no alpha and flattening one onto black is the kind of silently-wrong output this
+ * tool refuses to produce.
+ */
+export function isOpaque(bitmap: Bitmap): boolean {
   for (let at = 3; at < bitmap.data.length; at += 4) {
     if (bitmap.data[at] !== 255) return false;
   }

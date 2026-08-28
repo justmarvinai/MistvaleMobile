@@ -6,6 +6,39 @@
   background: $ground-deep;
 }
 
+/* The tab's own painting, behind everything.
+
+   `cover` and centred: the masters are 1672×941, so on a taller window the top and bottom
+   are the parts that go, and every one of the six has its subject on the horizon. */
+.wallpaper {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* The dark wash over it, at the owner's instruction (2026-08-28: "a little bit dark…
+   so it's a little darker").
+
+   Two layers rather than one flat fill, because a flat one either leaves the top too bright
+   for the currency rail or crushes the middle of the painting: a base wash the whole way
+   down, and a deeper gradient at the top and bottom where the top bar and the dock sit. The
+   fog is drawn *over* this, which is why it stays legible against a lit night market. */
+.wash {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(6, 8, 12, 0.62) 0%,
+      rgba(6, 8, 12, 0.28) 26%,
+      rgba(6, 8, 12, 0.28) 72%,
+      rgba(6, 8, 12, 0.68) 100%
+    ),
+    rgba(8, 9, 14, 0.34);
+}
+
 .canvas {
   display: block;
   width: 100%;

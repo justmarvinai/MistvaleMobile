@@ -19,6 +19,7 @@ apps/client/public/sprites/
 apps/client/public/audio/
 apps/client/public/portraits/
 apps/client/public/scenery/
+apps/client/public/wallpapers/
 
 # tool caches
 .cache/

@@ -2,7 +2,7 @@ import { mkdir, readFile, readdir, rm, rmdir, writeFile } from 'node:fs/promises
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { decode, downscale, encode } from './png';
+import { decode, downscale, encode, isOpaque } from './png';
 import { decode as decodeJpeg, encode as encodeJpeg } from './jpeg';
 
 /**
@@ -63,6 +63,20 @@ interface MediaSet {
    * and re-encoding one would be a quality decision this tool has no business making.
    */
   maxSide?: number;
+  /**
+   * Publish as JPEG whatever the source is, rewriting the extension.
+   *
+   * Only for sets that are **opaque paintings**, and it is worth the special case because
+   * the numbers are not close: the six tab wallpapers arrive as PNG and come to 12.9 MB
+   * published at 1600px, against **1.45 MB** as JPEG — a painted scene with thousands of
+   * colours and no flat regions is precisely the case PNG is worst at, which is the same
+   * finding C18's backdrop pass wrote down.
+   *
+   * A source with real transparency is **refused** rather than flattened onto black, which
+   * is `png.ts`'s own rule: a resizer that silently produces a wrong picture is worse than
+   * one that stops.
+   */
+  format?: 'jpeg';
 }
 
 /**
@@ -83,6 +97,16 @@ const AVATAR_MAX_SIDE = 320;
  * The masters are 2752 wide and about 2.8 MB apiece.
  */
 const SCENERY_MAX_SIDE = 1600;
+
+/**
+ * The longest side a tab wallpaper is published at.
+ *
+ * The same reasoning as the scenery it sits beside — full-bleed art behind a dark wash and
+ * a drifting fog, so what matters is the widest window the game is played in rather than a
+ * multiple of anything it is drawn at. The masters are 1672 wide, so this is barely a
+ * downscale; the saving is the format (see `MediaSet.format`).
+ */
+const WALLPAPER_MAX_SIDE = 1600;
 
 const AUDIO = ['.mp3', '.ogg', '.m4a', '.wav'] as const;
 const IMAGES = ['.png', '.webp', '.jpg', '.jpeg'] as const;
@@ -115,6 +139,14 @@ const MEDIA: readonly MediaSet[] = [
     extensions: IMAGES,
     maxSide: SCENERY_MAX_SIDE,
   },
+  {
+    label: 'wallpapers',
+    from: 'wallpapers',
+    to: 'wallpapers',
+    extensions: IMAGES,
+    maxSide: WALLPAPER_MAX_SIDE,
+    format: 'jpeg',
+  },
 ];
 
 const publicRoot = resolve(repoRoot, 'apps/client/public');
@@ -133,7 +165,19 @@ async function collectMedia(set: MediaSet): Promise<MediaFile[]> {
     .map((item) => item.name)
     .filter((name) => set.extensions.some((ext) => name.toLowerCase().endsWith(ext)))
     .sort()
-    .map((name) => ({ from: join(source, name), to: join(target, name) }));
+    .map((name) => ({ from: join(source, name), to: join(target, publishedName(name, set)) }));
+}
+
+/**
+ * What a file is called once published.
+ *
+ * Its own name, unless the set re-encodes it — a PNG published as JPEG must not be served
+ * under a `.png` the browser then has to sniff past, and a name that lies about its format
+ * is a name somebody debugs twice.
+ */
+function publishedName(name: string, set: MediaSet): string {
+  if (set.format !== 'jpeg') return name;
+  return `${name.replace(/\.[^.]+$/, '')}.jpg`;
 }
 
 interface UnitManifestEntry {
@@ -202,8 +246,13 @@ async function publishFile(from: string, to: string): Promise<string> {
  * A file it cannot read is a hard error rather than a silent copy: an avatar published at
  * full size would be a 2 MB regression nobody would notice until the next budget pass.
  */
-async function publishImage(from: string, to: string, maxSide: number): Promise<string> {
-  const wanted = resize(from, await readFile(from), maxSide);
+async function publishImage(
+  from: string,
+  to: string,
+  maxSide: number,
+  format?: MediaSet['format'],
+): Promise<string> {
+  const wanted = resize(from, await readFile(from), maxSide, format);
   const existing = await readFile(to).catch(() => null);
   if (!existing || !existing.equals(wanted)) await writeFile(to, wanted);
   return to;
@@ -212,15 +261,31 @@ async function publishImage(from: string, to: string, maxSide: number): Promise<
 /**
  * One image, re-encoded at a ceiling on its longest side.
  *
- * The format is the file's own. Re-encoding a painted JPEG as PNG triples it — thousands of
- * distinct colours with no flat regions is the case PNG is worst at — and a sprite with an
- * alpha channel cannot become a JPEG at all.
+ * The format is the file's own unless the set asks for JPEG. Re-encoding a painted JPEG as
+ * PNG triples it — thousands of distinct colours with no flat regions is the case PNG is
+ * worst at — and a sprite with an alpha channel cannot become a JPEG at all, which is why
+ * the conversion is opt-in per set rather than a rule about painted-looking files.
+ *
+ * A source with **real transparency** is refused rather than flattened onto black. JPEG has
+ * no alpha channel, so converting one would produce a picture that is wrong in a way the
+ * tool cannot see and a reviewer might not either — `png.ts`'s own rule.
  */
-function resize(from: string, source: Buffer, maxSide: number): Buffer {
-  const jpeg = /\.jpe?g$/i.test(from);
+function resize(
+  from: string,
+  source: Buffer,
+  maxSide: number,
+  format?: MediaSet['format'],
+): Buffer {
+  const sourceIsJpeg = /\.jpe?g$/i.test(from);
   try {
-    const bitmap = downscale(jpeg ? decodeJpeg(source) : decode(source), maxSide);
-    return jpeg ? encodeJpeg(bitmap) : encode(bitmap);
+    const bitmap = downscale(sourceIsJpeg ? decodeJpeg(source) : decode(source), maxSide);
+    if (format === 'jpeg') {
+      if (!sourceIsJpeg && !isOpaque(bitmap)) {
+        throw new Error('it has transparent pixels, and JPEG has no alpha channel');
+      }
+      return encodeJpeg(bitmap);
+    }
+    return sourceIsJpeg ? encodeJpeg(bitmap) : encode(bitmap);
   } catch (cause) {
     throw new Error(
       `cannot resize ${from}: ${cause instanceof Error ? cause.message : String(cause)}`,
@@ -311,7 +376,7 @@ async function publishMedia(set: MediaSet, files: MediaFile[]): Promise<void> {
     keep.add(
       set.maxSide === undefined
         ? await publishFile(file.from, file.to)
-        : await publishImage(file.from, file.to, set.maxSide),
+        : await publishImage(file.from, file.to, set.maxSide, set.format),
     );
   }
   await prune(target, keep);
@@ -338,7 +403,8 @@ async function mediaIsCurrent(set: MediaSet, files: MediaFile[]): Promise<boolea
     const name = file.to.slice(target.length + 1);
     if (!published.delete(name)) return false;
     const [source, actual] = await Promise.all([readFile(file.from), readFile(file.to)]);
-    const wanted = set.maxSide === undefined ? source : resize(file.from, source, set.maxSide);
+    const wanted =
+      set.maxSide === undefined ? source : resize(file.from, source, set.maxSide, set.format);
     if (!wanted.equals(actual)) return false;
   }
   return published.size === 0;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { deflateSync } from 'node:zlib';
-import { decode, downscale, encode, type Bitmap } from './png';
+import { decode, downscale, encode, isOpaque, type Bitmap } from './png';
 
 /**
  * The image codec `pnpm assets` shrinks avatars with.
@@ -136,3 +136,33 @@ function fabricate(over: { depth?: number; colour?: number; interlace?: number }
     chunk('IEND', Buffer.alloc(0)),
   ]);
 }
+
+describe('isOpaque', () => {
+  /**
+   * Two callers, and the second one is a refusal.
+   *
+   * `encode` uses it to decide whether the alpha channel earns its byte, which is a saving.
+   * The publisher uses it to decide whether a picture may become a JPEG at all, which is
+   * correctness — JPEG has no alpha, so a wrong answer here flattens a cut-out champion
+   * onto black and publishes it, and nothing downstream can tell.
+   */
+
+  it('says so when every pixel is solid', () => {
+    expect(isOpaque(bitmap(6, 6, () => [10, 20, 30, 255]))).toBe(true);
+  });
+
+  it('catches a single pixel one step off solid', () => {
+    // 254, not 0: a fully transparent pixel is the easy case, and the one that would slip
+    // through a threshold is the nearly-opaque one.
+    expect(isOpaque(bitmap(6, 6, (x, y) => [10, 20, 30, x === 3 && y === 4 ? 254 : 255]))).toBe(
+      false,
+    );
+  });
+
+  it('reads the alpha channel rather than a colour that happens to be 255', () => {
+    // A white opaque image and a white transparent one differ in one byte of four, and a
+    // stride bug reads the same value from both.
+    expect(isOpaque(bitmap(4, 4, () => [255, 255, 255, 255]))).toBe(true);
+    expect(isOpaque(bitmap(4, 4, () => [255, 255, 255, 0]))).toBe(false);
+  });
+});

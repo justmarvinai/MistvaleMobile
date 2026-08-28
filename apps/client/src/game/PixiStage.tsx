@@ -1,10 +1,27 @@
 import { useEffect, useRef } from 'react';
-import { createMistScene, destroyStage, hasScene, initStage, resizeStage, setScene } from './stage';
+import {
+  createMistScene,
+  activeScene,
+  destroyStage,
+  hasScene,
+  initStage,
+  resizeStage,
+  setScene,
+} from './stage';
+import { EMBER_SMOKE, wallpaperUrl, type SmokePalette } from '../ui/tabScenery';
 import styles from './PixiStage.module.scss';
 
 export interface PixiStageProps {
   /** Which scene to show. More arrive with the battle and summon screens. */
   scene?: 'mist' | 'none';
+  /**
+   * The tab's painting, behind the fog and a dark wash. Null while signed out and on any
+   * tab with no art of its own — the game's own ground shows through, which is what it
+   * looked like before there were paintings.
+   */
+  wallpaper?: string | null;
+  /** What colour the fog drifts in. Follows the tab (C23). */
+  smoke?: SmokePalette;
 }
 
 /**
@@ -12,10 +29,34 @@ export interface PixiStageProps {
  *
  * Rendered once near the root and kept alive for the session; screens choose which
  * scene it displays.
+ *
+ * Three layers, back to front: the tab's **wallpaper**, a **dark wash** over it so painted
+ * panels and white text still read, and the **fog** on the canvas above both. The wash is
+ * why the paintings can be as bright as they are — the owner's art is a lit night market
+ * and a burning field, and UI over either at full strength is unreadable.
  */
-export function PixiStage({ scene = 'mist' }: PixiStageProps) {
+export function PixiStage({
+  scene = 'mist',
+  wallpaper = null,
+  smoke = EMBER_SMOKE,
+}: PixiStageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const initialised = useRef(false);
+
+  /**
+   * The palette the *next* scene is built with.
+   *
+   * The lifecycle effect below runs once and its `initStage` resolves several frames later,
+   * by which time the player may have signed in and landed on a tab whose fog is not the
+   * one this component first rendered with — a signed-out boot renders with the default.
+   * A ref is what lets that effect stay dependency-free and still build the fog the shell
+   * is actually asking for, and it is written in an effect rather than during render
+   * because a render is not allowed to have side effects at all.
+   */
+  const smokeRef = useRef(smoke);
+  useEffect(() => {
+    smokeRef.current = smoke;
+  }, [smoke]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -32,7 +73,7 @@ export function PixiStage({ scene = 'mist' }: PixiStageProps) {
       // not a claim on the stage: replacing a battle that is already running with the
       // ambient mist is exactly what a reload into a fight used to do.
       if (hasScene()) return;
-      setScene(scene === 'mist' ? createMistScene() : null);
+      setScene(scene === 'mist' ? createMistScene(smokeRef.current) : null);
     });
 
     const observer = new ResizeObserver(() => resizeStage());
@@ -57,11 +98,33 @@ export function PixiStage({ scene = 'mist' }: PixiStageProps) {
   useEffect(() => {
     if (!initialised.current || previousScene.current === scene) return;
     previousScene.current = scene;
-    setScene(scene === 'mist' ? createMistScene() : null);
+    setScene(scene === 'mist' ? createMistScene(smokeRef.current) : null);
   }, [scene]);
+
+  // Re-tint the fog already drifting rather than building a second one: rebuilding on
+  // navigation restarts the drift from zero, which reads as the backdrop flinching every
+  // time a player changes tab.
+  useEffect(() => {
+    const live = activeScene();
+    if (live && 'setPalette' in live && typeof live.setPalette === 'function') {
+      (live as { setPalette(next: SmokePalette): void }).setPalette(smoke);
+    }
+  }, [smoke]);
 
   return (
     <div className={styles.stageWrap} aria-hidden="true">
+      {wallpaper && (
+        <>
+          <div
+            className={styles.wallpaper}
+            style={{ backgroundImage: `url(${wallpaperUrl(wallpaper)})` }}
+          />
+          {/* Not too dark — the owner's word. Enough that a painted panel and white text
+              read over a lit night market, and not so much that the painting becomes a
+              texture nobody can make out. */}
+          <div className={styles.wash} />
+        </>
+      )}
       <canvas ref={canvasRef} className={styles.canvas} />
       <div className={styles.vignette} />
     </div>

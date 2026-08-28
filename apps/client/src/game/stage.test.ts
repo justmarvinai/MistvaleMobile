@@ -60,6 +60,9 @@ class FakeApp {
 
 let failInit = false;
 
+/** Every colour any `Graphics.fill` has been given, so the fog's palette is checkable. */
+const fills: number[] = [];
+
 vi.mock('pixi.js', () => ({
   Application: FakeApp,
   Container: class {
@@ -74,10 +77,14 @@ vi.mock('pixi.js', () => ({
     destroy = vi.fn();
   },
   Graphics: class {
+    clear() {
+      return this;
+    }
     ellipse() {
       return this;
     }
-    fill() {
+    fill(style?: { color?: number }) {
+      if (typeof style?.color === 'number') fills.push(style.color);
       return this;
     }
     rect() {
@@ -111,8 +118,20 @@ async function freshModule() {
   vi.resetModules();
   created.length = 0;
   destroyCalls.length = 0;
+  fills.length = 0;
   failInit = false;
   return import('./stage');
+}
+
+/**
+ * The colours the fog was painted in, in painting order, with each run collapsed to one.
+ *
+ * A band is several blobs of one colour, so the raw list is thirteen entries and says
+ * nothing readable. What matters is which colour each band came out in and in what order,
+ * which is exactly what a run-length view of it is.
+ */
+function paintedRuns(): number[] {
+  return fills.filter((colour, index) => colour !== fills[index - 1]);
 }
 
 afterEach(() => {
@@ -312,5 +331,74 @@ describe('tearing the stage down', () => {
     expect(stage.getStage()).not.toBeNull();
     expect(created, 'no second application was built for the same canvas').toHaveLength(1);
     expect(created[0]?.destroyed).toBe(false);
+  });
+});
+
+describe('what colour the fog drifts in', () => {
+  // The owner's C23 request: the same drifting fog everywhere, tinted to the painting
+  // behind it — blue over the Haven's night market, violet at the Mistgate, green over
+  // Errands. `ui/tabScenery` decides which palette a tab gets and this is the half that
+  // has to actually reach the screen, so these check the *painting* rather than the map.
+
+  /** Four colours nothing in the game uses, so a hard-coded one cannot pass by accident. */
+  const FIRST = { bands: [0x010203, 0x040506, 0x070809], glow: 0x0a0b0c } as const;
+  const SECOND = { bands: [0x111213, 0x141516, 0x171819], glow: 0x1a1b1c } as const;
+
+  it('paints each band in its own colour, and the glow in the glow', async () => {
+    const stage = await freshModule();
+    stage.createMistScene(FIRST);
+
+    const glows = fills.filter((colour) => colour === FIRST.glow);
+    expect(glows, 'one glow, drawn once').toHaveLength(1);
+    expect(
+      paintedRuns().filter((colour) => colour !== FIRST.glow),
+      'back, middle and front bands, in that order',
+    ).toEqual([...FIRST.bands]);
+  });
+
+  it('re-tints the fog already drifting rather than being rebuilt', async () => {
+    // The whole reason `setPalette` exists. Building a second scene on every change of tab
+    // would restart the drift from zero, which reads as the backdrop flinching every time
+    // a player presses the dock.
+    const stage = await freshModule();
+    const scene = stage.createMistScene(FIRST);
+
+    fills.length = 0;
+    scene.setPalette(SECOND);
+
+    expect(
+      paintedRuns().filter((colour) => colour !== SECOND.glow),
+      'the new palette, on the same three bands',
+    ).toEqual([...SECOND.bands]);
+    expect(
+      fills.some((colour) => (FIRST.bands as readonly number[]).includes(colour)),
+      'and nothing left over from the old one',
+    ).toBe(false);
+  });
+
+  it('does not repaint for a palette it is already drawing', async () => {
+    // Three of the six tabs share the ember fog, and `tabScenery` hands back the same
+    // object for all of them. Stepping between them must cost nothing.
+    const stage = await freshModule();
+    const scene = stage.createMistScene(FIRST);
+
+    fills.length = 0;
+    scene.setPalette(FIRST);
+
+    expect(fills, 'no ellipse was redrawn').toEqual([]);
+  });
+
+  it('is reachable for tinting before the graphics context is up', async () => {
+    // The shell tints on every change of tab, including the first one — which on a boot
+    // straight into the Haven happens while `initStage` is still waiting on WebGL. If the
+    // pending scene were invisible to `activeScene`, the first tab a player lands on would
+    // keep the fog the shell was built with until they navigated away and back.
+    const stage = await freshModule();
+    const scene = stage.createMistScene(FIRST);
+
+    stage.initStage(canvasA);
+    stage.setScene(scene);
+
+    expect(stage.activeScene(), 'the scene waiting to be attached is the live one').toBe(scene);
   });
 });

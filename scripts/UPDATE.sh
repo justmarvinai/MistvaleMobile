@@ -480,7 +480,8 @@ MUSIC_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/audio/music")"
 VOICE_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/audio/tutorial")"
 PORTRAIT_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/portraits")"
 SCENERY_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/scenery")"
-log "media: ${MUSIC_COUNT} music, ${VOICE_COUNT} spoken lines, ${PORTRAIT_COUNT} portraits, ${SCENERY_COUNT} scenery"
+WALLPAPER_COUNT="$(count_files "${REPO_DIR}/${CLIENT_DIST_REL}/wallpapers")"
+log "media: ${MUSIC_COUNT} music, ${VOICE_COUNT} spoken lines, ${PORTRAIT_COUNT} portraits, ${SCENERY_COUNT} scenery, ${WALLPAPER_COUNT} wallpapers"
 if [[ "${MUSIC_COUNT}" == "0" && "${VOICE_COUNT}" == "0" && "${PORTRAIT_COUNT}" == "0" ]]; then
 	warn "this release carries no audio or portraits at all — if that is a surprise, run 'pnpm assets' in ${REPO_DIR}"
 fi
@@ -490,6 +491,12 @@ fi
 # absence a player would never report and an operator would never notice.
 if [[ "${SCENERY_COUNT}" == "0" ]]; then
 	warn "no scenery in this release — the title screen falls back to a plain gradient. Run 'pnpm assets' in ${REPO_DIR} if that is a surprise"
+fi
+# And the tab paintings, for exactly the same reason and one degree worse: a tab with no
+# painting falls back to the ground the game had before there were any, which is not merely
+# presentable — it is what the game looked like for twenty-two phases.
+if [[ "${WALLPAPER_COUNT}" == "0" ]]; then
+	warn "no tab wallpapers in this release — every tab falls back to the bare ground. Run 'pnpm assets' in ${REPO_DIR} if that is a surprise"
 fi
 
 log "collecting build output"

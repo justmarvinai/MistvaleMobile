@@ -42,6 +42,7 @@ import {
   type ScreenId,
 } from './screens';
 import { useNavStore } from '@/state/navStore';
+import { tabScenery } from '@/ui/tabScenery';
 import { useTutorialStore } from '@/state/tutorialStore';
 import { useLoadoutStore } from '@/state/loadoutStore';
 import { useBattleStore } from '@/state/battleStore';
@@ -77,6 +78,10 @@ export function App() {
   const refreshPlayer = usePlayerStore((state) => state.refresh);
 
   const ensureContent = useContentStore((state) => state.ensureLoaded);
+  // Which tab the shell is standing in, so the backdrop can be that tab's. Read here
+  // rather than inside `GameShell` because the stage is mounted out here, once, and a
+  // stage that moved into the shell would be destroyed and rebuilt on every sign-in.
+  const screen = useNavStore((state) => state.screen);
 
   const [bootError, setBootError] = useState<string>();
 
@@ -119,7 +124,14 @@ export function App() {
   // each of them, so signing in unmounted one and mounted another — and `PixiStage`'s
   // cleanup destroys the *shared* Application and removes its canvas from the DOM, so
   // every auth transition threw away a WebGL context and built a new one.
-  const backdrop = <PixiStage scene="mist" />;
+  //
+  // The tab's painting comes with it (C23), and only once there is a player: the title
+  // screen paints its own key art full-bleed (C18) and the boot screen is a lantern in the
+  // dark, so a wallpaper under either would be a second picture nobody asked for.
+  // `dockSlotFor` maps every screen in the game to the tab it lives in, so the Depths and
+  // the Mistspire share the Combat painting rather than each needing one.
+  const scenery = tabScenery(status === 'authenticated' && player ? dockSlotFor(screen) : null);
+  const backdrop = <PixiStage scene="mist" wallpaper={scenery.wallpaper} smoke={scenery.smoke} />;
 
   if (status === 'unknown') {
     return (

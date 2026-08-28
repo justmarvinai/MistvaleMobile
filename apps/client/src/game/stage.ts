@@ -230,6 +230,17 @@ export function hasScene(): boolean {
 }
 
 /**
+ * The scene on the stage right now, or the one waiting to be attached.
+ *
+ * For callers that want to *adjust* what is already running rather than replace it — the
+ * shell re-tints the fog on every change of tab, and building a second scene for that
+ * would restart the drift a player is watching from zero on every navigation.
+ */
+export function activeScene(): Scene | null {
+  return currentScene ?? pendingScene;
+}
+
+/**
  * Whether *this* scene is the one the stage is showing.
  *
  * A screen that owns a scene has to be able to ask, because it is not the only thing that
@@ -295,43 +306,80 @@ export function destroyStage(canvas?: HTMLCanvasElement): void {
 }
 
 /**
+ * The three drifting bands and the glow beneath them.
+ *
+ * Declared here because it is the *renderer's* contract — what a fog can be painted in —
+ * and every value it is ever given lives in `ui/tabScenery`, which is where a tab's
+ * colours are decided. There is deliberately no default: the ember fog the game shipped
+ * with is one of the six palettes over there, and a copy of it here would be a second
+ * source of truth for three numbers that must agree, only ever read on a code path
+ * nothing takes.
+ */
+export interface MistPalette {
+  bands: readonly [number, number, number];
+  glow: number;
+}
+
+/** Where each band sits and how fast it drifts. Only the *colour* is a tab's business. */
+const BANDS = [
+  { alpha: 0.9, y: 0.62, speed: 0.006, amplitude: 14, blobs: 5 },
+  { alpha: 0.7, y: 0.78, speed: 0.011, amplitude: 22, blobs: 4 },
+  { alpha: 0.45, y: 0.94, speed: 0.017, amplitude: 30, blobs: 3 },
+] as const;
+
+/**
  * The ambient mist backdrop.
  *
  * Drifting, layered fog with a slow parallax — the "living world" baseline that sits
- * behind the Haven and, later, battle scenes. Deliberately cheap: a handful of blurred
- * shapes rather than a particle system, so it costs almost nothing on the target box.
+ * behind every screen in the game. Deliberately cheap: a handful of blurred shapes rather
+ * than a particle system, so it costs almost nothing on the target box.
+ *
+ * **Its colour follows the tab** (C23). The shape, the drift and the blur are the same fog
+ * everywhere; what changes is the three band colours and the glow, so the Haven's night
+ * market drifts blue and the Mistgate violet without a second scene existing. `setPalette`
+ * redraws rather than rebuilds — twelve ellipses is nothing, and rebuilding the scene on
+ * navigation would throw away the drift a player is watching and restart it from zero.
  */
-export function createMistScene(): Scene {
+export function createMistScene(palette: MistPalette): Scene & {
+  setPalette(next: MistPalette): void;
+} {
   const root = new Container();
   root.label = 'mist-scene';
 
   const layers: { graphic: Graphics; speed: number; offset: number; amplitude: number }[] = [];
 
-  // Three depth layers, each drifting at its own rate.
-  const configs = [
-    { color: 0x2b211a, alpha: 0.9, y: 0.62, speed: 0.006, amplitude: 14, blobs: 5 },
-    { color: 0x3d2d1f, alpha: 0.7, y: 0.78, speed: 0.011, amplitude: 22, blobs: 4 },
-    { color: 0x55381f, alpha: 0.45, y: 0.94, speed: 0.017, amplitude: 30, blobs: 3 },
-  ];
-
-  for (const config of configs) {
+  for (const band of BANDS) {
     const graphic = new Graphics();
-    for (let i = 0; i < config.blobs; i += 1) {
-      const x = (i / config.blobs) * VIRTUAL_WIDTH * 1.4;
-      const radius = 120 + ((i * 37) % 90);
-      graphic
-        .ellipse(x, VIRTUAL_HEIGHT * config.y, radius, radius * 0.42)
-        .fill({ color: config.color, alpha: config.alpha });
-    }
     root.addChild(graphic);
-    layers.push({ graphic, speed: config.speed, offset: 0, amplitude: config.amplitude });
+    layers.push({ graphic, speed: band.speed, offset: 0, amplitude: band.amplitude });
   }
 
-  // A warm ember glow near the horizon: the light the vale is lit by.
-  const glow = new Graphics()
-    .ellipse(VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT * 0.58, VIRTUAL_WIDTH * 0.62, 130)
-    .fill({ color: 0xc2764a, alpha: 0.16 });
+  // A glow near the horizon: the light the vale is lit by, in the tab's own colour.
+  const glow = new Graphics();
   root.addChildAt(glow, 0);
+
+  let current = palette;
+
+  /** Redraws every band and the glow in the current palette, in place. */
+  const paint = (): void => {
+    BANDS.forEach((band, index) => {
+      const graphic = layers[index]!.graphic;
+      graphic.clear();
+      for (let i = 0; i < band.blobs; i += 1) {
+        const x = (i / band.blobs) * VIRTUAL_WIDTH * 1.4;
+        const radius = 120 + ((i * 37) % 90);
+        graphic
+          .ellipse(x, VIRTUAL_HEIGHT * band.y, radius, radius * 0.42)
+          .fill({ color: current.bands[index]!, alpha: band.alpha });
+      }
+    });
+    glow
+      .clear()
+      .ellipse(VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT * 0.58, VIRTUAL_WIDTH * 0.62, 130)
+      .fill({ color: current.glow, alpha: 0.16 });
+  };
+
+  paint();
 
   // Without this the layers read as hard-edged ellipses rather than fog. Low quality is
   // deliberate — it is a soft backdrop, and the target box has integrated graphics.
@@ -341,6 +389,13 @@ export function createMistScene(): Scene {
 
   return {
     root,
+    setPalette(next) {
+      // Same object, same values — a navigation between two tabs sharing the ember fog
+      // must not repaint, or three of the six tabs would redraw on every step between them.
+      if (next === current) return;
+      current = next;
+      paint();
+    },
     update(ticker) {
       elapsed += ticker.deltaMS / 1000;
       for (const layer of layers) {

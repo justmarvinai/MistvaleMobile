@@ -5,6 +5,53 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — every tab has a room of its own (C23)
+
+The owner's six paintings (2026-08-28), one per dock tab: Combat, the Haven, Champions, the
+Mistgate, the Bazaar and Errands. Each is drawn full-bleed behind everything, with **a dark
+wash over it** so painted panels and white text still read over a lit night market, and
+**the drifting fog on top of it** — the same fog the game has always had, now **tinted to
+the painting it is drifting over**. The owner's own list: Combat, Champions and the Bazaar
+keep the ember brown the fog shipped in; the Haven drifts blue, the Mistgate violet and
+Errands green.
+
+**One entry per dock slot rather than one per screen**, which is what keeps the map six
+lines long instead of twenty-four: a player standing in the Depths is inside the Battle tab,
+so `dockSlotFor` decides the backdrop. It also means stepping from the Mistspire to Trials
+does not repaint the room — and `setPalette` **re-tints the fog already drifting** rather
+than building a second scene, because rebuilding one restarts the drift from zero and reads
+as the backdrop flinching every time somebody presses the dock.
+
+Two screens are painted despite reaching no tab of their own, because "no tab" is not the
+same as "no room": a **fight** is Combat (the cold open is a mostly empty screen by design,
+and would otherwise be the one place in the game that went back to a bare wall), and the
+**mailbox** is an errand — a list of things to claim, reached from the top bar only because
+it carries a pip. Both were found by a test asking whether *every* screen in the game
+resolves to a painting rather than only the six on the owner's list.
+
+The **title and boot screens keep their own art**: the title screen paints its key art
+full-bleed already (C18), so a wallpaper under it would be a second picture nobody asked
+for.
+
+### Changed — the asset pipeline publishes a set as JPEG (C23)
+
+`pnpm assets` gained one option, and the numbers are why it is worth a special case: the six
+wallpapers arrive as PNG and come to **12.9 MB** published at 1600px, against **1.45 MB** as
+JPEG. A painted scene with thousands of colours and no flat regions is precisely the case
+PNG is worst at — the same finding C18's backdrop pass wrote down, applied in the other
+direction. The extension is rewritten with the format, because a `.png` that is really a
+JPEG is a name somebody debugs twice.
+
+A source with **real transparency is refused** rather than flattened onto black, which is
+`png.ts`'s own rule about producing a wrong picture quietly. `isOpaque` is exported from
+`png.ts` for it rather than written a second time in the publisher — the encoder has asked
+the same question since C16 to decide whether the alpha channel earns its byte.
+
+**A release must run `pnpm assets`** for the paintings to exist at all; the published tree is
+gitignored, like the sprites and the scenery. A missing one fails quietly by design — the
+game simply shows the ground it always did — so `e2e/wallpaper.spec.ts` asks by **decoding**
+each file rather than fetching it, since a missing file answers 200 with the game's own HTML.
+
 ### Changed — setting a lineup is a confrontation, not a column (C22)
 
 The owner's reference (2026-08-28, Raid's Classic Arena screen): **your four on the left,
