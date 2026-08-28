@@ -1,6 +1,6 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { chooseStarter, dismissUnlocks, goToScreen, registerRaw } from './support';
-import { decodePng, litFraction } from './pixels';
+import { decodePng, differingFraction, litFraction } from './pixels';
 
 /**
  * The tab paintings (C23).
@@ -77,6 +77,17 @@ test.describe('the tab paintings', () => {
         'style',
         new RegExp(`/wallpapers/${painting.file}\\.jpg`),
       );
+
+      // And it is on the *screen*, not merely in the document.
+      //
+      // The first cut of this spec stopped at the line above, and it passed for a whole
+      // release with the paintings invisible: the shared canvas cleared to an opaque colour
+      // and, once it was correctly stacked in front of them, covered every one. An element
+      // carrying the right URL says nothing about whether anybody can see it.
+      expect(
+        await wallpaperContribution(page),
+        `${painting.tab}'s painting reaches the screen`,
+      ).toBeGreaterThan(0.08);
     }
 
     // And the shell is still on top of it. `expectOnTop` cannot answer this and it is worth
@@ -92,3 +103,30 @@ test.describe('the tab paintings', () => {
     expect(litFraction(heading, 150), 'the title is painted, not buried').toBeGreaterThan(0.05);
   });
 });
+
+/**
+ * How much of the window the tab's painting is actually contributing.
+ *
+ * Shoot the page, hide the painting, shoot it again: what changed is the painting's own
+ * contribution, and a painting nobody can see contributes nothing. The same measurement as
+ * `visible.spec.ts` makes of the canvas, in the other direction — the two layers are a
+ * stack, and each of them has now covered the other once.
+ *
+ * Measured at 1440×900: 31% of the window on the Haven, 25% on Champions and Errands, and
+ * 17% at the Mistgate, whose screen carries the most opaque panelling. With the stage's
+ * opaque clear colour put back — the state the owner reported — the Haven falls to 4.6%,
+ * so the bar sits between the two with room on both sides rather than at zero.
+ */
+async function wallpaperContribution(page: Page): Promise<number> {
+  const setHidden = (hidden: boolean) =>
+    page.evaluate((hide) => {
+      const layer = document.querySelector('div[style*="/wallpapers/"]');
+      if (layer instanceof HTMLElement) layer.style.visibility = hide ? 'hidden' : '';
+    }, hidden);
+
+  const painted = decodePng(await page.screenshot());
+  await setHidden(true);
+  const bare = decodePng(await page.screenshot());
+  await setHidden(false);
+  return differingFraction(painted, bare);
+}

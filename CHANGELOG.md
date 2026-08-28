@@ -5,6 +5,29 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — and then the paintings were behind an opaque sheet (C23b)
+
+Putting the canvas in front of the paintings (C23a, below) revealed the other half of the
+same mistake: the Pixi stage cleared to `0x0c0a09`, an **opaque** colour, so the moment it
+was correctly stacked in front of the wallpapers it covered every one of them. The tabs
+went back to the bare ground they had before C23 — the layering was right and the room was
+still invisible.
+
+The stage clears to nothing now (`backgroundAlpha: 0`). Nothing is lost by dropping the
+colour: `.stageWrap` paints `$ground-deep`, which is the very colour it used to clear to,
+one layer further down — so a tab with no painting looks exactly as it always did.
+
+**And `e2e/wallpaper.spec.ts` had passed through all of it.** It asked whether the layer
+carried the right URL, which is a question about the document rather than about the screen,
+and an element with a perfect `background-image` behind an opaque canvas satisfies it
+completely. It measures the painting's own contribution now, the same way the battlefield
+guard measures the canvas's: shoot the window, hide the painting, shoot it again. Measured
+at 1440×900 — 31% of the window on the Haven, 25% on Champions and Errands, 17% at the
+Mistgate, against 4.6% with the opaque clear colour put back.
+
+The two layers have now each covered the other exactly once, and each of them shipped past
+a guard that was looking at the DOM instead of at the picture.
+
 ### Fixed — the champions were painted over (C23a)
 
 The tab paintings covered the battlefield. Every fight in the game — campaign, Arena, the

@@ -129,7 +129,12 @@ export async function initStage(canvas: HTMLCanvasElement): Promise<Application 
     try {
       await application.init({
         canvas,
-        background: 0x0c0a09,
+        // Cleared to nothing, not to a colour. The stage is the *middle* of a stack now:
+        // the tab's painting and its dark wash are behind this canvas, so a clear colour
+        // here is an opaque sheet over both of them and the paintings simply never appear.
+        // Nothing is lost by dropping it — `.stageWrap` paints `$ground-deep`, which is the
+        // very colour this used to clear to, one layer further down.
+        backgroundAlpha: 0,
         antialias: false, // Pixel art must never be smoothed.
         // Guarded rather than bare: this module is exercised outside a browser, and a
         // `ReferenceError` here would be indistinguishable from "this machine has no WebGL".
