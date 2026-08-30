@@ -25,6 +25,15 @@ export {
 } from './team';
 export { simulateStage, type StageResult } from './stage';
 export {
+  arenaDiversity,
+  drawComp,
+  poolRoles,
+  type ArenaDiversity,
+  type ArenaSetup,
+  type ChampionArenaRecord,
+  type RoleArenaBand,
+} from './arena';
+export {
   benchPartners,
   benchmarkChampion,
   benchmarkRoster,

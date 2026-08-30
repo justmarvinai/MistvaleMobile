@@ -14,12 +14,15 @@ import {
 } from '@mistvale/shared';
 import {
   FULL_RELICS,
+  arenaDiversity,
   benchmarkRoster,
   roleIndex,
   simulateStage,
   wardedTeam,
   withCollection,
   withRelics,
+  type ArenaDiversity,
+  type ArenaSetup,
   type BenchSetup,
   type ChampionBenchmark,
   type LoadedContent,
@@ -64,12 +67,15 @@ import {
  */
 export {
   FULL_RELICS,
+  arenaDiversity,
   benchmarkRoster,
   roleIndex,
   simulateStage,
   wardedTeam,
   withCollection,
   withRelics,
+  type ArenaDiversity,
+  type ArenaSetup,
   type BenchSetup,
   type ChampionBenchmark,
   type LoadedContent,

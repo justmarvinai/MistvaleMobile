@@ -1,4 +1,5 @@
 import {
+  arenaDiversity,
   benchmarkRoster,
   campaignStages,
   dungeonFloors,
@@ -13,6 +14,7 @@ import {
   starterKeys,
   withCollection,
   withRelics,
+  type ArenaSetup,
   type BenchSetup,
   type LoadedContent,
   type StageResult,
@@ -88,6 +90,36 @@ const BENCHMARK_RUNS = Math.max(30, Math.round(RUNS / 20));
  * something` is what covers that end, and it fires on exactly that mutation.
  */
 const OUTLIER_HIGH = 200;
+
+/**
+ * How many Arena pairings the diversity report draws, and what it may say.
+ *
+ * Each pairing is fought **twice**, sides swapped, because the attacker moves first and
+ * that is worth real win rate — scoring one direction only would credit the draw rather
+ * than the champions. At the default that is six thousand battles and about eight seconds.
+ *
+ * The band is on a **role** rather than on a champion, and the reason is measured. One
+ * champion in four cannot escape the noise floor of its three random partners: a champion
+ * given a hundred times its authored attack tops the table at 76.5%, against an authored
+ * best of 76.3%, and stripped to 1/1/1 it falls only to 20.6% against an authored worst of
+ * 24.9%. Nothing could cross a champion-level bound, so none is written. A role pools six
+ * to fourteen champions over thousands of battles and moves by only **0.2 to 1.3 points**
+ * across disjoint seed blocks, which is a statistic a gate can stand on.
+ *
+ * **A ceiling and no floor**, for the same structural reason C29 has no floor: a role can
+ * be pushed up but not down. Every attack champion cut to a *twentieth* of its authored
+ * attack moves the role from 42.5% to 38.5% and stops there — a comp is four champions
+ * drawn from thirty-seven, so a comp holding a crippled attacker still holds three others
+ * who win it. Pushed the other way it moves freely: supports at five times their attack
+ * reach 65.9% and at twenty times 67.0%, which is about the ceiling the format allows.
+ *
+ * So the bound is **62%**: five points clear of the shipped maximum of 56.9% — five times
+ * the drift — and demonstrably crossable, which is the whole test of whether a gate is
+ * real. What it says is the thing §14 is actually asking: no comp has to be built out of
+ * one role to compete.
+ */
+const ARENA_PAIRINGS = Math.max(200, Math.round(RUNS * 1.5));
+const ARENA_ROLE_HIGH = 62;
 
 /**
  * The line each trial is authored around — the answer key.
@@ -906,6 +938,71 @@ function main(): void {
         outliers.length === 0
           ? `roster spans ${Math.min(...spread).toFixed(0)}–${Math.max(...spread).toFixed(0)}%`
           : outliers.map(({ row, index }) => `${row.name} ${index.toFixed(0)}%`).join(', '),
+    });
+  }
+
+  // ── Gate 3g: nobody is mandatory in the Arena ───────────────────────────
+  //
+  // The other half of §14's champion gate, and it asks a different question from the bench
+  // above: not "how much faster does the wall fall with this champion" but "with power held
+  // equal, does one name keep turning up on the winning side".
+  //
+  // **It is not the 40%-of-winning-comps figure the doc names**, and that is arithmetic
+  // rather than a shortcut. A champion fills 4 of 37 comp slots, so it appears in 10.8% of
+  // random comps; every battle produces exactly one winner, so half of all comps win. A
+  // champion that won *every fight it ever appeared in* would still appear in only
+  // 0.108 / 0.5 = 21.6% of winning comps. The line could never be crossed. That figure
+  // means what it means in a metagame where players *choose* their comps; here they are
+  // drawn, so the same question is asked in the form drawn comps can answer.
+  const arenaSetup: ArenaSetup = {
+    level: 60,
+    rank: 6,
+    ascension: 6,
+    pairings: ARENA_PAIRINGS,
+  };
+  const arena = arenaDiversity(content, arenaSetup);
+  if (arena.battles > 0) {
+    console.log(`\nThe Arena — ${arena.battles} battles between random comps at equal power`);
+    for (const band of arena.roles) {
+      console.log(
+        `  ${band.role.padEnd(9)} ${(band.winRate * 100).toFixed(1).padStart(5)}%  ` +
+          `over ${band.champions} champions and ${band.battles} battles`,
+      );
+    }
+    console.log('  strongest and weakest, for the record rather than for a gate:');
+    for (const row of [...arena.champions.slice(0, 3), ...arena.champions.slice(-3)]) {
+      console.log(
+        `    ${row.name.padEnd(28)} ${(row.winRate * 100).toFixed(1).padStart(5)}%  ` +
+          `${row.wins}/${row.battles}  ${row.role}`,
+      );
+    }
+
+    const offRoles = arena.roles.filter((band) => band.winRate * 100 > ARENA_ROLE_HIGH);
+    gates.push({
+      name: 'arena-no-role-is-mandatory',
+      detail: `no role wins more than ${ARENA_ROLE_HIGH}% of its Arena battles at equal power`,
+      passed: offRoles.length === 0,
+      measured:
+        offRoles.length === 0
+          ? arena.roles.map((band) => `${band.role} ${(band.winRate * 100).toFixed(0)}%`).join(', ')
+          : offRoles.map((band) => `${band.role} ${(band.winRate * 100).toFixed(1)}%`).join(', '),
+    });
+
+    // A self-check on the *draw* rather than on the content, and the one thing about this
+    // harness that can silently go wrong: if the comps stopped being drawn at random the
+    // table would still print, still be sorted, and be about four champions. There is
+    // deliberately no gate on the median — every battle has exactly one winner and each
+    // pairing is fought both ways, so the middle champion sits at half whatever the fold
+    // does, which makes it a tautology rather than a check.
+    const unfought = arena.champions.filter((row) => row.battles === 0);
+    gates.push({
+      name: 'arena-every-champion-is-drawn',
+      detail: 'every champion is fielded by the comp draw, so the table is about the roster',
+      passed: unfought.length === 0,
+      measured:
+        unfought.length === 0
+          ? `${arena.champions.length} champions, fewest ${Math.min(...arena.champions.map((row) => row.battles))} battles`
+          : `${unfought.length} champions never fought`,
     });
   }
 

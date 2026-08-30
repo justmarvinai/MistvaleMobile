@@ -5,6 +5,55 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — nobody is mandatory in the Arena, and it is measured (C29b)
+
+The other half of gap G7, and the last of the two balance gates COMBAT_SYSTEM §14 has
+documented since P2 and never enforced. `pnpm sim` now draws random four-champion comps at
+**identical** level, rank, ascension and relics, fights them in arena mode, and fights every
+pairing **twice with the sides swapped** — the attacker moves first and that is worth real
+win rate, so scoring one direction only would credit the draw rather than the champions.
+
+**Three things it is deliberately not, each ruled out by measurement.**
+
+It is not the *>40% of winning comps* figure the doc names. That is arithmetic: a champion
+fills 4 of 37 comp slots so it appears in **10.8%** of random comps, and every battle has
+exactly one winner so half of all comps win — a champion winning *every fight it ever
+appeared in* would still be in only **21.6%** of winning comps. The line could never be
+crossed. It means what it means in a metagame where players choose their comps; here they
+are drawn, so the same question is asked in the form drawn comps can answer.
+
+It is not per-champion either, for the reason C29's benchmark has no lower bound: one
+champion in four cannot escape the noise of its three random partners. Given **a hundred
+times** its authored attack a champion tops the table at 76.5%, against an authored best of
+76.3%; stripped to 1/1/1 it falls only to 20.6%, against an authored worst of 24.9%.
+
+And there is no floor. A role can be pushed up but not down — every attack champion cut to a
+*twentieth* of its attack moves the role from 42.5% to 38.5% and stops there, because a comp
+holding a crippled attacker still holds three others who win it.
+
+**What is gated is a role's ceiling.** Pooling six to fourteen champions over thousands of
+battles takes the noise with them: a role moves **0.2–1.3 points** across disjoint seed
+blocks. Shipped, the roles run attack 42.5% · defense 51.4% · hp 54.0% · support 56.9%, and
+the bound is **62%** — five points clear of the maximum, five times the drift, and
+demonstrably crossable, since every support at five times its attack reaches 65.9%. A second
+gate checks the *draw* rather than the content: every champion must actually be fielded,
+which is the one way this harness could silently go wrong and still print a plausible table.
+Both are mutation-checked and each fires on its own mutation. **G7 is closed.**
+
+The finding worth carrying: **the Arena inverts the stage benchmark.** Supports are the
+strongest role in PvP and the slowest at clearing PvE; attackers are the reverse. Two modes
+rewarding different champions is what a collection game wants.
+
+### Changed — Q9 answered: the roster stands, the band stays unenforced
+
+The owner took the recommended default (2026-08-30). A spread of 75–151% within a role is
+not obviously wrong for a collection game — an auto-include and a niche pick are what make a
+collection worth having — and the ten champions outside the documented 85–115% band are
+doing what they were authored to do rather than misbehaving. The instrument and its report
+ship; the tuning does not. Two observations are on the record for whenever a champion pass
+happens: **Ugrim Pyrechant is authored `support` and out-damages half the `attack` roster**,
+and **six of the ten supports neither heal nor shield**.
+
 ### Added — every champion, measured against its own role (C29)
 
 COMBAT_SYSTEM §14 has asked for this since P2 and the repo could not answer it. The gate
