@@ -360,3 +360,79 @@ export const adminAuditPageSchema = z.object({
   entities: z.array(z.string()),
 });
 export type AdminAuditPage = z.infer<typeof adminAuditPageSchema>;
+
+/**
+ * The battle inspector (ADMIN_SUITE_DESIGN §2.18).
+ *
+ * The debugging tool for "that fight felt wrong", and the reason it can exist at all is
+ * that a battle *is* its event log: the engine is deterministic given a seed, the server
+ * stores the whole log on the row, and the client only ever renders it. So an operator
+ * looking at this is looking at exactly what the player saw, rather than at a
+ * reconstruction that could differ in the way that matters.
+ */
+export const ADMIN_BATTLE_MAX_LIMIT = 50;
+export const ADMIN_BATTLE_DEFAULT_LIMIT = 20;
+
+export const adminBattleQuerySchema = z.object({
+  /** Whose fights. Omitted lists the most recent across the whole server. */
+  playerId: z.string().max(64).optional(),
+  mode: z.string().max(40).optional(),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(ADMIN_BATTLE_MAX_LIMIT)
+    .default(ADMIN_BATTLE_DEFAULT_LIMIT),
+  offset: z.coerce.number().int().min(0).max(1_000_000).default(0),
+});
+export type AdminBattleQuery = z.infer<typeof adminBattleQuerySchema>;
+
+export const adminBattleSummarySchema = z.object({
+  id: z.string(),
+  playerId: z.string(),
+  profileName: z.string().nullable(),
+  mode: z.string(),
+  stageKey: z.string(),
+  status: z.string(),
+  outcome: z.string().nullable(),
+  turns: z.number().int(),
+  createdAt: z.string(),
+  finishedAt: z.string().nullable(),
+});
+export type AdminBattleSummary = z.infer<typeof adminBattleSummarySchema>;
+
+export const adminBattleListSchema = z.object({
+  battles: z.array(adminBattleSummarySchema),
+  total: z.number().int(),
+});
+export type AdminBattleList = z.infer<typeof adminBattleListSchema>;
+
+/** One unit as the log's opening snapshot described it. */
+export const adminBattleUnitSchema = z.object({
+  side: z.string(),
+  slot: z.number().int(),
+  defKey: z.string(),
+  name: z.string(),
+});
+export type AdminBattleUnit = z.infer<typeof adminBattleUnitSchema>;
+
+export const adminBattleDetailSchema = adminBattleSummarySchema.extend({
+  /** The seed the fight was rolled from — with it, the fight is reproducible exactly. */
+  seed: z.number(),
+  /** The revision the fight was resolved against, since a kit may have changed since. */
+  contentRev: z.number().int(),
+  energySpent: z.number().int(),
+  allies: z.array(adminBattleUnitSchema),
+  enemies: z.array(adminBattleUnitSchema),
+  /**
+   * The engine's own event log, verbatim.
+   *
+   * Not summarised and not re-derived: this is the record the client rendered, and a
+   * paraphrase of it would be a second account of the fight that could differ from the
+   * first in exactly the case somebody is asking about.
+   */
+  events: z.array(z.unknown()),
+  /** What the clear paid, when it finished. */
+  rewards: z.unknown(),
+});
+export type AdminBattleDetail = z.infer<typeof adminBattleDetailSchema>;

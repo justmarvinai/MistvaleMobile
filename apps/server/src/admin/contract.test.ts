@@ -10,7 +10,7 @@ import {
   buildOpenApiDocument,
   type ApiEndpoint,
 } from '@mistvale/shared';
-import { accounts, contentEntries, contentRevisions } from '../db/schema/index';
+import { accounts, battleSessions, contentEntries, contentRevisions } from '../db/schema/index';
 import {
   buildTestApp,
   extractSessionCookie,
@@ -52,12 +52,18 @@ function urlFor(endpoint: ApiEndpoint, key = 'testers'): string {
       // The job runner takes a name from a closed list rather than an id; `daily` is the
       // safe one to exercise — it prunes an empty fixture and rebuilds an empty ladder.
       .replace(':name', 'daily')
-      .replace(':id', targetPlayerId)
+      // Most `:id` routes are keyed on a player; the battle inspector is the one that is
+      // not, and substituting a player id there answers NOT_FOUND rather than exercising
+      // the contract — which is a green test about a 404.
+      .replace(':id', endpoint.operationId === 'getBattle' ? targetBattleId : targetPlayerId)
   );
 }
 
 /** The disposable account the player-management cases act on. */
 let targetPlayerId = '';
+
+/** A finished fight for the inspector's contract case to read. */
+let targetBattleId = '';
 
 const FIXTURE = [
   {
@@ -260,6 +266,26 @@ describe.skipIf(!dbUp)('API contract', () => {
    * create its own rather than rely on one an earlier case left behind.
    */
   const SETUP: Record<string, () => Promise<void>> = {
+    // Created here rather than in `beforeAll`, and the reason is worth the comment: these
+    // cases run in endpoint order, `resetAccount` comes first, and a reset cascades every
+    // battle the subject ever fought. A row seeded up front is gone by the time this runs.
+    getBattle: async () => {
+      const [battle] = await app.db
+        .insert(battleSessions)
+        .values({
+          playerId: targetPlayerId,
+          mode: 'campaign',
+          stageKey: 'test_stage',
+          contentRev: 1,
+          seed: 1,
+          state: { turn: 1 },
+          events: [{ type: 'battleStart', allies: [], enemies: [] }],
+          status: 'finished',
+          outcome: 'victory',
+        })
+        .returning({ id: battleSessions.id });
+      targetBattleId = battle!.id;
+    },
     publishContent: async () => {
       const response = await app.inject({
         method: 'PUT',

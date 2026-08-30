@@ -19,6 +19,11 @@ import {
   adminAuditEntrySchema,
   adminAuditPageSchema,
   adminAuditQuerySchema,
+  adminBattleDetailSchema,
+  adminBattleListSchema,
+  adminBattleQuerySchema,
+  adminBattleSummarySchema,
+  adminBattleUnitSchema,
   adminSimulateRequestSchema,
   adminSimulateResultSchema,
 } from './admin';
@@ -640,6 +645,37 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     response: adminAuditPageSchema,
     errors: [400],
   },
+
+  // ── Admin: the battle inspector ───────────────────────────────────────────
+  {
+    surface: 'admin',
+    method: 'get',
+    path: ADMIN_ROUTES.battles.list,
+    operationId: 'listBattles',
+    summary: 'List battles, newest first',
+    description:
+      'Optionally narrowed to one player or one mode. The debugging entry point for ' +
+      '"that fight felt wrong": find the fight, then open it.',
+    query: adminBattleQuerySchema,
+    response: adminBattleListSchema,
+    errors: [400],
+  },
+  {
+    surface: 'admin',
+    method: 'get',
+    path: routePattern(ADMIN_ROUTES.battles.detail),
+    operationId: 'getBattle',
+    summary: 'One battle, with its event log',
+    description:
+      'Metadata, both sides as the log opened with them, and the engine event log ' +
+      'verbatim — not summarised and not re-derived, because a paraphrase would be a ' +
+      'second account of the fight that could differ from the one the player saw in ' +
+      'exactly the case somebody is asking about. The seed is included: with it, the ' +
+      'fight is reproducible exactly. Read-only, and not audited — looking at a fight ' +
+      'changes nothing.',
+    response: adminBattleDetailSchema,
+    errors: [404],
+  },
 ];
 
 // ── Document generation ─────────────────────────────────────────────────────
@@ -675,6 +711,10 @@ const SHARED_SCHEMAS: Record<string, z.ZodType> = {
   AdminResetPasswordResult: adminResetPasswordResultSchema,
   AdminGrantResult: adminGrantResultSchema,
   AdminAuditEntry: adminAuditEntrySchema,
+  AdminBattleUnit: adminBattleUnitSchema,
+  AdminBattleSummary: adminBattleSummarySchema,
+  AdminBattleList: adminBattleListSchema,
+  AdminBattleDetail: adminBattleDetailSchema,
   AdminAuditPage: adminAuditPageSchema,
   AdminSetRankRequest: adminSetRankRequestSchema,
   AdminBanRequest: adminBanRequestSchema,

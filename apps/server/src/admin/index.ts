@@ -12,6 +12,7 @@ import { adminJobRoutes } from './job-routes';
 import { adminSimulateRoutes } from './simulate-routes';
 import { adminAuditRoutes } from './audit-routes';
 import { readActivity } from './activity';
+import { adminBattleRoutes } from './battle-routes';
 
 /**
  * The Admin API.
@@ -126,5 +127,6 @@ export const adminApi: FastifyPluginAsync = async (app) => {
     await guarded.register(adminJobRoutes);
     await guarded.register(adminSimulateRoutes);
     await guarded.register(adminAuditRoutes);
+    await guarded.register(adminBattleRoutes);
   });
 };

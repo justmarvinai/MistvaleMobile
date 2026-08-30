@@ -187,6 +187,232 @@
         ],
         "additionalProperties": false
       },
+      "AdminBattleDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "playerId": {
+            "type": "string"
+          },
+          "profileName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mode": {
+            "type": "string"
+          },
+          "stageKey": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "turns": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seed": {
+            "type": "number"
+          },
+          "contentRev": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "energySpent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "allies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminBattleUnit"
+            }
+          },
+          "enemies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminBattleUnit"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {}
+          },
+          "rewards": {}
+        },
+        "required": [
+          "id",
+          "playerId",
+          "profileName",
+          "mode",
+          "stageKey",
+          "status",
+          "outcome",
+          "turns",
+          "createdAt",
+          "finishedAt",
+          "seed",
+          "contentRev",
+          "energySpent",
+          "allies",
+          "enemies",
+          "events",
+          "rewards"
+        ],
+        "additionalProperties": false
+      },
+      "AdminBattleList": {
+        "type": "object",
+        "properties": {
+          "battles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminBattleSummary"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "battles",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "AdminBattleSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "playerId": {
+            "type": "string"
+          },
+          "profileName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mode": {
+            "type": "string"
+          },
+          "stageKey": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "turns": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "playerId",
+          "profileName",
+          "mode",
+          "stageKey",
+          "status",
+          "outcome",
+          "turns",
+          "createdAt",
+          "finishedAt"
+        ],
+        "additionalProperties": false
+      },
+      "AdminBattleUnit": {
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "defKey": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "side",
+          "slot",
+          "defKey",
+          "name"
+        ],
+        "additionalProperties": false
+      },
       "AdminEconomyEntry": {
         "type": "object",
         "properties": {
@@ -16419,6 +16645,368 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 1000000
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/battles": {
+      "get": {
+        "operationId": "listBattles",
+        "summary": "List battles, newest first",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AdminBattleList"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body failed validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "Optionally narrowed to one player or one mode. The debugging entry point for \"that fight felt wrong\": find the fight, then open it.",
+        "parameters": [
+          {
+            "name": "playerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 64
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/battles/{id}": {
+      "get": {
+        "operationId": "getBattle",
+        "summary": "One battle, with its event log",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AdminBattleDetail"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such content type, entity or revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "Metadata, both sides as the log opened with them, and the engine event log verbatim — not summarised and not re-derived, because a paraphrase would be a second account of the fight that could differ from the one the player saw in exactly the case somebody is asking about. The seed is included: with it, the fight is reproducible exactly. Read-only, and not audited — looking at a fight changes nothing.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ],

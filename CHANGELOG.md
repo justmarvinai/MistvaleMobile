@@ -5,6 +5,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the battle inspector's reads (C33, ADMIN_SUITE_DESIGN §2.18)
+
+`GET /admin/api/battles` and `/battles/:id` — the server half of the debugging tool for
+"that fight felt wrong". The detail hands back the engine's event log **verbatim**, both
+sides as the log opened with them, and the **seed**: with the seed the fight is reproducible
+exactly, which is the difference between investigating a report and guessing at it.
+
+Not summarised and not re-derived. A paraphrase would be a second account of the fight, and
+it could differ from the one the player saw in precisely the case somebody is asking about.
+Both sides are read off the log's opening snapshot rather than off the final board, because
+a champion who died on wave two was still in the fight and the board at the end does not say
+so. The list deliberately carries no log — a hundred fights at three hundred turns each is a
+response nobody wants.
+
+Read-only by construction, and not audited: the audit log records what an operator
+*changed*, and looking at a fight changes nothing.
+
+**Two traps it walked into, both now closed.** `ADMIN_ROUTES.battles.detail(':id')`
+percent-encodes the colon, so the OpenAPI path came out as `/battles/%3Aid` and the contract
+test's `:id` substitution silently never matched — `routePattern` exists for exactly this and
+every other id route already used it. And the contract cases run in endpoint order with
+`resetAccount` among them, which cascades away every battle the subject ever fought: a row
+seeded in `beforeAll` was gone by the time the inspector's case ran.
+
 ### Added — the dashboard says what the game has been doing (C32, gap G3)
 
 `/stats/overview` could report how many champions and stages were published, which describes

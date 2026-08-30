@@ -331,6 +331,17 @@ export const ADMIN_ROUTES = {
     list: '/audit',
   },
   /**
+   * The battle inspector (ADMIN_SUITE_DESIGN §2.18).
+   *
+   * Read-only, and it has to be: a battle row is the record of a fight that already
+   * happened, and the one thing an inspector must never do is change the thing it is
+   * inspecting.
+   */
+  battles: {
+    list: '/battles',
+    detail: (id: string) => `/battles/${encodeURIComponent(id)}`,
+  },
+  /**
    * Player management, keyed by **player** id rather than account id.
    *
    * The player is what an operator has in front of them — it is what `economy_log`,
