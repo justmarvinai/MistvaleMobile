@@ -592,6 +592,7 @@ export async function attack(
         openingState.finished ? 'finished' : 'active',
         openingEvents,
       ),
+      team: attackers.map((member) => member.id),
     };
   });
 }

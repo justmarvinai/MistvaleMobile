@@ -1,0 +1,182 @@
+@use '../../styles/tokens' as *;
+
+/* The four who fought, as cards.
+
+   Mistvale's own element rather than the library's: `ResultScreen` models label/value
+   stats and reward chips, and a champion's card carrying a level ladder, a star rank and
+   three per-column bars is not a shape it has. The rule from the design rework applies as
+   written — the library owns the chrome, and where React owns the content the element
+   stays ours. */
+
+.party {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $space-3;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  /* Rises with the card rather than after it: two staggered entrances on one screen read
+     as the second one arriving late. */
+  animation: party-rise 520ms $ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .party {
+    animation: none;
+  }
+}
+
+@keyframes party-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  width: 12.5rem;
+  padding: $space-3;
+  background: rgba(12, 10, 16, 0.78);
+  border: 1px solid $edge;
+  text-align: center;
+
+  /* A champion who went down is dimmed rather than struck through: their numbers still
+     count, and they earned them before they fell. */
+  &[data-fell='true'] .name {
+    color: $muted;
+  }
+}
+
+/* ── The level ladder ─────────────────────────────────────────────────────── */
+.ladder {
+  width: 100%;
+}
+
+.ladderLabel {
+  display: block;
+  margin-bottom: 3px;
+  color: $muted;
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.stars {
+  margin: 0;
+  color: $gold-soft;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.face {
+  flex: none;
+}
+
+.name {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 0.92rem;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.level {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: $space-2;
+  margin: 0;
+  color: $muted;
+  font-size: 0.72rem;
+}
+
+.fell {
+  color: $danger;
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── The three kinds of work ──────────────────────────────────────────────── */
+.bars {
+  width: 100%;
+  margin: $space-1 0 0;
+  display: grid;
+  gap: $space-2;
+}
+
+.bar {
+  display: grid;
+  gap: 2px;
+}
+
+.barLabel {
+  color: $muted;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.barValue {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: $space-2;
+  margin: 0;
+
+  /* A zero is a real answer and stays legible, but it should not read as loudly as a
+     figure somebody earned. */
+  &[data-zero='true'] .figure {
+    color: $muted-deep;
+  }
+}
+
+.track {
+  display: block;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.grow {
+  display: block;
+  height: 100%;
+  background: $accent;
+  transition: width $duration-base $ease-out;
+
+  /* Each bar against the biggest figure in its own column across the party, never against
+     the other columns: forty thousand damage and four thousand healing are both a full
+     bar, which is right — they are answers to different questions. */
+  &[data-kind='damage'] {
+    background: $danger;
+  }
+  &[data-kind='shielding'] {
+    background: $rarity-rare;
+  }
+  &[data-kind='healing'] {
+    background: $success;
+  }
+}
+
+.figure {
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 0.76rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}

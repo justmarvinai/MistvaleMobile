@@ -72,6 +72,10 @@
 | GET `/battles/active` | Resume support after refresh/crash. |
 | GET `/battles/:id/log` | Replay events (own battles + arena battles involving you). |
 
+**Every battle view carries the team that fought it** (`team`, `player_champions` ids in formation order) — the engine works in slots and the client works in roster copies, and slot *n* of `contributions` is `team[n]`. The results screen needs both halves: a champion's card carries the level and star rank the copy finished on rather than only the name the log knows, and **Again** re-sends the same four rather than whatever the picker last remembered. Empty in the modes that field champions the account does not own.
+
+**A finished fight's summary carries `turns` and `previousBest`.** `turns` is the figure the server filed as the stage's record; `previousBest` is the record held *before* this run, or null on a first clear. "Before" is load-bearing — `recordClear` folds this run's count into `best_turns` as it files it, so a best read afterwards would print the same number twice and the screen could never say a record had been broken.
+
 **`practice` is a lens, not a stage kind.** It re-fights a stage the player has already cleared — any mode's — for zero energy and zero reward: no silver, no XP, no drops, no clear recorded, no first-clear bonus. Stars are still reported, because finding out how a team does is the entire point. A stage nobody has beaten cannot be practised, or the sandbox would be free reconnaissance on every boss in the game.
 
 ### Arena

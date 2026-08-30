@@ -126,6 +126,19 @@ export interface BattleView {
    * brought, not a breakdown of the enemy's health bar.
    */
   contributions: UnitContribution[];
+  /**
+   * The `player_champions` ids that fought, in formation order.
+   *
+   * The engine works in slots and the client works in roster copies, and the results screen
+   * is the first thing that needs both: slot *n* of `contributions` is `team[n]`, which is
+   * what lets a champion's card carry the level and the star rank it finished the fight on
+   * rather than only the name the log knows. It is also the team **Replay** sends, so a
+   * repeat is the same four rather than whatever the picker last remembered.
+   *
+   * Empty for the modes that field champions the account does not own — the cold open and
+   * every Trial fight a borrowed team.
+   */
+  team: string[];
 }
 
 export interface RewardSummary {
@@ -211,6 +224,23 @@ export interface RewardSummary {
    * a drop went.
    */
   vaultOverflow: gear.VaultOverflow;
+  /**
+   * How many turns the fight took — the same figure filed as the stage's record.
+   *
+   * Sent rather than counted off the state the client already holds, so the pair on the
+   * results screen ("12 turns · best 9") comes from one place. Zero on a fight that
+   * records nothing.
+   */
+  turns: number;
+  /**
+   * The record before this run, or null when this was the first clear or the stage keeps
+   * none.
+   *
+   * "Before" is load-bearing: `recordClear` folds this run's count into `bestTurns` as it
+   * files it, so a best read afterwards would say 9 and 9 on the very run that set it,
+   * and the screen could never say a record had been broken.
+   */
+  previousBest: number | null;
 }
 
 /** The payout of a fight that pays nothing but is still a result. */
@@ -234,6 +264,8 @@ const NO_REWARDS: RewardSummary = {
   deepRun: null,
   spire: null,
   vaultOverflow: gear.NO_OVERFLOW,
+  turns: 0,
+  previousBest: null,
 };
 
 const MAX_TEAM = 4;
@@ -834,6 +866,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         openingState.finished ? 'finished' : 'active',
         openingEvents,
       ),
+      team: (row.teamIds as string[]) ?? [],
     };
   });
 }
@@ -983,6 +1016,7 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
       rewards: summary,
       canSkip: row.canSkip,
       contributions: contributionTable(finished ? 'finished' : 'active', events),
+      team: (row.teamIds as string[]) ?? [],
     };
   });
 }
@@ -1054,6 +1088,7 @@ export async function retreat(
       rewards: summary,
       canSkip: row.canSkip,
       contributions: contributionTable('finished', events),
+      team: (row.teamIds as string[]) ?? [],
     };
   });
 }
@@ -1598,7 +1633,7 @@ async function settle(
   // Practice is free and pays nothing — including stars, clears and first-clear bonuses.
   // A sandbox that quietly advanced progress would be the cheapest farm in the game.
   if (row.mode === 'practice') {
-    return { ...NO_REWARDS, stars: starsFor(stage, state) };
+    return { ...NO_REWARDS, stars: starsFor(stage, state), turns: state.turn };
   }
 
   // The cold open pays nothing either — it is fought with champions the account does not
@@ -1612,7 +1647,7 @@ async function settle(
       { type: 'battleWin', facts: { mode: row.mode } },
       { type: 'stageClear', facts: { mode: row.mode, stageKey: row.stageKey } },
     ]);
-    return { ...NO_REWARDS, stars: starsFor(stage, state) };
+    return { ...NO_REWARDS, stars: starsFor(stage, state), turns: state.turn };
   }
 
   // A separate stream from the battle's: consuming loot rolls must not shift combat.
@@ -1713,6 +1748,8 @@ async function settle(
     bonus: cleared.bonus,
     chestTiers: cleared.chestTiers,
     beatPar: cleared.beatPar,
+    turns: state.turn,
+    previousBest: cleared.previousBest,
     firstWin,
     arena: null,
     titan: null,
@@ -1941,6 +1978,7 @@ export function toView(row: typeof battleSessions.$inferSelect): BattleView {
     rewards: (row.rewards as RewardSummary | null) ?? null,
     canSkip: row.canSkip,
     contributions: contributionTable(row.status, row.events as BattleEvent[]),
+    team: (row.teamIds as string[]) ?? [],
   };
 }
 

@@ -131,6 +131,14 @@ export interface BattleRewards {
   bonus: Record<string, number>;
   /** Chapter star-chest tiers this clear crossed. */
   chestTiers: number[];
+  /**
+   * True when this run was the first to solve a Trial inside its par (C10d).
+   *
+   * Its own flag rather than something read out of `bonus`, because the result screen has a
+   * different thing to say about it — "you beat par" is the sentence the whole mode exists
+   * for, and a par with no rewards behind it would otherwise be silent.
+   */
+  beatPar: boolean;
   /** The day's first victory in this mode, paid automatically. Empty once taken. */
   firstWin: Record<string, number>;
   /** What an Arena fight moved, on both ratings. Null for every other mode. */
@@ -142,6 +150,15 @@ export interface BattleRewards {
   titan: TitanRun | null;
   /** Relics the vault had no room for, and the silver paid in their place (Q5). */
   vaultOverflow: VaultOverflow;
+  /** How many turns the fight took — the same figure the server filed as the record. */
+  turns: number;
+  /**
+   * The stage's record **before** this run, or null when this was the first clear.
+   *
+   * Sent rather than read out of the progress store, which is loaded when a map screen
+   * mounts and is a fight or two stale by the time a player is looking at this.
+   */
+  previousBest: number | null;
 }
 
 export interface BattleView {
@@ -169,6 +186,17 @@ export interface BattleView {
    * shown about a fight are the engine's numbers, the way loot and stars and rating are.
    */
   contributions: UnitContribution[];
+  /**
+   * The roster ids that fought, in formation order — slot *n* of `contributions` is
+   * `team[n]`.
+   *
+   * Two things need it, and both are on the results screen: a champion's card carries the
+   * level and star rank the copy finished on rather than only the name the log knows, and
+   * **Replay** sends the same four rather than whatever the picker last remembered.
+   *
+   * Empty in the modes that field champions the account does not own.
+   */
+  team: string[];
 }
 
 export const gameApi = {

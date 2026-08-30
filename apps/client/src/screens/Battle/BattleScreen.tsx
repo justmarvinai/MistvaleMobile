@@ -23,6 +23,8 @@ import { useContentStore } from '../../state/contentStore';
 import { SpeedLadder } from '../../ui/SpeedLadder/SpeedLadder';
 import { useNavStore } from '../../state/navStore';
 import { usePlayerStore } from '../../state/playerStore';
+import { useProgressStore } from '../../state/progressStore';
+import { useRosterStore } from '../../state/rosterStore';
 import { currentStep, useTutorialStore } from '../../state/tutorialStore';
 import { Results } from './Results';
 import styles from './BattleScreen.module.scss';
@@ -81,6 +83,11 @@ export function BattleScreen(): JSX.Element {
   const back = useNavStore((state) => state.back);
   const coldOpenStage = useColdOpenStage();
   const refreshPlayer = usePlayerStore((state) => state.refresh);
+  // The party cards on the result screen carry the level and star rank each champion
+  // *finished* on, and "Next" is only offered on a stage the server has said is open — so
+  // both stores are stale by exactly one fight without this.
+  const refreshRoster = useRosterStore((state) => state.load);
+  const refreshProgress = useProgressStore((state) => state.load);
 
   /**
    * Whether to draw the fight with the browser rather than with the graphics card.
@@ -317,13 +324,17 @@ export function BattleScreen(): JSX.Element {
     if (!battle) void resume();
   }, [battle, resume]);
 
-  // The wallet moved when the fight resolved — but the top bar is on screen throughout a
-  // battle, and silver climbing at turn three announces the win as plainly as the modal
-  // would. So it re-syncs when the player has watched the end, not when the server got
-  // there.
+  // Three things moved when the fight resolved, and the result screen reads all of them:
+  // the wallet, the champions who fought (a level, a rank, the experience left to run) and
+  // what the clear opened. All three re-sync when the player has **watched** the end rather
+  // than when the server got there — the top bar is on screen throughout a battle, and
+  // silver climbing at turn three announces the win as plainly as the modal would.
   useEffect(() => {
-    if (watched) void refreshPlayer();
-  }, [watched, refreshPlayer]);
+    if (!watched) return;
+    void refreshPlayer();
+    void refreshRoster();
+    void refreshProgress();
+  }, [watched, refreshPlayer, refreshRoster, refreshProgress]);
 
   const skillsByKey = useMemo(
     () => new Map((bundle?.skills ?? []).map((skill) => [skill.key, skill])),

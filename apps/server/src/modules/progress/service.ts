@@ -180,6 +180,16 @@ export interface ClearOutcome {
    * happens to land inside the limit. Always false outside a trial.
    */
   beatPar: boolean;
+  /**
+   * The fewest turns this stage had ever been beaten in **before** this run, or null when
+   * this was the first clear.
+   *
+   * Read before the upsert for the same reason `beatPar` is: afterwards it is unanswerable,
+   * because `least(...)` has already folded this run's turn count into the record. The
+   * results screen is what wants it — "12 turns, best 9" is the pair a player reads, and
+   * a best recomputed after the clear would say 9 and 9 on the run that set it.
+   */
+  previousBest: number | null;
 }
 
 /**
@@ -257,7 +267,15 @@ export async function recordClear(
     await payRewards(tx, playerId, bonus, `progress:${stage.key}`, knownItem(content));
   }
 
-  return { stars: row.stars, firstClear, bonus, chestTiers, chapterStars: chapterTotal, beatPar };
+  return {
+    stars: row.stars,
+    firstClear,
+    bonus,
+    chestTiers,
+    chapterStars: chapterTotal,
+    beatPar,
+    previousBest: previous?.bestTurns ?? null,
+  };
 }
 
 /**

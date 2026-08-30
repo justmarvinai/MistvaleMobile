@@ -5,6 +5,56 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the end of a fight, rebuilt to the reference (C26a)
+
+The owner (2026-08-29), with a Raid screenshot: *"you will fully rework the End of Battle
+Screen to look more similar to Raid Shadow Legends"*. It is a composition now rather than a
+card with a table beside it. Reading down: **where the fight was and how long it took** in
+one corner, the stars and the gold headline in the middle of the light, **the account's
+energy** in the other corner, then the spoils as one strip, then **a card per champion**,
+then the ways on. That is the order a player's own questions arrive in — *did I win, what
+did I get, can I go again* — which is why this genre settled on it.
+
+`ResultScreen` still paints the ground: the backdrop, the turning rays, the gold headline
+and the three stars are the library's, which is chrome and holds no state React drives.
+Everything below is Mistvale's, portalled into the library's own root so one column rule in
+the screen's stylesheet lays the whole thing out. The pack's stat list, reward chips and
+action row are no longer asked for — what the game has to say after a fight is a strip, a
+party and a footer, and none of those is a `dl`.
+
+- **Turns, never a clock.** The reference reads `Time 00:11 · Best 00:07`. Mistvale is
+  turn-based and playback runs at ×1, ×2 or ×4, so a wall-clock figure would measure how
+  fast somebody chose to *watch* rather than how well they fought. Turns is what the game
+  already records, already scores Trials on and already prints on a chapter's stage rows.
+  The record beside it is the one held **before** this run (`previousBest`), read in
+  `recordClear` before the upsert folds this fight into it — otherwise the run that breaks
+  a record prints the same number twice and "a new best" could never be true.
+- **A card per champion**, replacing the C21 table: their face, the star rank and level the
+  copy finished on, how far that level has left to run, and three bars for damage, shield
+  and healing. Three figures and never a total; each bar scaled against the biggest figure
+  **in its own column across the party**; a bar nobody filled is not drawn. It needed the
+  battle view to carry its own **team** — the engine works in slots, the client works in
+  roster copies, and slot *n* is `team[n]`.
+- **Relics that dropped are shown as relics.** The screen used to say "Relics found · 2",
+  which is the results screen telling a player to go and look in the vault. They are the
+  same painted card the vault draws, tooltip and all.
+- **Three ways on**, offered only where they work. *Again* and *Next* re-enter the fight
+  with the same four; *Change team* opens the ordinary picker over the result, so every
+  economy stays with the component that owns it. All three appear only on a stage paid for
+  in **energy**, and that falls out of content rather than a list of mode names — every
+  attempt-limited mode in the game is authored at zero energy, so a Titan key or an Arena
+  token can never be spent from here. *Next* additionally waits on the server's own `open`
+  flag and is offered only after a win.
+- **"Par beaten" is finally said out loud.** It is the sentence the Trials mode exists for
+  (C10d) and the results screen had never printed it — the par bonus arrived inside `bonus`
+  and read as ordinary loot.
+- The headline **stopped repeating the place the corner already names**, which is C12c's
+  "a screen says its own name twice" on a fifth screen, and the browser guard now counts it.
+
+The roster and the progress table re-sync when the player has *watched* the fight end,
+alongside the wallet that already did — the party cards read levels that moved and *Next*
+reads a stage the clear just opened, so both were stale by exactly one fight without it.
+
 ### Changed — an unlock is a banner, not a card in the way (C25)
 
 The owner (2026-08-29): the celebration modal is *"very annoying while the tutorial is

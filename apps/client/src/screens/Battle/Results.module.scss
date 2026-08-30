@@ -1,32 +1,206 @@
-/* Where the result sits in the stack, and nothing else.
+@use '../../styles/tokens' as *;
 
-   The gold headline, the rays, the stars, the stat table and the reward chips are painted
-   by the FantasyUIs `ResultScreen` since the design rework. What this file owns is the one
-   thing the library cannot know: that Mistvale has an overlay stack (P10b), and a result
-   has to sit at its own depth in it so an unlock celebration opening on top of a victory
-   lands on top rather than behind. */
+/* The result, laid out to the owner's reference.
+
+   The library paints the ground — the backdrop, the turning rays, the gold headline and
+   the three stars are `ResultScreen`. What this file owns is the composition around it:
+   where the fight was and how long it took in one corner, what is left to spend in the
+   other, and below the headline the spoils, the party and the ways on.
+
+   Written here rather than in `ResultScreen.css`, which is vendored and would be
+   overwritten by the next `pnpm fui:vendor`. */
 
 .result {
   z-index: calc(#{$z-modal} + var(--mv-layer-depth, 0));
-}
 
-/* Card and scoreboard, side by side.
-
-   `.result` is the library's own root (the React bridge merges a className onto it), and
-   the pack lays it out as a centring flex box with one child. A second child needs the box
-   to become a row with room between them — written here rather than in `ResultScreen.css`,
-   which is vendored and would be overwritten by the next `pnpm fui:vendor`.
-
-   It wraps below 1100px, where two columns would squeeze the card under its own ornament,
-   and the card keeps its place first in the reading order either way. */
-.result {
-  flex-wrap: wrap;
+  /* The pack lays its root out as a centring flex box with one child. The composition is a
+     column: the card, then everything Mistvale portals in after it. */
+  flex-direction: column;
   gap: $space-5;
-  align-content: center;
+  /* A tall result on a short window scrolls inside itself rather than taking the document
+     with it — the C12c rule, applied to the one overlay that grows with its content. */
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding-block: $space-6;
 
-  /* The library's card has no `flex` of its own, so it would stretch beside a wider
-     sibling. Its width is the pack's number and stays the pack's number. */
+  /* The library's card has no `flex` of its own, so it would stretch to the column's
+     width. Its measure is the pack's number and stays the pack's number. */
   :global(.fui-result__card) {
     flex: none;
+    margin-top: auto;
   }
+
+  /* The rule under the headline is the card's last ornament now that the stat list and the
+     chips it used to hold are drawn below it. */
+  :global(.fui-result__actions) {
+    display: none;
+  }
+}
+
+/* ── The corners ──────────────────────────────────────────────────────────── */
+.corner {
+  position: absolute;
+  top: $space-5;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  margin: 0;
+
+  &[data-side='left'] {
+    left: $space-5;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $space-1;
+  }
+
+  &[data-side='right'] {
+    right: $space-5;
+  }
+}
+
+.where {
+  margin: 0;
+  color: $parchment;
+  font-family: $font-display;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.clock {
+  display: flex;
+  gap: $space-3;
+  margin: 0;
+  color: $muted;
+  font-size: 0.76rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  b {
+    color: $parchment;
+    font-family: $font-mono;
+    font-weight: 400;
+  }
+}
+
+.record {
+  color: $gold-soft;
+}
+
+.energy {
+  color: $parchment;
+  font-family: $font-mono;
+  font-size: 0.95rem;
+}
+
+.cap {
+  color: $muted;
+  font-size: 0.8rem;
+}
+
+/* ── Below the headline ───────────────────────────────────────────────────── */
+.body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-4;
+  width: min(64rem, 94vw);
+  margin-bottom: auto;
+}
+
+/* Shrink-wrapped rather than stretched to the composition's measure: three chips
+   floating in the middle of a thousand-pixel panel is the emptiness-inside-the-card
+   mistake C12c named on the Bazaar's stalls. */
+.spoils {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2 $space-4;
+  max-width: 100%;
+  padding: $space-3 $space-5;
+  background: rgba(12, 10, 16, 0.72);
+  border: 1px solid $edge;
+}
+
+.strip {
+  justify-content: center;
+}
+
+.relics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A relic that dropped, drawn as the card the vault draws it with.
+
+   `$card-artifact` is the library's own fixed width (D9): a holder that lays out a card
+   and nothing else still has to be the card's width, or the card draws wider than the box
+   it belongs to. */
+.relic {
+  width: $card-artifact;
+}
+
+/* ── Why some of it arrived ───────────────────────────────────────────────── */
+.notes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $space-2 $space-5;
+  margin: 0;
+}
+
+.note {
+  display: flex;
+  align-items: baseline;
+  gap: $space-2;
+  font-size: 0.78rem;
+
+  dt {
+    color: $muted;
+  }
+
+  dd {
+    margin: 0;
+    color: $parchment;
+    font-family: $font-display;
+
+    /* A note with nothing to quantify reserves no room for a figure that is not there. */
+    &:empty {
+      display: none;
+    }
+  }
+
+  &[data-best='true'] {
+    dt,
+    dd {
+      color: $gold-soft;
+    }
+
+    dd {
+      text-shadow: 0 0 9px rgba(201, 162, 39, 0.45);
+    }
+  }
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.85rem;
+}
+
+/* ── The ways on ──────────────────────────────────────────────────────────── */
+.ways {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: $space-3;
+  margin-top: $space-2;
 }
