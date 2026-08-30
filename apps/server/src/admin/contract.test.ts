@@ -105,6 +105,51 @@ const FIXTURE = [
       assetKey: 'test_asset',
     },
   },
+  // An enemy, a chapter and a stage, so the balance sandbox has something to fight on.
+  // Deliberately feeble: the sandbox case asserts the *shape* of a result, and a fixture
+  // stage that the bench champion cannot beat would make the response's turn figures null
+  // and the case would then prove less than it looks like it does.
+  {
+    path: 'enemies',
+    key: 'test_grunt',
+    data: {
+      key: 'test_grunt',
+      name: 'Test Grunt',
+      archetype: 'grunt',
+      element: 'verdant',
+      role: 'attack',
+      baseStats: { hp: 400, atk: 60, def: 40, spd: 70 },
+      anchorLevel: 10,
+      skills: ['test_a1'],
+      assetKey: 'test_asset',
+    },
+  },
+  {
+    path: 'chapters',
+    key: 'test_chapter',
+    data: { key: 'test_chapter', number: 1, name: 'Test Chapter' },
+  },
+  {
+    path: 'stages',
+    key: 'test_stage',
+    data: {
+      key: 'test_stage',
+      mode: 'campaign',
+      parentKey: 'test_chapter',
+      number: 1,
+      difficulty: 'normal',
+      energyCost: 4,
+      waves: [[{ enemyKey: 'test_grunt', level: 5, stars: 6, slot: 0 }]],
+      rewards: {
+        silverMin: 10,
+        silverMax: 20,
+        playerXp: 5,
+        championXp: 5,
+        drops: {},
+      },
+      starRules: { noDeaths: true, maxTurns: 20 },
+    },
+  },
 ];
 
 describe.skipIf(!dbUp)('API contract', () => {
@@ -201,6 +246,10 @@ describe.skipIf(!dbUp)('API contract', () => {
       attachments: {},
       expiresInDays: 1,
     },
+    // One run: the case is about the response's shape, and the arithmetic behind it is
+    // pinned on real content in `simulate.test.ts` and on every stage in the game by the
+    // CI balance gates.
+    simulateStage: { stageKey: 'test_stage', tier: 'fresh', runs: 1 },
   };
 
   /**

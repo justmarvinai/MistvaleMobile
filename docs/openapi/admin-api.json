@@ -773,6 +773,183 @@
         ],
         "additionalProperties": false
       },
+      "AdminSimulateRequest": {
+        "type": "object",
+        "properties": {
+          "stageKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "source": {
+            "default": "live",
+            "type": "string",
+            "enum": [
+              "live",
+              "draft"
+            ]
+          },
+          "tier": {
+            "default": "modest",
+            "type": "string",
+            "enum": [
+              "fresh",
+              "modest",
+              "built"
+            ]
+          },
+          "runs": {
+            "default": 60,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          }
+        },
+        "required": [
+          "stageKey",
+          "source",
+          "tier",
+          "runs"
+        ],
+        "additionalProperties": false
+      },
+      "AdminSimulateResult": {
+        "type": "object",
+        "properties": {
+          "stageKey": {
+            "type": "string"
+          },
+          "stageLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "live",
+              "draft"
+            ]
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "fresh",
+              "modest",
+              "built"
+            ]
+          },
+          "team": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "championKey": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "rank": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "ascension": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "championKey",
+                "name",
+                "level",
+                "rank",
+                "ascension"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "runs": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "wins": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "winRate": {
+            "type": "number"
+          },
+          "averageTurns": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "medianTurns": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "starTurnLimit": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "winsWithinStarLimit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "msPerRun": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "stageKey",
+          "stageLabel",
+          "source",
+          "tier",
+          "team",
+          "runs",
+          "wins",
+          "winRate",
+          "averageTurns",
+          "medianTurns",
+          "starTurnLimit",
+          "winsWithinStarLimit",
+          "msPerRun"
+        ],
+        "additionalProperties": false
+      },
       "ApiError": {
         "type": "object",
         "properties": {
@@ -7676,6 +7853,30 @@
           "crystalSlotCost",
           "refreshCost",
           "offers"
+        ],
+        "additionalProperties": false
+      },
+      "SimulateStageResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/AdminSimulateResult"
+          },
+          "tiers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "fresh",
+                "modest",
+                "built"
+              ]
+            }
+          }
+        },
+        "required": [
+          "result",
+          "tiers"
         ],
         "additionalProperties": false
       },
@@ -15575,6 +15776,198 @@
             }
           }
         ],
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/simulate/stage": {
+      "post": {
+        "operationId": "simulateStage",
+        "summary": "Fight a stage many times and report how a bench team fared",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SimulateStageResponse"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body failed validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such content type, entity or revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "The same simulation the CI balance gates run, against live content or against the drafts an operator is still editing — so a retune can be checked before it is published rather than by publishing it and going to play the stage. Reads content and writes nothing: no player, no roster, no progress, and no audit row, because the audit log is the record of what an operator changed.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSimulateRequest"
+              }
+            }
+          }
+        },
         "security": [
           {
             "sessionCookie": []

@@ -9,6 +9,7 @@ import { adminPlayerRoutes } from './player-routes';
 import { adminBotRoutes } from './bot-routes';
 import { adminMailRoutes } from './mail-routes';
 import { adminJobRoutes } from './job-routes';
+import { adminSimulateRoutes } from './simulate-routes';
 
 /**
  * The Admin API.
@@ -119,5 +120,6 @@ export const adminApi: FastifyPluginAsync = async (app) => {
     await guarded.register(adminBotRoutes);
     await guarded.register(adminMailRoutes);
     await guarded.register(adminJobRoutes);
+    await guarded.register(adminSimulateRoutes);
   });
 };

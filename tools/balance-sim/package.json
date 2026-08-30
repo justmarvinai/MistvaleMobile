@@ -3,7 +3,7 @@
   "version": "0.1.0-ea.0",
   "private": true,
   "type": "module",
-  "description": "Headless batch simulation over the committed content seeds, with the tuning gates from COMBAT_SYSTEM §14.",
+  "description": "Headless batch simulation over the committed content seeds, with the tuning gates from COMBAT_SYSTEM \u00a714.",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "sim": "tsx src/index.ts"
@@ -11,7 +11,8 @@
   "dependencies": {
     "@mistvale/engine": "workspace:*",
     "@mistvale/server": "workspace:*",
-    "@mistvale/shared": "workspace:*"
+    "@mistvale/shared": "workspace:*",
+    "@mistvale/sim": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.2"

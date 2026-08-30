@@ -102,6 +102,9 @@ importers:
       '@mistvale/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@mistvale/sim':
+        specifier: workspace:*
+        version: link:../../packages/sim
       argon2:
         specifier: ^0.41.1
         version: 0.41.1
@@ -164,6 +167,15 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
 
+  packages/sim:
+    dependencies:
+      '@mistvale/engine':
+        specifier: workspace:*
+        version: link:../engine
+      '@mistvale/shared':
+        specifier: workspace:*
+        version: link:../shared
+
   tools/asset-sync:
     devDependencies:
       tsx:
@@ -181,6 +193,9 @@ importers:
       '@mistvale/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@mistvale/sim':
+        specifier: workspace:*
+        version: link:../../packages/sim
     devDependencies:
       tsx:
         specifier: ^4.19.2

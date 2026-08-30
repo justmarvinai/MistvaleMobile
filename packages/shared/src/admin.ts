@@ -214,3 +214,80 @@ export const TEMP_PASSWORD_BYTES = 12;
 
 /** Re-exported so the reset endpoint and the change-password form agree on the floor. */
 export const adminTemporaryPasswordSchema = passwordSchema;
+
+// ── The balance sandbox ─────────────────────────────────────────────────────
+
+/**
+ * How many times one press of Simulate may fight a stage.
+ *
+ * A stage resolves headlessly in about a twentieth of a millisecond, so two hundred runs is
+ * a tenth of a second on the target box and gives a win rate with enough resolution to act
+ * on. The cap exists because this endpoint is a *loop* an operator controls the length of,
+ * and a one-core box has a game to serve at the same time.
+ */
+export const SIMULATE_MAX_RUNS = 200;
+export const SIMULATE_DEFAULT_RUNS = 60;
+
+/** Which content a simulation is run against. */
+export const SIMULATE_SOURCES = ['live', 'draft'] as const;
+export type SimulateSource = (typeof SIMULATE_SOURCES)[number];
+
+/**
+ * The three teams a stage is worth measuring against.
+ *
+ * The same rungs the CI gates use, named here so the sandbox and the gates cannot mean
+ * different things by "a modest team" — comparing the two is the whole reason an operator
+ * opens the sandbox after a gate has said something.
+ */
+export const BENCH_TIER_KEYS = ['fresh', 'modest', 'built'] as const;
+export type BenchTierKey = (typeof BENCH_TIER_KEYS)[number];
+
+export const adminSimulateRequestSchema = z.object({
+  stageKey: z.string().min(1).max(120),
+  /**
+   * `draft` layers the pending edits over live content, which is the case this endpoint
+   * exists for: an operator retuning a stage wants to know what the *edit* does before it
+   * is published, not what the published version already did.
+   */
+  source: z.enum(SIMULATE_SOURCES).default('live'),
+  tier: z.enum(BENCH_TIER_KEYS).default('modest'),
+  runs: z.number().int().min(1).max(SIMULATE_MAX_RUNS).default(SIMULATE_DEFAULT_RUNS),
+});
+export type AdminSimulateRequest = z.infer<typeof adminSimulateRequestSchema>;
+
+export const adminSimulateResultSchema = z.object({
+  stageKey: z.string(),
+  stageLabel: z.string(),
+  source: z.enum(SIMULATE_SOURCES),
+  tier: z.enum(BENCH_TIER_KEYS),
+  /** What the bench team was, so a number is never reported without its team. */
+  team: z.array(
+    z.object({
+      championKey: z.string(),
+      name: z.string(),
+      level: z.number().int(),
+      rank: z.number().int(),
+      ascension: z.number().int(),
+    }),
+  ),
+  runs: z.number().int(),
+  wins: z.number().int(),
+  winRate: z.number(),
+  /**
+   * Across **winning** runs only — a loss runs to the turn cap and would drag the mean
+   * toward it, reporting a fight as slower than the ones that actually finished.
+   * Null when nothing was won, because a mean of no numbers is not zero.
+   */
+  averageTurns: z.number().nullable(),
+  medianTurns: z.number().nullable(),
+  /**
+   * The stage's own three-star turn limit, and the share of runs that came in under it.
+   *
+   * The figure an operator is usually really asking about: a stage can be clearable and
+   * still be mis-tuned if nobody can three-star it. Null when the stage sets no limit.
+   */
+  starTurnLimit: z.number().int().nullable(),
+  winsWithinStarLimit: z.number().nullable(),
+  msPerRun: z.number(),
+});
+export type AdminSimulateResult = z.infer<typeof adminSimulateResultSchema>;

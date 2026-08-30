@@ -123,6 +123,22 @@ export class ContentCache {
     return merged;
   }
 
+  /**
+   * The draft state as a **bundle** — what a publish would produce, without publishing it.
+   *
+   * Built through the same `buildSnapshot` the live cache uses, so the sandbox that reads
+   * it sees exactly the shape a battle would resolve against. Not cached and not swapped
+   * in: it is a throwaway view for one request, and the live snapshot is untouched.
+   *
+   * An entity that does not parse is carried through as the operator typed it, which is
+   * `fillDefaults`'s existing behaviour and the right one here — a half-edited quest must
+   * not stop somebody simulating the stage they are actually working on.
+   */
+  async draftBundle(): Promise<ContentBundle> {
+    return buildSnapshot(await this.draftSet(), this.snapshot.rev, this.snapshot.publishedAt)
+      .bundle;
+  }
+
   /** Validates the draft state without changing anything. */
   async validateDrafts(): Promise<ContentValidationResult> {
     return validateContentSet(await this.draftSet());

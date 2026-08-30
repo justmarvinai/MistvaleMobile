@@ -379,6 +379,20 @@ export const ADMIN_ROUTES = {
     list: '/jobs',
     run: (name: string) => `/jobs/run/${encodeURIComponent(name)}`,
   },
+
+  /**
+   * The balance sandbox.
+   *
+   * Fights a stage many times against a named bench team and reports how it went — against
+   * live content, or against the drafts the operator is still editing. It is the difference
+   * between retuning a stage and *knowing* what the retune did: until it existed, the only
+   * way to check a change was to publish it and go and play the stage.
+   *
+   * It reads content and writes nothing. No player, no roster, no progress is touched.
+   */
+  simulate: {
+    stage: '/simulate/stage',
+  },
 } as const;
 
 /**

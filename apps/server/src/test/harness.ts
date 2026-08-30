@@ -2,6 +2,10 @@ import { randomUUID } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../app';
+import { contentEntries, contentRevisions } from '../db/schema/index';
+import { buildSeedContent } from '../db/seed/seeders';
+import * as contentRepo from '../content/repo';
+import { validateAndNormalise, type ContentSet } from '../content/validate';
 import { loadConfig, resetConfigCache, type AppConfig } from '../lib/config';
 
 /**
@@ -56,6 +60,59 @@ export async function buildTestApp(): Promise<FastifyInstance> {
     config: testConfig(),
     logger: process.env.MISTVALE_TEST_LOGS ? { level: 'error' } : false,
   });
+}
+
+/**
+ * Publishes the committed seeds as live content, and loads them into the cache.
+ *
+ * Any suite that fights a battle, reads a stage or resolves a champion needs the real
+ * content behind it — a mock would be testing the mock. Suites share one database and each
+ * of them starts by replacing what is there, so the revision numbering below is the only
+ * one in play whatever ran before.
+ *
+ * Twenty-five suites carry their own copy of this, each written before there was a shared
+ * one. New tests should use this; folding the existing copies in is a tidy-up worth doing
+ * on its own rather than inside a pass about something else.
+ */
+export async function seedLiveContent(app: FastifyInstance): Promise<void> {
+  const seeds = buildSeedContent();
+  const set: ContentSet = new Map();
+  for (const seed of seeds) {
+    set.set(seed.contentType, new Map(seed.entities.map((entity) => [entity.key, entity.data])));
+  }
+  const { result, normalised } = validateAndNormalise(set);
+  if (!result.ok) {
+    throw new Error(`The seeds do not validate: ${JSON.stringify(result.errors.slice(0, 3))}`);
+  }
+
+  const flattened = seeds.flatMap((seed) =>
+    seed.entities.map((entity) => ({
+      contentType: seed.contentType,
+      key: entity.key,
+      data: normalised.get(seed.contentType)?.get(entity.key) ?? entity.data,
+    })),
+  );
+
+  await app.db.transaction(async (tx) => {
+    await tx.delete(contentEntries);
+    await tx.delete(contentRevisions);
+    await contentRepo.replaceLiveContent(tx, flattened);
+    await contentRepo.insertRevision(tx, {
+      rev: 1,
+      publishedBy: 'test',
+      note: 'test fixture',
+      summary: { added: flattened.length, modified: 0, removed: 0 },
+      snapshot: Object.fromEntries(
+        seeds.map((seed) => [
+          seed.contentType,
+          Object.fromEntries(normalised.get(seed.contentType) ?? []),
+        ]),
+      ),
+    });
+  });
+
+  await app.content.load();
+  app.setContentRevision(app.content.rev);
 }
 
 /** Removes all rows created by tests, leaving the schema intact. */

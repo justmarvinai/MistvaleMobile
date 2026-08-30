@@ -87,7 +87,8 @@ MistvaleMobile/
 │       └── drizzle.config.ts
 ├── packages/
 │   ├── shared/                 # DTOs, enums, API route constants, formulas' types
-│   └── engine/                 # PURE battle engine (no IO, no DB) + its test suite
+│   ├── engine/                 # PURE battle engine (no IO, no DB) + its test suite
+│   └── sim/                    # PURE headless stage simulation, shared by CI and Admin
 ├── tools/
 │   ├── atlas-pack/             # sprite → texture atlas packing (build step)
 │   ├── icon-fetch/             # game-icons.net fetcher + manifest (attribution)
@@ -208,7 +209,9 @@ createBattle(setup: BattleSetup, contentView: ContentView, seed: number): Battle
 - Unit tests per mechanic (turn order ties, poison ticking, resist math boundaries, shield/damage interaction order…).
 - **Golden replay tests**: canonical setups + seeds → committed event logs; any diff fails CI (catches accidental balance/behavior drift).
 - Property tests: no negative HP without death event, TM bounds, energy conservation of effects, battle always terminates (< 300 turns hard cap → draw/defeat rule).
-- `tools/balance-sim`: headless mass-simulation CLI (`--stage 3-5 --team ... --n 1000`) reporting win rates / avg turns — used to tune every stage before seeding it (see ECONOMY_BALANCE.md).
+- `packages/sim`: the simulation itself — `LoadedContent`, the three named bench teams, and `simulateStage`. Pure and IO-free, depending on the engine and the content contracts and on nothing else, which is what lets the server import it without importing itself.
+- `tools/balance-sim`: the CI gates on top of it (`pnpm sim`) — fills a `LoadedContent` from the committed **seeds**, so it always measures what a fresh install would get, and adds the modes with balance questions of their own: the cold open, the Trials, the Titan.
+- `POST /admin/api/simulate/stage`: the same simulation against **live or draft** content, on demand (C27). An operator retuning a stage can ask what the edit does before publishing it, rather than publishing it and going to play the stage. It is deliberately the same `simulateStage` the gates call: a sandbox that answered a balance question differently from the gate guarding the same number would be worse than no sandbox.
 
 ---
 

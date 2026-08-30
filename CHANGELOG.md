@@ -5,6 +5,46 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the balance sandbox: a retune you can check before you publish it (C27)
+
+Until now, the only way to find out what a stage retune actually did was to publish it and
+go and play the stage. `tools/balance-sim` had answered exactly that question in CI since
+P2 — it just had no way in from the outside, which quietly made a balance *edit* a deploy
+(ROADMAP item 13, gap G4).
+
+`POST /admin/api/simulate/stage` fights a stage many times against a named bench team and
+reports the win rate, the average and median turns across winning runs, the stage's own
+three-star turn limit, and the share of runs that came in under it — which is usually the
+figure an operator is really asking about, because a stage can be perfectly clearable and
+still be mis-tuned if nobody can three-star it.
+
+Three things make it worth trusting:
+
+- **It is the same simulation CI runs.** The fighting half moved into `packages/sim` — pure,
+  IO-free, depending on the engine and the content contracts and nothing else — and both the
+  gates and the endpoint call its one `simulateStage` and its one definition of each bench
+  team. A sandbox that answered a balance question differently from the gate guarding the
+  same number would be worse than no sandbox. Every one of the 84 gates reports the same
+  measurement, to the digit, as it did before the extraction.
+- **It can read the drafts.** An operator retuning a stage wants to know what the *edit*
+  does, not what the published version already did, so `source: 'draft'` layers the pending
+  edits over live exactly as a publish would — `ContentCache.draftBundle()` builds the same
+  snapshot a publish would produce, without publishing it or touching the live cache.
+- **It writes nothing.** No player, no roster, no progress, no content — and deliberately no
+  audit row either, because the audit log is the record of what an operator *changed*, and
+  filling it with "somebody pressed Simulate" would bury the entries that matter. The test
+  asserts all of that rather than trusting it.
+
+The three bench teams are the shapes the gates already used, named so the two can be
+compared: **fresh** (four Rares at 20 / ★3, no relics), **modest** (50 / ★5 / asc 2 with
+relics) and **built** (60 / ★6 / asc 6, relics and a collection). They are picked by key
+rather than by strength, deliberately — a benchmark whose baseline drifts when a champion is
+retuned cannot be compared to yesterday's answer.
+
+Runs are capped at 200 a press: a stage resolves headlessly in about a twentieth of a
+millisecond, so that is a tenth of a second on the target box, and the cap is there because
+this is a loop whose length the caller chooses on a machine that has a game to serve.
+
 ### Changed — the fight itself, laid out for the hands that play it (C26b)
 
 The owner (2026-08-29), with a second Raid screenshot: *"fully rework the battle screen

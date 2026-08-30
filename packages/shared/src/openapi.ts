@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ADMIN_API_PREFIX, ADMIN_ROUTES, API_PREFIX, ROUTES, routePattern } from './routes';
 import {
+  BENCH_TIER_KEYS,
   adminAccountStateSchema,
   adminBanRequestSchema,
   adminEconomyEntrySchema,
@@ -15,6 +16,8 @@ import {
   adminSessionSchema,
   adminSessionsRevokedSchema,
   adminSetRankRequestSchema,
+  adminSimulateRequestSchema,
+  adminSimulateResultSchema,
 } from './admin';
 import { arenaBotCensusSchema, arenaLadderResultSchema } from './arena';
 import { mailBatchSchema, mailSendRequestSchema, mailSendResultSchema } from './mail';
@@ -538,6 +541,27 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     }),
     errors: [404],
   },
+
+  // ── Admin: the balance sandbox ────────────────────────────────────────────
+  {
+    surface: 'admin',
+    method: 'post',
+    path: ADMIN_ROUTES.simulate.stage,
+    operationId: 'simulateStage',
+    summary: 'Fight a stage many times and report how a bench team fared',
+    description:
+      'The same simulation the CI balance gates run, against live content or against the ' +
+      'drafts an operator is still editing — so a retune can be checked before it is ' +
+      'published rather than by publishing it and going to play the stage. Reads content ' +
+      'and writes nothing: no player, no roster, no progress, and no audit row, because ' +
+      'the audit log is the record of what an operator changed.',
+    body: adminSimulateRequestSchema,
+    response: z.object({
+      result: adminSimulateResultSchema,
+      tiers: z.array(z.enum(BENCH_TIER_KEYS)),
+    }),
+    errors: [400, 404],
+  },
 ];
 
 // ── Document generation ─────────────────────────────────────────────────────
@@ -576,6 +600,8 @@ const SHARED_SCHEMAS: Record<string, z.ZodType> = {
   AdminBanRequest: adminBanRequestSchema,
   AdminRenameRequest: adminRenameRequestSchema,
   AdminGrantRequest: adminGrantRequestSchema,
+  AdminSimulateRequest: adminSimulateRequestSchema,
+  AdminSimulateResult: adminSimulateResultSchema,
   ...Object.fromEntries(
     CONTENT_TYPES.map((type) => [`${pascal(type)}Def`, CONTENT_REGISTRY[type].schema]),
   ),
