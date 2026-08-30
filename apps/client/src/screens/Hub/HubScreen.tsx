@@ -1,5 +1,6 @@
 import { Heading } from '@/ui/Heading/Heading';
 import { Icon } from '@/ui/Icon/Icon';
+import { useText } from '@/i18n/t';
 import { CardGrid, Page } from '@/ui/Page/Page';
 import { usePlayerStore, type DockBadges } from '@/state/playerStore';
 import {
@@ -43,10 +44,15 @@ export function HubScreen({
   const badges = usePlayerStore((state) => state.badges);
   const definition = SCREENS.find((screen) => screen.id === hub);
   const places = screensInHub(hub);
+  // The registry keeps its English, which is also the catalogue key, so this reads the same
+  // and translates the day a second locale exists (C39).
+  const text = useText();
 
   return (
     <Page width="wide">
-      <Heading tagline={definition?.blurb ?? ''}>{definition?.label ?? 'Places'}</Heading>
+      <Heading tagline={definition?.blurb ? text(definition.blurb) : ''}>
+        {text(definition?.label ?? 'Places')}
+      </Heading>
 
       <CardGrid min="hub" className={styles.places}>
         {places.map((place) => (
@@ -86,6 +92,8 @@ function Destination({
   waiting: number;
   onNavigate: () => void;
 }): JSX.Element {
+  const text = useText();
+
   return (
     <button
       type="button"
@@ -114,15 +122,15 @@ function Destination({
       <span className={styles.body}>
         <span className={styles.name}>
           <Icon name={screen.icon} size={22} />
-          {screen.label}
+          {text(screen.label)}
         </span>
         {/* A locked place keeps its sentence and gains a line under it, rather than trading
             one for the other. "Opens at level 16" says when and never why, and why is the
             whole reason a shrouded card is still on the screen (UI_UX §2) — a player who
             cannot go yet is exactly the one deciding whether to care. */}
-        <span className={styles.blurb}>{screen.blurb}</span>
+        <span className={styles.blurb}>{screen.blurb ? text(screen.blurb) : ''}</span>
         {!unlocked && (
-          <span className={styles.gate}>{screen.lockedHint ?? 'Not yet open to you.'}</span>
+          <span className={styles.gate}>{text(screen.lockedHint ?? 'Not yet open to you.')}</span>
         )}
       </span>
 

@@ -2,6 +2,7 @@ import { usePlayerStore } from '@/state/playerStore';
 import { useRosterStore } from '@/state/rosterStore';
 import { Heading } from '@/ui/Heading/Heading';
 import { HIGHLIGHT_ATTR } from '../../app/highlight';
+import { useText } from '@/i18n/t';
 import { Icon } from '@/ui/Icon/Icon';
 import { Panel } from '@/ui/Panel/Panel';
 import { Rail } from '@/ui/Rail/Rail';
@@ -135,14 +136,18 @@ function Station({
   unlocked: boolean;
   onNavigate: () => void;
 }): JSX.Element {
+  // Every string a board shows goes through the text layer (C39). The registry keeps its
+  // English, which is also the catalogue key — so this reads the same, and translates the
+  // day a second locale exists.
+  const text = useText();
   const ref = useTip({
-    title: screen.label,
-    subtitle: unlocked ? 'Open' : 'Shrouded',
-    ...(screen.blurb ? { flavor: screen.blurb } : {}),
+    title: text(screen.label),
+    subtitle: text(unlocked ? 'Open' : 'Shrouded'),
+    ...(screen.blurb ? { flavor: text(screen.blurb) } : {}),
     ...(unlocked
-      ? { hint: 'Click to go there' }
+      ? { hint: text('Click to go there') }
       : screen.lockedHint
-        ? { requires: [screen.lockedHint] }
+        ? { requires: [text(screen.lockedHint)] }
         : {}),
   });
 
@@ -175,9 +180,11 @@ function Station({
       )}
 
       <span className={styles.plate}>
-        <span className={styles.name}>{screen.label}</span>
-        {screen.blurb && <span className={styles.blurb}>{screen.blurb}</span>}
-        <span className={styles.cta}>{unlocked ? 'Enter' : (screen.lockedHint ?? 'Shrouded')}</span>
+        <span className={styles.name}>{text(screen.label)}</span>
+        {screen.blurb && <span className={styles.blurb}>{text(screen.blurb)}</span>}
+        <span className={styles.cta}>
+          {unlocked ? text('Enter') : text(screen.lockedHint ?? 'Shrouded')}
+        </span>
       </span>
     </button>
   );

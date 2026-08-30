@@ -4,7 +4,30 @@
 
 ## Open questions
 
-**None.** Q9 was answered on 2026-08-30, Q6 and Q8 on 2026-08-27 and 2026-08-26, Q7 on
+**Q10 — how far localisation should go**, and it is open because the two halves have very
+different costs and only you can say whether the second is wanted.
+
+The **client's own chrome** is scaffolded and needs no decision (C39, ARCHITECTURE §7b):
+strings are keyed by their own English, so a screen converted to `t()` reads exactly as it did
+and a second language is a catalogue file plus one entry in `LOCALES`. `pnpm i18n` reports
+**77** strings already reachable and **686** still written into components — that second
+number is the retrofit, and it is work anybody can do a screen at a time whenever a translator
+appears.
+
+**Content is the half that is a decision.** Champion names, kit text, stage briefs, quest
+wording — 1,137 entities — live in PostgreSQL and are edited in Admin, so a second language
+for them means a **locale dimension on `content_entries`**: every editor gains a language
+picker, publish validates a set per locale, and the bundle is served per locale. That is a
+migration, an Admin pass and a permanent widening of what publishing means.
+
+**Recommended default (active, so nothing blocks): leave content English-only.** A game with
+one language and no translator does not need it, the scaffolding above means the *client* is
+ready whenever you are, and the schema change is the kind that is cheaper done once with a
+real language in front of it than guessed at now. If you ever want a second language, say so
+and content follows the same draft → validate → publish flow it already has, one locale at a
+time.
+
+Answered previously: Q9 on 2026-08-30, Q6 and Q8 on 2026-08-27 and 2026-08-26, Q7 on
 2026-08-21, Q4 and Q5 on 2026-08-18; all of them are in the decision record below.
 
 Two small **operational** items remain open but non-blocking (defaults active):

@@ -207,6 +207,19 @@ importers:
         specifier: ^4.19.2
         version: 4.23.12
 
+  tools/i18n-extract:
+    dependencies:
+      '@mistvale/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.12
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   tools/icon-fetch:
     devDependencies:
       tsx:

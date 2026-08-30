@@ -352,8 +352,16 @@ engine, the goal DSL and the events framework already do most of the work*.
     requests, no accepts, no pending state and no channel to notify through. A guild proper
     (chat, officers, a shared bank, a boss to schedule) stays parked and is a different
     feature; the Wurm Wakes (C10e) already covers "fighting the same thing together".
-11. **Localisation scaffolding** — no strings are extracted. Retrofitting is strictly more
-    expensive per screen added, so if it is ever wanted, earlier is cheaper.
+11. ~~**Localisation scaffolding** — no strings are extracted. Retrofitting is strictly more
+    expensive per screen added, so if it is ever wanted, earlier is cheaper.~~ **Done —
+    C39**, and the claim is now a measured number rather than an assumption: **686** strings
+    are still written into components and **77** are already reachable. Strings are keyed by
+    their own English, so a converted screen reads exactly as it did and a half-converted
+    client is a correct state — which is what makes the retrofit something anybody can do a
+    screen at a time. `pnpm i18n` extracts, reports and (in `pnpm verify`) refuses a stale
+    template. **Content** is the half that is a decision rather than a build task — a locale
+    dimension on `content_entries` — and is open as **Q10** with English-only as the active
+    default.
 
 **Debts worth paying**
 

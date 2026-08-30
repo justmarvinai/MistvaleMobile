@@ -5,6 +5,54 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — localisation scaffolding (C39)
+
+Mistvale ships in one language and has no translator, so this is not a translation. It is the
+roadmap's own argument acted on: *retrofitting is strictly more expensive per screen added, so
+if it is ever wanted, earlier is cheaper.* Every screen written without a way to reach its
+strings is a screen somebody has to go back through.
+
+**Strings are keyed by their own English.** `t('Roster')` rather than `t('screen.roster')`,
+which is the shape most projects reach for and the wrong one here — three reasons, all of
+which bite before a second language exists. A missing entry falls back to correct English
+rather than showing an id, so a gap is invisible instead of being a visible defect. The code
+still reads as the sentence it produces. And a **half-converted client is a correct state**,
+which is the property that makes converting one screen at a time possible instead of all of
+them in a single unreviewable commit.
+
+`t()` is a function and `useText()` is the hook, because most of the client's chrome is not
+written inside a component — the screen registry is a module-level array, the combat tips are
+a table — and a hook could not reach any of it. Both read one store. The dock, the Haven's
+rail and every hub card go through the hook now, which is the whole navigation.
+
+**`pnpm i18n` is the half with a number in it.** It parses rather than greps, because only
+the syntactic position of a string says whether a player reads it, and it answers two
+questions: what is already reachable — **77** strings, the catalogue a translator fills in —
+and what is not, which is **686** still written into components. That second figure is what
+the roadmap's claim rests on and nobody had ever counted. `pnpm i18n:check` is in
+`pnpm verify` and refuses a stale template, the same shape as `openapi:check`.
+
+Two things it needed that are worth carrying. **Text tables**: the screen registry's labels
+and blurbs are prose held as *data*, so the call site says `text(screen.label)` and no
+extractor can read it — sixty-eight of the game's most-read strings would have been left out
+of every translator's file with nothing saying so. The tables are named in a closed list,
+because a heuristic mining "string properties of object literals" would fill the catalogue
+with icon ids. And the **classifier's own first cut was wrong**: it refused every single-token
+string as an identifier, which is right for `nav-arena` and wrong for `Roster` — most of the
+navigation. A single token is prose when it is capitalised, and that is the line it turns on.
+
+The check's message order matters too, and is the one place a guard here could do harm: any
+difference makes the template "stale", so a translator who filled it in would be told to run
+`pnpm i18n`, which would silently overwrite their work. The specific complaint is reported
+first, and it names `catalogues.ts` as where a translation belongs.
+
+**Content is deliberately not localised by this.** Champion names and kit text live in
+PostgreSQL and are edited in Admin, so a second language for them is a locale dimension on
+`content_entries` with a migration, an Admin pass and a permanent widening of what publishing
+means. That is a decision rather than a build task and is open as **Q10**, with English-only
+as the active default so nothing blocks.
+
+
 ### Added — the Vale Pass, a season with a reward track (C38)
 
 The roadmap's fourth parked item, and it exists because of a gap the retention layer had

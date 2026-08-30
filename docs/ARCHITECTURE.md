@@ -220,6 +220,36 @@ createBattle(setup: BattleSetup, contentView: ContentView, seed: number): Battle
 - `packages/shared`: enums (Element, Rarity, Role, Faction, StatusType, Slot…), DTO types for every endpoint, API route constants, `BattleEvent` types, error codes. Server validates with Zod schemas co-located here; client imports the inferred types. **Formulas live in the engine, not shared** — the client never needs to compute game math (it renders server-provided numbers).
 - Versioning: client sends `X-Client-Rev` (build hash); server replies `426` if a breaking API change requires a reload — the SPA then force-refreshes. Deploys are atomic (nginx swaps the build dir symlink).
 
+## 7b. Localisation (`packages/shared/src/i18n.ts`, `apps/client/src/i18n/`) — C39
+
+Mistvale ships in one language and has no translator. The layer exists for the roadmap's own
+argument: *retrofitting is strictly more expensive per screen added, so if it is ever wanted,
+earlier is cheaper.* Every screen written without a way to reach its strings is a screen
+somebody has to go back through.
+
+**Strings are keyed by their own English.** `t('Roster')` rather than `t('screen.roster')`,
+and the three reasons all bite before a second language exists: a missing entry falls back to
+correct English rather than showing an id; the code still reads as the sentence it produces;
+and a half-converted screen is a *correct* state, which is what makes converting one screen
+at a time possible instead of all of them in one unreviewable commit.
+
+**`t()` is a function, `useText()` is the hook.** Most of the client's chrome is not written
+inside a component — the screen registry is a module-level array, the combat tips are a table
+— so a hook could not reach it. Both read the same store, so they cannot disagree.
+
+**`pnpm i18n` extracts, reports and checks.** It parses rather than greps, because only the
+syntactic position of a string says whether a player reads it. It answers two questions: what
+is already reachable (the catalogue a translator fills in — **77** strings), and what is not
+(**686** still written into components, which is the figure the roadmap's claim rests on and
+nobody had counted). It also mines the named **text tables** — the screen registry, the unlock
+titles — because their prose is data and the call site says `text(screen.label)`, which no
+extractor can read. `pnpm i18n:check` is in `pnpm verify` and fails on a stale template.
+
+**Content is not localised by this**, and that is a schema decision rather than an oversight:
+champion names and kit text live in PostgreSQL and are edited in Admin, so a second language
+for them needs a locale dimension on `content_entries` with a real migration behind it. It is
+open as **Q10**.
+
 ## 8. Admin API (consumed by MistvaleMobile-Admin)
 
 - Mounted at `/admin/api/*` in the same process (see §5.1 for why); the Admin SPA itself is served at **`play.pathlands.cc/admin`** (path-based, single domain — owner decision). Full CRUD for every `*_defs` table, draft/publish, asset upload + atlas pack, player management (search, inspect, grant via RewardService, password reset, rank changes, ban), bot management, mail composer, battle log inspector, health/stats endpoints.
