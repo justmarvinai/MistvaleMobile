@@ -5,6 +5,34 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — what an account actually holds (A5, ADMIN_SUITE_DESIGN §2.14)
+
+`GET /admin/api/players/:id/champions`, `/gear` and `/summons`. The player page has reported
+holdings as three counts since the A5 slice, with its own schema comment promising the
+drill-ins "with A5 proper" — and the two questions an operator is actually asked, "my
+champion is gone" and "I never got the relic", are answered by **looking**. A count cannot
+look.
+
+**Reads only, and there should never be a write here.** Every change to what an account holds
+already exists as a grant through `RewardService`, which lands in `economy_log`; an endpoint
+that reached in and changed a relic's substats would be the one mutation in the suite with no
+ledger behind it. Not audited either, for the balance sandbox's reason: the log is the record
+of what an operator *changed*.
+
+Three shapes rather than one, because they are bounded differently. The roster comes back
+**whole** — `rosterCapacity` bounds it, and an operator hunting for one champion wants the
+list entire so the browser's own search reaches all of it. Gear and summons are **paged**,
+because nothing bounds either: a built account holds a thousand relics and a spender's
+history has no ceiling at all. Both report the count of **matches** rather than of the page,
+which is the difference between "12 relics" and "12 of 840".
+
+Two details are load-bearing and both are invisible when wrong. A relic's stat line is
+rendered **server-side**, because whether a value is a percentage decides what the number
+means — `DEF 40` and `DEF 40%` are two very different relics, and a client re-deriving that
+is a second place to get it wrong. And `fromMercy` is on every pull, because that is the
+field the support question turns on: "I pulled forty times and got nothing" is answered by
+whether mercy was doing anything, which no count of pulls can say.
+
 ### Added — publish refuses a mastery board that cannot be spent (C36)
 
 A tree missing a whole tier has been refused since P6c, which is the obvious half. The half

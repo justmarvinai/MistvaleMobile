@@ -369,6 +369,16 @@ export const ADMIN_ROUTES = {
     sessions: (id: string) => `/players/${encodeURIComponent(id)}/sessions`,
     /** Back to the state registration leaves an account in. Irreversible. */
     reset: (id: string) => `/players/${encodeURIComponent(id)}/reset`,
+    /**
+     * The drill-ins (§2.14): what the account actually holds.
+     *
+     * Reads only. Every write against a player's holdings already exists as a grant through
+     * `RewardService`, which lands in `economy_log` — an endpoint that reached in and
+     * changed a relic would be the one mutation in the suite with no ledger behind it.
+     */
+    champions: (id: string) => `/players/${encodeURIComponent(id)}/champions`,
+    gear: (id: string) => `/players/${encodeURIComponent(id)}/gear`,
+    summons: (id: string) => `/players/${encodeURIComponent(id)}/summons`,
   },
 
   /**

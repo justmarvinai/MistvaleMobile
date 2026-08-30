@@ -15,6 +15,7 @@ import {
   players,
   sessions,
   stageProgress,
+  summonHistory,
 } from '../db/schema/index';
 import {
   buildTestApp,
@@ -724,5 +725,173 @@ describe.skipIf(!dbUp)('player management', () => {
       });
       expect(response.statusCode, `${method} ${url}`).toBe(403);
     }
+  });
+
+  /**
+   * The drill-ins (§2.14).
+   *
+   * The player page has reported holdings as three counts since the A5 slice. What an
+   * operator is actually asked — "my champion is gone", "I never got the relic" — is
+   * answered by looking, and a count cannot look.
+   */
+  describe('what an account holds', () => {
+    async function giveChampion(over: Partial<typeof playerChampions.$inferInsert> = {}) {
+      const [row] = await app.db
+        .insert(playerChampions)
+        .values({ playerId: targetPlayerId, championKey: 'test_hero', ...over })
+        .returning({ id: playerChampions.id });
+      return row!.id;
+    }
+
+    async function giveRelic(over: Partial<typeof gearInstances.$inferInsert> = {}) {
+      const [row] = await app.db
+        .insert(gearInstances)
+        .values({
+          playerId: targetPlayerId,
+          setKey: 'hawkeye',
+          slot: 'weapon',
+          rank: 4,
+          rarity: 'rare',
+          source: 'drop',
+          mainStat: { stat: 'atk', percent: false, value: 120 },
+          substats: [{ stat: 'critRate', percent: true, value: 6, rolls: 2 }],
+          ...over,
+        })
+        .returning({ id: gearInstances.id });
+      return row!.id;
+    }
+
+    it('lists the roster whole, strongest first, with what each copy is wearing', async () => {
+      const weak = await giveChampion({ championKey: 'a_weak', rank: 2, level: 10 });
+      const strong = await giveChampion({ championKey: 'b_strong', rank: 5, level: 40 });
+      await giveRelic({ equippedChampionId: strong });
+      await giveRelic({ equippedChampionId: strong, slot: 'helm' });
+
+      const response = await asAdmin({
+        method: 'GET',
+        url: adminUrl(ADMIN_ROUTES.players.champions(targetPlayerId)),
+      });
+      expect(response.statusCode, response.body).toBe(200);
+
+      const data = response.json().data as {
+        total: number;
+        champions: { id: string; championKey: string; relicsWorn: number }[];
+      };
+      expect(data.total).toBe(2);
+      // Rank first, which is the game's own "by rank" sort — the order an operator
+      // scanning for "the one they levelled" expects.
+      expect(data.champions.map((entry) => entry.championKey)).toEqual(['b_strong', 'a_weak']);
+      expect(data.champions[0]?.relicsWorn).toBe(2);
+      expect(data.champions[1]?.relicsWorn).toBe(0);
+      expect(data.champions.map((entry) => entry.id)).toContain(weak);
+    });
+
+    it('renders a stat line with its percent flag, because 40 and 40% are different relics', async () => {
+      await giveRelic();
+      const response = await asAdmin({
+        method: 'GET',
+        url: adminUrl(ADMIN_ROUTES.players.gear(targetPlayerId)),
+      });
+      const data = response.json().data as { relics: { mainStat: string; substats: string[] }[] };
+      expect(data.relics[0]?.mainStat).toBe('atk 120');
+      expect(data.relics[0]?.substats).toEqual(['critRate% 6']);
+    });
+
+    it('narrows gear to the loose vault, which is what the cap counts', async () => {
+      const wearer = await giveChampion();
+      await giveRelic({ equippedChampionId: wearer });
+      await giveRelic({ slot: 'helm' });
+      await giveRelic({ slot: 'boots' });
+
+      const loose = await asAdmin({
+        method: 'GET',
+        url: adminUrl(`${ADMIN_ROUTES.players.gear(targetPlayerId)}?equipped=false`),
+      });
+      expect(loose.json().data.total).toBe(2);
+
+      const worn = await asAdmin({
+        method: 'GET',
+        url: adminUrl(`${ADMIN_ROUTES.players.gear(targetPlayerId)}?equipped=true`),
+      });
+      expect(worn.json().data.total).toBe(1);
+
+      const both = await asAdmin({
+        method: 'GET',
+        url: adminUrl(ADMIN_ROUTES.players.gear(targetPlayerId)),
+      });
+      expect(both.json().data.total).toBe(3);
+    });
+
+    it('counts matches rather than the page', async () => {
+      for (let index = 0; index < 5; index += 1) await giveRelic({ slot: 'helm' });
+
+      const response = await asAdmin({
+        method: 'GET',
+        url: adminUrl(`${ADMIN_ROUTES.players.gear(targetPlayerId)}?limit=2`),
+      });
+      const data = response.json().data as { total: number; relics: unknown[] };
+      // "2 relics" and "2 of 5" are different answers, and the second is the one being
+      // asked for.
+      expect(data.total).toBe(5);
+      expect(data.relics).toHaveLength(2);
+    });
+
+    it('reads the pull history newest first, carrying whether mercy produced it', async () => {
+      await app.db.insert(summonHistory).values([
+        {
+          playerId: targetPlayerId,
+          poolKey: 'faded',
+          sigilItemKey: 'sigil_faded',
+          championKey: 'early',
+          rarity: 'common',
+          createdAt: new Date('2026-08-01T00:00:00Z'),
+        },
+        {
+          playerId: targetPlayerId,
+          poolKey: 'radiant',
+          sigilItemKey: 'sigil_radiant',
+          championKey: 'late',
+          rarity: 'legendary',
+          fromMercy: true,
+          createdAt: new Date('2026-08-20T00:00:00Z'),
+        },
+      ]);
+
+      const response = await asAdmin({
+        method: 'GET',
+        url: adminUrl(ADMIN_ROUTES.players.summons(targetPlayerId)),
+      });
+      const data = response.json().data as {
+        total: number;
+        pulls: { championKey: string; fromMercy: boolean }[];
+      };
+      expect(data.total).toBe(2);
+      expect(data.pulls.map((pull) => pull.championKey)).toEqual(['late', 'early']);
+      // The field the support question turns on: "forty pulls and nothing" is answered by
+      // whether mercy was doing anything, which a count cannot say.
+      expect(data.pulls[0]?.fromMercy).toBe(true);
+    });
+
+    it('answers empty for an account that holds nothing rather than failing', async () => {
+      const roster = await asAdmin({
+        method: 'GET',
+        url: adminUrl(ADMIN_ROUTES.players.champions(targetPlayerId)),
+      });
+      expect(roster.json().data).toEqual({ total: 0, champions: [] });
+
+      const summons = await asAdmin({
+        method: 'GET',
+        url: adminUrl(ADMIN_ROUTES.players.summons(targetPlayerId)),
+      });
+      expect(summons.json().data).toEqual({ total: 0, pulls: [] });
+    });
+
+    it('refuses a limit past the ceiling rather than trusting it', async () => {
+      const response = await asAdmin({
+        method: 'GET',
+        url: adminUrl(`${ADMIN_ROUTES.players.gear(targetPlayerId)}?limit=99999`),
+      });
+      expect(response.statusCode).toBe(400);
+    });
   });
 });

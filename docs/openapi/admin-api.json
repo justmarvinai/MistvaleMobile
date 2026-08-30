@@ -439,6 +439,93 @@
         ],
         "additionalProperties": false
       },
+      "AdminGearItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "setKey": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "rarity": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "mainStat": {
+            "type": "string"
+          },
+          "substats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "equippedChampionId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "setKey",
+          "slot",
+          "rank",
+          "rarity",
+          "level",
+          "mainStat",
+          "substats",
+          "equippedChampionId",
+          "locked",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "AdminGearPage": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "relics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminGearItem"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "relics"
+        ],
+        "additionalProperties": false
+      },
       "AdminGrantRequest": {
         "type": "object",
         "properties": {
@@ -1226,6 +1313,97 @@
         ],
         "additionalProperties": false
       },
+      "AdminRoster": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "champions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminRosterChampion"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "champions"
+        ],
+        "additionalProperties": false
+      },
+      "AdminRosterChampion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "championKey": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ascension": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "awakening": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "xp": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "favourite": {
+            "type": "boolean"
+          },
+          "relicsWorn": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "masteries": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "championKey",
+          "level",
+          "rank",
+          "ascension",
+          "awakening",
+          "xp",
+          "locked",
+          "favourite",
+          "relicsWorn",
+          "masteries",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
       "AdminSession": {
         "type": "object",
         "properties": {
@@ -1557,6 +1735,65 @@
         "required": [
           "type",
           "entities"
+        ],
+        "additionalProperties": false
+      },
+      "AdminSummon": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "poolKey": {
+            "type": "string"
+          },
+          "championKey": {
+            "type": "string"
+          },
+          "rarity": {
+            "type": "string"
+          },
+          "fromMercy": {
+            "type": "boolean"
+          },
+          "contentRev": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "poolKey",
+          "championKey",
+          "rarity",
+          "fromMercy",
+          "contentRev",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "AdminSummonPage": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "pulls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminSummon"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "pulls"
         ],
         "additionalProperties": false
       },
@@ -16380,6 +16617,569 @@
           }
         },
         "description": "One row per send rather than per message: after a compensation mail the question is whether players took it, which a thousand rows cannot answer. Messages the game itself raised carry no batch and are not listed.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/players/{id}/champions": {
+      "get": {
+        "operationId": "listPlayerChampions",
+        "summary": "One account's roster",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AdminRoster"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such content type, entity or revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "Unpaginated: the roster is bounded by `rosterCapacity`, and an operator hunting for one champion wants the list whole so the browser's own search reaches all of it. A read, and not audited — the log is the record of what an operator *changed*.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/players/{id}/gear": {
+      "get": {
+        "operationId": "listPlayerGear",
+        "summary": "One account's relics",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AdminGearPage"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such content type, entity or revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "Paginated, because nothing bounds it — a built account holds a thousand. `equipped` narrows to what is worn or to the loose vault, which is what the vault cap counts.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "equipped",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/api/players/{id}/summons": {
+      "get": {
+        "operationId": "listPlayerSummons",
+        "summary": "One account's pull history",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AdminSummonPage"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No session, or the credentials were wrong.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The session is valid but the account lacks the admin rank.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such content type, entity or revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "const": false
+                    },
+                    "error": {
+                      "$ref": "#/components/schemas/ApiError"
+                    },
+                    "rev": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error",
+                    "rev"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "description": "Newest first. `fromMercy` is on every row and it is the field the support question turns on: \"I pulled forty times and got nothing\" is answered by whether mercy was doing anything, which no count of pulls can say.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "equipped",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          }
+        ],
         "security": [
           {
             "sessionCookie": []

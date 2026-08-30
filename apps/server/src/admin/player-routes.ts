@@ -5,6 +5,7 @@ import {
   adminBanRequestSchema,
   adminGrantRequestSchema,
   adminRenameRequestSchema,
+  adminHoldingsQuerySchema,
   adminSetRankRequestSchema,
   apiSuccess,
   routePattern,
@@ -12,6 +13,7 @@ import {
 import { AppError } from '../lib/errors';
 import { recordAudit } from './audit';
 import * as playerAdmin from './players';
+import * as holdings from './holdings';
 import { idParam } from '../lib/params';
 
 /**
@@ -214,6 +216,37 @@ export const adminPlayerRoutes: FastifyPluginAsync = async (app) => {
     });
 
     return reply.send(apiSuccess({ revoked }, app.content.rev));
+  });
+
+  // ── The drill-ins (§2.14) ────────────────────────────────────────────────
+  //
+  // Reads only, and not audited, for the reason the balance sandbox writes no audit row:
+  // the log is the record of what an operator *changed*, and "somebody looked at a roster"
+  // would bury the entries that matter. Every write against holdings already exists as a
+  // grant through `RewardService`, which lands in `economy_log`.
+
+  app.get(routePattern(ADMIN_ROUTES.players.champions), async (request, reply) => {
+    const roster = await holdings.readRoster(app.db, idParam(request));
+    return reply.send(apiSuccess(roster, app.content.rev));
+  });
+
+  app.get(routePattern(ADMIN_ROUTES.players.gear), async (request, reply) => {
+    const query = adminHoldingsQuerySchema.parse(request.query ?? {});
+    const page = await holdings.readGear(app.db, idParam(request), {
+      limit: query.limit,
+      offset: query.offset,
+      equipped: query.equipped,
+    });
+    return reply.send(apiSuccess(page, app.content.rev));
+  });
+
+  app.get(routePattern(ADMIN_ROUTES.players.summons), async (request, reply) => {
+    const query = adminHoldingsQuerySchema.parse(request.query ?? {});
+    const page = await holdings.readSummons(app.db, idParam(request), {
+      limit: query.limit,
+      offset: query.offset,
+    });
+    return reply.send(apiSuccess(page, app.content.rev));
   });
 };
 

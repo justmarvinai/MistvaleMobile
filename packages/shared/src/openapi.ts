@@ -30,6 +30,13 @@ import {
   adminSnapshotFileSchema,
   adminImportRequestSchema,
   adminImportResultSchema,
+  adminRosterSchema,
+  adminRosterChampionSchema,
+  adminGearItemSchema,
+  adminGearPageSchema,
+  adminSummonSchema,
+  adminSummonPageSchema,
+  adminHoldingsQuerySchema,
 } from './admin';
 import { arenaBotCensusSchema, arenaLadderResultSchema } from './arena';
 import { mailBatchSchema, mailSendRequestSchema, mailSendResultSchema } from './mail';
@@ -605,6 +612,47 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     response: z.object({ batches: z.array(mailBatchSchema) }),
   },
 
+  {
+    surface: 'admin',
+    method: 'get',
+    path: routePattern(ADMIN_ROUTES.players.champions),
+    operationId: 'listPlayerChampions',
+    summary: "One account's roster",
+    description:
+      'Unpaginated: the roster is bounded by `rosterCapacity`, and an operator hunting for ' +
+      "one champion wants the list whole so the browser's own search reaches all of it. " +
+      'A read, and not audited — the log is the record of what an operator *changed*.',
+    response: adminRosterSchema,
+    errors: [404],
+  },
+  {
+    surface: 'admin',
+    method: 'get',
+    path: routePattern(ADMIN_ROUTES.players.gear),
+    operationId: 'listPlayerGear',
+    summary: "One account's relics",
+    description:
+      'Paginated, because nothing bounds it — a built account holds a thousand. `equipped` ' +
+      'narrows to what is worn or to the loose vault, which is what the vault cap counts.',
+    query: adminHoldingsQuerySchema,
+    response: adminGearPageSchema,
+    errors: [404],
+  },
+  {
+    surface: 'admin',
+    method: 'get',
+    path: routePattern(ADMIN_ROUTES.players.summons),
+    operationId: 'listPlayerSummons',
+    summary: "One account's pull history",
+    description:
+      'Newest first. `fromMercy` is on every row and it is the field the support question ' +
+      'turns on: "I pulled forty times and got nothing" is answered by whether mercy was ' +
+      'doing anything, which no count of pulls can say.',
+    query: adminHoldingsQuerySchema,
+    response: adminSummonPageSchema,
+    errors: [404],
+  },
+
   // ── Admin: scheduled work, on demand ──────────────────────────────────────
   {
     surface: 'admin',
@@ -758,6 +806,12 @@ const SHARED_SCHEMAS: Record<string, z.ZodType> = {
   AdminSnapshot: adminSnapshotSchema,
   AdminImportRequest: adminImportRequestSchema,
   AdminImportResult: adminImportResultSchema,
+  AdminRosterChampion: adminRosterChampionSchema,
+  AdminRoster: adminRosterSchema,
+  AdminGearItem: adminGearItemSchema,
+  AdminGearPage: adminGearPageSchema,
+  AdminSummon: adminSummonSchema,
+  AdminSummonPage: adminSummonPageSchema,
   ...Object.fromEntries(
     CONTENT_TYPES.map((type) => [`${pascal(type)}Def`, CONTENT_REGISTRY[type].schema]),
   ),

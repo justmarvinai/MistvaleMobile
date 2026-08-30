@@ -520,3 +520,102 @@ export const adminImportResultSchema = z.object({
   unchanged: z.number().int(),
 });
 export type AdminImportResult = z.infer<typeof adminImportResultSchema>;
+
+// ── Holdings: the drill-ins (§2.14) ─────────────────────────────────────────
+
+/**
+ * What an account actually holds.
+ *
+ * The player page has reported holdings as three counts since the A5 slice, and the two
+ * support questions an operator is actually asked — "my champion is gone" and "I never got
+ * the relic" — are answered by *looking*, which a count cannot do.
+ *
+ * Read-only by design. Every write against a player's holdings already exists as a grant
+ * through `RewardService`, which lands in `economy_log`; an editor that reached in and
+ * changed a relic's substats would be the one mutation in the suite with no ledger behind
+ * it.
+ */
+export const adminRosterChampionSchema = z.object({
+  id: z.string(),
+  championKey: z.string(),
+  level: z.number().int(),
+  rank: z.number().int(),
+  ascension: z.number().int(),
+  awakening: z.number().int(),
+  xp: z.number().int(),
+  locked: z.boolean(),
+  favourite: z.boolean(),
+  /** How many relics this copy is wearing, out of nine. */
+  relicsWorn: z.number().int(),
+  masteries: z.number().int(),
+  createdAt: z.string(),
+});
+export type AdminRosterChampion = z.infer<typeof adminRosterChampionSchema>;
+
+/**
+ * The whole roster, unpaginated.
+ *
+ * Bounded by `rosterCapacity`, and an operator hunting for one champion wants the list
+ * whole so the browser's own search reaches all of it — the two things that make paging it
+ * a cost with no benefit.
+ */
+export const adminRosterSchema = z.object({
+  total: z.number().int(),
+  champions: z.array(adminRosterChampionSchema),
+});
+export type AdminRoster = z.infer<typeof adminRosterSchema>;
+
+export const adminGearItemSchema = z.object({
+  id: z.string(),
+  setKey: z.string(),
+  slot: z.string(),
+  rank: z.number().int(),
+  rarity: z.string(),
+  level: z.number().int(),
+  /** Rendered by the server, because a stat line's percent flag decides how it reads. */
+  mainStat: z.string(),
+  substats: z.array(z.string()),
+  equippedChampionId: z.string().nullable(),
+  locked: z.boolean(),
+  createdAt: z.string(),
+});
+export type AdminGearItem = z.infer<typeof adminGearItemSchema>;
+
+export const adminGearPageSchema = z.object({
+  /** Matches, not the page — the difference between "12 relics" and "12 of 840". */
+  total: z.number().int(),
+  relics: z.array(adminGearItemSchema),
+});
+export type AdminGearPage = z.infer<typeof adminGearPageSchema>;
+
+export const adminSummonSchema = z.object({
+  id: z.string(),
+  poolKey: z.string(),
+  championKey: z.string(),
+  rarity: z.string(),
+  /** Whether mercy rather than the base rate produced this rarity. */
+  fromMercy: z.boolean(),
+  contentRev: z.number().int(),
+  createdAt: z.string(),
+});
+export type AdminSummon = z.infer<typeof adminSummonSchema>;
+
+export const adminSummonPageSchema = z.object({
+  total: z.number().int(),
+  pulls: z.array(adminSummonSchema),
+});
+export type AdminSummonPage = z.infer<typeof adminSummonPageSchema>;
+
+/** How many rows one holdings page may carry. */
+export const HOLDINGS_MAX_LIMIT = 200;
+
+export const adminHoldingsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(HOLDINGS_MAX_LIMIT).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+  /** Gear only: `true` for what is worn, `false` for the loose vault, absent for both. */
+  equipped: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((value) => (value === undefined ? undefined : value === 'true')),
+});
+export type AdminHoldingsQuery = z.infer<typeof adminHoldingsQuerySchema>;
