@@ -24,3 +24,13 @@ export {
   type TeamSpec,
 } from './team';
 export { simulateStage, type StageResult } from './stage';
+export {
+  benchPartners,
+  benchmarkChampion,
+  benchmarkRoster,
+  benchmarkedChampions,
+  roleIndex,
+  type BenchSetup,
+  type ChampionBenchmark,
+  type RoleBand,
+} from './benchmark';

@@ -1,4 +1,5 @@
 import {
+  benchmarkRoster,
   campaignStages,
   dungeonFloors,
   loadContent,
@@ -8,9 +9,11 @@ import {
   simulateTitan,
   simulateTrial,
   simulateTrialOnAuto,
+  roleIndex,
   starterKeys,
   withCollection,
   withRelics,
+  type BenchSetup,
   type LoadedContent,
   type StageResult,
   type TeamSpec,
@@ -48,6 +51,43 @@ const RUNS = Number(process.env.SIM_RUNS ?? 2_000);
  * "sometimes", which is all the gate claims.
  */
 const SPIRE_RUNS = Math.max(30, Math.round(RUNS / 12));
+
+/**
+ * Where a champion is measured, and how hard.
+ *
+ * The last fight of the campaign, at the investment a finished account brings to it. It is
+ * chosen for what it lacks as much as for what it is: no boss mechanic. The Titan and the
+ * world boss are the obvious dummies — nobody kills them and both run to a turn cap — and
+ * a hit-counter shield would turn the whole table into "is this champion a multi-hitter",
+ * which is a fact about that boss rather than about the champion.
+ *
+ * A hundred runs each at the default. Measured rather than picked: across two disjoint
+ * blocks of seeds the worst a champion's index moved was **5.6 points**, against the fifty
+ * points of margin between the roster's fastest and the outlier bound — so the gate fires
+ * on a regression and never on the sampling.
+ */
+const BENCHMARK_STAGE = 'c12_s7_brutal';
+const BENCHMARK_RUNS = Math.max(30, Math.round(RUNS / 20));
+
+/**
+ * How far above its role's median a champion may sit.
+ *
+ * Wide on purpose, and not the 85–115% COMBAT_SYSTEM §14 documents. The narrow band is a
+ * *tuning* target for a champion pass nobody has run yet; this number only has to separate
+ * "stronger than its peers", which is content design, from "broken", which is a bug. The
+ * roster spans 75–151% as shipped and a champion given a hundred times its authored attack
+ * reaches 262%, so the bound sits between the two with real room on each side.
+ *
+ * **There is deliberately no lower bound**, and the reason is the more interesting half.
+ * The score is what the *team* did, and the other three carry the fight — so the measure
+ * saturates from below. A champion stripped to one point of attack, one of health and one
+ * of defence, which dies on the first wave and does nothing at all, still scores **66%**,
+ * against a roster whose own weakest is 75%. Any floor far enough from 75% to clear the
+ * six points of sampling noise would sit below 66% and could never fire: a guard that
+ * cannot be made to fail has not been checked, so it is not written. `champion-does-
+ * something` is what covers that end, and it fires on exactly that mutation.
+ */
+const OUTLIER_HIGH = 200;
 
 /**
  * The line each trial is authored around — the answer key.
@@ -770,6 +810,103 @@ function main(): void {
         measured: `auto ${auto.won ? `won in ${auto.turns}` : 'lost'} vs par ${par}`,
       });
     }
+  }
+
+  // ── Gate 3f: every champion pulls its weight, for its role ──────────────
+  //
+  // COMBAT_SYSTEM §14 has asked for this since P2 and the repo could not answer it: the
+  // gate wants every champion inside a band of its *role's* benchmark, and nothing here
+  // could measure what one champion contributes. `contributions()` (C21) reads it off the
+  // event log and `packages/sim` (C27) is where a measurement both CI and the Admin
+  // sandbox can call belongs, so the two halves finally met.
+  //
+  // The score is **turns to clear the bench**, and that was settled by measurement rather
+  // than by argument — see `benchmark.ts`, which records why the obvious per-role figures
+  // do not work (six of Mistvale's ten supports neither heal nor shield).
+  //
+  // **What is gated is not the documented 85–115% band**, and that is deliberate rather
+  // than a shortfall. The roster has never been tuned against this measurement, so ten of
+  // the thirty-seven sit outside that band today — which is the champion pass the roadmap
+  // has always said this waits for, and a balance decision about a live game is the
+  // owner's rather than a side effect of building the instrument (USER_QUESTIONS Q9).
+  // What is enforced is the three statements that hold whatever the owner decides about
+  // tuning: the bench fight is still winnable, every champion still does something, and
+  // nobody has become an outlier by an order only a bug produces. The table below is what
+  // the champion pass reads.
+  const benchSetup: BenchSetup = {
+    stageKey: BENCHMARK_STAGE,
+    level: 60,
+    rank: 6,
+    ascension: 6,
+    runs: BENCHMARK_RUNS,
+  };
+  const benchStage = content.stages.get(BENCHMARK_STAGE);
+  if (benchStage) {
+    console.log(`\nChampions — turns to clear ${BENCHMARK_STAGE} beside a fixed trio`);
+    const bands = benchmarkRoster(content, benchSetup);
+    for (const band of bands) {
+      console.log(
+        `  ${band.role} — median ${band.medianTurns.toFixed(1)} turns over ${band.members.length} champions`,
+      );
+      for (const row of band.members) {
+        const index = roleIndex(row, band);
+        console.log(
+          `    ${row.name.padEnd(28)} ${row.turnsToClear.toFixed(1).padStart(5)}t ` +
+            `${index.toFixed(0).padStart(4)}%  win ${(row.winRate * 100).toFixed(0).padStart(3)}%  ` +
+            `dmg/t ${row.damagePerTurn.toFixed(0).padStart(5)}  sus/t ${row.sustainPerTurn.toFixed(0).padStart(5)}`,
+        );
+      }
+    }
+
+    const everyone = bands.flatMap((band) => band.members);
+
+    // The bench itself, rather than any champion on it. If a content change made the last
+    // Brutal stage unwinnable at this investment, every turn count above would be a `NaN`
+    // and the two gates under it would be measuring nothing — so this is what keeps them
+    // honest, and it is why it is stated as a fact about the fight and not about a name.
+    const stuck = everyone.filter((row) => row.winRate < 0.95);
+    gates.push({
+      name: 'champion-bench-holds',
+      detail: `${BENCHMARK_STAGE} is still a fight a built team wins, so the turn counts mean something`,
+      passed: stuck.length === 0,
+      measured:
+        stuck.length === 0
+          ? `${everyone.length} champions, all clearing`
+          : `${stuck.length} teams did not clear (worst ${Math.min(...stuck.map((row) => row.winRate * 100)).toFixed(0)}%)`,
+    });
+
+    // Nobody is inert. Damage *or* healing *or* shielding, because all three are real work
+    // and a pure healer with no damage is a champion somebody may legitimately author one
+    // day — a gate that demanded damage would refuse them. What it refuses is a champion
+    // that did none of the three, which is a broken kit rather than a weak one.
+    const idle = everyone.filter(
+      (row) => row.damagePerTurn + row.sustainPerTurn <= 0 || row.survivalRate <= 0,
+    );
+    gates.push({
+      name: 'champion-does-something',
+      detail: 'every champion deals damage, heals or shields, and survives some of the time',
+      passed: idle.length === 0,
+      measured:
+        idle.length === 0
+          ? `weakest contribution ${Math.min(...everyone.map((row) => row.damagePerTurn + row.sustainPerTurn)).toFixed(0)}/turn`
+          : idle.map((row) => row.name).join(', '),
+    });
+
+    const outliers = bands.flatMap((band) =>
+      band.members
+        .map((row) => ({ row, index: roleIndex(row, band) }))
+        .filter(({ index }) => index > OUTLIER_HIGH),
+    );
+    const spread = bands.flatMap((band) => band.members.map((row) => roleIndex(row, band)));
+    gates.push({
+      name: 'champion-role-outlier',
+      detail: `no champion is more than ${OUTLIER_HIGH}% of its role's median`,
+      passed: outliers.length === 0,
+      measured:
+        outliers.length === 0
+          ? `roster spans ${Math.min(...spread).toFixed(0)}–${Math.max(...spread).toFixed(0)}%`
+          : outliers.map(({ row, index }) => `${row.name} ${index.toFixed(0)}%`).join(', '),
+    });
   }
 
   // ── Gate 4: the headless performance budget ─────────────────────────────

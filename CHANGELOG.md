@@ -5,6 +5,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — every champion, measured against its own role (C29)
+
+COMBAT_SYSTEM §14 has asked for this since P2 and the repo could not answer it. The gate
+wants every champion inside a band of its **role's** benchmark, and nothing here could
+measure what one champion contributes — so the line sat in the doc reading *not yet
+enforced* for eight phases. Two later passes quietly supplied both halves: `contributions()`
+(C21) reads a champion's work off the event log, and `packages/sim` (C27) is where a
+measurement CI and the Admin sandbox can both call belongs.
+
+`pnpm sim` now fights **every champion** in the same team, on the same stage, at the same
+investment — slot 0 under test, the other three the same trio every time — and prints what
+each one did.
+
+**The score is turns to clear, and that was settled by measuring rather than by arguing.**
+The first cut scored the three fighting roles on damage and `support` on healing plus
+shielding, and the roster says that is wrong: **six of Mistvale's ten supports neither heal
+nor shield.** They buff, debuff and move the turn meter, so six of ten came out at zero and
+the role's median at 3 — every ratio in the column was noise. Turns has none of that: it is
+defined for every kit, it is the currency `bestTurns` and every three-star limit already use,
+and it credits each role in its own coin — an attacker shortens the fight by killing, a tank
+by keeping the party alive to keep killing, a support by making the other three better at it.
+
+The bench is the last Brutal campaign stage, picked for what it **lacks**: no boss mechanic.
+The Titan and the world boss are the obvious dummies — nobody kills them and both run to a
+turn cap — and both carry a hit-counter shield, which would turn the whole table into "is
+this champion a multi-hitter", a fact about that boss rather than about the champion.
+
+**Three gates, each mutation-checked, and each fires on a different mutation:** the bench
+fight is still winnable (or every turn count under it is meaningless); every champion deals
+damage, heals or shields and survives some of the time; and no champion exceeds 200% of its
+role's median. A champion given a hundred times its authored attack reaches 262% and trips
+the third; one stripped to a single point of attack, health and defence trips the second; a
+bench nobody can win trips the first.
+
+**There is deliberately no lower bound**, and that is the finding worth keeping. The score
+is what the *team* did and the other three carry the fight, so the measure saturates from
+below: the champion stripped to 1/1/1, which dies on the first wave and does nothing at all,
+still scores **66%** — against a roster whose own weakest is 75%. Any floor far enough from
+75% to clear the six points of sampling noise would sit under 66% and could never fire, and
+a guard that cannot be made to fail has not been checked.
+
+**What is not enforced is the documented 85–115% band**, because ten of the thirty-seven sit
+outside it — that is the champion pass the roadmap has always said this waits for, and a
+balance decision about a live game is the owner's rather than a side effect of building the
+instrument. The report is the input that pass needs, and it is **Q9**.
+
 ### Fixed — the fight was watched in a void with the room painted underneath it (C28b)
 
 C23 put one of the owner's paintings behind every tab. The battle scene opened by clearing
