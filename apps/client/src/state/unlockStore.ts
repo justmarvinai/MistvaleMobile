@@ -7,11 +7,16 @@ import { unlockedBetween, type Unlock } from '../app/unlocks';
  * **The last celebrated level is remembered per account**, in local storage, and that is
  * the whole mechanism. A fresh sign-in seeds it silently at the account's current level —
  * somebody returning at level 30 is not owed a parade for the twelve things they unlocked
- * last month — and every rise after that is celebrated, gate by gate, in order.
+ * last month — and every rise after that is announced, gate by gate, in order.
  *
  * Presentation state, and kept client-side deliberately: a column for "has this player
  * seen the Bazaar card" would be a migration and a write on a hot path to remember
  * something that only matters to the tab it happened in.
+ *
+ * The queue is **handed over whole** (`take`) rather than popped one at a time, because
+ * since C25 the thing that shows them owns their pacing: `AchievementPopup` queues banners
+ * itself and plays them one after another. Two stores of the same queue, each with its own
+ * idea of what is on screen, is how one of them goes stale.
  */
 
 const KEY = 'mv.unlocks.seenLevel';
@@ -22,9 +27,10 @@ interface UnlockState {
   /** Which account the remembered level belongs to; a different one re-seeds. */
   accountId: string | null;
 
-  /** Records the level, celebrating anything it crossed since the last call. */
+  /** Records the level, queueing anything it crossed since the last call. */
   observe: (accountId: string, level: number) => void;
-  dismiss: () => void;
+  /** Empties the queue and hands it back, for whoever is going to announce it. */
+  take: () => Unlock[];
   reset: () => void;
 }
 
@@ -71,8 +77,10 @@ export const useUnlockStore = create<UnlockState>((set, get) => ({
     set({ accountId, queue: [...get().queue, ...opened] });
   },
 
-  dismiss() {
-    set({ queue: get().queue.slice(1) });
+  take() {
+    const queue = get().queue;
+    if (queue.length > 0) set({ queue: [] });
+    return queue;
   },
 
   reset() {

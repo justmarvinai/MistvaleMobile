@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseStarter, dismissUnlocks, goToScreen, registerRaw } from './support';
+import { chooseStarter, goToScreen, registerRaw } from './support';
 import { decodePng, differingFraction, litFraction } from './pixels';
 
 /**
@@ -65,7 +65,6 @@ test.describe('the tab paintings', () => {
     test.slow();
     await registerRaw(page, 'e2ewall', 'Painter');
     await chooseStarter(page);
-    await dismissUnlocks(page);
 
     for (const painting of PAINTINGS) {
       if (!painting.tab) continue;

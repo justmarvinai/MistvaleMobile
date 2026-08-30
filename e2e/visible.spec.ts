@@ -1,7 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   chooseStarter,
-  dismissUnlocks,
   dockEntry,
   enterStageOneOne,
   expectOnTop,
@@ -320,7 +319,6 @@ test.describe('what a player can actually see', () => {
         .getByRole('button', { name: /back to the campaign/i })
         .click()
         .catch(() => undefined);
-      await dismissUnlocks(page);
 
       const held = await page.evaluate(async () => {
         const response = await fetch('/api/player/gear', { credentials: 'include' });
@@ -508,7 +506,6 @@ test.describe('what a player can actually see', () => {
 
     // The switch, set the way the settings panel sets it.
     await setSimpleBattlefield(page);
-    await dismissUnlocks(page);
 
     await goToScreen(page, 'Campaign');
     await openCampaignStage(page, '1-1');
@@ -696,7 +693,6 @@ test.describe('what a player can actually see', () => {
     await registerRaw(page, 'e2egs', 'GrndS');
     await chooseStarter(page);
     await setSimpleBattlefield(page);
-    await dismissUnlocks(page);
     await enterStageOneOne(page);
 
     const field = page.locator('[data-battlefield="simple"]');

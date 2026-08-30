@@ -52,7 +52,7 @@ import { TopBar } from './TopBar';
 import { TutorialOverlay } from './TutorialOverlay';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ScreenWipe } from './ScreenWipe';
-import { UnlockCelebration } from './UnlockCelebration';
+import { UnlockBanner } from './UnlockBanner';
 import { Dock } from './Dock';
 import { BootScreen } from './BootScreen';
 import styles from './App.module.scss';
@@ -386,6 +386,12 @@ function GameShell() {
           </ErrorBoundary>
         </main>
 
+        {/* Inside the frame rather than over the viewport, which is the whole of how it
+            knows where to sit: it hangs from the top of the content box, so it clears the
+            top bar at whatever height the bar happens to be — and the bar's height is
+            content, since the player chip grew with C15 and would again. */}
+        <UnlockBanner />
+
         {/* A fight takes the whole screen: leaving it is a deliberate act, not a tab away. */}
         {screen !== 'battle' && <Dock current={dockSlotFor(screen)} onNavigate={navigate} />}
       </div>
@@ -397,7 +403,6 @@ function GameShell() {
       <NewsPanel open={newsOpen} onClose={() => setNewsOpen(false)} />
       <ProfilePanel />
       <TutorialOverlay />
-      <UnlockCelebration />
     </>
   );
 }

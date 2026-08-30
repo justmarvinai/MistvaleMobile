@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseStarter, dismissUnlocks, registerRaw } from './support';
+import { chooseStarter, registerRaw } from './support';
 
 /**
  * The XP boost badge, and a bar that has gone past its cap (C24).
@@ -44,7 +44,6 @@ test.describe('the top bar', () => {
     test.slow();
     await registerRaw(page, 'e2ebst', 'Boost');
     await chooseStarter(page);
-    await dismissUnlocks(page);
 
     // Drawn even when it is not running, and that is deliberate: a badge that appeared
     // only while active would teach nobody that the boost exists.
@@ -58,7 +57,6 @@ test.describe('the top bar', () => {
     test.slow();
     await registerRaw(page, 'e2ebst2', 'Boost2');
     await chooseStarter(page);
-    await dismissUnlocks(page);
 
     await withPlayer(page, { xpBoost: { until: new Date(Date.now() + 5_400_000).toISOString() } });
     await page.reload();
@@ -76,7 +74,6 @@ test.describe('the top bar', () => {
     test.slow();
     await registerRaw(page, 'e2ebst3', 'Boost3');
     await chooseStarter(page);
-    await dismissUnlocks(page);
 
     await withPlayer(page, {
       energy: { value: 2_437, cap: 20, regenSeconds: 180, nextTickAt: null, fullAt: null },

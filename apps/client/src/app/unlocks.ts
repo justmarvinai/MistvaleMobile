@@ -2,146 +2,123 @@ import { UNLOCK_LEVELS, type UnlockFlags } from '@mistvale/shared';
 import type { ScreenId } from './screens';
 
 /**
- * What a level opened, and what to say about it.
+ * What a level opened, and what to call it.
  *
- * Features open on account level (GAME_DESIGN §12) and until now they simply *appeared* —
- * a dock tile that was shrouded on Tuesday was lit on Wednesday, with nothing to mark it.
- * That is the moment the whole gating structure exists to create, and letting it pass in
- * silence wastes it.
+ * Features open on account level (GAME_DESIGN §12), and a dock tile that was shrouded on
+ * Tuesday is simply lit on Wednesday — so something has to name the moment or the whole
+ * gating structure passes unremarked. Since C25 that something is a banner rather than a
+ * card with buttons on it (`UnlockBanner`), which is why there is a title here and no
+ * paragraph: the game says what opened, and the place itself says what it is for.
  *
  * Derived from the level rather than from watching the flags flip, and deliberately: a
  * flag diff cannot tell "just unlocked" from "unlocked before this tab was open", so the
- * first load of every session would celebrate everything the account had ever earned. A
- * level is a number that only goes up, and the last one celebrated is the only thing worth
+ * first load of every session would announce everything the account had ever earned. A
+ * level is a number that only goes up, and the last one announced is the only thing worth
  * remembering.
  */
 
 export interface Unlock {
   key: keyof UnlockFlags;
   level: number;
-  /** The screen it opens, when it opens one. */
+  /** The screen it opens, when it opens one — and whose glyph the banner wears. */
   screen?: ScreenId;
+  /**
+   * The banner's badge, when there is no destination to take one from.
+   *
+   * Two unlocks need it, and they are the reason the field exists: multi-battle opens no
+   * screen at all — it is a *capability* on the campaign's team chooser — and the Hall of
+   * Valor lives behind the Arena's own title bar rather than in the dock. Everything else
+   * takes its badge from the place it opens, which is what keeps the banner and the hub
+   * card wearing the same picture without anybody authoring it twice.
+   */
+  art?: string;
   title: string;
-  blurb: string;
 }
 
 /**
  * The copy, one entry per flag.
  *
  * Three levels hand over two things at once — 8, 9 and 14 — so a single level-up can open
- * more than one feature. The celebration queues them rather than picking a winner.
+ * more than one feature. They queue and play one after another rather than one winning.
  */
 const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> = Object.freeze({
   spire: {
     screen: 'spire',
     title: 'The Mistspire',
-    blurb:
-      'A watchtower above the mist line with twenty-seven floors nobody built. The wards on its stairs are old and particular — some let only Tide champions past, some only a defender, some only the Hollowborn — so the tower is the one place in the Vale that asks who else you have rather than who is best.',
   },
   deepRun: {
     screen: 'deepRun',
     title: 'The Sunken Stair',
-    blurb:
-      'Twelve floors under the Vale, and your relics stay at the top of them. Four champions go down with nothing but their own levels, and what carries them is whatever the Stair offers on the way — one boon at a time, and every wound they take stays taken.',
   },
   worldBoss: {
     screen: 'worldBoss',
     title: 'The Wurm Wakes',
-    blurb:
-      'The thing you have been going down to alone comes up at the end of the week, and the whole Vale turns out for it. One health bar, everybody’s damage on it, and whatever you take off stays off — so what you manage on Friday is still gone when somebody else arrives on Sunday.',
   },
   trials: {
     screen: 'trials',
     title: 'Trials',
-    blurb:
-      'Four champions you have never owned, at a strength you have not reached, against something authored to be a puzzle rather than a wall. Nothing you have farmed counts here — everybody is handed the same fight, and the only question is how few turns you can finish it in.',
   },
   expeditions: {
     screen: 'expeditions',
     title: 'Expeditions',
-    blurb:
-      'There is work in the Vale that is not a fight, and champions who are not fighting today can do it. They are gone for hours and cannot be fielded while they are — which is the cost, and the reason a wide roster is worth having.',
   },
   loginCalendar: {
     screen: 'calendar',
     title: 'The Calendar',
-    blurb:
-      'A warden who shows up is owed something for it. Come back each day and take what the Vale has put aside — miss one and you lose the day, not your place.',
   },
   relicUpgrading: {
     screen: 'relics',
     title: 'The Forge',
-    blurb:
-      'Silver and a hot enough fire will wake a relic further. It does not always take; no smith in the Vale has ever managed better.',
   },
   quests: {
     screen: 'quests',
     title: 'The day’s work',
-    blurb:
-      'A list that refreshes every morning, and the Valewarden’s Path beside it — the long road, from here to the far end of the Reclamation.',
   },
   bazaar: {
     screen: 'bazaar',
     title: 'The Bazaar',
-    blurb:
-      'Somebody always sets up in a Haven. Her stock rotates on a schedule she will not explain, and silver you are holding is silver doing nothing.',
   },
   multiBattle: {
+    // No screen: the stepper appears on the campaign's own team chooser.
+    art: 'crest-warmark',
     title: 'Ten at a time',
-    blurb:
-      'You have walked that road enough times to stop watching. Send a team down it ten runs at once and read what came back.',
   },
   events: {
     screen: 'events',
     title: 'Events',
-    blurb:
-      'The Vale stirs on its own schedule. When it does there is a ladder to climb and a window to climb it in.',
   },
   arena: {
     screen: 'arena',
     title: 'The Arena',
-    blurb:
-      'Other wardens have left teams standing on the sand. Beat them and take their rating; leave one of your own and see how it holds.',
   },
   hallOfValor: {
+    // No screen: the Hall is behind the Arena's own title bar rather than the dock.
+    art: 'crest-gilded-crown',
     title: 'The Hall of Valor',
-    blurb:
-      'What the Arena pays, the Hall spends. Every level bought there is on every champion of that breath, in every fight, for good.',
   },
   chronicle: {
     screen: 'chronicle',
     title: 'The Chronicle',
-    blurb:
-      'Everything you have met, written down — champions, and the things on the roads that were not champions.',
   },
   springs: {
     screen: 'depths',
     title: 'The Essence Springs',
-    blurb:
-      'Under the vale, where the breaths run close to the surface. What comes out of them is what ascension costs.',
   },
   dungeons: {
     screen: 'depths',
     title: 'The relic keeps',
-    blurb:
-      'Four keeps the Sskarn moved into rather than built. Each is a farm for one set, and each floor is worse than the last.',
   },
   provingGrounds: {
     screen: 'depths',
     title: 'The Proving Grounds',
-    blurb: 'No relics, no essence — only tomes, and something down there that reads your team.',
   },
   masteries: {
     screen: 'champions',
     title: 'Masteries',
-    blurb:
-      'Emblems buy a champion the things a champion cannot be taught. Two trees of three, and no undoing it cheaply.',
   },
   titan: {
     screen: 'titan',
     title: 'The Valewurm',
-    blurb:
-      'Something is coiled under the whole vale, and nobody expects to kill it. Two keys a day to go down and find out how much of it you can move — and then to come back with a better answer.',
   },
 });
 

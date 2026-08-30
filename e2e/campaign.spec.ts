@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { dismissUnlocks, goToScreen, leaveTutorial, resolveBattle, unique } from './support';
+import { goToScreen, leaveTutorial, resolveBattle, unique } from './support';
 
 /**
  * The loop, in a real browser.
@@ -87,7 +87,6 @@ test.describe('the campaign loop', () => {
 
     await results.getByRole('button', { name: /back to the campaign/i }).click();
     // A first win can be a first level, and a first level can open something.
-    await dismissUnlocks(page);
     await expect(results).toBeHidden();
     // Back on the *chapter*, not the vale: the opened chapter is remembered across the
     // fight, because farming a stage means coming straight back to it.

@@ -1,7 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
   championSheet,
-  dismissUnlocks,
   goToScreen,
   leaveTutorial,
   openCampaignStage,
@@ -115,7 +114,6 @@ test.describe('the management loop', () => {
       await expect(results).toBeVisible({ timeout: 60_000 });
       await results.getByRole('button', { name: /back to the campaign/i }).click();
       // Farming levels an account; the celebration is part of what that looks like.
-      await dismissUnlocks(page);
       await expect(results).toBeHidden();
 
       relicsHeld = await page.evaluate(async () => {

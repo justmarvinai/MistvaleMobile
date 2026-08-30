@@ -28,11 +28,26 @@ describe('the unlock catalogue', () => {
     expect([...levels].sort((a, b) => a - b)).toEqual(levels);
   });
 
-  it('says something about each one', () => {
+  it('names each one, in words that fit a banner', () => {
+    // A banner is one line, ellipsised by the library at about forty characters — so a
+    // title long enough to be cut is a title nobody reads the end of. The paragraph these
+    // used to carry went with the modal in C25; the place itself says what it is for.
     for (const unlock of UNLOCKS) {
       expect(unlock.title.length, unlock.key).toBeGreaterThan(0);
-      expect(unlock.blurb.length, unlock.key).toBeGreaterThan(40);
+      expect(unlock.title.length, `${unlock.key} is too long for one line`).toBeLessThan(32);
     }
+  });
+
+  it('gives every unlock a badge to wear', () => {
+    // The library draws a fixed-width badge slot whether or not it is handed art, so an
+    // unlock with neither a screen nor art of its own is a hole in the card. Most take the
+    // picture off the place they open; two open no place — multi-battle is a stepper on
+    // the team chooser and the Hall is behind the Arena's title bar — and carry their own.
+    const unbadged = UNLOCKS.filter((unlock) => !unlock.screen && !unlock.art);
+    expect(
+      unbadged.map((unlock) => unlock.key),
+      'unlocks with no badge',
+    ).toEqual([]);
   });
 });
 

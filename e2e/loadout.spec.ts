@@ -1,7 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
   chooseStarter,
-  dismissUnlocks,
   goToScreen,
   openCampaignStage,
   registerRaw,
@@ -58,7 +57,6 @@ test.describe('the game remembers', () => {
     const results = page.getByRole('dialog', { name: /victory|defeat|withdrawn/i });
     await expect(results).toBeVisible({ timeout: 60_000 });
     await results.getByRole('button', { name: /back to the campaign/i }).click();
-    await dismissUnlocks(page);
     await expect(results).toBeHidden();
 
     // ── The next stage opens on the same team ─────────────────────────────
@@ -80,7 +78,6 @@ test.describe('the game remembers', () => {
     // ── And the preferences survive a reload, not merely a screen change ──
     await page.reload();
     await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible({ timeout: 30_000 });
-    await dismissUnlocks(page);
     await goToScreen(page, 'Campaign');
     await openCampaignStage(page, '1-1');
     const third = page.getByRole('dialog', { name: /stage 1/i });

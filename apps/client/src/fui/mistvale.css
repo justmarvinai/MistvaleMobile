@@ -117,3 +117,39 @@
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
 }
+
+/* ── The unlock banner (C25) ───────────────────────────────────────────────
+   The library's `AchievementPopup` pins itself to the viewport at `top: 26px`,
+   which in Mistvale is *inside* the painted top bar. Re-anchored to the shell's
+   own content box instead — the component is mounted there, and `.content` is
+   already a positioning context — so it hangs just under the bar at whatever
+   height the bar happens to be. That matters: the bar's height is content, since
+   the player chip grew with C15 and will again, and a hardcoded offset would be
+   a guess about somebody else's layout (C17's lesson).
+
+   Scoped here rather than edited into `components/AchievementPopup.css`, which
+   `pnpm fui:vendor` overwrites byte-for-byte on the next vendor (C8's rule). */
+.fui-achieve {
+  position: absolute;
+  z-index: 40;
+}
+
+.fui-achieve[data-position='top'] {
+  top: 14px;
+}
+
+/* Mistvale's own type, and a card that reads at the size the rest of the game
+   does — the pack's 9.5px eyebrow and 15px title are its phone-width defaults,
+   the same ones C5 sized up across the whole top bar. */
+.fui-achieve__eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+}
+
+.fui-achieve__title {
+  font-size: 17px;
+}
+
+.fui-achieve__desc {
+  font-size: 12.5px;
+}

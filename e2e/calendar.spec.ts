@@ -1,6 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
-  dismissUnlocks,
   goToScreen,
   havenBoard,
   leaveTutorial,
@@ -56,7 +55,6 @@ test.describe('the login calendar', () => {
 
     // Levelling to 2 is what opens the calendar, so the celebration for opening it is on
     // screen — and it is modal, so the dock press below is eaten rather than refused.
-    await dismissUnlocks(page);
 
     // The card is no longer shrouded, and the screen draws the tracks.
     await goToScreen(page, 'Calendar');
@@ -174,7 +172,6 @@ async function winFirstStage(page: Page): Promise<void> {
   await expect(results).toBeVisible({ timeout: 60_000 });
   await results.getByRole('button', { name: /back to the campaign/i }).click();
   // A first win can be a first level, and a first level can open something.
-  await dismissUnlocks(page);
   await expect(results).toBeHidden();
 }
 

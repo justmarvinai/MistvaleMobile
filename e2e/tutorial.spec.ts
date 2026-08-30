@@ -303,16 +303,23 @@ test.describe('the tutorial', () => {
     await expect(starterDialog).toBeHidden({ timeout: 20_000 });
     await advance(page);
 
-    const celebration = page.getByRole('dialog', { name: /the mist thins/i });
-    await expect(celebration).toBeVisible({ timeout: 30_000 });
-    await expect(celebration).toContainText(/level 2/i);
-    await expect(celebration).toContainText(/calendar/i);
+    // The unlock arrives as a **banner**, not a card with buttons (C25). This is the exact
+    // moment the owner objected to: a new warden has just been told to press something,
+    // and the old modal stopped the tutorial to ask a question nobody asked.
+    const banner = page.locator('.fui-achieve__card');
+    await expect(banner).toBeVisible({ timeout: 30_000 });
+    await expect(banner).toContainText(/achievement unlocked/i);
+    await expect(banner).toContainText(/calendar/i);
+    await expect(banner).toContainText(/level 2/i);
 
-    // And it is a one-off: dismissed, it does not come back on a reload.
-    await celebration.getByRole('button', { name: /later/i }).click();
-    await expect(celebration).toBeHidden();
+    // It never blocks: the tutorial's own controls stay reachable underneath it, which is
+    // the whole difference between this and what it replaced.
+    await expectOnTop(page, overlay.getByRole('button', { name: /skip tutorial/i }), 'skip');
+
+    // And it leaves on its own, with nothing to press and nothing left behind on a reload.
+    await expect(banner).toBeHidden({ timeout: 20_000 });
     await page.reload();
-    await expect(celebration).toBeHidden({ timeout: 20_000 });
+    await expect(page.locator('.fui-achieve__card')).toBeHidden({ timeout: 20_000 });
   });
 
   test('a skip is final, and the overlay does not come back', async ({ page }) => {

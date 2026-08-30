@@ -1,7 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   chooseStarter,
-  dismissUnlocks,
   goToScreen,
   openCampaignStage,
   pickTeam,
@@ -69,7 +68,6 @@ test.describe('what a player may skip watching', () => {
       .isVisible()
       .catch(() => false);
     await page.getByRole('button', { name: /back to the campaign/i }).click();
-    await dismissUnlocks(page);
     test.skip(!won, 'the starter lost 1-1; there is no clear to unlock Skip with');
 
     // ── Second visit: Skip is offered ───────────────────────────────────

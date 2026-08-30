@@ -174,27 +174,6 @@ export async function chooseStarter(page: Page): Promise<void> {
 }
 
 /**
- * Dismisses an unlock celebration if one is showing.
- *
- * Winning a fight levels an account, and a level can open a feature — so any spec that
- * fights is liable to meet the card on its way back to the shell. It is deliberately a
- * modal, so it has to be got past rather than ignored; `tutorial.spec.ts` is where the
- * celebration itself is tested.
- */
-export async function dismissUnlocks(page: Page): Promise<void> {
-  const card = page.getByRole('dialog', { name: /the mist thins/i });
-  // Two can queue — level 8 opens the Arena and the Hall together.
-  for (let guard = 0; guard < 4; guard += 1) {
-    const showing = await card
-      .waitFor({ state: 'visible', timeout: 3000 })
-      .then(() => true)
-      .catch(() => false);
-    if (!showing) return;
-    await card.getByRole('button', { name: /later/i }).click();
-  }
-}
-
-/**
  * Winds the speed up to the fastest rung this account has earned.
  *
  * Since C7 a stage nobody has beaten offers no Skip, so a first clear has to actually
@@ -294,7 +273,6 @@ export async function leaveResults(page: Page): Promise<void> {
       .catch(() => undefined);
     await results.waitFor({ state: 'hidden', timeout: 20_000 }).catch(() => undefined);
   }
-  await dismissUnlocks(page);
 }
 
 /**

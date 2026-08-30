@@ -5,6 +5,43 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — an unlock is a banner, not a card in the way (C25)
+
+The owner (2026-08-29): the celebration modal is *"very annoying while the tutorial is
+ongoing and new players can get confused by it"*. It is gone, and what replaced it is the
+small "Achievement Unlocked" banner this genre uses: it slides in under the top bar, holds
+for four seconds with its own cue, and leaves. Nothing to dismiss, nothing to decide.
+
+The modal's own note argued that an unlock "is worth a beat of the player's whole
+attention", and that was the mistake in one sentence: it is true of the **feature** and
+false of the **moment**, because the moment is never chosen by the player. A level arrives
+out of a fight they were watching, or three at once out of a mission chain, or — worst —
+in the middle of the tutorial while a new warden is being told to press something else. A
+card with two buttons stops all of that to ask a question nobody asked.
+
+Everything else about the system stays: unlocks are still derived from the level rather
+than from watching flags flip, still remembered per account so a returning player is not
+handed their whole history, and still **queued** — level 8 opens the Arena and the Hall
+together, and the two banners play one after the other rather than one winning.
+
+It is the library's own `AchievementPopup`, which is the D9 rule working as intended: the
+banner queues and times itself and holds no state React must drive, so the component is
+used rather than the art. Two things it needed from Mistvale:
+
+- **It is anchored to the content frame, not the viewport.** The library pins itself at
+  `top: 26px`, which here is *inside* the painted top bar. Mounted in the shell and
+  re-anchored, it hangs under the bar at whatever height the bar happens to be — and that
+  height is content, since the player chip grew with C15 and will again, so a hardcoded
+  offset would be a guess about somebody else's layout (C17's lesson).
+- **The badge is the destination's painted `art`, not its dock glyph.** A glyph is authored
+  `fill="currentColor"` and the dock paints it by using it as a *mask*; loaded as a
+  `background-image`, which is what the badge does, `currentColor` resolves against the
+  SVG's own document and comes out black. The first cut drew an empty slot.
+
+The paragraph each unlock used to carry went with the modal — a banner is one line, and
+the place itself says what it is for. `dismissUnlocks` went too, from the ten specs that
+called it: the banner is `pointer-events: none`, so there is nothing to get past.
+
 ### Added — the XP boost (C24)
 
 A timer on the account that pays **+25% champion experience** in every fight that pays any
