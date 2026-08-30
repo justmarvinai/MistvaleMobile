@@ -25,6 +25,7 @@ export * from './titan';
 export * from './quest';
 export * from './mission';
 export * from './event';
+export * from './valePass';
 export * from './login';
 export * from './mail';
 export * from './news';

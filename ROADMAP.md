@@ -294,8 +294,15 @@ engine, the goal DSL and the events framework already do most of the work*.
    forever. The Mistspire's ward-supply validation refuses exactly this at publish, so the
    door is shut rather than open and broken. Element and role wards work today and C11 ships
    nine of them.
-4. **The Vale Pass** — a season with a reward track. Parked as a large item, but P8's goal
-   engine, `event` content, the ladder rail and `ui/Ledger` are between them most of it.
+4. ~~**The Vale Pass** — a season with a reward track. Parked as a large item, but P8's goal
+   engine, `event` content, the ladder rail and `ui/Ledger` are between them most of it.~~
+   **Done — C38**, and the estimate was right: it is a fifth subscriber to
+   `ProgressService.track` and two of the library's reward rails. What was genuinely new is
+   the shape — a ladder with **two columns** and a purchase, which is why `valePass` is a
+   twenty-seventh content type rather than an optional field on `event` — and the **daily
+   ceiling**, which is the number that makes a season a season rather than a weekend, is a
+   rate limit like the farm allowance, and is on the screen because a ceiling nobody can see
+   is indistinguishable from a feature that has stopped working.
 
 **Would be felt every session (small, high-frequency)**
 

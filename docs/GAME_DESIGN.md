@@ -423,15 +423,54 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 - **Chronicle:** collection index, **grouped by faction** with an `owned/total` on each shelf, which is the shape the genre uses and the one that makes "which of these am I missing" a glance. **Nothing is hidden** — every champion in the game is listed whether or not the player has met them, greyed where they are not held (owner's call, 2026-08-21: a wall of question marks cannot be planned against, and the point of a collection tracker is to show what exists). Collection pressure made visible.
 - **Profile:** public card (level, arena tier, showcase champions) viewable from arena/leaderboard.
 
+### 11b. The Vale Pass — the season (C38)
+
+The roadmap's fourth parked item, and it exists because of a gap the retention layer had
+never filled: **nothing in Mistvale rewards coming back regularly.** The campaign rewards
+clearing, the Arena rewards a good team, the Titan rewards the best hour you had, the Wurm
+rewards turning up on a weekend, and quests reward one evening at a time and then forget.
+A pass rewards thirty ordinary evenings, which is the shape this genre invented it for.
+
+A season is **one ladder with two columns**: the free track everybody climbs by playing, and
+the season's own track, taken up for **crystals**. Crystals rather than money, because EA has
+no payments and crystals are "a pacing currency, not a paywall" (§13) — the honest premium
+track on a game with no shop is one a player can reach by playing. It is bought per *season*,
+which is what keeps it a season rather than an upgrade bought once.
+
+Three rules make it work:
+
+- **The day's earning is capped** ⚙. Without a ceiling a heavy weekend finishes the track and
+  the remaining five weeks are decoration. It is a *rate* limit, exactly like the farm
+  allowance, the Titan's keys and the Arena's tokens — and it is **stated on the screen**,
+  because a ceiling nobody can see is indistinguishable from a feature that has quietly
+  stopped working.
+- **The free column pays every tier.** A track that pays on a quarter of its rungs is one
+  most players stop looking at. Publish refuses a season whose free column pays nothing at
+  all, which would be a paywall wearing a ladder.
+- **There is no cron.** The season is derived from the clock the way an event is, and the
+  launch season runs **monthly** — a calendar that has to be re-cut by hand is one that stops
+  being cut, and at EA there is nobody running live-ops. A themed, hand-cut season is the
+  `window` schedule an operator reaches for once there is.
+
+What earns favour is deliberately **broad** — battles, clears, champion levels, relic
+upgrades, errands, Depths floors, arena wins, summons — because a pass should reward whatever
+somebody plays, which is what separates it from an event. Every rule is a report the goal
+engine already fans out, so the pass is a fifth subscriber to `ProgressService.track` and no
+module that reports had to learn anything about seasons.
+
+The launch season is thirty tiers at 500 favour each against a 600-a-day ceiling: **25 days
+of an ordinary month**, so three evenings off and still finished. Both ends are gated by
+`vale-pass.test.ts`, because either alone is satisfied by a mistake.
+
 ## 12. Account & unlock cadence
 
-Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor + Wardens** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · **L18 the Wurm Wakes** · **L20 the Sunken Stair** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Wardens sit at 8 for the opposite reason: it is the level at which other players become *findable* — the ladder and the Hall are the only places a name comes from — so a list of wardens opens at the moment there is anybody to put in it. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
+Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · **L7 events + the Vale Pass** · **L8 Arena + Hall of Valor + Wardens** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · **L18 the Wurm Wakes** · **L20 the Sunken Stair** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Wardens sit at 8 for the opposite reason: it is the level at which other players become *findable* — the ladder and the Hall are the only places a name comes from — so a list of wardens opens at the moment there is anybody to put in it. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
 
 ## 13. Fairness & EA posture
 No payments in EA (crystals fully earnable; "premium" is a pacing currency, not a paywall). Real odds displayed. Bots never take top-10 leaderboard slots at week end (auto-yield rule). Single account per player expected but not enforced beyond rate limits. All balance changes publish-logged → visible "balance updated" badges (champion `balance_version`).
 
 ## 14. Post-EA parked systems (architected-for, not built)
-**Warbands** (guilds) — first post-EA priority per the brief; ~~the Vale Titan (clan-boss analog)~~ **shipped solo in C9 as the Valewurm** (§9.2b), since the puzzle never needed a guild, and ~~the friends slice~~ **shipped as Wardens in C37** (§9.2g) — what is still parked is a guild proper: chat, officers, a shared bank and something to schedule with each other · **The Mistspire** (Doom-Tower-style ascending tower) · ~~Faction Trials~~ (faction-locked crypt ladders — **dropped by the owner 2026-08-27**; three of eight factions hold fewer than four champions, see §9.2d) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · Battle pass ("Vale Pass") · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
+**Warbands** (guilds) — first post-EA priority per the brief; ~~the Vale Titan (clan-boss analog)~~ **shipped solo in C9 as the Valewurm** (§9.2b), since the puzzle never needed a guild, and ~~the friends slice~~ **shipped as Wardens in C37** (§9.2g) — what is still parked is a guild proper: chat, officers, a shared bank and something to schedule with each other · **The Mistspire** (Doom-Tower-style ascending tower) · ~~Faction Trials~~ (faction-locked crypt ladders — **dropped by the owner 2026-08-27**; three of eight factions hold fewer than four champions, see §9.2d) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · ~~Battle pass ("Vale Pass")~~ **shipped — C38** (§11b) · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
 
 ## 15. Approved additions (owner-approved 2026-08-16 — all in EA-0.1 scope)
 1. **Choice-based skill tomes** (vs the source's random books) — §7.

@@ -454,6 +454,19 @@ A champion **key** rather than a `player_champions` id, and that is the whole di
 
 Ownership and champion-hood are checked when it is **set** — the key has to resolve in the published bundle, must not be food, and the account must hold a copy. It is deliberately *not* re-checked on read: an account that fed away its last Anuria still chose her, and a portrait that vanishes without being touched is worse than one that outlives the copy behind it. The showcase is where ownership is asserted; this is a picture.
 
+### `player_passes` — one climb up one season (C38)
+| column | notes |
+|---|---|
+| player_id, pass_key, season | unique on the three; `season` is the game-day the window opened |
+| points, points_today, points_day | the total, and the day's earning against the ceiling |
+| claimed_free, claimed_premium | tier indices already collected, per column |
+| unlocked | whether the season's own track has been taken up |
+| claim_action_id, unlock_action_id | so a retried claim or purchase replays rather than pays |
+
+The same shape as `player_events`, and for the same reasons: a season is a point ladder anchored to the day its window opened, so next season simply finds no row and there is nothing to reset and no job to run. Three things make it a table rather than two columns on `player_events` — the ladder has **two** columns to collect from, the track can be **taken up** for crystals, and the day's earning is **capped**. All three would be null on every event row ever written.
+
+The cap's counter lives here rather than in `players.daily_counters` deliberately. That map is for allowances checked at the moment of an action a player *takes*; pass points accrue as a side effect of everything, so keying it there would put a write to the players row on the hottest path in the game for a number only this table reads. A stamp from an older day reads as zero, which is `daily-counters.ts`'s own rule applied to a counter that belongs to a row.
+
 ### `player_follows` — the warden list (C37)
 | column | notes |
 |---|---|

@@ -249,6 +249,14 @@ export const ROUTES = {
     /** `/events/:key/claim` — one rung of one event's ladder. */
     claim: (key: string) => `/events/${encodeURIComponent(key)}/claim`,
   },
+  valePass: {
+    /** The season: the ladder, both columns, and where this account stands on it. */
+    state: '/vale-pass',
+    /** `/vale-pass/:key/claim` — one tier of one column. Which column is in the body. */
+    claim: (key: string) => `/vale-pass/${encodeURIComponent(key)}/claim`,
+    /** `/vale-pass/:key/unlock` — takes up the season's own track, for crystals. */
+    unlock: (key: string) => `/vale-pass/${encodeURIComponent(key)}/unlock`,
+  },
   login: {
     /** Both tracks, with today's tile marked on each. */
     state: '/login-calendar',

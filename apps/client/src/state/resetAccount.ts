@@ -11,6 +11,7 @@ import { useExpeditionStore } from './expeditionStore';
 import { useWarbandStore } from './warbandStore';
 import { useLoadoutSetStore } from './loadoutSetStore';
 import { useEventStore } from './eventStore';
+import { usePassStore } from './passStore';
 import { useInventoryStore } from './inventoryStore';
 import { useLoadoutStore } from './loadoutStore';
 import { useLoginStore } from './loginStore';
@@ -62,6 +63,7 @@ export function resetAccountState(): void {
   useWarbandStore.getState().reset();
   useLoadoutSetStore.getState().reset();
   useEventStore.getState().reset();
+  usePassStore.getState().reset();
   useInventoryStore.getState().reset();
   useLoadoutStore.getState().reset();
   useLoginStore.getState().reset();

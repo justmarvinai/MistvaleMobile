@@ -65,6 +65,7 @@ describe('what a level-up opened', () => {
       'bazaar',
       'multiBattle',
       'events',
+      'valePass',
       'arena',
       'hallOfValor',
       'wardens',
@@ -72,8 +73,10 @@ describe('what a level-up opened', () => {
   });
 
   it('hands over every one of a level’s unlocks rather than picking one', () => {
-    // Level 8 is the busiest rung in the game: the Arena, the Hall it pays into, and the
-    // wardens who make it a place with other people in it (C37).
+    // Level 7 opens the events screen and the season that sits beside it; level 8 is the
+    // busiest rung in the game — the Arena, the Hall it pays into, and the wardens who make
+    // it a place with other people in it (C37).
+    expect(unlockedBetween(6, 7)).toHaveLength(2);
     expect(unlockedBetween(7, 8)).toHaveLength(3);
     expect(unlockedBetween(13, 14)).toHaveLength(2);
   });

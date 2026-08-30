@@ -54,6 +54,10 @@ const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> =
     screen: 'wardens',
     title: 'Wardens',
   },
+  valePass: {
+    screen: 'valePass',
+    title: 'The Vale Pass',
+  },
   worldBoss: {
     screen: 'worldBoss',
     title: 'The Wurm Wakes',

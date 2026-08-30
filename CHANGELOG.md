@@ -5,6 +5,72 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the Vale Pass, a season with a reward track (C38)
+
+The roadmap's fourth parked item, and it exists because of a gap the retention layer had
+never filled: **nothing in Mistvale rewards coming back regularly.** The campaign rewards
+clearing, the Arena a good team, the Titan the best hour you had, the Wurm turning up on a
+weekend, and quests reward one evening and then forget it. A pass rewards thirty ordinary
+evenings, which is the shape this genre invented it for.
+
+A season is **one ladder with two columns** — the free track everybody climbs by playing, and
+the season's own, taken up for crystals. That two-column rung is why `valePass` is a
+**twenty-seventh content type** rather than an optional field on `event`: a `premium` map
+would be meaningless on all three preset events and every one an operator ever writes, and an
+optional field that is empty everywhere is how a schema stops telling the truth about its own
+content. Everything else is borrowed rather than reinvented — the schedule is the event's, so
+a season is derived from the clock with no cron and no activation job, and the point rules are
+the event's, so a season counts anything a quest can including a report type added after it
+was authored. Scoring is a fifth subscriber to `ProgressService.track`, and no module that
+*reports* had to learn anything about seasons.
+
+Three rules make it a season rather than a long event.
+
+**The day's earning is capped.** Without a ceiling a heavy weekend finishes the whole track
+and the remaining five weeks are decoration, which is the failure mode every pass in the genre
+is shaped to avoid. It is a *rate* limit like the farm allowance, the Titan's keys and the
+Arena's tokens — and it is **on the screen**, because a ceiling nobody can see is
+indistinguishable from favour that has quietly stopped arriving, which is the one way this
+feature looks broken while working perfectly.
+
+**The free column pays every tier.** A track that pays on a quarter of its rungs is one most
+players stop looking at. Publish refuses a season whose free column pays nothing at all — a
+paywall wearing a ladder, on a game with no payments — and refuses a *price* for a premium
+column with nothing in it, which is the same mistake from the other side.
+
+**The purchase pays out nothing.** Taking up the track opens every tier already passed and
+they are collected one at a time, because a purchase that also paid a backlog would be one
+transaction spending crystals and granting twenty different things, and a failure halfway
+through it is the worst kind to unpick. It costs 900 crystals — about a fortnight of crystal
+income (ECONOMY §9), which is the honest premium track on a game with no shop: a real choice
+against a ×10 Gleaming pull, affordable every month without saving all year.
+
+The launch season is thirty tiers at 500 favour each against a 600-a-day ceiling: **25 days of
+an ordinary month**, so three evenings off and still finished. Both ends are gated, because
+either alone is satisfied by a mistake — a ceiling of a million passes "finishable" and makes
+it a weekend, a ceiling of ten passes "not rushable" and makes it impossible — and the
+finishable half is measured against **28 days**, since a monthly season unfinishable every
+February is exactly the fault a monthly schedule invites.
+
+Its own contributions to the project are two, and both are about lists that cannot be checked
+by a compiler. `eventScheduleSchema` gained a **`monthly`** kind, because the events seed's own
+argument applies to a season with full force: *a calendar that has to be re-cut by hand is one
+that stops being cut, and at EA there is nobody running live-ops.* And a **registry guard**,
+found the hard way: `valePass` was schema-complete, registered, migrated and **invisible**,
+because `CONTENT_LOAD_ORDER` is a plain array the compiler cannot hold against `CONTENT_TYPES`
+and had twenty-six entries instead of twenty-seven. A missing type there is not a type error
+and not a runtime error either — it never validates, never seeds and never reaches the client,
+which is a whole content family that publishes cleanly and does nothing. Three tests now hold
+the load order, the reference order and the bundle mapping against the registry, in the two
+places those lists live.
+
+One further publish rule came out of it and it applies to events too: **a point rule on a
+threshold goal is refused.** A threshold is a piece of *state*, and the fan-out appends
+`accountLevel` to every batch it sends — so a rule matching one would pay its points on every
+action a player ever takes. It publishes cleanly, looks exactly right in the editor, and turns
+a season into a number that goes up on its own.
+
+
 ### Added — Wardens, the friends slice of Warbands (C37)
 
 The brief's largest parked item is **Warbands**, a guild. What ships is the split the roadmap

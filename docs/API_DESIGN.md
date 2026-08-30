@@ -88,6 +88,13 @@
 
 **Settlement.** An arena battle settles inside the same transaction as its result, through the ordinary battle settle path: both ratings move (the ladder is zero-sum), medals are granted at the tier the win landed in, the offer is spent, and a row goes into `arena_battles`. Unlike every other mode it settles on a **loss** too — the defender gains what the attacker gives up — and a retreat is a loss rather than an escape. The result rides back on the battle view as `rewards.arena`.
 
+### The Vale Pass (C38)
+| GET `/vale-pass` | The season: the ladder with both columns, where this account stands on it, what today still allows against the ceiling, whether the season's own track has been taken up and what it costs. One read draws the screen. Empty below level 7. |
+| POST `/vale-pass/:key/claim` | `{tier, track, actionId}` — collects one tier of one column. `track` is `free` or `premium`; a tier the points have not reached, one already collected, one that pays nothing on that column, and the premium column of a track not taken up are four separate refusals with four separate sentences. Replaying an `actionId` returns the recorded result rather than paying twice. |
+| POST `/vale-pass/:key/unlock` | `{actionId}` — takes up the season's own track for crystals. **Pays out nothing**: the tiers already reached become claimable and are collected one at a time, because a purchase that also paid a backlog would be one transaction spending crystals and granting twenty different things, and a failure halfway through it is the worst kind to unpick. Refused once the season is over — the grace period is for collecting what was earned, not for buying a track there is no time left to climb. |
+
+Scoring needs no endpoint: the season is a subscriber to `ProgressService.track`, so playing anything the rules name earns favour with nothing to call.
+
 ### Wardens (C37)
 | GET `/warband` | Your wardens, each with the champion they have put forward and how much of nine relics it wears, the cap, borrows left today and the allowance they came from, plus your own nomination and how many times it has been fielded by somebody else. One read answers both halves of the screen. |
 | POST `/warband/wardens` | `{profileName}` — keeps a warden. By profile name, because that is the only handle one player has for another. Refuses yourself, a bot and a full list; keeping the same warden twice is a **no-op rather than an error**, since the composite key makes it one. Nobody is asked and nobody is told. |

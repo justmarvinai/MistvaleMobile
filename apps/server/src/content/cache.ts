@@ -38,7 +38,7 @@ export interface ContentSnapshot {
   bundleJson: string;
 }
 
-const EMPTY_BUNDLE_TYPES = {
+export const EMPTY_BUNDLE_TYPES = {
   factions: 'faction',
   statuses: 'status',
   skills: 'skill',
@@ -58,6 +58,7 @@ const EMPTY_BUNDLE_TYPES = {
   quests: 'quest',
   missions: 'mission',
   events: 'event',
+  valePasses: 'valePass',
   loginTracks: 'loginTrack',
   newsPosts: 'newsPost',
   tutorialSteps: 'tutorialStep',

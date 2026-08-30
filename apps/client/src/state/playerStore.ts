@@ -59,6 +59,8 @@ export interface DockBadges {
   quests: number;
   missions: number;
   events: number;
+  /** Tiers of the season reached and not yet collected, on either column (C38). */
+  valePass: number;
   calendar: number;
   /** Unread, or holding something uncollected. Rides in the top bar, not the dock. */
   mail: number;
@@ -68,6 +70,7 @@ const NO_BADGES: DockBadges = Object.freeze({
   quests: 0,
   missions: 0,
   events: 0,
+  valePass: 0,
   calendar: 0,
   mail: 0,
 });

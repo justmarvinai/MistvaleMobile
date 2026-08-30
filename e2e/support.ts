@@ -105,6 +105,7 @@ export const HUB_OF: Readonly<Record<string, string>> = Object.freeze({
   Quests: 'Errands',
   Missions: 'Errands',
   Events: 'Errands',
+  'Vale Pass': 'Errands',
   Calendar: 'Errands',
   Expeditions: 'Errands',
 });

@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   check,
   index,
   integer,
@@ -145,6 +146,60 @@ export const playerEvents = pgTable(
   (table) => [
     uniqueIndex('player_events_key').on(table.playerId, table.eventKey, table.occurrence),
     check('player_events_points_check', sql`${table.points} >= 0`),
+  ],
+);
+
+/**
+ * One account's climb up one season of the Vale Pass (C38).
+ *
+ * The same shape as `player_events` and for the same reasons — a season is a point ladder
+ * anchored to the day its window opened, so next season simply finds no row and there is
+ * nothing to reset. Three things make it a table of its own rather than two columns on
+ * `player_events`: the ladder has **two** columns to collect from, the track can be **taken
+ * up** for crystals, and the day's earning is **capped**, which needs a counter that resets
+ * with the game-day. All three would be null on every event row ever written.
+ *
+ * The cap's counter lives here rather than in `players.dailyCounters` deliberately. That
+ * map is for allowances checked at the moment of an action a player *takes*; pass points
+ * accrue as a side effect of everything, so keying it there would put a write to the
+ * players row on the hottest path in the game for a number only this table reads.
+ */
+export const playerPasses = pgTable(
+  'player_passes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    playerId: uuid('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    /** `vale_pass_defs` key. */
+    passKey: text('pass_key').notNull(),
+    /** The season — the game-day the window opened on, exactly as an event's occurrence. */
+    season: text('season').notNull(),
+
+    points: integer('points').notNull().default(0),
+    /** Earned today, against the season's `dailyPointCap`. Stale stamps read as zero. */
+    pointsToday: integer('points_today').notNull().default(0),
+    /** The game-day `points_today` belongs to. Null before anything has been earned. */
+    pointsDay: text('points_day'),
+
+    /** Tier indices already collected, per column. Claiming is idempotent from these. */
+    claimedFree: jsonb('claimed_free').notNull().default([]).$type<number[]>(),
+    claimedPremium: jsonb('claimed_premium').notNull().default([]).$type<number[]>(),
+    /** Whether this account has taken up the season's own track. */
+    unlocked: boolean('unlocked').notNull().default(false),
+
+    /** The action that took the last tier, so a retried claim replays rather than pays. */
+    claimActionId: text('claim_action_id'),
+    /** And the one that took up the track, for the same reason. */
+    unlockActionId: text('unlock_action_id'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('player_passes_key').on(table.playerId, table.passKey, table.season),
+    check('player_passes_points_check', sql`${table.points} >= 0`),
+    check('player_passes_today_check', sql`${table.pointsToday} >= 0`),
   ],
 );
 

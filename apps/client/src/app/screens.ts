@@ -32,6 +32,7 @@ export type ScreenId =
   | 'quests'
   | 'missions'
   | 'events'
+  | 'valePass'
   | 'calendar'
   | 'mail'
   | 'wardens'
@@ -397,6 +398,20 @@ export const SCREENS: readonly ScreenDefinition[] = [
     art: 'rune-nova-star',
     blurb: 'Timed ladders. Score points at what the event asks for, collect at each rung.',
     unlock: 'events',
+    lockedHint: 'Opens at level 7',
+    inDock: false,
+    group: 'errandsHub',
+  },
+  {
+    id: 'valePass',
+    label: 'Vale Pass',
+    icon: 'nav-valepass',
+    // Not the trophy: the Arena has it, and a season is a road walked rather than a prize
+    // won at the end of one.
+    glyph: 'glyph-celestial-body',
+    art: 'rune-gilded-script',
+    blurb: 'A season of the reclamation. Everything you play walks the track, a little each day.',
+    unlock: 'valePass',
     lockedHint: 'Opens at level 7',
     inDock: false,
     group: 'errandsHub',

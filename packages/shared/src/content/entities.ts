@@ -604,6 +604,20 @@ export const eventScheduleSchema = z.discriminatedUnion('kind', [
     /** How many game-days it runs for, starting on that weekday. */
     durationDays: z.number().int().min(1).max(7),
   }),
+  /**
+   * A calendar month, first to last, with no fields to get wrong.
+   *
+   * Added for the Vale Pass, whose whole shape is a season — and the events seed's own
+   * argument applies to it with full force: *a calendar that has to be re-cut by hand every
+   * fortnight is a calendar that stops being cut, and at EA there is nobody running
+   * live-ops.* A season that goes dark because nobody authored next month is worse than a
+   * repeating one. It is the Mistspire's anchor in another costume (C11), and events may
+   * use it too — a monthly event is a reasonable thing to want and now costs nothing.
+   *
+   * There is no `durationDays`: a month is as long as the month is, which is the one thing
+   * about it that cannot be authored wrong.
+   */
+  z.object({ kind: z.literal('monthly') }),
 ]);
 export type EventSchedule = z.infer<typeof eventScheduleSchema>;
 
@@ -1320,6 +1334,62 @@ export const eventDefSchema = contentMetaSchema.extend({
   active: z.boolean().default(true),
 });
 export type EventDef = z.infer<typeof eventDefSchema>;
+
+/**
+ * The Vale Pass: a season, and the reward track it pays out along.
+ *
+ * Structurally this is an event with two reward columns and a purchase, and the two columns
+ * are the whole reason it is a type of its own rather than an optional field on `event` — a
+ * `premium` map would be meaningless on all three preset events and every one an operator
+ * ever writes, and an optional field that is empty everywhere is how a schema stops telling
+ * the truth about its own content.
+ *
+ * Everything else is deliberately borrowed rather than reinvented: the schedule is the
+ * event's (so a season is derived from the clock with no cron and no activation job), and
+ * the point rules are the event's (so a season can count anything a quest can, including a
+ * report type added after the season was authored).
+ */
+export const valePassTierSchema = z.object({
+  points: z.number().int().min(1),
+  /** Paid to everybody who reaches this tier. */
+  free: z.record(z.string(), z.number()).default({}),
+  /** Paid on top, and only once the season's own track has been taken up. */
+  premium: z.record(z.string(), z.number()).default({}),
+});
+export type ValePassTier = z.infer<typeof valePassTierSchema>;
+
+export const valePassDefSchema = contentMetaSchema.extend({
+  name: z.string().min(1).max(64),
+  description: z.string().max(400).default(''),
+  bannerAsset: z.string().max(64).default(''),
+  schedule: eventScheduleSchema,
+  /** At least one, or the season is a track nobody can climb. */
+  pointRules: z.array(eventPointRuleSchema).min(1).max(12),
+  /** Ascending by points; publish validation enforces the order, as it does a ladder's. */
+  tiers: z.array(valePassTierSchema).min(1).max(60),
+  /**
+   * Crystals to take up this season's own track. **Zero opens it to everybody.**
+   *
+   * Crystals rather than money, because EA has no payments and crystals are fully earnable
+   * — "a pacing currency, not a paywall" (GAME_DESIGN §13). Per *season*, which is what
+   * makes it a season rather than a permanent upgrade bought once.
+   */
+  unlockCost: z.number().int().min(0).max(100_000).default(0),
+  /**
+   * The most points one game-day can earn, or 0 for no ceiling.
+   *
+   * This is what makes a season a season. Without it a heavy weekend finishes the whole
+   * track and the remaining five weeks mean nothing, which is the failure mode every pass
+   * in the genre is shaped to avoid. It is a *rate* limit rather than a total, exactly as
+   * the farm allowance, the Titan's keys and the Arena's tokens are — and, like those, it
+   * is stated on the screen, because a ceiling nobody can see is indistinguishable from a
+   * feature that has quietly stopped working.
+   */
+  dailyPointCap: z.number().int().min(0).max(1_000_000).default(0),
+  unlockLevel: z.number().int().min(1).max(60).default(1),
+  active: z.boolean().default(true),
+});
+export type ValePassDef = z.infer<typeof valePassDefSchema>;
 
 /**
  * A login track: the 30-day calendar, or the 7-day welcome strip beside it.

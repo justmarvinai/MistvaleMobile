@@ -1,0 +1,166 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: $space-2;
+}
+
+.error {
+  margin: 0;
+  padding: $space-2 $space-3;
+  background: rgba(180, 60, 60, 0.12);
+  border: 1px solid $danger;
+  color: $parchment;
+  font-size: 0.8125rem;
+}
+
+.empty {
+  margin: $space-8 0;
+  color: $muted;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.live {
+  color: $success;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.closed {
+  color: $warning;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+}
+
+.blurb {
+  margin: 0 0 $space-3;
+  max-width: 60ch;
+  color: $parchment-dim;
+  font-size: 0.875rem;
+}
+
+// ── Where the season stands ─────────────────────────────────────────────────
+
+/* Three facts on one line: the total, what today still allows, and the distance to the
+   next tier. The middle one is the feature — a ceiling stated only when it is hit reads as
+   the game having stopped paying. */
+.standing {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: $space-3;
+  margin-bottom: $space-3;
+  padding-bottom: $space-2;
+  border-bottom: 1px solid $edge;
+}
+
+.figure {
+  color: $parchment-dim;
+  font-size: 0.875rem;
+
+  strong {
+    color: $gold;
+    font-family: $font-mono;
+    font-size: 1.25rem;
+  }
+}
+
+.today {
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+
+  /* Not an alarm: reaching the ceiling is the season working, so it is the colour of a
+     finished thing rather than of a problem. */
+  &[data-capped='true'] {
+    color: $success;
+  }
+}
+
+.next {
+  margin-left: auto;
+  color: $muted;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+}
+
+// ── What earns favour ───────────────────────────────────────────────────────
+
+.rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin-bottom: $space-3;
+}
+
+.rule {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px $space-2;
+  background: $panel-inset;
+  border: 1px solid $edge;
+  color: $parchment-dim;
+  font-size: 0.75rem;
+}
+
+.rulePoints {
+  color: $accent;
+  font-family: $font-mono;
+  font-weight: 700;
+}
+
+// ── The two rails ───────────────────────────────────────────────────────────
+
+/* Both rails are the library's reward track, so the bar, the fill and the rungs are its.
+   What is left is the one thing a container has to say — and, on the locked one, that it
+   is behind a purchase rather than merely empty. */
+.track {
+  width: 100%;
+
+  & + & {
+    margin-top: $space-3;
+  }
+
+  &[data-locked='true'] {
+    opacity: 0.72;
+  }
+}
+
+// ── Taking up the season's track ────────────────────────────────────────────
+
+.buy {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $space-3;
+  margin-top: $space-4;
+  padding-top: $space-3;
+  border-top: 1px solid $edge;
+}
+
+.buyLine {
+  flex: 1 1 20rem;
+  min-width: 0;
+  color: $parchment-dim;
+  font-size: 0.82rem;
+
+  strong {
+    color: $accent;
+    font-family: $font-mono;
+  }
+}
+
+.buyClosed {
+  margin: $space-4 0 0;
+  padding-top: $space-3;
+  border-top: 1px solid $edge;
+  color: $muted;
+  font-size: 0.82rem;
+}

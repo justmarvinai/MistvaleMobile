@@ -94,6 +94,7 @@ export const ICONS = {
   'nav-quests': { group: 'nav', name: 'scroll-quill', use: 'Quests' },
   'nav-missions': { group: 'nav', name: 'stairs-goal', use: "Missions (Valewarden's Path)" },
   'nav-events': { group: 'nav', name: 'party-popper', use: 'Events' },
+  'nav-valepass': { group: 'nav', name: 'laurels-trophy', use: 'The Vale Pass' },
   'nav-mail': { group: 'nav', name: 'envelope', use: 'Mail' },
   'nav-settings': { group: 'nav', name: 'cog', use: 'Settings', author: 'lorc' },
   'nav-locked': { group: 'nav', name: 'padlock', use: 'Locked feature / locked champion' },

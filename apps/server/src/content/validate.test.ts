@@ -756,6 +756,144 @@ describe('validateContentSet', () => {
     });
   });
 
+  /**
+   * The Vale Pass's publish rules, which are all of the same kind: a season that publishes
+   * cleanly, looks right in the editor, and is wrong in a way only the rules that *consume*
+   * it can see. The Mistspire ward's lesson (C11) on a third content family.
+   */
+  describe('the Vale Pass', () => {
+    const season = (overrides: Record<string, unknown> = {}) => ({
+      key: 'pass_test',
+      sortOrder: 0,
+      name: 'Test Season',
+      description: '',
+      bannerAsset: '',
+      schedule: { kind: 'monthly' },
+      pointRules: [{ type: 'battleWin', points: 10, label: '', filters: {} }],
+      tiers: [
+        { points: 100, free: { silver: 1000 }, premium: { crystals: 10 } },
+        { points: 200, free: { silver: 2000 }, premium: { crystals: 20 } },
+      ],
+      unlockCost: 500,
+      dailyPointCap: 600,
+      unlockLevel: 1,
+      active: true,
+      ...overrides,
+    });
+
+    const problems = (overrides: Record<string, unknown> = {}) =>
+      validateContentSet(setOf({ valePass: { pass_test: season(overrides) } })).errors.filter(
+        (issue) => issue.contentType === 'valePass',
+      );
+
+    it('accepts a season that climbs and pays on both columns', () => {
+      expect(problems()).toEqual([]);
+    });
+
+    it('refuses a ladder that does not climb', () => {
+      const errors = problems({
+        tiers: [
+          { points: 200, free: { silver: 1 }, premium: {} },
+          { points: 200, free: { silver: 2 }, premium: {} },
+        ],
+      });
+      expect(errors.some((issue) => issue.message.includes('climb'))).toBe(true);
+    });
+
+    it('refuses a tier that pays nothing on either column', () => {
+      const errors = problems({
+        tiers: [
+          { points: 100, free: { silver: 1 }, premium: {} },
+          { points: 200, free: {}, premium: {} },
+        ],
+      });
+      expect(errors.some((issue) => issue.path === 'tiers.1')).toBe(true);
+    });
+
+    it('refuses a season whose free column pays nothing at all', () => {
+      // A paywall wearing a ladder, on a game with no payments. It is exactly the shape an
+      // operator produces by filling the premium column first and running out of evening.
+      const errors = problems({
+        tiers: [
+          { points: 100, free: {}, premium: { crystals: 10 } },
+          { points: 200, free: {}, premium: { crystals: 20 } },
+        ],
+      });
+      expect(errors.some((issue) => issue.message.includes('behind a purchase'))).toBe(true);
+    });
+
+    it('refuses a price for a column with nothing in it', () => {
+      const errors = problems({
+        tiers: [
+          { points: 100, free: { silver: 1 }, premium: {} },
+          { points: 200, free: { silver: 2 }, premium: {} },
+        ],
+        unlockCost: 500,
+      });
+      expect(errors.some((issue) => issue.path === 'unlockCost')).toBe(true);
+    });
+
+    it('accepts a free season — an unlock cost of zero opens the column', () => {
+      expect(
+        problems({
+          tiers: [
+            { points: 100, free: { silver: 1 }, premium: {} },
+            { points: 200, free: { silver: 2 }, premium: {} },
+          ],
+          unlockCost: 0,
+        }),
+      ).toEqual([]);
+    });
+
+    it('refuses a point rule on a high-water mark, which would pay forever', () => {
+      // `accountLevel` is appended to *every* report batch by the fan-out, so a rule on it
+      // pays its points on every action a player ever takes. It publishes cleanly and looks
+      // exactly right in the editor — which is the whole reason this rule exists.
+      const errors = problems({
+        pointRules: [{ type: 'accountLevel', points: 10, label: '', filters: {} }],
+      });
+      expect(errors.some((issue) => issue.message.includes('high-water mark'))).toBe(true);
+    });
+
+    it('holds an event to the same rule, since they share the shape', () => {
+      const errors = validateContentSet(
+        setOf({
+          event: {
+            ev: {
+              key: 'ev',
+              sortOrder: 0,
+              name: 'E',
+              description: '',
+              bannerAsset: '',
+              schedule: { kind: 'monthly' },
+              pointRules: [{ type: 'gearLevel', points: 10, label: '', filters: {} }],
+              milestones: [{ points: 100, rewards: { silver: 1 } }],
+              unlockLevel: 1,
+              active: true,
+            },
+          },
+        }),
+      ).errors;
+      expect(errors.some((issue) => issue.message.includes('high-water mark'))).toBe(true);
+    });
+
+    it('refuses a window that ends before it starts', () => {
+      const errors = problems({
+        schedule: {
+          kind: 'window',
+          startsAt: '2026-09-10T00:00:00Z',
+          endsAt: '2026-09-01T00:00:00Z',
+        },
+      });
+      expect(errors.some((issue) => issue.path === 'schedule.endsAt')).toBe(true);
+    });
+
+    it('says nothing at all when no season is published', () => {
+      const result = validateContentSet(setOf({ faction: { testers: faction } }));
+      expect(result.errors.filter((issue) => issue.contentType === 'valePass')).toEqual([]);
+    });
+  });
+
   it('reports every problem at once rather than stopping at the first', () => {
     const content = setOf({
       champion: {

@@ -20,6 +20,7 @@ import { ArenaScreen } from '@/screens/Arena/ArenaScreen';
 import { QuestsScreen } from '@/screens/Quests/QuestsScreen';
 import { MissionsScreen } from '@/screens/Missions/MissionsScreen';
 import { EventsScreen } from '@/screens/Events/EventsScreen';
+import { PassScreen } from '../screens/Pass/PassScreen';
 import { CalendarScreen } from '@/screens/Calendar/CalendarScreen';
 import { MailScreen } from '@/screens/Mail/MailScreen';
 import { NewsPanel } from '@/screens/News/NewsPanel';
@@ -241,6 +242,7 @@ const SCREEN_VIEWS: Partial<Record<ScreenId, () => JSX.Element>> = {
   quests: QuestsScreen,
   missions: MissionsScreen,
   events: EventsScreen,
+  valePass: PassScreen,
   calendar: CalendarScreen,
   mail: MailScreen,
 };

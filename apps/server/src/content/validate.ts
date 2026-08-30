@@ -1,5 +1,6 @@
 import {
   CONTENT_LOAD_ORDER,
+  GOAL_ACCUMULATION,
   CONTENT_REGISTRY,
   EFFECT_COMPONENT_TYPES,
   ELEMENTS,
@@ -22,6 +23,7 @@ import {
   worldBossRuleProblems,
   type ContentIssue,
   type ContentType,
+  type GoalType,
   REWARD_SCALARS,
   isRewardScalar,
   type ContentValidationResult,
@@ -437,6 +439,138 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
           key,
           path: 'schedule.endsAt',
           message: 'An event cannot end before it starts.',
+        });
+      }
+    }
+  }
+
+  /**
+   * A point rule on a **threshold** goal pays on every report, forever.
+   *
+   * A threshold goal is a piece of *state* — "reach level 20", "hold Silver" — and the
+   * fan-out appends `accountLevel` to every batch it sends, so a rule matching one would
+   * pay its points on every action a player ever takes. It publishes cleanly, it looks
+   * exactly right in the editor, and it turns a season into a number that goes up on its
+   * own. The Mistspire's ward rule again (C11): validate content against the rules that
+   * *consume* it rather than against itself.
+   *
+   * Checked for both families, because they share the rule shape and would otherwise share
+   * only half the guard.
+   */
+  const thresholdRules = (
+    contentType: 'event' | 'valePass',
+    key: string,
+    rules: { type?: string }[],
+  ): void => {
+    rules.forEach((rule, index) => {
+      const type = rule.type as GoalType | undefined;
+      if (!type || GOAL_ACCUMULATION[type] !== 'highest') return;
+      errors.push({
+        severity: 'error',
+        contentType,
+        key,
+        path: `pointRules.${index}.type`,
+        message: `"${type}" is a high-water mark rather than an action, so a rule on it would pay points on every report forever. Use a goal that happens.`,
+      });
+    });
+  };
+
+  for (const [key, entity] of parsed.get('event') ?? []) {
+    thresholdRules('event', key, (entity as { pointRules: { type?: string }[] }).pointRules);
+  }
+
+  for (const [key, entity] of parsed.get('valePass') ?? []) {
+    const pass = entity as {
+      schedule: { kind: string; startsAt?: string; endsAt?: string };
+      pointRules: { type?: string; filters: Record<string, string | number> }[];
+      tiers: { points: number; free?: Record<string, number>; premium?: Record<string, number> }[];
+      unlockCost: number;
+    };
+
+    goalReferences('valePass', key, pass.pointRules);
+    thresholdRules('valePass', key, pass.pointRules);
+
+    pass.tiers.forEach((tier, index) => {
+      rewardMap({ contentType: 'valePass', key, path: `tiers.${index}.free` }, tier.free);
+      rewardMap({ contentType: 'valePass', key, path: `tiers.${index}.premium` }, tier.premium);
+
+      // A tier that pays nothing on either column is a rung nobody notices they passed.
+      if (
+        Object.keys(tier.free ?? {}).length === 0 &&
+        Object.keys(tier.premium ?? {}).length === 0
+      ) {
+        errors.push({
+          severity: 'error',
+          contentType: 'valePass',
+          key,
+          path: `tiers.${index}`,
+          message: 'A tier must pay something on one of its two tracks.',
+        });
+      }
+    });
+
+    for (let index = 1; index < pass.tiers.length; index += 1) {
+      if ((pass.tiers[index]?.points ?? 0) > (pass.tiers[index - 1]?.points ?? 0)) continue;
+      errors.push({
+        severity: 'error',
+        contentType: 'valePass',
+        key,
+        path: `tiers.${index}.points`,
+        message: 'Tiers must climb — each one needs more points than the one before it.',
+      });
+    }
+
+    /**
+     * A season whose free column pays nothing is a paywall wearing a ladder.
+     *
+     * Mistvale has no payments and crystals are "a pacing currency, not a paywall"
+     * (GAME_DESIGN §13), so a track that gives a non-buying player nothing at all is
+     * against the posture rather than merely stingy — and it is exactly the shape an
+     * operator produces by filling in the premium column first and running out of evening.
+     */
+    if (pass.tiers.every((tier) => Object.keys(tier.free ?? {}).length === 0)) {
+      errors.push({
+        severity: 'error',
+        contentType: 'valePass',
+        key,
+        path: 'tiers',
+        message:
+          'No tier pays anything on the free track, so the whole season is behind a purchase.',
+      });
+    }
+
+    // And the other way round: a price for a column with nothing in it.
+    if (
+      pass.unlockCost > 0 &&
+      pass.tiers.every((tier) => Object.keys(tier.premium ?? {}).length === 0)
+    ) {
+      errors.push({
+        severity: 'error',
+        contentType: 'valePass',
+        key,
+        path: 'unlockCost',
+        message: 'The season charges crystals for a track that pays nothing.',
+      });
+    }
+
+    if (pass.schedule.kind === 'window') {
+      const startsAt = Date.parse(pass.schedule.startsAt ?? '');
+      const endsAt = Date.parse(pass.schedule.endsAt ?? '');
+      if (!Number.isFinite(startsAt) || !Number.isFinite(endsAt)) {
+        errors.push({
+          severity: 'error',
+          contentType: 'valePass',
+          key,
+          path: 'schedule',
+          message: 'Start and end must both be timestamps.',
+        });
+      } else if (endsAt <= startsAt) {
+        errors.push({
+          severity: 'error',
+          contentType: 'valePass',
+          key,
+          path: 'schedule.endsAt',
+          message: 'A season cannot end before it starts.',
         });
       }
     }

@@ -5,6 +5,7 @@ import {
   goalMatches,
   type Goal,
   type EventDef,
+  type EventPointRule,
   type EventWindow,
   type GoalEvent,
   type MissionDef,
@@ -15,6 +16,7 @@ import type { Database } from '../../db/client';
 import type { ContentCache } from '../../content/cache';
 import { gameDayFrom } from '../../lib/game-day';
 import { advanceTutorial } from './tutorial';
+import * as pass from './pass';
 
 /**
  * `ProgressService` — the one place the game reports what a player did.
@@ -142,6 +144,7 @@ export async function track(
   await advanceQuests(tx, ctx, playerId, reports, level, now);
   await advanceMissions(tx, ctx, playerId, reports, now);
   await advanceEvents(tx, ctx, playerId, reports, level, now);
+  await advancePass(tx, ctx, playerId, reports, level, now);
   await advanceTutorial(tx, ctx, playerId, reports, now);
 }
 
@@ -168,7 +171,7 @@ async function advanceEvents(
   if (live.length === 0) return;
 
   const earned = live
-    .map(({ def, window }) => ({ def, window, points: pointsFor(def, reports) }))
+    .map(({ def, window }) => ({ def, window, points: pointsFor(def.pointRules, reports) }))
     .filter((entry) => entry.points > 0);
   if (earned.length === 0) return;
 
@@ -186,6 +189,43 @@ async function advanceEvents(
   }
 }
 
+/**
+ * The Vale Pass, scored (C38).
+ *
+ * A fifth subscriber and nothing else — which is the goal engine working as designed: the
+ * pass counts what a quest counts, by the same rules, and no module that *reports* had to
+ * learn anything about seasons.
+ *
+ * The one difference from an event is the ceiling. An event's score is a bare SQL increment
+ * because nothing bounds it; a season's award depends on what today has already taken, so
+ * `pass.score` reads before it writes — safe because the player row is locked above, and
+ * stated there rather than assumed.
+ */
+async function advancePass(
+  tx: Executor,
+  ctx: ProgressContext,
+  playerId: string,
+  reports: readonly GoalEvent[],
+  level: number,
+  now: Date,
+): Promise<void> {
+  const live = pass.livePasses(ctx, level, now);
+  if (live.length === 0) return;
+
+  const earned = live
+    .map(({ def, window }) => ({
+      def,
+      window,
+      // A pass's rules *are* an event's rules, so they are worth exactly the same thing
+      // read by the same function — which is what stops the two drifting the first time a
+      // report type gains a field.
+      points: pointsFor(def.pointRules, reports),
+    }))
+    .filter((entry) => entry.points > 0);
+
+  await pass.score(tx, ctx, playerId, earned, now);
+}
+
 /** Every event running right now that this account has reached. */
 export function liveEvents(
   ctx: ProgressContext,
@@ -201,10 +241,18 @@ export function liveEvents(
   });
 }
 
-/** What one batch of reports is worth to one event. */
-export function pointsFor(def: EventDef, reports: readonly GoalEvent[]): number {
+/**
+ * What one batch of reports is worth to a set of point rules.
+ *
+ * Takes the **rules** rather than the definition holding them, because two things score on
+ * this now — a timed event and a Vale Pass season — and they are different content types
+ * with the same rules inside. Handing it a whole `EventDef` would have meant the pass
+ * fabricating an event to ask a question about its own rules, which is a cast standing in
+ * for a signature.
+ */
+export function pointsFor(rules: readonly EventPointRule[], reports: readonly GoalEvent[]): number {
   let total = 0;
-  for (const rule of def.pointRules) {
+  for (const rule of rules) {
     for (const report of reports) {
       // A rule is a goal in everything but name, so it matches the same way — which is
       // what lets an event count anything a quest can, including a report type added

@@ -27,6 +27,14 @@ export interface EventWindow {
   endsOn: string;
 }
 
+/** The last game-day of the month a date falls in. */
+export function endOfMonth(date: string): string {
+  const at = new Date(`${date.slice(0, 7)}-01T00:00:00Z`);
+  at.setUTCMonth(at.getUTCMonth() + 1);
+  at.setUTCDate(0);
+  return at.toISOString().slice(0, 10);
+}
+
 /** Adds days to a `YYYY-MM-DD`, staying on calendar dates rather than instants. */
 export function addDays(date: string, days: number): string {
   const at = new Date(`${date}T00:00:00Z`);
@@ -67,6 +75,13 @@ export function eventWindowAt(
     };
   }
 
+  if (schedule.kind === 'monthly') {
+    // The month today is in, whatever length it happens to be. `endOfMonth` is derived
+    // rather than tabulated so February and a leap year need no special case.
+    const startsOn = `${today.slice(0, 7)}-01`;
+    return { anchor: startsOn, startsOn, endsOn: endOfMonth(today) };
+  }
+
   // Weekly: walk back to the most recent occurrence of the starting weekday — at most six
   // days — and see whether today is still inside its run.
   const back = (weekday - schedule.startWeekday + 7) % 7;
@@ -101,6 +116,11 @@ export function nextWindowStart(
     if (!Number.isFinite(startsAt) || now.getTime() >= startsAt) return null;
     return schedule.startsAt.slice(0, 10);
   }
+
+  // Monthly never has a "next" to report while it is running, and it is always running —
+  // so the only honest answer is the first of next month, which is also never reached,
+  // since `eventWindowAt` returns a window for every day of every month.
+  if (schedule.kind === 'monthly') return addDays(endOfMonth(today), 1);
 
   // Weekly: days forward to the next start weekday. Zero would mean today, which only
   // happens when today's occurrence has already been ruled out — so it is a full week off.

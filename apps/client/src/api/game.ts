@@ -37,6 +37,11 @@ import type {
   EventClaimRequest,
   EventClaimResult,
   EventsView,
+  ValePassClaimRequest,
+  ValePassClaimResult,
+  ValePassTrack,
+  ValePassUnlockRequest,
+  ValePassView,
   LoginClaimRequest,
   LoginClaimResult,
   LoginTrackKind,
@@ -600,6 +605,22 @@ export const gameApi = {
       milestone,
       actionId,
     } satisfies EventClaimRequest),
+
+  // ── The Vale Pass ─────────────────────────────────────────────────────────
+
+  valePass: () => api.get<{ pass: ValePassView }>(ROUTES.valePass.state).then((data) => data.pass),
+
+  claimPassTier: (passKey: string, tier: number, track: ValePassTrack, actionId: string) =>
+    api.post<ValePassClaimResult>(ROUTES.valePass.claim(passKey), {
+      tier,
+      track,
+      actionId,
+    } satisfies ValePassClaimRequest),
+
+  unlockPass: (passKey: string, actionId: string) =>
+    api.post<ValePassClaimResult>(ROUTES.valePass.unlock(passKey), {
+      actionId,
+    } satisfies ValePassUnlockRequest),
 
   login: () => api.get<{ login: LoginView }>(ROUTES.login.state).then((data) => data.login),
 

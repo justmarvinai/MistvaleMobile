@@ -6,6 +6,7 @@ import { MASTERIES } from './data/masteries';
 import { QUESTS } from './data/quests';
 import { MISSIONS } from './data/missions';
 import { EVENTS } from './data/events';
+import { VALE_PASSES } from './data/vale-pass';
 import { LOGIN_TRACKS } from './data/login';
 import { NEWS_POSTS } from './data/news';
 import { SOUND_CUES } from './data/sounds';
@@ -104,6 +105,7 @@ export function buildSeedContent(): SeedContent[] {
     quest: QUESTS.map((data) => ({ key: data.key, data })),
     mission: MISSIONS.map((data) => ({ key: data.key, data })),
     event: EVENTS.map((data) => ({ key: data.key, data })),
+    valePass: VALE_PASSES.map((data) => ({ key: data.key, data })),
     loginTrack: LOGIN_TRACKS.map((data) => ({ key: data.key, data })),
     newsPost: NEWS_POSTS.map((data) => ({ key: data.key, data })),
     tutorialStep: TUTORIAL_STEPS.map((data) => ({ key: data.key, data })),

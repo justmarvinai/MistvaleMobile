@@ -5,6 +5,8 @@ import {
   claimExpeditionRequestSchema,
   dispatchExpeditionRequestSchema,
   eventClaimRequestSchema,
+  valePassClaimRequestSchema,
+  valePassUnlockRequestSchema,
   loginClaimRequestSchema,
   tutorialAdvanceRequestSchema,
   missionClaimRequestSchema,
@@ -14,6 +16,7 @@ import {
 } from '@mistvale/shared';
 import { AppError } from '../../lib/errors';
 import * as events from './events';
+import * as pass from './pass';
 import * as expeditions from './expeditions';
 import * as login from './login';
 import * as missions from './missions';
@@ -102,6 +105,34 @@ export const questRoutes: FastifyPluginAsync = async (app) => {
       body.milestone,
       body.actionId,
     );
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  // ── The Vale Pass ─────────────────────────────────────────────────────────
+
+  app.get(ROUTES.valePass.state, async (request, reply) => {
+    const view = await pass.overview(ctx(), requirePlayer(request));
+    return reply.send(apiSuccess({ pass: view }, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.valePass.claim, 'key'), async (request, reply) => {
+    const key = keyParam(request);
+    const body = valePassClaimRequestSchema.parse(request.body);
+    const result = await pass.claimTier(
+      ctx(),
+      requirePlayer(request),
+      key,
+      body.tier,
+      body.track,
+      body.actionId,
+    );
+    return reply.send(apiSuccess(result, app.content.rev));
+  });
+
+  app.post(routePattern(ROUTES.valePass.unlock, 'key'), async (request, reply) => {
+    const key = keyParam(request);
+    const body = valePassUnlockRequestSchema.parse(request.body);
+    const result = await pass.unlock(ctx(), requirePlayer(request), key, body.actionId);
     return reply.send(apiSuccess(result, app.content.rev));
   });
 
