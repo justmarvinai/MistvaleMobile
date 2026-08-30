@@ -11,6 +11,7 @@ import { adminMailRoutes } from './mail-routes';
 import { adminJobRoutes } from './job-routes';
 import { adminSimulateRoutes } from './simulate-routes';
 import { adminAuditRoutes } from './audit-routes';
+import { readActivity } from './activity';
 
 /**
  * The Admin API.
@@ -63,7 +64,7 @@ export const adminApi: FastifyPluginAsync = async (app) => {
     });
 
     guarded.get(ADMIN_ROUTES.stats.overview, async (_request, reply) => {
-      const [[playerStats], [accountStats], recentAudit] = await Promise.all([
+      const [[playerStats], [accountStats], recentAudit, activity] = await Promise.all([
         app.db
           .select({
             total: sql<number>`count(*)::int`,
@@ -89,6 +90,7 @@ export const adminApi: FastifyPluginAsync = async (app) => {
           .from(auditLog)
           .orderBy(sql`${auditLog.createdAt} desc`)
           .limit(10),
+        readActivity(app.db),
       ]);
 
       const snapshot = app.content.current();
@@ -106,6 +108,7 @@ export const adminApi: FastifyPluginAsync = async (app) => {
               enemies: snapshot.bundle.enemies.length,
               stages: snapshot.bundle.stages.length,
             },
+            activity,
             recentAudit: recentAudit.map((row) => ({
               ...row,
               createdAt: row.createdAt.toISOString(),

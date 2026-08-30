@@ -5,6 +5,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the dashboard says what the game has been doing (C32, gap G3)
+
+`/stats/overview` could report how many champions and stages were published, which describes
+the *content*; it could not report whether anybody was playing. It carries an `activity`
+block now: **battles** today and this week, how many of today's were won, and a split by
+mode; **summons** today and this week, the rarity split over the week, and how many came
+from mercy rather than the base rate; and the **economy**'s faucet and sink per currency
+over the day.
+
+Three choices in it are deliberate. **A day beside a week everywhere**, because one number
+alone cannot tell a quiet Tuesday from a broken endpoint — which is the failure a dashboard
+exists to catch. **The rarity split over the week**, since a Legendary is rare enough that a
+day's count is usually zero and a zero says nothing about the rates. And **both halves of
+the economy rather than the net**, because a net of zero is produced by a healthy economy
+and by nothing happening at all, and those want very different responses.
+
+Four `created_at`-ranged queries against tables that already carry that index, grouped in
+one pass rather than one query per mode — the set of modes is content, so a query per mode
+would grow with the game. The dashboard is the first thing an operator opens and it must not
+be the most expensive thing they do.
+
 ### Added — the audit log is readable (C31, gap G1)
 
 `GET /admin/api/audit` — every administrative mutation has recorded who, what and both sides

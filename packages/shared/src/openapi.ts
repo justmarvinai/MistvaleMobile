@@ -97,6 +97,53 @@ export const adminOverviewSchema = z.object({
     enemies: z.number().int(),
     stages: z.number().int(),
   }),
+  /**
+   * What the game has actually been doing (gap G3).
+   *
+   * ADMIN_SUITE_DESIGN §2.1 asked for battle, summon and economy figures from the start,
+   * and until now the dashboard could only say how many rows each table held — which
+   * describes the *content*, not the game. These describe the game.
+   *
+   * Two windows on everything, deliberately: a day says whether something is happening
+   * now, and a week is what a day is read against. One number alone cannot tell a quiet
+   * Tuesday from a broken endpoint, which is the failure a dashboard exists to catch.
+   */
+  activity: z.object({
+    battles: z.object({
+      day: z.number().int(),
+      week: z.number().int(),
+      /** Won, over the day — the rest were lost, retreated from, or are still running. */
+      wonDay: z.number().int(),
+      /** Busiest first. Which modes nobody plays is the more interesting half. */
+      byMode: z.array(
+        z.object({ mode: z.string(), day: z.number().int(), week: z.number().int() }),
+      ),
+    }),
+    summons: z.object({
+      day: z.number().int(),
+      week: z.number().int(),
+      /**
+       * Over the **week** rather than the day, because a Legendary is rare enough that a
+       * day's count is usually zero and a zero says nothing about the rates.
+       */
+      byRarity: z.array(z.object({ rarity: z.string(), week: z.number().int() })),
+      /** How many of the week's pulls came from mercy rather than from the base rate. */
+      mercyWeek: z.number().int(),
+    }),
+    /**
+     * Faucet and sink per currency over the day, from `economy_log`'s signed deltas.
+     *
+     * Both halves rather than the net: a net of zero is produced both by a healthy economy
+     * and by nothing happening at all, and those want very different responses.
+     */
+    economy: z.array(
+      z.object({
+        currency: z.string(),
+        faucet: z.number().int(),
+        sink: z.number().int(),
+      }),
+    ),
+  }),
   recentAudit: z.array(auditEntrySchema),
 });
 
