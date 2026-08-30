@@ -375,21 +375,119 @@ function fillDefaults(
   return parsed;
 }
 
-/** Shallow field-level diff; nested objects are compared as wholes. */
-function diffFields(
+/**
+ * How many changed leaves one top-level field may report before it is shown whole.
+ *
+ * The cap is what keeps a deep diff readable. Changing one number inside a stage's waves
+ * should print one row; *replacing* the waves should print one row too, because forty
+ * rows saying "this enemy is now that enemy" is a worse account of the same edit than
+ * one row saying the waves were rewritten. Twelve is comfortably above a real retune —
+ * a champion's whole stat block is eight — and far below a rewrite.
+ */
+const MAX_LEAVES_PER_FIELD = 12;
+
+/** Whether a value is a plain object worth recursing into, rather than a leaf. */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** `a.b`, `a[0]`, `a[0].b` — the path an operator can paste into a search box. */
+function join(prefix: string, key: string | number): string {
+  if (typeof key === 'number') return `${prefix}[${key}]`;
+  return prefix ? `${prefix}.${key}` : key;
+}
+
+/**
+ * Field-level diff, all the way down (gap G2).
+ *
+ * It used to compare top-level keys only, so changing one point of a champion's attack
+ * rendered the entire `baseStats` on both sides and left the operator to find the digit
+ * that moved. Readable, and increasingly less so as content grew nested: a stage's
+ * `waves` is an array of arrays of enemy references, and a one-enemy retune printed the
+ * whole wave plan twice.
+ *
+ * **Server-side, deliberately.** The diff is what a publish decision is made on, so it
+ * stays the single source of truth rather than something the SPA re-derives — a second
+ * implementation is a second answer to "what is about to change".
+ *
+ * Two rules keep it honest rather than merely deep. A subtree is only walked while both
+ * sides are the same *shape*: an object replaced by an array, or by a number, is one
+ * change and reporting it as a hundred would be describing the shape rather than the
+ * edit. And each top-level field is capped (`MAX_LEAVES_PER_FIELD`) — past that the
+ * field is reported whole, which is the old behaviour kept for the case it was right for.
+ */
+export function diffFields(
   before: unknown,
   after: unknown,
 ): { path: string; before: unknown; after: unknown }[] {
   const left = (before ?? {}) as Record<string, unknown>;
   const right = (after ?? {}) as Record<string, unknown>;
-  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
+  const keys = [...new Set([...Object.keys(left), ...Object.keys(right)])].sort((a, b) =>
+    a.localeCompare(b),
+  );
   const changes: { path: string; before: unknown; after: unknown }[] = [];
 
   for (const key of keys) {
-    if (JSON.stringify(left[key]) === JSON.stringify(right[key])) continue;
-    changes.push({ path: key, before: left[key], after: right[key] });
+    if (same(left[key], right[key])) continue;
+    const deep = leaves(key, left[key], right[key], MAX_LEAVES_PER_FIELD + 1);
+    // Over the cap, or nothing a walk could break down: report the field as it was.
+    if (deep === null || deep.length === 0 || deep.length > MAX_LEAVES_PER_FIELD) {
+      changes.push({ path: key, before: left[key], after: right[key] });
+      continue;
+    }
+    changes.push(...deep);
   }
-  return changes.sort((a, b) => a.path.localeCompare(b.path));
+  return changes;
+}
+
+/** The top-level field a path belongs to: `baseStats.atk` and `waves[0][1]` both root. */
+export function rootField(path: string): string {
+  return path.split(/[.[]/, 1)[0] ?? path;
+}
+
+function same(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/**
+ * The changed leaves under one field, or `null` when the two sides are not the same shape.
+ *
+ * Stops early once `budget` leaves have been collected — a caller that only wants to know
+ * whether a subtree is over the cap should not pay for walking a rewritten stage plan.
+ */
+function leaves(
+  path: string,
+  before: unknown,
+  after: unknown,
+  budget: number,
+): { path: string; before: unknown; after: unknown }[] | null {
+  const out: { path: string; before: unknown; after: unknown }[] = [];
+
+  const walk = (at: string, a: unknown, b: unknown): boolean => {
+    if (same(a, b)) return true;
+    if (out.length >= budget) return false;
+
+    if (isPlainObject(a) && isPlainObject(b)) {
+      for (const key of [...new Set([...Object.keys(a), ...Object.keys(b)])].sort((x, y) =>
+        x.localeCompare(y),
+      )) {
+        if (!walk(join(at, key), a[key], b[key])) return false;
+      }
+      return true;
+    }
+
+    if (Array.isArray(a) && Array.isArray(b)) {
+      for (let index = 0; index < Math.max(a.length, b.length); index += 1) {
+        if (!walk(join(at, index), a[index], b[index])) return false;
+      }
+      return true;
+    }
+
+    out.push({ path: at, before: a, after: b });
+    return true;
+  };
+
+  return walk(path, before, after) ? out : null;
 }
 
 /** Flags changes that deserve a second look in the publish diff. */
@@ -397,12 +495,15 @@ function assessRisk(
   contentType: ContentType,
   fields: { path: string }[],
 ): ContentDiffEntry['risk'] {
-  const paths = new Set(fields.map((field) => field.path));
-  if (contentType === 'champion' && (paths.has('baseStats') || paths.has('skills'))) {
+  // The **root** of each path, not the path itself. Since G2 a field is reported at the
+  // leaf that moved — `baseStats.atk` rather than `baseStats` — and a risk rule matching
+  // the whole path would have silently stopped flagging every change it exists to catch.
+  const roots = new Set(fields.map((field) => rootField(field.path)));
+  if (contentType === 'champion' && (roots.has('baseStats') || roots.has('skills'))) {
     return 'balance';
   }
-  if (contentType === 'gameConfig' && paths.has('value')) return 'economy';
-  if (contentType === 'stage' && (paths.has('rewards') || paths.has('waves'))) return 'economy';
+  if (contentType === 'gameConfig' && roots.has('value')) return 'economy';
+  if (contentType === 'stage' && (roots.has('rewards') || roots.has('waves'))) return 'economy';
   return undefined;
 }
 

@@ -403,6 +403,13 @@ describe.skipIf(!dbUp)('content pipeline', () => {
 
       const diff = await asAdmin({ method: 'GET', url: adminPath('/content/diff') });
       expect(diff.json().data.entries[0].risk).toBe('balance');
+      // And it names the stat rather than the block holding it (G2). The risk rules read
+      // the *root* of a path for exactly this reason — a rule matching the whole path
+      // would have gone quiet the moment the diff learned to go deeper than one level,
+      // and the assertion above would have been the only thing to notice.
+      expect(diff.json().data.entries[0].fields).toEqual([
+        { path: 'baseStats.atk', before: stats.atk, after: 1500 },
+      ]);
     });
   });
 
