@@ -220,10 +220,12 @@ export const adminTemporaryPasswordSchema = passwordSchema;
 /**
  * How many times one press of Simulate may fight a stage.
  *
- * A stage resolves headlessly in about a twentieth of a millisecond, so two hundred runs is
- * a tenth of a second on the target box and gives a win rate with enough resolution to act
- * on. The cap exists because this endpoint is a *loop* an operator controls the length of,
- * and a one-core box has a game to serve at the same time.
+ * Measured on the dev box rather than guessed: an early campaign stage resolves in about
+ * 0.2 ms and a chapter-12 Brutal fight a fresh team **loses** takes 2.3 ms, because a loss
+ * runs to the turn cap. So two hundred runs is somewhere between a twentieth of a second
+ * and half of one — comfortably a press — while giving a win rate with enough resolution to
+ * act on. The cap exists because this endpoint is a *loop* an operator controls the length
+ * of, and a one-core box has a game to serve at the same time.
  */
 export const SIMULATE_MAX_RUNS = 200;
 export const SIMULATE_DEFAULT_RUNS = 60;
