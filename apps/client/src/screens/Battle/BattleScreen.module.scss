@@ -21,6 +21,13 @@
 
 /* The frame.
 
+   Laid out to the owner's reference (C26b): where the fight is top-left, the boss across
+   the top, what it can do down the right, the party down the left, and the two hands a
+   player uses along the bottom — **Auto and the speed ladder at bottom-left, the acting
+   champion's skills at bottom-right**. The two used to be a top-right cluster and a
+   centred row, which put the thing pressed most often furthest from the thing pressed
+   second-most.
+
    **`pointer-events: none` is load-bearing.** The HUD covers the whole stage, and the
    stage is where a player clicks an enemy to target it. Every widget below turns pointer
    events back on for itself; the empty space between them does not, so a click aimed at a
@@ -40,9 +47,33 @@
   > * {
     pointer-events: auto;
   }
+
+  /* Two bands of shade, top and bottom, so white text and painted plates read over
+     whatever the battlefield happens to be doing underneath them. Pseudo-elements rather
+     than children, which is what keeps them out of the grid *and* out of the rule above —
+     they inherit `pointer-events: none`, so a click aimed at a sprite still reaches it. */
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 26%;
+    z-index: -1;
+  }
+
+  &::before {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(6, 5, 8, 0.72), transparent);
+  }
+
+  &::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(6, 5, 8, 0.78), transparent);
+  }
 }
 
-.topLeft {
+.where {
   grid-column: 1;
   grid-row: 1;
   display: flex;
@@ -53,14 +84,37 @@
 
 .turnCount {
   @include label-text;
-  color: $muted;
+  color: $parchment-dim;
 }
 
-.controls {
-  grid-column: 3;
+/* The creature the fight is about, across the top. Centred in what is left between the
+   wave pips and the rail rather than in the window, because both of those are content and
+   a bar centred on the window would sit under one of them at some width. */
+.bossBar {
+  grid-column: 2;
   grid-row: 1;
   display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* What it can do, down the right — under the bar and above the hotbar, which is the one
+   column with nothing else in it. */
+.bossRail {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: start;
+}
+
+/* Auto, the speed ladder and the ways out — bottom-left, the reference's own arrangement
+   and the hand a player keeps on the mouse. */
+.controls {
+  grid-column: 1;
+  grid-row: 3;
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
+  justify-content: flex-end;
   gap: $space-2;
 }
 
@@ -82,13 +136,16 @@
   justify-self: center;
 }
 
-/* The acting champion and their hotbar, along the bottom across the full width. */
+/* The acting champion and their hotbar, bottom-right: the place the next decision is
+   made, and the same place every time — a hint, a spinner and a full hotbar all land
+   there, so a player's eye never has to look for it. */
 .bottom {
-  grid-column: 1 / -1;
+  grid-column: 2 / -1;
   grid-row: 3;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-end;
   gap: $space-4;
   min-height: 96px;
 }
@@ -104,13 +161,14 @@
 
 .hint {
   @include label-text;
-  align-self: center;
+  align-self: flex-end;
   color: $muted;
 }
 
 .error {
-  align-self: center;
+  flex-basis: 100%;
   font-size: 12px;
+  text-align: right;
   color: $danger;
 }
 

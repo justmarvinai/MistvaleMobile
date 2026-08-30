@@ -5,6 +5,47 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the fight itself, laid out for the hands that play it (C26b)
+
+The owner (2026-08-29), with a second Raid screenshot: *"fully rework the battle screen
+itself… on the top you see the boss's health bar, below that on the right his skills
+(hoverable), on the bottom left autobattle speed and auto mode, on the bottom right your own
+spells"*. That is the layout now, on every fight rather than only on a boss one:
+
+- **Auto, the speed ladder and the ways out are bottom-left**; **the acting champion and
+  their hotbar are bottom-right**, and so is the hint or the spinner that stands in when
+  there is no turn to take — the place the next decision is made never moves. They had been
+  a top-right cluster and a centred row, which put the two things pressed most often as far
+  apart as the screen allows.
+- **Two bands of shade** sit behind the HUD, top and bottom, so white text and painted plates
+  read over whatever the battlefield is doing. They are pseudo-elements of the frame rather
+  than children, which keeps them out of the grid *and* out of `pointer-events: auto` — a
+  click aimed at a sprite still reaches the sprite.
+
+**And a boss gets a frame of its own.** Its health across the top, tinted with its element's
+colour, and down the right a rail of **what it can do**: the `bossMechanics` sentences first,
+then its own skills, both hoverable. None of that is new data — `isBoss` has been on the unit
+since P3, an enemy's skills in the bundle since P1, `bossMechanics` since P6 — and none of it
+had ever reached the fight. The mechanics in particular were stated in the team chooser (D8)
+and vanished the moment the energy was spent, which is exactly when they decide what a player
+does. The plate in the middle now skips the boss the bar already names, because the same name
+and the same health in the two most prominent places on the screen is C12c's defect again; a
+unit the player *clicked* still gets a plate, since a click is a question.
+
+The bug found while building it is the one worth keeping: **the frame read the server's board
+and gave the fight away.** Auto resolves several turns per response, so the server is
+routinely two waves ahead of the animation — the first cut drew a full boss frame over wave
+one already reading `0 / 235`, naming the warlord and reporting his death before the player
+had met him. `VisualUnit` carries `isBoss` now and the whole frame is drawn from the
+playback, which is P10a's rule in a new place. The browser guard walks a fresh account from
+1-1 to 1-7 with C26a's own **Next** button and refuses a boss bar that appears before the
+pips read the last wave; it fails against the old code with the pips on `2 / 3`.
+
+Two smaller things came with it. The playing-out hint **stopped naming a button that is not
+there** — a first clear is not skippable (C7), so on the one fight a player is most likely to
+be impatient through, the line had been pointing at a Skip that was never drawn. And the
+turn counter is legible now rather than muted grey on a painted field.
+
 ### Changed — the end of a fight, rebuilt to the reference (C26a)
 
 The owner (2026-08-29), with a Raid screenshot: *"you will fully rework the End of Battle

@@ -13,6 +13,8 @@ import { stillPath } from '../../game/sprites';
 import { skillArt } from '../../ui/skillArt';
 import { getStage, isSceneAttached, setScene, stageFailure } from '../../game/stage';
 import { blindMessage, blindReason, type BlindReason } from './blindStage';
+import { BossBar, BossSkills, bossOnField } from './BossFrame';
+import { focusUnit, sameRef } from './focus';
 import { DomBattlefield } from './DomBattlefield';
 import { UnitOverlay } from './UnitOverlay';
 import { SkillTips } from './SkillTips';
@@ -382,16 +384,34 @@ export function BattleScreen(): JSX.Element {
   }, [bundle, battle?.stageKey, view.wave]);
 
   /**
-   * Whoever is under consideration: the ally the player picked as a target, or else the
-   * first enemy still standing. A fight with nobody in the middle of the screen reads as
-   * a fight against nothing.
+   * The boss the player can see, if this wave holds one.
+   *
+   * Read from the **playback** rather than from the server's board, which is the whole of
+   * P10a's rule applied to a new thing: Auto resolves several turns per response, so the
+   * server is routinely two waves ahead — the first cut of this read `isBoss` off
+   * `battle.state` and put a full boss frame over wave one already showing `0 / 235`.
    */
-  const focus = useMemo(() => {
-    if (!battle) return null;
-    const units = [...battle.state.allies, ...battle.state.enemies];
-    const picked = target ? units.find((unit) => sameRef(unit.ref, target)) : undefined;
-    return picked ?? battle.state.enemies.find((unit) => unit.alive) ?? null;
-  }, [battle, target]);
+  const boss = useMemo(() => bossOnField(view.enemies), [view.enemies]);
+
+  /** What it can do: its own skills out of content, and the mechanics beside them. */
+  const bossDef = useMemo(
+    () => bundle?.enemies.find((entry) => entry.key === boss?.defKey),
+    [bundle, boss],
+  );
+  const bossSkills: SkillDef[] = useMemo(() => {
+    return (bossDef?.skills ?? [])
+      .map((key) => skillsByKey.get(key))
+      .filter((skill): skill is SkillDef => skill !== undefined && skill.slot !== 'passive');
+  }, [bossDef, skillsByKey]);
+
+  /** Whoever is under consideration — the rule, and why there is one, is in `./focus`. */
+  const focus = useMemo(
+    () =>
+      battle
+        ? focusUnit(battle.state.allies, battle.state.enemies, target, boss?.ref ?? null)
+        : null,
+    [battle, boss, target],
+  );
 
   /** The acting champion's skills as action slots, with their cooldowns. */
   const slots = useMemo(
@@ -457,7 +477,7 @@ export function BattleScreen(): JSX.Element {
       </div>
 
       <div className={styles.hud}>
-        <div className={styles.topLeft}>
+        <div className={styles.where}>
           <Fui
             of={WaveTracker}
             options={{ waves: waveCount, current: view.wave + 1, label: 'Wave', size: 'sm' }}
@@ -470,6 +490,23 @@ export function BattleScreen(): JSX.Element {
           />
           <span className={styles.turnCount}>Turn {view.turn}</span>
         </div>
+
+        {/* The creature the fight is about, across the top — the owner's reference. Drawn
+            only when there is one, so an ordinary wave is the same screen without it. */}
+        {boss && (
+          <div className={styles.bossBar}>
+            <BossBar boss={boss} subtitle={`Wave ${view.wave + 1} of ${waveCount}`} />
+          </div>
+        )}
+
+        {/* And what it can do, down the side: the mechanics that decide which champions
+            belong here, and its own skills, hoverable. All of it content the game has
+            carried since P1 and P6 and stated only in the team chooser (D8). */}
+        {boss && (
+          <div className={styles.bossRail}>
+            <BossSkills name={boss.name} def={bossDef} skills={bossSkills} />
+          </div>
+        )}
 
         <div className={styles.controls} ref={controlsRef}>
           <Fui
@@ -592,7 +629,15 @@ export function BattleScreen(): JSX.Element {
             // is a recording, and the player who would rather not sit through it deserves
             // to be told where the button is.
             <span className={styles.hint}>
-              {settled || preferredAuto ? 'Playing out — Skip to jump ahead.' : 'Resolving…'}
+              {/* Skip is named only when it is actually offered. A first clear is not
+                  skippable (C7), so on the one fight a player is most likely to be
+                  impatient through, this line had been pointing at a button that was not
+                  on the screen. */}
+              {!(settled || preferredAuto)
+                ? 'Resolving…'
+                : canSkip
+                  ? 'Playing out — Skip to jump ahead.'
+                  : 'Playing out — the first walk down a road is one you watch.'}
             </span>
           ) : awaitingInput && actingUnit ? (
             <>
@@ -675,10 +720,6 @@ function refFrom(id: string): UnitRef | null {
   if ((side !== 'ally' && side !== 'enemy') || slot === undefined) return null;
   const index = Number(slot);
   return Number.isInteger(index) ? { side, slot: index } : null;
-}
-
-function sameRef(a: UnitRef, b: UnitRef): boolean {
-  return a.side === b.side && a.slot === b.slot;
 }
 
 /**

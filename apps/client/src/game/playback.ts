@@ -29,6 +29,16 @@ export interface VisualUnit {
   maxHp: number;
   hp: number;
   alive: boolean;
+  /**
+   * Whether this is the creature the fight is about.
+   *
+   * On the *visual* unit rather than only on the server's state, because the boss frame
+   * (C26b) is drawn from what the player can see. Auto resolves several turns in one
+   * response, so the server's board is routinely two waves ahead of the animation — read
+   * from there, a boss bar appeared over wave one already reading zero, which is the P10a
+   * defect in a new place.
+   */
+  isBoss: boolean;
   buffs: StatusChip[];
   debuffs: StatusChip[];
   /**
@@ -157,6 +167,7 @@ function toVisual(snapshot: UnitSnapshot): VisualUnit {
     maxHp: snapshot.maxHp,
     hp: snapshot.hp,
     alive: snapshot.hp > 0,
+    isBoss: snapshot.isBoss,
     buffs: [],
     debuffs: [],
     impulse: null,

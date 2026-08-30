@@ -1,0 +1,89 @@
+@use '../../styles/tokens' as *;
+
+/* The boss, framed.
+
+   Two pieces in two grid cells of the battle HUD: the health bar across the top, and what
+   the creature can do down the right-hand side. Both are placed by `BattleScreen.module.scss`
+   — this file is what they look like. */
+
+.bar {
+  width: min(46rem, 100%);
+}
+
+/* ── What it can do ───────────────────────────────────────────────────────── */
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $space-2;
+  width: 15rem;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.rules,
+.skills {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rule,
+.skill {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: 5px $space-2;
+  background: rgba(10, 8, 12, 0.66);
+  border: 1px solid $edge;
+  cursor: default;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $accent-dim;
+    background: rgba(20, 14, 12, 0.8);
+    outline: none;
+  }
+}
+
+/* A mechanic is the thing that decides which champions belong in the fight, so it reads
+   first and louder than a skill name. */
+.rule {
+  border-color: rgba(194, 118, 74, 0.4);
+
+  .name {
+    color: $accent-soft;
+  }
+}
+
+.icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  background: center / contain no-repeat;
+}
+
+.glyph {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  background: currentcolor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  color: $accent-soft;
+}
+
+.name {
+  color: $parchment-dim;
+  font-size: 0.76rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
