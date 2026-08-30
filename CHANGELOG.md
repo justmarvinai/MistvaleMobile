@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — a party stood in a heap (C28)
+
+Four champions on the field overlapped by about two thirds and read as one shape with
+several heads. `slotPosition` stepped 34 virtual pixels between slots against a champion
+body about 65 wide, so the more of a party you fielded the less of it you could see — and
+the same 34 applied to the enemy camp, so a four-wide wave was a pile too.
+
+It survived every guard in the suite for one reason: **it needs more than one champion on a
+side.** A fresh account fights 1-1 alone, and so did every browser spec — a formation cannot
+overlap with itself. The cold open is the only battle a fresh account can reach with three
+champions in it, and that is where the new guard asks the question.
+
+The other half of the same function was the vertical one: the party stood at 300 of the
+540-row canvas with nothing under it but floor, so the bottom two fifths of every fight in
+the game were empty while the champions sat in the upper middle. They stand low now, where
+the eye already is, and still clear the hotbar at every size measured.
+
+`game/formation` is its own module because **four** things read it — the Pixi renderer, the
+browser-drawn one, the pointable overlay and the damage floaters — and a fight has to look
+like the same fight whichever is running. A unit's footprint moved there too: the pointable
+box was a flat `96px`, which does not scale with the canvas, so on a 1920 window the hit
+target was a third of the champion it belonged to and most of a click missed.
+
+The arithmetic is pinned in `formation.test.ts` (slots clear each other, the camps mirror,
+nobody is drawn off the canvas, the party stands low) and the fact that it *reaches the
+screen* in `visible.spec.ts`. Both were mutation-checked against the old numbers: the unit
+test fails on two assertions, and the browser guard fails with champion 2 starting 43 pixels
+inside champion 1.
+
 ### Added — the balance sandbox: a retune you can check before you publish it (C27)
 
 Until now, the only way to find out what a stage retune actually did was to publish it and

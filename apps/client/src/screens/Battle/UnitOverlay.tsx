@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { UnitRef } from '@mistvale/engine';
-import { slotPosition } from '@/game/battleScene';
+import { UNIT_HEIGHT, UNIT_WIDTH, slotPosition } from '@/game/formation';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '@/game/stage';
 import { useContentStore } from '@/state/contentStore';
 import { useTooltip } from '@/ui/Tooltip/useTooltip';
@@ -86,9 +86,17 @@ function UnitMarks({
       style={{
         left: `${(at.x / VIRTUAL_WIDTH) * 100}%`,
         top: `${(at.y / VIRTUAL_HEIGHT) * 100}%`,
+        // The champion's own footprint, in the canvas's units rather than in pixels: a flat
+        // `96px` did not scale, so on a 1920 window the hit target was a third of the
+        // champion it belonged to and most of a click missed.
+        width: `${(UNIT_WIDTH / VIRTUAL_WIDTH) * 100}%`,
+        height: `${(UNIT_HEIGHT / VIRTUAL_HEIGHT) * 100}%`,
       }}
       data-selected={selected}
       data-focused={focused}
+      // Named on the element, because where a unit *is* on screen is a fact only a browser
+      // can check and the class names are hashed by the CSS module.
+      data-unit={`${unit.ref.side}:${unit.ref.slot}`}
     >
       {/* A champion's own footprint, so the click lands where the champion is rather than
           on a rectangle that happens to contain them. */}

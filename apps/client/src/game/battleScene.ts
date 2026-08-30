@@ -13,6 +13,7 @@ import { BURST_LIFT } from './playback';
 import type { Effect, EffectKind, Floater, PlaybackView, VisualUnit } from './playback';
 import { loadIdleFrames, loadPlaceholderTexture } from './sprites';
 import { mirrored } from './facing';
+import { UNIT_HEIGHT, slotPosition } from './formation';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH, type Scene } from './stage';
 
 /**
@@ -91,19 +92,12 @@ const FLOATER_COLOUR: Record<Floater['kind'], number> = {
 };
 
 /**
- * Where a slot sits, staggered so the back rank reads behind the front.
+ * Where a slot sits — see `./formation`, which four things read and none of them is this.
  *
- * Exported because the DOM battlefield draws the same formation — a fight must look like the
- * same fight whether it is painted by WebGL or by the browser.
+ * Re-exported rather than moved outright so the two overlays and the DOM battlefield keep
+ * one import, and so the scene stays the place a reader looks for anything about drawing.
  */
-export function slotPosition(side: 'ally' | 'enemy', slot: number): { x: number; y: number } {
-  const baseY = 300;
-  const step = 46;
-  const depth = 34;
-  const y = baseY + slot * step * 0.55;
-  const inset = 190 + slot * depth;
-  return { x: side === 'ally' ? inset : VIRTUAL_WIDTH - inset, y };
-}
+export { UNIT_HEIGHT, UNIT_WIDTH, slotPosition } from './formation';
 
 /**
  * Whatever is standing in the slot.
@@ -171,7 +165,8 @@ interface FloaterVisual {
 const FLOATER_LIFE = 52;
 
 /** How tall a stand-in stands: a champion's 88px art at ×2, so the two are interchangeable. */
-const STAND_IN_HEIGHT = 176;
+/** A stand-in stands the same size a champion does — see `formation.UNIT_HEIGHT`. */
+const STAND_IN_HEIGHT = UNIT_HEIGHT;
 
 /**
  * The last resort — a figure drawn rather than loaded.

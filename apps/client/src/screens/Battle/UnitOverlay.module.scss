@@ -24,12 +24,15 @@
   max-height: 100%;
 }
 
-/* Anchored at the feet, like the sprite. */
+/* Anchored at the feet, like the sprite.
+
+   The box itself is sized inline from `game/formation`, because it is the same fact the two
+   renderers draw from and a second copy here would drift the moment the art changed size.
+   It was a flat `96px` — which does not scale with the canvas, so on a 1920 window the hit
+   target was a third of the champion it belonged to. */
 .unit {
   position: absolute;
   transform: translate(-50%, -100%);
-  width: 96px;
-  height: calc(100% * 176 / 540);
 }
 
 /* The champion's own footprint, invisible until it matters. */

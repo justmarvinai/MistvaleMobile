@@ -37,14 +37,14 @@
   border-top: 2px solid #2a2018;
 }
 
-/* A champion's art is 88px drawn at ×2, so 176 of the scene's 540 virtual rows. The height
-   lives here rather than on the image because a percentage height resolves against the
-   parent's *definite* height — and an absolutely positioned box with no height of its own
+/* A champion's box is `formation.UNIT_HEIGHT` of the scene's 540 virtual rows, set inline
+   from that constant so the two renderers cannot disagree about how big a champion is. The
+   height lives on the box rather than on the image because a percentage height resolves
+   against the parent's *definite* height — and an absolutely positioned box with no height
    gives an image nothing to be a percentage of, which is how the first version shipped at
    half size. `.canvas` has a definite height; this does now too. */
 .fighter {
   position: absolute;
-  height: calc(100% * 176 / 540);
   --mv-lunge-x: 0%;
   --mv-lunge-y: 0%;
   /* The anchor is the feet, as it is for the sprite in the scene. The lunge is added to

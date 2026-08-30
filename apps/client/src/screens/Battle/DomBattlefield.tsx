@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '@/game/stage';
-import { slotPosition } from '@/game/battleScene';
+import { UNIT_HEIGHT, slotPosition } from '@/game/formation';
 import { framePath, loadSpriteManifest, spriteEntry, stillPath } from '@/game/sprites';
 import { CHAMPION_PLACEHOLDER } from '@/ui/championArt';
 import { mirrored } from '@/game/facing';
@@ -159,6 +159,8 @@ function Fighter({
       style={{
         left: pct(at.x, VIRTUAL_WIDTH),
         top: pct(at.y, VIRTUAL_HEIGHT),
+        // The champion's own box, from the one place that says how big a champion is.
+        height: pct(UNIT_HEIGHT, VIRTUAL_HEIGHT),
         // The lunge is inline because its direction is a fact about the formation rather
         // than about the class: only this component knows which way the target lies.
         ...(lunge ? { '--mv-lunge-x': `${lunge.x}%`, '--mv-lunge-y': `${lunge.y}%` } : {}),

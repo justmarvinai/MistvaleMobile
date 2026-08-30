@@ -11,6 +11,7 @@ import {
   registerRaw,
   resolveBattle,
   setSimpleBattlefield,
+  unique,
 } from './support';
 import { decodePng, differingFraction, litFraction, meanColour } from './pixels';
 
@@ -636,6 +637,55 @@ test.describe('what a player can actually see', () => {
     await expect
       .poll(async () => Math.round((await canvasContribution(page)) * 100), { timeout: 30_000 })
       .toBeGreaterThan(20);
+  });
+
+  /**
+   * A party stands apart rather than in a heap.
+   *
+   * `slotPosition` used to step 34 virtual pixels between slots against a champion body
+   * about 65 wide, so a full party overlapped by roughly two thirds and read as one shape
+   * with several heads. The arithmetic is pinned in `game/formation.test.ts`; what only a
+   * browser can answer is whether it reaches the screen — the two renderers and the two
+   * overlays all read that one function, and any of them could stop.
+   *
+   * The cold open is the fight it has to be asked on: it is the only battle a fresh account
+   * can reach with more than one champion on its side, which is exactly why the defect
+   * survived — every other spec in this suite fights 1-1 alone, where a formation cannot
+   * overlap with itself.
+   */
+  test('a party stands apart rather than in a heap', async ({ page }) => {
+    test.slow();
+    await page.goto('/');
+    await page.getByRole('tab', { name: 'New warden' }).click();
+    await page.getByLabel('Account name').fill(unique('e2eform'));
+    await page.getByLabel('Profile name').fill(unique('Form'));
+    await page.getByLabel('Password', { exact: true }).fill('a-good-long-password');
+    await page.getByRole('button', { name: 'Take up the lantern' }).click();
+
+    await page.getByRole('button', { name: /meet them on the road/i }).click({ timeout: 40_000 });
+    await expect(page.locator('.fui-actionbar').first()).toBeVisible({ timeout: 40_000 });
+
+    const boxes = await page.locator('[data-unit^="ally:"]').evaluateAll((nodes) =>
+      nodes
+        .map((node) => node.getBoundingClientRect())
+        .map((rect) => ({ left: rect.x, right: rect.x + rect.width, bottom: rect.y + rect.height }))
+        .sort((a, b) => a.left - b.left),
+    );
+    expect(boxes.length, 'the cold open fields three champions').toBe(3);
+
+    for (let i = 1; i < boxes.length; i += 1) {
+      expect(
+        boxes[i]!.left,
+        `champion ${i + 1} starts clear of champion ${i}`,
+      ).toBeGreaterThanOrEqual(boxes[i - 1]!.right);
+    }
+
+    // And the party stands in the lower half, where the eye already is — the other half of
+    // the same defect, which left the bottom two fifths of every fight empty.
+    const height = page.viewportSize()?.height ?? 0;
+    for (const box of boxes) {
+      expect(box.bottom, 'the party stands low').toBeGreaterThan(height / 2);
+    }
   });
 
   /**
