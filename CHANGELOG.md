@@ -5,6 +5,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — publish refuses a mastery board that cannot be spent (C36)
+
+A tree missing a whole tier has been refused since P6c, which is the obvious half. The half
+nobody could see is that a board can hold a node at **every** tier of **every** tree and
+still strand every build in the game: the budget is fifteen picks with a hard allowance per
+tier, and a champion may open at most two trees — so if no *pair* of trees supplies a tier's
+allowance, nobody ever finishes a board. A permanent, silent shortfall that publishes
+cleanly, looks right in the editor, and shows up as a board that simply stops letting you
+spend.
+
+It is the Mistspire ward's rule in another costume (C11): validate content against the rules
+that **consume** it, not against itself. One workable pair is the bar, because the player
+chooses the pair — requiring every pair to work would refuse content that is merely
+specialised, and requiring a single tree to work would refuse the seed as it stands, which
+fills tier 5 only across two trees.
+
+The existing rule was also reading literals: `['onslaught','bulwark','insight']` and
+`tier <= 6` were written out rather than read from `MASTERY_TREES` and `MASTERY_MAX_TIER`, so
+a fourth tree would have escaped the check entirely — the same class of silence as a field
+nothing reads.
+
 ### Added — content export and import over the API (A3, ADMIN_SUITE_DESIGN §2.17)
 
 `GET /admin/api/content/export` hands back the live content as one document — the same shape

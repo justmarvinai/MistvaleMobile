@@ -3,6 +3,11 @@ import {
   CONTENT_REGISTRY,
   EFFECT_COMPONENT_TYPES,
   ELEMENTS,
+  MASTERY_MAX_TIER,
+  MASTERY_MIN_TIER,
+  MASTERY_PICKS_BY_TIER,
+  MASTERY_TOTAL_PICKS,
+  MASTERY_TREES,
   RANK_RANGE_BY_RARITY,
   RARITIES,
   ROLES,
@@ -626,19 +631,35 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
     }
   }
 
-  // A tree needs enough nodes at each tier to satisfy the pick rules, or a player who
-  // commits to it hits a wall the UI cannot explain.
+  // ── Masteries ─────────────────────────────────────────────────────────────
+  //
+  // Two rules, and the second is the one an operator cannot see. A tree with a missing
+  // tier is a dead end, which is obvious once stated; but a tree can hold a node at every
+  // tier and still **strand every build in the game**, because the budget is fifteen picks
+  // with a hard allowance per tier and a champion may open at most two trees. If no pair of
+  // trees can supply `MASTERY_PICKS_BY_TIER[tier]` nodes at some tier, nobody can ever
+  // finish a build — a permanent, silent shortfall that publishes cleanly, looks right in
+  // the editor, and shows up as a board that simply stops letting you spend.
+  //
+  // It is the Mistspire ward's rule in another costume (C11): validate the content against
+  // the *rules that consume it*, not against itself.
+  //
+  // The tree list and the tier range are read from shared rather than written out here.
+  // They were literals until A4, which meant a fourth tree added to `MASTERY_TREES` would
+  // have escaped this check entirely — the same class of silence as a field nothing reads.
   const masteryTierCounts = new Map<string, number>();
   for (const [, entity] of parsed.get('mastery') ?? []) {
     const node = entity as { tree: string; tier: number };
     const slot = `${node.tree}:${node.tier}`;
     masteryTierCounts.set(slot, (masteryTierCounts.get(slot) ?? 0) + 1);
   }
+  const nodesAt = (tree: string, tier: number): number =>
+    masteryTierCounts.get(`${tree}:${tier}`) ?? 0;
+
   if (masteryTierCounts.size > 0) {
-    for (const tree of ['onslaught', 'bulwark', 'insight']) {
-      for (let tier = 1; tier <= 6; tier += 1) {
-        const held = masteryTierCounts.get(`${tree}:${tier}`) ?? 0;
-        if (held > 0) continue;
+    for (const tree of MASTERY_TREES) {
+      for (let tier = MASTERY_MIN_TIER; tier <= MASTERY_MAX_TIER; tier += 1) {
+        if (nodesAt(tree, tier) > 0) continue;
         errors.push({
           severity: 'error',
           contentType: 'mastery',
@@ -646,6 +667,40 @@ export function validateAndNormalise(content: ContentSet): ContentValidationPass
           message: `The ${tree} tree has no tier ${tier} mastery; a champion training it would hit a dead end.`,
         });
       }
+    }
+
+    // Does *some* pair of trees let a champion spend all fifteen picks? A player chooses
+    // the pair, so one workable pair is the honest minimum — requiring every pair to work
+    // would refuse content that is merely specialised, and requiring a single tree to work
+    // would refuse the seed as it stands, which fills tier 5 only across two trees.
+    const pairs: [string, string][] = [];
+    for (let a = 0; a < MASTERY_TREES.length; a += 1) {
+      for (let b = a + 1; b < MASTERY_TREES.length; b += 1) {
+        pairs.push([MASTERY_TREES[a]!, MASTERY_TREES[b]!]);
+      }
+    }
+    const shortfallOf = (pair: [string, string]): { tier: number; held: number } | null => {
+      for (let tier = MASTERY_MIN_TIER; tier <= MASTERY_MAX_TIER; tier += 1) {
+        const allowed = MASTERY_PICKS_BY_TIER[tier] ?? 0;
+        const held = nodesAt(pair[0], tier) + nodesAt(pair[1], tier);
+        if (held < allowed) return { tier, held };
+      }
+      return null;
+    };
+    const workable = pairs.filter((pair) => shortfallOf(pair) === null);
+    if (pairs.length > 0 && workable.length === 0) {
+      const worst = shortfallOf(pairs[0]!);
+      errors.push({
+        severity: 'error',
+        contentType: 'mastery',
+        key: 'mastery_build',
+        message:
+          `No pair of trees can fill a ${MASTERY_TOTAL_PICKS}-pick build: every pair runs out ` +
+          `at tier ${worst?.tier ?? MASTERY_MIN_TIER}, which allows ` +
+          `${MASTERY_PICKS_BY_TIER[worst?.tier ?? MASTERY_MIN_TIER] ?? 0} picks against ` +
+          `${worst?.held ?? 0} published node${worst?.held === 1 ? '' : 's'}. Every champion in ` +
+          `the game would stop short of a full board with nothing on screen to say why.`,
+      });
     }
   }
 

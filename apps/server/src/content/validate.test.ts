@@ -669,6 +669,93 @@ describe('validateContentSet', () => {
     });
   });
 
+  /**
+   * The mastery board's two rules.
+   *
+   * The second is the interesting one, and it is the Mistspire ward's rule in another
+   * costume: content validated against the rules that *consume* it rather than against
+   * itself. A tree can hold a node at every tier and still strand every build in the game.
+   */
+  describe('the mastery board', () => {
+    const node = (tree: string, tier: number, index: number) => ({
+      key: `${tree}_t${tier}_${index}`,
+      sortOrder: 0,
+      name: `${tree} ${tier}.${index}`,
+      description: '',
+      tree,
+      tier,
+      icon: '',
+      effects: [{ type: 'stat', stat: 'atk', flat: 10, pct: 0 }],
+    });
+
+    /**
+     * A board with a given number of nodes at every tier, per tree.
+     *
+     * Per tree rather than one figure for all three, because the rule under test is about
+     * *pairs*: a board where one pair works and another does not is the case that separates
+     * "some pair can fill a build" from "every pair can", and a uniform board cannot
+     * express it.
+     */
+    const board = (
+      perTier: number | Record<string, number>,
+    ): Record<string, Record<string, unknown>> => {
+      const out: Record<string, Record<string, unknown>> = {};
+      for (const tree of ['onslaught', 'bulwark', 'insight']) {
+        const count = typeof perTier === 'number' ? perTier : (perTier[tree] ?? 0);
+        for (let tier = 1; tier <= 6; tier += 1) {
+          for (let index = 0; index < count; index += 1) {
+            const entity = node(tree, tier, index);
+            out[entity.key] = entity;
+          }
+        }
+      }
+      return out;
+    };
+
+    it('accepts a board every pair of trees can fill', () => {
+      // Two per tier is enough for every tier's allowance across a pair: the largest is 3.
+      const result = validateContentSet(setOf({ mastery: board(2) }));
+      expect(result.errors.filter((issue) => issue.contentType === 'mastery')).toEqual([]);
+    });
+
+    it('refuses a tree missing a whole tier', () => {
+      const nodes = board(2);
+      for (const key of Object.keys(nodes)) if (key.startsWith('bulwark_t4')) delete nodes[key];
+      const result = validateContentSet(setOf({ mastery: nodes }));
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((issue) => issue.message.includes('no tier 4 mastery'))).toBe(true);
+    });
+
+    it('refuses a board no pair of trees can fill, even with every tier populated', () => {
+      // One node per tier per tree: every tree passes the dead-end check, and every pair
+      // still supplies only 2 where tiers 2–5 allow 3. Nobody could ever finish a build,
+      // and nothing on the board would say why.
+      const result = validateContentSet(setOf({ mastery: board(1) }));
+      expect(result.ok).toBe(false);
+      const issue = result.errors.find((entry) => entry.key === 'mastery_build');
+      expect(issue?.message).toContain('No pair of trees');
+      expect(issue?.message).toContain('tier 2');
+    });
+
+    it('accepts a board where a pair does not work, since the player picks the pair', () => {
+      // Onslaught and bulwark are one node per tier, so *that* pair supplies 2 where tiers
+      // 2–5 allow 3 and could never finish a build. Either of them with insight supplies 4.
+      // A player chooses the pair, so this content is specialised rather than broken —
+      // refusing it would refuse a deliberate design.
+      const result = validateContentSet(
+        setOf({ mastery: board({ onslaught: 1, bulwark: 1, insight: 3 }) }),
+      );
+      expect(result.errors.filter((issue) => issue.key === 'mastery_build')).toEqual([]);
+    });
+
+    it('says nothing at all about masteries when none are published', () => {
+      // A partial content set is an ordinary state mid-authoring; the board's rules are
+      // about a board that exists.
+      const result = validateContentSet(setOf({ faction: { testers: faction } }));
+      expect(result.errors.filter((issue) => issue.contentType === 'mastery')).toEqual([]);
+    });
+  });
+
   it('reports every problem at once rather than stopping at the first', () => {
     const content = setOf({
       champion: {
