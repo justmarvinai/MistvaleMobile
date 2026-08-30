@@ -5,6 +5,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — content export and import over the API (A3, ADMIN_SUITE_DESIGN §2.17)
+
+`GET /admin/api/content/export` hands back the live content as one document — the same shape
+`pnpm content:export` has written to disk since P10e, so an operator with no shell on the box
+can take an evening of retuning, commit it, and have a `git diff` of what they did. Changes
+nothing, so it is not audited.
+
+`POST /admin/api/content/import` is the way back in, and it **writes drafts and never live**.
+That is the whole safety story: a bundle arrives as pending edits and then goes through the
+validate → diff → publish flow every other edit takes, so the dry run §2.17 asks for is the
+publish center's own field-level diff rather than a second review path that would need its
+own trust.
+
+Two refusals rather than a best effort. A content type this build does not know is **named**
+back — a snapshot from a newer build silently losing a type is how a restore ends up
+incomplete and nobody finds out until a player does — and an entity already identical to live
+writes **no draft at all**, because a publish diff full of rows that change nothing is one
+nobody reads.
+
+The defect the work turned up is the one worth carrying: **the global 256 KB body limit made
+the feature impossible to use.** Mistvale's whole published content is 805 KB minified and the
+campaign's stages alone are 462 KB, so every real restore would have failed with a bare 413 —
+a status with nothing an operator can act on, from the one endpoint whose entire job is to be
+the way back. The route carries its own `bodyLimit` now, and the entity ceiling beside it is
+set so that *it* is the one that fires: a limit that pre-empts the check with the sentence in
+it is a check that never runs. Found by the test for the ceiling, which asked for a 400 and
+got a 413.
+
+`snapshotOf` moved out of `content/export.ts` into `content/snapshot.ts` so the route reads a
+database module rather than importing a CLI that opens its own pool.
+
 ### Removed — `stage.rewards.dropTableKey`, which nothing has ever read (C34)
 
 Declared on the stage schema since P4, editable in Admin ever since, and read by **no code

@@ -316,6 +316,16 @@ export const ADMIN_ROUTES = {
     revert: '/content/revert',
     revisions: '/content/revisions',
     discard: '/content/discard',
+    /**
+     * The live content as one reviewable document, and the way back in.
+     *
+     * Import writes **drafts**, never live — a bundle becomes pending edits and then goes
+     * through the same validate → diff → publish flow as any other change, which is the
+     * dry-run the design asks for built out of machinery that already has an operator's
+     * trust rather than a second review path that would need its own.
+     */
+    export: '/content/export',
+    import: '/content/import',
   },
   stats: {
     overview: '/stats/overview',

@@ -436,3 +436,87 @@ export const adminBattleDetailSchema = adminBattleSummarySchema.extend({
   rewards: z.unknown(),
 });
 export type AdminBattleDetail = z.infer<typeof adminBattleDetailSchema>;
+
+/**
+ * Content export and import (ADMIN_SUITE_DESIGN §2.16).
+ *
+ * The game repo's `pnpm content:export` has written the live content into the repository
+ * as reviewable JSON since P10e, and it needs a shell on the box. This is the same
+ * document over the wire, so an operator can take an evening's retune, commit it, and have
+ * a `git diff` of what they did.
+ *
+ * **Import writes drafts and never live**, which is the whole safety story: a bundle
+ * arrives as pending edits and then goes through the validate → diff → publish flow every
+ * other edit does. That is the dry-run §2.16 asks for, built out of machinery that already
+ * exists rather than a second review path that would need its own trust.
+ */
+export const adminSnapshotFileSchema = z.object({
+  /**
+   * Deliberately a plain string rather than the content-type enum.
+   *
+   * A snapshot taken from a newer build can carry a type this server has never heard of,
+   * and the enum would reject the whole bundle for it — losing the twenty-five types it
+   * *could* have restored, and reporting the failure as a validation error rather than as
+   * the fact it is. The import names what it did not know instead (`unknownTypes`).
+   */
+  type: z.string(),
+  /** An entity is always a JSON object — every content type is one. */
+  entities: z.array(z.object({ key: z.string(), data: z.record(z.string(), z.unknown()) })),
+});
+export type AdminSnapshotFile = z.infer<typeof adminSnapshotFileSchema>;
+
+export const adminSnapshotSchema = z.object({
+  summary: z.object({
+    rev: z.number().int(),
+    types: z.array(z.object({ type: z.string(), count: z.number().int() })),
+    total: z.number().int(),
+  }),
+  files: z.array(adminSnapshotFileSchema),
+});
+export type AdminSnapshot = z.infer<typeof adminSnapshotSchema>;
+
+/**
+ * How many entities one import may carry. The whole game is about 1,100.
+ *
+ * There are two ceilings here and the relationship between them is the point. Fastify
+ * refuses an over-large body *before* parsing it, which is cheap and protects memory but
+ * answers 413 with nothing an operator can act on; this one is checked afterwards and
+ * says what it refused and why. So the byte ceiling has to be generous enough that this
+ * one is the one that fires — otherwise it is dead code and a restore fails with a bare
+ * status. The whole published game is 1,054 entities and 805 KB minified, so both are set
+ * at roughly five times what the game weighs today.
+ */
+export const IMPORT_MAX_ENTITIES = 5_000;
+
+/**
+ * The largest import body the server will read, in bytes.
+ *
+ * Well past the global 256 KB limit, because the document this endpoint exists to accept
+ * is the whole game — 805 KB today, of which the campaign's stages alone are 462 KB — so
+ * the default would refuse every real restore and only ever accept the toy ones.
+ */
+export const IMPORT_MAX_BYTES = 4 * 1024 * 1024;
+
+export const adminImportRequestSchema = z.object({
+  files: z.array(adminSnapshotFileSchema).min(1),
+  /**
+   * Only these content types, when set.
+   *
+   * An operator restoring one type from a snapshot must not be made to import the other
+   * twenty-five to do it — and a snapshot is a whole-game document, so without this the
+   * only granularity available would be all of it.
+   */
+  only: z.array(z.string()).optional(),
+});
+export type AdminImportRequest = z.infer<typeof adminImportRequestSchema>;
+
+export const adminImportResultSchema = z.object({
+  /** Drafts written, per type. Nothing is live until the operator publishes. */
+  drafted: z.array(z.object({ type: z.string(), count: z.number().int() })),
+  total: z.number().int(),
+  /** Types in the bundle this server does not know, named rather than silently dropped. */
+  unknownTypes: z.array(z.string()),
+  /** Entities that were already identical to live, so no draft was written for them. */
+  unchanged: z.number().int(),
+});
+export type AdminImportResult = z.infer<typeof adminImportResultSchema>;

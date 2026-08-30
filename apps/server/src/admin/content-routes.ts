@@ -6,11 +6,15 @@ import {
   CONTENT_TYPES,
   apiSuccess,
   contentTypeByPath,
+  adminImportRequestSchema,
+  IMPORT_MAX_BYTES,
   type ContentType,
 } from '@mistvale/shared';
 import { AppError } from '../lib/errors';
 import * as repo from '../content/repo';
+import { snapshotOf } from '../content/snapshot';
 import { actorName, recordAudit } from './audit';
+import { importSnapshot } from './content-import';
 import { keyParam } from '../lib/params';
 
 /**
@@ -290,5 +294,38 @@ export const adminContentRoutes: FastifyPluginAsync = async (app) => {
     });
 
     return reply.send(apiSuccess({ discarded: removed }, app.content.rev));
+  });
+
+  /**
+   * The live content as one document (ADMIN_SUITE_DESIGN §2.16).
+   *
+   * The same shape `pnpm content:export` writes to disk, so an operator without a shell on
+   * the box can still take an evening's retune, commit it, and have a `git diff` of what
+   * they did. Not audited: it changes nothing.
+   */
+  app.get(ADMIN_ROUTES.content.export, async (_request, reply) => {
+    return reply.send(apiSuccess(await snapshotOf(app.db), app.content.rev));
+  });
+
+  /**
+   * A snapshot back in, as **drafts**.
+   *
+   * Never live, which is what makes it safe to offer at all: the bundle becomes pending
+   * edits and goes through the same validate → diff → publish flow as any other change.
+   * Audited, because unlike the export it does change something.
+   *
+   * The one endpoint in the API with its own body limit: the document it exists to accept
+   * is the whole game, which is three times the global 256 KB limit and growing with every
+   * chapter, so on the default every real restore would have failed with a bare 413.
+   */
+  app.post(ADMIN_ROUTES.content.import, { bodyLimit: IMPORT_MAX_BYTES }, async (request, reply) => {
+    const body = adminImportRequestSchema.parse(request.body ?? {});
+    const result = await importSnapshot(app.db, body, actorName(request));
+    await recordAudit(app.db, request, {
+      action: 'content.import',
+      entity: 'content',
+      after: { drafted: result.total, unchanged: result.unchanged, types: result.drafted },
+    });
+    return reply.send(apiSuccess(result, app.content.rev));
   });
 };

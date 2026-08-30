@@ -3,10 +3,9 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { CONTENT_LOAD_ORDER, type ContentType } from '@mistvale/shared';
 import { loadConfig } from '../lib/config';
 import type { Database } from '../db/client';
-import * as repo from './repo';
+import { snapshotOf, stable, type SnapshotSummary } from './snapshot';
 
 /**
  * The live content, written into the repository as reviewable JSON.
@@ -27,50 +26,20 @@ import * as repo from './repo';
  * Deliberately whole-file-per-type rather than one file per entity: 372 stages would be
  * 372 files, and the question a reader asks is "what changed in the campaign", not "what
  * changed in stage c07_s3_hard".
+ *
+ * The document itself is `content/snapshot.ts`, which the Admin API serves over the wire
+ * (ADMIN_SUITE_DESIGN §2.16) — this module is the half that puts it on a disk.
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_DIR = resolve(HERE, '../../../../content-snapshot');
-
-export interface SnapshotSummary {
-  rev: number;
-  types: { type: ContentType; count: number }[];
-  total: number;
-}
-
-/**
- * Sorts an object's keys, recursively.
- *
- * The point of the snapshot is the diff, and `JSON.stringify` preserves insertion order —
- * so two exports of identical content would differ wherever a row happened to come back
- * with its fields in another order. Sorting makes a diff mean "somebody changed this".
- */
-function stable(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stable);
-  if (value && typeof value === 'object') {
-    const source = value as Record<string, unknown>;
-    const sorted: Record<string, unknown> = {};
-    for (const key of Object.keys(source).sort()) sorted[key] = stable(source[key]);
-    return sorted;
-  }
-  return value;
-}
 
 /** Writes the snapshot and returns what it wrote. */
 export async function exportContent(
   db: Database,
   directory = SNAPSHOT_DIR,
 ): Promise<SnapshotSummary> {
-  const rev = await repo.latestRevision(db);
-  const live = await repo.listByState(db, 'live');
-
-  const byType = new Map<ContentType, { key: string; data: unknown }[]>();
-  for (const row of live) {
-    const type = row.contentType as ContentType;
-    const bucket = byType.get(type) ?? [];
-    bucket.push({ key: row.key, data: row.data });
-    byType.set(type, bucket);
-  }
+  const { summary, files } = await snapshotOf(db);
 
   await mkdir(directory, { recursive: true });
 
@@ -82,24 +51,13 @@ export async function exportContent(
     if (file.endsWith('.json')) await rm(resolve(directory, file));
   }
 
-  const types: SnapshotSummary['types'] = [];
-  for (const type of CONTENT_LOAD_ORDER) {
-    const entities = (byType.get(type) ?? []).sort((a, b) => a.key.localeCompare(b.key));
-    if (entities.length === 0) continue;
-    const body = entities.map((entity) => ({ key: entity.key, data: stable(entity.data) }));
+  for (const file of files) {
     await writeFile(
-      resolve(directory, `${type}.json`),
-      `${JSON.stringify(body, null, 2)}\n`,
+      resolve(directory, `${file.type}.json`),
+      `${JSON.stringify(file.entities, null, 2)}\n`,
       'utf8',
     );
-    types.push({ type, count: entities.length });
   }
-
-  const summary: SnapshotSummary = {
-    rev,
-    types,
-    total: types.reduce((carry, entry) => carry + entry.count, 0),
-  };
 
   // The manifest carries the revision, which is the one thing a file-per-type layout
   // cannot say — and the thing somebody restoring will want to know first.

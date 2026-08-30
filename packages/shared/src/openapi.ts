@@ -26,6 +26,10 @@ import {
   adminBattleUnitSchema,
   adminSimulateRequestSchema,
   adminSimulateResultSchema,
+  adminSnapshotSchema,
+  adminSnapshotFileSchema,
+  adminImportRequestSchema,
+  adminImportResultSchema,
 } from './admin';
 import { arenaBotCensusSchema, arenaLadderResultSchema } from './arena';
 import { mailBatchSchema, mailSendRequestSchema, mailSendResultSchema } from './mail';
@@ -391,6 +395,34 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Discard every pending draft',
     response: z.object({ discarded: z.number().int() }),
   },
+  {
+    surface: 'admin',
+    method: 'get',
+    path: ADMIN_ROUTES.content.export,
+    operationId: 'exportContent',
+    summary: 'The live content as one reviewable document',
+    description:
+      'The same document `pnpm content:export` writes to disk, so an operator without a ' +
+      'shell on the box can still take an evening of retuning, commit it, and have a ' +
+      '`git diff` of what they did. Changes nothing, so it is not audited.',
+    response: adminSnapshotSchema,
+  },
+  {
+    surface: 'admin',
+    method: 'post',
+    path: ADMIN_ROUTES.content.import,
+    operationId: 'importContent',
+    summary: 'Load a snapshot back in, as drafts',
+    description:
+      'Writes **drafts** and never live: the bundle becomes pending edits and then goes ' +
+      'through the same validate -> diff -> publish flow as any other change, which is ' +
+      'the dry-run the design asks for. An entity already identical to live writes no ' +
+      'draft at all, and a content type this server does not know is named rather than ' +
+      'silently dropped.',
+    body: adminImportRequestSchema,
+    response: adminImportResultSchema,
+    errors: [400],
+  },
 
   // ── Admin: player management ─────────────────────────────────────────────
   {
@@ -722,6 +754,10 @@ const SHARED_SCHEMAS: Record<string, z.ZodType> = {
   AdminGrantRequest: adminGrantRequestSchema,
   AdminSimulateRequest: adminSimulateRequestSchema,
   AdminSimulateResult: adminSimulateResultSchema,
+  AdminSnapshotFile: adminSnapshotFileSchema,
+  AdminSnapshot: adminSnapshotSchema,
+  AdminImportRequest: adminImportRequestSchema,
+  AdminImportResult: adminImportResultSchema,
   ...Object.fromEntries(
     CONTENT_TYPES.map((type) => [`${pascal(type)}Def`, CONTENT_REGISTRY[type].schema]),
   ),

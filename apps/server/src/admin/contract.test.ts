@@ -256,6 +256,12 @@ describe.skipIf(!dbUp)('API contract', () => {
     // pinned on real content in `simulate.test.ts` and on every stage in the game by the
     // CI balance gates.
     simulateStage: { stageKey: 'test_stage', tier: 'fresh', runs: 1 },
+    // Re-imports the fixture faction exactly as it stands, which is the case worth
+    // exercising here: identical-to-live writes no draft, so this contract case cannot
+    // leave a pending edit behind for the publish cases that follow it.
+    importContent: {
+      files: [{ type: 'factions', entities: [{ key: 'testers', data: FIXTURE[0]!.data }] }],
+    },
   };
 
   /**
