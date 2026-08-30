@@ -321,6 +321,16 @@ export const ADMIN_ROUTES = {
     overview: '/stats/overview',
   },
   /**
+   * The audit log, searchable and paginated (gap G1).
+   *
+   * Separate from `/stats/overview`, which carries the ten most recent as a dashboard
+   * strip. That strip answers "has anything happened"; this answers "what happened to
+   * this, and who did it", and the two want very different shapes.
+   */
+  audit: {
+    list: '/audit',
+  },
+  /**
    * Player management, keyed by **player** id rather than account id.
    *
    * The player is what an operator has in front of them — it is what `economy_log`,

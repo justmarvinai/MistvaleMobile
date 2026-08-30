@@ -16,6 +16,9 @@ import {
   adminSessionSchema,
   adminSessionsRevokedSchema,
   adminSetRankRequestSchema,
+  adminAuditEntrySchema,
+  adminAuditPageSchema,
+  adminAuditQuerySchema,
   adminSimulateRequestSchema,
   adminSimulateResultSchema,
 } from './admin';
@@ -115,6 +118,14 @@ export interface ApiEndpoint {
   description?: string;
   /** Body schema for write methods. */
   body?: z.ZodType;
+  /**
+   * Query-string schema, for the reads that take filters.
+   *
+   * An object, and flattened into `in: 'query'` parameters rather than referenced as a
+   * schema — that is what OpenAPI wants, and it is what makes a generated client hand the
+   * caller named arguments instead of an opaque bag.
+   */
+  query?: z.ZodObject<z.ZodRawShape>;
   /** The `data` member of the success envelope. */
   response: z.ZodType;
   /** Status codes this endpoint returns beyond 200 and the always-present ones. */
@@ -562,6 +573,26 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     }),
     errors: [400, 404],
   },
+
+  // ── Admin: the audit log ──────────────────────────────────────────────────
+  {
+    surface: 'admin',
+    method: 'get',
+    path: ADMIN_ROUTES.audit.list,
+    operationId: 'listAudit',
+    summary: 'Search the audit log',
+    description:
+      'Every administrative mutation has recorded who, what and both sides of the change ' +
+      'since P1; until now the suite could only see the ten most recent, on the dashboard. ' +
+      'Filtered by actor, action, entity, entity id and date, all optional and all ' +
+      'combinable. Returns the matching page, the total number of matches — the difference ' +
+      'between "3 changes to this stage" and "3 of 400" is the whole question — and the ' +
+      'distinct actions and entities present, so the filter can offer them. Reading is ' +
+      'deliberately not itself audited.',
+    query: adminAuditQuerySchema,
+    response: adminAuditPageSchema,
+    errors: [400],
+  },
 ];
 
 // ── Document generation ─────────────────────────────────────────────────────
@@ -596,6 +627,8 @@ const SHARED_SCHEMAS: Record<string, z.ZodType> = {
   AdminAccountState: adminAccountStateSchema,
   AdminResetPasswordResult: adminResetPasswordResultSchema,
   AdminGrantResult: adminGrantResultSchema,
+  AdminAuditEntry: adminAuditEntrySchema,
+  AdminAuditPage: adminAuditPageSchema,
   AdminSetRankRequest: adminSetRankRequestSchema,
   AdminBanRequest: adminBanRequestSchema,
   AdminRenameRequest: adminRenameRequestSchema,
@@ -753,35 +786,47 @@ export function buildOpenApiDocument(options: { version: string }): JsonSchema {
 
     if (endpoint.description) operation.description = endpoint.description;
 
-    if (params.length > 0) {
-      operation.parameters = params.map((name) => ({
-        name,
-        in: 'path',
-        required: true,
-        description:
-          name === 'type'
-            ? 'Content type path segment.'
-            : name === 'key'
-              ? 'Content key (lowercase snake_case).'
-              : undefined,
-        schema:
-          name === 'type'
-            ? { type: 'string', enum: CONTENT_TYPE_PARAM_VALUES }
-            : { type: 'string' },
-      }));
-    }
+    // One list, assembled once. Path, header and query parameters used to be three
+    // separate assignments to the same field, so the last one written silently discarded
+    // the others — harmless while nothing had two kinds, and a trap the moment one did.
+    const parameters: JsonSchema[] = params.map((name) => ({
+      name,
+      in: 'path',
+      required: true,
+      description:
+        name === 'type'
+          ? 'Content type path segment.'
+          : name === 'key'
+            ? 'Content key (lowercase snake_case).'
+            : undefined,
+      schema:
+        name === 'type' ? { type: 'string', enum: CONTENT_TYPE_PARAM_VALUES } : { type: 'string' },
+    }));
 
     if (endpoint.operationId === 'getContentBundle') {
-      operation.parameters = [
-        {
-          name: 'If-None-Match',
-          in: 'header',
-          required: false,
-          description: 'ETag from a previous bundle response.',
-          schema: { type: 'string' },
-        },
-      ];
+      parameters.push({
+        name: 'If-None-Match',
+        in: 'header',
+        required: false,
+        description: 'ETag from a previous bundle response.',
+        schema: { type: 'string' },
+      });
     }
+
+    if (endpoint.query) {
+      // Flattened rather than `$ref`-ed: OpenAPI has no notion of a query *object*, and a
+      // generated client is far more useful with named parameters than with a bag.
+      const shape = z.toJSONSchema(endpoint.query, { io: 'input' }) as {
+        properties?: Record<string, JsonSchema>;
+        required?: string[];
+      };
+      const required = new Set(shape.required ?? []);
+      for (const [name, schema] of Object.entries(shape.properties ?? {})) {
+        parameters.push({ name, in: 'query', required: required.has(name), schema });
+      }
+    }
+
+    if (parameters.length > 0) operation.parameters = parameters;
 
     if (endpoint.body) {
       operation.requestBody = {

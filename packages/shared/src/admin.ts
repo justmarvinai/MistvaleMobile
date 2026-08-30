@@ -293,3 +293,70 @@ export const adminSimulateResultSchema = z.object({
   msPerRun: z.number(),
 });
 export type AdminSimulateResult = z.infer<typeof adminSimulateResultSchema>;
+
+/**
+ * The audit log, searchable (gap G1).
+ *
+ * ADMIN_SUITE_DESIGN §2.17 asked for this from the start and the suite has only ever had
+ * the ten most recent entries, ridden in on `/stats/overview`. Ten is enough to notice
+ * that somebody published something; it is not enough to answer "who changed this stage,
+ * and when" — which is the question an audit log exists for, and the one that only comes
+ * up on a bad day.
+ *
+ * Filtered by actor, action, entity and date, all optional and all combinable, because an
+ * operator arrives at this screen from one of two directions: a name they are suspicious
+ * of, or an entity that has gone wrong.
+ */
+export const AUDIT_MAX_LIMIT = 100;
+export const AUDIT_DEFAULT_LIMIT = 50;
+
+export const adminAuditQuerySchema = z.object({
+  /** Substring, case-insensitive, matched against the recorded actor label. */
+  actor: z.string().max(120).optional(),
+  /** Exact action, e.g. `player.ban` — the list is small and an operator picks from it. */
+  action: z.string().max(120).optional(),
+  /** Exact entity type, e.g. `account` or `content`. */
+  entity: z.string().max(120).optional(),
+  /** Exact entity id, which is how "what happened to *this* thing" is asked. */
+  entityId: z.string().max(200).optional(),
+  /** ISO instants. Inclusive at both ends, because an operator thinks in whole days. */
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  limit: z.coerce.number().int().min(1).max(AUDIT_MAX_LIMIT).default(AUDIT_DEFAULT_LIMIT),
+  offset: z.coerce.number().int().min(0).max(1_000_000).default(0),
+});
+export type AdminAuditQuery = z.infer<typeof adminAuditQuerySchema>;
+
+export const adminAuditEntrySchema = z.object({
+  id: z.string(),
+  actor: z.string(),
+  action: z.string(),
+  entity: z.string(),
+  entityId: z.string().nullable(),
+  /**
+   * What the thing looked like on either side of the change.
+   *
+   * Carried rather than summarised: "vale-warden was banned" is a fact somebody can act on
+   * a year later and "ban" is not, which is why every mutation records both halves.
+   */
+  before: z.unknown(),
+  after: z.unknown(),
+  createdAt: z.string(),
+});
+export type AdminAuditEntry = z.infer<typeof adminAuditEntrySchema>;
+
+export const adminAuditPageSchema = z.object({
+  entries: z.array(adminAuditEntrySchema),
+  /**
+   * How many rows match the filter, not how many were returned.
+   *
+   * A count is worth the second query here: the difference between "3 changes to this
+   * stage" and "3 of 400" is the whole question, and a page of fifty cannot say which.
+   */
+  total: z.number().int(),
+  /** The distinct actions present in the log, so the filter can offer them. */
+  actions: z.array(z.string()),
+  /** The distinct entity types present, for the same reason. */
+  entities: z.array(z.string()),
+});
+export type AdminAuditPage = z.infer<typeof adminAuditPageSchema>;

@@ -5,6 +5,49 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — the audit log is readable (C31, gap G1)
+
+`GET /admin/api/audit` — every administrative mutation has recorded who, what and both sides
+of the change since P1, and nothing could read it beyond the ten most recent entries riding
+in on the dashboard's `/stats/overview`. Filtered by actor (a substring, since the recorded
+label is `admin:<name>` and an operator types the name), action, entity, entity id and date;
+all optional, all combining, and returning the count of *matches* alongside the page —
+"3 changes to this stage" and "3 of 400" are different answers and a page cannot say which.
+
+The response also carries the distinct actions and entities present, built from the **whole**
+log rather than from the current results: a filter whose own options narrow as it is used can
+only be used once. Reading is deliberately **not audited**, for the reason `simulate` writes
+no audit row either.
+
+It needed one thing of the OpenAPI generator, and that turned out to be a fix rather than a
+feature: query parameters were not expressible at all — the players search has been
+undocumented since it shipped — and the three places that set `operation.parameters` did so
+by *assignment*, so an endpoint with two kinds of parameter would have silently kept only the
+last. They are one list now.
+
+### Changed — the publish diff names the thing that changed (C30, gap G2)
+
+It compared top-level keys only, so changing one point of a champion's attack rendered the
+entire `baseStats` on both sides and left the operator to find the digit that moved. It reads
+`baseStats.atk` now — and `waves[1][0].enemyKey` rather than a whole wave plan printed twice,
+which is what content growing nested had quietly made of it.
+
+Two rules keep it honest rather than merely deep. A subtree is only walked while **both sides
+are the same shape**: an object replaced by a string is one edit, and reporting it as a
+hundred would be describing the shapes rather than the change. And each top-level field is
+**capped at twelve leaves** — past that it is reported whole, which is the old behaviour kept
+for the case it was always right for, because "the waves were rewritten" is a better account
+of a rewrite than twenty rows each naming one enemy. Both sides of that boundary are pinned.
+
+Server-side, deliberately: the diff is what a publish decision is made on, so it stays the
+single source of truth rather than something the SPA re-derives.
+
+**The trap it left behind is the half worth carrying.** The risk rules — the ones that mark a
+stat change as a balance risk and a price change as an economy one — matched on the whole
+path. They would have gone silent the moment the diff learned to go deeper than one level,
+flagging nothing and looking exactly like content that carried no risk. They read the *root*
+of a path now, and both the unit test and the live publish test assert it.
+
 ### Added — nobody is mandatory in the Arena, and it is measured (C29b)
 
 The other half of gap G7, and the last of the two balance gates COMBAT_SYSTEM §14 has
