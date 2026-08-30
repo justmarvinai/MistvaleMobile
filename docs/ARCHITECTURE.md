@@ -247,8 +247,12 @@ extractor can read. `pnpm i18n:check` is in `pnpm verify` and fails on a stale t
 
 **Content is not localised by this**, and that is a schema decision rather than an oversight:
 champion names and kit text live in PostgreSQL and are edited in Admin, so a second language
-for them needs a locale dimension on `content_entries` with a real migration behind it. It is
-open as **Q10**.
+for them needs a locale dimension on `content_entries` with a real migration behind it. **Q10
+settled it** (2026-08-30, *"leave content English"*): content stays English-only, so there is no
+locale dimension, no language picker on any editor and no per-locale validation pass — publish,
+diff and the served bundle are exactly what they were. Adding one later is a migration with a
+real translator in front of it, which is cheaper than a shape guessed at now; the client's own
+chrome needs nothing from it.
 
 ## 8. Admin API (consumed by MistvaleMobile-Admin)
 

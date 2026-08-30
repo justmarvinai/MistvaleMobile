@@ -49,8 +49,11 @@ first, and it names `catalogues.ts` as where a translation belongs.
 **Content is deliberately not localised by this.** Champion names and kit text live in
 PostgreSQL and are edited in Admin, so a second language for them is a locale dimension on
 `content_entries` with a migration, an Admin pass and a permanent widening of what publishing
-means. That is a decision rather than a build task and is open as **Q10**, with English-only
-as the active default so nothing blocks.
+means. That is a decision rather than a build task, and **the owner settled it the same day**
+(Q10, 2026-08-30 — *"leave content English"*): content stays English-only, so `content_entries`
+keeps one row per entity and publish, validate, diff and the served bundle are unchanged. The
+client's chrome stays scaffolded either way, which is what keeps the retrofit a screen-at-a-time
+job rather than a schema decision.
 
 
 ### Added — the Vale Pass, a season with a reward track (C38)

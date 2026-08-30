@@ -4,31 +4,8 @@
 
 ## Open questions
 
-**Q10 — how far localisation should go**, and it is open because the two halves have very
-different costs and only you can say whether the second is wanted.
-
-The **client's own chrome** is scaffolded and needs no decision (C39, ARCHITECTURE §7b):
-strings are keyed by their own English, so a screen converted to `t()` reads exactly as it did
-and a second language is a catalogue file plus one entry in `LOCALES`. `pnpm i18n` reports
-**77** strings already reachable and **686** still written into components — that second
-number is the retrofit, and it is work anybody can do a screen at a time whenever a translator
-appears.
-
-**Content is the half that is a decision.** Champion names, kit text, stage briefs, quest
-wording — 1,137 entities — live in PostgreSQL and are edited in Admin, so a second language
-for them means a **locale dimension on `content_entries`**: every editor gains a language
-picker, publish validates a set per locale, and the bundle is served per locale. That is a
-migration, an Admin pass and a permanent widening of what publishing means.
-
-**Recommended default (active, so nothing blocks): leave content English-only.** A game with
-one language and no translator does not need it, the scaffolding above means the *client* is
-ready whenever you are, and the schema change is the kind that is cheaper done once with a
-real language in front of it than guessed at now. If you ever want a second language, say so
-and content follows the same draft → validate → publish flow it already has, one locale at a
-time.
-
-Answered previously: Q9 on 2026-08-30, Q6 and Q8 on 2026-08-27 and 2026-08-26, Q7 on
-2026-08-21, Q4 and Q5 on 2026-08-18; all of them are in the decision record below.
+**None.** Q10 was answered on 2026-08-30 and is in the decision record below; Q9 the same day, Q6
+and Q8 on 2026-08-27 and 2026-08-26, Q7 on 2026-08-21, Q4 and Q5 on 2026-08-18.
 
 Two small **operational** items remain open but non-blocking (defaults active):
 - **O1. `/admin` IP allowlist** — optional hardening; default: off until you provide IP(s). (DEPLOYMENT_OPERATIONS §1)
@@ -86,6 +63,7 @@ Each has a phase and a default, so none of them blocks anything. Listed here so 
 | # | Question | Answer | Where it lives now |
 |---|---|---|---|
 | Q9 | Whether to tune the ten champions outside the documented 85–115% role band, or leave the band unenforced | **Recommendation taken** ("For Q9 → Do what you recommend"): **the roster is left alone and the band stays unenforced.** A spread of 75–151% within a role is not obviously wrong for a collection game — an auto-include and a niche pick are what make a collection worth having, and the source game's spread is far wider than this — and the ten names are champions doing what they were authored to do rather than bugs. What is enforced instead is the three statements that hold whatever the tuning is: the bench fight is still winnable, every champion deals damage or heals or shields and survives some of the time, and nobody exceeds 200% of its role's median. All three are mutation-checked and each fires on a different mutation. The table is printed by `pnpm sim` on every run, so a champion pass has its input the day anybody wants one, and the two observations worth carrying are recorded with it: **Ugrim Pyrechant is authored `support` and out-damages half the `attack` roster**, and **six of the ten supports neither heal nor shield** — the role is mostly buff, debuff and turn meter. | COMBAT_SYSTEM §14, `packages/sim/src/benchmark.ts`, `tools/balance-sim/src/index.ts` |
+| Q10 | How far localisation should go — the client's chrome is scaffolded either way; content is the half that costs a schema change | **Recommendation taken** ("For Q10 → Do whats recommended, leave content English"): **content stays English-only, and there is no locale dimension on `content_entries`.** Champion names, kit text, stage briefs and quest wording — 1,137 entities — keep one row per entity, so publish, validate, diff and the served bundle stay exactly what they are. That is the half that would have cost a migration, a language picker on every editor, a validation pass per locale and a permanent widening of what publishing means — and it is cheaper done once with a real translator in front of it than guessed at now. **The client's own chrome is unaffected and stays scaffolded** (C39): strings are keyed by their own English, so a screen converted to `t()` reads exactly as it did, a missing entry falls back to correct English rather than an id, and a half-converted client is a correct state. `pnpm i18n` reports both halves — 77 reachable against 686 still in components at the decision — so the retrofit stays measured rather than assumed and can be done a screen at a time whenever a second language is wanted; adding one is then a catalogue file plus one entry in `LOCALES`. | ARCHITECTURE §7b, `packages/shared/src/i18n.ts`, `tools/i18n-extract/` |
 
 ## Decision record (owner answers, 2026-08-27)
 

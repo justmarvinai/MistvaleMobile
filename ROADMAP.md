@@ -360,8 +360,10 @@ engine, the goal DSL and the events framework already do most of the work*.
     client is a correct state — which is what makes the retrofit something anybody can do a
     screen at a time. `pnpm i18n` extracts, reports and (in `pnpm verify`) refuses a stale
     template. **Content** is the half that is a decision rather than a build task — a locale
-    dimension on `content_entries` — and is open as **Q10** with English-only as the active
-    default.
+    dimension on `content_entries` — and **Q10 settled it on 2026-08-30** (*"leave content
+    English"*): content stays English-only, so there is no locale dimension and publishing is
+    unchanged. The client half stays scaffolded, and the retrofit is available a screen at a
+    time the day a translator is.
 
 **Debts worth paying**
 
