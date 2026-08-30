@@ -29,6 +29,7 @@ export * from './login';
 export * from './mail';
 export * from './news';
 export * from './profile';
+export * from './warband';
 export * from './tutorial';
 export * from './admin';
 export * from './routes';

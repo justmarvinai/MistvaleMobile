@@ -190,6 +190,14 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
   const following = repeatable && won ? nextStage(stage, bundle?.stages ?? [], standings) : null;
   const team = battle?.team ?? [];
 
+  /**
+   * Again, and Next: the same four, no borrowed warden.
+   *
+   * `team` is the account's own copies — a borrowed champion is never in it (C37) — and
+   * that is right rather than a gap: the day's one borrow was spent on the fight that
+   * just finished, so offering to bring them again would be offering something the
+   * server has already refused.
+   */
   const fight = async (target: StageDef): Promise<void> => {
     setError(null);
     try {
@@ -244,7 +252,11 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
                   </dl>
                 )}
 
-                <ResultParty rows={contributions} team={team} />
+                <ResultParty
+                  rows={contributions}
+                  team={team}
+                  borrowedFrom={battle?.borrowedFrom ?? null}
+                />
 
                 {error && <p className={styles.error}>{error}</p>}
 

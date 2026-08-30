@@ -16,6 +16,8 @@ import {
 } from '../Champions/rosterFilter';
 import { auraApplies, auraText } from '../../ui/auraText';
 import { rarityLabel } from '../../ui/labels';
+import { MAX_SLOTS } from '../../game/formation';
+import { lineupSlots } from './slots';
 import styles from './Lineup.module.scss';
 
 /**
@@ -49,8 +51,6 @@ import styles from './Lineup.module.scss';
  * confused. What comes in is a side, an opposition and a footer.
  */
 
-export const MAX_SLOTS = 4;
-
 /** One side's banner: whose aura is up, and what the four add up to. */
 export interface LineupSide {
   /** The heading over the side — "Your team", the opponent's name. */
@@ -70,11 +70,30 @@ export interface LineupSide {
   auraHint?: string | undefined;
 }
 
+/**
+ * A champion in the lineup that the account does not own — a warden's standard-bearer,
+ * borrowed for this one fight (C37).
+ *
+ * Resolved by the caller and handed over as a face and a name, for the reason every
+ * economy stays with the caller: which warden, whether a borrow is left today and which
+ * modes allow one at all are decisions, and this component draws lineups.
+ */
+export interface LineupGuest {
+  /** The borrowed champion's name. */
+  name: string;
+  /** Their portrait, or null for `Portrait`'s own stand-in. */
+  portrait: string | null;
+  /** The lender's profile name, drawn where a slot's level line goes. */
+  owner: string;
+  onRemove: () => void;
+}
+
 export function Lineup({
   yours,
   theirs,
   opposition,
   team,
+  guest,
   onToggle,
   eligible,
   barredReason,
@@ -88,6 +107,8 @@ export function Lineup({
   opposition?: ReactNode;
   /** `player_champions` ids in formation order; the first is the leader. */
   team: readonly string[];
+  /** A borrowed warden, standing in the slot after the account's own four. */
+  guest?: LineupGuest | undefined;
   onToggle: (id: string) => void;
   /** Whether a champion may be *started* with — a warded floor's rule. Dimmed, not hidden. */
   eligible?: ((championKey: string) => boolean) | undefined;
@@ -123,6 +144,7 @@ export function Lineup({
     [bundle],
   );
 
+  const { guestSlot } = lineupSlots(team.length, guest !== undefined);
   const narrowed = isNarrowed(filter);
   const narrow = <K extends keyof RosterFilter>(key: K, value: RosterFilter[K]): void =>
     setFilter({ ...filter, [key]: value });
@@ -141,21 +163,44 @@ export function Lineup({
               const id = team[index];
               const owned = roster.find((entry) => entry.id === id);
               const def = owned ? defs.get(owned.championKey) : undefined;
+              // Where the borrowed warden stands, decided by `lineupSlots` rather than
+              // here: three places do this arithmetic and the server refuses on it.
+              const isGuest = guest !== undefined && index === guestSlot;
               return (
                 <button
                   key={index}
                   type="button"
                   className={styles.slot}
-                  data-filled={Boolean(id)}
+                  data-filled={Boolean(id) || isGuest}
                   data-leader={index === 0}
-                  onClick={() => id && onToggle(id)}
-                  title={id ? 'Remove from the lineup' : 'Empty slot'}
+                  data-guest={isGuest}
+                  onClick={() => (isGuest ? guest.onRemove() : id ? onToggle(id) : undefined)}
+                  title={
+                    isGuest
+                      ? 'Send the borrowed warden home'
+                      : id
+                        ? 'Remove from the lineup'
+                        : 'Empty slot'
+                  }
                 >
                   {/* Only a filled slot gets a face. `Portrait` draws its own stand-in for
                       a missing image, which is right for an art-pending champion and wrong
                       for an empty slot — four hooded figures under "Leader · Slot 2 · Slot
                       3" reads as a team that has already been picked. */}
-                  {def && owned ? (
+                  {isGuest ? (
+                    <>
+                      <Portrait
+                        src={guest.portrait}
+                        name={guest.name}
+                        size={SLOT_FACE}
+                        className={styles.slotFace}
+                      />
+                      <span className={styles.slotName}>{guest.name}</span>
+                      {/* Whose it is, where the level line goes: a borrowed champion is
+                          interesting *because* somebody else built it. */}
+                      <span className={styles.slotMeta}>{guest.owner}</span>
+                    </>
+                  ) : def && owned ? (
                     <>
                       <Portrait
                         src={championArt(def, bundle?.assets).portrait ?? null}
@@ -177,6 +222,7 @@ export function Lineup({
                     </>
                   )}
                   {index === 0 && <span className={styles.leaderTag}>Leader</span>}
+                  {isGuest && <span className={styles.guestTag}>Borrowed</span>}
                 </button>
               );
             })}

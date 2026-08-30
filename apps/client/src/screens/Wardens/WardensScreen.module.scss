@@ -1,0 +1,171 @@
+@use '../../styles/tokens' as *;
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding-bottom: $space-4;
+}
+
+.note {
+  margin: 0 0 $space-2;
+  color: $parchment-dim;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.error {
+  margin: 0;
+  color: $danger;
+  font-size: 0.9rem;
+}
+
+.counts {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.85rem;
+}
+
+.offer {
+  display: flex;
+  gap: $space-3;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.offerText {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+
+.noOffer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 132px;
+  min-height: 176px;
+  border: 1px dashed rgba($parchment-dim, 0.4);
+  border-radius: 4px;
+  color: $parchment-dim;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: $space-2;
+}
+
+.lends {
+  margin: 0 0 $space-1;
+  color: $parchment;
+  font-size: 0.95rem;
+
+  strong {
+    color: $gold;
+    font-family: $font-mono;
+  }
+}
+
+.offerActions {
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.add {
+  display: flex;
+  gap: $space-2;
+  align-items: flex-end;
+  margin-bottom: $space-3;
+  flex-wrap: wrap;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(0, 2fr) auto;
+  gap: $space-3;
+  align-items: center;
+  padding: $space-2;
+  border: 1px solid rgba($parchment-dim, 0.2);
+  border-radius: 4px;
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+}
+
+.name {
+  color: $accent;
+  font-weight: 600;
+}
+
+.level,
+.title {
+  color: $parchment-dim;
+  font-size: 0.8rem;
+}
+
+.bearer {
+  display: flex;
+  gap: $space-2;
+  align-items: center;
+  min-width: 0;
+}
+
+.face {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.bearerName {
+  margin: 0;
+  color: $parchment;
+  font-size: 0.9rem;
+}
+
+.bearerFacts {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.8rem;
+  font-family: $font-mono;
+}
+
+.rowActions {
+  display: flex;
+  gap: $space-2;
+  align-items: center;
+}
+
+.lendCount {
+  color: $parchment-dim;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 132px);
+  gap: $space-2;
+  justify-content: center;
+  max-height: 60vh;
+  overflow-y: auto;
+}

@@ -8,6 +8,7 @@ import { useWorldBossStore } from './worldBossStore';
 import { useDeepRunStore } from './deepRunStore';
 import { useSpireStore } from './spireStore';
 import { useExpeditionStore } from './expeditionStore';
+import { useWarbandStore } from './warbandStore';
 import { useLoadoutSetStore } from './loadoutSetStore';
 import { useEventStore } from './eventStore';
 import { useInventoryStore } from './inventoryStore';
@@ -58,6 +59,7 @@ export function resetAccountState(): void {
   useDeepRunStore.getState().reset();
   useSpireStore.getState().reset();
   useExpeditionStore.getState().reset();
+  useWarbandStore.getState().reset();
   useLoadoutSetStore.getState().reset();
   useEventStore.getState().reset();
   useInventoryStore.getState().reset();

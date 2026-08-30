@@ -6,7 +6,8 @@ import { Portrait } from '../../ui/Portrait/Portrait';
 import { championArt } from '../../ui/championArt';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
-import { Lineup, MAX_SLOTS, leaderAura } from '../Battle/Lineup';
+import { Lineup, leaderAura } from '../Battle/Lineup';
+import { MAX_SLOTS } from '../../game/formation';
 import { auraApplies, auraText } from '../../ui/auraText';
 import styles from './TeamPicker.module.scss';
 

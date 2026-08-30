@@ -51,6 +51,14 @@ const startSchema = z.object({
    * which modes it serves.
    */
   team: z.array(z.string().uuid()).max(4).default([]),
+  /**
+   * A warden to borrow a champion from (C37) — their player id, not a champion's.
+   *
+   * Which champion is theirs to decide: the standard-bearer they nominated. The borrowed
+   * champion takes one of the four slots rather than adding a fifth, so `team` plus this
+   * is still one to four; the service enforces it, where the mode is known.
+   */
+  ally: z.string().uuid().optional(),
   /** Client-generated. Replaying it returns the fight that was already opened. */
   actionId: z.string().min(8).max(64),
 });

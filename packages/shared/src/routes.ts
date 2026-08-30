@@ -277,6 +277,22 @@ export const ROUTES = {
     /** The champion whose face the account wears, or null for the crest. */
     avatar: '/player/avatar',
   },
+  /**
+   * Wardens — the friends slice of Warbands (C37).
+   *
+   * The list is one-way and needs no requests, because what may be borrowed is what its
+   * owner nominated: the nomination *is* the consent, so nobody has to be asked.
+   */
+  warband: {
+    /** The list, this account's own nomination, and how many borrows are left today. */
+    list: '/warband',
+    /** Keep a warden, by profile name — the only handle one player has for another. */
+    follow: '/warband/wardens',
+    /** `/warband/wardens/:id` — stop keeping one. */
+    unfollow: (id: string) => `/warband/wardens/${encodeURIComponent(id)}`,
+    /** Nominate the copy anybody on your list may take into a fight, or withdraw it. */
+    standardBearer: '/warband/standard-bearer',
+  },
   tutorial: {
     /** The step in front of the player, or nothing once it is done. */
     state: '/tutorial',

@@ -65,7 +65,7 @@
 
 `tutorial` is the cold open and the one mode where `team` is empty: the stage carries its own roster (`presetTeam`), because the fight happens before the account owns a champion. It spends no energy, pays nothing, records no clear and is refused by `/battles/multi`.
 
-| POST `/battles/start` | `{mode, stageKey, team[1-4]}` → spends energy, creates the session, returns the opened battle. Needs no `actionId`: the one-active-battle index already makes a duplicate start a 409 rather than a second charge. |
+| POST `/battles/start` | `{mode, stageKey, team[1-4], ally?}` → spends energy, creates the session, returns the opened battle. Needs no `actionId`: the one-active-battle index already makes a duplicate start a 409 rather than a second charge. `ally` is a **warden's** player id, not a champion's — which champion comes is *their* choice, the standard-bearer they nominated (C37). It **takes one of the four**, so `team` plus a borrow is still one to four, the day's allowance is spent when the fight opens and never refunded, and the modes that refuse one are written once in `allyRefusal`. |
 | POST `/battles/:id/action` | `{actionId, skill?, target?, auto?, autoTurns?, focus?}` → `{state, events, outcome, rewards}`. Omit `skill` to let the AI take the turn; set `auto` to resolve the rest of the fight in one call. `autoTurns` (1–20) bounds that to a few of the player's turns, which is what makes the Auto **button** a toggle — the client asks for a handful at a time and stops asking the moment it is switched off. `focus` names the enemy auto-battle should concentrate on; it is honoured only where the skill leaves a choice and ignored everywhere else, so it can never redirect a heal or reach a corpse. Replaying an `actionId` returns the recorded state rather than taking a second turn. |
 | POST `/battles/:id/retreat` | Concede (energy stays spent). |
 | POST `/battles/multi` | `{mode, stageKey, team, runs, actionId}` → N seeded auto-runs server-side, and a summary rather than N logs. The count is **trimmed by the server** to the smallest of what was asked, the per-press cap, the daily allowance and what energy covers, and `stoppedReason` says which bit; a lost run ends the batch and keeps the rest. Writes no session rows — a batch has nothing to resume, and thirty states and logs per farm is megabytes. Replaying an `actionId` returns the recorded summary rather than farming again. |
@@ -87,6 +87,15 @@
 | POST `/arena/weekly-chest` | Claims the chest the Monday reset sealed, paid against the **best** rating held that week. Returns `{chest, arena}`. |
 
 **Settlement.** An arena battle settles inside the same transaction as its result, through the ordinary battle settle path: both ratings move (the ladder is zero-sum), medals are granted at the tier the win landed in, the offer is spent, and a row goes into `arena_battles`. Unlike every other mode it settles on a **loss** too — the defender gains what the attacker gives up — and a retreat is a loss rather than an escape. The result rides back on the battle view as `rewards.arena`.
+
+### Wardens (C37)
+| GET `/warband` | Your wardens, each with the champion they have put forward and how much of nine relics it wears, the cap, borrows left today and the allowance they came from, plus your own nomination and how many times it has been fielded by somebody else. One read answers both halves of the screen. |
+| POST `/warband/wardens` | `{profileName}` — keeps a warden. By profile name, because that is the only handle one player has for another. Refuses yourself, a bot and a full list; keeping the same warden twice is a **no-op rather than an error**, since the composite key makes it one. Nobody is asked and nobody is told. |
+| DELETE `/warband/wardens/:id` | Lets one go. Letting go twice is not an error either. |
+| PUT `/warband/standard-bearer` | `{championId \| null}` — the copy anybody keeping you may borrow, or null to withdraw the offer. A roster **id**, because what is lent is a particular copy with its relics and masteries. Refuses a champion the account does not hold and refuses food. |
+
+A borrow is spent at `/battles/start` rather than here: there is one a day, so the only place it can honestly be spent is the moment the energy is about to be. Lending pays nothing but `lends`, which is deliberate — a reward for being borrowed is thirty alts and thirty payouts.
+
 
 ### Admin: player management (`/admin/api`, Admin rank only)
 Keyed by **player** id, not account id — that is what `economy_log`, `stage_progress` and a support request all reference; the account behind it is resolved server-side. Every mutation is audited with before/after.

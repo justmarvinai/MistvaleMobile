@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { BATTLE_SPEEDS, type BattleSpeed } from '@mistvale/shared';
+// The formation owns how many slots a fight has, since it is the thing that draws them.
+import { MAX_SLOTS } from '../game/formation';
 
 /**
  * The team you last sent, and how you like to watch a fight.
@@ -29,7 +31,6 @@ import { BATTLE_SPEEDS, type BattleSpeed } from '@mistvale/shared';
 const KEY = 'mv.loadout';
 
 /** Four slots, and the fifth is never anybody's team. */
-const MAX_SLOTS = 4;
 
 interface Remembered {
   /** Champion instance ids, in the order they were chosen — slot one is the leader. */

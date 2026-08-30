@@ -26,7 +26,11 @@ import styles from './TeamSelect.module.scss';
 import { BossCard } from '../../ui/BossCard/BossCard';
 import { stageBoss } from '../../ui/BossCard/bossRules';
 import { Opposition } from './Opposition';
-import { Lineup, MAX_SLOTS, leaderAura } from './Lineup';
+import { AllyStrip } from './AllyStrip';
+import { Lineup, leaderAura } from './Lineup';
+import { lineupSlots } from './slots';
+import { useWarbandStore } from '../../state/warbandStore';
+import { championArt } from '../../ui/championArt';
 
 /**
  * Picking a team before a fight.
@@ -123,6 +127,7 @@ export function TeamSelect({
   const runMulti = useBattleStore((state) => state.runMulti);
   const busy = useBattleStore((state) => state.busy);
   const goTo = useNavStore((state) => state.setScreen);
+  const warband = useWarbandStore((state) => state.warband);
 
   const rememberedTeam = useLoadoutStore((state) => state.teamFor);
   const rememberTeam = useLoadoutStore((state) => state.remember);
@@ -140,6 +145,14 @@ export function TeamSelect({
   const [runs, setRuns] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<MultiBattleResult | null>(null);
+  /**
+   * The warden whose standard-bearer is coming along, by *their* player id (C37).
+   *
+   * Not remembered between fights, unlike the team: a borrow is one a day, so offering to
+   * spend it again the moment the picker reopens is how somebody spends theirs by reflex on
+   * a stage they were only glancing at.
+   */
+  const [ally, setAlly] = useState<string | null>(null);
 
   /**
    * What the dialog opens on: the last team sent into this mode.
@@ -229,11 +242,16 @@ export function TeamSelect({
   // line; this is only about farming.
   const batchRefusal = multiBattleRefusal(stage.mode as BattleMode);
 
+  // A borrowed warden takes one of the four rather than adding a fifth (C37), so the last
+  // slot stops being offered the moment one is picked. The server says the same thing in
+  // `assertTeamShape`; this only keeps the picker from composing a team it would refuse.
+  const { ownCapacity, free } = lineupSlots(team.length, ally !== null);
+
   const toggle = (id: string): void => {
     setEdits(
       team.includes(id)
         ? team.filter((entry) => entry !== id)
-        : team.length >= MAX_SLOTS
+        : team.length >= ownCapacity
           ? team
           : [...team, id],
     );
@@ -242,7 +260,11 @@ export function TeamSelect({
   const start = async (mode: string): Promise<void> => {
     setError(null);
     try {
-      await startBattle({ mode, stageKey: stage.key, team });
+      // `practice` is a different mode from the stage's own, and `allyRefusal` is about the
+      // mode the fight runs in — so a sandbox run carries no borrow, which is also right:
+      // spending the day's one borrow on a fight that pays nothing would be a trap.
+      const borrowed = ally !== null && mode === stage.mode;
+      await startBattle({ mode, stageKey: stage.key, team, ...(borrowed ? { ally } : {}) });
       // Remembered on the way in, not on the way out: a fight the player retreats from was
       // still the team they meant to bring.
       rememberTeam(stage.mode, team);
@@ -284,9 +306,22 @@ export function TeamSelect({
   }
 
   const { aura, idle } = leaderAura(team, roster, championsByKey, bundle?.factions, stage.mode);
-  const teamPower = team
-    .map((id) => roster.find((owned) => owned.id === id)?.power ?? 0)
-    .reduce((sum, power) => sum + power, 0);
+  /**
+   * The warden standing in the lineup, resolved out of the list the store already holds.
+   *
+   * The store is the *server's* answer about who may be borrowed from and whether there is
+   * a borrow left, so a pick that has gone stale — the warden released in another tab,
+   * their nomination withdrawn — simply stops resolving and the slot empties, rather than
+   * being carried into a start the server would refuse.
+   */
+  const lender = ally ? (warband.wardens.find((warden) => warden.playerId === ally) ?? null) : null;
+  const borrowedBearer = lender?.standardBearer ?? null;
+  const borrowedDef = borrowedBearer ? championsByKey.get(borrowedBearer.championKey) : undefined;
+
+  const teamPower =
+    team
+      .map((id) => roster.find((owned) => owned.id === id)?.power ?? 0)
+      .reduce((sum, power) => sum + power, 0) + (borrowedBearer?.power ?? 0);
 
   return (
     // `full` rather than `wide`: the confrontation is two formations side by side with a
@@ -323,6 +358,18 @@ export function TeamSelect({
           </>
         }
         team={team}
+        {...(lender && borrowedBearer
+          ? {
+              guest: {
+                name: borrowedDef?.name ?? borrowedBearer.championKey,
+                portrait: borrowedDef
+                  ? (championArt(borrowedDef, bundle?.assets).portrait ?? null)
+                  : null,
+                owner: lender.profileName,
+                onRemove: () => setAlly(null),
+              },
+            }
+          : {})}
         onToggle={toggle}
         {...(ward ? { eligible: meetsWard } : {})}
         {...(wardLabelText
@@ -345,6 +392,17 @@ export function TeamSelect({
                 <strong>Warded.</strong> Only {wardLabelText} may climb this floor.
               </p>
             )}
+
+            {/* A warden's champion, offered where the energy is about to be spent — which
+                is the only place a borrow can honestly be spent, since there is one a day
+                and a button on the Wardens screen would be a borrow with no fight
+                attached. */}
+            <AllyStrip
+              mode={stage.mode as BattleMode}
+              slotsFree={free}
+              chosen={ally}
+              onChoose={setAlly}
+            />
 
             {error && <p className={styles.error}>{error}</p>}
           </>
@@ -411,6 +469,16 @@ export function TeamSelect({
                 <Button variant="ghost" onClick={() => void farm()} disabled={!canFarm}>
                   {busy ? 'Fighting…' : 'Send them in'}
                 </Button>
+                {/* Said only when it costs something to not know. A borrow is one a day and
+                    a batch is ten fights, so lending into one would be ten fights for one
+                    borrow — the server takes no ally on `/battles/multi` and the picker
+                    must not imply otherwise. */}
+                {ally && (
+                  <p className={styles.batchNote}>
+                    A borrowed warden does not come on a batch — these runs are your {team.length}{' '}
+                    alone.
+                  </p>
+                )}
               </div>
             )}
 

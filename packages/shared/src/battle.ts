@@ -215,3 +215,43 @@ export function multiBattleRefusal(mode: BattleMode): string | null {
       return null;
   }
 }
+
+/**
+ * Why a mode refuses a borrowed ally, or `null` where one is welcome (C37).
+ *
+ * The Warbands slice lends a warden's **standard-bearer** into one fight a day, and where
+ * that is allowed is a design decision rather than a technical one. Written here, beside
+ * `multiBattleRefusal` and for the same reason: the team chooser has to grey out exactly
+ * what the server will refuse, and two copies of a list of modes drift within a week.
+ *
+ * Three arguments decide it, and each rules out a different set:
+ *
+ *  - **A borrowed champion must not decide somebody else's standing.** The Arena is a
+ *    ladder and the Wurm is one shared bar, so a champion whose owner is not playing has
+ *    no business in either.
+ *  - **A mode built to ask a question must not let you rent the answer.** The Mistspire
+ *    exists because no mode rewarded a broad roster, and a Titan's puzzle is a team-building
+ *    one — borrowing is precisely renting breadth, which is the thing both are for.
+ *  - **Some fights have no slot to lend into.** A trial and the cold open bring their own
+ *    team, and a descent is fought without relics by a party assembled at the door.
+ */
+export function allyRefusal(mode: BattleMode): string | null {
+  switch (mode) {
+    case 'arena':
+      return 'An arena attack is your own four against theirs.';
+    case 'worldBoss':
+      return 'Every strike on the Wurm is counted against the warden who made it.';
+    case 'spire':
+      return 'The Mistspire asks what your own roster can do — a borrowed champion would be renting the answer.';
+    case 'titan':
+      return 'A Titan run is measured against the team you built.';
+    case 'trial':
+      return 'A trial is fought with the champions it lends you.';
+    case 'deepRun':
+      return 'A descent is walked by the party that went down.';
+    case 'tutorial':
+      return 'There is nobody to borrow from yet.';
+    default:
+      return null;
+  }
+}

@@ -267,6 +267,13 @@
       "when": 1787085706000,
       "tag": "0037_xp_boost_and_energy_overflow",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1787085707000,
+      "tag": "0038_warband",
+      "breakpoints": true
     }
   ]
 }

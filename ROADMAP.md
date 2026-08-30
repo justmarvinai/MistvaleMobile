@@ -336,9 +336,15 @@ engine, the goal DSL and the events framework already do most of the work*.
 
 **Structural gaps**
 
-10. **Warbands** — the largest parked item and the only real social layer. Worth splitting:
+10. ~~**Warbands** — the largest parked item and the only real social layer. Worth splitting:
     a friends list and one borrowed champion per day is a fraction of the cost and most of
-    the felt benefit.
+    the felt benefit.~~ **The split shipped — C37.** Wardens: a one-way list, one nominated
+    **standard-bearer** per account, and one borrowed champion a day, taking a slot rather
+    than adding a fifth. What made it small enough to be worth having is that the nomination
+    *is* the consent — nothing can be taken that was not put forward — so there are no
+    requests, no accepts, no pending state and no channel to notify through. A guild proper
+    (chat, officers, a shared bank, a boss to schedule) stays parked and is a different
+    feature; the Wurm Wakes (C10e) already covers "fighting the same thing together".
 11. **Localisation scaffolding** — no strings are extracted. Retrofitting is strictly more
     expensive per screen added, so if it is ever wanted, earlier is cheaper.
 

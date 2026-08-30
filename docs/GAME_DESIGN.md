@@ -214,6 +214,41 @@ derived from the clock by the same scheduler timed events use, so there is **no 
 row is created lazily by whoever gets there first, and last week's contribution row simply
 stops matching when the anchor moves on.
 
+### 9.2g Wardens — the friends slice of Warbands (C37)
+
+The brief's largest parked item was **Warbands**, a guild. The roadmap's own note is what
+shipped instead: *a friends list and one borrowed champion per day is a fraction of the cost
+and most of the felt benefit*. Three rules make that small enough to be worth having.
+
+- **The list is one-way.** You keep wardens; they are not asked and never told. A mutual
+  friendship needs a request, an accept, a pending state and a channel to notify through,
+  and every one of those is machinery around a list of names.
+- **What may be borrowed is what its owner offered.** Every account nominates one
+  **standard-bearer** — a particular copy, with its relics, masteries and awakening, exactly
+  as an arena defence is a particular team — and that nomination *is* the consent. Nothing
+  can be taken that was not put forward, which is why nobody needs to be asked.
+- **Lending pays nothing.** A reward for being lent would be a farm: thirty alts, thirty
+  borrows, thirty payouts. What a lender gets is a count on their own card that only ever
+  goes up, and it is the only thing in the game that says somebody else fought beside you.
+
+A borrow is **one a day** and it **takes one of the four slots** rather than adding a fifth,
+because every boss in the game is tuned against four and the formation is drawn for four.
+The borrowed champion fights at their **owner's** level, in their owner's relics, with their
+owner's masteries and collection bonuses — a champion assembled at the borrower's power
+would not be the one that was offered. They are never the leader: the party is assembled
+with the account's own champions first, so the aura is always yours.
+
+**Where it does not apply** is the design rather than an omission, and it is written once in
+`allyRefusal`. The Arena is a record of what an *account* can field. The Mistspire asks
+whether your roster is broad. A Titan and the Wurm are scored on damage against a fixed
+allowance. A Trial is the one mode where what you own does not matter. The Sunken Stair takes
+your relics away at the door. Each of those asks a question a borrowed champion would answer
+for you. What is left — the campaign, the Depths, the springs, the Proving Grounds and the
+sandbox — is where a friend's champion is a help rather than a substitute.
+
+The two numbers are `game_config` (`social.wardenCap`, `social.borrowsPerDay`), because the
+day an operator has a population to move them for is the day they will want to.
+
 ### 9.2c Trials (C10d)
 
 The one mode where **what you own does not matter**. A trial hands the player four champions
@@ -390,13 +425,13 @@ Scripted RSL-style opening: cold-open battle with all three starters pre-made (t
 
 ## 12. Account & unlock cadence
 
-Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · **L18 the Wurm Wakes** · **L20 the Sunken Stair** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
+Account levels 1–60 (XP from stage clears). Feature gating (initial): L2 login calendar · L3 relic upgrading · L4 quests+missions · L5 Bazaar · L6 multi-battle · L7 events · **L8 Arena + Hall of Valor + Wardens** · **L9 Chronicle + Trials** · **L10 The Depths (springs)** · L11 expeditions · L12 relic dungeons · **L14 Proving Grounds + Masteries** · **L16 the Valewurm** · **L18 the Wurm Wakes** · **L20 the Sunken Stair** · L16+ deep floors pacing. Trials sit early on purpose: they are the one mode that does not care what has been farmed, so gating them late would waste the thing they are for. Wardens sit at 8 for the opposite reason: it is the level at which other players become *findable* — the ladder and the Hall are the only places a name comes from — so a list of wardens opens at the moment there is anybody to put in it. Energy cap grows with level (ECONOMY doc). Locked features visible as mist-shrouded teasers (see UI doc).
 
 ## 13. Fairness & EA posture
 No payments in EA (crystals fully earnable; "premium" is a pacing currency, not a paywall). Real odds displayed. Bots never take top-10 leaderboard slots at week end (auto-yield rule). Single account per player expected but not enforced beyond rate limits. All balance changes publish-logged → visible "balance updated" badges (champion `balance_version`).
 
 ## 14. Post-EA parked systems (architected-for, not built)
-**Warbands** (guilds) — first post-EA priority per the brief; ~~the Vale Titan (clan-boss analog)~~ **shipped solo in C9 as the Valewurm** (§9.2b), since the puzzle never needed a guild · **The Mistspire** (Doom-Tower-style ascending tower) · ~~Faction Trials~~ (faction-locked crypt ladders — **dropped by the owner 2026-08-27**; three of eight factions hold fewer than four champions, see §9.2d) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · Battle pass ("Vale Pass") · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
+**Warbands** (guilds) — first post-EA priority per the brief; ~~the Vale Titan (clan-boss analog)~~ **shipped solo in C9 as the Valewurm** (§9.2b), since the puzzle never needed a guild, and ~~the friends slice~~ **shipped as Wardens in C37** (§9.2g) — what is still parked is a guild proper: chat, officers, a shared bank and something to schedule with each other · **The Mistspire** (Doom-Tower-style ascending tower) · ~~Faction Trials~~ (faction-locked crypt ladders — **dropped by the owner 2026-08-27**; three of eight factions hold fewer than four champions, see §9.2d) · Live & Tag arena · Champion Fusion events · The Forge (crafting) · **Boons** (blessing-style empowerments) · Awakening tier · Mythic rarity · Battle pass ("Vale Pass") · skins · localization · native mobile wrap. Each has a reserved data-shape note in DATA_MODEL.md or an explicit extension point.
 
 ## 15. Approved additions (owner-approved 2026-08-16 — all in EA-0.1 scope)
 1. **Choice-based skill tomes** (vs the source's random books) — §7.

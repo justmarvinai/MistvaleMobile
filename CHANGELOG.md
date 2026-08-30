@@ -5,6 +5,61 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — Wardens, the friends slice of Warbands (C37)
+
+The brief's largest parked item is **Warbands**, a guild. What ships is the split the roadmap
+itself proposed: *a friends list and one borrowed champion per day is a fraction of the cost
+and most of the felt benefit*. Three decisions make it small enough to be worth having.
+
+**The list is one-way.** You keep wardens; they are not asked and never told. A mutual
+friendship needs a request, an accept, a pending state and a channel to notify through — four
+pieces of machinery around a list of names, on a game with no e-mail address and no chat.
+
+**What may be borrowed is what its owner offered.** Every account nominates one
+**standard-bearer** — a particular copy with its relics, masteries and awakening, exactly as
+an arena defence is a particular team — and that nomination *is* the consent. Nothing can be
+taken that was not put forward, which is precisely why nobody has to be asked.
+
+**Lending pays nothing.** Any reward for being borrowed is a farm: thirty alts, thirty
+borrows, thirty payouts. What a lender gets is a count on their own card that only goes up,
+which costs the economy nothing and is the one thing in the game that says somebody else
+fought beside you.
+
+A borrow is **one a day** (`social.borrowsPerDay`), spent when the fight **opens** and never
+refunded — the Titan's rule, because the resource being limited is the attempt — and it
+**takes one of the four slots** rather than adding a fifth, since every boss in the game is
+tuned against four and the formation is drawn for four. The borrowed champion is assembled
+from the **lender's** side of everything: their level, relics, masteries, Hall and collection
+bonuses. One assembled at the borrower's power would not be the champion that was offered.
+
+**Where a borrow is refused is the design**, and it is written once in `allyRefusal` so the
+team chooser greys out exactly what the server would turn back. The Arena is a record of what
+an *account* can field. The Mistspire asks whether your roster is broad. A Titan and the Wurm
+are scored on damage against a fixed allowance. A Trial is the one mode where what you own
+does not matter. The Sunken Stair takes your relics away at the door. Each of those asks a
+question a borrowed champion would answer for you. `/battles/multi` takes none either — one
+borrow across ten unwatched runs is ten fights for one allowance, and the picker says so
+rather than letting it look like an oversight.
+
+`player_follows` is the whole feature's storage: a composite primary key, so keeping the same
+warden twice is a no-op rather than a duplicate row, a `CHECK` that nobody keeps themselves,
+and one index, by follower — nothing asks *who keeps me*, because nobody is ever told.
+
+Two things came out of building it and both are the same lesson. The battle view carries
+`borrowedFrom` — the lender's name **as it stood when the fight opened**, on the row rather
+than joined at read time, since a fight is read on every turn and the record of who fought
+beside you should survive a rename unchanged — because a borrowed champion resolves to no
+roster copy and was otherwise the one face on the results screen with no level, no rank and
+no explanation. And `screens/Battle/slots.ts` is C28's lesson repeating: **four** things do
+the four-slots-minus-a-borrow arithmetic — the lineup deciding which slot draws the guest,
+the picker capping how many of your own you may still choose, the strip deciding whether
+there is room to borrow at all, and the server's `assertTeamShape`, which is the one that
+actually refuses — and three of them had it written out inline. A picker that composes a team
+the server refuses is not a layout bug, it is a wrong answer. It also swept up three separate
+private copies of `MAX_SLOTS = 4`; the formation owns it now, since the formation is the
+thing that draws them.
+
+
 ### Added — what an account actually holds (A5, ADMIN_SUITE_DESIGN §2.14)
 
 `GET /admin/api/players/:id/champions`, `/gear` and `/summons`. The player page has reported

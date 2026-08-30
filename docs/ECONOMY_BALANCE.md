@@ -112,6 +112,11 @@ Full build = 100 Bronze + 600 Silver + 950 Gold Emblems (source-faithful shape; 
 - **Valor Medals per win** ⚙: Bronze 1 · Silver 2 · Gold 3 · Platinum 4; weekly chest 20–150 medals + crystals/tomes/gear by tier.
 - **Hall of Valor** 〔dev: single medal currency vs source's 3-tier medals — simpler for one ladder〕: 4 elements × 6 stats (HP%/ATK%/DEF% 2%/lvl → 20%; C.DMG 1%/lvl → 10%; ACC & RES 4/lvl → 40), 10 levels each; cost curve per level ⚙ 40/60/90/130/180/240/310/390/480/580 medals (≈2,500/stat, ≈60k total — a year-scale sink, source-proportional).
 
+## 8b. Wardens (C37) ⚙
+- **Cap** `social.wardenCap` = **30** wardens on a list; **allowance** `social.borrowsPerDay` = **1** borrow a day. Both are `game_config`, because the day there is a population to move them for is the day an operator will want to.
+- **It costs nothing and pays nothing.** A borrow spends no currency, no energy and no token — only the allowance, which resets on the game-day like every other daily counter and is spent when the fight **opens**, never refunded. Lending pays nothing at all beyond `players.lends_total`, and that is deliberate: any reward for being borrowed is farmable with thirty alts, and a number that only goes up costs the economy nothing to grant.
+- **Nothing new enters the game through it.** The borrowed champion takes one of the four slots rather than adding a fifth, so a party is still four; it earns no experience for its owner, drops nothing extra, and the modes where a stronger fifth would distort a *measurement* — the Arena, the Mistspire, a Titan, the Wurm, a Trial and the Sunken Stair — refuse one outright (`allyRefusal`). What it moves is difficulty on content a player was going to clear anyway, a little earlier.
+
 ## 9. Crystal economy (F2P-fair by construction)
 **Faucets/day (active):** dailies chain 10 + Crystal Mine 5/10/15 (L1/2/3) + quest/event/arena extras ≈ **40–70/day**, plus 90–150/week from weeklies/arena chest, milestone bursts from star-chests/missions.
 **Sinks:** energy refill 40 · mastery buyout 800/champion · mastery reset 150 (first free) · Bazaar hidden slots 250 (4 unlockable) · Bazaar manual refresh 10 (escalating daily ×2 ⚙) · Training Yard slot 2 300 (EA ships 2 slots) · roster +10 slots: silver **or** crystals, scaling 50→ · arena token refill 30/10 tokens · cosmetic reserve post-EA.

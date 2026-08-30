@@ -69,6 +69,8 @@ import type {
   Stat,
   ExpeditionClaimResult,
   ExpeditionState,
+  Warband,
+  WardenSummary,
 } from '@mistvale/shared';
 import { ROUTES } from '@mistvale/shared';
 import type { BattleEvent, BattleState, UnitContribution, UnitRef } from '@mistvale/engine';
@@ -197,6 +199,14 @@ export interface BattleView {
    * Empty in the modes that field champions the account does not own.
    */
   team: string[];
+  /**
+   * The warden who lent a champion to this fight, and the slot they stood in (C37).
+   *
+   * Null on every fight nobody borrowed for. A borrowed champion is never in `team` — that
+   * list is the account's own copies, which is what the payout pays — so this is the only
+   * thing on the wire that says the fifth face on the results screen belongs to somebody.
+   */
+  borrowedFrom: { slot: number; profileName: string } | null;
 }
 
 export const gameApi = {
@@ -211,8 +221,14 @@ export const gameApi = {
       .post<{ champions: RosterChampion[] }>(ROUTES.roster.chooseStarter, { championKey })
       .then((data) => data.champions),
 
-  startBattle: (input: { mode: string; stageKey: string; team: string[]; actionId: string }) =>
-    api.post<BattleView>(ROUTES.battle.start, input),
+  startBattle: (input: {
+    mode: string;
+    stageKey: string;
+    team: string[];
+    /** A warden to borrow from, by *their* player id — which champion is their choice. */
+    ally?: string;
+    actionId: string;
+  }) => api.post<BattleView>(ROUTES.battle.start, input),
 
   activeBattle: () =>
     api.get<{ battle: BattleView | null }>(ROUTES.battle.active).then((data) => data.battle),
@@ -406,6 +422,20 @@ export const gameApi = {
   /** Forges several relics toward a level in one run. */
   upgradeMany: (ids: readonly string[], toLevel: number, actionId: string) =>
     api.post<BulkUpgradeResult>(ROUTES.gear.upgradeMany, { ids, toLevel, actionId }),
+
+  // ── Wardens (C37) ─────────────────────────────────────────────────────────
+
+  warband: () => api.get<Warband>(ROUTES.warband.list),
+
+  keepWarden: (profileName: string) =>
+    api.post<WardenSummary>(ROUTES.warband.follow, { profileName }),
+
+  releaseWarden: (playerId: string) =>
+    api.del<{ kept: boolean }>(ROUTES.warband.unfollow(playerId)),
+
+  /** `null` withdraws the offer. The whole list comes back, so there is no second read. */
+  setStandardBearer: (championId: string | null) =>
+    api.put<Warband>(ROUTES.warband.standardBearer, { championId }),
 
   // ── Expeditions ───────────────────────────────────────────────────────────
 

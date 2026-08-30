@@ -593,6 +593,10 @@ export async function attack(
         openingEvents,
       ),
       team: attackers.map((member) => member.id),
+      // An Arena attack never borrows a warden (`allyRefusal`): the ladder is a record of
+      // what an account can field, and a borrowed champion would put somebody else's build
+      // on somebody else's rating.
+      borrowedFrom: null,
     };
   });
 }

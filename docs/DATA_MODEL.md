@@ -454,6 +454,27 @@ A champion **key** rather than a `player_champions` id, and that is the whole di
 
 Ownership and champion-hood are checked when it is **set** — the key has to resolve in the published bundle, must not be food, and the account must hold a copy. It is deliberately *not* re-checked on read: an account that fed away its last Anuria still chose her, and a portrait that vanishes without being touched is worse than one that outlives the copy behind it. The showcase is where ownership is asserted; this is a picture.
 
+### `player_follows` — the warden list (C37)
+| column | notes |
+|---|---|
+| follower_id, warden_id | composite primary key, both `→ players` on delete cascade |
+| created_at | reading order for the list |
+
+`CHECK (follower_id <> warden_id)`, and the composite key is what makes keeping the same warden twice a no-op rather than a duplicate row. Indexed on `(follower_id, created_at)` only: nothing asks *who keeps me*, because a one-way list means nobody is ever told. The cap (`social.wardenCap`) is counted the same way it is read.
+
+### `players.standard_bearer_id`
+`uuid`, nullable, `→ player_champions ON DELETE SET NULL`. The one champion this account puts forward for others to borrow, and the *consent* that makes a one-way list safe: nothing can be taken which was not offered.
+
+A roster **id** rather than a key, which is the opposite of `avatar_champion_key` above and for the opposite reason — what is lent is a particular copy with its relics, masteries and awakening, exactly as an arena defence is a particular team. It is a real foreign key, and the cascade is the honest direction: feeding away the copy withdraws the offer rather than leaving a dangling one.
+
+### `players.lends_total`
+`integer not null default 0`, `CHECK >= 0`. How many times this account's standard-bearer has been taken into somebody else's fight, incremented in the borrower's own battle-start transaction. Deliberately **not** a currency: a reward for being borrowed is thirty alts and thirty payouts. A number that only goes up costs nothing to grant and is the one thing in the game that says somebody else fought beside you.
+
+### `battle_sessions.borrowed_from`
+`text`, nullable — the lender's **profile name as it stood when the fight opened**, or null on every fight nobody borrowed for. A name rather than a reference, for two reasons: a fight is read on every turn and after a reload, so a join would be paid for on all of them; and the record of who fought beside you should survive a rename unchanged. The slot needs no column — a borrowed champion is pushed onto the formation *after* the account's own, so it is exactly `jsonb_array_length(team_ids)`, derived once in `borrowedFromOf`.
+
+`team_ids` deliberately does **not** contain the borrowed champion: that list is what the payout pays experience to, and a champion somebody else owns must never be in it.
+
 ### `arena_state`
 `player_id pk, rating, tier, weekly_high, tokens, tokens_updated_at, defence_team jsonb (player_champion ids in formation order), offers jsonb, offers_refreshed_at, refreshes_used, refresh_day, last_weekly_claim, pending_chest_week, pending_chest_high`.
 Tokens follow energy's pattern — a value plus the moment it was written, everything else derived against the clock — so an idle account costs nothing to keep current and there is no job that can fall behind.

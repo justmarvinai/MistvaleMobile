@@ -40,10 +40,19 @@ type BarKey = (typeof BARS)[number]['key'];
 export function ResultParty({
   rows,
   team,
+  borrowedFrom,
 }: {
   rows: readonly UnitContribution[];
   /** Roster ids in formation order, so slot *n* is `team[n]`. Empty on a borrowed team. */
   team: readonly string[];
+  /**
+   * The warden who lent a champion to this fight, and the slot they stood in (C37).
+   *
+   * Named on the card because a borrowed champion resolves to no roster copy and would
+   * otherwise be the one face on the screen with no level, no rank and no explanation —
+   * and because the lender's whole reward for lending is that somebody saw their name.
+   */
+  borrowedFrom?: { slot: number; profileName: string } | null;
 }): JSX.Element | null {
   const bundle = useContentStore((state) => state.bundle);
   const roster = useRosterStore((state) => state.champions);
@@ -63,12 +72,15 @@ export function ResultParty({
         // turn and this screen has one that no longer resolves — both draw the card
         // without a level ladder rather than not drawing the card.
         const owned = roster.find((entry) => entry.id === team[row.ref.slot]);
+        const lender =
+          borrowedFrom && borrowedFrom.slot === row.ref.slot ? borrowedFrom.profileName : null;
         return (
           <li key={`${row.ref.side}:${row.ref.slot}`}>
             <ResultChampion
               row={row}
               def={def}
               owned={owned}
+              lender={lender}
               bars={shown.map((bar) => ({
                 ...bar,
                 value: row[bar.key],
@@ -93,11 +105,14 @@ function ResultChampion({
   row,
   def,
   owned,
+  lender,
   bars,
 }: {
   row: UnitContribution;
   def: ChampionDef | undefined;
   owned: RosterChampion | undefined;
+  /** The warden this champion was borrowed from, or null for one of your own. */
+  lender: string | null;
   bars: readonly Bar[];
 }): JSX.Element {
   const bundle = useContentStore((state) => state.bundle);
@@ -140,7 +155,10 @@ function ResultChampion({
 
       <p className={styles.name}>{row.name}</p>
       <p className={styles.level}>
-        {level === null ? '—' : `Level ${level}`}
+        {/* A borrowed champion has no roster copy here, so the level ladder and the star
+            row above are both absent — this is what stands in their place, and it is the
+            more interesting fact anyway. */}
+        {lender ? `Lent by ${lender}` : level === null ? '—' : `Level ${level}`}
         {/* Said quietly and said at all: a champion who contributed nothing after wave one
             is a different fact from one who contributed nothing while standing there the
             whole fight. */}

@@ -67,11 +67,14 @@ describe('what a level-up opened', () => {
       'events',
       'arena',
       'hallOfValor',
+      'wardens',
     ]);
   });
 
-  it('hands over both of a level’s unlocks rather than picking one', () => {
-    expect(unlockedBetween(7, 8)).toHaveLength(2);
+  it('hands over every one of a level’s unlocks rather than picking one', () => {
+    // Level 8 is the busiest rung in the game: the Arena, the Hall it pays into, and the
+    // wardens who make it a place with other people in it (C37).
+    expect(unlockedBetween(7, 8)).toHaveLength(3);
     expect(unlockedBetween(13, 14)).toHaveLength(2);
   });
 

@@ -97,6 +97,7 @@ export interface UnlockFlags {
   worldBoss: boolean;
   deepRun: boolean;
   spire: boolean;
+  wardens: boolean;
 }
 
 /** Account level at which each feature unlocks. Mirrored in game_config from P1. */
@@ -135,6 +136,10 @@ export const UNLOCK_LEVELS: Readonly<Record<keyof UnlockFlags, number>> = Object
   // who else you have is pointless to an account whose answer is "nobody". Sixteen is
   // roughly where a roster starts having somebody else.
   spire: 16,
+  // Wardens open with the Arena, and for its reason rather than for a level's: eight is
+  // where the game stops being solitary, and a list of other players before there is any
+  // other place to meet one would be a screen with nothing on it (C37).
+  wardens: 8,
 });
 
 export function computeUnlocks(level: number): UnlockFlags {

@@ -1,0 +1,82 @@
+@use '../../styles/tokens' as *;
+
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.label {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.85rem;
+
+  strong {
+    color: $gold;
+    font-family: $font-mono;
+  }
+}
+
+.refused {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.85rem;
+
+  strong {
+    color: $parchment;
+  }
+}
+
+.offers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.offer {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-1 $space-2;
+  background: none;
+  border: 1px solid rgba($parchment-dim, 0.3);
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+
+  &[data-picked='true'] {
+    border-color: $accent;
+    background: rgba($accent, 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.champion {
+  color: $parchment;
+  font-size: 0.85rem;
+}
+
+.who {
+  color: $parchment-dim;
+  font-size: 0.75rem;
+}
+
+.power {
+  color: $gold;
+  font-family: $font-mono;
+  font-size: 0.8rem;
+}

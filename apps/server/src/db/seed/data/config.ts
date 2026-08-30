@@ -833,6 +833,21 @@ export const GAME_CONFIG: GameConfigEntryInput[] = [
     'Paid offer refresh',
     'Crystals for a refresh once the free ones are gone.',
   ),
+  // ── Wardens (C37) ─────────────────────────────────────────────────────────
+  entry(
+    'social.wardenCap',
+    30,
+    'social',
+    'Wardens a list may hold',
+    'How many other wardens one account may keep. A list is one-way and costs nothing to be on, so the cap is about the screen rather than about fairness: past thirty it stops being a list of people you know and starts being a directory.',
+  ),
+  entry(
+    'social.borrowsPerDay',
+    1,
+    'social',
+    'Borrowed champions a day',
+    'How many times a day an account may take a warden’s standard-bearer into a fight. One by design: the point is a decision about *which* fight, not a fifth champion. Zero closes borrowing without removing the list.',
+  ),
   entry(
     'arena.weeklyDecayPct',
     10,

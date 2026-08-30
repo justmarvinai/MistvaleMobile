@@ -50,6 +50,10 @@ const COPY: Readonly<Record<keyof UnlockFlags, Omit<Unlock, 'key' | 'level'>>> =
     screen: 'deepRun',
     title: 'The Sunken Stair',
   },
+  wardens: {
+    screen: 'wardens',
+    title: 'Wardens',
+  },
   worldBoss: {
     screen: 'worldBoss',
     title: 'The Wurm Wakes',

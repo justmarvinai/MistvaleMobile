@@ -52,7 +52,13 @@ interface BattleStoreState {
   /** True once playback has caught up and the server wants an action. */
   awaitingInput: boolean;
 
-  startBattle: (input: { mode: string; stageKey: string; team: string[] }) => Promise<void>;
+  startBattle: (input: {
+    mode: string;
+    stageKey: string;
+    team: string[];
+    /** A warden to borrow a champion from, by their player id (C37). */
+    ally?: string;
+  }) => Promise<void>;
   /**
    * Opens an Arena fight against one of the offered opponents.
    *
@@ -235,7 +241,12 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
 
     async startBattle(input) {
       stopTimer();
-      const actionId = startIdFor(`${input.mode}:${input.stageKey}:${input.team.join(',')}`);
+      // The ally is part of the *intent*, so it is part of the key: pressing start, taking
+      // the borrowed warden back out and pressing again is two different fights, and
+      // reusing one id would answer the second with the first.
+      const actionId = startIdFor(
+        `${input.mode}:${input.stageKey}:${input.team.join(',')}:${input.ally ?? ''}`,
+      );
       set({ busy: true, error: null, view: emptyView(), pending: [], battle: null });
       try {
         const battle = await gameApi.startBattle({ ...input, actionId });

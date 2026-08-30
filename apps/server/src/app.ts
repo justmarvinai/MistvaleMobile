@@ -24,6 +24,7 @@ import { deepRunRoutes } from './modules/deeprun/routes';
 import { questRoutes } from './modules/meta/routes';
 import { mailRoutes } from './modules/mail/routes';
 import { profileRoutes } from './modules/profile/routes';
+import { warbandRoutes } from './modules/warband/routes';
 import { masteryRoutes } from './modules/mastery/routes';
 import { progressRoutes } from './modules/progress/routes';
 import { shopRoutes } from './modules/shop/routes';
@@ -116,6 +117,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await api.register(questRoutes);
       await api.register(mailRoutes);
       await api.register(profileRoutes);
+      await api.register(warbandRoutes);
       await api.register(masteryRoutes);
       await api.register(shopRoutes);
       await api.register(summonRoutes);

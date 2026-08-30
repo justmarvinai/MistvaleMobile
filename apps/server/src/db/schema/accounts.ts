@@ -257,6 +257,28 @@ export const players = pgTable(
      */
     avatarChampionKey: text('avatar_champion_key'),
 
+    /**
+     * The copy this account offers to anybody keeping it as a warden (C37).
+     *
+     * A roster **id** rather than a key, and that is the opposite choice to the avatar
+     * above for the opposite reason: what is lent is a particular copy — its level, its
+     * relics, its masteries — exactly as an arena defence is a particular team. Declared
+     * without a Drizzle reference because `player_champions` is defined in `game.ts` and
+     * importing it here would close a circle; the foreign key and its `ON DELETE SET NULL`
+     * are in the migration, where feeding away the copy withdraws the offer rather than
+     * leaving a dangling one.
+     */
+    standardBearerId: uuid('standard_bearer_id'),
+
+    /**
+     * How many times that copy has been taken into somebody else's fight.
+     *
+     * The only thing a lender gets, and deliberately not a currency: a reward for being
+     * borrowed is thirty alts and thirty payouts. A number that only goes up costs nothing
+     * to grant and is the one thing in the game that says somebody fought beside you.
+     */
+    lendsTotal: integer('lends_total').notNull().default(0),
+
     lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

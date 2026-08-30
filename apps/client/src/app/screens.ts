@@ -34,6 +34,7 @@ export type ScreenId =
   | 'events'
   | 'calendar'
   | 'mail'
+  | 'wardens'
   | 'battle';
 
 /**
@@ -330,6 +331,26 @@ export const SCREENS: readonly ScreenDefinition[] = [
     blurb: 'Every champion in the game, and which of them you have met.',
     unlock: 'chronicle',
     lockedHint: 'Opens at level 9',
+    inDock: false,
+    group: 'championsHub',
+  },
+  {
+    /**
+     * Wardens — the friends slice of Warbands (C37).
+     *
+     * Under Champions rather than Errands, and the reason is what the screen is *for*: a
+     * warden is somebody whose champion you may field, so it belongs with the roster and
+     * the Chronicle rather than with the lists of things to claim.
+     */
+    id: 'wardens',
+    label: 'Wardens',
+    icon: 'nav-arena',
+    glyph: 'glyph-two-shadows',
+    art: 'icon-banner',
+    blurb: 'Wardens you keep, the champion each has put forward, and the one you offer back.',
+    unlock: 'wardens',
+    lockedHint:
+      'Opens with the Arena, at level 8 — a list of other wardens needs somewhere to meet one',
     inDock: false,
     group: 'championsHub',
   },

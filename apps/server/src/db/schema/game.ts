@@ -7,6 +7,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   smallint,
   text,
   timestamp,
@@ -127,6 +128,16 @@ export const battleSessions = pgTable(
      * for the payout to know which champions earned XP.
      */
     teamIds: jsonb('team_ids').notNull().default([]),
+
+    /**
+     * The warden a champion was borrowed from, by profile name, or null (C37).
+     *
+     * A name rather than a reference: a fight is read on every turn and after a reload, so
+     * a join is paid for on all of them, and the record of who fought beside you should
+     * survive a rename unchanged. The slot needs no column — a borrowed champion is pushed
+     * onto the formation after the account's own, so it is `teamIds.length`.
+     */
+    borrowedFrom: text('borrowed_from'),
 
     seed: bigint('seed', { mode: 'number' }).notNull(),
     /** The engine's `BattleState`. */
@@ -444,6 +455,38 @@ export const playerSpireClimbs = pgTable(
     uniqueIndex('player_spire_climbs_key').on(table.playerId, table.dungeonKey, table.anchor),
   ],
 );
+
+/**
+ * One warden kept by another — the friends slice of Warbands (C37).
+ *
+ * **One-way, and no requests.** Nobody is asked and nobody is told, which is safe because
+ * what may be borrowed is what its owner nominated: the nomination is the consent. A
+ * mutual friendship would need an accept, a pending state and a channel to notify through,
+ * and every one of those is machinery around a list.
+ *
+ * The primary key is the pair, so following twice is a no-op rather than a duplicate row.
+ * There is deliberately no index the other way round: nothing asks "who keeps me", because
+ * nobody is ever told.
+ */
+export const playerFollows = pgTable(
+  'player_follows',
+  {
+    followerId: uuid('follower_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    wardenId: uuid('warden_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.followerId, table.wardenId] }),
+    index('player_follows_follower_idx').on(table.followerId, table.createdAt),
+    check('player_follows_not_self', sql`${table.followerId} <> ${table.wardenId}`),
+  ],
+);
+
+export type PlayerFollowRow = typeof playerFollows.$inferSelect;
 
 export type StageProgressRow = typeof stageProgress.$inferSelect;
 export type ChapterRewardRow = typeof chapterRewards.$inferSelect;

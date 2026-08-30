@@ -27,6 +27,7 @@ import {
   type ArenaResult,
   type BattleMode,
   canSkipBattle,
+  allyRefusal,
   multiBattleRefusal,
   type ChampionDef,
   type EnemyDef,
@@ -66,6 +67,7 @@ import * as rewards from '../rewards/service';
 import * as roster from '../roster/service';
 import { accountBonusFor, accountBonusesFor } from '../roster/account';
 import { assertAvailable } from '../meta/expeditions';
+import * as warband from '../warband/service';
 
 /**
  * Battles, server-side.
@@ -92,6 +94,15 @@ export interface StartOptions {
   stageKey: string;
   /** `player_champions` ids, in formation order. The first is the leader (aura). */
   team: string[];
+  /**
+   * A warden to borrow a champion from — their player id, not a champion's (C37).
+   *
+   * Which champion is *their* choice: the standard-bearer they nominated. The borrower
+   * does not pick, which is what makes the nomination mean something and keeps the request
+   * to one id. The borrowed champion takes one of the four slots, so `team` plus this is
+   * still one to four.
+   */
+  ally?: string | undefined;
   /** Client-generated. Replaying it returns the fight that was already opened. */
   actionId: string;
 }
@@ -139,6 +150,15 @@ export interface BattleView {
    * every Trial fight a borrowed team.
    */
   team: string[];
+  /**
+   * The warden whose champion fought beside the party, and the slot they stood in (C37).
+   *
+   * Null on every fight nobody borrowed for, which is nearly all of them. The name is the
+   * one the lender held **when the fight opened** rather than a join at read time: a rename
+   * afterwards must not rewrite the record of who fought beside you, and a fight is read
+   * on every turn where a join would not be free.
+   */
+  borrowedFrom: { slot: number; profileName: string } | null;
 }
 
 export interface RewardSummary {
@@ -318,9 +338,14 @@ function titanConfigFor(
   return cap ? { ...config, maxTurns: cap } : config;
 }
 
-function assertTeamShape(team: readonly string[]): void {
-  if (team.length === 0 || team.length > MAX_TEAM) {
-    throw new AppError('VALIDATION', `A team is one to ${MAX_TEAM} champions.`);
+function assertTeamShape(team: readonly string[], borrowedSlots = 0): void {
+  if (team.length === 0 || team.length + borrowedSlots > MAX_TEAM) {
+    throw new AppError(
+      'VALIDATION',
+      borrowedSlots > 0
+        ? `A team is one to ${MAX_TEAM} champions, and a borrowed warden takes one of them.`
+        : `A team is one to ${MAX_TEAM} champions.`,
+    );
   }
   if (new Set(team).size !== team.length) {
     throw new AppError('VALIDATION', 'A champion cannot take two slots.');
@@ -554,7 +579,16 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
       throw new AppError('CONTENT_STALE', `Stage "${options.stageKey}" has nobody to fight with.`);
     }
   } else {
-    assertTeamShape(options.team);
+    // The ally occupies a slot rather than adding a fifth: every boss in the game is tuned
+    // against four and the formation is drawn for four (C28).
+    assertTeamShape(options.team, options.ally ? 1 : 0);
+  }
+
+  // Where a borrowed champion is welcome is a design decision, and it is written once in
+  // `allyRefusal` so the team chooser greys out exactly what this refuses.
+  if (options.ally) {
+    const refusal = allyRefusal(options.mode);
+    if (refusal) throw new AppError('VALIDATION', refusal);
   }
 
   const snapshot = ctx.content.current();
@@ -629,6 +663,31 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
           // The Deep Run's one rule, applied at the only place it can be: the assembly.
           withoutGear: options.mode === 'deepRun',
         });
+
+    // The borrowed warden, resolved and charged for **before** any energy is spent, so a
+    // refusal never bills for a fight that did not start. Assembled from the *lender's*
+    // side of everything — their relics, masteries, Hall and collection — because a
+    // champion that fought at the borrower's power would not be the one that was offered.
+    let ally: warband.BorrowedAlly | null = null;
+    if (options.ally) {
+      ally = await warband.borrow(
+        tx,
+        { db: ctx.db, content: ctx.content },
+        {
+          playerId: options.playerId,
+          dailyCounters: player.dailyCounters,
+          dailyCountersDay: player.dailyCountersDay,
+        },
+        options.ally,
+        new Date(),
+      );
+      const lent = await roster.findOwned(tx, ally.wardenId, [ally.championId]);
+      if (lent.length !== 1) {
+        throw new AppError('CONTENT_STALE', `${ally.profileName} no longer holds that champion.`);
+      }
+      const assembled = await assembleEntries(tx, ctx, lent, champions, scaling, ally.wardenId, {});
+      entries.push(...assembled);
+    }
 
     // A descent's fight is the ordinary one with two things folded in that only exist
     // inside a run: the boons taken so far, and the health the party is carrying. Both are
@@ -815,6 +874,10 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         stageKey: options.stageKey,
         contentRev: snapshot.rev,
         teamIds: owned.map((member) => member.id),
+        // Only the account's own copies are in `teamIds`, so a borrowed warden is recorded
+        // beside it rather than in it: the ids in that list are what the payout pays and a
+        // champion somebody else owns must never be one of them.
+        ...(ally ? { borrowedFrom: ally.profileName } : {}),
         seed,
         state: openingState,
         events: openingEvents,
@@ -867,6 +930,7 @@ export async function start(ctx: BattleContext, options: StartOptions): Promise<
         openingEvents,
       ),
       team: (row.teamIds as string[]) ?? [],
+      borrowedFrom: borrowedFromOf(row),
     };
   });
 }
@@ -1017,6 +1081,7 @@ export async function step(ctx: BattleContext, options: StepOptions): Promise<Ba
       canSkip: row.canSkip,
       contributions: contributionTable(finished ? 'finished' : 'active', events),
       team: (row.teamIds as string[]) ?? [],
+      borrowedFrom: borrowedFromOf(row),
     };
   });
 }
@@ -1089,6 +1154,7 @@ export async function retreat(
       canSkip: row.canSkip,
       contributions: contributionTable('finished', events),
       team: (row.teamIds as string[]) ?? [],
+      borrowedFrom: borrowedFromOf(row),
     };
   });
 }
@@ -1966,6 +2032,23 @@ export function contributionTable(
   return status === 'finished' ? contributions(events, 'ally') : [];
 }
 
+/**
+ * The borrowed warden a view carries, out of the two fields the row stores about them.
+ *
+ * Its own function for `contributionTable`'s reason: five places build a `BattleView` and
+ * the slot is *derived* — the borrowed champion is pushed onto the formation after the
+ * account's own, so it is `teamIds.length` — which is exactly the kind of arithmetic that
+ * rots when it is written out five times.
+ */
+export function borrowedFromOf(row: {
+  borrowedFrom: string | null;
+  teamIds: unknown;
+}): BattleView['borrowedFrom'] {
+  if (!row.borrowedFrom) return null;
+  const team = (row.teamIds as string[] | null) ?? [];
+  return { slot: team.length, profileName: row.borrowedFrom };
+}
+
 export function toView(row: typeof battleSessions.$inferSelect): BattleView {
   return {
     id: row.id,
@@ -1979,6 +2062,7 @@ export function toView(row: typeof battleSessions.$inferSelect): BattleView {
     canSkip: row.canSkip,
     contributions: contributionTable(row.status, row.events as BattleEvent[]),
     team: (row.teamIds as string[]) ?? [],
+    borrowedFrom: borrowedFromOf(row),
   };
 }
 

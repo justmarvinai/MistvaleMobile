@@ -10,6 +10,7 @@ import { CampaignScreen } from '@/screens/Campaign/CampaignScreen';
 import { BattleScreen } from '@/screens/Battle/BattleScreen';
 import { DepthsScreen } from '@/screens/Depths/DepthsScreen';
 import { ExpeditionsScreen } from '../screens/Expeditions/ExpeditionsScreen';
+import { WardensScreen } from '../screens/Wardens/WardensScreen';
 import { TrialsScreen } from '../screens/Trials/TrialsScreen';
 import { WorldBossScreen } from '../screens/WorldBoss/WorldBossScreen';
 import { DeepRunScreen } from '../screens/DeepRun/DeepRunScreen';
@@ -229,6 +230,7 @@ const SCREEN_VIEWS: Partial<Record<ScreenId, () => JSX.Element>> = {
   spire: SpireScreen,
   trials: TrialsScreen,
   expeditions: ExpeditionsScreen,
+  wardens: WardensScreen,
   arena: ArenaScreen,
   battle: BattleScreen,
   champions: ChampionsScreen,
