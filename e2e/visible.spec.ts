@@ -13,7 +13,7 @@ import {
   setSimpleBattlefield,
   unique,
 } from './support';
-import { decodePng, differingFraction, litFraction, meanColour } from './pixels';
+import { decodePng, differingFraction, litFraction } from './pixels';
 
 /**
  * The screens a player looks at, checked for being *lookable at*.
@@ -620,8 +620,11 @@ test.describe('what a player can actually see', () => {
    * passes for a battlefield. So the canvas is *hidden* and the field shot again: what
    * changed is exactly what the canvas was contributing, and nothing else can fake it.
    *
-   * Measured: 86% of the field is the canvas's own paint as shipped, and 0.00% — not a
-   * rounding error, zero — with the canvas back to `position: static`.
+   * Measured: 60% of the field is the canvas's own paint as shipped, and 0.00% — not a
+   * rounding error, zero — with the canvas back to `position: static`. It was 86% before
+   * C28b, and the difference is the point of that pass rather than a regression: the scene
+   * no longer paints an opaque sky over the top of the band, so what it contributes there is
+   * the floor and the bodies standing on it, and the rest is the room showing through.
    */
   test('the battlefield is not painted over by the room behind it', async ({ page }) => {
     test.slow();
@@ -689,7 +692,7 @@ test.describe('what a player can actually see', () => {
   });
 
   /**
-   * The ground reaches the sides of the window.
+   * The ground reaches the sides of the window — and stops at the horizon.
    *
    * The scene *contains* its 960×540 design canvas rather than cropping it, which is the
    * right call for a composition with a side at each edge — but the floor was drawn exactly
@@ -703,6 +706,20 @@ test.describe('what a player can actually see', () => {
    * The browser's floor is an element, and reading *it* as pixels would be dishonest: with
    * the simple battlefield on, no battle scene is built, so what shows through the gaps is
    * the ambient mist — bright enough to answer the question for it and pass either way.
+   *
+   * **Read as the canvas's own contribution rather than as a brightness step.** The first
+   * cut compared two patches 70px apart in the same column and asked for the floor to be
+   * lighter than what was above it — which worked only while the scene painted an opaque
+   * sky, because both patches were then the canvas and the step between them was two flat
+   * fills. C28b dropped the sky, so what is above the horizon is the tab's own painting,
+   * which at the letterbox is darker than the ground plate and inverts the comparison. The
+   * honest question is not "is this patch brighter" but "is the canvas painting here at
+   * all", and hiding the canvas and shooting again is the only thing that answers it.
+   *
+   * Both halves are measured, and each fails on its own mutation. Below the horizon the
+   * canvas contributes 51% of the right edge and 60% of the left as shipped, and **0.00%**
+   * with the bleed taken off. Above it the canvas contributes **0.00%** — the room is what
+   * is up there — against 82% and 99% with the opaque sky put back.
    */
   test('the painted ground reaches the sides of a wide window', async ({ page }) => {
     test.slow();
@@ -714,25 +731,17 @@ test.describe('what a player can actually see', () => {
     await chooseStarter(page);
     await enterStageOneOne(page);
 
-    // Asked as the horizon step at the edge itself, at one x, rather than by comparing an
-    // edge against the middle of the screen: the field is lit with a lateral falloff, so the
-    // floor is genuinely darker at the sides than in the centre and an equality there would
-    // fail on a fix that works. Two patches 70px apart in the same column are on the same
-    // part of that gradient, and the only thing between them is the horizon.
-    //
-    // With the floor reaching the edge that step is about seven points — the void behind the
-    // letterbox against the ground plate, `#0c0a09` against `#171310`. Without it there is no
-    // step at all, because both patches are the void.
-    const patch = async (x: number, y: number): Promise<number> =>
-      meanColour(decodePng(await page.screenshot({ clip: { x, y, width: 30, height: 30 } })))[0];
-
+    // y=320 is below the horizon at this size and y=250 is above it: the scene is contained
+    // to 1244×700, so 230 of its 540 rows lands at 298 on screen.
     for (const [edge, x] of [
       ['right', 1570],
       ['left', 0],
     ] as const) {
-      const sky = await patch(x, 250);
-      const floor = await patch(x, 320);
-      expect(floor - sky, `the floor reaches the ${edge} edge`).toBeGreaterThan(3);
+      const floor = await canvasContribution(page, { x, y: 320, width: 30, height: 30 });
+      expect(floor * 100, `the floor reaches the ${edge} edge`).toBeGreaterThan(25);
+
+      const sky = await canvasContribution(page, { x, y: 250, width: 30, height: 30 });
+      expect(sky * 100, `nothing is painted over the room at the ${edge} edge`).toBeLessThan(5);
     }
   });
 
@@ -788,22 +797,24 @@ async function litOnTheField(page: Page): Promise<number> {
   return litFraction(decodePng(shot));
 }
 
+interface Clip {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /**
- * Runs something with everything *behind* the shared canvas hidden, then puts it back.
+ * How much of a region the shared canvas is actually drawing.
  *
- * "Behind" is read off the DOM rather than named: the stage wrapper draws its layers in
- * source order, so the canvas's earlier siblings are the ones underneath it. A measurement
- * of what the canvas drew must not be able to read them.
+ * Shoot it, hide the canvas, shoot it again: what differs is the canvas's own contribution,
+ * and a canvas that reaches the screen through nothing contributes zero. The region defaults
+ * to the middle band of the viewport — under the enemy plate, above the hotbar — and the
+ * ground guard passes a 30×30 patch at the letterbox instead.
  */
-/**
- * How much of the field the shared canvas is actually drawing.
- *
- * Shoot the middle band, hide the canvas, shoot it again: what differs is the canvas's own
- * contribution, and a canvas that reaches the screen through nothing contributes zero.
- */
-async function canvasContribution(page: Page): Promise<number> {
+async function canvasContribution(page: Page, clip?: Clip): Promise<number> {
   const box = page.viewportSize() ?? { width: 1280, height: 720 };
-  const clip = {
+  const region = clip ?? {
     x: 0,
     y: Math.round(box.height * 0.3),
     width: box.width,
@@ -815,13 +826,20 @@ async function canvasContribution(page: Page): Promise<number> {
       if (canvas) canvas.style.visibility = hide ? 'hidden' : '';
     }, hidden);
 
-  const withCanvas = decodePng(await page.screenshot({ clip }));
+  const withCanvas = decodePng(await page.screenshot({ clip: region }));
   await setCanvasHidden(true);
-  const withoutCanvas = decodePng(await page.screenshot({ clip }));
+  const withoutCanvas = decodePng(await page.screenshot({ clip: region }));
   await setCanvasHidden(false);
   return differingFraction(withCanvas, withoutCanvas);
 }
 
+/**
+ * Runs something with everything *behind* the shared canvas hidden, then puts it back.
+ *
+ * "Behind" is read off the DOM rather than named: the stage wrapper draws its layers in
+ * source order, so the canvas's earlier siblings are the ones underneath it. A measurement
+ * of what the canvas drew must not be able to read them.
+ */
 async function withBackdropHidden<T>(page: Page, run: () => Promise<T>): Promise<T> {
   const toggle = (hidden: boolean) =>
     page.evaluate((hide) => {

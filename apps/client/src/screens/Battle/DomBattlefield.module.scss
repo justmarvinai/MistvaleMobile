@@ -25,14 +25,20 @@
 }
 
 /* The horizon band and the ground plate the scene draws, in the same two colours at the
-   same height, so the field has a floor to stand on rather than being a void.
+   same height, so the field has a floor to stand on rather than being a void. The height
+   comes in from `formation.HORIZON` as an inline `top`, because a number two renderers must
+   agree on does not belong in one of their stylesheets (C28b).
+
+   Neither renderer draws a *sky*: above the horizon is the tab's own painting, which is the
+   room the fight is happening in. The scene used to cover it with an opaque plate and this
+   one never did — the whole of C28b.
 
    Bled past the sides for the same reason the scene bleeds its own: the canvas is a
    contained 960×540 box and the window is wider, so a floor that stops at the box stops in
    the middle of the screen. Scenery reaches the edges; the composition does not have to. */
 .ground {
   position: absolute;
-  inset: calc(100% * 230 / 540) -100% 0;
+  inset: 0 -100% 0;
   background: #171310;
   border-top: 2px solid #2a2018;
 }

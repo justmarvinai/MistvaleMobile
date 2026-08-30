@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '@/game/stage';
-import { UNIT_HEIGHT, slotPosition } from '@/game/formation';
+import { HORIZON, UNIT_HEIGHT, slotPosition } from '@/game/formation';
 import { framePath, loadSpriteManifest, spriteEntry, stillPath } from '@/game/sprites';
 import { CHAMPION_PLACEHOLDER } from '@/ui/championArt';
 import { mirrored } from '@/game/facing';
@@ -60,8 +60,15 @@ export function DomBattlefield({
     <div className={styles.field} data-battlefield="simple" aria-hidden="true">
       <div className={styles.canvas}>
         {/* Named so the suite can measure it: the floor has to reach the edges of the
-            window, and a class name a bundler hashed is not something a test can ask for. */}
-        <div className={styles.ground} data-ground="" />
+            window, and a class name a bundler hashed is not something a test can ask for.
+            Its top is set from `HORIZON` rather than written in the stylesheet, for the
+            reason `UNIT_HEIGHT` is: the scene draws the same floor at the same height, and
+            the two must not be able to disagree about where the ground is. */}
+        <div
+          className={styles.ground}
+          data-ground=""
+          style={{ top: pct(HORIZON, VIRTUAL_HEIGHT) }}
+        />
         {units.map((unit) => (
           <Fighter
             key={`${unit.ref.side}:${unit.ref.slot}`}

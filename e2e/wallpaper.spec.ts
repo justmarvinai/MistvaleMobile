@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseStarter, goToScreen, registerRaw } from './support';
+import { chooseStarter, enterStageOneOne, goToScreen, registerRaw } from './support';
 import { decodePng, differingFraction, litFraction } from './pixels';
 
 /**
@@ -101,6 +101,42 @@ test.describe('the tab paintings', () => {
     );
     expect(litFraction(heading, 150), 'the title is painted, not buried').toBeGreaterThan(0.05);
   });
+
+  /**
+   * And the room is still there once the fighting starts (C28b).
+   *
+   * The battle screen is the one place in the game with something of its own on the canvas,
+   * and the scene used to open by clearing the whole of it to an opaque near-black before
+   * laying the floor over the bottom. That was written before C23 put a painting behind
+   * every tab and was never reconciled with it, so the Combat painting was published,
+   * loaded, correctly stacked — and covered, in the only room a player spends real time in.
+   *
+   * The tell was that the *fallback* renderer looked better: `DomBattlefield` has only ever
+   * drawn the floor, so the simple battlefield showed the room above the horizon while the
+   * painted one showed a void. Two renderers meant to be the same fight.
+   *
+   * Asked of the band above the horizon, because below it there is a floor and there is
+   * supposed to be. At 1440×900 the scene is contained to 1440×810 from y=45, so its 230th
+   * row of 540 lands at y=390. Measured: the painting is **87%** of the band between the
+   * top bar and the horizon, and **0.79%** with the opaque sky put back.
+   */
+  test('the room shows through a fight', async ({ page }) => {
+    test.slow();
+    await registerRaw(page, 'e2ewallb', 'Battler');
+    await chooseStarter(page);
+    await enterStageOneOne(page);
+
+    const width = page.viewportSize()?.width ?? 1440;
+    await expect
+      .poll(
+        async () =>
+          Math.round(
+            (await wallpaperContribution(page, { x: 0, y: 120, width, height: 260 })) * 100,
+          ),
+        { timeout: 30_000 },
+      )
+      .toBeGreaterThan(40);
+  });
 });
 
 /**
@@ -115,17 +151,25 @@ test.describe('the tab paintings', () => {
  * 17% at the Mistgate, whose screen carries the most opaque panelling. With the stage's
  * opaque clear colour put back — the state the owner reported — the Haven falls to 4.6%,
  * so the bar sits between the two with room on both sides rather than at zero.
+ *
+ * A clip narrows it to one region, which the battle screen needs: the fight covers the
+ * bottom of its own window on purpose, and the question there is only about the band above
+ * the horizon.
  */
-async function wallpaperContribution(page: Page): Promise<number> {
+async function wallpaperContribution(
+  page: Page,
+  clip?: { x: number; y: number; width: number; height: number },
+): Promise<number> {
   const setHidden = (hidden: boolean) =>
     page.evaluate((hide) => {
       const layer = document.querySelector('div[style*="/wallpapers/"]');
       if (layer instanceof HTMLElement) layer.style.visibility = hide ? 'hidden' : '';
     }, hidden);
 
-  const painted = decodePng(await page.screenshot());
+  const shot = () => (clip ? page.screenshot({ clip }) : page.screenshot());
+  const painted = decodePng(await shot());
   await setHidden(true);
-  const bare = decodePng(await page.screenshot());
+  const bare = decodePng(await shot());
   await setHidden(false);
   return differingFraction(painted, bare);
 }

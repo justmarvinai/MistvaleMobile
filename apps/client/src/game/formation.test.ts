@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  HORIZON,
   MAX_SLOTS,
   UNIT_HEIGHT,
   UNIT_WIDTH,
@@ -18,6 +19,22 @@ import {
  */
 
 const slots = Array.from({ length: MAX_SLOTS }, (_, slot) => slot);
+
+describe('the ground', () => {
+  it('is under the party rather than over it', () => {
+    // Both renderers draw the floor from `HORIZON` down and stand the party on it. If the
+    // horizon ever dropped below the front rank the champions would be painted over from
+    // the feet up, which is the one way these two numbers can be wrong together — and it is
+    // exactly the kind of thing a browser guard reports as "the field looks odd".
+    for (const side of ['ally', 'enemy'] as const) {
+      for (let slot = 0; slot < MAX_SLOTS; slot += 1) {
+        expect(slotPosition(side, slot).y, `${side} ${slot} stands on the floor`).toBeGreaterThan(
+          HORIZON,
+        );
+      }
+    }
+  });
+});
 
 describe('slotPosition', () => {
   it('stands four champions far enough apart to count them', () => {

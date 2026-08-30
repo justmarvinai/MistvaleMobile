@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the fight was watched in a void with the room painted underneath it (C28b)
+
+C23 put one of the owner's paintings behind every tab. The battle scene opened by clearing
+its whole canvas to an opaque near-black and then laying the floor over the bottom of it —
+written long before there was anything behind the canvas to hide, and never reconciled with
+it. So the Combat painting was published, loaded, correctly stacked, and covered, in the one
+room a player spends real time in.
+
+**The tell was that the fallback renderer looked better.** `DomBattlefield` has drawn only
+the floor since B2 — its stylesheet says "the same two colours at the same height" and it
+never had a sky to draw — so the simple battlefield has been showing the room above the
+horizon all along and the painted one has not. Two renderers meant to be the same fight,
+disagreeing about the whole top half of it. Dropping the sky is what makes them agree; the
+floor stays opaque in both, because it is what the champions stand on and a wash that let
+the painting's own rocks through would put busy detail under their feet.
+
+The horizon itself moved into `game/formation` beside `BASE_Y`, for the reason C28 moved the
+formation there: it sat as a literal `230` in the scene and as `230 / 540` in the fallback's
+stylesheet, and two renderers that disagree about where the ground is put one camp's feet in
+the air.
+
+Two guards, both mutation-checked. In a fight the painting is **87%** of the band between
+the top bar and the horizon, against **0.79%** with the opaque sky put back. And the ground
+guard was rewritten rather than retuned: it had compared two patches 70px apart at the
+letterbox and asked for the lower one to be brighter, which only worked while the scene
+painted a sky — both patches were the canvas then. It reads the canvas's own contribution
+now: 51% and 60% at the two edges below the horizon (0.00% with the bleed taken off), and
+0.00% above it (82% and 99% with the sky back).
+
 ### Fixed — a party stood in a heap (C28)
 
 Four champions on the field overlapped by about two thirds and read as one shape with

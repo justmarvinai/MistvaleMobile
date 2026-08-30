@@ -45,6 +45,17 @@ const INSET = 132;
  */
 const BASE_Y = 344;
 
+/**
+ * Where the floor starts — the horizon both renderers draw, and the top of the plate the
+ * champions stand on.
+ *
+ * Here rather than in either renderer because it is the same class of number as `BASE_Y`:
+ * the two draw one field and a disagreement about where the ground is would put one camp's
+ * feet in the air. It sat as a literal `230` in the scene and as `230 / 540` in the
+ * fallback's stylesheet until C28b needed to touch both.
+ */
+export const HORIZON = 230;
+
 /** The virtual size of a champion's drawn box: 88px of art at ×2. */
 export const UNIT_HEIGHT = 176;
 

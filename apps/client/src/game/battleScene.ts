@@ -13,7 +13,7 @@ import { BURST_LIFT } from './playback';
 import type { Effect, EffectKind, Floater, PlaybackView, VisualUnit } from './playback';
 import { loadIdleFrames, loadPlaceholderTexture } from './sprites';
 import { mirrored } from './facing';
-import { UNIT_HEIGHT, slotPosition } from './formation';
+import { HORIZON, UNIT_HEIGHT, slotPosition } from './formation';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH, type Scene } from './stage';
 
 /**
@@ -164,7 +164,6 @@ interface FloaterVisual {
 
 const FLOATER_LIFE = 52;
 
-/** How tall a stand-in stands: a champion's 88px art at ×2, so the two are interchangeable. */
 /** A stand-in stands the same size a champion does — see `formation.UNIT_HEIGHT`. */
 const STAND_IN_HEIGHT = UNIT_HEIGHT;
 
@@ -237,7 +236,23 @@ export class BattleScene implements Scene {
 
   private drawBackdrop(): void {
     const ground = new Graphics();
-    // A horizon band and a ground plate: enough depth to sit units in, cheap to draw.
+    // A horizon band and a ground plate — and, since C28b, no sky.
+    //
+    // The scene used to clear the whole canvas to an opaque near-black before laying the
+    // floor over the bottom of it. That was written when there was nothing behind the
+    // canvas to hide; C23 put one of the owner's paintings behind every tab and the plate
+    // was never reconciled with it, so the fight was watched in a void while the room it
+    // was fought in sat underneath, painted and invisible.
+    //
+    // `DomBattlefield` is the argument for the shape of the fix rather than a taste call:
+    // it has drawn *only* the floor since B2 — its stylesheet says "the same two colours at
+    // the same height" and it never had a sky to draw — so the simple battlefield has been
+    // showing the room above the horizon all along and the painted one has not. Two
+    // renderers meant to be the same fight, disagreeing about the whole top half of it.
+    // Dropping the sky is what makes them agree.
+    //
+    // The floor stays opaque, in both. It is what the champions stand on, and a wash that
+    // let the painting's own rocks through would put busy detail under their feet.
     //
     // Drawn far wider than the design canvas on purpose. `resize` *contains* 960×540 inside
     // the viewport — the right choice for the composition, since cropping the flanks would
@@ -247,9 +262,8 @@ export class BattleScene implements Scene {
     // reaches the sides of any window the fight is watched in.
     const bleed = VIRTUAL_WIDTH;
     const wide = VIRTUAL_WIDTH + bleed * 2;
-    ground.rect(-bleed, 0, wide, VIRTUAL_HEIGHT).fill(0x0c0a09);
-    ground.rect(-bleed, 230, wide, VIRTUAL_HEIGHT - 230).fill(0x171310);
-    ground.rect(-bleed, 228, wide, 2).fill(0x2a2018);
+    ground.rect(-bleed, HORIZON, wide, VIRTUAL_HEIGHT - HORIZON).fill(0x171310);
+    ground.rect(-bleed, HORIZON - 2, wide, 2).fill(0x2a2018);
     this.backdrop.addChildAt(ground, 0);
   }
 
