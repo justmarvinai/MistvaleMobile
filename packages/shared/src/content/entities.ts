@@ -973,15 +973,21 @@ export const stageDefSchema = contentMetaSchema.extend({
     silverMax: z.number().int().min(0).max(1_000_000),
     playerXp: z.number().int().min(0).max(10_000),
     championXp: z.number().int().min(0).max(50_000),
-    dropTableKey: contentKeySchema.optional(),
     /**
      * What a clear can drop, beyond silver and experience.
      *
      * Relics are described as a band rather than a list: the set comes from the chapter,
      * the slot from the stage number, and the rank/rarity from here — the source game's
-     * arrangement, and the reason a chapter's farm is a *specific* farm. The generalised
-     * drop-table content type arrives with the Depths in P6; until then a campaign stage
-     * carries its own band, which is where an operator looks for it anyway.
+     * arrangement, and the reason a chapter's farm is a *specific* farm.
+     *
+     * **There is no separate drop-table content type, and there is not going to be.** This
+     * schema carried a `dropTableKey` from P4 to A2, on the promise that "the generalised
+     * drop-table content type arrives with the Depths in P6". P6 shipped the band instead
+     * — deliberately, because a chapter farming one specific set is the whole design — and
+     * the field was left behind: declared here, editable in Admin, and read by nothing at
+     * all. An operator could set it and the game would ignore them. Removed rather than
+     * implemented, since the band is the mechanism and a second one would be a second
+     * answer to what a stage drops.
      */
     drops: z
       .object({

@@ -5,6 +5,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Removed — `stage.rewards.dropTableKey`, which nothing has ever read (C34)
+
+Declared on the stage schema since P4, editable in Admin ever since, and read by **no code
+anywhere**. An operator could set it and the game would ignore them, which is the same class
+of defect as the enemy `stars` that decided nothing (Q8) and the `currency` shop kind with no
+payout branch (C24).
+
+It was a placeholder for a generalised `dropTable` content type, promised in its own comment
+as arriving "with the Depths in P6". P6 shipped the inline drops band instead — deliberately,
+because a chapter farming one specific set is the whole design, and a generalised table would
+have been a second answer to what a stage drops. The promise was never revisited and the
+field outlived it.
+
+Found by building A2's campaign editor, which is what `ADMIN_SUITE_DESIGN` §2.9 called a
+drop-table editor: there was no drop table to edit.
+
 ### Added — the battle inspector's reads (C33, ADMIN_SUITE_DESIGN §2.18)
 
 `GET /admin/api/battles` and `/battles/:id` — the server half of the debugging tool for
