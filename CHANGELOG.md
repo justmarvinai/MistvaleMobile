@@ -5,6 +5,44 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the floor is lit, the type is desktop-sized, and two screens stopped being forms (C42)
+
+- **The battlefield has a floor.** Below the horizon was one flat near-black plate from the
+  horizon to the foot of the window — sixty percent of every fight in the dark, with the
+  champions standing on a stage rather than in the room the painting behind them shows. It is
+  lit now, in both renderers from one set of numbers (`formation.campLight`): a plate lightest
+  at the horizon and darkest at the feet, a haze along the horizon carrying the room's ember
+  down onto the ground, and a soft cast of light under each camp. The Pixi scene paints it
+  with `FillGradient`s and the simple battlefield with the same gradients in CSS, positioned
+  from custom properties the DOM renderer converts inline. The floor's brightest pixel is
+  kept under 60 by design, and the "is there anything on this field" guard reads against 64
+  rather than 42 — the old bar would have been cleared by the empty floor alone, which is the
+  one answer that guard exists to refuse. The silhouette a missing-art champion wears is
+  tinted in a lightened element colour now rather than the raw one: it was a shadow on a lit
+  floor, and at the raw tint the refused-art guard reached exactly its bar and no more.
+- **The type is set for the display the game is played on.** 344 `font-size` declarations in
+  73 stylesheets moved up one step: the 0.62–0.7rem footnotes to 0.78, 0.72–0.76 to 0.84,
+  0.78–0.82 to 0.9, 0.85–0.88 to 0.95, and 9–12.5px to 11–14px; the body is 15px, the
+  smallest label 12.5px, and a screen's title 24px with its tagline at 14.5. Nothing about a
+  layout changed, which is the point — the same screens at a size a desktop is read at.
+- **The first decision in the game is three hero panels.** The starter choice was three
+  sixty-pixel sprites in plain rectangles with two lines of small text under each. Each
+  choice is a tall board now with the champion's painted face filling it, the element as the
+  library's own badge and the role beside it, the name at 26px and the title and rarity under
+  it, and the chosen one lifted and lit. A starter with no face drawn gets the same
+  silhouette every faceless champion wears.
+- **The victory is read over the field it was won on.** The result screen's ground was the
+  pack's leather under a wash reaching 92% black — a void, entered from the middle of a
+  painted fight. The wash stays, lighter, and the leather goes, so the fight and the room
+  behind it show through; the spoils strip, the notes and the champion cards are at desktop
+  size (a 96px face on a 15.5rem card) instead of phone size.
+- **Fixed: the shared tooltip made the document taller than the window.** The library's
+  card is `position: relative` until it is first shown, and Mistvale parks one on the body
+  as soon as any tooltip-bearing element mounts — so from the first frame there were thirty
+  pixels of empty tooltip in flow *after the shell*, and the document was thirty pixels
+  taller than the window. Nothing showed it, because `body` clips its overflow; the shell
+  guard measures exactly that and caught it. The card is parked fixed and off-screen now.
+
 ### Changed — the Haven fills its room, and the dock and top bar are drawn for a desktop (C41)
 
 The second chunk of the UI/UX pass, and the owner's own first example: *"look at the first

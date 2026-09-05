@@ -54,7 +54,7 @@
 
   dt {
     color: $parchment-dim;
-    font-size: 0.72rem;
+    font-size: 0.84rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
@@ -70,7 +70,7 @@
 .blocked {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-style: italic;
 }
 
@@ -90,7 +90,7 @@
 
 .floorOf {
   color: $parchment-dim;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .floorTrack {
@@ -138,7 +138,7 @@
 .memberName {
   overflow: hidden;
   color: $parchment;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   grid-area: name;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -147,7 +147,7 @@
 .memberPct {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   grid-area: pct;
 }
 
@@ -167,7 +167,7 @@
 
 .memberDown {
   color: $blood;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   grid-area: bar;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -184,7 +184,7 @@
 
 .heldLabel {
   color: $parchment-dim;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -202,7 +202,7 @@
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(0, 0, 0, 0.3);
     color: $parchment;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
   }
 
   li[data-rarity='rare'] {
@@ -224,7 +224,7 @@
 .sectionTitle {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   font-weight: normal;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -272,7 +272,7 @@
 
 .doorKind {
   color: $parchment-dim;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -284,7 +284,7 @@
 
 .doorText {
   color: $parchment-dim;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.4;
 }
 
@@ -296,13 +296,13 @@
 
 .doorWave {
   color: $parchment;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   opacity: 0.8;
 }
 
 .doorGain {
   color: #7fbf5a;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 // ── The offer ──────────────────────────────────────────────────────────────
@@ -351,14 +351,14 @@
 
 .boonRarity {
   color: $parchment-dim;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .boonText {
   color: $parchment;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.45;
 }
 
@@ -380,7 +380,7 @@
 
 .retireNote {
   color: $parchment-dim;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-style: italic;
 }
 
@@ -408,13 +408,13 @@
 .rungFloor {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
 .rungName {
   color: $parchment;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
 }
 
 // ── Picking a party, and coming back up ────────────────────────────────────

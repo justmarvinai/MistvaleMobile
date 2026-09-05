@@ -14,7 +14,7 @@
   padding: $space-2;
   background: $panel-inset;
   color: $muted;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 
   strong {
     color: $parchment;
@@ -40,7 +40,7 @@
 .hint {
   margin-left: $space-2;
   color: $muted-deep;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   line-height: 1.4;
 }
 
@@ -54,7 +54,7 @@
   overflow-y: auto;
   list-style: none;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 
   li {
     display: flex;
@@ -98,5 +98,5 @@
 
 .error {
   color: $danger;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }

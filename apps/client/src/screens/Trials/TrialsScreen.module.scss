@@ -86,7 +86,7 @@
   overflow: hidden;
   min-height: 2 * 1.2 * 0.72rem;
   color: $parchment;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   line-height: 1.2;
   // Mistvale has single words longer than a quarter of a card — "Cindermaw", "Palewatch" —
   // and a name that cannot wrap inside its cell draws over the frame instead.
@@ -98,7 +98,7 @@
 .memberRank {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   white-space: nowrap;
 }
 
@@ -115,7 +115,7 @@
 
   dt {
     color: $parchment-dim;
-    font-size: 0.75rem;
+    font-size: 0.84rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
@@ -148,7 +148,7 @@
 
 .paysLabel {
   color: $parchment-dim;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -156,13 +156,13 @@
 .status {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.4;
 }
 
 .blocked {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-style: italic;
 }

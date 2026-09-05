@@ -63,17 +63,28 @@ export interface RewardsProps {
   rewards: Readonly<Record<string, number>>;
   /** `+` in front of each amount, for a payout rather than a price. */
   signed?: boolean;
+  /** `lg` for a strip that is the point of its screen — the spoils of a fight (C42). */
+  size?: 'md' | 'lg';
   className?: string;
 }
 
-export function Rewards({ rewards, signed = false, className }: RewardsProps): JSX.Element | null {
+export function Rewards({
+  rewards,
+  signed = false,
+  size = 'md',
+  className,
+}: RewardsProps): JSX.Element | null {
   const nameOf = useRewardName();
   const bundle = useContentStore((state) => state.bundle);
   const entries = Object.entries(rewards).filter(([, amount]) => amount > 0);
   if (entries.length === 0) return null;
 
   return (
-    <ul className={[styles.rewards, className ?? ''].filter(Boolean).join(' ')}>
+    <ul
+      className={[styles.rewards, size === 'lg' ? styles.lg : '', className ?? '']
+        .filter(Boolean)
+        .join(' ')}
+    >
       {entries.map(([key, amount]) => (
         <Reward
           key={key}

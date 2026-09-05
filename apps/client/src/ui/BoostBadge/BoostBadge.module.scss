@@ -30,7 +30,7 @@
 
 .mark {
   font-family: $font-display;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -38,7 +38,7 @@
 /* Monospace so the last minute does not shuffle the badge's width once a second. */
 .clock {
   font-family: $font-mono;
-  font-size: 0.66rem;
+  font-size: 0.78rem;
   color: inherit;
   opacity: 0.85;
 }

@@ -22,7 +22,7 @@
 }
 
 .title {
-  @include display-text(20px);
+  @include display-text(24px);
   margin: 0;
   color: $parchment;
   letter-spacing: 0.08em;
@@ -35,7 +35,7 @@
 .tagline {
   margin: 0;
   color: $muted;
-  font-size: 12px;
+  font-size: 14.5px;
   letter-spacing: 0.06em;
 }
 
@@ -53,7 +53,7 @@
 }
 
 .level2 .title {
-  font-size: 16px;
+  font-size: 18px;
   color: $accent-soft;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .level3 .title {
-  font-size: 13px;
+  font-size: 14px;
   color: $muted;
   letter-spacing: 0.14em;
   text-shadow: none;
@@ -70,7 +70,7 @@
 
 .level2 .tagline,
 .level3 .tagline {
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 /* ── Alignment ────────────────────────────────────────────────────────────── */

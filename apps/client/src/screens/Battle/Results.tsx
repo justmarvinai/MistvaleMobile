@@ -360,7 +360,7 @@ function Spoils({
   if (Object.keys(rewards).length === 0 && relics.length === 0) return null;
   return (
     <section className={styles.spoils} aria-label="What the fight paid">
-      <Rewards rewards={rewards} signed className={styles.strip} />
+      <Rewards rewards={rewards} signed size="lg" className={styles.strip} />
       {relics.length > 0 && (
         <ul className={styles.relics}>
           {relics.map((relic) => (

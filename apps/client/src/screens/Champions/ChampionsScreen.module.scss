@@ -90,7 +90,7 @@
 
 .fieldLabel {
   color: $muted;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -106,7 +106,7 @@
   border: 1px solid $edge;
   color: $parchment;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .select {
@@ -127,14 +127,14 @@
   align-items: center;
   gap: $space-1;
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
 .count {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   margin-left: auto;
 }
 
@@ -159,7 +159,7 @@
 
 .note {
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.6;
 }
 
@@ -172,7 +172,7 @@
   div {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
 
   dt {
@@ -187,6 +187,6 @@
 
 .empty {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.6;
 }

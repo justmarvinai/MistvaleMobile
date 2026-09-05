@@ -14,7 +14,7 @@
 .blurb {
   margin: 0;
   color: $muted;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -46,7 +46,7 @@
 
 .slotLabel {
   color: $muted-deep;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -80,7 +80,7 @@
   border: 1px solid $edge;
   color: $parchment;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   text-align: left;
   cursor: pointer;
 
@@ -105,21 +105,21 @@
 
 .cardMeta {
   color: $muted;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
 }
 
 .empty {
   margin: 0;
   padding: $space-4 0;
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   text-align: center;
 }
 
 .error {
   margin: 0;
   color: $danger;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .actions {
@@ -133,7 +133,7 @@
 
 .count {
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 /* ── The defence on the other side ──────────────────────────────────────────
@@ -180,7 +180,7 @@
 .defenderName {
   max-width: 100%;
   color: $parchment;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -189,13 +189,13 @@
 .defenderMeta {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.66rem;
+  font-size: 0.78rem;
 }
 
 .defenderPower {
   color: $accent;
   font-family: $font-mono;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
 }
 
 .defenderLeader {
@@ -215,7 +215,7 @@
   margin: 0;
   padding: $space-4 $space-2;
   color: $muted;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.7;
   text-align: center;
 }

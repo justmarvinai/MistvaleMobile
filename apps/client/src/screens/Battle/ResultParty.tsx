@@ -149,7 +149,7 @@ function ResultChampion({
       <Portrait
         src={championArt(def, bundle?.assets).portrait ?? null}
         name={row.name}
-        size={64}
+        size={96}
         className={styles.face}
       />
 

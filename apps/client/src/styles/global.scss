@@ -22,7 +22,9 @@ body {
   background: $ground-deep;
   color: $parchment;
   font-family: $font-body;
-  font-size: 14px;
+  /* 15 rather than 14 (C42): the game is played on a desktop at arm's length, and the
+     library's own 14–15px body is the phone number it was cut for. */
+  font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

@@ -6,14 +6,14 @@
   background: rgba(180, 60, 60, 0.12);
   border: 1px solid $danger;
   color: $parchment;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
 .empty {
   margin: $space-4 0;
   color: $muted;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
 }
 
 .card {
@@ -145,7 +145,7 @@
 }
 
 .crestNote {
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.4;
   color: $muted;
 }
@@ -164,14 +164,14 @@
 
 .title {
   color: $gold;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   letter-spacing: 0.04em;
 }
 
 .joined {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.625rem;
+  font-size: 0.78rem;
 }
 
 // ── What they have done ─────────────────────────────────────────────────────
@@ -197,7 +197,7 @@
 .factLabel {
   margin: 0 0 2px;
   color: $parchment-dim;
-  font-size: 0.625rem;
+  font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -209,13 +209,13 @@
   margin: 0;
   color: $parchment;
   font-family: $font-mono;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
 }
 
 .factNote {
   margin-left: auto;
   color: $gold;
-  font-size: 0.6875rem;
+  font-size: 0.78rem;
 }
 
 // ── The four ────────────────────────────────────────────────────────────────
@@ -224,7 +224,7 @@
   margin: 0;
   color: $parchment-dim;
   font-family: $font-body;
-  font-size: 0.6875rem;
+  font-size: 0.78rem;
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -279,7 +279,7 @@
 .pickerHint {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
 .pickerList {
@@ -343,7 +343,7 @@
 .unblooded {
   margin-left: auto;
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .tile {

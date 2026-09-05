@@ -1,6 +1,7 @@
 import {
   AnimatedSprite,
   Container,
+  FillGradient,
   Graphics,
   Sprite,
   Text,
@@ -13,7 +14,7 @@ import { BURST_LIFT } from './playback';
 import type { Effect, EffectKind, Floater, PlaybackView, VisualUnit } from './playback';
 import { loadIdleFrames, loadPlaceholderTexture } from './sprites';
 import { mirrored } from './facing';
-import { HORIZON, UNIT_HEIGHT, slotPosition } from './formation';
+import { HAZE_DEPTH, HORIZON, UNIT_HEIGHT, campLight, slotPosition } from './formation';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH, type Scene } from './stage';
 
 /**
@@ -36,6 +37,20 @@ const FALL_FRAMES = 30;
  * Pixi's tint multiplies, so flashing by *setting* a colour would darken a body rather than
  * light it — the mix has to happen here, channel by channel, before it is handed over.
  */
+/**
+ * A stand-in's tint: its element, lightened.
+ *
+ * Pixi's tint multiplies, and the library's silhouette is a dark figure to begin with —
+ * tinted in the raw element it came out a shadow, and on the lit floor C42 gave the field a
+ * shadow is nearly the ground. Mixed a good way toward white it reads as a lit figure in
+ * its element's colour, which is what a missing-art champion should look like, and it is
+ * also what keeps "the battlefield has bodies on it" true with every sprite refused: at
+ * the raw tint the silhouettes reached exactly the bar that guard asks for and no more.
+ */
+function standInTint(element: string): number {
+  return mixTint(ELEMENT_TINT[element] ?? 0x9c9382, 0xffffff, 0.42);
+}
+
 function mixTint(base: number, towards: number, amount: number): number {
   const t = Math.max(0, Math.min(1, amount));
   const mix = (shift: number): number => {
@@ -262,8 +277,65 @@ export class BattleScene implements Scene {
     // reaches the sides of any window the fight is watched in.
     const bleed = VIRTUAL_WIDTH;
     const wide = VIRTUAL_WIDTH + bleed * 2;
-    ground.rect(-bleed, HORIZON, wide, VIRTUAL_HEIGHT - HORIZON).fill(0x171310);
-    ground.rect(-bleed, HORIZON - 2, wide, 2).fill(0x2a2018);
+    const depth = VIRTUAL_HEIGHT - HORIZON;
+
+    // The floor is lit (C42). It was one flat fill from the horizon to the foot of the
+    // window, which put the bottom sixty percent of every fight in the dark and left the
+    // champions standing on a stage rather than in the room behind them. Three things,
+    // all of them the painting's own ember: a plate that is lightest at the horizon and
+    // darkest at the feet, a haze along the horizon carrying the room's tone down onto
+    // the ground, and a soft cast of light under each camp — where the light is decided by
+    // `campLight`, so the DOM renderer puts it in the same place.
+    //
+    // Everything here stays under 60 on its brightest channel on purpose. The suite asks
+    // "is there anything on this field" by counting pixels brighter than the floor
+    // (`litOnTheField`, bar 64), and a floor lit past the bar it reads against would answer
+    // yes about an empty battlefield — the one question that guard exists to ask. The
+    // haze's alpha is the number that decides it: the plate's 0x2a at the horizon plus
+    // 0.11 of the ember's 0xc2 is 59.
+    const plate = new FillGradient({
+      type: 'linear',
+      start: { x: 0, y: 0 },
+      end: { x: 0, y: 1 },
+      textureSpace: 'local',
+      colorStops: [
+        { offset: 0, color: 0x2a211a },
+        { offset: 0.55, color: 0x1a1410 },
+        { offset: 1, color: 0x100d0a },
+      ],
+    });
+    ground.rect(-bleed, HORIZON, wide, depth).fill(plate);
+
+    const haze = new FillGradient({
+      type: 'linear',
+      start: { x: 0, y: 0 },
+      end: { x: 0, y: 1 },
+      textureSpace: 'local',
+      colorStops: [
+        { offset: 0, color: 'rgba(194, 118, 74, 0.11)' },
+        { offset: 1, color: 'rgba(194, 118, 74, 0)' },
+      ],
+    });
+    ground.rect(-bleed, HORIZON, wide, HAZE_DEPTH).fill(haze);
+
+    for (const side of ['ally', 'enemy'] as const) {
+      const light = campLight(side);
+      const cast = new FillGradient({
+        type: 'radial',
+        center: { x: 0.5, y: 0.5 },
+        innerRadius: 0,
+        outerCenter: { x: 0.5, y: 0.5 },
+        outerRadius: 0.5,
+        textureSpace: 'local',
+        colorStops: [
+          { offset: 0, color: 'rgba(194, 118, 74, 0.14)' },
+          { offset: 1, color: 'rgba(194, 118, 74, 0)' },
+        ],
+      });
+      ground.ellipse(light.x, light.y, light.rx, light.ry).fill(cast);
+    }
+
+    ground.rect(-bleed, HORIZON - 2, wide, 2).fill(0x3a2c20);
     this.backdrop.addChildAt(ground, 0);
   }
 
@@ -386,7 +458,7 @@ export class BattleScene implements Scene {
 
     // The element rather than white: a silhouette has no colour of its own, and a field of
     // identical black figures is only marginally better than an empty one.
-    const tint = ELEMENT_TINT[unit.element] ?? 0x9c9382;
+    const tint = standInTint(unit.element);
 
     if (stand) {
       const sprite = new Sprite(stand);

@@ -36,7 +36,7 @@
 
 .dim {
   color: $parchment-dim;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .big {
@@ -154,7 +154,7 @@
   padding: 1px 6px;
   border: 1px solid $danger;
   color: $danger;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -165,7 +165,7 @@
   gap: $space-1;
   margin: 0;
   color: $accent;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 
   strong {
     color: $gold;
@@ -182,7 +182,7 @@
 
 .done {
   color: $parchment-dim;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 /* ── Landings ───────────────────────────────────────────────────────────── */
@@ -258,11 +258,11 @@
 .claimed {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .ready {
   margin: 0;
   color: $gold;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }

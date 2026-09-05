@@ -16,7 +16,7 @@
   padding: 2px $space-2;
   background: $panel-inset;
   border: 1px solid $edge;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   line-height: 1.4;
 }
 
@@ -33,6 +33,17 @@
 }
 .reward[data-rarity='legendary'] {
   border-color: color-mix(in srgb, #{$rarity-legendary} 70%, transparent);
+}
+
+/* The spoils of a fight, at the size the result screen is read at. */
+.lg {
+  gap: $space-2 $space-3;
+
+  .reward {
+    padding: 6px $space-3;
+    font-size: 1.05rem;
+    gap: 6px;
+  }
 }
 
 .amount {

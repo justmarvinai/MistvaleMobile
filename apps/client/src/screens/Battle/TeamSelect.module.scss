@@ -13,7 +13,7 @@
 
 .summary {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .slots {
@@ -34,7 +34,7 @@
   border: 1px dashed $edge;
   color: $muted;
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   cursor: pointer;
 
   &[data-filled='true'] {
@@ -54,7 +54,7 @@
 
 .slotRole {
   color: $muted;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -91,7 +91,7 @@
   border: 1px solid $edge;
   color: $parchment;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   text-align: left;
   cursor: pointer;
 
@@ -121,7 +121,7 @@
 
 .cardMeta {
   color: $muted;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
 }
 
 /* A chosen champion is marked by the frame rather than by a glyph in the name, which used
@@ -162,7 +162,7 @@
   flex: 1 1 12rem;
   min-width: 0;
   color: $muted;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 /* Its own line under the batch row, since it is about the batch rather than beside it. */
@@ -170,7 +170,7 @@
   flex: 1 0 100%;
   margin: 0;
   color: $muted-deep;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
 }
 
 .stepper {
@@ -210,7 +210,7 @@
 
 .error {
   color: $danger;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 /* ── Warded floors (the Mistspire) ──────────────────────────────────────── */
@@ -231,7 +231,7 @@
 .wardFailure {
   margin: 0;
   color: $danger;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 
@@ -251,7 +251,7 @@
 
 .empty {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 
@@ -265,7 +265,7 @@
   align-items: center;
   gap: $space-2;
   color: $parchment-dim;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   cursor: pointer;
   user-select: none;
 

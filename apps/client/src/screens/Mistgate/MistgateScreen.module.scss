@@ -142,7 +142,7 @@
 
 .sigilTier {
   color: var(--mv-sigil-tier, #{$muted});
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -355,7 +355,7 @@
   padding: 3px 10px;
   border: 1px solid var(--mv-sigil-tier, #{$edge-bright});
   color: var(--mv-sigil-tier, #{$muted});
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -380,7 +380,7 @@
 
 .featuredLabel {
   color: $gold;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -416,7 +416,7 @@
 
 .featuredName {
   color: $parchment-dim;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 
 .actions {
@@ -440,7 +440,7 @@
 
 .summonCost {
   color: $parchment-dim;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   font-weight: normal;
   letter-spacing: 0.4px;
   text-transform: none;
@@ -475,7 +475,7 @@
   grid-template-columns: auto minmax(8rem, 12rem) auto;
   align-items: center;
   gap: $space-2;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 
   &[data-rarity='common'] .clockFill {
     background: $rarity-common;
@@ -527,7 +527,7 @@
 
 .error {
   color: $danger;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 /* ── The weather ────────────────────────────────────────────────────────────── */

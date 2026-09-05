@@ -57,7 +57,7 @@
 
 .lineRolls {
   color: $parchment-dim;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 /* The published pool. Deliberately plain and complete — this is the odds panel, and an
@@ -73,7 +73,7 @@
   margin-bottom: $space-1;
   color: $accent;
   font-family: $font-display;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -102,14 +102,14 @@
 
 .poolStat {
   color: $parchment;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
 .poolRange {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   white-space: nowrap;
 }
 
@@ -129,7 +129,7 @@
 .held {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 }
 
 .short strong,
@@ -139,7 +139,7 @@
 
 .history {
   color: $parchment-dim;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .outcome {

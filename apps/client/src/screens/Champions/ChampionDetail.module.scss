@@ -115,7 +115,7 @@
 
 .levelLine {
   color: $parchment-dim;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 /* The right-hand column owns its own scrolling: the portrait stays put, the work moves. */
@@ -128,7 +128,7 @@
 
 .title {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .tier {
@@ -159,7 +159,7 @@
 
 .powerLabel {
   color: $muted;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -182,7 +182,7 @@
   border: 1px solid transparent;
   color: $muted;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   cursor: pointer;
 
   &[aria-pressed='true'] {
@@ -204,7 +204,7 @@
   border-bottom: 2px solid transparent;
   color: $muted;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   cursor: pointer;
 
   &[aria-selected='true'] {
@@ -290,7 +290,7 @@
   align-self: center;
   overflow: hidden;
   color: var(--mv-relic, #{$parchment});
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -304,7 +304,7 @@
 
 .slotName {
   align-self: end;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -313,7 +313,7 @@
   align-self: start;
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 }
 
 .slotEmpty {
@@ -321,7 +321,7 @@
      the same height as a full one and the grid does not jump as relics go on. */
   grid-row: 2 / span 2;
   align-self: start;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 }
 
 /* The empty state of the panel beside the stat table. It keeps the row two columns wide on
@@ -332,7 +332,7 @@
   padding: $space-2 $space-3;
   background: $panel-inset;
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.6;
 
   p {
@@ -343,7 +343,7 @@
 .noSetsHeading {
   margin: 0 0 $space-1;
   color: $parchment-dim;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: normal;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -359,7 +359,7 @@
   background: $panel-inset;
   list-style: none;
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 
   strong {
     color: $accent;
@@ -398,7 +398,7 @@
 
 .lore {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.7;
 }
 
@@ -448,7 +448,7 @@
 .note,
 .notice,
 .error {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 

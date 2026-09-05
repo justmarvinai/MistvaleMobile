@@ -11,7 +11,7 @@
 .rates {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 
   th,
   td {
@@ -21,7 +21,7 @@
 
   thead th {
     color: $muted;
-    font-size: 0.68rem;
+    font-size: 0.78rem;
     font-weight: normal;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -76,7 +76,7 @@
   display: flex;
   justify-content: space-between;
   color: $muted;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 }
 
 .pitySince {
@@ -98,7 +98,7 @@
 .pityNote {
   margin: 0;
   color: $muted-deep;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   line-height: 1.5;
 }
 
@@ -109,7 +109,7 @@
   border: none;
   color: $accent;
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -127,7 +127,7 @@
   justify-content: space-between;
   gap: $space-2;
   margin: 0 0 2px;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   font-weight: normal;
 
   &[data-rarity='rare'] {
@@ -149,12 +149,12 @@
 
 .contentsCount {
   color: $muted-deep;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
 }
 
 .contentsList {
   margin: 0;
   color: $muted;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   line-height: 1.6;
 }

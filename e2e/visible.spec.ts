@@ -850,7 +850,14 @@ async function litOnTheField(page: Page): Promise<number> {
       },
     }),
   );
-  return litFraction(decodePng(shot));
+  // 64 rather than the helper's default of 42: the floor has been *lit* since C42 — a haze
+  // at the horizon and a cast of light under each camp — and its brightest pixel is kept
+  // under 60 by design so the bar sits between the ground and anything standing on it. A
+  // real sprite is mostly armour and clears it easily; the silhouette a missing-art unit
+  // wears is the tight case, which is why it is tinted in a *lightened* element colour
+  // rather than the element itself (`standInTint`) — at the raw tint it reached exactly the
+  // four parts in a thousand the bar asks for and no more.
+  return litFraction(decodePng(shot), 64);
 }
 
 interface Clip {

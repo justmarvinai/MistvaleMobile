@@ -84,4 +84,28 @@ export function slotPosition(side: 'ally' | 'enemy', slot: number): { x: number;
 /** The whole formation, for a test or a measurement. */
 export const MAX_SLOTS = 4;
 
+/**
+ * Where the floor is lit (C42).
+ *
+ * The plate under a fight was one flat near-black colour from the horizon to the foot of
+ * the window — sixty percent of the screen with no light on it, which is why the champions
+ * read as standing on a stage rather than in the room the painting behind them shows. The
+ * light is a soft cast under each camp, centred on the formation, and it is *here* rather
+ * than in either renderer for C28's reason: both draw it, and a lit patch that landed under
+ * the party in one renderer and beside it in the other would be two different fights.
+ */
+export function campLight(side: 'ally' | 'enemy'): {
+  x: number;
+  y: number;
+  rx: number;
+  ry: number;
+} {
+  const first = slotPosition(side, 0);
+  const last = slotPosition(side, MAX_SLOTS - 1);
+  return { x: (first.x + last.x) / 2, y: (first.y + last.y) / 2 + 26, rx: 250, ry: 74 };
+}
+
+/** How far the horizon's haze reaches down the floor, in virtual rows. */
+export const HAZE_DEPTH = 96;
+
 export { VIRTUAL_HEIGHT, VIRTUAL_WIDTH };

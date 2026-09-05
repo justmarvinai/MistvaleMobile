@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { VIRTUAL_HEIGHT, VIRTUAL_WIDTH } from '@/game/stage';
-import { HORIZON, UNIT_HEIGHT, slotPosition } from '@/game/formation';
+import { HAZE_DEPTH, HORIZON, UNIT_HEIGHT, campLight, slotPosition } from '@/game/formation';
 import { framePath, loadSpriteManifest, spriteEntry, stillPath } from '@/game/sprites';
 import { CHAMPION_PLACEHOLDER } from '@/ui/championArt';
 import { mirrored } from '@/game/facing';
@@ -67,7 +67,12 @@ export function DomBattlefield({
         <div
           className={styles.ground}
           data-ground=""
-          style={{ top: pct(HORIZON, VIRTUAL_HEIGHT) }}
+          style={
+            {
+              top: pct(HORIZON, VIRTUAL_HEIGHT),
+              ...groundLight(),
+            } as React.CSSProperties
+          }
         />
         {units.map((unit) => (
           <Fighter
@@ -200,6 +205,31 @@ function Fighter({
 }
 
 /** Percentage of the virtual canvas, so the DOM lands where the scene would have drawn. */
+/**
+ * Where the floor's light falls, as custom properties the stylesheet paints from (C42).
+ *
+ * The scene reads `campLight` in virtual pixels; this box is three canvases wide (it bleeds
+ * one canvas past each side so the floor reaches the edges of a wide window) and one floor
+ * deep, so the same numbers are converted into that box's own percentages here — inline,
+ * for the reason the horizon is: the two renderers must not be able to disagree about
+ * where the light is.
+ */
+function groundLight(): Record<string, string> {
+  const boxWidth = VIRTUAL_WIDTH * 3;
+  const boxDepth = VIRTUAL_HEIGHT - HORIZON;
+  const out: Record<string, string> = {
+    '--mv-haze': pct(HAZE_DEPTH, boxDepth),
+  };
+  for (const side of ['ally', 'enemy'] as const) {
+    const light = campLight(side);
+    out[`--mv-cast-${side}-x`] = pct(light.x + VIRTUAL_WIDTH, boxWidth);
+    out[`--mv-cast-${side}-y`] = pct(light.y - HORIZON, boxDepth);
+    out[`--mv-cast-${side}-rx`] = pct(light.rx, boxWidth);
+    out[`--mv-cast-${side}-ry`] = pct(light.ry, boxDepth);
+  }
+  return out;
+}
+
 function pct(value: number, of: number): string {
   return `${(value / of) * 100}%`;
 }

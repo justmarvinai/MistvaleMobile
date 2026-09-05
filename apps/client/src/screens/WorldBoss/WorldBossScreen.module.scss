@@ -85,13 +85,13 @@
 .poolLeft {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .crowd {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
 
   strong {
     color: $parchment;
@@ -123,7 +123,7 @@
 
   dt {
     color: $parchment-dim;
-    font-size: 0.72rem;
+    font-size: 0.84rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
@@ -139,14 +139,14 @@
 .blocked {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-style: italic;
 }
 
 .next {
   margin: 0;
   color: $accent-soft;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
 
   strong {
     color: $gold-soft;
@@ -168,7 +168,7 @@
   display: block;
   margin-bottom: 4px;
   color: $gold-soft;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -217,13 +217,13 @@
 .rungAt {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .rungDone,
 .rungLocked {
   color: $parchment-dim;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
@@ -238,7 +238,7 @@
 .boardTitle {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   font-weight: normal;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -273,7 +273,7 @@
 .boardRank {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .boardName {

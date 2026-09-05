@@ -39,8 +39,26 @@
 .ground {
   position: absolute;
   inset: 0 -100% 0;
-  background: #171310;
-  border-top: 2px solid #2a2018;
+  border-top: 2px solid #3a2c20;
+  /* The same three layers the scene paints (C42): a haze at the horizon, a cast of light
+     under each camp, and a plate lightest at the horizon and darkest at the feet. Every
+     position and radius comes in as a custom property from `groundLight`, converted from
+     `campLight`'s virtual pixels, so the two renderers light the same patch of floor. */
+  background:
+    linear-gradient(to bottom, rgba(194, 118, 74, 0.11), rgba(194, 118, 74, 0) var(--mv-haze, 30%)),
+    radial-gradient(
+      ellipse var(--mv-cast-ally-rx, 8%) var(--mv-cast-ally-ry, 24%) at var(--mv-cast-ally-x, 42%)
+        var(--mv-cast-ally-y, 50%),
+      rgba(194, 118, 74, 0.14),
+      rgba(194, 118, 74, 0) 100%
+    ),
+    radial-gradient(
+      ellipse var(--mv-cast-enemy-rx, 8%) var(--mv-cast-enemy-ry, 24%) at
+        var(--mv-cast-enemy-x, 58%) var(--mv-cast-enemy-y, 50%),
+      rgba(194, 118, 74, 0.14),
+      rgba(194, 118, 74, 0) 100%
+    ),
+    linear-gradient(to bottom, #2a211a, #1a1410 55%, #100d0a);
 }
 
 /* A champion's box is `formation.UNIT_HEIGHT` of the scene's 540 virtual rows, set inline

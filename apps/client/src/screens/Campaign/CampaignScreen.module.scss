@@ -45,7 +45,7 @@
 .note,
 .empty {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.7;
 }
 
@@ -130,7 +130,7 @@
 }
 
 .mapPane :global(.fui-map__note) {
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 /* A locked chapter at half opacity over a *transparent* map is nearly gone — the library

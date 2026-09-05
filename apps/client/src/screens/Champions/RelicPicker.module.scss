@@ -41,7 +41,7 @@
 .heading {
   margin: 0 0 $space-2;
   color: $muted;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: normal;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -78,7 +78,7 @@
   padding: 0;
   list-style: none;
   font-family: $font-mono;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 
   li[data-sign='up'] {
     color: $success;
@@ -92,7 +92,7 @@
 /* A set gained or broken, named under the numbers it explains. */
 .setChange {
   margin: 0 0 $space-1;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 
   &[data-sign='up'] {
     color: $success;
@@ -109,7 +109,7 @@
 .setWhat {
   margin-left: $space-2;
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 /* The piece being displaced. Quiet: it is context for the change above, not the change. */
@@ -117,12 +117,12 @@
   margin: 0 0 $space-2;
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 
 .power {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 
   strong {
     color: $accent;
@@ -156,7 +156,7 @@
 .socketNote {
   margin: 0;
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.6;
   text-align: center;
 }
@@ -171,14 +171,14 @@
   background: $panel-inset;
   border: 1px dashed $edge;
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.6;
   text-align: center;
 }
 
 .error {
   color: $danger;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 /* The two things you can do to the piece that is on: level it where it is, or take it off.

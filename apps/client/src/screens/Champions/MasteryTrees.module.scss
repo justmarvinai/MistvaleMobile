@@ -25,7 +25,7 @@
   border: 1px solid transparent;
   color: $muted;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   cursor: pointer;
 
   &[data-open='true'] {
@@ -47,13 +47,13 @@
 .spent {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 }
 
 .blurb {
   margin: 0;
   color: $muted;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -80,7 +80,7 @@
 
 .tierName {
   color: $parchment-dim;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -88,7 +88,7 @@
 .tierPicks {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
 }
 
 .nodes {
@@ -128,12 +128,12 @@
 }
 
 .nodeName {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .nodeText {
   color: $muted;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   line-height: 1.45;
 }
 
@@ -141,12 +141,12 @@
   margin-top: 2px;
   color: $muted-deep;
   font-family: $font-mono;
-  font-size: 0.66rem;
+  font-size: 0.78rem;
 }
 
 .locked {
   margin: 0;
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.6;
 }

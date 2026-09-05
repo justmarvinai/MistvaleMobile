@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { AffinityBadge } from '@/fui/components/AffinityBadge.ts';
+import { Fui } from '@/fui/react';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
+import { CHAMPION_PLACEHOLDER, championArt } from '../../ui/championArt';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { currentStep, useTutorialStore } from '../../state/tutorialStore';
-import { stillPath } from '../../game/sprites';
 import { highlightable } from '../../app/highlight';
 import styles from './StarterChoice.module.scss';
 
@@ -14,6 +16,15 @@ import styles from './StarterChoice.module.scss';
  * Offered whenever the roster is empty, so an account that somehow reaches the Haven
  * without champions is never stuck. The choices come from content — a champion becomes a
  * starter by being flagged in Admin (docs/UI_UX_DESIGN.md §3, screen 4).
+ *
+ * **Three hero panels rather than three boxes** (C42). The first decision in the game was
+ * three sixty-pixel sprites in plain dark rectangles with two lines of small text under
+ * each — a form, on the one screen where the game has to make somebody want a champion.
+ * Each choice is a tall panel now with the champion's painted face filling it, the element
+ * as the library's own badge and the role beside it, the name at a size worth reading and
+ * the title under it, and the chosen one lit. The face is `championArt`'s answer, so a
+ * starter without an avatar gets the same silhouette every other faceless champion does
+ * rather than a torn page.
  */
 
 export function StarterChoice(): JSX.Element | null {
@@ -33,12 +44,11 @@ export function StarterChoice(): JSX.Element | null {
   const [picked, setPicked] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
-  // Art that will not load is hidden rather than left as the browser's torn page. The
-  // three starters all have a still today and the fallback is the lizard, which has one
-  // too — but an asset entry an operator points at a folder with no `still.png` is the
-  // same class of thing that left 34 champions faceless on the roster, and this is the
-  // one image in the game that does not go through `Portrait`. The button reads fine
-  // without it: name, element, role and title are all text.
+  // A face that will not load falls back to the silhouette rather than the browser's torn
+  // page. `championArt` only offers a portrait when the asset *declares* one, but a
+  // declared file can still be missing from a release that skipped `pnpm assets` — the
+  // same class of thing that left 34 champions faceless on the roster — and this is one of
+  // the few images in the game that does not go through `Portrait`.
   const [brokenArt, setBrokenArt] = useState<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
@@ -48,11 +58,6 @@ export function StarterChoice(): JSX.Element | null {
   useEffect(() => {
     if (checked && champions.length === 0) void loadStarters();
   }, [checked, champions.length, loadStarters]);
-
-  const artFor = useMemo(() => {
-    const assets = new Map((bundle?.assets ?? []).map((asset) => [asset.key, asset.basePath]));
-    return (assetKey: string): string => assets.get(assetKey) ?? 'enemies/teritorial_lizard';
-  }, [bundle]);
 
   if (!checked || champions.length > 0 || starters.length === 0) return null;
   // Offered when the script says so, or — outside the script — whenever the roster is
@@ -81,32 +86,60 @@ export function StarterChoice(): JSX.Element | null {
         </p>
 
         <div className={styles.choices}>
-          {starters.map((starter) => (
-            <button
-              key={starter.key}
-              type="button"
-              className={styles.choice}
-              aria-pressed={picked === starter.key}
-              aria-label={`Choose ${starter.name}`}
-              onClick={() => setPicked(starter.key)}
-            >
-              {!brokenArt.has(starter.assetKey) && (
-                <img
-                  className={styles.portrait}
-                  src={stillPath(artFor(starter.assetKey))}
-                  alt=""
-                  aria-hidden="true"
-                  onError={() => setBrokenArt((known) => new Set(known).add(starter.assetKey))}
-                />
-              )}
-              <span className={styles.name}>{starter.name}</span>
-              <span className={styles.meta}>
-                {starter.element} · {starter.role}
-                <br />
-                {starter.title}
-              </span>
-            </button>
-          ))}
+          {starters.map((starter) => {
+            const art = championArt({ assetKey: starter.assetKey }, bundle?.assets);
+            const portrait = brokenArt.has(starter.assetKey) ? undefined : art.portrait;
+            return (
+              <button
+                key={starter.key}
+                type="button"
+                className={styles.choice}
+                data-rarity={starter.rarity}
+                aria-pressed={picked === starter.key}
+                aria-label={`Choose ${starter.name}`}
+                onClick={() => setPicked(starter.key)}
+              >
+                {portrait ? (
+                  <img
+                    className={styles.portrait}
+                    src={portrait}
+                    alt=""
+                    aria-hidden="true"
+                    onError={() => setBrokenArt((known) => new Set(known).add(starter.assetKey))}
+                  />
+                ) : (
+                  <span
+                    className={styles.standIn}
+                    style={
+                      {
+                        '--mv-stand-in': `var(--fui-img-${art.art ?? CHAMPION_PLACEHOLDER})`,
+                      } as React.CSSProperties
+                    }
+                    aria-hidden="true"
+                  />
+                )}
+                <span className={styles.gloom} aria-hidden="true" />
+
+                <span className={styles.badges} aria-hidden="true">
+                  <Fui
+                    of={AffinityBadge}
+                    options={{ affinity: starter.element, size: 34, variant: 'chip' }}
+                  />
+                  <span className={styles.role}>{starter.role}</span>
+                </span>
+
+                <span className={styles.plate}>
+                  <span className={styles.name}>{starter.name}</span>
+                  <span className={styles.title}>{starter.title}</span>
+                  <span className={styles.rarity}>{starter.rarity}</span>
+                </span>
+
+                <span className={styles.chosen} aria-hidden="true">
+                  Chosen
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {error && <p className={styles.error}>{error}</p>}

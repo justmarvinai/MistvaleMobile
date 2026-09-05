@@ -30,7 +30,7 @@
   margin: 0 0 $space-3;
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 }
 
 .arcs {
@@ -52,7 +52,7 @@
   background: transparent;
   border: 1px solid transparent;
   color: $parchment-dim;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
   text-align: left;
   cursor: pointer;
   transition:
@@ -81,7 +81,7 @@
 
 .arcMark {
   color: $gold;
-  font-size: 0.6875rem;
+  font-size: 0.78rem;
 }
 
 .arcName {
@@ -93,7 +93,7 @@
 .arcCount {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.6875rem;
+  font-size: 0.78rem;
 }
 
 .title {
@@ -106,13 +106,13 @@
   border: 1px solid $gold;
   color: $gold;
   font-family: $font-display;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
 .titleLabel {
   color: $parchment-dim;
   font-family: $font-body;
-  font-size: 0.625rem;
+  font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -139,7 +139,7 @@
   margin: 0;
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 }
 
 .error {
@@ -148,14 +148,14 @@
   background: rgba(180, 60, 60, 0.12);
   border: 1px solid $danger;
   color: $parchment;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
 .empty {
   margin: $space-6 0;
   color: $muted;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
 }
 
 /* The step rows are the library's ledger now; the arc rail beside them is Mistvale's,

@@ -38,7 +38,7 @@
 .count {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 
 .filters {
@@ -53,7 +53,7 @@
   border: 1px solid transparent;
   color: $muted;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   cursor: pointer;
 
   &[aria-pressed='true'] {
@@ -106,14 +106,14 @@
 
 .shelfCount {
   font-family: $font-mono;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: $muted;
 }
 
 .shelfBonus {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: $parchment-dim;
   text-align: right;
 }
@@ -150,7 +150,7 @@
   border: 1px solid $edge;
   color: $muted;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   cursor: pointer;
 
   &:hover:not(:disabled) {
@@ -240,7 +240,7 @@
 
 .refineLabel {
   color: $muted;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -254,7 +254,7 @@
   border: 1px solid $edge;
   color: $parchment;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
@@ -263,38 +263,38 @@
   align-items: center;
   gap: $space-1;
   color: $muted;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
 .refineCount {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   margin-left: auto;
 }
 
 .warn {
   margin: 0;
   color: $warning;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
 .empty {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 
 .notice {
   color: $success;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .error {
   color: $danger;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 /* A full vault is not an error, but it is worth reading before the next fight. */

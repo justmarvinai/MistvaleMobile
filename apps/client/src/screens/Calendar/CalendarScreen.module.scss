@@ -16,14 +16,14 @@
   background: rgba(180, 60, 60, 0.12);
   border: 1px solid $danger;
   color: $parchment;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
 .empty {
   margin: $space-8 0;
   color: $muted;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
 }
 
 .locked {
@@ -33,20 +33,20 @@
   background: $panel-inset;
   border: 1px solid $edge;
   color: $parchment-dim;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
 .meta {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 }
 
 .blurb {
   margin: 0 0 $space-3;
   max-width: 62ch;
   color: $parchment-dim;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
 }
 
 // ── Today ───────────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@
 
 .done {
   color: $muted;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
 // ── The tracks ──────────────────────────────────────────────────────────────
@@ -92,7 +92,7 @@
 .choicePrompt {
   margin: 0 0 $space-3;
   color: $parchment-dim;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
 }
 
 /* Painted cards, sized from the card's own fixed width rather than from a fraction of the

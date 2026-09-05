@@ -29,7 +29,7 @@
   margin-left: auto;
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 
 .filters {
@@ -43,7 +43,7 @@
   border: 1px solid transparent;
   color: $muted;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   cursor: pointer;
 
   &[aria-pressed='true'] {
@@ -57,7 +57,7 @@
   align-items: center;
   gap: $space-1;
   color: $muted;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
@@ -237,7 +237,7 @@
 
 .name {
   color: $parchment-dim;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   text-align: center;
   line-height: 1.2;
 }
@@ -249,7 +249,7 @@
   display: flex;
   align-items: baseline;
   gap: 4px;
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   line-height: 1.2;
 
   &[data-quiet='true'] {
@@ -281,7 +281,7 @@
 
 .progressLabel {
   color: $muted;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -301,11 +301,11 @@
 
 .note {
   color: $muted;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   line-height: 1.6;
 }
 
 .empty {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }

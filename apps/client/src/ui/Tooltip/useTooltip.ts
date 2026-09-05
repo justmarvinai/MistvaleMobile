@@ -41,6 +41,15 @@ function sharedTooltip(): Tooltip {
     // the same reasoning: a tooltip belongs to the pointer, and nothing the pointer is on
     // should be able to cover it.
     shared.el.style.zIndex = '3000';
+    // Parked off-screen, fixed, from the first frame (C42). The library's card is
+    // `position: relative` until `showAt` writes a `left` — and a relative element appended
+    // to the body sits *in flow after the shell*, thirty pixels of empty tooltip that made
+    // the document taller than the window before anything had ever been hovered. Nothing
+    // showed it, since `body` clips its overflow, but the shell guard measures exactly that
+    // and was right to fail.
+    shared.el.style.position = 'fixed';
+    shared.el.style.left = '-9999px';
+    shared.el.style.top = '0px';
     document.body.appendChild(shared.el);
   }
   return shared;
