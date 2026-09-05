@@ -80,6 +80,15 @@ cards) and **composition** (what a screen does with the room it has).
 | L3 | Settings | Fine. Slider labels 12px. | ✔ Labels 14.5px, descriptions and slider values 13.5px. |
 | L4 | Achievement banner | Fine. | ✔ Nothing to change. |
 
+## The second sweep (C48)
+
+Every walk re-shot at 1440×900 once the table was closed, because every row above had been
+judged at 1920×1080 and only spot-checked below it. Three things did not survive the
+smaller frame: the hubs cut their second row at the dock (their rows had never actually
+shared the frame — see the CHANGELOG), the Valewurm ran past the fold with the way down
+under the dock, and the Expeditions' and Trials' buttons sat below it. All three are fixed
+and measured; the rest of the game fits the smaller frame or scrolls inside it as designed.
+
 ## Not UI, but seen
 
 - **30 of 37 champions and every enemy are placeholders.** It is the largest single reason a

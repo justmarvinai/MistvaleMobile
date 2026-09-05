@@ -50,7 +50,7 @@
 .card {
   display: flex;
   flex-direction: column;
-  gap: $space-2;
+  gap: $space-1;
 }
 
 .hint {
@@ -58,19 +58,19 @@
   color: $parchment;
   font-size: 15.5px;
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
-/* The lent team, as faces a player can actually tell apart (C45): 56px rather than 44,
+/* The lent team, as faces a player can actually tell apart (C45): 48px rather than 44,
    since who is lent is the whole puzzle — and one to a row with the name beside the face,
    because four faces across a 300px card leave 69px for a name, and "Thordakk Cindermaw"
    cut to "hordakk / indermaw" is not a name. Four rows of 56 are a hair taller than the
    old row of four and every name is whole. */
 .team {
   display: grid;
-  margin: $space-2 0;
+  margin: $space-1 0;
   padding: 0;
-  gap: $space-1;
+  gap: 2px;
   grid-template-columns: minmax(0, 1fr);
   list-style: none;
 }

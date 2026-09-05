@@ -173,7 +173,11 @@ function Keep({
       {/* The key art is the room (C46): a tall painted block with the way in at its foot,
           where a 96px icon beside a button used to leave two thirds of the frame to three
           panels of text. The name is on the block only when there is more than one Titan
-          to tell apart — the screen's title says it otherwise. */}
+          to tell apart — the screen's title says it otherwise. What it does about being
+          fought is placed by the frame's height (C48, grid areas in the stylesheet): under
+          the ladder where a tall frame has room for three panels down the right, and under
+          the painting on a 900px frame, where that column ran past the dock and put the
+          way down under it. */}
       <Hero
         art={dungeonArt(keep.key, keep.kind)}
         ink={dungeonInk(keep.kind)}
@@ -193,6 +197,15 @@ function Keep({
           </Button>
         </div>
       </Hero>
+
+      {boss && (
+        <BossCard
+          name={boss.name}
+          where={`${standing.turnCap} turns, then it sees you off`}
+          mechanics={boss.bossMechanics as never}
+          className={styles.boss}
+        />
+      )}
 
       <div className={styles.beside}>
         <Panel title="What you managed" className={styles.record}>
@@ -261,15 +274,6 @@ function Keep({
             onClaim={() => undefined}
           />
         </Panel>
-
-        {boss && (
-          <BossCard
-            name={boss.name}
-            where={`${standing.turnCap} turns, then it sees you off`}
-            mechanics={boss.bossMechanics as never}
-            className={styles.boss}
-          />
-        )}
       </div>
     </section>
   );

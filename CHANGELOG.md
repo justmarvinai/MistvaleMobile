@@ -5,6 +5,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the second sweep, at 1440×900 (C48)
+
+- **The hubs' rows now actually share the frame.** C45 said they did — "`1fr` resolves
+  because the grid is a flex child with a definite height" — and it was not one: the page
+  wrapper grows with its content, so the rows were content-sized (387px at 1440×900, two
+  of them under the dock) and only *looked* shared at 1080, where two content-sized rows
+  happen to fit. The hub page `fills` the frame now, the grid's centring is `safe` so an
+  overflowing hub starts at the top rather than hiding its first row above the fold, a
+  short frame gets a tighter card with a three-line reserve under the sentence, and below
+  1600px the floor is four across — so Battle's eight cards are two rows of four on a
+  900px laptop instead of three rows it could show two of. Measured at 1440×900, 1920×1080
+  and 1280×720 (which still scrolls, as the shell guard requires).
+- **The Valewurm fits a 900px frame.** Two panels and the boss card down the right ran
+  past the fold and put the way down under the dock; the card is placed by grid area now —
+  under the painting on a short frame, back under the ladder on a tall one — and the keep
+  fills its scroller so the painting stands the full height of the room either way.
+- **The Expeditions' Send and the Trials' Attempt are above the dock at 900px**: the
+  expedition painting yields on a short frame, and a trial's way in sits in its title row
+  rather than at the foot of a card holding a lore paragraph, four faces, a par and its pay.
+
 ### Changed — the audit's MEDIUM and LOW rows (C47)
 
 - **The battle HUD is sized for the display it is played on.** The library's phone-width

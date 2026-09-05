@@ -51,7 +51,7 @@ export function HubScreen({
   const text = useText();
 
   return (
-    <Page width="wide">
+    <Page width="wide" fills>
       <Heading tagline={definition?.blurb ? text(definition.blurb) : ''}>
         {text(definition?.label ?? 'Places')}
       </Heading>

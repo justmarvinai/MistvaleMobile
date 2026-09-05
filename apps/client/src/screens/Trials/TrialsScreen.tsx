@@ -149,7 +149,21 @@ function TrialCard({
   const champions = bundle?.champions;
 
   return (
-    <Panel title={trial.name} variant="hero" className={styles.card}>
+    <Panel
+      title={trial.name}
+      variant="hero"
+      className={styles.card}
+      // The way in sits in the title row (C48): at the foot of a card holding a lore
+      // paragraph, four faces, a par and its pay, it was the one thing on the card under
+      // the dock on a 900px frame — and the one thing a player has to reach.
+      actions={
+        trial.blockedReason ? undefined : (
+          <Button size="sm" variant="primary" onClick={onAttempt} disabled={busy}>
+            {trial.cleared ? 'Attempt again' : 'Attempt'}
+          </Button>
+        )
+      }
+    >
       <p className={styles.hint}>{trial.hint}</p>
 
       <ul className={styles.team} aria-label="The team you are lent">
@@ -161,7 +175,7 @@ function TrialCard({
               <Portrait
                 src={def ? (championArt(def, bundle?.assets).portrait ?? null) : null}
                 name={def?.name ?? key}
-                size={56}
+                size={48}
               />
               <span className={styles.memberWords}>
                 <span className={styles.memberName}>{def?.name ?? key}</span>
@@ -206,13 +220,7 @@ function TrialCard({
             : 'Never cleared.'}
       </p>
 
-      {trial.blockedReason ? (
-        <p className={styles.blocked}>{trial.blockedReason}</p>
-      ) : (
-        <Button onClick={onAttempt} disabled={busy}>
-          {trial.cleared ? 'Attempt again' : 'Attempt'}
-        </Button>
-      )}
+      {trial.blockedReason && <p className={styles.blocked}>{trial.blockedReason}</p>}
     </Panel>
   );
 }

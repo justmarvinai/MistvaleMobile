@@ -228,17 +228,51 @@
    30rem row leaves. */
 .places {
   flex: 1;
-  /* The rows share the frame's height — `1fr` resolves because the grid is a flex child
-     with a definite height — and each card is as tall as its row *up to* its own ceiling,
-     centred in whatever the row has left. So Battle's two rows at 1080 are two rows of
-     400px cards that fit, and Champions' one row is four 480px cards in the middle of the
+  min-height: 0;
+  /* The rows share the frame's height and each card is as tall as its row *up to* its
+     own ceiling, centred in whatever the row has left. So Battle's two rows at 1080 are
+     two rows that fit, and Champions' one row is four 480px cards in the middle of the
      frame rather than one 830px row holding a picture and two lines. A ceiling on the
      row itself cannot do this: a fixed 30rem row is right for one row and 960px of
      scrolling for two, which is how C45's first cut cut the Battle hub's second row off
-     at the dock. */
-  align-items: center;
-  align-content: center;
+     at the dock.
+
+     `1fr` only shares a height the grid actually has (C48). C45 wrote that it "resolves
+     because the grid is a flex child with a definite height" — and it was not one: the
+     page wrapper grows with its content, so the rows were content-sized (387px at
+     1440×900, two of them past the dock) and only *looked* shared at 1080, where two
+     content-sized rows happen to fit. The page `fills` the frame now, which is what makes
+     this grid's height definite and the rows a share of it. Below the floor, the frame
+     scrolls exactly as before. */
+  /* `safe`: a grid that does not fit its frame starts at the top and scrolls, rather
+     than centring its overflow and hiding the first row above the fold (C48). */
+  align-items: safe center;
+  align-content: safe center;
   grid-auto-rows: minmax(15rem, 1fr);
+}
+
+/* Four across below 1600px (C48). The hub floor is 400px, which is four columns on a
+   1920 display and three on a 1440 one — where Battle's eight cards became three rows and
+   a 900px frame could show two of them. At a 20rem floor the same eight are two rows of
+   four, and a row of four 336px cards still carries its name, its sentence and a picture. */
+@media (max-width: 1600px) {
+  .places.places {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+}
+
+/* A short frame — a 900px laptop: the card's fixed parts give first, a tighter pad and a
+   three-line reserve under the sentence, and the painting takes what is left. */
+@media (max-height: 960px) {
+  .places .card {
+    gap: $space-2;
+    padding: $space-4 $space-5;
+  }
+
+  .places .blurb {
+    -webkit-line-clamp: 3;
+    min-height: 3 * 1.55 * 0.95rem;
+  }
 }
 
 .places .card {
