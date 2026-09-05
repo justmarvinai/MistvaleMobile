@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the Valewurm, the Wurm Wakes and the Sunken Stair are places (C46)
+
+- **Each of the three one-thing modes is composed as a room.** `ui/Hero` is a mode's key
+  art as a tall painted block with a wash over its foot and the thing the player came to
+  press standing on it — the same painting the mode's card on the Battle hub wears, read
+  off the registry so the two cannot drift. The Valewurm's block carries the keys and the
+  way down; the Wurm's carries the shared health bar, at 36px across the foot of the
+  creature, with the crowd line, your figures and the strike under it; the Stair's carries
+  the descents left and the way down. Each had been a 96px icon or no picture at all over
+  a panel of text that stopped two thirds of the way down the frame.
+- **Their ladders are the shared ladder's tiles.** The Valewurm's damage rungs and the
+  Stair's depth rungs are `ui/Ladder` tiles with the rung's own name on the tooltip and a
+  tick on every rung the account has reached — nothing on them is pressed, since a Titan
+  pays the rung a run reaches on the spot and a descent pays its deepest floor once; the
+  Wurm's contribution rungs are the same tiles as buttons, since a wake's rungs are each
+  collected once. The Ladder learned a rung's `name` and a `label` that stands in for its
+  score, so a floor reads *Floor 6* rather than *6*.
+- **The Stair's lore is behind the i**, first among the panels that explain the mode,
+  rather than a paragraph above the way down, and the room stands in the frame with no
+  panel around it — a frame inside the frame is the shape the audit named. Beside its
+  ladder is **Your last descent**, the floor reached and what it paid, which is the Titan's
+  "what you managed" for a mode scored on depth and had been one figure in a facts row.
+  All three screens are `wide` now.
+- **The plate under a hero's words follows the words.** The Wurm's foot holds a health
+  bar, a crowd line, four figures and a button; the Valewurm's holds one row — so a wash
+  fixed at a fraction of the block's height drowned one painting and left the other's bar
+  on bare art. The foot carries its own ground now, fading out over a fixed distance above
+  its first line, and the painting is open above whatever the foot happens to hold.
+
 ### Changed — hub cards that say where you stand, and three card screens composed for the frame (C45)
 
 - **A hub card carries a live line.** Under the sentence saying what a place is *for*, the

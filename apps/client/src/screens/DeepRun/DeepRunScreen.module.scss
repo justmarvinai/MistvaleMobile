@@ -33,11 +33,83 @@
   font-style: italic;
 }
 
-.idle,
 .descent {
   display: flex;
   flex-direction: column;
   gap: $space-3;
+}
+
+/* The room on the left, the depth ladder on the right (C46). */
+.idle {
+  display: grid;
+  grid-template-columns: minmax(20rem, 5fr) minmax(0, 8fr);
+  gap: $space-4;
+  align-items: stretch;
+}
+
+@media (max-width: 1100px) {
+  .idle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.hero {
+  min-height: 30rem;
+}
+
+.beside {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  min-width: 0;
+}
+
+.record,
+.ladderPanel {
+  min-width: 0;
+}
+
+.none {
+  margin: 0;
+  color: $muted;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.lastRun {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.lastFloor {
+  margin: 0;
+  color: $parchment-dim;
+  font-size: 0.95rem;
+
+  strong {
+    color: $gold-soft;
+    font-family: $font-mono;
+    font-size: 1.2rem;
+  }
+}
+
+/* The allowance and the way down together at the foot of the painting, as on the
+   Valewurm: the count is the reason the button is or is not pressable. */
+.entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  flex-wrap: wrap;
+}
+
+.lore {
+  margin: 0 0 $space-3;
+  color: $parchment-dim;
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.6;
 }
 
 .facts {
@@ -63,7 +135,7 @@
     margin: 0;
     color: $parchment;
     font-family: $font-mono;
-    font-size: 1.05rem;
+    font-size: 1.4rem;
   }
 }
 
@@ -383,41 +455,6 @@
   font-size: 0.9rem;
   font-style: italic;
 }
-
-.ladder {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.rung {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  padding: 4px $space-2;
-  border-left: 3px solid transparent;
-  background: rgba(0, 0, 0, 0.2);
-  gap: $space-2;
-
-  &[data-reached='yes'] {
-    border-left-color: $gold;
-    background: rgba(201, 162, 39, 0.08);
-  }
-}
-
-.rungFloor {
-  color: $parchment-dim;
-  font-family: $font-mono;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-.rungName {
-  color: $parchment;
-  font-size: 0.95rem;
-}
-
-// ── Picking a party, and coming back up ────────────────────────────────────
 
 .picker {
   display: flex;

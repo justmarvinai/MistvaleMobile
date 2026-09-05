@@ -212,6 +212,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'titan',
+    width: 'wide',
     label: 'The Valewurm',
     icon: 'nav-titan',
     glyph: 'glyph-thorny-branch',
@@ -225,6 +226,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'worldBoss',
+    width: 'wide',
     label: 'The Wurm Wakes',
     icon: 'nav-worldboss',
     glyph: 'glyph-cursed-eye',
@@ -238,6 +240,7 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'deepRun',
+    width: 'wide',
     label: 'The Sunken Stair',
     icon: 'nav-deeprun',
     glyph: 'glyph-broken-shackle',

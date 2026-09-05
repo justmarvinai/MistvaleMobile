@@ -10,6 +10,9 @@ import { Rewards } from '@/ui/Rewards/Rewards';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
 import { ChampionCard } from '@/ui/ChampionCard/ChampionCard';
 import { championArt } from '@/ui/championArt';
+import { Hero } from '@/ui/Hero/Hero';
+import { Ladder } from '@/ui/Ladder/Ladder';
+import { SCREENS } from '@/app/screens';
 import { useContentStore } from '@/state/contentStore';
 import { useDeepRunStore } from '@/state/deepRunStore';
 import { useNavStore } from '@/state/navStore';
@@ -18,6 +21,9 @@ import { useRosterStore } from '@/state/rosterStore';
 import styles from './DeepRunScreen.module.scss';
 
 const MAX_PARTY = 4;
+
+/** The Stair's painting — the one its card on the Battle hub wears, read off the registry. */
+const STAIR_ART = SCREENS.find((screen) => screen.id === 'deepRun')?.art ?? 'hero-voidguard';
 
 /**
  * The Sunken Stair.
@@ -93,6 +99,13 @@ export function DeepRunScreen(): JSX.Element {
         tagline="Twelve floors down, and your relics stay at the top of them."
         actions={
           <ScreenInfo title="The Sunken Stair">
+            {/* The Stair's own words first (C46) — they opened the panel as a paragraph
+                above the way down, and the way down is the thing. */}
+            {view.runs.map((run) => (
+              <p key={run.runKey} className={styles.lore}>
+                {run.lore}
+              </p>
+            ))}
             <Panel title="Nothing comes down with you">
               <p className={styles.note}>
                 Your champions go down at their own levels and ranks, with{' '}
@@ -126,50 +139,60 @@ export function DeepRunScreen(): JSX.Element {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      {view.runs.map((run) => (
-        // Named only when there is more than one. The screen is a list and its title is the
-        // registry's label, which today is the name of the only descent published — so the
-        // panel said "The Sunken Stair" a hundred pixels under "THE SUNKEN STAIR", with the
-        // identical sentence under both.
-        <Panel
-          key={run.runKey}
-          {...(view.runs.length > 1 ? { title: run.name } : {})}
-          variant="hero"
-          className={styles.run}
-        >
-          {view.runs.length > 1 && <p className={styles.tagline}>{run.tagline}</p>}
-
-          {run.phase === null ? (
-            <div className={styles.idle}>
-              <p className={styles.note}>{run.lore}</p>
-              <dl className={styles.facts}>
-                <div>
-                  <dt>Descents left today</dt>
-                  <dd>
-                    {run.runsLeft} / {run.runsPerDay}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Floors</dt>
-                  <dd>{run.floors}</dd>
-                </div>
-                {run.lastRunFloor > 0 && (
+      {view.runs.map((run) =>
+        run.phase === null ? (
+          // Named only when there is more than one. The screen is a list and its title is
+          // the registry's label, which today is the name of the only descent published —
+          // so the panel said "The Sunken Stair" a hundred pixels under "THE SUNKEN STAIR",
+          // with the identical sentence under both. The room stands in the frame with no
+          // panel around it (C46): a frame inside the frame is the shape the audit named.
+          <div key={run.runKey} className={styles.idle}>
+            {/* The Stair as a place (C46): its painting, with the descents left and the way
+                  down at its foot, and what each depth is worth as a ladder of tiles beside
+                  it. It was a lore paragraph over a 1,300px-wide button. */}
+            <Hero
+              art={STAIR_ART}
+              title={view.runs.length > 1 ? run.name : undefined}
+              tagline={view.runs.length > 1 ? run.tagline : undefined}
+              label={run.name}
+              className={styles.hero}
+            >
+              <div className={styles.entry}>
+                <dl className={styles.facts}>
                   <div>
-                    <dt>Last descent</dt>
-                    <dd>floor {run.lastRunFloor}</dd>
+                    <dt>Descents left today</dt>
+                    <dd>
+                      {run.runsLeft} / {run.runsPerDay}
+                    </dd>
                   </div>
+                  <div>
+                    <dt>Floors</dt>
+                    <dd>{run.floors}</dd>
+                  </div>
+                </dl>
+                {run.blockedReason ? (
+                  <p className={styles.blocked}>{run.blockedReason}</p>
+                ) : (
+                  <Button onClick={() => setPicking(run)} disabled={busy}>
+                    Go down
+                  </Button>
                 )}
-              </dl>
-              {run.blockedReason ? (
-                <p className={styles.blocked}>{run.blockedReason}</p>
-              ) : (
-                <Button onClick={() => setPicking(run)} disabled={busy}>
-                  Go down
-                </Button>
-              )}
+              </div>
+            </Hero>
+
+            <div className={styles.beside}>
+              <LastDescent run={run} />
               <DepthLadder run={run} />
             </div>
-          ) : (
+          </div>
+        ) : (
+          <Panel
+            key={run.runKey}
+            {...(view.runs.length > 1 ? { title: run.name } : {})}
+            variant="hero"
+            className={styles.run}
+          >
+            {view.runs.length > 1 && <p className={styles.tagline}>{run.tagline}</p>}
             <div className={styles.descent}>
               <FloorHeader run={run} />
               <Party run={run} />
@@ -259,9 +282,9 @@ export function DeepRunScreen(): JSX.Element {
 
               <DepthLadder run={run} />
             </div>
-          )}
-        </Panel>
-      ))}
+          </Panel>
+        ),
+      )}
 
       {picking && (
         <PartyPicker
@@ -408,18 +431,65 @@ function Door({
   );
 }
 
+/**
+ * What each depth is worth, as the shared ladder's tiles (C46). Drawn beside the way down
+ * before a descent and under the party during one; nothing on it is pressed, since a
+ * descent pays its deepest floor once, on the way out — so a reached floor wears the tick
+ * and the rung's own name is on the tile's tooltip. `Floor 6` stands in for the score,
+ * because a floor is the score.
+ */
+/**
+ * What the last descent came back with (C46) — the Titan's "what you managed" for the
+ * Stair. A mode scored on how deep you get is measured against the last time you went, and
+ * the rung its tick lands on is the floor to beat; it had been one figure in the facts row.
+ */
+function LastDescent({ run }: { run: DeepRunState }): JSX.Element {
+  const none = run.lastRunFloor === 0 && Object.keys(run.lastRunRewards).length === 0;
+  return (
+    <Panel title="Your last descent" className={styles.record}>
+      {none ? (
+        <p className={styles.none}>
+          Nothing on record yet. The first descent is the one every one after it is measured
+          against.
+        </p>
+      ) : (
+        <div className={styles.lastRun}>
+          <p className={styles.lastFloor}>
+            Reached <strong>floor {run.lastRunFloor}</strong> of {run.floors}
+          </p>
+          <Rewards rewards={run.lastRunRewards} signed />
+        </div>
+      )}
+    </Panel>
+  );
+}
+
 function DepthLadder({ run }: { run: DeepRunState }): JSX.Element | null {
   if (run.depthTiers.length === 0) return null;
   return (
-    <section className={styles.ladder} aria-label="What depth is worth">
-      {run.depthTiers.map((tier) => (
-        <div key={tier.key} className={styles.rung} data-reached={tier.reached ? 'yes' : 'no'}>
-          <span className={styles.rungFloor}>Floor {tier.floor}</span>
-          <span className={styles.rungName}>{tier.name}</span>
-          <Rewards rewards={tier.rewards} signed />
-        </div>
-      ))}
-    </section>
+    <Panel title="What depth is worth" className={styles.ladderPanel}>
+      <Ladder
+        rows={[
+          {
+            key: 'depth',
+            title: 'Depth',
+            subtitle: 'Paid once, at the deepest floor a descent reaches',
+          },
+        ]}
+        tiers={run.depthTiers.map((tier, index) => ({
+          index,
+          points: tier.floor,
+          label: `Floor ${tier.floor}`,
+          name: tier.name,
+          reached: tier.reached,
+          tiles: [{ rewards: tier.rewards, claimed: tier.reached, barred: false }],
+        }))}
+        scrollKey={run.runKey}
+        busy={false}
+        label={`${run.name} depth ladder`}
+        onClaim={() => undefined}
+      />
+    </Panel>
   );
 }
 

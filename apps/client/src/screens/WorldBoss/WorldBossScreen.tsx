@@ -7,6 +7,10 @@ import { Heading } from '@/ui/Heading/Heading';
 import { Panel } from '@/ui/Panel/Panel';
 import { Rewards } from '@/ui/Rewards/Rewards';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
+import { Hero } from '@/ui/Hero/Hero';
+import { Ladder } from '@/ui/Ladder/Ladder';
+import { dungeonInk } from '@/ui/dungeonArt';
+import { SCREENS } from '@/app/screens';
 import { usePlayerStore } from '@/state/playerStore';
 import { useWorldBossStore } from '@/state/worldBossStore';
 import { useContentStore } from '@/state/contentStore';
@@ -226,131 +230,147 @@ function BossPanel({
   const spoilsReady = boss.felled && boss.yourDamage > 0 && !boss.fellingClaimed;
 
   return (
-    <Panel {...(named ? { title: boss.name } : {})} variant="hero" className={styles.boss}>
-      {named && <p className={styles.tagline}>{boss.tagline}</p>}
-
-      {/* The bar first and biggest: it is the only thing on this screen that is ours
-          rather than mine, and watching it move while you were away is the whole feature. */}
-      <div className={styles.pool} data-felled={boss.felled ? 'yes' : 'no'}>
-        <div className={styles.poolTrack}>
-          <div className={styles.poolFill} style={{ width: `${pct}%` }} />
+    <div className={styles.boss}>
+      {/* The creature is the room (C46): its painting — the same one its card on the
+          Battle hub wears — with the one thing on this screen that is ours rather than
+          mine laid across its foot: the bar. Watching it move while you were away is the
+          whole feature, and it was a 26px strip at the top of a panel of text. */}
+      <Hero
+        art={WAKE_ART}
+        ink={dungeonInk('titan')}
+        title={named ? boss.name : undefined}
+        tagline={named ? boss.tagline : undefined}
+        label={boss.name}
+        className={styles.hero}
+      >
+        <div className={styles.pool} data-felled={boss.felled ? 'yes' : 'no'}>
+          <div className={styles.poolTrack}>
+            <div className={styles.poolFill} style={{ width: `${pct}%` }} />
+          </div>
+          <div className={styles.poolNumbers}>
+            <span className={styles.poolPct}>{pct.toFixed(1)}%</span>
+            <span className={styles.poolLeft}>
+              {boss.felled
+                ? 'It fell. The Vale brought it down.'
+                : `${left.toLocaleString()} left of ${boss.maxHp.toLocaleString()}`}
+            </span>
+          </div>
         </div>
-        <div className={styles.poolNumbers}>
-          <span className={styles.poolPct}>{pct.toFixed(1)}%</span>
-          <span className={styles.poolLeft}>
-            {boss.felled
-              ? 'It fell. The Vale brought it down.'
-              : `${left.toLocaleString()} left of ${boss.maxHp.toLocaleString()}`}
-          </span>
-        </div>
-      </div>
 
-      <p className={styles.crowd}>
-        <strong>{boss.wardens.toLocaleString()}</strong>{' '}
-        {boss.wardens === 1 ? 'warden has' : 'wardens have'} struck it,{' '}
-        <strong>{boss.strikes.toLocaleString()}</strong> {boss.strikes === 1 ? 'time' : 'times'}
-        {boss.awake && boss.endsOn ? ` · the wake runs to ${sayDay(boss.endsOn)}` : ''}
-        {!boss.awake && boss.wakesOn ? ` · it stirs again on ${sayDay(boss.wakesOn)}` : ''}
-      </p>
-
-      <div className={styles.strip}>
-        <dl className={styles.yours}>
-          <div>
-            <dt>Your damage</dt>
-            <dd>{boss.yourDamage.toLocaleString()}</dd>
-          </div>
-          <div>
-            <dt>Your strikes</dt>
-            <dd>{boss.yourStrikes}</dd>
-          </div>
-          <div>
-            <dt>Your place</dt>
-            <dd>{boss.yourRank === null ? '—' : `#${boss.yourRank}`}</dd>
-          </div>
-          <div>
-            <dt>Strikes today</dt>
-            <dd>
-              {boss.attemptsLeft} / {boss.attemptsPerDay}
-            </dd>
-          </div>
-        </dl>
-
-        {boss.blockedReason ? (
-          <p className={styles.blocked}>{boss.blockedReason}</p>
-        ) : (
-          <Button onClick={onStrike} disabled={busy}>
-            Strike it
-          </Button>
-        )}
-      </div>
-
-      {next && !boss.felled && (
-        <p className={styles.next}>
-          {(next.damage - boss.yourDamage).toLocaleString()} more damage to{' '}
-          <strong>{next.name}</strong>.
+        <p className={styles.crowd}>
+          <strong>{boss.wardens.toLocaleString()}</strong>{' '}
+          {boss.wardens === 1 ? 'warden has' : 'wardens have'} struck it,{' '}
+          <strong>{boss.strikes.toLocaleString()}</strong> {boss.strikes === 1 ? 'time' : 'times'}
+          {boss.awake && boss.endsOn ? ` · the wake runs to ${sayDay(boss.endsOn)}` : ''}
+          {!boss.awake && boss.wakesOn ? ` · it stirs again on ${sayDay(boss.wakesOn)}` : ''}
         </p>
-      )}
 
-      {spoilsReady && (
-        <div className={styles.spoils}>
-          <div>
-            <span className={styles.spoilsTitle}>The Vale felled it</span>
-            <Rewards rewards={boss.fellingRewards} signed />
-          </div>
-          <Button onClick={onClaimSpoils} disabled={busy}>
-            Take your share
-          </Button>
-        </div>
-      )}
-
-      <section className={styles.ladder} aria-label="Contribution ladder">
-        {boss.tiers.map((tier) => (
-          <div
-            key={tier.key}
-            className={styles.rung}
-            data-state={tier.claimed ? 'claimed' : tier.reached ? 'ready' : 'locked'}
-          >
-            <div className={styles.rungText}>
-              <span className={styles.rungName}>{tier.name}</span>
-              <span className={styles.rungAt}>{tier.damage.toLocaleString()} damage</span>
-              <Rewards rewards={tier.rewards} signed />
+        <div className={styles.strip}>
+          <dl className={styles.yours}>
+            <div>
+              <dt>Your damage</dt>
+              <dd>{boss.yourDamage.toLocaleString()}</dd>
             </div>
-            {tier.claimed ? (
-              <span className={styles.rungDone}>Collected</span>
-            ) : tier.reached ? (
-              <Button
-                variant="ghost"
-                onClick={() => onClaimTier(tier.key, tier.name)}
-                disabled={busy}
-              >
-                Collect
-              </Button>
-            ) : (
-              <span className={styles.rungLocked}>Not yet</span>
-            )}
-          </div>
-        ))}
-      </section>
+            <div>
+              <dt>Your strikes</dt>
+              <dd>{boss.yourStrikes}</dd>
+            </div>
+            <div>
+              <dt>Your place</dt>
+              <dd>{boss.yourRank === null ? '—' : `#${boss.yourRank}`}</dd>
+            </div>
+            <div>
+              <dt>Strikes today</dt>
+              <dd>
+                {boss.attemptsLeft} / {boss.attemptsPerDay}
+              </dd>
+            </div>
+          </dl>
 
-      <section className={styles.board} aria-label="Who has struck it">
-        <h3 className={styles.boardTitle}>Who has struck it</h3>
-        {boss.board.length === 0 ? (
-          <p className={styles.note}>Nobody yet. Somebody has to go first.</p>
-        ) : (
-          <ol className={styles.boardList}>
-            {boss.board.map((striker) => (
-              <li
-                key={`${striker.rank}-${striker.profileName}`}
-                data-you={striker.you ? 'yes' : 'no'}
-              >
-                <span className={styles.boardRank}>{striker.rank}</span>
-                <span className={styles.boardName}>{striker.profileName}</span>
-                <span className={styles.boardDamage}>{striker.damage.toLocaleString()}</span>
-              </li>
-            ))}
-          </ol>
+          {boss.blockedReason ? (
+            <p className={styles.blocked}>{boss.blockedReason}</p>
+          ) : (
+            <Button onClick={onStrike} disabled={busy}>
+              Strike it
+            </Button>
+          )}
+        </div>
+
+        {next && !boss.felled && (
+          <p className={styles.next}>
+            {(next.damage - boss.yourDamage).toLocaleString()} more damage to{' '}
+            <strong>{next.name}</strong>.
+          </p>
         )}
-      </section>
-    </Panel>
+      </Hero>
+
+      <div className={styles.beside}>
+        {spoilsReady && (
+          <div className={styles.spoils}>
+            <div>
+              <span className={styles.spoilsTitle}>The Vale felled it</span>
+              <Rewards rewards={boss.fellingRewards} signed />
+            </div>
+            <Button onClick={onClaimSpoils} disabled={busy}>
+              Take your share
+            </Button>
+          </div>
+        )}
+
+        {/* The contribution ladder as tiles (C46): counted across the whole wake, each
+            rung collected once, so a reached rung is a button until it is taken. */}
+        <Panel title="The ladder" className={styles.ladderPanel}>
+          <Ladder
+            rows={[
+              {
+                key: 'contribution',
+                title: 'Contribution',
+                subtitle: 'Counted across the wake, collected once',
+              },
+            ]}
+            tiers={boss.tiers.map((tier, index) => ({
+              index,
+              points: tier.damage,
+              name: tier.name,
+              reached: tier.reached,
+              tiles: [{ rewards: tier.rewards, claimed: tier.claimed, barred: false }],
+            }))}
+            scrollKey={`${boss.dungeonKey}:${boss.endsOn ?? ''}`}
+            busy={busy}
+            label={`${boss.name} contribution ladder`}
+            onClaim={(_, tier) => {
+              const rung = boss.tiers[tier.index];
+              if (rung && rung.reached && !rung.claimed) onClaimTier(rung.key, rung.name);
+            }}
+          />
+        </Panel>
+
+        <Panel title="Who has struck it" className={styles.board}>
+          {boss.board.length === 0 ? (
+            <p className={styles.note}>Nobody yet. Somebody has to go first.</p>
+          ) : (
+            <ol className={styles.boardList}>
+              {boss.board.map((striker) => (
+                <li
+                  key={`${striker.rank}-${striker.profileName}`}
+                  data-you={striker.you ? 'yes' : 'no'}
+                >
+                  <span className={styles.boardRank}>{striker.rank}</span>
+                  <span className={styles.boardName}>{striker.profileName}</span>
+                  <span className={styles.boardDamage}>{striker.damage.toLocaleString()}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </Panel>
+      </div>
+    </div>
   );
 }
+
+/**
+ * The painting the wake is drawn with — the one its card on the Battle hub wears, read off
+ * the registry so the two cannot drift. The Valewurm alone all week is the serpent coil;
+ * the creature that comes up at the weekend is drawn as the thing the whole Vale sees.
+ */
+const WAKE_ART = SCREENS.find((screen) => screen.id === 'worldBoss')?.art ?? 'blood-cursed-beast';

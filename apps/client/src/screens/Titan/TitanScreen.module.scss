@@ -23,86 +23,52 @@
   padding-right: $space-2;
 }
 
+/* The room on the left, the record and the ladder on the right (C46). Five parts to eight
+   rather than half and half: the painting reads at any width and the ladder's tiles want
+   the room. */
 .keep {
+  display: grid;
+  grid-template-columns: minmax(20rem, 5fr) minmax(0, 8fr);
+  gap: $space-4;
+  align-items: stretch;
+  min-height: 0;
+}
+
+@media (max-width: 1100px) {
+  .keep {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.hero {
+  min-height: 30rem;
+}
+
+.beside {
   display: flex;
   flex-direction: column;
   gap: $space-3;
-}
-
-/* Art, then the way in — and the name between them only when there is more than one Titan
-   to tell apart (`TitanScreen.tsx`).
-
-   Packed left rather than spread, which was the first attempt: `space-between` put the key
-   count and the Go Down button against the right edge of a 1440px page, as far from the
-   art as the screen allows, which is the opposite of a hero block. A wider gap is what the
-   missing title was really contributing. When a second Titan does exist its `flex: 1`
-   title holds the two apart again and this rule stays correct. */
-.head {
-  display: flex;
-  align-items: center;
-  gap: $space-6;
-}
-
-/* Key art rather than an icon: this is the one thing on the screen, and a 24px glyph
-   beside a name would make it look like a row in a list of many. */
-.art {
-  flex: 0 0 auto;
-  width: 96px;
-  height: 96px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  filter: drop-shadow(0 0 12px rgb(143 47 47 / 45%));
-}
-
-.title {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
   min-width: 0;
-  flex: 1 1 auto;
 }
 
-.name {
-  margin: 0;
-  font-family: $font-display;
-  font-size: 1.5rem;
-  color: $parchment;
-}
-
-.tagline {
-  margin: 0;
-  font-size: 0.9rem;
-  color: $muted;
-}
-
-/* Keys and the button together: the allowance is the reason the button is or is not
-   pressable, so they are one thing rather than a number somewhere else on the page. */
+/* Keys and the button together at the foot of the painting: the allowance is the reason
+   the button is or is not pressable, so they are one thing. */
 .entry {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: $space-2;
-  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  flex-wrap: wrap;
 }
 
 .keys {
   font-family: $font-mono;
-  font-size: 0.9rem;
+  font-size: 17px;
   color: $gold-soft;
 
   &[data-spent='true'] {
     color: $muted;
   }
-}
-
-/* Three panes, and they wrap rather than squash: the ladder is the widest of them and a
-   two-column squeeze turns its reward chips into a stack of one. */
-.panes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: $space-3;
-  align-items: start;
 }
 
 .record,
@@ -138,6 +104,7 @@
 
   dd {
     margin: 0;
+    font-size: 1.4rem;
     font-family: $font-mono;
     font-size: 1.25rem;
     color: $parchment;

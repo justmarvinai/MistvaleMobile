@@ -40,6 +40,10 @@ export interface LadderTile {
 export interface LadderTier {
   index: number;
   points: number;
+  /** Drawn under the rung's number in place of the score — "Floor 6" where a floor is the score. */
+  label?: string | undefined;
+  /** The rung's own name, said on its tiles' tooltips — "Titanshard", "The Bottom Step". */
+  name?: string | undefined;
   reached: boolean;
   /** One per row, in the rows' order. */
   tiles: readonly LadderTile[];
@@ -111,7 +115,7 @@ export function Ladder({
             >
               <div className={styles.rung}>
                 <span className={styles.rungIndex}>{tier.index + 1}</span>
-                <span className={styles.rungAt}>{tier.points.toLocaleString()}</span>
+                <span className={styles.rungAt}>{tier.label ?? tier.points.toLocaleString()}</span>
               </div>
               {rows.map((row, at) => {
                 const tile = tier.tiles[at];
@@ -180,7 +184,7 @@ function Tile({
   const words = describeRewards(tile.rewards, nameOf) || 'Nothing here';
   const ref = useTip({
     title: words,
-    subtitle: `${row.title} · tier ${tier.index + 1} · ${STATE_WORDS[state]}`,
+    subtitle: `${tier.name ?? `${row.title} · tier ${tier.index + 1}`} · ${STATE_WORDS[state]}`,
     ...(state === 'ready' ? { hint: 'Click to collect' } : {}),
   });
 

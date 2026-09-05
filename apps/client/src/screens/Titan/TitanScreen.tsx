@@ -5,10 +5,11 @@ import { Button } from '@/ui/Button/Button';
 import { Empty } from '@/ui/Empty/Empty';
 import { Heading } from '@/ui/Heading/Heading';
 import { Panel } from '@/ui/Panel/Panel';
-import { Rewards } from '@/ui/Rewards/Rewards';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
 import { BossCard } from '@/ui/BossCard/BossCard';
-import { dungeonArt } from '@/ui/dungeonArt';
+import { Hero } from '@/ui/Hero/Hero';
+import { Ladder } from '@/ui/Ladder/Ladder';
+import { dungeonArt, dungeonInk } from '@/ui/dungeonArt';
 import { useContentStore } from '@/state/contentStore';
 import { useTitanStore } from '@/state/titanStore';
 import { TeamSelect } from '../Battle/TeamSelect';
@@ -169,31 +170,31 @@ function Keep({
 
   return (
     <section className={styles.keep}>
-      <header className={styles.head}>
-        <span
-          className={styles.art}
-          style={{ backgroundImage: `var(--fui-img-${dungeonArt(keep.key, keep.kind)})` }}
-          aria-hidden="true"
-        />
-        {named && (
-          <div className={styles.title}>
-            <h2 className={styles.name}>{keep.name}</h2>
-            <p className={styles.tagline}>{keep.tagline}</p>
-          </div>
-        )}
+      {/* The key art is the room (C46): a tall painted block with the way in at its foot,
+          where a 96px icon beside a button used to leave two thirds of the frame to three
+          panels of text. The name is on the block only when there is more than one Titan
+          to tell apart — the screen's title says it otherwise. */}
+      <Hero
+        art={dungeonArt(keep.key, keep.kind)}
+        ink={dungeonInk(keep.kind)}
+        title={named ? keep.name : undefined}
+        tagline={named ? keep.tagline : undefined}
+        label={keep.name}
+        className={styles.hero}
+      >
         <div className={styles.entry}>
           <span className={styles.keys} data-spent={standing.keysLeft === 0}>
             {standing.open
-              ? `${standing.keysLeft} / ${standing.keysPerDay} keys`
+              ? `${standing.keysLeft} / ${standing.keysPerDay} keys today`
               : (standing.lockedReason ?? 'Closed')}
           </span>
           <Button onClick={onFight} disabled={!canFight}>
             {standing.open ? 'Go down' : 'Locked'}
           </Button>
         </div>
-      </header>
+      </Hero>
 
-      <div className={styles.panes}>
+      <div className={styles.beside}>
         <Panel title="What you managed" className={styles.record}>
           {standing.runs === 0 ? (
             <p className={styles.none}>
@@ -233,16 +234,32 @@ function Keep({
           )}
         </Panel>
 
+        {/* The ladder as tiles (C46): the shared `Ladder`, one row, a rung per damage
+            threshold with the run's own best marking how far up it has been. Nothing here
+            is pressed — a Titan pays the rung a run reaches, on the spot — so a reached
+            rung wears the tick and an unreached one is dim, and the rung's name is on the
+            tile's tooltip. */}
         <Panel title="The ladder" className={styles.ladder}>
-          <ol className={styles.rungs}>
-            {ladder.map((tier) => (
-              <li key={tier.key} className={styles.rung} data-reached={tier.reached}>
-                <span className={styles.rungName}>{tier.name}</span>
-                <span className={styles.rungDamage}>{tier.damage.toLocaleString()} damage</span>
-                <Rewards rewards={tier.rewards} className={styles.rungRewards} />
-              </li>
-            ))}
-          </ol>
+          <Ladder
+            rows={[
+              {
+                key: 'damage',
+                title: 'Damage',
+                subtitle: 'Paid at the highest rung a run reaches',
+              },
+            ]}
+            tiers={ladder.map((tier, index) => ({
+              index,
+              points: tier.damage,
+              name: tier.name,
+              reached: tier.reached,
+              tiles: [{ rewards: tier.rewards, claimed: tier.reached, barred: false }],
+            }))}
+            scrollKey={keep.key}
+            busy={false}
+            label={`${keep.name} damage ladder`}
+            onClaim={() => undefined}
+          />
         </Panel>
 
         {boss && (
