@@ -1,12 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import type { EventStanding } from '@mistvale/shared';
 import { CountdownTimer } from '@/fui/components/CountdownTimer.ts';
-import { RewardTrack } from '@/fui/components/RewardTrack.ts';
 import { Fui } from '@/fui/react';
 import { Empty } from '../../ui/Empty/Empty';
+import { Ladder, type LadderTier } from '../../ui/Ladder/Ladder';
 import { Panel } from '../../ui/Panel/Panel';
 import { describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
-import { rewardArt } from '../../ui/Rewards/art';
 import { useEventStore } from '../../state/eventStore';
 import { toast } from '../../state/uiStore';
 import styles from './EventsScreen.module.scss';
@@ -16,9 +15,10 @@ import { Heading } from '@/ui/Heading/Heading';
  * What is running right now.
  *
  * Each event is one panel: what earns points, how many you have, and the ladder. The
- * ladder is the screen's spine — a horizontal track with the rungs on it — because the
- * question a player actually has is "how far to the next one", and a list of six rows
- * answers that worse than a bar does (docs/UI_UX_DESIGN.md §3, screen 21).
+ * ladder is the screen's spine — a rail of rungs, each a tile you can read (`ui/Ladder`,
+ * shared with the Vale Pass since C44) — because the question a player actually has is
+ * "how far to the next one", and a list of six rows answers that worse than a row of
+ * tiles with the score under each does (docs/UI_UX_DESIGN.md §3, screen 21).
  *
  * An event that has ended but still owes a milestone stays on the page, marked closed.
  * Hiding it would be quietly taking back something the player earned.
@@ -85,23 +85,16 @@ function EventPanel({
   busy: string | null;
   onClaim: (milestone: number) => void;
 }): JSX.Element {
-  const rewardName = useRewardName();
-
-  /** The ladder's rungs, as the library's rail draws them. */
-  const nodes = useMemo(
+  /** The ladder's rungs, one tile per milestone. Every state is the server's flag. */
+  const tiers = useMemo<LadderTier[]>(
     () =>
-      event.milestones.map((rung) => {
-        const rewards = Object.entries(rung.rewards).filter(([, amount]) => amount > 0);
-        const first = rewards[0];
-        return {
-          at: rung.points,
-          icon: first ? rewardArt(first[0]) : 'rune-bronze-disc',
-          label: describeRewards(rung.rewards, rewardName),
-          ...(first && first[1] > 1 ? { qty: first[1] } : {}),
-          ...(rung.claimed ? { claimed: true } : {}),
-        };
-      }),
-    [event.milestones, rewardName],
+      event.milestones.map((rung) => ({
+        index: rung.index,
+        points: rung.points,
+        reached: rung.reached,
+        tiles: [{ rewards: rung.rewards, claimed: rung.claimed, barred: false }],
+      })),
+    [event.milestones],
   );
 
   return (
@@ -139,34 +132,33 @@ function EventPanel({
         ))}
       </div>
 
-      {/* The ladder is the screen's spine, and the library's rail is exactly it: one line
-          with the rungs sitting on it at the score each is worth, so "how far to the next"
-          is a distance rather than a subtraction the player has to do.
-
-          Keyed on the milestones *and* on whether a claim is in flight. The rail ticks a
-          node the moment it is pressed, which is the one thing this game does not do —
-          the server settles a claim — and remounting on `busy` puts the node back where
-          the server has it until the server says otherwise. */}
-      <Fui
-        key={`${event.milestones.map((rung) => `${rung.claimed}`).join('')}|${busy ?? ''}`}
-        of={RewardTrack}
-        className={styles.track}
-        options={{
-          nodes,
-          progress: event.points,
-          unit: 'points',
-          subtitle: event.live
-            ? today === event.endsOn
-              ? 'Last day to score'
-              : `Scoring until ${event.endsOn}`
-            : `Scoring closed on ${event.endsOn}`,
-          title: 'The ladder',
-        }}
-        on={{
-          'track:claim': (node: { at: number }) => {
-            const rung = event.milestones.find((entry) => entry.points === node.at);
-            if (rung && rung.reached && !rung.claimed && busy === null) onClaim(rung.index);
+      {/* The score, then the ladder (C44). The library's rail used to draw both — a bar
+          with the rungs on it at the score each is worth — and at 36px a rung was an icon
+          with a nine-pixel label; the tiles say what each rung pays at a size that can be
+          read, and the score above them says how far along the row you are. A tile marks
+          nothing on its own: the server settles a claim and the store re-reads. */}
+      <div className={styles.score}>
+        <strong>{event.points.toLocaleString()}</strong> points
+      </div>
+      <Ladder
+        rows={[
+          {
+            key: 'ladder',
+            title: 'The ladder',
+            subtitle: event.live
+              ? today === event.endsOn
+                ? 'Last day to score'
+                : `Scoring until ${event.endsOn}`
+              : `Scoring closed on ${event.endsOn}`,
           },
+        ]}
+        tiers={tiers}
+        scrollKey={`${event.eventKey}:${event.occurrence}`}
+        busy={busy !== null}
+        label={`${event.name} ladder`}
+        onClaim={(_, tier) => {
+          const rung = event.milestones.find((entry) => entry.index === tier.index);
+          if (rung && rung.reached && !rung.claimed && busy === null) onClaim(rung.index);
         }}
       />
     </Panel>

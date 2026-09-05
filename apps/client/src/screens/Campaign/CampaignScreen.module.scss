@@ -104,33 +104,111 @@
 
 /* ── The markers ─────────────────────────────────────────────────────────── */
 
+/* 72 rather than 52 (C44), and a *picture* in each: the region's painting, written onto
+   the node by the screen as `--mv-node-art`, with the library's own glyph as a seal on its
+   corner. Twelve identical grey discs with a different scratch in each was a diagram;
+   twelve paintings on a road is a map. */
 .mapPane :global(.fui-map__disc) {
-  width: 52px;
-  height: 52px;
+  width: 72px;
+  height: 72px;
   border-width: 3px;
+  background:
+    var(--mv-node-art, none) center / cover no-repeat,
+    rgba(6, 6, 10, 0.9);
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.6),
+    0 6px 18px rgba(0, 0, 0, 0.7),
+    0 0 14px color-mix(in srgb, var(--fui-map-ink) 45%, transparent);
 }
 
+/* The seal: a dark disc on the marker's corner carrying the region's glyph in the
+   marker's own colour. The library draws the glyph as a mask over the whole disc, and a
+   mask cuts *everything* under it to the glyph's shape — so the disc is the `::before`,
+   which the library does not use, and the glyph stays on the `::after`. */
+.mapPane :global(.fui-map__disc::before) {
+  content: '';
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(6, 6, 10, 0.95);
+  box-shadow: 0 0 0 2px var(--fui-map-ink);
+}
+
+.mapPane :global(.fui-map__disc::after) {
+  inset: auto -6px -6px auto;
+  width: 28px;
+  height: 28px;
+  mask-size: 56%;
+  -webkit-mask-size: 56%;
+}
+
+/* The end of the road is a larger, squarer, redder marker. The library turns it into a
+   diamond, and a painting turned forty-five degrees is a mistake rather than a shape — so
+   the rotation goes, on the disc, on its glyph, and on the hover that re-applied it. */
 .mapPane :global(.fui-map__node.is-boss .fui-map__disc) {
-  width: 68px;
-  height: 68px;
-  border-radius: 8px;
+  width: 92px;
+  height: 92px;
+  border-radius: 12px;
+  transform: none;
+}
+
+.mapPane :global(.fui-map__node.is-boss .fui-map__disc::after) {
+  transform: none;
+}
+
+.mapPane :global(.fui-map__node.is-boss:not(:disabled):hover .fui-map__disc) {
+  transform: scale(1.16);
 }
 
 .mapPane :global(.fui-map__node) {
-  gap: 6px;
+  gap: 8px;
+}
+
+/* The chapter you are on is lit rather than merely coloured: a gold ring, and a breath
+   on it. The library's own `fui-glow` is replaced rather than stacked. */
+.mapPane :global(.fui-map__node[data-state='current'] .fui-map__disc) {
+  animation: none;
+  box-shadow:
+    0 0 0 3px var(--fui-gold),
+    0 0 30px color-mix(in srgb, var(--fui-gold) 70%, transparent),
+    0 6px 18px rgba(0, 0, 0, 0.7);
+
+  @include motion-safe {
+    animation: marker-breathe 2.4s ease-in-out infinite;
+  }
 }
 
 .mapPane :global(.fui-map__name) {
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .mapPane :global(.fui-map__stars) {
-  font-size: 15px;
-  letter-spacing: 0;
+  font-size: 17px;
+  letter-spacing: 1px;
 }
 
 .mapPane :global(.fui-map__note) {
-  font-size: 14px;
+  font-size: 14.5px;
+}
+
+@keyframes marker-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px var(--fui-gold),
+      0 0 24px color-mix(in srgb, var(--fui-gold) 60%, transparent),
+      0 6px 18px rgba(0, 0, 0, 0.7);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 3px var(--fui-gold),
+      0 0 40px color-mix(in srgb, var(--fui-gold) 90%, transparent),
+      0 6px 18px rgba(0, 0, 0, 0.7);
+  }
 }
 
 /* A locked chapter at half opacity over a *transparent* map is nearly gone — the library
@@ -138,6 +216,12 @@
    the road ahead disappears. */
 .mapPane :global(.fui-map__node[data-state='locked']) {
   opacity: 0.72;
+}
+
+/* A shut chapter's painting is drained as well as dimmed, so the road ahead reads as
+   somewhere you have not been rather than somewhere the art has not loaded. */
+.mapPane :global(.fui-map__node[data-state='locked'] .fui-map__disc) {
+  filter: grayscale(0.8) brightness(0.6);
 }
 
 /* The road itself, drawn heavier now that it is competing with the game's own backdrop

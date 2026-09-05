@@ -5,6 +5,7 @@ import { ChampionCard as FuiChampionCard } from '@/fui/components/ChampionCard.t
 import { Fui } from '@/fui/react';
 import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
+import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 import { Button } from '../../ui/Button/Button';
 import { Modal } from '../../ui/Modal/Modal';
 import { describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
@@ -90,7 +91,26 @@ export function CalendarScreen(): JSX.Element {
 
   return (
     <div className={styles.screen}>
-      <Heading tagline="Thirty days of the vale's gratitude, one lantern at a time.">
+      <Heading
+        tagline="Thirty days of the vale's gratitude, one lantern at a time."
+        actions={
+          // Each track's own words, behind the i (C44) — they were a paragraph above each
+          // grid, and the grid is the thing.
+          <ScreenInfo title="The Lantern Calendar" label="About the calendar">
+            {[login?.welcome, login?.calendar]
+              .filter((track): track is LoginTrackStanding => track !== undefined)
+              .map((track) => (
+                <p key={track.track}>
+                  <strong>{track.name}.</strong> {track.description}
+                </p>
+              ))}
+            <p>
+              Each track pays its day N on the Nth claim, so a missed day costs the day and never
+              your place in the track.
+            </p>
+          </ScreenInfo>
+        }
+      >
         The Lantern Calendar
       </Heading>
 
@@ -232,29 +252,31 @@ function TrackPanel({
       variant="hero"
       title={track.name}
       actions={
-        <span className={styles.meta}>
-          {track.track === 'calendar' ? `Cycle ${track.cycle} · ` : ''}
-          {track.claimsMade} collected
+        // Where the track stands and today's claim, in the title bar (C44). It was a strip
+        // above the grid saying "Day 4 is waiting" over a tile already lit gold and
+        // saying the same — and a 170px strip is a row of tiles' worth of room. The button
+        // stays a button: the library's tile answers a click, but it is a `div`, and the
+        // one thing a player is asked to press every day should be reachable by keyboard.
+        <span className={styles.standing}>
+          <span className={styles.meta}>
+            {track.track === 'calendar' ? `Cycle ${track.cycle} · ` : ''}
+            {track.claimsMade} collected
+          </span>
+          {track.claimedToday ? (
+            <span className={styles.done}>Collected today — come back tomorrow.</span>
+          ) : next ? (
+            <>
+              <span className={styles.todayLabel}>Day {next.day} is waiting</span>
+              <Button variant="primary" disabled={disabled} onClick={onClaim}>
+                {busy ? 'Collecting…' : next.choices.length > 0 ? 'Choose…' : 'Collect'}
+              </Button>
+            </>
+          ) : (
+            <span className={styles.done}>Walked to the end.</span>
+          )}
         </span>
       }
     >
-      <p className={styles.blurb}>{track.description}</p>
-
-      <div className={styles.today}>
-        {track.claimedToday ? (
-          <span className={styles.done}>Collected today. Come back tomorrow.</span>
-        ) : next ? (
-          <>
-            <span className={styles.todayLabel}>Day {next.day} is waiting</span>
-            <Button variant="primary" disabled={disabled} onClick={onClaim}>
-              {busy ? 'Collecting…' : next.choices.length > 0 ? 'Choose…' : 'Collect'}
-            </Button>
-          </>
-        ) : (
-          <span className={styles.done}>Walked to the end.</span>
-        )}
-      </div>
-
       {/* Keyed on what it draws *and* on whether a claim is in flight: the component ticks
           today's tile the moment it is pressed, and the server is what settles a claim —
           so a remount puts the tile back where the server has it until the server moves

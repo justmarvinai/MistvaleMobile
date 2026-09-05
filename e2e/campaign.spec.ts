@@ -55,6 +55,15 @@ test.describe('the campaign loop', () => {
     // The chapter page says what a stage is worth before any energy is spent.
     const firstStage = page.getByRole('button', { name: '1-1', exact: false }).first();
     await expect(firstStage).toContainText(/waves/i);
+
+    // A row is a row (C44): tall enough to be read across a desktop, and carrying the first
+    // wave's faces — a portrait, or the honest stand-in for one — so a stage is more than
+    // a number and the word "waves". Every face on the row is an `img` or the placeholder's
+    // svg; the energy glyph is one svg, so a row with foes on it has at least two.
+    const rowBox = await firstStage.boundingBox();
+    expect(rowBox?.height ?? 0).toBeGreaterThanOrEqual(90);
+    expect(await firstStage.locator('img, svg').count()).toBeGreaterThanOrEqual(2);
+
     await firstStage.click();
 
     const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
@@ -126,6 +135,23 @@ test.describe('the campaign loop', () => {
     // 252 stages laid flat would be a wall rather than a map.
     await expect(page.locator('.fui-map__node')).toHaveCount(12);
     await expect(page.locator('.fui-map__node[data-state="current"]')).toHaveCount(1);
+
+    // A marker is a picture (C44): 72px, with its region's painting resolved onto it. The
+    // painting is written by the screen after the library builds the node, so this is the
+    // one place that can check the two halves met — a rule with nothing to read draws the
+    // library's bare disc and passes every other assertion here.
+    const discs = page.locator('.fui-map__disc');
+    await expect(discs).toHaveCount(12);
+    const painted = await discs.evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        width: node.getBoundingClientRect().width,
+        painting: getComputedStyle(node).backgroundImage.includes('url('),
+      })),
+    );
+    for (const disc of painted) {
+      expect(disc.width).toBeGreaterThanOrEqual(72);
+      expect(disc.painting).toBe(true);
+    }
     await expect(page.getByText(/12\. The Coilmother’s Court/)).toBeVisible();
 
     // Chapter 2 is on the map, shut, and says why on the marker itself — a locked chapter

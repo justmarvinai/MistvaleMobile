@@ -4,7 +4,9 @@
   display: grid;
   /* The title is a row of its own; the content row takes the slack. */
   grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: 16rem minmax(0, 1fr);
+  /* 22rem rather than 16 (C44): the arcs' names were cut to "Awakening t…" at 16, and an
+     arc a player cannot name is an arc they cannot talk about. */
+  grid-template-columns: 22rem minmax(0, 1fr);
   gap: $space-4;
   height: 100%;
   min-height: 0;

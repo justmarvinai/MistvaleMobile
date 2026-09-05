@@ -28,23 +28,14 @@ import { SpringDial } from '../../ui/SpringDial/SpringDial';
  * know: which keeps are open today, and how deep this warden has been.
  */
 
-const GROUPS: { kind: DungeonDef['kind']; title: string; blurb: string }[] = [
-  {
-    kind: 'relic',
-    title: 'The Relic Keeps',
-    blurb:
-      'Four keeps, four sets. A run always pays a relic; how good a relic is how deep you went.',
-  },
-  {
-    kind: 'proving',
-    title: 'The Proving Grounds',
-    blurb: 'Emblems for masteries, and a pitmaster whose patience runs out on a timer.',
-  },
-  {
-    kind: 'springs',
-    title: 'The Essence Springs',
-    blurb: 'Ascension essence. The Pure Spring runs every day; the rest keep their own hours.',
-  },
+/* A title per section and nothing under it (C44). Each carried a sentence — "Four keeps,
+   four sets. A run always pays a relic…" — which is the screen explaining itself in prose
+   above the thing it is; the words are behind the i, and each keep's own tile says what it
+   pays. */
+const GROUPS: { kind: DungeonDef['kind']; title: string }[] = [
+  { kind: 'relic', title: 'The Relic Keeps' },
+  { kind: 'proving', title: 'The Proving Grounds' },
+  { kind: 'springs', title: 'The Essence Springs' },
 ];
 
 export function DepthsScreen(): JSX.Element {
@@ -131,7 +122,6 @@ export function DepthsScreen(): JSX.Element {
             <section key={group.kind} className={styles.group}>
               <header className={styles.groupHead}>
                 <h2 className={styles.groupTitle}>{group.title}</h2>
-                <p className={styles.groupBlurb}>{group.blurb}</p>
               </header>
 
               {/* The two things the sidebar used to say about a group, said by the group

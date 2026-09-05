@@ -73,10 +73,17 @@
 
 // ── The score ───────────────────────────────────────────────────────────────
 
-// ── The ladder ──────────────────────────────────────────────────────────────
+.score {
+  margin-bottom: $space-3;
+  color: $parchment-dim;
+  font-size: 15px;
 
-/* The ladder is the library's reward rail now, so the bar, the fill and the rungs are all
-   drawn by it. What is left is the one thing a container has to say. */
-.track {
-  width: 100%;
+  strong {
+    color: $gold;
+    font-family: $font-mono;
+    font-size: 22px;
+  }
 }
+
+// ── The ladder ──────────────────────────────────────────────────────────────
+// Drawn by `ui/Ladder` since C44 — the rungs, the tiles and their states are all its.

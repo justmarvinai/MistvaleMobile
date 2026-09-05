@@ -5,6 +5,51 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the road, the ledgers, the calendar and the ladders at desktop size (C44)
+
+- **The vale's markers are paintings.** Twelve identical 52px grey discs on faint lines,
+  with a different scratch of glyph in each, was a diagram; each chapter's marker is 72px
+  now and carries its region's painting from the pack's own art, the glyph as a seal on its
+  corner, the chapter you are on ringed in gold and breathing, a shut one drained as well
+  as dimmed, and the last one a larger, squarer, redder marker instead of a diamond — a
+  painting turned forty-five degrees is a mistake rather than a shape. Two chapters in one
+  region get two paintings, so the road is twelve places rather than six repeated. The
+  three rows use the whole pane; the bottom third used to stand empty.
+- **A stage's row says who is on it.** Each row of a chapter is 96px tall with the first
+  wave's faces beside the number, the name at 20px, stars at 20px, and a real plate for the
+  way in rather than a bordered word. It was a line of 13px text ending at 60% of the frame.
+- **The ledgers are two columns.** Quests and the Path drew the pack's phone-sized rows —
+  a 40px badge, a 13px name, a six-pixel bar running the whole 1,300px width with the
+  reward and a 10px button crowded into its last hundred pixels. The badge is 56px, the
+  name 17px, the bar is sized to its sentence, and the reward and the button are a column
+  of their own on the right (`ui/Ledger/Ledger.module.scss`, scoped under the class the
+  wrapper puts on the list). The day's chest is one row — what it is, what it pays, the
+  meter and the button — rather than a 170px panel around one line.
+- **The calendar's tiles are 108px** with the day at 12.5, the reward at 56 and the count
+  at 14, stretched across the row rather than parked at the pack's 76; today's tile is lit a
+  shade further. The "Day N is waiting — Collect" strip that repeated what the lit tile
+  said is in the panel's title bar now, with the count beside it — the button stays a
+  button, because the library's tile is a `div` and the one thing a player presses every
+  day should be reachable by keyboard. Each track's own words went behind the **i**.
+- **The events' ladder is the Vale Pass's** (`ui/Ladder`, generalised from C43's
+  `PassLadder`): a rail of 88px tiles with the score under each, the next rung centred,
+  ready tiles gold and breathing, collected ones ticked — where the library's rail drew a
+  36px icon with a nine-pixel label on a hairline. A ladder takes any number of rows, so
+  the pass's two and an event's one share every rule; each tile carries a painted tooltip
+  naming what it pays. The rail is scrolled sideways by hand rather than with
+  `scrollIntoView`, which would also have scrolled the *page* to the third event's ladder.
+  A tier grows when the rail has room to spare, so an event's six rungs spread across the
+  whole panel with the rung line running between them, where the pass's thirty overflow
+  the rail and the growth has nothing to share out.
+- **The Path's arc list is 22rem wide** rather than 16, because "Awakening t…" and "The
+  Causew…" were the names of arcs a player could not name.
+- **The springs' week is a strip of seven** across the section — today lit, the springs
+  open on each day as chips under its name — rather than a seven-row table down the left
+  beside cards that scrolled off the frame.
+- **Less prose above the thing it describes.** The Depths' three section sentences are
+  gone (the **i** and the tiles say it), and the season's and each calendar track's
+  description moved behind the **i** from above the ladder and the grid.
+
 ### Changed — the team chooser, the Vale Pass and the roster at desktop size (C43)
 
 - **The lineup's four are sockets.** The team chooser drew its four slots as 104px faces

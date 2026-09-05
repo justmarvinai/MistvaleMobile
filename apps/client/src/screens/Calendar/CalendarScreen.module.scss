@@ -42,50 +42,76 @@
   font-size: 0.84rem;
 }
 
-.blurb {
-  margin: 0 0 $space-3;
-  max-width: 62ch;
-  color: $parchment-dim;
-  font-size: 0.95rem;
-}
+// ── The standing, in the title bar ──────────────────────────────────────────
 
-// ── Today ───────────────────────────────────────────────────────────────────
-
-.today {
-  display: flex;
+.standing {
+  display: inline-flex;
   align-items: center;
-  gap: $space-3;
-  margin-bottom: $space-3;
-  padding: $space-2 $space-3;
-  background: $panel-inset;
-  border: 1px solid $edge;
+  flex-wrap: wrap;
+  gap: $space-4;
 }
 
 .todayLabel {
   color: $gold;
   font-family: $font-display;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .done {
   color: $muted;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 // ── The tracks ──────────────────────────────────────────────────────────────
 
-.grid,
-
-// Six across is the shape thirty days wants: five clean rows, and the sigil days land in
-// the same column every week so the rhythm is visible before it is read.
 /* The day tiles are the library's calendar since the design rework — their state, their
-   milestone treatment and their icons are all drawn by it. */
+   milestone treatment and their icons are all drawn by it. What is Mistvale's is the size
+   (C44): the pack's tiles are 76px with a nine-pixel day label, a phone's calendar, and
+   they park at that width however wide the row is. 108 at least, the day at 12.5, the
+   reward at 56 and the count at 14, stretched across the row so ten of them fill the
+   panel. Scoped here rather than in the vendored stylesheet, which the next
+   `pnpm fui:vendor` overwrites. */
 .grid {
+  display: block;
   width: 100%;
 }
 
-// The one tile that matters. A steady inner glow rather than a pulse: it has to hold the
-// eye for as long as the screen is open without becoming something to look away from.
+.grid :global(.fui-daily__grid) {
+  gap: 10px;
+}
+
+.grid :global(.fui-daily__cell) {
+  width: auto;
+  min-width: 108px;
+  gap: 5px;
+  padding: 12px 8px 14px;
+}
+
+.grid :global(.fui-daily__day) {
+  font-size: 12.5px;
+}
+
+.grid :global(.fui-daily__icon) {
+  width: 56px;
+  height: 56px;
+}
+
+.grid :global(.fui-daily__cell.is-milestone .fui-daily__icon) {
+  width: 64px;
+  height: 64px;
+}
+
+.grid :global(.fui-daily__qty) {
+  font-size: 14px;
+}
+
+/* Today's tile, lit a shade further than the library lights it: it is the one thing on the
+   screen a player came for. */
+.grid :global(.fui-daily__cell[data-state='ready']) {
+  box-shadow:
+    0 0 0 2px var(--fui-gold),
+    0 0 26px -4px var(--fui-gold);
+}
 
 // ── The selector ────────────────────────────────────────────────────────────
 

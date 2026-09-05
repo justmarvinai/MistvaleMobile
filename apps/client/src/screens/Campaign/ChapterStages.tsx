@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import type { CampaignChapterDef, Difficulty, StageDef } from '@mistvale/shared';
 import { Heading } from '@/ui/Heading/Heading';
 import { Icon } from '@/ui/Icon/Icon';
+import { Portrait } from '@/ui/Portrait/Portrait';
+import { championArt } from '@/ui/championArt';
 import { Panel } from '@/ui/Panel/Panel';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
 import { useContentStore } from '@/state/contentStore';
@@ -250,6 +252,25 @@ function StageEntry({
           ) : (
             row.stage.number
           )}
+        </span>
+
+        {/* Who is waiting on the stage (C44): the first wave's line-up as faces, the way
+            the team chooser shows every wave. A row that says "3 waves" and nothing else
+            asks a player to open the chooser to learn what a stage is, which is the one
+            thing a row exists to save them. */}
+        <span className={styles.foes} aria-hidden="true">
+          {(row.stage.waves[0] ?? []).slice(0, 4).map((unit, index) => {
+            const foe = bundle?.enemies.find((entry) => entry.key === unit.enemyKey);
+            return (
+              <Portrait
+                key={`${unit.enemyKey}:${index}`}
+                src={championArt(foe, bundle?.assets).portrait ?? null}
+                name={foe?.name}
+                size={44}
+                className={styles.foe}
+              />
+            );
+          })}
         </span>
 
         <span className={styles.main}>

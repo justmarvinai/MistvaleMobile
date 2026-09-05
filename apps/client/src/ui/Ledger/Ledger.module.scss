@@ -1,0 +1,94 @@
+@use '../../styles/tokens' as *;
+
+/* The library's `AchievementList` at desktop size (C44).
+
+   The pack draws a phone's ledger: a 40px badge, a 13px name, an 11.5px sentence, a 13px
+   track, a 10.5px claim button — and lets the track take every pixel the row has, so on a
+   1,300px list a six-pixel bar ran the width of the screen with the reward and the button
+   crowded into its last hundred pixels. Two columns now: the objective with a bar sized to
+   its sentence on the left, the reward and a real button on the right. Everything here is
+   a size or a width; the states, the badge shape and the tick stay the library's. Scoped
+   under the class the wrapper puts on the list's root, so no other ledger is touched. */
+.ledger :global(.fui-achievements__head) {
+  padding: $space-2 $space-4;
+}
+
+.ledger :global(.fui-achievements__title) {
+  font-size: 13px;
+}
+
+.ledger :global(.fui-achievements__score) {
+  font-size: 14px;
+}
+
+.ledger :global(.fui-achievements__row) {
+  gap: $space-4;
+  padding: $space-3 $space-4;
+}
+
+.ledger :global(.fui-achievements__badge) {
+  width: 56px;
+  height: 56px;
+}
+
+.ledger :global(.fui-achievements__tier) {
+  font-size: 11px;
+}
+
+.ledger :global(.fui-achievements__main) {
+  gap: 4px;
+  /* The bar belongs to the sentence, not to the screen. */
+  max-width: 36rem;
+}
+
+.ledger :global(.fui-achievements__name) {
+  font-size: 17px;
+}
+
+.ledger :global(.fui-achievements__desc) {
+  font-size: 14px;
+}
+
+.ledger :global(.fui-achievements__track) {
+  height: 12px;
+}
+
+.ledger :global(.fui-achievements__count) {
+  font-size: 11.5px;
+  line-height: 12px;
+}
+
+/* The right column: the reward at a readable size, then the button. `margin-left: auto`
+   is what makes it a column — the pack lets the track push it to the edge. */
+.ledger :global(.fui-achievements__side) {
+  margin-left: auto;
+  gap: $space-2;
+  min-width: 16rem;
+}
+
+.ledger :global(.fui-achievements__reward) {
+  font-size: 14.5px;
+}
+
+.ledger :global(.fui-achievements__reward-art) {
+  width: 28px;
+  height: 28px;
+}
+
+.ledger :global(.fui-achievements__points) {
+  font-size: 12.5px;
+}
+
+.ledger :global(.fui-achievements__claim) {
+  padding: 8px 18px;
+  font-size: 13.5px;
+  letter-spacing: 0.08em;
+}
+
+.ledger :global(.fui-achievements__claimed) {
+  font-size: 13px;
+}
+
+.ledger :global(.fui-achievements__empty) {
+  font-size: 15px;
+}

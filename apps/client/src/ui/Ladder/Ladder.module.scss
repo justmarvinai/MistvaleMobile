@@ -1,8 +1,9 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
-/* The season's ladder: row labels on the left, a rail of tier columns beside them. See
-   PassLadder.tsx. */
+/* A ladder: row labels on the left, a rail of tier columns beside them — see Ladder.tsx.
+   The number of rows comes in as `--mv-ladder-rows`, so the pass's two and an event's one
+   share every rule below. */
 
 .ladder {
   display: grid;
@@ -12,15 +13,15 @@
   min-width: 0;
 }
 
-/* The three rows of a column, named once here so the labels and the tiles line up: the
-   rung, the free tile, the season's tile. */
+/* The rows of a column, named once here so the labels and the tiles line up: the rung,
+   then one tile per row. */
 $rung-h: 3.4rem;
 $tile: 5.5rem;
 $row-gap: $space-2;
 
 .labels {
   display: grid;
-  grid-template-rows: $rung-h $tile $tile;
+  grid-template-rows: $rung-h repeat(var(--mv-ladder-rows, 1), $tile);
   gap: $row-gap;
   /* Matches the rail's own vertical padding so the rows sit on the same lines. */
   padding: $space-3 0;
@@ -63,9 +64,16 @@ $row-gap: $space-2;
    it; a reached rung is gold. */
 .tier {
   display: grid;
-  grid-template-rows: $rung-h $tile $tile;
+  grid-template-rows: $rung-h repeat(var(--mv-ladder-rows, 1), $tile);
   gap: $row-gap;
-  width: $tile;
+  justify-items: center;
+  /* A tier is a tile wide, and grows when the rail has room to spare: an event's six
+     rungs then spread across the whole panel with the rung line running between them,
+     where the pass's thirty overflow the rail and the growth has nothing to share out.
+     Six tiles huddled at the left of a 1,300px panel was the negative space the pass
+     exists to remove. */
+  flex: 1 0 auto;
+  min-width: $tile;
   padding: 0;
 
   &[data-next='true'] .rung {
@@ -84,6 +92,10 @@ $row-gap: $space-2;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
+  /* The rung spans its column whatever the column grew to (the tiles under it stay
+     centred): the line under the rungs is then one line along the ladder, and the lit
+     rung is as wide as the tile it stands over. */
+  justify-self: stretch;
   gap: 2px;
   padding-bottom: 4px;
   border: 1px solid transparent;
@@ -119,7 +131,7 @@ $row-gap: $space-2;
   background: $panel-inset;
   overflow: hidden;
 
-  &[data-track='premium'] {
+  &[data-row='premium'] {
     border-color: rgba(160, 107, 216, 0.4);
     background: rgba(28, 18, 36, 0.7);
   }
@@ -239,7 +251,7 @@ $row-gap: $space-2;
 
   .labels {
     grid-template-rows: auto;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--mv-ladder-rows, 1), minmax(0, 1fr));
     padding: 0;
   }
 

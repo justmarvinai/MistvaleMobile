@@ -9,7 +9,7 @@ import { useContentStore } from '../../state/contentStore';
 import { useCampaignStore } from '../../state/campaignStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { useProgressStore } from '../../state/progressStore';
-import { regionGlyph } from '../../ui/regionArt';
+import { regionArt, regionGlyph } from '../../ui/regionArt';
 import { TeamSelect } from '../Battle/TeamSelect';
 import { ChapterStages } from './ChapterStages';
 import { STARS_PER_CHAPTER_DIFFICULTY } from './chapterView';
@@ -80,10 +80,27 @@ function mapPosition(index: number): { x: number; y: number } {
     x: 12 + column * (76 / (MAP_COLUMNS - 1)),
     // The first row starts below the region title rather than beside it. With the map's
     // frame gone the title floats on the same ground the markers do, and at 1440 the
-    // progress bar and chapter one's disc were touching. The rows are closer together to
-    // pay for it, which also uses the foot of the pane that was standing empty.
-    y: 20 + row * 28 + (index % 3) * 3,
+    // progress bar and chapter one's disc were touching. Three rows at 32% apart use the
+    // whole pane (C44) — the bottom third used to stand empty — and a 72px marker with
+    // its three lines of label is about 140px tall, which fits between rows at every
+    // window the game is played on.
+    y: 18 + row * 32 + (index % 3) * 3,
   };
+}
+
+/**
+ * Writes each marker's painting onto the library's own node (C44).
+ *
+ * `WorldMap` draws a glyph mask in a disc and has no notion of a picture, so the region's
+ * painting goes on as a custom property the screen's stylesheet reads, after the map is
+ * built. The node carries the chapter key as `data-id`, so the lookup is by key rather
+ * than by order.
+ */
+function paintMarkers(root: HTMLElement, artByKey: ReadonlyMap<string, string>): void {
+  for (const node of Array.from(root.querySelectorAll<HTMLElement>('.fui-map__node[data-id]'))) {
+    const art = artByKey.get(node.dataset.id ?? '');
+    if (art) node.style.setProperty('--mv-node-art', `var(--fui-img-${art})`);
+  }
 }
 
 export function CampaignScreen(): JSX.Element {
@@ -189,6 +206,22 @@ export function CampaignScreen(): JSX.Element {
       }),
     [chapters, stagesByChapter, standings, current],
   );
+
+  /**
+   * The painting on each marker, by chapter key (C44). Two chapters in one region get two
+   * paintings, in chapter order, so the road reads as twelve places rather than six
+   * repeated twice.
+   */
+  const artByKey = useMemo(() => {
+    const seen = new Map<string, number>();
+    return new Map(
+      chapters.map((entry) => {
+        const ordinal = seen.get(entry.region) ?? 0;
+        seen.set(entry.region, ordinal + 1);
+        return [entry.key, regionArt(entry.region, ordinal)] as const;
+      }),
+    );
+  }, [chapters]);
 
   /**
    * A digest of everything drawn on the map.
@@ -344,6 +377,10 @@ export function CampaignScreen(): JSX.Element {
                 interactive: true,
               }}
               on={{ 'map:enter': (key: string) => openChapter(key) }}
+              // The bridge calls `apply` on mount, and the map is remounted whenever a
+              // marker would change (see `mapKey`) — so this runs exactly when there are
+              // fresh nodes to paint.
+              apply={(map) => paintMarkers(map.el, artByKey)}
             />
           </div>
         )}

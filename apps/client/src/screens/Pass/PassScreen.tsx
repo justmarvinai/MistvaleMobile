@@ -58,6 +58,13 @@ export function PassScreen(): JSX.Element {
         tagline="A season of the reclamation. Play, and the track walks with you."
         actions={
           <ScreenInfo title="The Vale Pass">
+            {/* The season's own description first — it was a paragraph above the ladder,
+                and the ladder is the thing (C44). */}
+            {pass?.passes.map((season) => (
+              <p key={season.passKey}>
+                <strong>{season.name}.</strong> {season.description}
+              </p>
+            ))}
             <p>
               Everything you do in the vale earns favour, and favour walks the track. There is a{' '}
               <strong>ceiling on each day</strong> — a season is thirty tiers over a month, not a
@@ -141,8 +148,6 @@ function SeasonPanel({ season, today }: { season: ValePassStanding; today: strin
         )
       }
     >
-      <p className={styles.blurb}>{season.description}</p>
-
       {/* The standing strip: where you are, what today still allows, and what is next. The
           ceiling is stated whether or not it has been hit — a limit a player only meets by
           running into it is one they read as the game having stopped paying. */}

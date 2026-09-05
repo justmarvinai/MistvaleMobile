@@ -187,16 +187,19 @@ export function QuestsScreen(): JSX.Element {
 
         {chest && (
           <Panel variant="hero" className={styles.chest}>
+            {/* One row (C44): what it is and where you are on the left, what it pays in
+                the middle, the meter and the button on the right. It was a 170px panel
+                with three stacked lines in one corner of it. */}
             <div className={styles.chestBody}>
-              <div>
+              <div className={styles.chestWords}>
                 <h3 className={styles.chestTitle}>
                   {tab === 'daily' ? 'The day’s chest' : 'Completion chest'}
                 </h3>
                 <p className={styles.chestNote}>
                   Claim all {chest.required} to open it — {chest.claimedQuests} so far.
                 </p>
-                <Rewards rewards={chest.rewards} signed />
               </div>
+              <Rewards rewards={chest.rewards} signed />
               <div className={styles.chestAction}>
                 <Meter value={chest.claimedQuests} of={chest.required} />
                 <Button

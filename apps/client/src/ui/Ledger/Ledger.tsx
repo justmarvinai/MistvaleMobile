@@ -4,6 +4,7 @@ import { useFui, useFuiAttrs } from '@/fui/react';
 import { describeRewards, useRewardName } from '../Rewards/Rewards';
 import { rewardArt } from '../Rewards/art';
 import { goalGlyph } from '../goalArt';
+import styles from './Ledger.module.scss';
 
 /**
  * Every claimable objective in the game, drawn the same way.
@@ -134,7 +135,9 @@ export function Ledger({
       ...(title ? { title } : {}),
       ...(maxHeight != null ? { maxHeight } : {}),
       ...(emptyText ? { emptyText } : {}),
-      ...(className ? { class: className } : {}),
+      // The library merges `class` onto its own root, which is where the desktop sizes
+      // in Ledger.module.scss are scoped.
+      class: [styles.ledger, className].filter(Boolean).join(' '),
     },
     onClaim ? { 'achievement:claim': (id: string) => onClaim(id) } : undefined,
     // The list is the one component here with a wholesale setter, so progress arriving a

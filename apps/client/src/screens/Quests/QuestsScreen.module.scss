@@ -70,32 +70,41 @@
   flex: 0 0 auto;
 }
 
+/* One row: the words, the spoils, the meter and the button (C44). */
 .chestBody {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: $space-4;
-  flex-wrap: wrap;
+  gap: $space-5;
+}
+
+@media (max-width: 900px) {
+  .chestBody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.chestWords {
+  min-width: 0;
 }
 
 .chestTitle {
   margin: 0 0 2px;
   color: $gold;
   font-family: $font-display;
-  font-size: 1rem;
+  font-size: 18px;
 }
 
 .chestNote {
-  margin: 0 0 $space-2;
+  margin: 0;
   color: $parchment-dim;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 .chestAction {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: $space-2;
+  align-items: center;
+  gap: $space-4;
 }
 
 .meter {
@@ -104,8 +113,8 @@
 }
 
 .notch {
-  width: 10px;
-  height: 14px;
+  width: 12px;
+  height: 18px;
   background: $panel-inset;
   border: 1px solid $edge;
 }

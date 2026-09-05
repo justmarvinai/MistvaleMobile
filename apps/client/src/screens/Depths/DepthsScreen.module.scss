@@ -36,15 +36,10 @@
   margin: 0;
   color: $parchment;
   font-family: $font-display;
-  font-size: 1.05rem;
+  font-size: 20px;
   font-weight: normal;
-}
-
-.groupBlurb {
-  margin: 0;
-  color: $muted;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .keeps {
@@ -73,8 +68,10 @@
 /* The week strip reads as a small calendar, not as a full-width table: seven short rows
    stretched across a 1400px window put four inches of nothing between a day and its
    springs. */
+/* Full width since C44: the week is a strip across the section rather than a table down
+   its left. */
 .week {
-  max-width: 34rem;
+  width: 100%;
 }
 
 .notice {

@@ -1,9 +1,15 @@
 @use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
 
+/* The week as a strip of seven, with the springs on it (C44). It was a seven-row table
+   down the left of the section — a list, read top to bottom, beside cards that scrolled
+   off the frame. A week is a row: the days run left to right, today is lit, and the springs
+   open on each are chips under the day's name, so "when do I come back for Verdant" is a
+   glance along one line. */
 .dial {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: $space-2;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -11,24 +17,26 @@
 
 .day {
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: center;
   gap: $space-2;
-  padding: 3px $space-2;
+  min-height: 6.5rem;
+  padding: $space-3 $space-2;
+  border: 1px solid $edge;
   background: $panel-inset;
 
   &[data-today='true'] {
+    border-color: $accent;
     background: color-mix(in srgb, $accent 14%, $panel-inset);
-    box-shadow: inset 2px 0 0 $accent;
+    box-shadow: 0 0 18px -6px $accent-glow;
   }
 }
 
 .name {
-  flex: none;
-  width: 2.2rem;
-  color: $muted;
-  font-family: $font-mono;
-  font-size: 0.78rem;
+  @include display-text(16px);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: $muted;
 
   .day[data-today='true'] & {
     color: $accent-soft;
@@ -38,11 +46,16 @@
 .springs {
   display: flex;
   flex-wrap: wrap;
-  gap: $space-2;
+  justify-content: center;
+  gap: 4px;
   min-width: 0;
 }
 
 .spring {
+  padding: 3px 8px;
+  border: 1px solid $edge-bright;
+  background: rgba(12, 10, 9, 0.6);
   color: $parchment-dim;
-  font-size: 0.84rem;
+  font-size: 13.5px;
+  white-space: nowrap;
 }

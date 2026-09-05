@@ -31,7 +31,7 @@
    press: where they are, who is at the end of it, and what the next chest costs. */
 .body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem);
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
   align-items: start;
   gap: $space-4;
   min-height: 0;
@@ -80,11 +80,14 @@
   @include interactive;
 
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  /* The number, the foes, the words, the way in (C44): a row is 6rem tall now rather than
+     a line of 13px text, and the extra column is the first wave's faces. */
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: $space-4;
+  gap: $space-5;
   width: 100%;
-  padding: $space-3 $space-4;
+  min-height: 6rem;
+  padding: $space-3 $space-5;
   border: 1px solid $edge;
   background: linear-gradient(180deg, rgba(34, 29, 24, 0.86), rgba(18, 16, 13, 0.86));
   color: $parchment;
@@ -119,18 +122,37 @@
 .disc {
   display: grid;
   place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 3.4rem;
+  height: 3.4rem;
   border: 1px solid $edge-bright;
   background: rgba(12, 10, 9, 0.75);
   font-family: $font-mono;
-  font-size: 15px;
+  font-size: 20px;
   color: $accent-soft;
 }
 
+/* The first wave, as faces — overlapped a little, the way a party stands. */
+.foes {
+  display: flex;
+  align-items: center;
+}
+
+.foe {
+  border: 1px solid $edge-bright;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+
+  & + & {
+    margin-left: -10px;
+  }
+}
+
+.row[data-locked='true'] .foe {
+  filter: grayscale(0.9) brightness(0.55);
+}
+
 .bossGlyph {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.8rem;
+  height: 1.8rem;
   background: currentcolor;
   mask: var(--mv-glyph) center / contain no-repeat;
   -webkit-mask: var(--mv-glyph) center / contain no-repeat;
@@ -151,7 +173,7 @@
 }
 
 .label {
-  @include display-text(15px);
+  @include display-text(20px);
   letter-spacing: 0.06em;
 }
 
@@ -166,8 +188,8 @@
    a library component mounts, and because a star that changes after a fight would need the
    component remounted to notice. Same asset, same look, no instance. */
 .star {
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   background: var(--fui-img-icon-star) center / contain no-repeat;
   /* A shade brighter than the library's own unlit star: at 15px on a dark row its 0.34
      read as three specks of dust rather than as an empty track. */
@@ -195,7 +217,7 @@
   align-items: center;
   gap: $space-3;
   flex-wrap: wrap;
-  font-size: 13px;
+  font-size: 14.5px;
   color: $muted;
 
   /* Three facts in a row need a mark between them, or they read as one sentence with the
@@ -230,9 +252,9 @@
 .cost {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-family: $font-mono;
-  font-size: 13px;
+  font-size: 15px;
   color: $parchment-dim;
 
   &[data-short='true'] {
@@ -240,23 +262,32 @@
   }
 }
 
+/* A plate rather than a bordered word: the row is the button, and this is the part of it
+   that says so. */
 .go {
   @include label-text;
-  padding: 5px $space-4;
+  padding: 10px $space-5;
   border: 1px solid $accent-dim;
-  color: $accent;
+  background: rgba(194, 118, 74, 0.16);
+  color: $accent-soft;
+  font-size: 13.5px;
+  letter-spacing: 0.12em;
   white-space: nowrap;
+  transition:
+    background-color $duration-fast $ease-out,
+    color $duration-fast $ease-out;
 }
 
 .row[data-locked='true'] .go {
   border-color: $edge;
+  background: transparent;
   color: $muted-deep;
 }
 
 .row:hover:not(:disabled) .go {
   border-color: $accent;
-  color: $accent-soft;
-  background: rgba(194, 118, 74, 0.12);
+  background: $accent;
+  color: $ground-deep;
 }
 
 /* ── The info popover ─────────────────────────────────────────────────────── */
