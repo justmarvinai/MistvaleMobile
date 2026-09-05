@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   bestRarity,
+  dealOffset,
   beatFor,
   deservesHerald,
   heraldIndex,
@@ -107,5 +108,25 @@ describe('the small rules', () => {
     expect(beatFor('legendary')).toBeGreaterThan(beatFor('epic'));
     expect(beatFor('epic')).toBeGreaterThan(beatFor('common'));
     expect(beatFor('nonsense')).toBe(beatFor('rare'));
+  });
+});
+
+describe('dealOffset', () => {
+  it('lays a ×10 out five across and two down, centred on the gate', () => {
+    // The corners travel furthest and the middle of each row travels straight up or down.
+    expect(dealOffset(0, 10)).toEqual({ col: -2, row: -0.5 });
+    expect(dealOffset(2, 10)).toEqual({ col: 0, row: -0.5 });
+    expect(dealOffset(4, 10)).toEqual({ col: 2, row: -0.5 });
+    expect(dealOffset(7, 10)).toEqual({ col: 0, row: 0.5 });
+    expect(dealOffset(9, 10)).toEqual({ col: 2, row: 0.5 });
+  });
+
+  it('does not move a hand of one', () => {
+    expect(dealOffset(0, 1)).toEqual({ col: 0, row: 0 });
+  });
+
+  it('centres a short hand rather than left-aligning it', () => {
+    expect(dealOffset(0, 3)).toEqual({ col: -1, row: 0 });
+    expect(dealOffset(2, 3)).toEqual({ col: 1, row: 0 });
   });
 });

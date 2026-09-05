@@ -8,14 +8,17 @@ import { useContentStore } from '../../state/contentStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { championArt } from '../../ui/championArt';
 import { rarityLabel } from '../../ui/labels';
-import { ChampionIdle } from '../../ui/ChampionIdle/ChampionIdle';
+import { sigilArt } from '../../ui/sigilArt';
+import { tabScenery, wallpaperUrl } from '../../ui/tabScenery';
 import { useSummonStore } from '../../state/summonStore';
 import {
   BURST_MS,
   CHARGE_MS,
+  DEAL_MS,
   HERALD_MS,
   beatFor,
   bestRarity,
+  dealOffset,
   heraldIndex,
   revealOrder,
   teaseLadder,
@@ -25,22 +28,27 @@ import styles from './SummonCinematic.module.scss';
 /**
  * The pull, as a cinematic.
  *
- * Six beats, and each of them exists because the one before it earned it:
+ * Seven beats, and each of them exists because the one before it earned it:
  *
- * 1. **Charge.** The gate winds up the instant the button is pressed — which is also what
- *    the network round trip happens under, so the wait is the show rather than a disabled
- *    button. Motes fall inward, the ring accelerates, the room goes dark.
- * 2. **The climb.** The mist takes a colour, then a better one, then a better one. It goes
- *    to *rare* on every pull however bad, so the wind-up never leaks the answer early
- *    (`drama.ts` — the claim is tested); above rare the climb is the news, and the moment
- *    the whole system is built around is the one where it does not stop at blue.
- * 3. **The break.** A flash in the colour it reached, a shockwave, and the gate collapses.
- * 4. **The cards**, turning one at a time, the best held to last — because a reveal that
- *    opens on the legendary has nothing left to give.
- * 5. **The herald**, for an epic or better: the champion themself, full height and
- *    breathing, in a pillar of light with their name under it, before their card lands.
- * 6. **Again.** The one press a player wants at the end of a pull is the same press, and
- *    it is right here rather than three clicks away.
+ * 1. **Charge.** The room is the Mistgate's own painting, and the camera starts moving
+ *    into the portal the instant the button is pressed — which is also what the network
+ *    round trip happens under, so the wait is the show rather than a disabled button. The
+ *    pool's rune hangs in the gate, the rings accelerate, mist thickens, motes fall inward.
+ * 2. **The climb.** The mist takes a colour, then a better one, then a better one, and the
+ *    whole scene answers each rung — the vignette, the rune's glow, a ring of light thrown
+ *    outward. It always climbs to *rare* however bad the pull (`drama.ts`, tested), so the
+ *    wind-up never leaks the answer early; above rare the climb is the news.
+ * 3. **The break.** A flash in the colour it reached, three shockwaves, the rune shatters
+ *    into shards, and the frame shakes.
+ * 4. **The deal.** The cards are thrown out of the gate face-down to the places they will
+ *    turn in — ten of them in a third of a second, with one whoosh for the whole hand.
+ * 5. **The turn.** One at a time, each with a burst of its own colour behind it, the best
+ *    held to last — because a reveal that opens on the legendary has nothing left to give.
+ * 6. **The herald**, for an epic or better: the champion's card at the size the moment
+ *    deserves, standing in a pillar of light with a wheel of rays behind it and the name
+ *    under it. A legendary gets gold rain across the whole screen as well.
+ * 7. **Again.** The one press a player wants at the end of a pull is the same press, and it
+ *    is right here rather than three clicks away.
  *
  * Everything shown was decided by the server before the first frame. This is choreography,
  * not a lottery running in the browser (CLAUDE.md — the client renders server numbers);
@@ -48,21 +56,30 @@ import styles from './SummonCinematic.module.scss';
  * nothing about what was received.
  *
  * **Not the library's `SummonResult`.** That component runs its own reveal on a fixed
- * stagger, where this one has a per-rarity beat, a wind-up, and a herald. So the
+ * stagger, where this one has a per-rarity beat, a wind-up and a herald. So the
  * choreography is ours and the *cards* are the library's, which is what makes a Legendary
  * here look like a Legendary in the roster: the same `ChampionCard`, the same gold.
+ *
+ * **Geometry, not art.** Every burst, ring, shard and mote here is a gradient or a border on
+ * an element. `assets/` has no effect art and inventing icons is against the brief (C9), so
+ * the drama comes from motion and colour rather than from a texture nobody drew.
  */
 
 type Phase = 'charge' | 'climb' | 'break' | 'cards' | 'herald' | 'done';
 
+/** Card width in the hand, and for the one card of a ×1. The stylesheet agrees. */
+const CARD_PX = 220;
+const SINGLE_PX = 320;
+/** The herald's card. */
+const HERALD_PX = 360;
+
 /**
  * What the pull is worth, as the sentence it deserves.
  *
- * The summary used to read "4 new · 10 summoned" in small grey text under the cards, which
- * is the *receipt* rather than the news. An Epic or a Legendary is the thing that happened
- * and it should be the largest words on the screen; below that the honest headline is how
- * many came out, because a ×10 of commons is a ×10 of commons and dressing it up is the
- * one thing a gacha screen must not do.
+ * An Epic or a Legendary is the thing that happened and it should be the largest words on
+ * the screen; below that the honest headline is how many came out, because a ×10 of
+ * commons is a ×10 of commons and dressing it up is the one thing a gacha screen must not
+ * do.
  */
 function headline(best: string, count: number): string {
   if (best === 'legendary') return 'A Legendary answered';
@@ -72,8 +89,11 @@ function headline(best: string, count: number): string {
 }
 
 export function SummonCinematic({
+  poolKey,
   onAgain,
 }: {
+  /** Which gate is being pulled — its rune is what stands in the portal. */
+  poolKey: string;
   /** Runs the same pull again. The screen owns it, because it also owns the refresh after. */
   onAgain: () => void;
 }): JSX.Element {
@@ -120,10 +140,9 @@ export function SummonCinematic({
   /**
    * Every card turned, however it got that way.
    *
-   * Derived rather than a sixth phase reached by an effect: "the cards are all face up" is
-   * a fact about two numbers we already have, and storing it would mean a render whose only
-   * job is to notice something that was already true. Skip sets the phase directly, so a
-   * player who pressed it and a player who waited land in the same place.
+   * Derived rather than a seventh phase reached by an effect: "the cards are all face up"
+   * is a fact about two numbers we already have. Skip sets the phase directly, so a player
+   * who pressed it and a player who waited land in the same place.
    */
   const finished = phase === 'done' || (phase === 'cards' && ready && revealed >= results.length);
   const stage: Phase = finished ? 'done' : phase;
@@ -135,8 +154,7 @@ export function SummonCinematic({
   // ── The wind-up ────────────────────────────────────────────────────────────
   // A fixed clock that also waits for the answer, so the charge lasts as long as it lasts
   // *or* as long as the server takes, whichever is longer. The pull's latency is spent
-  // inside the animation instead of in front of it — which is most of the reason the gate
-  // no longer has a disabled button and a spinner.
+  // inside the animation instead of in front of it.
   const readyRef = useRef(ready);
   useEffect(() => {
     readyRef.current = ready;
@@ -175,16 +193,26 @@ export function SummonCinematic({
     return () => window.clearTimeout(handle);
   }, [phase]);
 
-  // ── The cards ──────────────────────────────────────────────────────────────
+  // ── The deal and the cards ─────────────────────────────────────────────────
+  // The hand is thrown out of the gate the moment the phase turns to cards, and the first
+  // turn waits for it to land. One whoosh for the whole hand rather than ten.
+  const dealt = useRef(false);
+  useEffect(() => {
+    if (phase !== 'cards' || dealt.current) return;
+    dealt.current = true;
+    if (!calm) playCue(CUE.summonDeal);
+  }, [phase, calm]);
+
   useEffect(() => {
     if (phase !== 'cards' || !ready || finished) return;
     const next = results[order[revealed] as number];
     // The card about to turn, not the one that just did: the pause belongs *before* the
     // good news. An epic or better takes the herald instead of a pause.
     const herald = revealed === heraldAt && !calm;
+    const settle = revealed === 0 && !calm ? DEAL_MS : 0;
     const handle = window.setTimeout(
       () => (herald ? setPhase('herald') : advance()),
-      calm ? 90 : herald ? 260 : beatFor(next?.rarity ?? 'rare'),
+      settle + (calm ? 90 : herald ? 260 : beatFor(next?.rarity ?? 'rare')),
     );
     return () => window.clearTimeout(handle);
   }, [phase, ready, finished, revealed, results, order, heraldAt, advance, calm]);
@@ -210,14 +238,20 @@ export function SummonCinematic({
   const nameOf = (key: string): string => defOf(key)?.name ?? key;
   const artFor = (key: string) => championArt(defOf(key), bundle?.assets);
 
-  /** The sprite folder for the herald, the same lookup the champion sheet does. */
-  const spriteFor = (key: string): string => {
-    const def = defOf(key);
-    return (
-      (bundle?.assets ?? []).find((asset) => asset.key === def?.assetKey)?.basePath ??
-      'enemies/teritorial_lizard'
-    );
-  };
+  /** The library card for one result, at a size. */
+  const cardOptions = (result: (typeof results)[number], size: number) => ({
+    name: nameOf(result.championKey),
+    ...artFor(result.championKey),
+    rarity: result.rarity,
+    size,
+    // A pull arrives at its base rank; what it becomes is the roster's business, and a
+    // level here would be a number nobody asked about at the moment they are looking at
+    // a face.
+    ...(result.champion ? { stars: result.champion.rank, maxStars: 6 } : {}),
+    ...(defOf(result.championKey)?.element ? { affinity: defOf(result.championKey)!.element } : {}),
+    // The ribbon the library already draws for a freshly pulled unit.
+    ...(result.isNew ? { isNew: true } : {}),
+  });
 
   const heraldCard = phase === 'herald' ? results[order[revealed] as number] : undefined;
 
@@ -231,39 +265,87 @@ export function SummonCinematic({
   const againBanner = again ? banners.find((banner) => banner.key === again.poolKey) : undefined;
   const canAgain = Boolean(again && againBanner && againBanner.sigilsHeld >= again.count);
 
+  const room = tabScenery('mistgate').wallpaper;
+  const single = results.length === 1;
+  // Read once: the library sizes a card from a number, so a short window gets a smaller
+  // hand rather than a hand the foot has to be drawn over.
+  const short = useMemo(() => typeof window !== 'undefined' && window.innerHeight < 940, []);
+  const cardPx = single ? (short ? 280 : SINGLE_PX) : short ? 190 : CARD_PX;
+
   return (
     <div
       className={styles.overlay}
-      style={{ '--mv-layer-depth': depth } as CSSProperties}
+      style={{ '--mv-layer-depth': depth, '--mv-card-w': `${cardPx}px` } as CSSProperties}
       data-phase={stage}
       data-tint={tint}
       role="dialog"
       aria-modal="true"
       aria-label="Summon results"
     >
+      {/* The room: the gate's own painting, and the camera moving into it for the whole of
+          the wind-up. The wash over it lifts as the mist takes a colour. */}
+      <div
+        className={styles.room}
+        style={room ? { backgroundImage: `url(${wallpaperUrl(room)})` } : undefined}
+        aria-hidden="true"
+      />
+      <div className={styles.vignette} aria-hidden="true" />
+      <div className={styles.mist} data-layer="a" aria-hidden="true" />
+      <div className={styles.mist} data-layer="b" aria-hidden="true" />
+
       {/* The gate. Present for the whole wind-up and gone the moment it breaks — it is the
           thing the cards come out of, so leaving it behind them would say they had not. */}
       {(phase === 'charge' || phase === 'climb' || phase === 'break') && (
         <div className={styles.gate} aria-hidden="true">
           <span className={styles.halo} />
           <span className={styles.ring} data-ring="outer" />
+          <span className={styles.ring} data-ring="mid" />
           <span className={styles.ring} data-ring="inner" />
           <span className={styles.core} />
-          {/* Twelve motes falling in. Their angle is an inline custom property because
-              twelve near-identical keyframe blocks is what a stylesheet should never be. */}
-          {Array.from({ length: 12 }, (_, index) => (
+          {phase !== 'break' && (
+            <span
+              className={styles.rune}
+              style={{ backgroundImage: `var(--fui-img-${sigilArt(poolKey)})` }}
+            />
+          )}
+          {/* Twenty-four motes falling in, two rings of twelve. Their angle is an inline
+              custom property because twenty-four near-identical keyframe blocks is what a
+              stylesheet should never be. */}
+          {Array.from({ length: 24 }, (_, index) => (
             <span
               key={index}
               className={styles.mote}
+              data-ring={index < 12 ? 'near' : 'far'}
               style={
                 {
-                  '--mv-mote': `${index * 30}deg`,
-                  '--mv-mote-delay': `${index * 70}ms`,
+                  '--mv-mote': `${(index % 12) * 30 + (index < 12 ? 0 : 15)}deg`,
+                  '--mv-mote-delay': `${(index * 70) % 1600}ms`,
                 } as CSSProperties
               }
             />
           ))}
-          {phase === 'break' && <span className={styles.shock} />}
+          {/* One ring of light thrown outward per rung of the climb. Keyed on the rung so
+              each step starts its own. */}
+          {phase === 'climb' && <span key={rung} className={styles.pulse} />}
+          {phase === 'break' && (
+            <>
+              <span className={styles.shock} data-wave="1" />
+              <span className={styles.shock} data-wave="2" />
+              <span className={styles.shock} data-wave="3" />
+              {Array.from({ length: 10 }, (_, index) => (
+                <span
+                  key={index}
+                  className={styles.shard}
+                  style={
+                    {
+                      '--mv-shard': `${index * 36 + 8}deg`,
+                      '--mv-shard-far': `${18 + ((index * 7) % 12)}rem`,
+                    } as CSSProperties
+                  }
+                />
+              ))}
+            </>
+          )}
         </div>
       )}
 
@@ -277,12 +359,34 @@ export function SummonCinematic({
 
       {phase === 'break' && <div className={styles.flash} aria-hidden="true" />}
 
-      {/* The herald: the champion themself, at the size the moment deserves. */}
+      {/* The herald: the champion's card at the size the moment deserves. */}
       {heraldCard && (
         <div className={styles.herald} data-rarity={heraldCard.rarity}>
           <div className={styles.pillar} aria-hidden="true" />
           <div className={styles.rays} aria-hidden="true" />
-          <ChampionIdle art={spriteFor(heraldCard.championKey)} className={styles.heraldArt} />
+          {heraldCard.rarity === 'legendary' && (
+            <div className={styles.rain} aria-hidden="true">
+              {Array.from({ length: 36 }, (_, index) => (
+                <span
+                  key={index}
+                  style={
+                    {
+                      '--mv-drop-x': `${(index * 29) % 100}%`,
+                      '--mv-drop-delay': `${(index * 113) % 1400}ms`,
+                      '--mv-drop-time': `${1600 + ((index * 211) % 900)}ms`,
+                    } as CSSProperties
+                  }
+                />
+              ))}
+            </div>
+          )}
+          <div className={styles.heraldCard}>
+            <Fui
+              of={ChampionCard}
+              options={cardOptions(heraldCard, HERALD_PX)}
+              attrs={{ tabindex: -1 }}
+            />
+          </div>
           <p className={styles.heraldRarity}>{rarityLabel(heraldCard.rarity)}</p>
           <p className={styles.heraldName}>{nameOf(heraldCard.championKey)}</p>
           {heraldCard.isNew && <p className={styles.heraldNew}>New to the Chronicle</p>}
@@ -292,10 +396,13 @@ export function SummonCinematic({
       {(phase === 'cards' || phase === 'done') && (
         <div className={styles.cards} data-count={results.length}>
           {/* Laid out in the order they turn, so the grid fills left to right and the last
-              card of the pull is the one in the corner a player is already watching. */}
+              card of the pull is the one in the corner a player is already watching. Each
+              one is dealt from the centre: its offset from there comes from `dealOffset`,
+              and the stylesheet multiplies it by a card's width. */}
           {order.map((source, position) => {
             const result = results[source] as (typeof results)[number];
             const shown = position < revealed;
+            const offset = dealOffset(position, results.length);
             return (
               <article
                 key={`${result.championKey}-${source}`}
@@ -303,30 +410,25 @@ export function SummonCinematic({
                 data-rarity={shown ? result.rarity : undefined}
                 data-shown={shown}
                 aria-hidden={!shown}
+                style={
+                  {
+                    '--mv-col': offset.col,
+                    '--mv-row': offset.row,
+                    '--mv-deal-delay': `${position * 55}ms`,
+                  } as CSSProperties
+                }
               >
                 {shown ? (
                   <>
+                    <span className={styles.burst} aria-hidden="true" />
                     <Fui
                       of={ChampionCard}
                       className={styles.pull}
-                      options={{
-                        name: nameOf(result.championKey),
-                        ...artFor(result.championKey),
-                        rarity: result.rarity,
-                        // A pull arrives at its base rank; what it becomes is the roster's
-                        // business, and a level here would be a number nobody asked about
-                        // at the moment they are looking at a face.
-                        ...(result.champion ? { stars: result.champion.rank, maxStars: 6 } : {}),
-                        ...(defOf(result.championKey)?.element
-                          ? { affinity: defOf(result.championKey)!.element }
-                          : {}),
-                        // The ribbon the library already draws for a freshly pulled unit.
-                        ...(result.isNew ? { isNew: true } : {}),
-                      }}
+                      options={cardOptions(result, cardPx)}
                       // The card is a `<button>`, because in a roster it opens a champion.
-                      // Here it opens nothing, and ten tab stops that do nothing in front of
-                      // the one button that does is worse than not being able to reach them.
-                      // Out of the tab order, still readable — the card names itself.
+                      // Here it opens nothing, and ten tab stops that do nothing in front
+                      // of the one button that does is worse than not being able to reach
+                      // them. Out of the tab order, still readable — the card names itself.
                       attrs={{ tabindex: -1 }}
                     />
                     {result.fromMercy && <span className={styles.mercy}>mercy</span>}
@@ -337,7 +439,11 @@ export function SummonCinematic({
                     )}
                   </>
                 ) : (
-                  <span className={styles.back} aria-hidden="true" />
+                  <span
+                    className={styles.back}
+                    style={{ backgroundImage: `var(--fui-img-${sigilArt(poolKey)})` }}
+                    aria-hidden="true"
+                  />
                 )}
               </article>
             );

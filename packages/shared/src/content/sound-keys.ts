@@ -49,6 +49,8 @@ export const CUE = {
   summonCharge: 'summon_charge',
   summonTease: 'summon_tease',
   summonBurst: 'summon_burst',
+  /** The cards dealt out of the gate, before the first one turns. */
+  summonDeal: 'summon_deal',
   summonCommon: 'summon_common',
   summonRare: 'summon_rare',
   summonEpic: 'summon_epic',

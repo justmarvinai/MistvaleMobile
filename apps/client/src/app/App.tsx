@@ -133,7 +133,14 @@ export function App() {
   // `dockSlotFor` maps every screen in the game to the tab it lives in, so the Depths and
   // the Mistspire share the Combat painting rather than each needing one.
   const scenery = tabScenery(status === 'authenticated' && player ? dockSlotFor(screen) : null);
-  const backdrop = <PixiStage scene="mist" wallpaper={scenery.wallpaper} smoke={scenery.smoke} />;
+  const backdrop = (
+    <PixiStage
+      scene="mist"
+      wallpaper={scenery.wallpaper}
+      smoke={scenery.smoke}
+      wash={scenery.wash}
+    />
+  );
 
   if (status === 'unknown') {
     return (

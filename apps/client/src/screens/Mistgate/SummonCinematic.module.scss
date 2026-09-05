@@ -2,9 +2,11 @@
 
 /* The pull, as a cinematic.
 
-   Everything here is CSS: the gate, the motes, the shockwave, the rays behind the herald.
-   No canvas, no library, no third graphics context standing up over the shell for four
-   seconds — a summon is a modal, and the battlefield may want its context back.
+   Everything here is CSS: the room, the gate, the motes, the shatter, the deal, the rays
+   behind the herald. No canvas, no library, no third graphics context standing up over the
+   shell for four seconds — a summon is a modal, and the battlefield may want its context
+   back. Every animated property is `transform` or `opacity` (the two blurs are static), so
+   a ×10 on integrated graphics stays at the frame rate the fight runs at.
 
    The scene's colour is one custom property, `--mv-summon`, set by `[data-tint]` on the
    root and read by every layer beneath it. That is what makes the climb work: the mist
@@ -16,20 +18,15 @@
   // A full-screen cinematic, but it joins the same stack as the dialogs (see
   // ui/Modal/stack.ts) so anything opened over it lands on top rather than behind it.
   z-index: calc(#{$z-modal} + var(--mv-layer-depth, 0));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: $space-4;
-  padding: $space-4;
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  /* Opaque, not a scrim. The gate behind it still had its own portal, its own buttons and
-     its own blurb showing through a 0.94 wash — two Mistgates at once, and the wind-up
-     read as a effect layered over a screen rather than as somewhere the game had gone. */
-  background: radial-gradient(circle at 50% 45%, #120e1e 0%, #04050a 78%);
+  background: #050409;
+  isolation: isolate;
 
   --mv-summon: #{$accent};
   --mv-summon-soft: #{rgba(194, 118, 74, 0.35)};
+  --mv-gap: 24px;
 
   &[data-tint='common'] {
     --mv-summon: #{$rarity-common};
@@ -52,36 +49,127 @@
     --mv-summon-soft: #{rgba(255, 196, 92, 0.48)};
   }
 
-  /* The room darkens as the gate winds up, and the tint bleeds into the walls once the
-     mist has a colour to give them. */
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(circle at 50% 45%, var(--mv-summon-soft), transparent 58%);
-    opacity: 0;
-    transition: opacity 420ms $ease-out;
+  /* The break throws the whole frame. */
+  &[data-phase='break'] {
+    @include motion-safe {
+      animation: shake 520ms $ease-out;
+    }
+  }
+}
+
+/* ── The room ─────────────────────────────────────────────────────────────── */
+
+/* The gate's own painting, and the camera moving into its portal for the whole of the
+   wind-up. Larger than the window so the approach never shows an edge. */
+.room {
+  position: absolute;
+  inset: -6%;
+  z-index: 0;
+  background: #0a0812 center / cover no-repeat;
+  transform-origin: 58% 42%;
+  filter: brightness(0.62) saturate(0.85);
+  transition: filter 700ms $ease-out;
+
+  @include motion-safe {
+    animation: approach 7s $ease-out forwards;
   }
 
-  /* Lit from the climb onward, including while the cards are turning and after they have
-     all turned. It used to go out the moment the gate broke, so the payoff — the part a
-     player actually looks at — was ten cards on a flat near-black void, with the colour
-     the whole wind-up had been building to spent on the wind-up. */
-  &[data-phase='climb']::before,
-  &[data-phase='break']::before,
-  &[data-phase='cards']::before,
-  &[data-phase='done']::before {
+  [data-phase='break'] & {
+    @include motion-safe {
+      animation: lurch 620ms $ease-out forwards;
+    }
+  }
+
+  /* Once the cards are out the room steps back — darker and softer, so ten painted faces
+     read over it and the painting is a place rather than a competitor. */
+  [data-phase='cards'] &,
+  [data-phase='herald'] &,
+  [data-phase='done'] & {
+    animation: none;
+    transform: scale(1.06);
+    filter: brightness(0.42) saturate(0.75) blur(3px);
+  }
+}
+
+/* Darkens the edges in the pull's colour. Lit from the climb onward, including while the
+   cards are turning: the colour the whole wind-up built to is what the payoff is seen in. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 42%,
+    transparent 22%,
+    color-mix(in srgb, var(--mv-summon) 18%, rgba(5, 4, 9, 0.7)) 70%,
+    color-mix(in srgb, var(--mv-summon) 30%, #05040a) 100%
+  );
+  opacity: 0.55;
+  transition: opacity 420ms $ease-out;
+
+  [data-phase='climb'] &,
+  [data-phase='break'] &,
+  [data-phase='cards'] &,
+  [data-phase='herald'] &,
+  [data-phase='done'] & {
     opacity: 1;
+  }
+}
+
+/* Two bands of mist over the room, drifting, and thickening as the gate charges. */
+.mist {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 1;
+  width: 90rem;
+  height: 40rem;
+  margin: -20rem 0 0 -45rem;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--mv-summon) 30%, rgba(240, 232, 250, 0.2)) 0%,
+    color-mix(in srgb, var(--mv-summon) 12%, rgba(220, 200, 240, 0.07)) 42%,
+    transparent 70%
+  );
+  filter: blur(22px);
+  opacity: 0.45;
+  transition: opacity 900ms $ease-out;
+
+  @include motion-safe {
+    animation: drift 24s linear infinite;
+  }
+
+  &[data-layer='b'] {
+    width: 64rem;
+    height: 28rem;
+    margin: -14rem 0 0 -32rem;
+    opacity: 0.35;
+    animation-duration: 17s;
+    animation-direction: reverse;
+  }
+
+  [data-phase='climb'] & {
+    opacity: 0.8;
+  }
+  [data-phase='cards'] &,
+  [data-phase='herald'] &,
+  [data-phase='done'] & {
+    opacity: 0.3;
   }
 }
 
 /* ── The gate ─────────────────────────────────────────────────────────────── */
 
 .gate {
-  position: relative;
-  width: 22rem;
-  height: 22rem;
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 2;
+  width: 30rem;
+  height: 30rem;
+  margin: -15rem 0 0 -15rem;
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -89,7 +177,7 @@
 
 .halo {
   position: absolute;
-  inset: -20%;
+  inset: -30%;
   border-radius: 50%;
   background: radial-gradient(circle, var(--mv-summon-soft) 0%, transparent 62%);
 
@@ -98,20 +186,21 @@
   }
 
   [data-phase='climb'] & {
-    animation-duration: 900ms;
+    animation-duration: 800ms;
   }
 }
 
+/* Three broken rings, out of phase, accelerating as the mist climbs. */
 .ring {
   position: absolute;
   border: 2px solid var(--mv-summon);
   border-radius: 50%;
   opacity: 0.75;
+  box-shadow: 0 0 12px var(--mv-summon-soft);
 
   &[data-ring='outer'] {
     inset: 0;
-    /* Broken rather than whole: a closed circle reads as a loading spinner, and a gate is
-       a thing with a gap in it. */
+    border-width: 3px;
     clip-path: polygon(0 0, 100% 0, 100% 64%, 0 64%);
 
     @include motion-safe {
@@ -119,178 +208,306 @@
     }
   }
 
-  &[data-ring='inner'] {
-    inset: 22%;
-    border-width: 1px;
-    clip-path: polygon(0 30%, 100% 30%, 100% 100%, 0 100%);
+  &[data-ring='mid'] {
+    inset: 13%;
+    clip-path: polygon(0 40%, 100% 40%, 100% 100%, 0 100%);
+    opacity: 0.55;
 
     @include motion-safe {
-      animation: spin 3.1s linear infinite reverse;
+      animation: spin 3.8s linear infinite reverse;
+    }
+  }
+
+  &[data-ring='inner'] {
+    inset: 27%;
+    border-width: 1px;
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+
+    @include motion-safe {
+      animation: spin 2.6s linear infinite;
     }
   }
 
   [data-phase='climb'] &[data-ring='outer'] {
     animation-duration: 1.1s;
   }
+  [data-phase='climb'] &[data-ring='mid'] {
+    animation-duration: 800ms;
+  }
   [data-phase='climb'] &[data-ring='inner'] {
-    animation-duration: 700ms;
+    animation-duration: 550ms;
   }
 }
 
 .core {
-  width: 34%;
-  height: 34%;
+  position: absolute;
+  width: 40%;
+  height: 40%;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, var(--mv-summon) 38%, transparent 72%);
-  filter: blur(1px);
+  background: radial-gradient(circle, #fff 0%, var(--mv-summon) 34%, transparent 70%);
+  filter: blur(2px);
+  opacity: 0.85;
 
   @include motion-safe {
     animation: swell 2.4s ease-in-out infinite;
   }
 
   [data-phase='climb'] & {
-    animation-duration: 620ms;
+    animation-duration: 560ms;
   }
 }
 
-/* One falling ember. Twelve of these, each rotated to its own angle by the inline
-   `--mv-mote` and started on its own `--mv-mote-delay`, so the ring feeds the core from
-   every side without twelve near-identical keyframe blocks in this file. */
-.mote {
+/* The pool's rune, standing in the gate. It hovers through the charge and shivers as the
+   mist climbs, and it is gone the frame the gate breaks — the shards are what is left. */
+.rune {
   position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--mv-summon);
-  box-shadow: 0 0 8px var(--mv-summon);
-  opacity: 0;
-  transform: rotate(var(--mv-mote, 0deg)) translateY(-11rem);
+  width: 52%;
+  height: 52%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  /* Screen-blended and masked for the reason the screen's rune is: the tile is a square
+     painting on a near-black ground, and only the lit rune should hang in the gate. */
+  mix-blend-mode: screen;
+  mask-image: radial-gradient(circle at 50% 50%, #000 42%, transparent 70%);
+  filter: drop-shadow(0 0 26px var(--mv-summon-soft));
 
   @include motion-safe {
-    animation: fall-in 1.6s $ease-out infinite;
-    animation-delay: var(--mv-mote-delay, 0ms);
+    animation: hover 3.2s ease-in-out infinite;
   }
 
   [data-phase='climb'] & {
-    animation-duration: 800ms;
+    animation:
+      hover 3.2s ease-in-out infinite,
+      shiver 140ms linear infinite;
   }
 }
 
-/* The break: one ring thrown outward past the edge of the window. */
+/* One falling ember. Two rings of twelve, each rotated to its own angle by the inline
+   `--mv-mote` and started on its own delay, so the gate is fed from every side. */
+.mote {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mv-summon);
+  box-shadow: 0 0 10px var(--mv-summon);
+  opacity: 0;
+  --mv-mote-far: -14rem;
+  transform: rotate(var(--mv-mote, 0deg)) translateY(var(--mv-mote-far));
+
+  &[data-ring='far'] {
+    --mv-mote-far: -19rem;
+    width: 4px;
+    height: 4px;
+  }
+
+  @include motion-safe {
+    animation: fall-in 1.7s $ease-out infinite;
+    animation-delay: var(--mv-mote-delay, 0ms);
+  }
+
+  &[data-ring='far'] {
+    animation-duration: 2.3s;
+  }
+
+  [data-phase='climb'] & {
+    animation-duration: 720ms;
+  }
+  [data-phase='climb'] &[data-ring='far'] {
+    animation-duration: 980ms;
+  }
+}
+
+/* One ring of light thrown outward per rung of the climb. */
+.pulse {
+  position: absolute;
+  inset: 22%;
+  border: 3px solid var(--mv-summon);
+  border-radius: 50%;
+  box-shadow: 0 0 18px var(--mv-summon);
+
+  @include motion-safe {
+    animation: pulse-out 560ms $ease-out forwards;
+  }
+}
+
+/* The break: three rings thrown outward past the edge of the window, a beat apart. */
 .shock {
   position: absolute;
   inset: 30%;
   border: 3px solid var(--mv-summon);
   border-radius: 50%;
+  opacity: 0;
 
   @include motion-safe {
-    animation: shockwave 620ms $ease-out forwards;
+    animation: shockwave 760ms $ease-out forwards;
+  }
+
+  &[data-wave='2'] {
+    animation-delay: 110ms;
+    border-width: 2px;
+  }
+  &[data-wave='3'] {
+    animation-delay: 220ms;
+    border-width: 1px;
+  }
+}
+
+/* What is left of the rune: ten bars of its colour flying outward and going out. */
+.shard {
+  position: absolute;
+  width: 16px;
+  height: 5px;
+  background: linear-gradient(90deg, #fff, var(--mv-summon));
+  box-shadow: 0 0 10px var(--mv-summon);
+  transform: rotate(var(--mv-shard, 0deg)) translateX(0);
+
+  @include motion-safe {
+    animation: shard-fly 640ms $ease-out forwards;
   }
 }
 
 .flash {
   position: absolute;
   inset: 0;
+  z-index: 3;
   pointer-events: none;
-  background: radial-gradient(circle at 50% 45%, #fff 0%, var(--mv-summon) 26%, transparent 68%);
+  background: radial-gradient(circle at 50% 42%, #fff 0%, var(--mv-summon) 24%, transparent 66%);
 
   @include motion-safe {
-    animation: flare 620ms $ease-out forwards;
+    animation: flare 640ms $ease-out forwards;
   }
 }
 
 .whisper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(42% + 17rem);
+  z-index: 2;
   margin: 0;
-  color: $muted;
-  font-size: 0.85rem;
-  letter-spacing: 2px;
+  color: $parchment-dim;
+  font-size: 1.05rem;
+  letter-spacing: 0.24em;
+  text-align: center;
   text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+
+  @include motion-safe {
+    animation: arrive 600ms $ease-out;
+  }
 }
 
 /* ── The herald ───────────────────────────────────────────────────────────── */
 
 .herald {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: $space-1;
+  justify-content: center;
+  gap: $space-2;
+  pointer-events: none;
 
   @include motion-safe {
-    animation: arrive 520ms $ease-out;
+    animation: arrive 480ms $ease-out;
   }
 }
 
 /* A wheel of light behind the champion.
 
    `repeating-conic-gradient`, not `conic-gradient` — a plain one runs its stops once and
-   holds the last colour for the remaining 315°, which drew two lonely beams at twelve
-   o'clock and nothing anywhere else. Repeating gives the whole wheel from one 40° pattern,
-   and the mask fades it out before it reaches the corners of the window. */
+   holds the last colour for the remaining 315°. The mask fades it out before it reaches the
+   corners of the window. Centred with margins rather than `translate`, because `transform`
+   is one property and a keyframe that sets `rotate()` *replaces* a translate. */
 .rays {
   position: absolute;
-  /* Centred with negative margins rather than `translate(-50%, -50%)`.
-     `transform` is one property: a keyframe that sets `rotate()` *replaces* the translate
-     rather than composing with it, and the wheel walked off to the bottom-right the moment
-     it started turning. Margins leave transform entirely to the animation. */
-  top: 42%;
+  top: 46%;
   left: 50%;
-  width: 54rem;
-  height: 54rem;
-  margin: -27rem 0 0 -27rem;
-  pointer-events: none;
+  width: 70rem;
+  height: 70rem;
+  margin: -35rem 0 0 -35rem;
   background: repeating-conic-gradient(
     from 0deg,
-    var(--mv-summon-soft) 0deg 5deg,
-    transparent 5deg 20deg,
-    var(--mv-summon-soft) 20deg 23deg,
-    transparent 23deg 40deg
+    var(--mv-summon-soft) 0deg 4deg,
+    transparent 4deg 18deg,
+    var(--mv-summon-soft) 18deg 21deg,
+    transparent 21deg 36deg
   );
-  mask-image: radial-gradient(circle, transparent 8%, #000 26%, transparent 62%);
+  mask-image: radial-gradient(circle, transparent 8%, #000 24%, transparent 60%);
 
   @include motion-safe {
-    animation: spin 24s linear infinite;
+    animation: spin 26s linear infinite;
   }
 }
 
-/* The pillar the champion is standing in. Behind the rays, so the wheel reads as light
-   coming *off* them rather than as wallpaper. */
 .pillar {
   position: absolute;
-  top: 42%;
+  top: 46%;
   left: 50%;
-  width: 34rem;
-  height: 34rem;
-  margin: -17rem 0 0 -17rem;
-  pointer-events: none;
+  width: 44rem;
+  height: 44rem;
+  margin: -22rem 0 0 -22rem;
   background: radial-gradient(circle, var(--mv-summon-soft) 0%, transparent 58%);
 
   @include motion-safe {
-    animation: breathe 2.8s ease-in-out infinite;
+    animation: breathe 2.6s ease-in-out infinite;
   }
 }
 
-.heraldArt {
+/* Gold rain for a legendary, across the whole screen. */
+.rain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+
+  > span {
+    position: absolute;
+    top: -3rem;
+    left: var(--mv-drop-x, 50%);
+    width: 3px;
+    height: 34px;
+    background: linear-gradient(to bottom, transparent, $gold-soft);
+    box-shadow: 0 0 8px $gold;
+    opacity: 0.85;
+
+    @include motion-safe {
+      animation: rain var(--mv-drop-time, 2s) linear infinite;
+      animation-delay: var(--mv-drop-delay, 0ms);
+    }
+  }
+}
+
+/* The card itself, rising into the light. Its name wraps for the same reason the hand's
+   do: the full name is printed under the card, but "Maruan the St…" on the card above it
+   is a truncation sitting next to the answer, which reads as a fault rather than a choice. */
+.heraldCard {
   position: relative;
-  /* Both dimensions, because `object-fit: contain` scales to the smaller of the two and a
-     stage with no width of its own left a legendary the size of a battlefield sprite. */
-  width: min(36rem, 56vw);
-  height: min(36rem, 54vh);
-  filter: drop-shadow(0 0 40px var(--mv-summon-soft));
+  filter: drop-shadow(0 0 44px var(--mv-summon-soft)) drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7));
 
   @include motion-safe {
-    animation: rise-up 620ms $ease-out;
+    animation: rise-up 720ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+
+  :global(.fui-champ__name) {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+    line-height: 1.1;
   }
 }
 
 .heraldRarity {
   position: relative;
-  margin: 0;
+  margin: $space-3 0 0;
   color: var(--mv-summon);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  letter-spacing: 8px;
-  text-indent: 8px;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
   text-transform: uppercase;
   text-shadow: 0 0 18px var(--mv-summon-soft);
 }
@@ -300,104 +517,163 @@
   margin: 0;
   color: $parchment;
   font-family: $font-display;
-  font-size: 2.6rem;
+  font-size: 3.2rem;
   font-weight: normal;
-  letter-spacing: 2px;
-  text-shadow: 0 0 24px var(--mv-summon-soft);
+  letter-spacing: 0.04em;
+  text-shadow:
+    0 0 28px var(--mv-summon-soft),
+    0 4px 16px rgba(0, 0, 0, 0.9);
 }
 
 .heraldNew {
   position: relative;
   margin: 0;
-  color: $gold;
-  font-size: 0.75rem;
-  letter-spacing: 2px;
+  color: $gold-soft;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 /* ── The cards ────────────────────────────────────────────────────────────── */
 
 .cards {
+  position: relative;
+  z-index: 2;
   display: grid;
-  grid-template-columns: repeat(5, 12rem);
-  gap: $space-3;
+  grid-template-columns: repeat(5, var(--mv-card-w));
+  gap: var(--mv-gap);
+  /* Lifted a little, so the summary underneath has the room it needs. */
+  margin-top: -4rem;
 
   &[data-count='1'] {
-    grid-template-columns: 18rem;
+    grid-template-columns: var(--mv-card-w);
+  }
+
+  /* A hand of fewer than five still lays out in a row. */
+  &[data-count='2'],
+  &[data-count='3'],
+  &[data-count='4'] {
+    grid-template-columns: repeat(auto-fit, var(--mv-card-w));
   }
 }
 
-@media (max-width: 1100px) {
-  .cards {
-    grid-template-columns: repeat(5, 9.5rem);
-    gap: $space-2;
-  }
-}
-
+/* One slot in the hand. Dealt from the centre of the grid: the stylesheet knows a card's
+   width and the gap, the component says which column and row this one is going to. */
 .card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  min-height: 13rem;
-  padding: $space-2;
-  background: $panel;
-  border: 1px solid $edge;
-  border-top-width: 3px;
-  border-top-color: transparent;
+  width: var(--mv-card-w);
+  aspect-ratio: 3 / 4;
+  perspective: 1000px;
 
-  &[data-shown='true'] {
-    @include motion-safe {
-      animation: turn 340ms $ease-out;
-    }
+  @include motion-safe {
+    animation: deal 620ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    animation-delay: var(--mv-deal-delay, 0ms);
   }
 
   &[data-rarity='common'] {
-    border-top-color: $rarity-common;
+    --mv-card-tint: #{$rarity-common};
   }
   &[data-rarity='uncommon'] {
-    border-top-color: $rarity-uncommon;
+    --mv-card-tint: #{$rarity-uncommon};
   }
   &[data-rarity='rare'] {
-    border-top-color: $rarity-rare;
-    box-shadow: 0 0 14px rgba(92, 156, 232, 0.3);
+    --mv-card-tint: #{$rarity-rare};
   }
   &[data-rarity='epic'] {
-    border-top-color: $rarity-epic;
-    box-shadow: 0 0 22px rgba(160, 110, 220, 0.45);
+    --mv-card-tint: #{$rarity-epic};
   }
   &[data-rarity='legendary'] {
-    border-top-color: $rarity-legendary;
-    box-shadow: 0 0 34px rgba(255, 196, 92, 0.55);
+    --mv-card-tint: #{$rarity-legendary};
   }
 }
 
-/* The face-down card, still hiding something. It breathes so the wait reads as a wait
-   rather than as a grid that has finished drawing. */
+/* The face-down card, still hiding something: the gate's rune on a dark plate, breathing
+   so the wait reads as a wait rather than as a grid that has finished drawing. */
 .back {
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(circle at 50% 40%, rgba(194, 118, 74, 0.16), transparent 60%),
-    repeating-linear-gradient(45deg, $panel-inset 0 6px, $ground 6px 12px);
-  opacity: 0.75;
+  position: absolute;
+  inset: 0;
+  border: 2px solid color-mix(in srgb, var(--mv-summon) 55%, transparent);
+  border-radius: calc(var(--mv-card-w) * 0.05);
+  background-color: #0b0910;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 46% auto;
+  background-blend-mode: screen;
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.8),
+    0 0 18px -6px var(--mv-summon-soft);
+  opacity: 0.9;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 50% 50%, var(--mv-summon-soft), transparent 62%),
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0 6px, transparent 6px 12px);
+  }
 
   @include motion-safe {
     animation: breathe 2.6s ease-in-out infinite;
   }
 }
 
+/* The burst behind a card as it turns, in its own colour. */
+.burst {
+  position: absolute;
+  inset: -22%;
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, var(--mv-card-tint, #{$accent}) 0%, transparent 58%);
+  opacity: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 22%;
+    border: 3px solid var(--mv-card-tint, #{$accent});
+    border-radius: 50%;
+    opacity: 0;
+
+    @include motion-safe {
+      animation: pulse-out 640ms $ease-out forwards;
+    }
+  }
+
+  @include motion-safe {
+    animation: burst-out 720ms $ease-out forwards;
+  }
+}
+
 /* The library's card fills the face; the two Mistvale-only marks sit under it. */
 .pull {
+  position: relative;
+  z-index: 1;
   width: 100%;
+  transform-style: preserve-3d;
+
+  @include motion-safe {
+    animation: turn 460ms $ease-out both;
+  }
+
+  [data-rarity='rare'] & {
+    filter: drop-shadow(0 0 14px rgba(92, 156, 232, 0.45));
+  }
+  [data-rarity='epic'] & {
+    filter: drop-shadow(0 0 22px rgba(160, 110, 220, 0.6));
+  }
+  [data-rarity='legendary'] & {
+    filter: drop-shadow(0 0 34px rgba(255, 196, 92, 0.7));
+  }
 
   /* The one place in the game where a champion's name is the *news*, so it wraps instead
      of truncating. The library clamps it to one line with an ellipsis, which is right in a
-     roster — the card is a way in to a sheet, and the sheet says the name in full — and
-     wrong here, where the card is the whole answer and half the roster came back as
-     "Sskarn Broodli…". The block is anchored to the card's bottom edge, so a second line
-     grows up into the art rather than out of the frame. */
+     roster — the card is a way in to a sheet — and wrong here, where the card is the whole
+     answer. The block is anchored to the card's bottom edge, so a second line grows up into
+     the art rather than out of the frame. */
   :global(.fui-champ__name) {
     overflow: visible;
     white-space: normal;
@@ -406,17 +682,35 @@
   }
 }
 
+.mercy,
+.full {
+  position: absolute;
+  left: 50%;
+  bottom: -1.4rem;
+  z-index: 2;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .mercy {
-  color: $accent;
-  font-size: 0.65rem;
+  color: $accent-soft;
 }
 
 .full {
   color: $warning;
-  font-size: 0.65rem;
 }
 
+/* ── The foot ─────────────────────────────────────────────────────────────── */
+
 .controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3rem;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -429,8 +723,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   text-align: center;
+
+  @include motion-safe {
+    animation: rise-up 520ms $ease-out both;
+  }
 }
 
 /* What happened, at the size it happened. */
@@ -438,28 +736,28 @@
   margin: 0;
   color: $parchment;
   font-family: $font-display;
-  font-size: 1.6rem;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  font-size: 2.2rem;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
 
   &[data-rarity='rare'] {
     color: $rarity-rare;
   }
   &[data-rarity='epic'] {
     color: $rarity-epic;
-    text-shadow: 0 0 22px rgba(160, 110, 220, 0.55);
+    text-shadow: 0 0 26px rgba(160, 110, 220, 0.6);
   }
   &[data-rarity='legendary'] {
     color: $rarity-legendary;
-    text-shadow: 0 0 26px rgba(255, 196, 92, 0.6);
+    text-shadow: 0 0 30px rgba(255, 196, 92, 0.65);
   }
 }
 
 /* The receipt, underneath where a receipt belongs. */
 .tally {
   margin: 0;
-  color: $muted;
-  font-size: 0.82rem;
+  color: $parchment-dim;
+  font-size: 0.95rem;
 }
 
 .buttons {
@@ -471,11 +769,41 @@
 /* Stands where the Again button would be, saying which of the two reasons it is not
    there. A button that can never be pressed reads as a fault in the game. */
 .spent {
-  color: $muted-deep;
-  font-size: 0.78rem;
+  color: $muted;
+  font-size: 0.85rem;
 }
 
 /* ── The motion ───────────────────────────────────────────────────────────── */
+
+@keyframes approach {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.22);
+  }
+}
+
+@keyframes lurch {
+  from {
+    transform: scale(1.18);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  to {
+    transform: rotate(360deg) scale(1);
+  }
+}
 
 @keyframes spin {
   to {
@@ -507,17 +835,50 @@
   }
 }
 
+@keyframes hover {
+  0%,
+  100% {
+    transform: translateY(0) scale(0.98);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.02);
+  }
+}
+
+@keyframes shiver {
+  0% {
+    rotate: -1.5deg;
+  }
+  50% {
+    rotate: 1.5deg;
+  }
+  100% {
+    rotate: -1.5deg;
+  }
+}
+
 @keyframes fall-in {
   0% {
     opacity: 0;
-    transform: rotate(var(--mv-mote, 0deg)) translateY(-11rem) scale(0.6);
+    transform: rotate(var(--mv-mote, 0deg)) translateY(var(--mv-mote-far)) scale(0.6);
   }
   25% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: rotate(var(--mv-mote, 0deg)) translateY(-2rem) scale(1.4);
+    transform: rotate(var(--mv-mote, 0deg)) translateY(-1.5rem) scale(1.5);
+  }
+}
+
+@keyframes pulse-out {
+  0% {
+    opacity: 1;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.8);
   }
 }
 
@@ -528,7 +889,18 @@
   }
   100% {
     opacity: 0;
-    transform: scale(6);
+    transform: scale(8);
+  }
+}
+
+@keyframes shard-fly {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--mv-shard, 0deg)) translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--mv-shard, 0deg)) translateX(var(--mv-shard-far, 20rem)) scale(0.2);
   }
 }
 
@@ -536,11 +908,50 @@
   0% {
     opacity: 0;
   }
-  18% {
+  16% {
     opacity: 1;
   }
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  15% {
+    transform: translate(-7px, 4px);
+  }
+  30% {
+    transform: translate(6px, -5px);
+  }
+  45% {
+    transform: translate(-5px, -3px);
+  }
+  60% {
+    transform: translate(4px, 4px);
+  }
+  75% {
+    transform: translate(-2px, 2px);
+  }
+}
+
+@keyframes deal {
+  0% {
+    opacity: 0;
+    transform: translate(
+        calc(var(--mv-col, 0) * -1 * (var(--mv-card-w) + var(--mv-gap))),
+        calc(var(--mv-row, 0) * -1 * (var(--mv-card-w) * 4 / 3 + var(--mv-gap)))
+      )
+      scale(0.16) rotate(-18deg);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
   }
 }
 
@@ -555,6 +966,17 @@
   }
 }
 
+@keyframes burst-out {
+  0% {
+    opacity: 1;
+    transform: scale(0.75);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
 @keyframes arrive {
   from {
     opacity: 0;
@@ -564,6 +986,28 @@
 @keyframes rise-up {
   from {
     opacity: 0;
-    transform: translateY(2.5rem) scale(0.94);
+    transform: translateY(3rem) scale(0.92);
+  }
+}
+
+@keyframes rain {
+  to {
+    transform: translateY(115vh);
+  }
+}
+
+/* A short window: smaller hand, the foot tucked in. The component picks the card size
+   from the window as well, because the library scales a card from its `size` option. */
+@media (max-height: 940px) {
+  .cards {
+    margin-top: -2.5rem;
+  }
+
+  .controls {
+    bottom: 1.5rem;
+  }
+
+  .heraldName {
+    font-size: 2.4rem;
   }
 }

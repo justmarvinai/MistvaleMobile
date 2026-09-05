@@ -401,6 +401,24 @@ export const SOUND_CUES: SoundCueDef[] = [
     },
     0,
   ),
+  // The deal. A rising whoosh of noise for ten cards thrown out of the gate at once — one
+  // sound for the whole hand rather than ten, because the cards land inside a third of a
+  // second and ten cues that close together are one cue with a stutter.
+  cue(
+    'summon_deal',
+    336,
+    'sfx',
+    {
+      source: 'noise',
+      startHz: 240,
+      endHz: 2600,
+      attack: 0.05,
+      decay: 0.55,
+      gain: 0.2,
+      filterHz: 4200,
+    },
+    0,
+  ),
   cue(
     'summon_common',
     340,

@@ -1,0 +1,89 @@
+# UI/UX audit — 2026-09-05
+
+A read of every screen against a running box at 1920×1080 (and the Haven and roster at
+1440×900), on an account with a filled roster, a vault, currencies, sigils, a fought stage and
+claimable errands — the state a player is actually in rather than the empty state a fresh
+account gives a screenshot. The owner's brief for the pass (2026-09-05): *too much text, too
+small text, too much information, frames that do not look good, an interface that feels
+outdated rather than like a modern fantasy RPG* — and above all **negative space**: screens
+that leave most of a desktop display empty and make the game feel thin.
+
+Findings are ranked by how much they cost the player, not by how hard they are to fix. Each
+names the screen, what is wrong, and the fix — **✔** where it has shipped, **○** while it is
+still owed, so this table is the plan as well as the record. The screenshots the audit was made
+from are not committed (49 PNGs at 1920×1080, taken by a throwaway browser walk that is not
+kept, since a screenshot walk is not a test); the walk is a developed account pressing every
+card in every hub, and repeating it is an afternoon rather than a tool.
+
+## The systemic cause
+
+Most of what follows has one root: **the game is laid out and typeset for a phone and played on
+a desktop.** The library it is dressed in (FantasyUIs) ships phone defaults — 10–12px labels,
+17px coins, 30px buttons, 108–150px cards — and a great deal of Mistvale's own chrome inherited
+those numbers. On a 1920px display everything reads as small, the small things leave gaps, and
+the gaps read as emptiness. The fixes below are therefore of two kinds: **scale** (type, targets,
+cards) and **composition** (what a screen does with the room it has).
+
+## CRITICAL
+
+| # | Screen | Problem | Fix (✔ shipped · ○ owed) |
+|---|---|---|---|
+| C1 | **Mistgate** | The gate is a flat opaque panel covering the painting, with a 180px rune in the middle of 1,460×780px of nothing. The summon cinematic is a radial glow, two thin rings and twelve dots in a black void; the break is a flash; the cards turn at 150px in the same void; an epic's herald is a sprite that falls back to the enemy lizard. No build-up, no anticipation, no place. | ✔ Rebuilt: the painting is the gate (no panel), the rail stays, controls sit on a plinth strip, and the cinematic is a six-beat sequence — camera into the portal, mist, a rarity climb the whole scene answers to, a shatter, cards dealt from the gate at 220px, a hero card for an epic or better, gold rain for a legendary. |
+| C2 | **Haven** | Half the screen is empty: a 120px band above the rail and 110px below, boards 220×430 on a 1920px display, blurbs clamped and cut mid-sentence, 10px ENTER buttons, and a caps-lock instruction telling the player to drag. | ○ Boards fill the pane's height, blurbs are whole, type and targets scaled, the hint is gone (the arrows and the fade are the affordance). |
+| C3 | **Battle** | The field below the horizon is a flat near-black plane — no ground, no light, no depth — so the champions float on a stage and the bottom 60% of the fight is dark. | ○ The floor is lit: a ground gradient with a cast of light under the formation, a horizon haze, and the painting's tone carried down into the floor. |
+| C4 | **Every screen** | Phone-scale type: 10–12px labels, 11.5px blurbs, 9px names on cards, 16px currency figures, 13px table numbers. It is the single biggest reason the interface reads as dated. | ○ The desktop type scale: body 15→16px, labels 11→12.5px, blurbs 13–14px, card names scaled with the card, and the library's phone numbers overridden where Mistvale's own screens draw them. |
+
+## VERY HIGH
+
+| # | Screen | Problem | Fix (✔ shipped · ○ owed) |
+|---|---|---|---|
+| V1 | **Dock** | Six entries spread edge to edge across 1920px with 30px glyphs, a permanent `1 2 3 4 5 6` hotkey digit in every corner, and a 2px underline as the whole active state. | ○ A centred cluster of fixed-width tabs, 36px glyphs, 16px labels, a lit plate under the active tab; the digits are gone from view (the keys still work, the tooltip says so). |
+| V2 | **Team chooser (Lineup)** | A 1,680px dialog laid out like a phone inventory: 108px roster cards with 9px names, four dashed empty rectangles for the slots, enemy waves as 60px generic hood icons. | ○ Slots are painted sockets at 190px, roster cards 128px, enemy tiles carry the level and a real-size portrait, the summary line is a strip. |
+| V3 | **Vale Pass** | Two tracks of thirty 36px tiles: reward labels overlap each other and the tier numbers are 9px — the screen is unreadable. | ○ Each track is a horizontal rail of 88px tiles with the tier under it, the current tier centred and lit. |
+| V4 | **Starter choice** | The first decision in the game is three ~60px sprites in plain dark boxes. | ○ Three hero panels with the champion large, element and role as painted badges, the rarity frame, and a lit selection. |
+| V5 | **Results** | The victory sits in a black void: a small spoils strip, one 200px champion card, four buttons and 600px of nothing. | ○ The painting shows through a wash, the stars and headline are large, spoils and champion cards are one composed strip at desktop size. |
+| V6 | **Roster** | The most-used screen is the most cramped: 108px rail cards, a 100px idle in a 300px box, a 12px mono stat table, 80px relic sockets. | ○ Rail cards 128px, the idle fills its box, the stat table at 14px, sockets 104px with the set's colour on the frame. |
+| V7 | **Top bar** | 16px currency figures on 26px coins, 38px tool buttons, an "A" initial in a box where the portrait goes. | ○ Coins 30px, figures 18px, buttons 44px; the empty portrait draws the faction crest rather than an initial. |
+
+## HIGH
+
+| # | Screen | Problem | Fix (✔ shipped · ○ owed) |
+|---|---|---|---|
+| H1 | **Campaign map** | Twelve identical 52px grey discs on faint lines with the bottom third of the map empty; no chapter art, no progress on a node. | ○ Nodes 72px with their region's art, star progress under each, the current one lit; the map fills the pane. |
+| H2 | **Campaign chapter** | Seven thin rows across 1,500px, each carrying 12px text and a 60px button, ending at 60% of the frame. | ○ Rows are 96px with the stage's enemies as tiles, larger stars, a real button; the brief and chests column is sized to the rows. |
+| H3 | **Single-panel screens** — Sunken Stair, Wurm Wakes, Valewurm, Expeditions, Bazaar, Trials | One panel in the middle of the frame and nothing else: a 1,300px-wide GO DOWN button under a two-line lore paragraph; a Valewurm panel holding one sentence; three expedition cards over 600px of nothing; four Bazaar stalls with 90px art; a fourth trial orphaned on its own row. | ○ Each composed for the frame: hero art where the mode has it (the Wurm, the Stair), the ladder as a rail, cards sized to fill a row, buttons at their natural width. |
+| H4 | **Ledger rows** (Quests, Missions) | 1,300px-long 6px progress bars, 60px CLAIM buttons, 12px reward text; the day's chest is a 170px panel around one line. | ○ Rows are two columns — the objective with a bar sized to its text, the reward and a full button on the right; the chest is a banner. |
+| H5 | **Calendar** | 76px tiles with 9px day labels and 10px amounts; a "Day N is waiting — COLLECT" strip repeating what the lit tile already says. | ○ 108px tiles, today lit and carrying its own Collect, the strip gone. |
+| H6 | **Events** | Ladder rungs are 36px icons with 9px labels on a hairline. | ○ 72px rungs with the reward's amount readable and the reached ones lit. |
+| H7 | **Hub with one row** (Champions) | Four cards centred in the frame with 300px empty above and below. | ○ Cards carry a live line — roster count, vault fill, chronicle progress — and grow to the row they are given. |
+| H8 | **Text volume** | Every screen has a tagline *and* section sentences: the Depths says three sentences before its first button, the Stair opens with a lore paragraph, the Pass and both calendars explain themselves in prose above the thing they are. | ○ B1's rule applied everywhere: words go behind the **i**, the screen is the feature. |
+| H9 | **Depths springs** | A seven-row table beside five spring cards that scroll off the frame, under two sentences of section prose. | ○ The week is one strip of seven, the springs a row beneath it. |
+
+## MEDIUM
+
+| # | Screen | Problem | Fix (✔ shipped · ○ owed) |
+|---|---|---|---|
+| M1 | **Battle HUD** | Wave pips, turn counter, a 200px party frame, a 30px Auto and a 80px hotbar — phone sizes over a 1920px fight. | ○ Scaled for the display. |
+| M2 | **Arena** | Rows carry an opponent's team as 70px hood icons and 1,000px of empty width before the button. | ○ The team as four cards with power, the row's slack given to them. |
+| M3 | **Chronicle** | Six 180px tiles per shelf with 700px of empty shelf beside them. | ○ Tiles 210px, nine to a shelf. |
+| M4 | **Bazaar** | Item art at 90px, prices at 13px. | ○ Art 150px, price and button as one plate. |
+| M5 | **Placeholders** | Three different stand-ins for a champion with no art — the silhouette card, the hood icon, the enemy lizard — on the same screens. | ○ One: the silhouette, everywhere a face is missing. (The art itself is content and the owner's; the *consistency* is UI.) |
+| M6 | **Mistspire** | Floors are text rows; the keeper is a word. | ○ The keeper's portrait on its row. |
+| M7 | **Profile card** | "Warden since" at 11px; the portrait box shows an initial. | ○ Same treatment as the top bar. |
+
+## LOW
+
+| # | Screen | Problem | Fix (✔ shipped · ○ owed) |
+|---|---|---|---|
+| L1 | Title screen | "SHOW" at 10px in the password field. | ○ 12px. |
+| L2 | Odds dialog | 13px mono table. | ○ 14px. |
+| L3 | Settings | Fine. Slider labels 12px. | ○ 13px. |
+| L4 | Achievement banner | Fine. | ○ — |
+
+## Not UI, but seen
+
+- **30 of 37 champions and every enemy are placeholders.** It is the largest single reason a
+  screenshot reads as unfinished, and it is content the owner supplies (`assets/`), not chrome.
+  Noted so it is not mistaken for a layout fault.
+- The audit account reached level 34 from 23 in six fights of 1-1, which is C24's front-loading
+  working as designed.

@@ -1,21 +1,28 @@
 @use '../../styles/tokens' as *;
 
+/* The Mistgate, as a scene.
+
+   No panel. The room behind the screen is the owner's portal painting (the wash over it is
+   lighter on this tab — `tabScenery`), the sigils stand down the left, the pool's rune hangs
+   in the middle of the air with its rings and its mist, and the controls sit on a plinth
+   across the foot. Everything that moves here is CSS on `transform` and `opacity`, so a
+   screen a player idles on for a minute costs the GPU nothing worth measuring. */
+
 .screen {
   display: grid;
-  /* The title is a row of its own; the content row takes the slack. */
   grid-template-rows: auto minmax(0, 1fr);
   gap: $space-3;
   height: 100%;
   min-height: 0;
 }
 
-/* Two columns: the four pools down the left, the chosen one filling the rest.
-   The rail is fixed because it is a *list of four*, so growing it with the window only
-   makes four boards wider without telling anybody anything more. */
+/* Two columns: the four pools down the left, the gate filling the rest. The rail is fixed
+   because it is a *list of four*, so growing it with the window only makes four boards
+   wider without telling anybody anything more. */
 .main {
   display: grid;
-  grid-template-columns: 20rem minmax(0, 1fr);
-  gap: $space-3;
+  grid-template-columns: 22rem minmax(0, 1fr);
+  gap: $space-4;
   min-height: 0;
 }
 
@@ -24,7 +31,7 @@
 .sigils {
   display: flex;
   flex-direction: column;
-  gap: $space-2;
+  gap: $space-3;
   min-height: 0;
   overflow-y: auto;
 }
@@ -34,42 +41,48 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: $space-3;
-  padding: $space-3;
-  /* Grows into the column rather than sitting in a stack at the top of it, and stops
-     before a board is taller than it is wide. Four pools is a rail; four 80px chips
-     against the top of a 780px column is a settings page. */
+  padding: $space-3 $space-4;
+  /* Grows into the column and stops before a board is taller than it is wide. Four pools
+     is a rail; four 80px chips against the top of a 780px column is a settings page. */
   flex: 1 1 auto;
-  min-height: 5.5rem;
-  max-height: 9rem;
-  background: $panel-inset;
+  min-height: 6.5rem;
+  max-height: 10rem;
+  background: linear-gradient(180deg, rgba(20, 16, 24, 0.86), rgba(10, 8, 12, 0.92));
   border: 1px solid $edge;
   /* The tier's colour down the left edge, so the four read as a ladder at a glance. */
-  border-left: 3px solid var(--mv-sigil-tier, #{$edge});
+  border-left: 4px solid var(--mv-sigil-tier, #{$edge});
   color: $muted;
   font: inherit;
   text-align: left;
   cursor: pointer;
   transition:
     background $duration-fast $ease-out,
-    border-color $duration-fast $ease-out;
+    border-color $duration-fast $ease-out,
+    transform $duration-fast $ease-out;
 
   &:hover:not([aria-selected='true']) {
-    background: $panel;
+    background: linear-gradient(180deg, rgba(30, 24, 34, 0.9), rgba(14, 11, 16, 0.94));
     color: $parchment-dim;
+    transform: translateX(3px);
   }
 
   &[aria-selected='true'] {
-    background: $panel;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--mv-sigil-tier, #{$accent}) 22%, rgba(16, 12, 20, 0.94)),
+      rgba(12, 9, 14, 0.94) 70%
+    );
     border-color: var(--mv-sigil-tier, #{$accent});
     border-left-color: var(--mv-sigil-tier, #{$accent});
     color: $parchment;
-    box-shadow: inset 0 0 24px -8px var(--mv-sigil-tier, #{$accent});
+    box-shadow:
+      inset 0 0 28px -10px var(--mv-sigil-tier, #{$accent}),
+      0 0 24px -8px var(--mv-sigil-tier, #{$accent});
   }
 }
 
 /* One `--mv-sigil-tier` per rarity, set on the board and read by the rim, the count and
-   the gate's own glow. Four rules instead of four times as many, and adding a fifth pool
-   in Admin lands on the fallback rather than on nothing. */
+   the gate's own glow. Adding a fifth pool in Admin lands on the fallback, not on nothing. */
 .sigil,
 .gate {
   &[data-tier='common'] {
@@ -90,33 +103,38 @@
 }
 
 .sigilArt {
-  width: 4rem;
-  height: 4rem;
+  width: 4.75rem;
+  height: 4.75rem;
   flex: none;
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
+  mask-image: radial-gradient(circle at 50% 50%, #000 48%, transparent 72%);
   /* Dimmed until chosen, so the rail has one lit rune rather than four competing. */
-  opacity: 0.62;
-  transition: opacity $duration-fast $ease-out;
+  opacity: 0.6;
+  transition:
+    opacity $duration-fast $ease-out,
+    transform $duration-base $ease-out;
 
   [aria-selected='true'] & {
     opacity: 1;
-    filter: drop-shadow(0 0 10px var(--mv-sigil-tier, #{$accent-glow}));
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 12px var(--mv-sigil-tier, #{$accent-glow}));
   }
 }
 
 .sigilText {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
 }
 
 .sigilName {
   color: inherit;
   font-family: $font-display;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -124,15 +142,16 @@
 
 .sigilTier {
   color: var(--mv-sigil-tier, #{$muted});
-  font-size: 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.1em;
 }
 
 .sigilCount {
-  color: $accent;
+  color: $accent-soft;
   font-family: $font-mono;
-  font-size: 1.4rem;
+  font-size: 1.9rem;
   line-height: 1;
 
   /* Nothing to spend reads as nothing to spend, rather than as a bright zero. */
@@ -143,158 +162,228 @@
 
 /* ── The gate ───────────────────────────────────────────────────────────────── */
 
-/* Centred both ways: without the odds column beside it the gate has the whole pane, and a
-   portal pinned to the top of a tall empty panel looks like a page that failed to load the
-   rest of itself. `safe` so a short window scrolls to the top rather than clipping. */
+/* Fills its column, clips its own weather, and carries no surface of its own: the painting
+   behind the shell is the room. */
 .gate {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: safe center;
-  gap: $space-2;
-  min-height: 0;
-  padding: $space-4;
-  background:
-    radial-gradient(ellipse at 50% 38%, var(--mv-sigil-glow, transparent) 0%, transparent 62%),
-    $panel;
-  border: 1px solid $edge;
-  text-align: center;
-  overflow-y: auto;
-
-  /* The pool's own colour, at the strength a backdrop can carry without tinting text. */
-  &[data-tier='rare'] {
-    --mv-sigil-glow: #{rgba(90, 150, 220, 0.16)};
-  }
-  &[data-tier='epic'] {
-    --mv-sigil-glow: #{rgba(160, 110, 220, 0.18)};
-  }
-  &[data-tier='legendary'] {
-    --mv-sigil-glow: #{rgba(255, 196, 92, 0.18)};
-  }
-}
-
-/* The largest single thing on the screen, and deliberately: this is where a player comes
-   for the game's best moment. What turns inside it is the pool's own painted rune — the
-   rings used to turn around a radial gradient, which at any size reads as a spinner that
-   has stopped rather than as a portal. */
-.portal {
   position: relative;
-  width: 19rem;
-  height: 19rem;
-  display: grid;
-  place-items: center;
-  flex: none;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
 }
 
-.portalRing {
+.scene {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+  /* Every layer is centred on this point, which is where the rune hangs: a little above the
+     middle, so the plinth underneath does not crowd it. */
+  --mv-cx: 50%;
+  --mv-cy: 40%;
+}
+
+/* A soft field of the pool's colour behind everything, breathing. */
+.nebula {
+  position: absolute;
+  left: var(--mv-cx);
+  top: var(--mv-cy);
+  width: 52rem;
+  height: 52rem;
+  margin: -26rem 0 0 -26rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--mv-sigil-tier, #{$accent}) 34%, transparent) 0%,
+    color-mix(in srgb, var(--mv-sigil-tier, #{$accent}) 10%, transparent) 38%,
+    transparent 66%
+  );
+  animation: breathe 5.2s ease-in-out infinite;
+}
+
+/* Two bands of mist drifting through the gate at different speeds. Radial blobs on a slow
+   turn read as weather where a flat gradient reads as a stain. */
+.mist {
+  position: absolute;
+  left: var(--mv-cx);
+  top: var(--mv-cy);
+  width: 64rem;
+  height: 30rem;
+  margin: -15rem 0 0 -32rem;
+  border-radius: 50%;
+  opacity: 0.55;
+  background: radial-gradient(
+    ellipse,
+    rgba(230, 220, 240, 0.16) 0%,
+    rgba(200, 180, 220, 0.06) 40%,
+    transparent 70%
+  );
+  filter: blur(18px);
+  animation: drift 26s linear infinite;
+
+  &[data-layer='b'] {
+    width: 48rem;
+    height: 22rem;
+    margin: -11rem 0 0 -24rem;
+    opacity: 0.4;
+    animation-duration: 19s;
+    animation-direction: reverse;
+  }
+}
+
+/* Two broken rings out of phase. Two read as a mechanism; one reads as a spinner. */
+.ring {
+  position: absolute;
+  left: var(--mv-cx);
+  top: var(--mv-cy);
   border: 2px solid var(--mv-sigil-tier, #{$accent-dim});
   border-radius: 50%;
-  opacity: 0.75;
-  animation: spin 14s linear infinite;
-  clip-path: polygon(0 0, 100% 0, 100% 62%, 0 62%);
+  opacity: 0.7;
+
+  &[data-ring='outer'] {
+    width: 30rem;
+    height: 30rem;
+    margin: -15rem 0 0 -15rem;
+    clip-path: polygon(0 0, 100% 0, 100% 62%, 0 62%);
+    animation: spin 18s linear infinite;
+  }
+
+  &[data-ring='inner'] {
+    width: 23rem;
+    height: 23rem;
+    margin: -11.5rem 0 0 -11.5rem;
+    border-width: 1px;
+    opacity: 0.5;
+    clip-path: polygon(0 34%, 100% 34%, 100% 100%, 0 100%);
+    animation: spin 11s linear infinite reverse;
+  }
 }
 
-/* A second, slower ring the other way. Two rings out of phase read as a mechanism; one
-   reads as a spinner. */
-.portalRingInner {
+.glow {
   position: absolute;
-  inset: 13%;
-  border: 1px solid var(--mv-sigil-tier, #{$accent-dim});
+  left: var(--mv-cx);
+  top: var(--mv-cy);
+  width: 20rem;
+  height: 20rem;
+  margin: -10rem 0 0 -10rem;
   border-radius: 50%;
-  opacity: 0.5;
-  animation: spin 9s linear infinite reverse;
-  clip-path: polygon(0 34%, 100% 34%, 100% 100%, 0 100%);
+  background: radial-gradient(circle, var(--mv-sigil-tier, #{$accent-glow}) 0%, transparent 66%);
+  opacity: 0.4;
+  animation: pulse 3.4s ease-in-out infinite;
 }
 
-.portalGlow {
+/* The pool's own painted rune, the largest single thing on the screen and deliberately:
+   this is where a player comes for the game's best moment. */
+.rune {
   position: absolute;
-  inset: 16%;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--mv-sigil-tier, #{$accent-glow}) 0%, transparent 68%);
-  opacity: 0.34;
-  animation: pulse 3.2s ease-in-out infinite;
-}
-
-.portalSigil {
-  position: relative;
-  width: 58%;
-  height: 58%;
+  left: var(--mv-cx);
+  top: var(--mv-cy);
+  width: 18rem;
+  height: 18rem;
+  margin: -9rem 0 0 -9rem;
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
-  filter: drop-shadow(0 0 18px var(--mv-sigil-tier, #{$accent-glow}));
-  animation: breathe 4.4s ease-in-out infinite;
+  /* The rune tiles are square paintings on a near-black ground. Screen-blended, the ground
+     goes transparent and the lit rune stays; the mask takes the tile's corners off so what
+     is left reads as a medallion hanging in the air rather than a dark square. */
+  mix-blend-mode: screen;
+  mask-image: radial-gradient(circle at 50% 50%, #000 42%, transparent 70%);
+  filter: drop-shadow(0 0 28px var(--mv-sigil-tier, #{$accent-glow}));
+  animation: hover 4.6s ease-in-out infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+/* One spark, rising off the gate and going out. Position, delay and speed come in as
+   custom properties from the screen. */
+.spark {
+  position: absolute;
+  left: calc(var(--mv-cx) + var(--mv-spark-x, 0%) * 0.34);
+  top: var(--mv-cy);
+  width: 5px;
+  height: 5px;
+  margin: 6rem 0 0 -2px;
+  border-radius: 50%;
+  background: var(--mv-sigil-tier, #{$accent-soft});
+  box-shadow: 0 0 10px var(--mv-sigil-tier, #{$accent-soft});
+  opacity: 0;
+  animation: rise var(--mv-spark-time, 4s) ease-out infinite;
+  animation-delay: var(--mv-spark-delay, 0ms);
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.24;
-    transform: scale(0.94);
-  }
-  50% {
-    opacity: 0.46;
-    transform: scale(1.06);
-  }
+/* ── The plinth ─────────────────────────────────────────────────────────────── */
+
+/* The controls, across the foot of the scene. A translucent gradient rather than a panel,
+   so the room stays a room: the text reads because the ground under it darkens, not because
+   a box was drawn around it. */
+.plinth {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-7 $space-5 $space-5;
+  background: linear-gradient(
+    to top,
+    rgba(6, 5, 10, 0.92) 0%,
+    rgba(6, 5, 10, 0.78) 55%,
+    rgba(6, 5, 10, 0.3) 85%,
+    transparent 100%
+  );
+  text-align: center;
 }
 
-@keyframes breathe {
-  0%,
-  100% {
-    transform: scale(0.97);
-  }
-  50% {
-    transform: scale(1.03);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .portalRing,
-  .portalRingInner,
-  .portalGlow,
-  .portalSigil {
-    animation: none;
-  }
+.name {
+  display: flex;
+  align-items: baseline;
+  gap: $space-3;
 }
 
 .title {
   margin: 0;
   color: $parchment;
   font-family: $font-display;
-  font-size: 1.5rem;
+  font-size: 2.1rem;
   font-weight: normal;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
+}
+
+/* What the pool can produce, worst to best, in the tier's colour. */
+.range {
+  padding: 3px 10px;
+  border: 1px solid var(--mv-sigil-tier, #{$edge-bright});
+  color: var(--mv-sigil-tier, #{$muted});
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .blurb {
   margin: 0;
-  max-width: 34rem;
-  color: $muted;
-  font-size: 0.88rem;
-  line-height: 1.7;
+  max-width: 44rem;
+  color: $parchment-dim;
+  font-size: 0.98rem;
+  line-height: 1.6;
 }
 
 /* The rate-up champions, as faces. */
 .featured {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: $space-2;
-  margin-top: $space-2;
+  gap: $space-3;
+  margin-top: $space-1;
 }
 
 .featuredLabel {
   color: $gold;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.16em;
 }
 
 .featuredList {
@@ -311,7 +400,7 @@
   align-items: center;
   gap: $space-1;
   padding: $space-2;
-  background: $panel-inset;
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid $edge;
 
   &[data-rarity='epic'] {
@@ -327,18 +416,16 @@
 
 .featuredName {
   color: $parchment-dim;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 .actions {
   display: flex;
-  gap: $space-3;
-  margin-top: $space-3;
+  gap: $space-4;
+  margin-top: $space-2;
 }
 
-/* Two lines inside the painted plate: the count, and what it costs. Column rather than a
-   wrapped sentence so the price sits under its own button and neither button has to be
-   read against the other to find its price. */
+/* Two lines inside the painted plate: the count, and what it costs. */
 .summonLabel {
   display: flex;
   flex-direction: column;
@@ -348,12 +435,12 @@
 }
 
 .summonCount {
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .summonCost {
   color: $parchment-dim;
-  font-size: 0.7rem;
+  font-size: 0.74rem;
   font-weight: normal;
   letter-spacing: 0.4px;
   text-transform: none;
@@ -362,7 +449,7 @@
 .held {
   margin: 0;
   color: $muted;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 
   /* Nothing to spend is worth reading, so an empty purse is not the faintest thing on
      the screen — it is the reason both buttons are dark. */
@@ -372,11 +459,11 @@
 }
 
 /* The mercy clocks, on the gate itself. Anticipation a player can read is the best
-   argument the screen has for one more pull, and it was behind a click. */
+   argument the screen has for one more pull. */
 .clocks {
   display: flex;
-  gap: $space-4;
-  margin: $space-3 0 0;
+  gap: $space-5;
+  margin: $space-1 0 0;
   padding: 0;
   list-style: none;
   flex-wrap: wrap;
@@ -385,10 +472,10 @@
 
 .clock {
   display: grid;
-  grid-template-columns: auto minmax(6rem, 10rem) auto;
+  grid-template-columns: auto minmax(8rem, 12rem) auto;
   align-items: center;
   gap: $space-2;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
 
   &[data-rarity='common'] .clockFill {
     background: $rarity-common;
@@ -409,14 +496,15 @@
 
 .clockLabel {
   color: $muted;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.08em;
   white-space: nowrap;
 }
 
 .clockTrack {
-  height: 6px;
-  background: $panel-inset;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.55);
   border: 1px solid $edge;
 }
 
@@ -427,17 +515,122 @@
 }
 
 .clockText {
-  color: $muted-deep;
+  color: $parchment-dim;
   font-family: $font-mono;
   white-space: nowrap;
 }
 
 .empty {
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .error {
   color: $danger;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+}
+
+/* ── The weather ────────────────────────────────────────────────────────────── */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.08);
+  }
+  to {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes hover {
+  0%,
+  100% {
+    transform: translateY(0) scale(0.98);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.02);
+  }
+}
+
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16rem) scale(1.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nebula,
+  .mist,
+  .ring,
+  .glow,
+  .rune,
+  .spark {
+    animation: none;
+  }
+
+  .spark {
+    display: none;
+  }
+}
+
+/* A short window gives the rune its room by dropping the sparks and tightening the plinth. */
+@media (max-height: 760px) {
+  .rune {
+    width: 13rem;
+    height: 13rem;
+    margin: -6.5rem 0 0 -6.5rem;
+  }
+
+  .scene {
+    --mv-cy: 34%;
+  }
+
+  .plinth {
+    padding-top: $space-5;
+    gap: $space-1;
+  }
+
+  .blurb {
+    display: none;
+  }
 }

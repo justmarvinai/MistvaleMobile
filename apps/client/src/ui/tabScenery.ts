@@ -62,6 +62,15 @@ export interface TabScenery {
   /** The published wallpaper, or null for a tab with no painting of its own. */
   wallpaper: string | null;
   smoke: SmokePalette;
+  /**
+   * How hard the dark wash sits over the painting.
+   *
+   * `deep` is the owner's default — enough that painted panels and white text read over a
+   * lit night market. `light` is for a tab whose painting *is* the screen: the Mistgate's
+   * portal is the gate a player summons at, and a wash that turns it into a texture takes
+   * the room away from the one screen built around it.
+   */
+  wash: 'deep' | 'light';
 }
 
 /**
@@ -73,12 +82,12 @@ export interface TabScenery {
  * six the owner listed.
  */
 const TABS: Readonly<Partial<Record<ScreenId, TabScenery>>> = Object.freeze({
-  haven: { wallpaper: 'tab_haven_wallpaper', smoke: TIDE_SMOKE },
-  battleHub: { wallpaper: 'tab_combat_wallpaper', smoke: EMBER_SMOKE },
-  championsHub: { wallpaper: 'tab_champions_wallpaper', smoke: EMBER_SMOKE },
-  errandsHub: { wallpaper: 'tab_errands_wallpaper', smoke: VERDANT_SMOKE },
-  mistgate: { wallpaper: 'tab_mistgate_wallpaper', smoke: MIST_SMOKE },
-  bazaar: { wallpaper: 'tab_bazaar_wallpaper', smoke: EMBER_SMOKE },
+  haven: { wallpaper: 'tab_haven_wallpaper', smoke: TIDE_SMOKE, wash: 'deep' },
+  battleHub: { wallpaper: 'tab_combat_wallpaper', smoke: EMBER_SMOKE, wash: 'deep' },
+  championsHub: { wallpaper: 'tab_champions_wallpaper', smoke: EMBER_SMOKE, wash: 'deep' },
+  errandsHub: { wallpaper: 'tab_errands_wallpaper', smoke: VERDANT_SMOKE, wash: 'deep' },
+  mistgate: { wallpaper: 'tab_mistgate_wallpaper', smoke: MIST_SMOKE, wash: 'light' },
+  bazaar: { wallpaper: 'tab_bazaar_wallpaper', smoke: EMBER_SMOKE, wash: 'deep' },
 
   // The two screens that are *takeovers* rather than tabs, and so reach no dock slot of
   // their own. Both are painted anyway, because "no tab" is not the same as "no room":
@@ -89,14 +98,14 @@ const TABS: Readonly<Partial<Record<ScreenId, TabScenery>>> = Object.freeze({
   //  - **The mailbox is an errand.** It is a list of things to claim, which is exactly what
   //    C12 put behind the Errands tab; it is reached from the top bar only because it has a
   //    pip on it.
-  battle: { wallpaper: 'tab_combat_wallpaper', smoke: EMBER_SMOKE },
-  mail: { wallpaper: 'tab_errands_wallpaper', smoke: VERDANT_SMOKE },
+  battle: { wallpaper: 'tab_combat_wallpaper', smoke: EMBER_SMOKE, wash: 'deep' },
+  mail: { wallpaper: 'tab_errands_wallpaper', smoke: VERDANT_SMOKE, wash: 'deep' },
 });
 
 /** What the room behind a given tab looks like. */
 export function tabScenery(slot: ScreenId | null): TabScenery {
   const found = slot ? TABS[slot] : undefined;
-  return found ?? { wallpaper: null, smoke: EMBER_SMOKE };
+  return found ?? { wallpaper: null, smoke: EMBER_SMOKE, wash: 'deep' };
 }
 
 /**

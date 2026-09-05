@@ -314,7 +314,9 @@ export const SCREENS: readonly ScreenDefinition[] = [
   },
   {
     id: 'mistgate',
-    width: 'wide',
+    // A scene rather than a column: the painting is the gate, and a gate that centres
+    // inside a rule is a gate with letterboxing.
+    width: 'full',
     label: 'Mistgate',
     icon: 'nav-mistgate',
     glyph: 'glyph-spirit-vortex',

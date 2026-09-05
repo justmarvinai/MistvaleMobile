@@ -116,8 +116,31 @@ export function heraldIndex(
   return result && deservesHerald(result.rarity) ? last : -1;
 }
 
+/**
+ * Where a card lands when it is dealt out of the gate, in card units from the centre.
+ *
+ * The deal is the beat between the break and the first turn: ten face-down cards thrown
+ * from the point the gate stood at to the places they will turn in. The stylesheet knows a
+ * card's width and the gap between them; what it cannot know is which slot a card is going
+ * to, so this hands it a signed column and row offset from the centre of the hand and the
+ * CSS multiplies. A ×10 is five across and two down; a ×1 is one card, dead centre.
+ *
+ * Centred offsets rather than raw grid coordinates because the cards fly *outward* from one
+ * point: the card in the middle of the top row travels straight up, the corner cards
+ * travel furthest, and a hand of one does not travel at all.
+ */
+export function dealOffset(index: number, count: number): { col: number; row: number } {
+  const cols = count <= 1 ? 1 : Math.min(5, count);
+  const rows = Math.ceil(count / cols);
+  const col = index % cols;
+  const row = Math.floor(index / cols);
+  return { col: col - (cols - 1) / 2, row: row - (rows - 1) / 2 };
+}
+
 /** How long the charge holds before the mist starts to climb. */
 export const CHARGE_MS = 1_100;
+/** How long the cards take to land once they are dealt, before the first one turns. */
+export const DEAL_MS = 760;
 /** How long the break itself takes, flash and all. */
 export const BURST_MS = 620;
 /** How long a herald holds the screen. Long enough to read the name and feel it. */

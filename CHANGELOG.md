@@ -5,6 +5,43 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the UI/UX pass opens: the audit, and the Mistgate rebuilt (C40)
+
+The owner's brief (2026-09-05): *do a whole UI/UX improvement job* — too much text, too small
+text, too much information, frames that do not look good, an interface that feels outdated
+rather than like a modern fantasy RPG, and above all **negative space**, screens that leave
+most of a desktop display empty. The pass opens with an **audit rather than a fix**:
+`docs/UI_UX_AUDIT.md` reads every screen against a running box on a developed account and
+ranks what it found CRITICAL → VERY HIGH → HIGH → MEDIUM → LOW. Most of it has one root — the
+game is typeset and laid out for a phone and played on a desktop — and each row carries its
+status, so the table is the plan for the rest of the pass as well as the record of it.
+
+**The Mistgate is the first item closed, because it was the one the owner disliked most.** The
+gate was an opaque panel over the painting with a 180px rune in the middle of it, and the
+summon was a glow, two rings and twelve dots in a black void. Now:
+
+- **The gate is fullscreen.** There is no panel: the portal painting *is* the gate, lit through
+  a lighter wash than the other five tabs (`tabScenery.wash` — the Mistgate is the one room
+  where the art is the subject rather than the backdrop), the sigil rail keeps its place on the
+  left, and the summon controls sit on a plinth strip across the foot with the cost on the
+  button and the mercy clocks beside it. The chosen sigil's rune hangs in the arch, breathing,
+  with sparks rising through it.
+- **The summon is a six-beat cinematic.** The room zooms into the portal and the mist rolls in;
+  the gate **climbs the rarity ladder** and the whole scene answers it — rings, motes, the
+  tint on the fog and the vignette all take the rung's colour; it **shatters** in a lurch of
+  the room and a ring of shards; the hand is **dealt from the gate**, face down, each card
+  flying to its place in the grid (`dealOffset`, pure and tested) with its own cue; each card
+  **bursts** as it turns; an Epic or better is **heralded** on a hero card in a pillar of light
+  with its name at the size it deserves, and a Legendary brings gold rain. Skip is offered
+  throughout and finishes the whole sequence. Reduced motion gets the calm path: no zoom, no
+  shake, the results laid out at once.
+- **The server still decides everything.** The client choreographs a result it has already
+  been handed; `teaseLadder` always climbs at least to Rare so the wind-up teases without ever
+  lying about what is in the hand, and the herald is read off the result rather than guessed.
+- A pulled champion's name wraps on the hero card as it does in the hand, since "Maruan the
+  St…" beside the full name underneath read as a fault.
+- `summon_deal` is a new `soundCue`, content like every other cue; the plain seed publishes it.
+
 ### Added — localisation scaffolding (C39)
 
 Mistvale ships in one language and has no translator, so this is not a translation. It is the

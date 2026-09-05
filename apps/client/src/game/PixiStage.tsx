@@ -20,6 +20,8 @@ export interface PixiStageProps {
    * looked like before there were paintings.
    */
   wallpaper?: string | null;
+  /** How hard the wash sits over the painting — see `tabScenery`. */
+  wash?: 'deep' | 'light';
   /** What colour the fog drifts in. Follows the tab (C23). */
   smoke?: SmokePalette;
 }
@@ -38,6 +40,7 @@ export interface PixiStageProps {
 export function PixiStage({
   scene = 'mist',
   wallpaper = null,
+  wash = 'deep',
   smoke = EMBER_SMOKE,
 }: PixiStageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -122,7 +125,7 @@ export function PixiStage({
           {/* Not too dark — the owner's word. Enough that a painted panel and white text
               read over a lit night market, and not so much that the painting becomes a
               texture nobody can make out. */}
-          <div className={styles.wash} />
+          <div className={styles.wash} data-wash={wash} />
         </>
       )}
       <canvas ref={canvasRef} className={styles.canvas} />

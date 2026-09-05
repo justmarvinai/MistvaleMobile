@@ -57,7 +57,7 @@ describe('tabScenery', () => {
   it('falls back to the fog the game shipped with, and no painting', () => {
     // A seventh tab added to the dock before anyone has painted it: the fog still drifts
     // and the ground shows through, which is exactly what the game looked like before.
-    expect(tabScenery(null)).toEqual({ wallpaper: null, smoke: EMBER_SMOKE });
+    expect(tabScenery(null)).toEqual({ wallpaper: null, smoke: EMBER_SMOKE, wash: 'deep' });
   });
 
   it('serves a wallpaper as the JPEG the pipeline publishes', () => {

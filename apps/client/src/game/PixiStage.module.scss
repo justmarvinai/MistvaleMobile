@@ -37,6 +37,21 @@
       rgba(6, 8, 12, 0.68) 100%
     ),
     rgba(8, 9, 14, 0.34);
+
+  /* The Mistgate's setting. Its painting is a lit portal and the screen is built around
+     it, so the wash keeps only the bands the top bar and the dock need and lets the middle
+     of the room burn. */
+  &[data-wash='light'] {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(6, 8, 12, 0.58) 0%,
+        rgba(6, 8, 12, 0.1) 22%,
+        rgba(6, 8, 12, 0.08) 70%,
+        rgba(6, 8, 12, 0.66) 100%
+      ),
+      rgba(8, 9, 14, 0.12);
+  }
 }
 
 /* The battlefield, the fog, every scene the game paints.

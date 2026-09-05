@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { SummonBanner } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
@@ -25,21 +25,24 @@ import { rarityLabel } from '../../ui/labels';
  * the numbers are honest, so there is nothing to gain by hiding them, and a player who
  * can see the pity clock ticking trusts the one they cannot see.
  *
- * The gate is a **place** rather than a tab strip over a panel. Four pools is a choice a
- * player makes every time they arrive — which one is worth a sigil today — and the screen
- * had answered it with four text tabs carrying a name and a number. A sigil is a board now:
- * its own painted rune, the count it holds, and the line that actually decides the choice,
- * which is **how good the pool gets**. That last one is derived from the published rates
- * rather than authored (`poolTier`), so it cannot disagree with the odds panel behind it.
+ * **The painting is the gate.** The screen used to put an opaque panel over the owner's
+ * portal painting and draw a 180px rune in the middle of it, with fourteen hundred pixels of
+ * flat dark around the rune — a settings page with a logo on it, in front of the one
+ * painting in the game that is literally a gate. There is no panel now. The rail of sigils
+ * stands down the left, the pool's own rune hangs in the middle of the room with its rings
+ * and its mist, and everything a player *does* — the two summon buttons, the count, the
+ * mercy clocks — sits on a plinth across the foot of the scene where the stairs are. The
+ * wash over the painting is lighter on this one tab (`tabScenery`) so the portal burns.
  *
- * The gate beside them is the sigil's own art, lit, with the rings turning around it — the
- * ring pair used to turn around a radial gradient, which at any size reads as a spinner
- * that has stopped rather than as a portal.
+ * A sigil is a board rather than a tab: its own painted rune, the count it holds, and the
+ * line that actually decides the choice, which is **how good the pool gets**. That line is
+ * derived from the published rates rather than authored (`poolTier`), so it cannot disagree
+ * with the odds panel behind it — and it is a *range* rather than a ceiling, since three of
+ * the four pools can produce a Legendary and "up to Legendary" would separate nothing.
  *
- * And the mercy clocks are the pool's own best two (`clockRarities`) rather than a fixed
- * epic-and-legendary pair. That filter was right for the Radiant sigil and left the other
- * three gates with no clock at all: the Faded pool tops out at Rare, and rare mercy is
- * exactly what somebody pulling on it is counting.
+ * The mercy clocks are the pool's own best two (`clockRarities`) rather than a fixed
+ * epic-and-legendary pair, because the Faded pool tops out at Rare and rare mercy is exactly
+ * what somebody pulling on it is counting.
  */
 
 export function MistgateScreen(): JSX.Element {
@@ -76,7 +79,7 @@ export function MistgateScreen(): JSX.Element {
       // The roster and the sigil stack both moved; other screens read them.
       await Promise.all([refreshRoster(), refreshInventory()]);
     } catch {
-      // The store already holds the message; the panel below renders it.
+      // The store already holds the message; the plinth below renders it.
     }
   };
 
@@ -110,6 +113,9 @@ export function MistgateScreen(): JSX.Element {
     .filter((state): state is NonNullable<typeof state> => Boolean(state));
   const canPullOne = banner.sigilsHeld >= 1;
   const canPullTen = banner.sigilsHeld >= 10;
+  const [floor, tier] = poolRange(banner.rates);
+  const rangeLabel =
+    floor === tier ? rarityLabel(tier) : `${rarityLabel(floor)} – ${rarityLabel(tier)}`;
 
   return (
     <div className={styles.screen}>
@@ -131,7 +137,7 @@ export function MistgateScreen(): JSX.Element {
             not, and that is exactly what the role means. */}
         <div className={styles.sigils} role="tablist" aria-label="Sigils">
           {banners.map((entry) => {
-            const [floor, tier] = poolRange(entry.rates);
+            const [entryFloor, entryTier] = poolRange(entry.rates);
             const chosen = entry.key === banner.key;
             return (
               <button
@@ -140,7 +146,7 @@ export function MistgateScreen(): JSX.Element {
                 role="tab"
                 aria-selected={chosen}
                 className={styles.sigil}
-                data-tier={tier}
+                data-tier={entryTier}
                 onClick={() => setSelected(entry.key)}
               >
                 <span
@@ -150,15 +156,10 @@ export function MistgateScreen(): JSX.Element {
                 />
                 <span className={styles.sigilText}>
                   <span className={styles.sigilName}>{entry.name}</span>
-                  {/* The line that decides which gate is worth a sigil, and the screen has
-                      never said it. A *range* rather than a ceiling: three of the four
-                      pools can produce a Legendary, so "up to Legendary" is true on three
-                      boards and tells a player nothing. The floor is the half that
-                      separates them. Read off the pool's own published rates. */}
                   <span className={styles.sigilTier}>
-                    {floor === tier
-                      ? rarityLabel(tier)
-                      : `${rarityLabel(floor)} – ${rarityLabel(tier)}`}
+                    {entryFloor === entryTier
+                      ? rarityLabel(entryTier)
+                      : `${rarityLabel(entryFloor)} – ${rarityLabel(entryTier)}`}
                   </span>
                 </span>
                 <span className={styles.sigilCount} data-empty={entry.sigilsHeld === 0}>
@@ -169,120 +170,145 @@ export function MistgateScreen(): JSX.Element {
           })}
         </div>
 
-        <section className={styles.gate} data-tier={poolTier(banner.rates)}>
-          <div className={styles.portal} aria-hidden="true">
-            <span className={styles.portalRing} />
-            <span className={styles.portalRingInner} />
-            <span className={styles.portalGlow} />
+        {/* The gate. No panel: the room behind it is the owner's portal painting, and this
+            section only *arranges* things in it — the rune and its rings in the middle of
+            the air, the controls on the plinth at the foot. */}
+        <section
+          className={styles.gate}
+          data-tier={poolTier(banner.rates)}
+          aria-label={`${banner.name} gate`}
+        >
+          <div className={styles.scene} aria-hidden="true">
+            <span className={styles.nebula} />
+            <span className={styles.mist} data-layer="a" />
+            <span className={styles.mist} data-layer="b" />
+            <span className={styles.ring} data-ring="outer" />
+            <span className={styles.ring} data-ring="inner" />
+            <span className={styles.glow} />
             <span
-              className={styles.portalSigil}
+              className={styles.rune}
               style={{ backgroundImage: `var(--fui-img-${sigilArt(banner.key)})` }}
             />
+            {/* Sparks rising off the gate. Their angle and timing are inline custom
+                properties, because sixteen near-identical keyframe blocks is what a
+                stylesheet should never be. */}
+            {Array.from({ length: 16 }, (_, index) => (
+              <span
+                key={index}
+                className={styles.spark}
+                style={
+                  {
+                    '--mv-spark-x': `${((index * 61) % 100) - 50}%`,
+                    '--mv-spark-delay': `${(index * 530) % 4200}ms`,
+                    '--mv-spark-time': `${3600 + ((index * 337) % 1800)}ms`,
+                  } as CSSProperties
+                }
+              />
+            ))}
           </div>
 
-          <h2 className={styles.title}>{banner.name}</h2>
-          <p className={styles.blurb}>{banner.description}</p>
+          <div className={styles.plinth}>
+            <div className={styles.name}>
+              <h2 className={styles.title}>{banner.name}</h2>
+              <span className={styles.range}>{rangeLabel}</span>
+            </div>
+            <p className={styles.blurb}>{banner.description}</p>
 
-          {/* The rate-up champions, as faces. A line reading "Rate up: Aureleth · Vharn"
-              asks a player to already know who those are; a portrait with a gold frame
-              round it is the argument itself. */}
-          {featured.length > 0 && (
-            <div className={styles.featured}>
-              <span className={styles.featuredLabel}>Rate up</span>
-              <ul className={styles.featuredList}>
-                {featured.map((champion) => (
-                  <li
-                    key={champion.key}
-                    className={styles.featuredOne}
-                    data-rarity={champion.rarity}
-                  >
-                    <Portrait
-                      src={championArt(champion, bundle?.assets).portrait ?? null}
-                      name={champion.name}
-                      size={56}
-                    />
-                    <span className={styles.featuredName}>{champion.name}</span>
+            {/* The rate-up champions, as faces. A line reading "Rate up: Aureleth · Vharn"
+                asks a player to already know who those are; a portrait with a gold frame
+                round it is the argument itself. */}
+            {featured.length > 0 && (
+              <div className={styles.featured}>
+                <span className={styles.featuredLabel}>Rate up</span>
+                <ul className={styles.featuredList}>
+                  {featured.map((champion) => (
+                    <li
+                      key={champion.key}
+                      className={styles.featuredOne}
+                      data-rarity={champion.rarity}
+                    >
+                      <Portrait
+                        src={championArt(champion, bundle?.assets).portrait ?? null}
+                        name={champion.name}
+                        size={64}
+                      />
+                      <span className={styles.featuredName}>{champion.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* A button in a gacha screen should say what it costs before it is pressed:
+                the count is the obvious half and the price is the decision. Still the
+                painted button — the chrome is the library's and the two lines inside it
+                are ours. */}
+            <div className={styles.actions}>
+              <Button
+                {...highlightable(`button:summon-${banner.key}`)}
+                size="lg"
+                disabled={!canPullOne || pulling}
+                onClick={() => void summon(1)}
+              >
+                <span className={styles.summonLabel}>
+                  <span className={styles.summonCount}>Summon ×1</span>
+                  <span className={styles.summonCost}>1 {sigilName(1)}</span>
+                </span>
+              </Button>
+              <Button size="lg" disabled={!canPullTen || pulling} onClick={() => void summon(10)}>
+                <span className={styles.summonLabel}>
+                  <span className={styles.summonCount}>Summon ×10</span>
+                  <span className={styles.summonCost}>
+                    10 {sigilName(10)}
+                    {banner.tenPullFloor && ` · 1 ${rarityLabel(banner.tenPullFloor)} guaranteed`}
+                  </span>
+                </span>
+              </Button>
+            </div>
+
+            {/* What is in the purse, and nothing about where more comes from: the four
+                sigils have four different sources and none of that is on the wire, so a
+                sentence the client cannot derive is one that goes stale the first time an
+                operator retunes a drop table. */}
+            <p className={styles.held} data-empty={banner.sigilsHeld === 0}>
+              {banner.sigilsHeld} {sigilName(banner.sigilsHeld)} held
+            </p>
+
+            {/* The clocks worth watching, on the gate rather than only in the dialog.
+                `since` past `after` is mercy already paying — the bar fills and stays full,
+                because the bonus keeps growing after the threshold rather than resetting. */}
+            {clocks.length > 0 && (
+              <ul className={styles.clocks}>
+                {clocks.map((clock) => (
+                  <li key={clock.rarity} className={styles.clock} data-rarity={clock.rarity}>
+                    <span className={styles.clockLabel}>{rarityLabel(clock.rarity)} mercy</span>
+                    <span className={styles.clockTrack}>
+                      <span
+                        className={styles.clockFill}
+                        style={{
+                          width: `${Math.min(100, clock.after > 0 ? (clock.since / clock.after) * 100 : 100)}%`,
+                        }}
+                      />
+                    </span>
+                    <span className={styles.clockText}>
+                      {clock.since >= clock.after
+                        ? `rising — ${(clock.effectiveChance * 100).toFixed(2)}%`
+                        : `${clock.after - clock.since} more without one`}
+                    </span>
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            )}
 
-          {/* A button in a gacha screen should say what it costs before it is pressed.
-              These said "Summon ×1" and put the price in a sentence underneath — the wrong
-              way round, since the count is the obvious half and the price is the decision.
-              Still the painted button: the chrome is the library's and the two lines
-              inside it are ours. */}
-          <div className={styles.actions}>
-            <Button
-              {...highlightable(`button:summon-${banner.key}`)}
-              size="lg"
-              disabled={!canPullOne || pulling}
-              onClick={() => void summon(1)}
-            >
-              <span className={styles.summonLabel}>
-                <span className={styles.summonCount}>Summon ×1</span>
-                <span className={styles.summonCost}>1 {sigilName(1)}</span>
-              </span>
-            </Button>
-            <Button size="lg" disabled={!canPullTen || pulling} onClick={() => void summon(10)}>
-              <span className={styles.summonLabel}>
-                <span className={styles.summonCount}>Summon ×10</span>
-                <span className={styles.summonCost}>
-                  10 {sigilName(10)}
-                  {banner.tenPullFloor && ` · 1 ${rarityLabel(banner.tenPullFloor)} guaranteed`}
-                </span>
-              </span>
-            </Button>
+            {error && <p className={styles.error}>{error}</p>}
           </div>
-
-          {/* What is in the purse, and nothing about where more comes from: the four
-              sigils have four different sources — the Faded one falls off 36 campaign
-              stages, the Radiant one falls nowhere and is paid only by missions and
-              quests — and none of that is on the wire. A sentence the client cannot
-              derive is a sentence that goes stale the first time an operator retunes a
-              drop table. */}
-          <p className={styles.held} data-empty={banner.sigilsHeld === 0}>
-            {banner.sigilsHeld} {sigilName(banner.sigilsHeld)} held
-          </p>
-
-          {/* The clocks worth watching, on the gate rather than only in the dialog.
-              `since` past `after` is mercy already paying — the bar fills and stays full,
-              because the bonus keeps growing after the threshold rather than resetting. */}
-          {clocks.length > 0 && (
-            <ul className={styles.clocks}>
-              {clocks.map((clock) => (
-                <li key={clock.rarity} className={styles.clock} data-rarity={clock.rarity}>
-                  <span className={styles.clockLabel}>{rarityLabel(clock.rarity)} mercy</span>
-                  <span className={styles.clockTrack}>
-                    <span
-                      className={styles.clockFill}
-                      style={{
-                        width: `${Math.min(100, clock.after > 0 ? (clock.since / clock.after) * 100 : 100)}%`,
-                      }}
-                    />
-                  </span>
-                  <span className={styles.clockText}>
-                    {clock.since >= clock.after
-                      ? `rising — ${(clock.effectiveChance * 100).toFixed(2)}%`
-                      : `${clock.after - clock.since} more without one`}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {error && <p className={styles.error}>{error}</p>}
         </section>
       </div>
 
       {/* The rates are a dialog rather than a column, but the way to them is a worded
           button and not a lowercase "i": these are published odds, and a player must be
           able to find them without guessing what an icon means. The panel reads the same
-          store the screen does, so an open dialog tracks a mercy counter as it moves.
-
-          The dialog is titled with the pool, and the panel inside it no longer repeats
-          "Odds & Mercy" underneath — C12c's rule, and this screen was still breaking it. */}
+          store the screen does, so an open dialog tracks a mercy counter as it moves. */}
       <Modal
         open={oddsOpen}
         title={`${banner.name} — odds & mercy`}
@@ -301,7 +327,11 @@ export function MistgateScreen(): JSX.Element {
           Keyed on the pull count: the cinematic is a state machine with six timers in it,
           and starting one over is building a new one. */}
       {(pulling || revealing.length > 0) && (
-        <SummonCinematic key={pullSeq} onAgain={() => void summon(lastPull?.count ?? 1)} />
+        <SummonCinematic
+          key={pullSeq}
+          poolKey={banner.key}
+          onAgain={() => void summon(lastPull?.count ?? 1)}
+        />
       )}
     </div>
   );
