@@ -54,7 +54,7 @@ const SORTS: { key: SortKey; label: string }[] = [
  * second, smaller component — which is C2's rule and the reason a champion looks the same
  * wherever it is drawn. 108 fits three to a row in the rail at its usual width.
  */
-const ROLL_CARD = 108;
+const ROLL_CARD = 128;
 
 const ROLE_LABELS: Readonly<Record<string, string>> = Object.freeze({
   attack: 'Attack',

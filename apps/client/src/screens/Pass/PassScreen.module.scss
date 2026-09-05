@@ -116,22 +116,9 @@
   font-weight: 700;
 }
 
-// ── The two rails ───────────────────────────────────────────────────────────
-
-/* Both rails are the library's reward track, so the bar, the fill and the rungs are its.
-   What is left is the one thing a container has to say — and, on the locked one, that it
-   is behind a purchase rather than merely empty. */
-.track {
-  width: 100%;
-
-  & + & {
-    margin-top: $space-3;
-  }
-
-  &[data-locked='true'] {
-    opacity: 0.72;
-  }
-}
+// ── The ladder ───────────────────────────────────────────────────────────────
+// `PassLadder` and its own stylesheet, since C43: a rail of tier columns rather than the
+// library's `RewardTrack`, which put thirty nodes on one line and made the screen unreadable.
 
 // ── Taking up the season's track ────────────────────────────────────────────
 

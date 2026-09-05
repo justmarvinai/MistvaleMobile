@@ -88,8 +88,13 @@
   }
 }
 
+/* `flex: none` as well as a height: the portrait column is a flex column with a ceiling
+   (`max-height` above) and `ChampionIdle`'s stage carries `min-height: 0`, so as a plain
+   flex item the idle was shrunk to about a quarter of this the moment the ladders under it
+   asked for room. The column scrolls instead. */
 .idle {
-  height: 400px;
+  flex: 0 0 440px;
+  height: 440px;
 }
 
 @media (max-width: 900px) {
@@ -302,6 +307,13 @@
   align-self: center;
 }
 
+/* 104 rather than the pack's 88 for `lg` (C43): the socket is the picture on a row that is
+   otherwise words, and on a desktop sheet 88 read as an icon. The variable is the library's
+   own knob, overridden at a specificity above its `[data-size]` rule. */
+.slot .slotSocket:global(.fui-slot) {
+  --fui-slot-size: 104px;
+}
+
 .slotName {
   align-self: end;
   font-size: 0.78rem;
@@ -429,20 +441,22 @@
   }
 }
 
-/* Stats and set bonuses in one row above the tabs. `minmax(0, …)` on the first track
-   because a table is happy to be min-content and would leave the bonuses holding half the
-   sheet on a champion wearing nothing. */
+/* Stats and set bonuses in one row above the tabs — when the row has the room for both.
+
+   The split used to turn on the *window's* width (one column under 1200px), which is the
+   wrong question: what decides whether the table and the panel fit side by side is the
+   width of this column, and at 1440×900 the column is about 560px — the roll on the left
+   and the portrait column take the rest — so the five-column table was squeezed under the
+   set-bonus panel and its last two columns drew through it (C43). `auto-fit` over a
+   24rem minimum asks the right question: two tracks when the column can hold two, one
+   otherwise, with the panel taking the full width under the table rather than a corner
+   of it. `min(100%, 24rem)` keeps the single track from overflowing a column narrower
+   than 24rem. */
 .summary {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
   gap: $space-3;
   align-items: start;
-}
-
-@media (max-width: 1200px) {
-  .summary {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 .note,

@@ -1,0 +1,249 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+/* The season's ladder: row labels on the left, a rail of tier columns beside them. See
+   PassLadder.tsx. */
+
+.ladder {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+  gap: $space-3;
+  align-items: stretch;
+  min-width: 0;
+}
+
+/* The three rows of a column, named once here so the labels and the tiles line up: the
+   rung, the free tile, the season's tile. */
+$rung-h: 3.4rem;
+$tile: 5.5rem;
+$row-gap: $space-2;
+
+.labels {
+  display: grid;
+  grid-template-rows: $rung-h $tile $tile;
+  gap: $row-gap;
+  /* Matches the rail's own vertical padding so the rows sit on the same lines. */
+  padding: $space-3 0;
+}
+
+.corner {
+  @include label-text;
+  align-self: end;
+  color: $muted-deep;
+}
+
+.rowLabel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+
+  &[data-locked='true'] {
+    opacity: 0.72;
+  }
+}
+
+.rowTitle {
+  @include display-text(16px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rowSub {
+  color: $muted;
+  font-size: 13.5px;
+}
+
+.rail {
+  min-width: 0;
+}
+
+/* One tier. `data-next` is the rung the player is walking toward, lit so the eye lands on
+   it; a reached rung is gold. */
+.tier {
+  display: grid;
+  grid-template-rows: $rung-h $tile $tile;
+  gap: $row-gap;
+  width: $tile;
+  padding: 0;
+
+  &[data-next='true'] .rung {
+    border-color: $accent;
+    background: rgba(194, 118, 74, 0.18);
+    box-shadow: 0 0 18px -4px $accent-glow;
+  }
+
+  &[data-reached='true'] .rungIndex {
+    color: $gold-soft;
+  }
+}
+
+.rung {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding-bottom: 4px;
+  border: 1px solid transparent;
+  border-bottom-color: $edge;
+  transition:
+    border-color $duration-base $ease-out,
+    background-color $duration-base $ease-out;
+}
+
+.rungIndex {
+  @include display-text(20px);
+  line-height: 1;
+  color: $parchment;
+}
+
+.rungAt {
+  font-family: $font-mono;
+  font-size: 12.5px;
+  color: $muted;
+}
+
+/* A tile. The reward's painted art fills it, the quantity sits on its foot, and the state is
+   the frame: dim for a rung not reached, gold and breathing for one ready to collect, a tick
+   over one collected, a padlock over a season reward the account has not taken up. */
+.tile {
+  @include interactive;
+
+  position: relative;
+  width: $tile;
+  height: $tile;
+  padding: 0;
+  border: 2px solid $edge;
+  background: $panel-inset;
+  overflow: hidden;
+
+  &[data-track='premium'] {
+    border-color: rgba(160, 107, 216, 0.4);
+    background: rgba(28, 18, 36, 0.7);
+  }
+
+  &[data-state='empty'] {
+    border-style: dashed;
+    background: transparent;
+    cursor: default;
+  }
+
+  &[data-state='locked'] .art {
+    filter: grayscale(0.85) brightness(0.5);
+  }
+
+  &[data-state='locked'],
+  &[data-state='barred'],
+  &[data-state='claimed'] {
+    cursor: default;
+  }
+
+  &[data-state='ready'] {
+    border-color: $gold;
+    box-shadow:
+      0 0 0 1px rgba(201, 162, 39, 0.35),
+      0 0 22px -4px rgba(201, 162, 39, 0.75);
+
+    @include motion-safe {
+      animation: breathe 1.8s ease-in-out infinite;
+    }
+  }
+
+  &[data-state='ready']:hover {
+    transform: translateY(-3px);
+  }
+
+  &[data-state='claimed'] .art {
+    filter: brightness(0.55);
+  }
+
+  &[data-state='barred'] .art {
+    filter: grayscale(0.4) brightness(0.65);
+  }
+
+  /* `interactive` dims a disabled control, which is right for a button and wrong for a
+     tile whose state is already drawn: a claimed tile is finished, not broken. */
+  &:disabled {
+    filter: none;
+  }
+}
+
+.art {
+  position: absolute;
+  inset: 8px;
+  background: var(--mv-tile-art) center / contain no-repeat;
+  transition: filter $duration-base $ease-out;
+}
+
+.qty {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  padding: 1px 6px;
+  background: rgba(8, 6, 5, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: $font-mono;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: $parchment;
+}
+
+.mark {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(8, 6, 5, 0.85);
+  color: $parchment-dim;
+
+  &[data-mark='claimed'] {
+    background: $success;
+
+    &::after {
+      content: '';
+      width: 5px;
+      height: 10px;
+      margin-top: -3px;
+      border: solid #06210c;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(201, 162, 39, 0.35),
+      0 0 22px -4px rgba(201, 162, 39, 0.75);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(201, 162, 39, 0.55),
+      0 0 30px -2px rgba(201, 162, 39, 0.95);
+  }
+}
+
+/* The labels go above the rail on a narrow window rather than beside it. */
+@media (max-width: 900px) {
+  .ladder {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .labels {
+    grid-template-rows: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
+  }
+
+  .corner {
+    display: none;
+  }
+}

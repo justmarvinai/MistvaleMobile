@@ -33,9 +33,11 @@ test.describe('the result screen', () => {
     const dialog = page.getByRole('dialog', { name: /choose your first champion/i });
     await expect(dialog).toBeVisible({ timeout: 20_000 });
     const choose = dialog.getByRole('button', { name: /^choose /i }).first();
-    // First line only: the button is a whole champion card, so its text runs on into the
-    // element, the role and the leader skill underneath the name.
-    const starter = ((await choose.innerText()).split('\n')[0] ?? '')
+    // From the button's accessible name rather than its text: the button is a whole hero
+    // panel, and since C42 the first line of its text is the element badge over the face,
+    // not the name — which is how this read "TIDE" and then looked for a champion called
+    // that on the result screen.
+    const starter = ((await choose.getAttribute('aria-label')) ?? '')
       .replace(/^choose\s+/i, '')
       .trim();
     expect(starter, 'the starter dialog names its champions').not.toBe('');

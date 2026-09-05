@@ -43,9 +43,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  width: 4.6rem;
-  padding: $space-1;
+  gap: 4px;
+  width: 6.25rem;
+  padding: $space-2 $space-1;
   border: 1px solid $edge;
   background: rgba(12, 10, 9, 0.6);
   text-align: center;
@@ -66,10 +66,10 @@
    team, and the only one small enough to draw on a 44px face. */
 .affinity {
   position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 10px;
-  height: 10px;
+  right: -3px;
+  bottom: -3px;
+  width: 14px;
+  height: 14px;
   border: 1px solid rgba(12, 10, 9, 0.85);
   background: var(--mv-affinity);
 }

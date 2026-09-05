@@ -34,11 +34,35 @@
 }
 
 /* The panel fills the dialog and hands the overflow to the body, so the painted frame and
-   the title bar stay put while the content moves under them. */
-.dialog > * {
+   the title bar stay put while the content moves under them.
+
+   Three rules, and the selectors are the point (C43). The dialog's direct child is the
+   React bridge's mount point, a `display: contents` div — so a rule written `.dialog > *`,
+   which is what this was, styled a box that has no box and constrained nothing. What has
+   to be constrained is the library's panel *inside* it, and the panel's body inside that:
+
+   - the panel may **shrink**. Mistvale's `Panel` carries `flex-shrink: 0` for D6's reason
+     (a panel stacked in a scrolling column must never be squashed to its header), which is
+     right everywhere except here, where the panel is the whole dialog and the dialog has a
+     ceiling — a panel that cannot shrink grows past it, and the ceiling means nothing;
+   - the library's panel body is a **column**. It is a flex item of the panel and a block
+     for what it holds, so `.body`'s `flex: 1; min-height: 0; overflow-y: auto` had no flex
+     parent and was inert.
+
+   Every dialog shorter than a window hid both; the team chooser at 900px found them the day
+   its sockets grew, with "Into the mist" drawn at y=911 of 900 and no scroll container
+   anywhere that could reach it. */
+.dialog :global(.fui-panel) {
+  flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+.dialog :global(.fui-panel__body) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .body {

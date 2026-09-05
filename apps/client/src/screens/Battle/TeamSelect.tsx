@@ -336,7 +336,16 @@ export function TeamSelect({
           auraIdle: idle,
           auraHint: 'Whoever stands in slot one brings their aura to the whole team.',
         }}
-        theirs={{ label: 'What is waiting' }}
+        theirs={{
+          label: 'What is waiting',
+          // What the fight is, on the banner over the enemy — where the other side's aura
+          // line sits — rather than as a notice under the confrontation, which cost the
+          // dialog a row it does not have on a 900px window.
+          note: attempts
+            ? (attempts.summary ??
+              `One wave · ${attempts.turnCap} turns · paid for the damage you do`)
+            : `${stage.waves.length} waves · ${stage.energyCost} energy · ${stage.rewards.silverMin}–${stage.rewards.silverMax} silver`,
+        }}
         opposition={
           <>
             {/* Who is on the other side, wave by wave. Content has named every enemy of
@@ -377,13 +386,6 @@ export function TeamSelect({
           : {})}
         notices={
           <>
-            <p className={styles.summary}>
-              {attempts
-                ? (attempts.summary ??
-                  `One wave · ${attempts.turnCap} turns · paid for the damage you do`)
-                : `${stage.waves.length} waves · ${stage.energyCost} energy · ${stage.rewards.silverMin}–${stage.rewards.silverMax} silver`}
-            </p>
-
             {/* The ward, in words, because it decides which of the cards below are even
                 worth reading. A player who scrolls a roster of thirty and then finds out
                 four of them were never eligible has been made to do the work twice. */}

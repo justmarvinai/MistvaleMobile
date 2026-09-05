@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import type { ValePassStanding, ValePassTrack } from '@mistvale/shared';
+import { useEffect } from 'react';
+import type { ValePassStanding, ValePassTierStanding, ValePassTrack } from '@mistvale/shared';
 import { CountdownTimer } from '@/fui/components/CountdownTimer.ts';
-import { RewardTrack } from '@/fui/components/RewardTrack.ts';
 import { Fui } from '@/fui/react';
 import { Button } from '../../ui/Button/Button';
 import { Empty } from '../../ui/Empty/Empty';
@@ -9,7 +8,7 @@ import { Heading } from '../../ui/Heading/Heading';
 import { Panel } from '../../ui/Panel/Panel';
 import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 import { describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
-import { rewardArt } from '../../ui/Rewards/art';
+import { PassLadder } from './PassLadder';
 import { usePassStore } from '../../state/passStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { toast } from '../../state/uiStore';
@@ -18,20 +17,20 @@ import styles from './PassScreen.module.scss';
 /**
  * The Vale Pass (C38).
  *
- * Two rails, one marker. The season's ladder has a free column and the season's own, and
- * the genre draws them as parallel tracks with one progress line through both — because the
- * question is "how far to the next thing", asked twice about the same distance. Two lists
- * would ask a player to line up rungs by eye.
+ * One ladder, two columns. The season has a free column and the season's own, and they are
+ * drawn as one rail of tier columns with both rewards on each rung — because the question
+ * is "how far to the next thing", asked twice about the same distance, and two lists would
+ * ask a player to line up rungs by eye.
  *
  * **The day's ceiling is on the screen**, in the standing line. It is the number the whole
  * design rests on, and a ceiling nobody can see is indistinguishable from points that have
  * quietly stopped arriving — which is the one way this feature can look broken while
  * working perfectly.
  *
- * The rails are the library's `RewardTrack`, the same component the events screen uses, for
- * D9's rule: it is the semantic element and holds no state React must drive. What is
- * Mistvale's is everything about *which* column a press lands on, and the standing strip
- * above them, which is the feature.
+ * The ladder is Mistvale's own (`PassLadder`, C43) rather than the library's `RewardTrack`,
+ * which the first cut used for D9's reason and which turned out to be the wrong shape: it
+ * spreads its nodes along one line by the favour they sit at, right for six milestones and
+ * unreadable at thirty. What stays the library's is the countdown chip in the title bar.
  */
 export function PassScreen(): JSX.Element {
   const pass = usePassStore((state) => state.pass);
@@ -107,52 +106,14 @@ function SeasonPanel({ season, today }: { season: ValePassStanding; today: strin
   const claim = usePassStore((state) => state.claim);
   const unlock = usePassStore((state) => state.unlock);
   const crystals = usePlayerStore((state) => state.player?.crystals ?? 0);
-  const rewardName = useRewardName();
 
-  /**
-   * One rail's rungs, as the library draws them.
-   *
-   * Built twice from the same tiers with a different column each time, so the two rails
-   * line up rung for rung — which is the whole reason the layout works. Memoised on the
-   * tiers and the naming function it closes over, which is everything it reads.
-   */
-  const railFor = useCallback(
-    (track: ValePassTrack) =>
-      season.tiers.map((tier) => {
-        const payout = track === 'free' ? tier.free : tier.premium;
-        const rewards = Object.entries(payout).filter(([, amount]) => amount > 0);
-        const first = rewards[0];
-        const taken = track === 'free' ? tier.freeClaimed : tier.premiumClaimed;
-        return {
-          at: tier.points,
-          icon: first ? rewardArt(first[0]) : 'rune-bronze-disc',
-          label: describeRewards(payout, rewardName) || '—',
-          ...(first && first[1] > 1 ? { qty: first[1] } : {}),
-          ...(taken ? { claimed: true } : {}),
-        };
-      }),
-    [season.tiers, rewardName],
-  );
-
-  const free = useMemo(() => railFor('free'), [railFor]);
-  const premium = useMemo(() => railFor('premium'), [railFor]);
-
-  const press = (track: ValePassTrack, at: number): void => {
-    const tier = season.tiers.find((entry) => entry.points === at);
-    if (!tier || !tier.reached || busy !== null) return;
+  const press = (track: ValePassTrack, tier: ValePassTierStanding): void => {
+    if (!tier.reached || busy !== null) return;
     if (track === 'free' && tier.freeClaimed) return;
     if (track === 'premium' && (tier.premiumClaimed || tier.premiumLocked)) return;
     if (Object.keys(track === 'free' ? tier.free : tier.premium).length === 0) return;
     void claim(season.passKey, tier.index, track);
   };
-
-  // A rail redraws when its own claims move, when the score moves, and when a claim is in
-  // flight — the library ticks a node the moment it is pressed, and this game does not
-  // decide a claim in the browser (the events screen's note, and the same fix).
-  const railKey = (track: ValePassTrack): string =>
-    `${season.tiers
-      .map((tier) => (track === 'free' ? tier.freeClaimed : tier.premiumClaimed))
-      .join('')}|${season.points}|${season.unlocked}|${busy ?? ''}`;
 
   const nextTier = season.tiers.find((tier) => !tier.reached);
   const capped = season.dailyCap > 0 && season.pointsToday >= season.dailyCap;
@@ -212,36 +173,7 @@ function SeasonPanel({ season, today }: { season: ValePassStanding; today: strin
         ))}
       </div>
 
-      <Fui
-        key={railKey('free')}
-        of={RewardTrack}
-        className={styles.track}
-        options={{
-          nodes: free,
-          progress: season.points,
-          unit: 'favour',
-          title: 'Open to everybody',
-          subtitle: season.live ? `Until ${season.endsOn}` : `Closed on ${season.endsOn}`,
-        }}
-        on={{ 'track:claim': (node: { at: number }) => press('free', node.at) }}
-      />
-
-      <Fui
-        key={railKey('premium')}
-        of={RewardTrack}
-        className={styles.track}
-        data-locked={!season.unlocked}
-        options={{
-          nodes: premium,
-          progress: season.points,
-          unit: 'favour',
-          title: 'The season’s own track',
-          subtitle: season.unlocked
-            ? 'Yours for this season'
-            : `Not taken up — ${season.unlockCost.toLocaleString()} crystals`,
-        }}
-        on={{ 'track:claim': (node: { at: number }) => press('premium', node.at) }}
-      />
+      <PassLadder season={season} busy={busy !== null} onClaim={press} />
 
       {/* Offered only where it can be pressed. A permanently disabled button on a closed
           season reads as something broken, and the sentence beside it says which it is. */}

@@ -5,6 +5,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the team chooser, the Vale Pass and the roster at desktop size (C43)
+
+- **The lineup's four are sockets.** The team chooser drew its four slots as 104px faces
+  in hairline boxes — and, empty, as four dashed rectangles labelled *Slot 2 · Slot 3 · Slot
+  4*, which is a form. A slot is a 150px face in the pack's bevel frame now, the same frame
+  the top bar's chip wears, and an empty one is the frame with a faint figure in it. The
+  roster underneath draws the roster screen's own 128px card rather than a 96px one with a
+  nine-pixel name, and the enemy waves on the other side are 72px faces rather than 44px
+  hoods. The opposition's ceiling rose to 30rem so a three-wave stage's last row is not cut
+  through its level line.
+- **The Vale Pass is a ladder of tiles.** The library's `RewardTrack` places its nodes along
+  one line by the favour they sit at — right for six milestones and unreadable at thirty,
+  where the shipped season put thirty 44px tiles into 1,300px with every label overlapping
+  the next. `PassLadder` draws one column per tier — the number, its favour, the free tile,
+  the season's tile — on a `Rail` that runs off the edge and brings the next tier into view
+  when the screen opens. A tile ready to collect is gold and breathing, a collected one
+  carries a tick, a season reward not taken up carries a padlock, and every state is the
+  server's own flag; the tile is a button only while it can be pressed.
+- **The roster is one size up**: 128px cards in a 444px rail instead of 108 in 380, the
+  relic sockets at 104px rather than the pack's 88, and the champion's idle at 440px.
+- **Fixed: a tall dialog drew its footer below the window with no way to scroll to it.**
+  Two rules in the modal were aimed at the React bridge's `display: contents` wrapper rather
+  than the library's panel inside it, so neither constrained anything: the panel could not
+  shrink (Mistvale's `Panel` carries `flex-shrink: 0` for a scrolling column's sake), and
+  its body was a block rather than the column the scrolling body below it assumed. Every
+  dialog shorter than a window hid both; the team chooser at 900px found them the day its
+  sockets grew, with *Into the mist* at y=911 of 900. The selectors reach the panel now, the
+  panel may shrink, and its body is a column.
+- **Fixed: in a short window the team chooser's roster collapsed to nothing.** The fix
+  above let the lineup shrink to the dialog's body, and something inside it then had to
+  give: the confrontation kept its full height and the roster grid — the one thing the
+  player has to press — went to zero, with its cards clipped inside it. There is an order
+  now: the confrontation yields first, down to the height four sockets need, with the enemy
+  waves scrolling inside their side; the roster never drops below one full row; only what
+  is left scrolls the body. The stage's summary line ("3 waves · 4 energy · 375–560
+  silver") sits on the *What is waiting* banner, where the other side's aura sentence does,
+  rather than as a row of its own under the confrontation — the row that at 1440×900 was
+  the difference between the footer fitting and not.
+- **Fixed: the champion sheet's stat table ran under its set-bonus panel at 1440×900.**
+  The two split into one column below a *window* width of 1200px, which is the wrong
+  question — what decides whether they fit side by side is the width of the sheet's own
+  column, about 560px at 1440 once the roll and the portrait have theirs, and the
+  five-column table was squeezed under the panel with its last two columns drawn through
+  it. The row is `auto-fit` over a 24rem minimum now: two tracks when the column can hold
+  two, one otherwise, with the panel taking the full width under the table.
+
 ### Changed — the floor is lit, the type is desktop-sized, and two screens stopped being forms (C42)
 
 - **The battlefield has a floor.** Below the horizon was one flat near-black plate from the

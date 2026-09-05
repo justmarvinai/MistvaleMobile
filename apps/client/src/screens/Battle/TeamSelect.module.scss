@@ -11,11 +11,6 @@
   min-width: 0;
 }
 
-.summary {
-  color: $muted;
-  font-size: 0.95rem;
-}
-
 .slots {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

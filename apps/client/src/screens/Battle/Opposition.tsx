@@ -108,7 +108,7 @@ function Unit({
   return (
     <span ref={ref} className={styles.unit} data-boss={def?.isBoss === true}>
       <span className={styles.portrait}>
-        <Portrait src={art.portrait ?? null} name={def?.name} size={44} />
+        <Portrait src={art.portrait ?? null} name={def?.name} size={72} />
         {affinity && (
           <span
             className={styles.affinity}

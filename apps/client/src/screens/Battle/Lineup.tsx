@@ -68,6 +68,14 @@ export interface LineupSide {
    * does not apply to them.
    */
   auraHint?: string | undefined;
+  /**
+   * One line under the label for a side that has no aura to state — what the fight *is*,
+   * in the caller's words: "3 waves · 4 energy · 375–560 silver". It sits where the other
+   * side's aura sentence does, so the two banners are the same height and the line costs
+   * the dialog no row of its own (C43: it was a notice under the confrontation, and on a
+   * 900px window that row was the difference between the footer fitting and not).
+   */
+  note?: string | undefined;
 }
 
 /**
@@ -386,8 +394,13 @@ export function Lineup({
   );
 }
 
-/** Smaller than the roster screen's 108, because this grid shares a window with two lineups. */
-const ROSTER_CARD = 96;
+/**
+ * The roster's card, the roster screen's own size (C43). It was 96 — smaller than the
+ * screen's 108 "because this grid shares a window with two lineups" — and at 96 the library
+ * draws a nine-pixel name, which on a 1680px dialog is a card nobody can read. The grid
+ * scrolls; the cards do not have to be small for it.
+ */
+const ROSTER_CARD = 128;
 
 /**
  * The face in a formation slot, bigger than a card in the roster below it.
@@ -397,7 +410,7 @@ const ROSTER_CARD = 96;
  * choosing from are the list. Four of these plus their padding come to ~480px, which fits
  * inside the narrowest side the layout allows before it stacks.
  */
-const SLOT_FACE = 104;
+const SLOT_FACE = 150;
 
 /** A content enum as a word. The roster screen capitalises these the same way. */
 function capital(value: string): string {
@@ -422,6 +435,8 @@ function Banner({ side }: { side: LineupSide }): JSX.Element {
           <span className={styles.auraTag}>Aura</span>
           {side.auraHint}
         </p>
+      ) : side.note ? (
+        <p className={styles.aura}>{side.note}</p>
       ) : null}
     </header>
   );
