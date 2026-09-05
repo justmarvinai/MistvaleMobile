@@ -5,6 +5,39 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — hub cards that say where you stand, and three card screens composed for the frame (C45)
+
+- **A hub card carries a live line.** Under the sentence saying what a place is *for*, the
+  card now says where this account stands with it — *9 champions*, *40 of 250 in the
+  vault*, *12 of 37 met*, *2 wardens kept*, *3 of 5 tokens*, *1 of 2 keys today*, *5
+  springs open today*. The counts ride on `readiness`, the block the snapshot already
+  carries, so a hub costs no round trip and can never disagree with the screen behind the
+  card; below a feature's unlock the count is null and the shrouded card says when it
+  opens instead. `liveLine` is pure and asked what every card says.
+- **The hub's rows share the frame and the paintings take the room.** A one-row hub used
+  to draw four 22rem cards in the middle of a 1080px window with two hundred pixels of
+  nothing above and below; the rows share the frame's height now, each card as tall as
+  its row up to 30rem and centred in it, and the painting is what grows — four 480px cards
+  holding 300px paintings on Champions, two rows of 400px on Battle that still fit. A
+  first cut capped the *row* at 30rem and cut Battle's second row off at the dock. Every
+  card reserves four blurb lines, so a short sentence beside a long one no longer draws a
+  taller painting.
+- **Fixed: the Wardens card had no picture.** It named `icon-banner`, which the vendored
+  library does not have, and a card's art is a `background-image` — a missing one is
+  simply empty, from C12 to now. It is the library's night watch, and a test refuses any
+  place or unlock badge naming a painting the library does not ship.
+- **Trials are four across**, with the lent team one to a row — a 56px face with the
+  whole name beside it — and the par at 1.4rem; the fourth trial used to sit orphaned on
+  a row of its own, and four 44px faces across a card left each name sixty pixels, which
+  is "Thordakk Cindermaw" cut to "hordakk / indermaw".
+- **Each expedition has a painting** across the top of a card that fills its row, with
+  the way to send a party pinned to its foot so three buttons line up — three cards of
+  words over six hundred pixels of nothing was the audit's example of a screen that
+  forgot to finish. `expeditionArt` chooses by key for the three seeded errands and from
+  a short rotation for any added in Admin.
+- **The Bazaar's stalls carry 150px art** with the price and the button as one plate at
+  the foot, four to a row; the art was 90px and the price a 13px figure in a corner.
+
 ### Changed — the road, the ledgers, the calendar and the ladders at desktop size (C44)
 
 - **The vale's markers are paintings.** Twelve identical 52px grey discs on faint lines,

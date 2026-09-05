@@ -62,7 +62,10 @@
    that forgot to finish. Buying a shelf adds a stall and the rows simply grow into it. */
 .slots {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  /* 20rem rather than 18 (C45): the socket is 150px now and a stall is a picture with a
+     price under it, which wants the room — and four still fit a row on a desktop, where
+     22rem wrapped the fourth stall onto a row of its own. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
   gap: $space-3;
   align-content: center;
   flex: 1;
@@ -93,7 +96,7 @@
 
 .slotName {
   color: $parchment;
-  font-size: 0.95rem;
+  font-size: 17px;
 }
 
 .qty {
@@ -102,13 +105,20 @@
   font-size: 0.9rem;
 }
 
-/* A painted socket and the name under it. */
+/* A painted socket and the name under it. 150px rather than the pack's 88 for `lg`
+   (C45): the art is the whole reason to look at a stall, and at 90px a relic set and a
+   sigil were the same brown square. The variable is the library's own knob, overridden
+   at a specificity above its `[data-size]` rule. */
 .slotArt {
   flex: none;
 }
 
+.slotBody .slotArt:global(.fui-slot) {
+  --fui-slot-size: 150px;
+}
+
 .slotWhat {
-  font-size: 13.5px;
+  font-size: 15px;
   color: $parchment-dim;
   text-align: center;
 }
@@ -120,24 +130,29 @@
   gap: $space-2;
 }
 
+/* The price and the way to pay it, as one plate at the foot of the stall (C45) — they
+   were a 13px figure and a small button floating at the two corners of the card. */
 .slotFoot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: $space-2;
+  gap: $space-3;
   margin-top: auto;
+  padding: $space-2 $space-3;
+  border: 1px solid $edge;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .price {
   color: $gold;
   font-family: $font-mono;
-  font-size: 0.9rem;
+  font-size: 18px;
 }
 
 .priceShort {
   color: $danger;
   font-family: $font-mono;
-  font-size: 0.9rem;
+  font-size: 18px;
 }
 
 .reason {

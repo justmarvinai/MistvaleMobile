@@ -25,6 +25,27 @@ export const meterSchema = z.object({
 });
 export type Meter = z.infer<typeof meterSchema>;
 
+/**
+ * What an account holds, for the hubs' cards (C45).
+ *
+ * A card that says "Roster" and a sentence is a door; one that says "9 champions" under
+ * the sentence is a door with a window in it. Four counts, on the snapshot for the same
+ * reason as everything else here: a hub built from four lazy stores would draw blank lines
+ * to anybody who had not yet opened each screen — which is everybody, on the page they
+ * navigate from.
+ */
+export const holdingsSchema = z.object({
+  /** Copies on the roster, food included — what the roster screen lists. */
+  champions: z.number().int(),
+  /** Loose relics against the vault's capacity. */
+  vault: meterSchema,
+  /** Collectable champions met, against all of them. Null below the Chronicle's unlock. */
+  chronicle: meterSchema.nullable(),
+  /** Wardens kept. Null below the Wardens' unlock. */
+  wardens: z.number().int().nullable(),
+});
+export type Holdings = z.infer<typeof holdingsSchema>;
+
 export const readinessSchema = z.object({
   /** Attack tokens. Null below the Arena's unlock level. */
   arenaTokens: meterSchema.nullable(),
@@ -48,6 +69,7 @@ export const readinessSchema = z.object({
    * grace is the one thing on this card with a clock on it that nothing else mentions.
    */
   springsInGrace: z.boolean(),
+  holdings: holdingsSchema,
 });
 export type Readiness = z.infer<typeof readinessSchema>;
 
@@ -56,6 +78,7 @@ export const NO_READINESS: Readiness = Object.freeze({
   titanKeys: null,
   openSprings: [],
   springsInGrace: false,
+  holdings: { champions: 0, vault: { value: 0, cap: 0 }, chronicle: null, wardens: null },
 });
 
 /** Whether a meter is sitting at its ceiling, and so wasting whatever refills it. */

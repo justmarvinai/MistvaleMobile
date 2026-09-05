@@ -353,7 +353,10 @@ export const SCREENS: readonly ScreenDefinition[] = [
     label: 'Wardens',
     icon: 'nav-arena',
     glyph: 'glyph-two-shadows',
-    art: 'icon-banner',
+    // A night watch — the library's own painting. It was `icon-banner`, which the vendored
+    // pack does not have, so the card drew no picture at all from C12 to C45 and nothing
+    // said so: a card's art is a `background-image`, and a missing one is simply empty.
+    art: 'hero-nightwatch',
     blurb: 'Wardens you keep, the champion each has put forward, and the one you offer back.',
     unlock: 'wardens',
     lockedHint:

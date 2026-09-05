@@ -1,11 +1,20 @@
-import { eq } from 'drizzle-orm';
-import { UNLOCK_LEVELS, titanCounter, type Readiness, NO_READINESS } from '@mistvale/shared';
-import { arenaState } from '../../db/schema/index';
+import { eq, sql } from 'drizzle-orm';
+import {
+  UNLOCK_LEVELS,
+  titanCounter,
+  type Holdings,
+  type Meter,
+  type Readiness,
+  NO_READINESS,
+} from '@mistvale/shared';
+import { arenaState, playerChampions, playerFollows } from '../../db/schema/index';
 import type { Database } from '../../db/client';
 import type { ContentCache } from '../../content/cache';
 import { countersFor, remaining } from '../../lib/daily-counters';
 import { arenaConfigFrom, computeTokens } from '../arena/rating';
 import * as depths from '../depths/service';
+import * as gear from '../gear/service';
+import * as summon from '../summon/service';
 import * as titan from '../titan/service';
 
 /**
@@ -78,5 +87,60 @@ export async function readinessFor(
       .map((dungeon) => dungeon.key);
   }
 
+  readiness.holdings = await holdingsFor(db, content, player);
+
   return readiness;
+}
+
+/**
+ * What the account holds, for the hubs' cards (C45): the roster's size, the vault's fill,
+ * how much of the Chronicle has been met and how many wardens are kept. Four counts over
+ * indexed rows, and the Chronicle's is the same read the Chronicle screen makes — a second
+ * definition of "met" here would be the one that drifted.
+ *
+ * Null below each feature's unlock, as the rest of readiness is: a shrouded card says
+ * when it opens, not how empty it is.
+ */
+async function holdingsFor(
+  db: Database,
+  content: ContentCache,
+  player: { id: string; level: number },
+): Promise<Holdings> {
+  const bundle = content.current().bundle;
+
+  const [roster] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(playerChampions)
+    .where(eq(playerChampions.playerId, player.id));
+
+  const vault = await gear.vaultState(db, player.id, gear.gearContextFrom(bundle));
+
+  let chronicle: Meter | null = null;
+  if (player.level >= UNLOCK_LEVELS.chronicle) {
+    const book = await summon.chronicle(db, player.id, content);
+    const collectable = new Set(
+      bundle.champions.filter((champion) => !champion.isFood).map((champion) => champion.key),
+    );
+    chronicle = {
+      value: book.entries.filter((entry) => entry.seen && collectable.has(entry.championKey))
+        .length,
+      cap: book.total,
+    };
+  }
+
+  let wardens: number | null = null;
+  if (player.level >= UNLOCK_LEVELS.wardens) {
+    const [kept] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(playerFollows)
+      .where(eq(playerFollows.followerId, player.id));
+    wardens = kept?.count ?? 0;
+  }
+
+  return {
+    champions: roster?.count ?? 0,
+    vault: { value: vault.used, cap: vault.capacity },
+    chronicle,
+    wardens,
+  };
 }

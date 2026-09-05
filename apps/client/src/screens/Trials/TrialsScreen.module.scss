@@ -38,10 +38,13 @@
   font-size: 0.9rem;
 }
 
+/* Four across on a desktop (C45): the floor was 23rem, which on a 1440px content width
+   fits three and orphans the fourth on a row of its own. `min(100%, 20rem)` keeps the
+   single track from overflowing a column narrower than 20rem. */
 .trials {
   display: grid;
   gap: $space-3;
-  grid-template-columns: repeat(auto-fit, minmax(23rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
 }
 
 .card {
@@ -53,28 +56,39 @@
 .hint {
   margin: 0;
   color: $parchment;
-  font-size: 0.92rem;
+  font-size: 15.5px;
   font-style: italic;
   line-height: 1.5;
 }
 
+/* The lent team, as faces a player can actually tell apart (C45): 56px rather than 44,
+   since who is lent is the whole puzzle — and one to a row with the name beside the face,
+   because four faces across a 300px card leave 69px for a name, and "Thordakk Cindermaw"
+   cut to "hordakk / indermaw" is not a name. Four rows of 56 are a hair taller than the
+   old row of four and every name is whole. */
 .team {
   display: grid;
-  margin: 0;
+  margin: $space-2 0;
   padding: 0;
   gap: $space-1;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   list-style: none;
 }
 
 .member {
   display: flex;
   overflow: hidden;
-  flex-direction: column;
   align-items: center;
   min-width: 0;
+  gap: $space-2;
+  text-align: left;
+}
+
+.memberWords {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   gap: 2px;
-  text-align: center;
 }
 
 // Two lines, always, however long the name is. Mistvale's champions run from "Anuria" to
@@ -84,13 +98,12 @@
 .memberName {
   display: -webkit-box;
   overflow: hidden;
-  min-height: 2 * 1.2 * 0.72rem;
   color: $parchment;
-  font-size: 0.84rem;
+  font-size: 15px;
   line-height: 1.2;
-  // Mistvale has single words longer than a quarter of a card — "Cindermaw", "Palewatch" —
-  // and a name that cannot wrap inside its cell draws over the frame instead.
-  overflow-wrap: anywhere;
+  // Two lines at most beside the face (C45), at a width where "Vess'aryn of the Deep
+  // Thorn" wraps at its spaces; a word breaks only when it is wider than the whole row.
+  overflow-wrap: break-word;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -98,7 +111,7 @@
 .memberRank {
   color: $parchment-dim;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -123,7 +136,7 @@
   dd {
     margin: 0;
     font-family: $font-mono;
-    font-size: 1.05rem;
+    font-size: 1.4rem;
   }
 }
 

@@ -7,6 +7,7 @@ import {
   buildTestApp,
   extractSessionCookie,
   isDatabaseAvailable,
+  seedLiveContent,
   truncateAll,
   uniqueAccountName,
   uniqueProfileName,
@@ -59,6 +60,52 @@ describe.skipIf(!dbUp)('player endpoints', () => {
       expect(data.settings.musicVolume).toBeTypeOf('number');
       expect(data.serverTime).toBeTypeOf('string');
       expect(data.unlocks.arena).toBe(false);
+    });
+
+    it('carries what the account holds, null below each unlock (C45)', async () => {
+      // The published content is what the counts are measured against: the vault's ceiling
+      // is a config number and the Chronicle's total is the champion list, and without
+      // either both read zero — which is the answer this must never give a real account.
+      await seedLiveContent(app);
+      const { cookie, accountName } = await registerPlayer();
+
+      const before = (
+        await app.inject({
+          method: 'GET',
+          url: apiPath(ROUTES.player.self),
+          cookies: { mv_session: cookie },
+        })
+      ).json().data.readiness.holdings;
+      // A fresh account: nobody on the roster, an empty vault with a real ceiling, and
+      // nothing said about screens it cannot open yet.
+      expect(before.champions).toBe(0);
+      expect(before.vault.value).toBe(0);
+      expect(before.vault.cap).toBeGreaterThan(0);
+      expect(before.chronicle).toBeNull();
+      expect(before.wardens).toBeNull();
+
+      const account = (
+        await app.db.select().from(accounts).where(eq(accounts.accountName, accountName))
+      )[0];
+      if (!account) throw new Error('account missing');
+      await app.db
+        .update(players)
+        .set({ level: Math.max(UNLOCK_LEVELS.chronicle, UNLOCK_LEVELS.wardens) })
+        .where(eq(players.accountId, account.id));
+
+      const after = (
+        await app.inject({
+          method: 'GET',
+          url: apiPath(ROUTES.player.self),
+          cookies: { mv_session: cookie },
+        })
+      ).json().data.readiness.holdings;
+      // Open now: the Chronicle counts collectable champions against all of them, and the
+      // wardens list is empty rather than absent.
+      expect(after.chronicle).not.toBeNull();
+      expect(after.chronicle.value).toBe(0);
+      expect(after.chronicle.cap).toBeGreaterThan(0);
+      expect(after.wardens).toBe(0);
     });
 
     it('reflects unlock gating as the account levels up', async () => {

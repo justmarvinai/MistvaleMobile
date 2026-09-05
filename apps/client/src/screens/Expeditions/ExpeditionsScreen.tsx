@@ -21,6 +21,7 @@ import { useContentStore } from '@/state/contentStore';
 import { useExpeditionStore } from '@/state/expeditionStore';
 import { usePlayerStore } from '@/state/playerStore';
 import { useRosterStore } from '@/state/rosterStore';
+import { expeditionArt } from '../../ui/expeditionArt';
 import styles from './ExpeditionsScreen.module.scss';
 
 /**
@@ -157,8 +158,13 @@ export function ExpeditionsScreen(): JSX.Element {
         />
       ) : (
         <section className={styles.offers} aria-label="Where they can go">
-          {state.offers.map((offer) => (
-            <OfferCard key={offer.key} offer={offer} onSend={() => setSending(offer)} />
+          {state.offers.map((offer, index) => (
+            <OfferCard
+              key={offer.key}
+              offer={offer}
+              ordinal={index}
+              onSend={() => setSending(offer)}
+            />
           ))}
         </section>
       )}
@@ -224,9 +230,29 @@ function RunCard({
   );
 }
 
-function OfferCard({ offer, onSend }: { offer: ExpeditionOffer; onSend: () => void }): JSX.Element {
+function OfferCard({
+  offer,
+  ordinal,
+  onSend,
+}: {
+  offer: ExpeditionOffer;
+  ordinal: number;
+  onSend: () => void;
+}): JSX.Element {
   return (
     <Panel title={offer.name} className={styles.offerCard}>
+      {/* A painting across the top (C45). Three cards of words over six hundred pixels of
+          nothing were the audit's example of a screen that forgot to finish; a picture is
+          what makes an errand a place to send somebody. */}
+      <span
+        className={styles.offerArt}
+        style={
+          {
+            '--mv-offer-art': `var(--fui-img-${expeditionArt(offer.key, ordinal)})`,
+          } as React.CSSProperties
+        }
+        aria-hidden="true"
+      />
       <p className={styles.description}>{offer.description}</p>
       <p className={styles.terms}>
         {offer.hours}h · {offer.partySize} {offer.partySize === 1 ? 'champion' : 'champions'}
@@ -239,14 +265,18 @@ function OfferCard({ offer, onSend }: { offer: ExpeditionOffer; onSend: () => vo
           </li>
         ))}
       </ul>
-      <Button
-        disabled={offer.blockedReason !== null}
-        title={offer.blockedReason ?? undefined}
-        onClick={onSend}
-      >
-        Send a party
-      </Button>
-      {offer.blockedReason && <p className={styles.blocked}>{offer.blockedReason}</p>}
+      {/* At the foot of the card whatever the card above it holds, so three buttons in a
+          row line up (C45). */}
+      <div className={styles.offerActions}>
+        <Button
+          disabled={offer.blockedReason !== null}
+          title={offer.blockedReason ?? undefined}
+          onClick={onSend}
+        >
+          Send a party
+        </Button>
+        {offer.blockedReason && <p className={styles.blocked}>{offer.blockedReason}</p>}
+      </div>
     </Panel>
   );
 }

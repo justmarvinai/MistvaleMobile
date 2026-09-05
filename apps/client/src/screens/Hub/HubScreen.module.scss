@@ -117,7 +117,11 @@
   z-index: 1;
   width: 100%;
   /* Landscape rather than the station's square: a wide card with a square picture in it is
-     mostly picture, and the sentence underneath is what a hub is *for*. */
+     mostly picture, and the sentence underneath is what a hub is *for*. The ratio is the
+     picture's floor; it grows into whatever height the row has spare (C45), so a hub with
+     one row draws its four paintings at three hundred pixels rather than a hundred and
+     seventy over a card that was mostly frame. */
+  flex: 1 1 auto;
   aspect-ratio: 21 / 9;
   min-height: 0;
   background-image: var(--mv-place-art);
@@ -198,6 +202,11 @@
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* …and four lines *reserved*, whatever the sentence needs (C45): the painting above
+     takes the card's spare height, so a card with a one-line blurb beside one with four
+     drew its painting fifty pixels taller, and a row of destinations read as a row of
+     different cards. Same text block on every card, same picture. */
+  min-height: 4 * 1.55 * 0.95rem;
 }
 
 /* ── The page of them ───────────────────────────────────────────────────────
@@ -209,19 +218,40 @@
    four-line sentence stood taller than the one beside it and a row of destinations had a
    ragged bottom edge. A menu of places is tiles; tiles are the same size.
 
-   **The grid sits in the middle of what is left.** Battle holds eight cards and fills the
-   frame; Champions holds three and used to draw one row at the top of a 1080px window with
-   six hundred pixels of nothing under it — the owner's "so much empty space", reintroduced
-   by the very screen that was meant to answer it. Centring is the honest fix rather than
-   growing three cards to 700px tall: the row is capped, and the space is shared above and
-   below it instead of all falling to the bottom. */
+   **The grid sits in the middle of what is left, and a row may grow.** Battle holds eight
+   cards and fills the frame; Champions holds four and used to draw one 22rem row in the
+   middle of a 1080px window with two hundred and thirty pixels of nothing above and below
+   it — the owner's "so much empty space", on the very screen meant to answer it. The
+   ceiling is 30rem now (C45) and the *painting* is what takes the extra height, so a
+   one-row hub is four large pictures with a sentence and a live line under each rather
+   than four small ones with the same room around them. Centring still shares out what a
+   30rem row leaves. */
 .places {
   flex: 1;
-  align-items: stretch;
+  /* The rows share the frame's height — `1fr` resolves because the grid is a flex child
+     with a definite height — and each card is as tall as its row *up to* its own ceiling,
+     centred in whatever the row has left. So Battle's two rows at 1080 are two rows of
+     400px cards that fit, and Champions' one row is four 480px cards in the middle of the
+     frame rather than one 830px row holding a picture and two lines. A ceiling on the
+     row itself cannot do this: a fixed 30rem row is right for one row and 960px of
+     scrolling for two, which is how C45's first cut cut the Battle hub's second row off
+     at the dock. */
+  align-items: center;
   align-content: center;
-  /* A floor and a ceiling. Without the ceiling a hub with one row would stretch that row
-     to the whole frame, which is a 700px card holding a picture and two lines. */
-  grid-auto-rows: minmax(15rem, 22rem);
+  grid-auto-rows: minmax(15rem, 1fr);
+}
+
+.places .card {
+  height: 100%;
+  max-height: 30rem;
+}
+
+/* Where the account stands with the place — a figure, in the numerals' face. */
+.live {
+  color: $accent-soft;
+  font-family: $font-mono;
+  font-size: 15px;
+  letter-spacing: 0.02em;
 }
 
 /* The unlock line on a shrouded card — under the sentence rather than instead of it. */

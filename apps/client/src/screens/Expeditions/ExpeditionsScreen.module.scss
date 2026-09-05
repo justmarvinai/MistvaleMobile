@@ -26,10 +26,13 @@
 }
 
 .running,
+/* Three errands across a desktop, each a tall card with its painting on top (C45); the
+   floor keeps a fourth from squeezing in at a width where the painting would be a strip. */
 .offers {
   display: grid;
-  gap: $space-3;
-  grid-template-columns: repeat(auto-fit, minmax(23rem, 1fr));
+  gap: $space-4;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  align-items: stretch;
 }
 
 .runCard,
@@ -37,6 +40,34 @@
   display: flex;
   flex-direction: column;
   gap: $space-2;
+}
+
+/* The library's panel body is a block; as a column that fills the card, the actions can
+   sit at its foot (C45). The class lands on the library root, so this reaches inside it. */
+.offerCard :global(.fui-panel__body) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.offerActions {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin-top: auto;
+  padding-top: $space-2;
+}
+
+/* The errand's painting: landscape, lit, and the first thing on the card. */
+.offerArt {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: $space-2;
+  border: 1px solid $edge-bright;
+  background: var(--mv-offer-art) center / cover no-repeat;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
 }
 
 .when {
@@ -49,15 +80,15 @@
 .description {
   margin: 0;
   color: $parchment-dim;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.55;
 }
 
 .terms {
   margin: 0;
   color: $parchment;
   font-family: $font-mono;
-  font-size: 0.95rem;
+  font-size: 16px;
 }
 
 /* Favours as chips. A met one is lit; an unmet one is still shown, because what the

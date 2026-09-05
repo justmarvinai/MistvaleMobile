@@ -12,6 +12,7 @@ import {
   type ScreenId,
 } from '@/app/screens';
 import { HIGHLIGHT_ATTR } from '@/app/highlight';
+import { liveLine } from './liveLine';
 import styles from './HubScreen.module.scss';
 
 /**
@@ -42,6 +43,7 @@ export function HubScreen({
 }): JSX.Element {
   const unlocks = usePlayerStore((state) => state.unlocks);
   const badges = usePlayerStore((state) => state.badges);
+  const readiness = usePlayerStore((state) => state.readiness);
   const definition = SCREENS.find((screen) => screen.id === hub);
   const places = screensInHub(hub);
   // The registry keeps its English, which is also the catalogue key, so this reads the same
@@ -61,6 +63,7 @@ export function HubScreen({
             screen={place}
             unlocked={isScreenUnlocked(place, unlocks)}
             waiting={badges[place.id as keyof DockBadges] ?? 0}
+            line={liveLine(place.id, readiness)}
             onNavigate={() => onNavigate(place.id)}
           />
         ))}
@@ -85,11 +88,14 @@ function Destination({
   screen,
   unlocked,
   waiting,
+  line,
   onNavigate,
 }: {
   screen: ScreenDefinition;
   unlocked: boolean;
   waiting: number;
+  /** Where the account stands with the place, or null where there is nothing to count. */
+  line: string | null;
   onNavigate: () => void;
 }): JSX.Element {
   const text = useText();
@@ -129,6 +135,10 @@ function Destination({
             whole reason a shrouded card is still on the screen (UI_UX §2) — a player who
             cannot go yet is exactly the one deciding whether to care. */}
         <span className={styles.blurb}>{screen.blurb ? text(screen.blurb) : ''}</span>
+        {/* The live line (C45): where this account stands with the place, under the
+            sentence about what the place is for. Only on an open card — a shrouded one
+            says when it opens instead, and a count of nothing is not news. */}
+        {unlocked && line && <span className={styles.live}>{line}</span>}
         {!unlocked && (
           <span className={styles.gate}>{text(screen.lockedHint ?? 'Not yet open to you.')}</span>
         )}

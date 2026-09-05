@@ -161,14 +161,16 @@ function TrialCard({
               <Portrait
                 src={def ? (championArt(def, bundle?.assets).portrait ?? null) : null}
                 name={def?.name ?? key}
-                size={44}
+                size={56}
               />
-              <span className={styles.memberName}>{def?.name ?? key}</span>
-              {member && (
-                <span className={styles.memberRank}>
-                  ★{member.rank} · {member.level}
-                </span>
-              )}
+              <span className={styles.memberWords}>
+                <span className={styles.memberName}>{def?.name ?? key}</span>
+                {member && (
+                  <span className={styles.memberRank}>
+                    ★{member.rank} · {member.level}
+                  </span>
+                )}
+              </span>
             </li>
           );
         })}
