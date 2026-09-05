@@ -17,8 +17,10 @@ import styles from './Dock.module.scss';
  *
  * Locked destinations stay visible behind a mist shroud rather than disappearing —
  * seeing what is coming is part of the pull forward (docs/UI_UX_DESIGN.md §2) — and each
- * one keeps the tooltip that says when it opens. Number keys 1-9 jump straight to a slot,
- * and the hint sits in the corner of the first nine.
+ * one keeps the tooltip that says when it opens. Number keys 1-9 jump straight to a slot;
+ * the key is named in the tooltip rather than printed in the corner of every button, since
+ * a permanent `1 2 3 4 5 6` across the bottom of the screen is a keyboard overlay that
+ * nobody asked to see (C41).
  *
  * Pips come off the player snapshot rather than a poll: the shell re-fetches it after
  * every action, which is exactly when something becomes claimable (UI_UX §1.3).
@@ -92,9 +94,9 @@ export function Dock({
     },
   );
 
-  // The three things the library has no option for, written onto its own buttons: the
+  // The two things the library has no option for, written onto its own buttons: the
   // tutorial's highlight hook (which measures a box, so it has to be on the real
-  // element), the locked tooltip, and the hotkey hint.
+  // element) and the tooltip — the key that opens the slot, or when a locked one opens.
   useLayoutEffect(() => {
     const root = instance?.el;
     if (!root) return;
@@ -103,15 +105,12 @@ export function Dock({
       if (!button) return;
       button.setAttribute(HIGHLIGHT_ATTR, `dock:${screen.id}`);
       const unlocked = isScreenUnlocked(screen, unlocks);
-      button.title = unlocked ? text(screen.label) : text(screen.lockedHint ?? 'Still locked');
+      const key = index < 9 ? ` · ${index + 1}` : '';
+      button.title = unlocked
+        ? `${text(screen.label)}${key}`
+        : text(screen.lockedHint ?? 'Still locked');
       button.setAttribute('aria-disabled', String(!unlocked));
-      if (index < 9 && !button.querySelector(`.${styles.hotkey}`)) {
-        const hint = document.createElement('span');
-        hint.className = styles.hotkey ?? '';
-        hint.setAttribute('aria-hidden', 'true');
-        hint.textContent = String(index + 1);
-        button.appendChild(hint);
-      }
+      if (index < 9) button.setAttribute('aria-keyshortcuts', String(index + 1));
     });
   });
 

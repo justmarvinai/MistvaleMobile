@@ -25,8 +25,9 @@ import styles from './ProfileChip.module.scss';
  *
  * **The face is a champion you own**, chosen on your own profile card and stored as a
  * champion *key*, so it is drawn from the content bundle already in hand rather than
- * fetched. An account that has not chosen wears the crest with its initial on it, which is
- * where every account starts and a perfectly good place to stay.
+ * fetched. An account that has not chosen wears the Haven's crest, which is where every
+ * account starts and a perfectly good place to stay — it was the account's initial in a
+ * box until C41, which is a web page's answer to a missing avatar and not a game's.
  *
  * **The shape is the owner's second reference** (2026-08-27), and it moves three things:
  * the level is a *disc on the corner of the portrait* rather than a tag tucked under it,
@@ -110,11 +111,11 @@ export function ProfileChip({
           {art ? (
             <Portrait src={art.portrait ?? null} name={def?.name} size={76} />
           ) : (
-            // No champion chosen: the account's own initial, which is what the top bar has
-            // drawn since P0 and is still the honest answer for somebody who likes it.
-            <span className={styles.initial} aria-hidden="true">
-              {player.profileName.charAt(0).toUpperCase()}
-            </span>
+            // No champion chosen: the Haven's crest, the same mark the profile card's "no
+            // portrait" option wears, so the two agree about what an account without a
+            // face looks like. Painted art rather than an `<img>`, which is also what lets
+            // a spec ask "is there a portrait yet" by counting images.
+            <span className={styles.crest} aria-hidden="true" />
           )}
           <LevelDisc level={player.level} />
         </span>

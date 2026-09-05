@@ -21,7 +21,7 @@
   position: relative;
   display: flex;
   align-items: stretch;
-  gap: $space-4;
+  gap: $space-5;
   flex: 1;
   min-width: 0;
   padding: $space-3 0;
@@ -74,8 +74,8 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3.25rem;
+  height: 3.25rem;
   transform: translateY(-50%);
   border: 1px solid $edge;
   background: rgba(12, 10, 9, 0.82);
@@ -96,8 +96,8 @@
   /* The chevron, drawn rather than typed: no glyph in the kit is a bare arrowhead, and a
      Unicode one would pick up whatever font the browser felt like. */
   > span {
-    width: 0.6rem;
-    height: 0.6rem;
+    width: 0.8rem;
+    height: 0.8rem;
     border-top: 2px solid currentcolor;
     border-right: 2px solid currentcolor;
   }
@@ -124,35 +124,4 @@
 /* No overflow, no arrows — and no dead furniture around a row that fits. */
 .rail[data-overflows='false'] .arrow {
   display: none;
-}
-
-/* The drag hint, shown only when the track actually overflows (`Rail.tsx`).
-
-   Moved here from the Haven in C12, along with the decision about *whether* to show it:
-   the camp went from twelve boards to five, every one of them fitted, and the line telling
-   the player to drag sideways was still under a row with nothing off the edge of it.
-
-   Absolutely placed under the track rather than in flow: the rail root is a three-column
-   row (arrow, track, arrow), so a fourth child in flow would sit *beside* the end arrow.
-
-   It used to hang *outside* the rail at `bottom: -1.4rem`, which is fine while something
-   sits below and wrong the moment the rail is the last thing in a full-height column — on
-   the Haven it landed on the dock, so the one instruction the camp gives was written across
-   the navigation. The room is reserved inside the rail's own box now, and only when there
-   is a hint to put in it. */
-.rail[data-overflows='true'] {
-  padding-bottom: 1.6rem;
-}
-
-.hint {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: 0;
-  text-align: center;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: $muted-deep;
 }

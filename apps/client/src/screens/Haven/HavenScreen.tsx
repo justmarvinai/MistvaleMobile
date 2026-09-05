@@ -26,6 +26,12 @@ import styles from './HavenScreen.module.scss';
  *
  * A locked station keeps its panel and takes the shroud, because seeing what is coming is
  * part of the pull forward (UI_UX §2). The drifting mist behind it comes from the Pixi stage.
+ *
+ * **The boards are as tall as the room** (C41). They used to stop at 27rem and sit in the
+ * middle of the rail, which on a 1080px display left a hand's width of nothing above them and
+ * another below — the owner's first example of the game not using its screen. A board takes
+ * the rail's whole height now and its width follows from that, so a bigger window is a bigger
+ * camp rather than the same camp with more dark around it.
  */
 export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
   const player = usePlayerStore((state) => state.player);
@@ -97,11 +103,11 @@ export function HavenScreen({ onNavigate }: { onNavigate: (id: ScreenId) => void
           nothing waiting, which is most mornings. */}
       <WhatsReady onNavigate={onNavigate} />
 
-      <Rail
-        label="Locations"
-        className={styles.rail}
-        hint="Drag the camp sideways to see every place in the vale."
-      >
+      {/* No "drag the camp" line under it any more (C41): the arrows at either end and the
+          fade the last board dissolves into are the affordance, and a sentence in capitals
+          telling a player how to use a row of pictures is the kind of text the owner's
+          brief is about. */}
+      <Rail label="Locations" className={styles.rail}>
         {stations.map((screen) => (
           <Station
             key={screen.id}
@@ -175,7 +181,7 @@ function Station({
 
       {!unlocked && (
         <span className={styles.seal} aria-hidden="true">
-          <Icon name="nav-locked" size={28} />
+          <Icon name="nav-locked" size={34} />
         </span>
       )}
 

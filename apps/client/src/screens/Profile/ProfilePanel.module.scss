@@ -31,7 +31,7 @@
   gap: $space-4;
 }
 
-/* The warden's face: the champion they chose, or their initial. Framed either way, and
+/* The warden's face: the champion they chose, or the Haven's crest. Framed either way, and
    ringed in the champion's rarity when there is one — the same treatment the top bar's chip
    gives it, because they are the same portrait and a card that dressed it differently would
    read as a different account. */
@@ -44,9 +44,6 @@
   height: 6.5rem;
   flex: none;
   background: $panel-inset;
-  color: $gold;
-  font-family: $font-display;
-  font-size: 2.6rem;
   /* Not hidden: the level disc hangs off the corner, and `overflow: hidden` on the box it
      hangs from is how a mark placed outside a frame silently disappears. The portrait is
      `object-fit: cover` inside anyway, so there is nothing else here to clip. */
@@ -98,6 +95,14 @@
     height: 100%;
     object-fit: cover;
   }
+}
+
+/* The crest itself, filling the frame the way a portrait would. */
+.avatarCrest {
+  position: absolute;
+  inset: 5px;
+  background: var(--fui-img-crest-stone-guard) center / contain no-repeat;
+  filter: saturate(0.85);
 }
 
 /* The way back to the crest, sized to stand in a row of champion cards without pretending

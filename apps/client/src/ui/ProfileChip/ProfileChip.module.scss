@@ -112,12 +112,13 @@
   }
 }
 
-.initial {
-  font-family: $font-display;
-  font-size: 36px;
-  line-height: 1;
-  color: $accent-soft;
-  text-shadow: 0 1px 3px #000;
+/* The crest an account wears until it chooses a face: the Haven's own, drawn to fill the
+   frame the way a portrait would, so the chip is the same shape with or without one. */
+.crest {
+  position: absolute;
+  inset: 4px;
+  background: var(--fui-img-crest-stone-guard) center / contain no-repeat;
+  filter: saturate(0.85);
 }
 
 /* ── The lines ───────────────────────────────────────────────────────────── */

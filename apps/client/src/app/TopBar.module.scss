@@ -15,7 +15,7 @@
   z-index: $z-chrome;
   flex: none;
   gap: $space-4;
-  padding: $space-2 $space-3;
+  padding: $space-2 $space-4;
 }
 
 /* ── The currency rail ─────────────────────────────────────────────────────── */
@@ -26,25 +26,28 @@
 
 .bar :global(.fui-topbar__res) {
   gap: $space-2;
+  padding: 5px 12px 5px 8px;
 }
 
 /* The chip is portalled in and so lands after the rail in the DOM; it orders itself first
    (see ProfileChip.module.scss), and the rail claims the slack with its own
    `margin-left: auto`.
 
-   17px painted coins on a 1440px window are stamps. */
+   17px painted coins on a 1440px window are stamps; C5 took them to 26 and C41 to 30,
+   with the figures beside them at 18px — the size the rest of the desktop chrome reads at
+   now, so a currency count is not the smallest text on a screen it is the point of. */
 .bar :global(.fui-topbar__icon) {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
 }
 
 .bar :global(.fui-topbar__value) {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.15;
 }
 
 .bar :global(.fui-topbar__refill) {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 /* ── The tool buttons ──────────────────────────────────────────────────────── */
@@ -54,17 +57,17 @@
 }
 
 .bar :global(.fui-topbar__action) {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
 }
 
 /* The glyph inside is a `::after` inset by a percentage, so it grows with the button and
    needs no rule of its own. */
 
 .bar :global(.fui-topbar__badge) {
-  min-width: 18px;
-  font-size: 11px;
-  line-height: 18px;
+  min-width: 20px;
+  font-size: 12px;
+  line-height: 20px;
 }
 
 /* A narrow window gives the numbers back their room by dropping the rail's gaps first —

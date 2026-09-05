@@ -1,9 +1,14 @@
-/* The Haven: a heading, a rail of painted places, and one line telling you it moves.
+/* The Haven: a heading, what is waiting, and a rail of painted places.
 
    The stations used to be a wrapped grid of 64px sockets. What replaced them is a row of
    tall boards, each with its own art, its name and its purpose on it — and the row is
    wider than the window on purpose, because a camp you walk along reads as somewhere you
-   are rather than a list of somewheres you could be. The dragging is `ui/Rail`. */
+   are rather than a list of somewheres you could be. The dragging is `ui/Rail`.
+
+   C41 made the boards fill the room. They were capped at 27rem and centred in the rail,
+   which on a desktop display is a row of phone-sized cards floating in the middle of a dark
+   screen; now a board is as tall as the rail and as wide as that height allows, the art
+   grows with it, and the words on it are at a size a desktop is read at. */
 
 .screen {
   display: flex;
@@ -13,22 +18,12 @@
   min-height: 0;
 }
 
-/* The rail takes every pixel the heading and the hint do not. `min-height: 0` because a
-   flex child's automatic minimum is its content, and without it a 20rem panel would push
+/* The rail takes every pixel the heading and the card do not. `min-height: 0` because a
+   flex child's automatic minimum is its content, and without it a tall board would push
    the column past the window instead of letting the rail scroll. */
 .rail {
   flex: 1 1 auto;
   min-height: 0;
-}
-
-.hint {
-  flex: none;
-  margin: 0;
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: $muted-deep;
 }
 
 /* ── A station ─────────────────────────────────────────────────────────────
@@ -45,19 +40,19 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  /* Art at the top, plate at the bottom, the slack between them. */
-  justify-content: space-between;
   gap: $space-3;
-  align-self: center;
-  width: clamp(10.5rem, 20vw, 14.5rem);
-  /* As tall as the rail, up to a ceiling. Without the ceiling a 900px window drew a
-     640px board with two hundred pixels of nothing between the art and the name; without
-     the `height` a short one clipped the name off the bottom, since the track hides its
-     vertical overflow. Both ends of that are now the panel's problem rather than the
-     window's. */
+  /* As tall as the rail, and as wide as that height allows. The height is the track's —
+     a stretched flex item's cross size is definite — and the width follows from the
+     aspect ratio, so a 1080px display gets a 350px board and a 900px one a 260px board,
+     each with the art scaled to match. The clamps are for the two ends nobody designs
+     for: a very short window would otherwise draw a board too narrow to hold a word, and
+     a very tall one a board wider than the rail's arrows can step across. */
+  align-self: stretch;
   height: 100%;
-  min-height: 12rem;
-  max-height: 27rem;
+  width: auto;
+  aspect-ratio: 5 / 9;
+  min-width: 13rem;
+  max-width: 23rem;
   /* Clears the frame's painted edge: the tall frame's slice is 25px, and text laid at
      16px ran straight through the corner filigree. */
   padding: $space-5;
@@ -122,8 +117,9 @@
   }
 
   &:hover:not([data-locked='true']) .cta {
-    color: $accent-soft;
-    border-color: $accent-dim;
+    color: $ground-deep;
+    background: $accent-soft;
+    border-color: $accent-soft;
   }
 
   &:active:not([data-locked='true']) {
@@ -132,27 +128,36 @@
 }
 
 /* The place's own artwork, sitting inside the frame's painted edge rather than under it —
-   a 25px border with art drawn to the very corner reads as a picture that has slipped. */
+   a 25px border with art drawn to the very corner reads as a picture that has slipped.
+
+   It takes whatever the plate leaves, and the painting is fitted inside that: the art is
+   square and a board is not, so the room above and below it is the board's own leather,
+   with a soft light behind the painting so it sits in the space rather than floating in
+   it. The first thing to shrink when a window is short, since the words are what a
+   player needs and the picture is what they enjoy. */
 .art {
-  /* In flow and square, rather than absolutely placed: the artwork is the panel's biggest
-     element and the one that should give way when the window is short. A flex item with
-     an aspect ratio does exactly that — as wide as the board allows, as tall as it is
-     wide, and the first thing to shrink when there is not room for all three parts. */
   position: relative;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   width: 100%;
-  aspect-ratio: 1;
   min-height: 0;
   z-index: 1;
   background-image: var(--mv-station-art);
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  transform-origin: center 40%;
+  transform-origin: center;
   transition:
     transform $duration-slow $ease-out,
     filter $duration-slow $ease-out;
   pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 8%;
+    z-index: -1;
+    background: radial-gradient(circle at 50% 50%, rgba(194, 118, 74, 0.16), transparent 62%);
+  }
 }
 
 /* Darkens the bottom half so the plate's text is legible over any artwork, and takes the
@@ -181,53 +186,60 @@
 }
 
 .name {
-  @include display-text(17px);
+  @include display-text(22px);
   letter-spacing: 0.05em;
+  line-height: 1.15;
   text-transform: uppercase;
   color: $parchment;
   transition: color $duration-fast $ease-out;
 }
 
+/* The whole sentence, at a size a desktop reads at. It was 11.5px and clamped to three
+   lines, which cut the registry's own sentences mid-clause on most of the boards — the
+   one line that says what a place is *for*, ending in an ellipsis. Four lines is a ceiling
+   under a blurb somebody writes very long later rather than a trim of the ones we have,
+   and the room is reserved so every board's picture sits at the same height whatever its
+   sentence runs to. */
 .blurb {
-  font-size: 11.5px;
+  font-size: 14.5px;
   line-height: 1.5;
+  min-height: calc(14.5px * 1.5 * 4);
   color: $parchment-dim;
-  /* Three lines and then an ellipsis: the registry's blurbs run to two sentences for the
-     places that need it, and a panel that grows to fit the longest one makes every other
-     panel that tall as well. The hover carries the whole line. */
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 /* Not a nested button — the panel is the button. A bordered word that says what pressing
-   does, or when it will start doing it. */
+   does, or when it will start doing it, and lights solid on hover. */
 .cta {
   align-self: flex-start;
   margin-top: $space-1;
-  padding: 3px $space-2;
-  border: 1px solid $edge-bright;
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  padding: 6px $space-3;
+  border: 1px solid $accent-dim;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: $accent;
+  color: $accent-soft;
   transition:
     color $duration-fast $ease-out,
+    background-color $duration-fast $ease-out,
     border-color $duration-fast $ease-out;
 }
 
 /* The seal on a place that is not yours yet. */
 .seal {
   position: absolute;
-  top: $space-4;
-  right: $space-4;
+  top: $space-5;
+  right: $space-5;
   z-index: 4;
   display: grid;
   place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 3.25rem;
+  height: 3.25rem;
   border: 1px solid rgba(194, 118, 74, 0.28);
   background: rgba(12, 10, 9, 0.72);
   color: $muted;

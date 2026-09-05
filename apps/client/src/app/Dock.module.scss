@@ -1,9 +1,9 @@
-/* Layout and the hotkey hint only.
+/* Layout and the desktop sizes only.
 
    The rail, the item's lift when active, the glyph tinting, the shroud on a locked
    destination and the badge bubble are all painted by the FantasyUIs `BottomNav`
-   underneath since the design rework. Anything here declaring a background or a border
-   would sit on top of that and flatten it. */
+   underneath since the design rework. Anything here declaring a background on the bar
+   itself would sit on top of that and flatten it. */
 
 .dock {
   position: relative;
@@ -26,68 +26,97 @@
   color: inherit;
 }
 
-/* The one thing the library has no notion of: a keyboard shortcut. Written into the
-   library's own button by `Dock.tsx`, so it is positioned against that button's box. */
-.hotkey {
-  position: absolute;
-  top: 3px;
-  right: 5px;
-  font-family: $font-mono;
-  font-size: 9px;
-  line-height: 1;
-  color: $muted-deep;
-  opacity: 0.7;
-  pointer-events: none;
-}
+/* ── Desktop sizing (C12, redrawn in C41) ───────────────────────────────────
 
-/* ── Desktop sizing (C12) ───────────────────────────────────────────────────
+   The library's `BottomNav` is cut for a phone: a 24px glyph over a 10px label, six of
+   them shared out across the whole width with `space-around`. C12 halved the count and
+   sized the entries up; what it left was the phone's *arrangement* — six small things
+   spread edge to edge across 1920px, with a two-pixel underline as the whole of "you are
+   here" and a hotkey digit printed in every corner.
 
-   The library's `BottomNav` is cut for a phone: a 20px glyph over an 11px label, sized so
-   nine of them fit across a handset. Mistvale put *nineteen* destinations through it, and
-   the result was the wall of unreadable pictograms the owner called overwhelming.
-
-   Halving the count to six is the first half of the answer and this is the second: with a
-   third of the entries there is room for each to be a real target with a real word under
-   it. Everything here is scale — the rail, the lift, the tinting and the badge are still
-   the library's, which is the rule the design rework settled on (the library owns chrome).
+   So the desktop dock is a **cluster**: six fixed-width tabs sitting together in the
+   middle of the bar, where the eye is, rather than one in each corner of the screen; a
+   glyph and a word at a size that can be read from a normal sitting distance; and the
+   active tab on a lit plate rather than under a hairline. Everything is still the
+   library's — the ground, the lift, the tinting, the badge — and everything here is a
+   size or a placement, which is the rule the rework settled on (the library owns chrome).
 
    Written as a floor that *grows*, not a fixed size: the same dock has to work on the
    landscape phone the PWA is going to, where the library's own numbers are right. Below
    the breakpoint nothing here applies and the pack's defaults stand. */
 
 @media (min-width: 900px) {
-  .dock :global(.fui-bottomnav) {
-    padding-block: $space-2;
+  /* `.dock` *is* the library's root — `useFui` merges the class onto the `<nav>` — so the
+     rule is a compound selector rather than a descendant one. C12 wrote it as a descendant
+     (`.dock .fui-bottomnav`), which matched nothing, and the bar kept the phone's
+     `space-around` for three batches without anybody noticing: six entries spread edge to
+     edge across a 1920px window looked like a decision. */
+  .dock:global(.fui-bottomnav) {
+    justify-content: center;
+    gap: $space-2;
+    padding: $space-2 $space-4 $space-2;
   }
 
   .dock :global(.fui-bottomnav__item) {
-    gap: $space-1;
-    padding-block: $space-2;
-    /* Comfortably past the 44px touch minimum, and wide enough that "The Wurm Wakes" is a
-       label rather than an ellipsis. */
-    min-width: 96px;
-    min-height: 60px;
+    flex: 0 0 auto;
+    gap: 6px;
+    /* A real target with a real word under it, and the same width whatever the word —
+       "Champions" and "Haven" are the same size of button, which is what makes six of
+       them read as one control. */
+    min-width: 152px;
+    min-height: 74px;
+    padding: $space-2 $space-4;
+    border-radius: 4px;
+    transition:
+      color var(--fui-t-fast) var(--fui-ease),
+      background-color var(--fui-t-fast) var(--fui-ease),
+      box-shadow var(--fui-t-fast) var(--fui-ease);
+  }
+
+  .dock :global(.fui-bottomnav__item:hover:not([aria-disabled='true'])) {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  /* The lit plate under the tab you are on. The library's own mark is a 20px underline,
+     which on a 1920px bar is a detail; a plate that is lit from the top and glows at the
+     edges is a state you can see from across the room, and it is the pack's own accent
+     doing the lighting. */
+  .dock :global(.fui-bottomnav__item.is-active) {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--fui-accent) 26%, transparent),
+      color-mix(in srgb, var(--fui-accent) 5%, transparent)
+    );
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--fui-accent) 60%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--fui-accent) 22%, transparent),
+      0 0 22px -6px var(--fui-accent);
+  }
+
+  .dock :global(.fui-bottomnav__item.is-active::after) {
+    width: 48px;
+    height: 3px;
+    bottom: -1px;
   }
 
   .dock :global(.fui-bottomnav__label) {
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
+    font-family: var(--mv-font-display);
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .dock :global(.fui-bottomnav__glyph) {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
   }
 
   .dock :global(.fui-bottomnav__badge) {
-    min-width: 22px;
-    height: 22px;
-    font-size: 0.8rem;
-  }
-
-  .hotkey {
-    font-size: 11px;
-    top: 5px;
-    right: 8px;
+    top: 6px;
+    right: 18%;
+    min-width: 24px;
+    height: 24px;
+    font-size: 0.85rem;
+    line-height: 22px;
   }
 }

@@ -5,6 +5,34 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the Haven fills its room, and the dock and top bar are drawn for a desktop (C41)
+
+The second chunk of the UI/UX pass, and the owner's own first example: *"look at the first
+screenshot of The Haven: there is so much free space there."*
+
+- **The Haven's boards are as tall as the room.** They stopped at 27rem and sat in the middle
+  of the rail, which on a 1080px display was a row of phone-sized cards with a hand's width
+  of nothing above them and another below. A board takes the rail's whole height now and its
+  width follows from that, so a 1080p window gets 368×750 boards with the art scaled to
+  match; the camp is `full` width rather than centred in a 1440px rule; the name is 22px,
+  the whole sentence is drawn at 14.5px instead of clamped at 11.5, and the Enter plate is a
+  real one. The "drag the camp sideways" line under the rail is gone — the arrows and the
+  fade the last board dissolves into are the affordance, and the `Rail` no longer carries a
+  hint at all.
+- **The dock is a cluster.** Six tabs sit together in the middle of the bar at 152px each,
+  with 36px glyphs and 15px uppercase labels in the game's display face, and the tab you are
+  on is on a lit plate rather than under a two-pixel underline. The `1 2 3 4 5 6` hotkey
+  digits are gone from the corners; the keys still work and each tab's tooltip names its
+  key. The centring rule had been written since C12 and never applied — `.dock` *is* the
+  library's root, so a descendant selector matched nothing, and the phone's `space-around`
+  stood for three batches looking like a decision.
+- **The top bar's figures are readable**: 30px coins with 18px counts, 44px tool buttons,
+  and the account's face when no champion has been chosen is the Haven's crest rather than
+  an initial in a box — on the chip and on the profile card alike, which is also what the
+  card's "No portrait" option has drawn since C5.
+- A browser guard measures all of it: a board is at least 90% of the rail's height and over
+  600px at 1080p, and the dock's six tabs span under 70% of the bar with equal margins.
+
 ### Changed — the UI/UX pass opens: the audit, and the Mistgate rebuilt (C40)
 
 The owner's brief (2026-09-05): *do a whole UI/UX improvement job* — too much text, too small

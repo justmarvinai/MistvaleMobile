@@ -144,6 +144,62 @@ test.describe('the shell stays put', () => {
   });
 });
 
+/**
+ * The screen is *used* (C41).
+ *
+ * The owner's first example for the UI pass was the Haven: a row of phone-sized boards
+ * floating in the middle of a 1080px display with a hand's width of nothing above and
+ * below them, and a dock whose six entries were spread one to each corner of a 1920px bar.
+ * Neither is a defect any role-and-text assertion can see — every board was visible and
+ * every dock button clickable — so both are checked here as geometry.
+ *
+ * The dock's rule had in fact been *written* since C12 (`justify-content: center` on the
+ * bar) and never applied, because the selector was a descendant of the element it was
+ * meant for; nothing said so for three batches because nothing measured it.
+ */
+test.describe('the screen is used', () => {
+  test('the camp is as tall as the room and the dock is a cluster', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await registerRaw(page, 'e2eroom', 'Roomy');
+    await chooseStarter(page);
+
+    // The camp: a board is the height of the rail it stands in, not a card in the middle
+    // of it. The old ceiling was 27rem (432px) in a rail some 700px tall.
+    const rail = page.getByRole('group', { name: 'Locations' });
+    await expect(rail).toBeVisible();
+    const board = page.getByRole('button', { name: /^campaign\b/i }).first();
+    const railBox = await rail.boundingBox();
+    const boardBox = await board.boundingBox();
+    expect(railBox).not.toBeNull();
+    expect(boardBox).not.toBeNull();
+    expect(boardBox!.height, 'a board should fill the rail').toBeGreaterThan(railBox!.height * 0.9);
+    expect(boardBox!.height, 'a board should be desktop-sized at 1080p').toBeGreaterThan(600);
+    expect(boardBox!.width, 'a board should be as wide as its height allows').toBeGreaterThan(300);
+
+    // The dock: six tabs sitting together in the middle, not one in each corner. Measured
+    // as the cluster's width against the bar's, and as its two margins against each other.
+    const dock = page.getByRole('navigation');
+    const tabs = dock.getByRole('button');
+    await expect(tabs).toHaveCount(6);
+    const bar = await dock.boundingBox();
+    const boxes = await tabs.evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const rect = node.getBoundingClientRect();
+        return { left: rect.left, right: rect.right };
+      }),
+    );
+    const left = Math.min(...boxes.map((box) => box.left));
+    const right = Math.max(...boxes.map((box) => box.right));
+    expect(bar).not.toBeNull();
+    expect(right - left, 'the dock should be a cluster, not a spread').toBeLessThan(
+      bar!.width * 0.7,
+    );
+    const leftMargin = left - bar!.x;
+    const rightMargin = bar!.x + bar!.width - right;
+    expect(Math.abs(leftMargin - rightMargin), 'the cluster should be centred').toBeLessThan(8);
+  });
+});
+
 test.describe('what a player can actually see', () => {
   /**
    * The title screen, which is the one screen every player sees and nobody is signed in for.

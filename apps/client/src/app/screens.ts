@@ -121,6 +121,10 @@ export interface ScreenDefinition {
 export const SCREENS: readonly ScreenDefinition[] = [
   {
     id: 'haven',
+    /* A camp rather than a column (C41): the rail of boards is a picture that runs off the
+       edge of the window, and centring it in a 1440px rule left a quarter of a wide display
+       dark on either side of it. */
+    width: 'full',
     label: 'Haven',
     icon: 'nav-haven',
     glyph: 'glyph-holy-totem',

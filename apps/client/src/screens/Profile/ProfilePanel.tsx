@@ -158,9 +158,10 @@ function Card({ card }: { card: PublicProfile }): JSX.Element {
   return (
     <div className={styles.card}>
       <div className={styles.identity}>
-        {/* The face the warden chose, or their initial. The initial is not a placeholder
+        {/* The face the warden chose, or the Haven's crest. The crest is not a placeholder
             waiting to be replaced — plenty of accounts will keep it — so it is drawn in the
-            same frame rather than as a lesser version of one. */}
+            same frame rather than as a lesser version of one, and it is the same mark the
+            top bar's chip wears, because they are one portrait in two places. */}
         <div className={styles.avatar} data-rarity={face?.rarity ?? 'none'}>
           {face ? (
             <Portrait
@@ -169,7 +170,7 @@ function Card({ card }: { card: PublicProfile }): JSX.Element {
               size={104}
             />
           ) : (
-            <span aria-hidden="true">{card.profileName.charAt(0).toUpperCase()}</span>
+            <span className={styles.avatarCrest} aria-hidden="true" />
           )}
           {/* The same mark the top bar's chip wears, one size up. It is on the portrait
               rather than in the facts row below for the reason the owner's reference has it
@@ -345,7 +346,7 @@ function AvatarPicker({
             >
               <span className={styles.crestMark} aria-hidden="true" />
               <span className={styles.crestLabel}>No portrait</span>
-              <span className={styles.crestNote}>Your initial, on a plain frame</span>
+              <span className={styles.crestNote}>The Haven’s crest, on a plain frame</span>
             </button>
           </li>
 
