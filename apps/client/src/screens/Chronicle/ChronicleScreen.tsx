@@ -266,12 +266,12 @@ function Tile({
 /**
  * How large a face is drawn on a shelf.
  *
- * `$tile-chronicle` (11rem = 176px) less the tile's own padding. It is a number in two
+ * `$tile-chronicle` (13rem = 208px) less the tile's own padding. It is a number in two
  * places because the library's `Portrait` sizes its frame in pixels and the tile sizes its
  * track in CSS — and the two disagreeing is exactly the bug this fixed: a 56px portrait
  * adrift in a tile that had stretched to three hundred.
  */
-const CHRONICLE_PORTRAIT = 168;
+const CHRONICLE_PORTRAIT = 200;
 
 function artFor(
   def: ChampionDef | undefined,

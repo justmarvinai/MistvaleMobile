@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Icon } from '../Icon/Icon';
 import styles from './Portrait.module.scss';
 
 export interface PortraitProps {
@@ -24,6 +23,12 @@ export interface PortraitProps {
  * you have not met yet". It reads the same whether the art arrives next week or never, and
  * swapping a real portrait in later is a file appearing rather than a code change.
  *
+ * **The same silhouette the card draws** (C47). A missing face used to be a hood *glyph*
+ * here and the library's painted `silhouette-warrior-m` on every `ChampionCard`, so one
+ * champion with no art wore two different stand-ins on one screen — the Arena drew a hood
+ * in its rows and the painted figure in its picker. It is the painted figure everywhere
+ * now, cropped to the head and shoulders where the frame is square.
+ *
  * `onError` rather than checking a manifest first, deliberately. The client cannot know
  * which files exist — and under the SPA's catch-all a missing one arrives as an HTML page
  * with a 200, which no amount of looking ahead would have caught. Letting the browser try
@@ -41,9 +46,14 @@ export function Portrait({ src, name, size = 96, className }: PortraitProps): JS
       className={[styles.portrait, className].filter(Boolean).join(' ')}
       style={{ width: size, height: size }}
       title={missing && name ? `${name} — portrait not yet drawn` : undefined}
+      // Which of the two it is, as an attribute: a guard counting faces on a row can ask
+      // for portraits rather than for `img, svg`, which stopped being true the moment the
+      // stand-in became a painted span (C47) and would be false again the next time the
+      // markup moved.
+      data-mv-portrait={missing ? 'standin' : 'drawn'}
     >
       {missing ? (
-        <Icon name="portrait-unknown" size={Math.round(size * 0.62)} className={styles.unknown} />
+        <span className={styles.unknown} aria-hidden="true" />
       ) : (
         <img src={src} alt={name ?? ''} loading="lazy" onError={() => setFailedSrc(src)} />
       )}

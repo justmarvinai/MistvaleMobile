@@ -40,8 +40,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 6.5rem;
-  height: 6.5rem;
+  width: 8rem;
+  height: 8rem;
   flex: none;
   background: $panel-inset;
   /* Not hidden: the level disc hangs off the corner, and `overflow: hidden` on the box it
@@ -140,12 +140,12 @@
 }
 
 .crestLabel {
-  @include display-text(13px);
+  @include display-text(14px);
   color: $parchment;
 }
 
 .crestNote {
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.4;
   color: $muted;
 }
@@ -159,19 +159,19 @@
 .name {
   color: $parchment;
   font-family: $font-display;
-  font-size: 1.125rem;
+  font-size: 1.3rem;
 }
 
 .title {
   color: $gold;
-  font-size: 0.84rem;
+  font-size: 0.95rem;
   letter-spacing: 0.04em;
 }
 
 .joined {
   color: $muted;
   font-family: $font-mono;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 
 // ── What they have done ─────────────────────────────────────────────────────
@@ -197,7 +197,7 @@
 .factLabel {
   margin: 0 0 2px;
   color: $parchment-dim;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -209,13 +209,13 @@
   margin: 0;
   color: $parchment;
   font-family: $font-mono;
-  font-size: 0.95rem;
+  font-size: 1.2rem;
 }
 
 .factNote {
   margin-left: auto;
   color: $gold;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
 }
 
 // ── The four ────────────────────────────────────────────────────────────────
@@ -224,7 +224,7 @@
   margin: 0;
   color: $parchment-dim;
   font-family: $font-body;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;

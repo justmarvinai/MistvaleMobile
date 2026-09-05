@@ -9,6 +9,8 @@ import { Modal } from '@/ui/Modal/Modal';
 import { Panel } from '@/ui/Panel/Panel';
 import { Rewards } from '@/ui/Rewards/Rewards';
 import { ScreenInfo } from '@/ui/ScreenInfo/ScreenInfo';
+import { Portrait } from '@/ui/Portrait/Portrait';
+import { championArt } from '@/ui/championArt';
 import { useContentStore } from '@/state/contentStore';
 import { firstSpire, useSpireStore } from '@/state/spireStore';
 import { TeamSelect } from '../Battle/TeamSelect';
@@ -318,6 +320,13 @@ function FloorRow({
   /** Set on the one floor a key can be spent on, so the screen can open there. */
   rowRef?: MutableRefObject<HTMLElement | null>;
 }): JSX.Element {
+  const bundle = useContentStore((store) => store.bundle);
+  // Who holds the floor (C47): the last wave's faces, the keeper ringed. The row had said
+  // "Keeper" as a word and nothing else about what was up there, which on a tower whose
+  // whole point is that no two floors want the same team is the one fact a row owes.
+  const stage = bundle?.stages.find((entry) => entry.key === floor.stageKey);
+  const holders = (stage?.waves.at(-1) ?? []).slice(0, 4);
+
   const classes = [
     styles.floor,
     floor.cleared ? styles.floorDone : '',
@@ -336,6 +345,21 @@ function FloorRow({
     >
       <span className={styles.number} aria-hidden="true">
         {floor.floor}
+      </span>
+      <span className={styles.holders} aria-hidden="true">
+        {holders.map((unit, index) => {
+          const foe = bundle?.enemies.find((entry) => entry.key === unit.enemyKey);
+          const keeper = foe?.isBoss === true;
+          return (
+            <span key={`${unit.enemyKey}:${index}`} className={styles.holder} data-keeper={keeper}>
+              <Portrait
+                src={championArt(foe, bundle?.assets).portrait ?? null}
+                name={foe?.name}
+                size={keeper ? 64 : 48}
+              />
+            </span>
+          );
+        })}
       </span>
       <div className={styles.floorBody}>
         <h3 className={styles.floorTitle}>

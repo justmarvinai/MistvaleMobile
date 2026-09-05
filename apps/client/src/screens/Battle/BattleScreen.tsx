@@ -363,6 +363,9 @@ export function BattleScreen(): JSX.Element {
       id: unitId(unit.ref),
       name: unit.name,
       portrait: stillPath(artFor(unit.defKey)),
+      // 56 rather than the compact frame's 40 (C47): the party is the thing a player checks
+      // between every decision, and on a 1080p fight a 40px face is a thumbnail.
+      portraitSize: 56,
       level: unit.level,
       health: unit.hp,
       healthMax: unit.maxHp,
@@ -480,7 +483,7 @@ export function BattleScreen(): JSX.Element {
         <div className={styles.where}>
           <Fui
             of={WaveTracker}
-            options={{ waves: waveCount, current: view.wave + 1, label: 'Wave', size: 'sm' }}
+            options={{ waves: waveCount, current: view.wave + 1, label: 'Wave', size: 'md' }}
             /* `WaveTracker` takes `current` at construction and paints from its own field
                thereafter — so without this it was built on wave one and stayed there for
                the whole fight, however many waves the stage had. Silent, because `set`
@@ -605,6 +608,8 @@ export function BattleScreen(): JSX.Element {
               kind: focus.ref.side === 'enemy' ? ('target' as const) : ('player' as const),
               name: focus.name,
               portrait: stillPath(artFor(focus.defKey)),
+              portraitSize: 84,
+              width: 380,
               level: focus.level,
               health: focus.hp,
               healthMax: focus.maxHp,
@@ -648,6 +653,8 @@ export function BattleScreen(): JSX.Element {
                   kind: 'player' as const,
                   name: actingUnit.name,
                   portrait: stillPath(artFor(actingUnit.defKey)),
+                  portraitSize: 84,
+                  width: 380,
                   level: actingUnit.level,
                   health: actingUnit.hp,
                   healthMax: actingUnit.maxHp,

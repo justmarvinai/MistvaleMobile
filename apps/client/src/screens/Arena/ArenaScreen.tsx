@@ -14,8 +14,7 @@ import { useLoadoutStore } from '../../state/loadoutStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { toast } from '../../state/uiStore';
 import { arenaTierEmblem } from '../../ui/arenaTier';
-import { championArt } from '../../ui/championArt';
-import { Portrait } from '../../ui/Portrait/Portrait';
+import { OpponentCard } from '../../ui/ChampionCard/ChampionCard';
 import { TeamPicker } from './TeamPicker';
 import { Leaderboard } from './Leaderboard';
 import { HallOfValor } from './HallOfValor';
@@ -286,27 +285,24 @@ export function ArenaScreen(): JSX.Element {
                   <span className={styles.loss}>{offer.ratingLoss}</span>
                 </span>
 
-                {/* Four faces rather than four names. What a player is deciding is whether
-                    they can beat this team, and a wall of text in five cards side by side
-                    is the one shape that cannot be compared at a glance. */}
+                {/* Four cards rather than four names — the same card the picker one
+                    dialog later draws for your own four (C47), so the two sides of the
+                    comparison a player is making are drawn the same way. What a player is
+                    deciding is whether they can beat this team, and four hooded 72px faces
+                    with a level under each answered that with a squint. */}
                 <ul className={styles.team}>
-                  {offer.team.map((member, index) => {
-                    const def = defOf(member.championKey);
-                    const art = championArt(def, bundle?.assets);
-                    return (
-                      <li key={`${offer.offerId}-${index}`} className={styles.member}>
-                        <Portrait
-                          src={art.portrait ?? null}
-                          name={championName(member.championKey)}
-                          size={72}
-                        />
-                        <span className={styles.memberMeta}>
-                          {member.level}
-                          <span className={styles.memberRank}>★{member.rank}</span>
-                        </span>
-                      </li>
-                    );
-                  })}
+                  {offer.team.map((member, index) => (
+                    <li key={`${offer.offerId}-${index}`} className={styles.member}>
+                      <OpponentCard
+                        def={defOf(member.championKey)}
+                        championKey={member.championKey}
+                        level={member.level}
+                        rank={member.rank}
+                        power={member.power}
+                        size={120}
+                      />
+                    </li>
+                  ))}
                 </ul>
 
                 <footer className={styles.offerFoot}>

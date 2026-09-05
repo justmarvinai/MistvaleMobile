@@ -94,7 +94,7 @@
   margin: 0;
   color: $parchment;
   font-family: $font-display;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: normal;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -103,7 +103,7 @@
 .shelfCount {
   color: $accent;
   font-family: $font-mono;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .shelfOf {
@@ -224,10 +224,10 @@
    behind it, so it is a dot. The name is on the tooltip. */
 .affinity {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 9px;
-  height: 9px;
+  top: 4px;
+  left: 4px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--mv-affinity, #{$muted});
   box-shadow:
@@ -237,7 +237,7 @@
 
 .name {
   color: $parchment-dim;
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   text-align: center;
   line-height: 1.2;
 }
@@ -249,7 +249,7 @@
   display: flex;
   align-items: baseline;
   gap: 4px;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   line-height: 1.2;
 
   &[data-quiet='true'] {

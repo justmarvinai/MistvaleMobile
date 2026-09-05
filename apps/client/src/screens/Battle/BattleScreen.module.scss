@@ -84,7 +84,48 @@
 
 .turnCount {
   @include label-text;
+  font-size: 15px;
   color: $parchment-dim;
+}
+
+/* The library's phone-width defaults, raised for the display the fight is played on
+   (C47): 20px wave pips under a 13px label, party rows 300 wide with a 15px name, the
+   plates 380 wide, 46px control buttons, 96px hotbar slots. Scoped under the HUD and
+   written here rather than in the vendored stylesheets, which the next vendor overwrites. */
+.where :global(.fui-waves__label) {
+  font-size: 13px;
+}
+
+.party :global(.fui-unit--compact) {
+  width: 300px;
+  gap: 10px;
+  padding: 8px 12px;
+}
+
+.party :global(.fui-unit--compact .fui-unit__name) {
+  font-size: 15px;
+}
+
+.focus :global(.fui-unit__name),
+.actor :global(.fui-unit__name) {
+  font-size: 17px;
+}
+
+.controls :global(.fui-battlectl__btn) {
+  min-width: 56px;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 23px;
+  font-size: 15px;
+}
+
+.controls :global(.fui-battlectl__glyph) {
+  width: 18px;
+  height: 18px;
+}
+
+.hud .skills :global(.fui-slot) {
+  --fui-slot-size: 96px;
 }
 
 /* The creature the fight is about, across the top. Centred in what is left between the
@@ -124,7 +165,7 @@
   grid-column: 1;
   grid-row: 2;
   align-self: start;
-  width: 210px;
+  width: 300px;
 }
 
 /* Whoever is under consideration, at the top of the middle: an enemy's plate mirrors, so
@@ -147,12 +188,12 @@
   align-items: flex-end;
   justify-content: flex-end;
   gap: $space-4;
-  min-height: 96px;
+  min-height: 112px;
 }
 
 .actor {
   flex: none;
-  width: 210px;
+  width: 380px;
 }
 
 .skills {
@@ -162,6 +203,7 @@
 .hint {
   @include label-text;
   align-self: flex-end;
+  font-size: 15px;
   color: $muted;
 }
 

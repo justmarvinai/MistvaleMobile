@@ -15,9 +15,15 @@
   }
 }
 
-// Dimmed on purpose: a placeholder should read as one rather than compete with the
-// champions whose art does exist.
+// The library's own hooded figure — the one every `ChampionCard` draws for a champion
+// with no art — cropped to the head and shoulders, since the painting is a full-length
+// 1:2 figure and the frame here is square. Dimmed on purpose: a placeholder should read
+// as one rather than compete with the champions whose art does exist.
 .unknown {
-  color: $parchment-dim;
-  opacity: 0.5;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--fui-img-silhouette-warrior-m) center 8% / auto 210% no-repeat;
+  opacity: 0.62;
+  filter: saturate(0.5);
 }

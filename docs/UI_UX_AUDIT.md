@@ -63,22 +63,22 @@ cards) and **composition** (what a screen does with the room it has).
 
 | # | Screen | Problem | Fix (✔ shipped · ○ owed) |
 |---|---|---|---|
-| M1 | **Battle HUD** | Wave pips, turn counter, a 200px party frame, a 30px Auto and a 80px hotbar — phone sizes over a 1920px fight. | ○ Scaled for the display. |
-| M2 | **Arena** | Rows carry an opponent's team as 70px hood icons and 1,000px of empty width before the button. | ○ The team as four cards with power, the row's slack given to them. |
-| M3 | **Chronicle** | Six 180px tiles per shelf with 700px of empty shelf beside them. | ○ Tiles 210px, nine to a shelf. |
+| M1 | **Battle HUD** | Wave pips, turn counter, a 200px party frame, a 30px Auto and a 80px hotbar — phone sizes over a 1920px fight. | ✔ 20px pips under a 13px label, 56px party faces in 300px rows with 15px names, 380px plates with 84px portraits, 46px control buttons, 96px hotbar slots; the turn counter, the hint, the speed ladder and the boss rail a step up. Scoped under the HUD in the screen’s stylesheet. |
+| M2 | **Arena** | Rows carry an opponent's team as 70px hood icons and 1,000px of empty width before the button. | ✔ `OpponentCard` — the picker’s own painted card built from the snapshot (rarity, stars, level, affinity, role, power), four to a row at 120px. |
+| M3 | **Chronicle** | Six 180px tiles per shelf with 700px of empty shelf beside them. | ✔ Tiles 208px with 200px faces, 15px names, a 12px affinity pip. |
 | M4 | **Bazaar** | Item art at 90px, prices at 13px. | ✔ Art 150px, price and button as one plate, four stalls to a row. |
-| M5 | **Placeholders** | Three different stand-ins for a champion with no art — the silhouette card, the hood icon, the enemy lizard — on the same screens. | ○ One: the silhouette, everywhere a face is missing. (The art itself is content and the owner's; the *consistency* is UI.) |
-| M6 | **Mistspire** | Floors are text rows; the keeper is a word. | ○ The keeper's portrait on its row. |
-| M7 | **Profile card** | "Warden since" at 11px; the portrait box shows an initial. | ○ Same treatment as the top bar. |
+| M5 | **Placeholders** | Three different stand-ins for a champion with no art — the silhouette card, the hood icon, the enemy lizard — on the same screens. | ✔ `Portrait`’s placeholder is the library’s hooded figure — the one the card draws — cropped to the head and shoulders. The battlefield’s stand-in was already the same figure (B2). |
+| M6 | **Mistspire** | Floors are text rows; the keeper is a word. | ✔ The last wave’s faces on every floor, the keeper 64px and ringed red. |
+| M7 | **Profile card** | "Warden since" at 11px; the portrait box shows an initial. | ✔ Portrait 128px, name 21px, title and “Warden since” 15px, facts 19px, the crest note 13.5px. |
 
 ## LOW
 
 | # | Screen | Problem | Fix (✔ shipped · ○ owed) |
 |---|---|---|---|
-| L1 | Title screen | "SHOW" at 10px in the password field. | ○ 12px. |
-| L2 | Odds dialog | 13px mono table. | ○ 14px. |
-| L3 | Settings | Fine. Slider labels 12px. | ○ 13px. |
-| L4 | Achievement banner | Fine. | ○ — |
+| L1 | Title screen | "SHOW" at 10px in the password field. | ✔ 13px. |
+| L2 | Odds dialog | 13px mono table. | ✔ Table 15px, its header 13.5px; the mercy and contents lines a step up. |
+| L3 | Settings | Fine. Slider labels 12px. | ✔ Labels 14.5px, descriptions and slider values 13.5px. |
+| L4 | Achievement banner | Fine. | ✔ Nothing to change. |
 
 ## Not UI, but seen
 

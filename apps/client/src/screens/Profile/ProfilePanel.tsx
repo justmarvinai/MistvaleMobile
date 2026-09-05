@@ -167,7 +167,7 @@ function Card({ card }: { card: PublicProfile }): JSX.Element {
             <Portrait
               src={championArt(face, bundle?.assets).portrait ?? null}
               name={face.name}
-              size={104}
+              size={128}
             />
           ) : (
             <span className={styles.avatarCrest} aria-hidden="true" />

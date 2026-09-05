@@ -58,11 +58,12 @@ test.describe('the campaign loop', () => {
 
     // A row is a row (C44): tall enough to be read across a desktop, and carrying the first
     // wave's faces — a portrait, or the honest stand-in for one — so a stage is more than
-    // a number and the word "waves". Every face on the row is an `img` or the placeholder's
-    // svg; the energy glyph is one svg, so a row with foes on it has at least two.
+    // a number and the word "waves". Faces are counted by the portrait's own attribute
+    // rather than as `img, svg` (C47): the stand-in is a painted span now, and a guard
+    // that counted tags read one energy glyph on a row with two foes on it.
     const rowBox = await firstStage.boundingBox();
     expect(rowBox?.height ?? 0).toBeGreaterThanOrEqual(90);
-    expect(await firstStage.locator('img, svg').count()).toBeGreaterThanOrEqual(2);
+    expect(await firstStage.locator('[data-mv-portrait]').count()).toBeGreaterThanOrEqual(2);
 
     await firstStage.click();
 

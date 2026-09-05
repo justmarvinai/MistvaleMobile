@@ -197,10 +197,13 @@
   font-size: 0.95rem;
 }
 
-/* Four faces in a row, and they fit: a fifth would wrap rather than overflow. */
+/* Four cards in a row, and they fit: a fifth would wrap rather than overflow. `flex-start`
+   on the cross axis because a `ChampionCard` is an `aspect-ratio` button whose content is
+   absolutely positioned (C19) — stretched, its box lies about its height. */
 .team {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: flex-start;
   gap: $space-3;
   margin: 0;
@@ -210,17 +213,7 @@
 
 .member {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.memberMeta {
-  display: flex;
-  gap: 5px;
-  color: $parchment-dim;
-  font-family: $font-mono;
-  font-size: 0.95rem;
+  flex: none;
 }
 
 /* The button's own cell, at the end of the row. It keeps a minimum because the painted

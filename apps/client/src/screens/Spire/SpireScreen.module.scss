@@ -102,12 +102,33 @@
 
 .floor {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-columns: 44px auto minmax(0, 1fr) auto;
   align-items: center;
   gap: $space-3;
+  min-height: 5.75rem;
   padding: $space-2 $space-3;
   border: 1px solid rgba(0, 0, 0, 0.35);
   background: rgba(0, 0, 0, 0.18);
+}
+
+/* Who holds the floor: the last wave's faces, the keeper a size up and ringed in the
+   colour the Depths use for a boss. A fixed slot for four, so thirty rows line up. */
+.holders {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 14.5rem;
+}
+
+.holder {
+  display: flex;
+  border: 1px solid $edge;
+  background: rgba(12, 10, 9, 0.6);
+
+  &[data-keeper='true'] {
+    border-color: rgba(200, 65, 47, 0.7);
+    box-shadow: 0 0 14px -4px rgba(200, 65, 47, 0.8);
+  }
 }
 
 .floorDone {
@@ -147,14 +168,14 @@
   align-items: center;
   gap: $space-2;
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.15rem;
 }
 
 .keeper {
   padding: 1px 6px;
   border: 1px solid $danger;
   color: $danger;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }

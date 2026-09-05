@@ -1,6 +1,11 @@
-import { ROLE_NAMES, type ChampionDef, type RosterChampion } from '@mistvale/shared';
+import {
+  ROLE_NAMES,
+  levelCapForRank,
+  type ChampionDef,
+  type RosterChampion,
+} from '@mistvale/shared';
 import { ChampionCard as FuiChampionCard } from '@/fui/components/ChampionCard.ts';
-import { FuiSlotted } from '@/fui/react';
+import { Fui, FuiSlotted } from '@/fui/react';
 import { useContentStore } from '../../state/contentStore';
 import { championArt } from '../championArt';
 import { championTip } from '../Tooltip/tips';
@@ -156,5 +161,71 @@ export function ChampionCard({
         ))}
       </span>
     </FuiSlotted>
+  );
+}
+
+/**
+ * A champion that is not yours, as the same card (C47).
+ *
+ * An Arena defender is a snapshot — a key, a level, a rank and a power — and the row that
+ * showed it drew four 72px hooded faces with "23 ★4" under each, which answered "can I
+ * beat this team" with a squint. It is the card every picker draws now, at the picker's
+ * size, so an opponent's four read exactly as your own four do one dialog later. No relic
+ * pips, no favourite mark and no lock: none of those is in the snapshot, and none is the
+ * reader's business.
+ */
+export function OpponentCard({
+  def,
+  championKey,
+  level,
+  rank,
+  power,
+  size,
+}: {
+  def: ChampionDef | undefined;
+  championKey: string;
+  level: number;
+  rank: number;
+  power: number;
+  size?: number;
+}): JSX.Element {
+  const bundle = useContentStore((state) => state.bundle);
+  const art = championArt(def, bundle?.assets);
+  const name = def?.name ?? championKey;
+  return (
+    <Fui
+      of={FuiChampionCard}
+      className={styles.card}
+      options={{
+        name,
+        ...art,
+        rarity: def?.rarity ?? 'common',
+        stars: rank,
+        maxStars: 6,
+        level,
+        maxLevel: levelCapForRank(rank),
+        ...(def?.element ? { affinity: def.element } : {}),
+        ...(def?.role ? { role: ROLE_GLYPH[def.role] ?? 'glyph-crossed-swords' } : {}),
+        ...(def?.role ? { roleLabel: ROLE_NAMES[def.role] ?? def.role } : {}),
+        power,
+        ...(size === undefined ? {} : { size }),
+      }}
+      apply={(card, next) => {
+        card.setLevel(level, levelCapForRank(rank));
+        card.setPower(next.power ?? power);
+      }}
+      attrs={{
+        title: def?.title || name,
+        'aria-label': [
+          name,
+          def?.rarity,
+          `${rank} star`,
+          `Lv ${level}`,
+          `power ${power.toLocaleString()}`,
+        ]
+          .filter(Boolean)
+          .join(', '),
+      }}
+    />
   );
 }

@@ -5,6 +5,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the audit's MEDIUM and LOW rows (C47)
+
+- **The battle HUD is sized for the display it is played on.** The library's phone-width
+  defaults — 13px wave pips, 40px party faces in 210px rows, 38px control buttons, an 88px
+  hotbar — are 20px pips under a 13px label, 56px faces in 300px rows with 15px names,
+  380px plates with 84px portraits, 46px buttons and 96px slots, with the turn counter,
+  the hint line, the speed ladder and the boss rail's sentences a step up. Scoped under the
+  HUD in the screen's own stylesheet, since the vendored ones are overwritten.
+- **An Arena opponent's team is four cards.** `OpponentCard` is the same painted card every
+  picker draws — rarity frame, stars, level, affinity, role, power — built from the
+  snapshot an offer carries, so an opponent's four read exactly as your own four do one
+  dialog later. They had been four 72px hooded faces with "23 ★4" under each and a
+  thousand pixels of nothing before the button.
+- **The Chronicle's tiles are 208px with 200px faces**, 15px names and a 12px affinity pip.
+- **One stand-in everywhere a face is missing.** `Portrait`'s placeholder is the library's
+  own hooded figure — the one `ChampionCard` has always drawn — cropped to the head and
+  shoulders, where it had been a separate hood glyph; the Arena drew one in its rows and
+  the other in its picker for the same champion.
+- **The Mistspire's floors show who holds them**: the last wave's faces on every row, the
+  keeper a size up and ringed red, where "Keeper" had been a word.
+- **The profile card at the top bar's sizes**: a 128px portrait, the title and "Warden
+  since" at 15px, facts at 19px.
+- **The title screen's Show, the odds table and the settings labels** each a size up.
+
 ### Changed — the Valewurm, the Wurm Wakes and the Sunken Stair are places (C46)
 
 - **Each of the three one-thing modes is composed as a room.** `ui/Hero` is a mode's key
