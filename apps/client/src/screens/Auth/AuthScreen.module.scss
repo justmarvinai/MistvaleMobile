@@ -123,7 +123,10 @@
   align-items: center;
   gap: $space-6;
   width: 100%;
-  max-width: 460px;
+  /* Wider than the form it stands over (C49): the wordmark is the largest thing on the
+     screen and the panel keeps the 460px it was drawn for, so the column is the logo's
+     width and the form centres inside it. */
+  max-width: 560px;
   margin: auto;
 
   @include motion-safe {
@@ -139,12 +142,16 @@
   text-align: center;
 }
 
-/* The name, at title-screen size. `clamp` rather than a breakpoint because this is one
-   word and it should be as large as the window allows — 40px on a handset, 76px on a
-   desktop, and it never wraps because there is nothing to wrap.
+/* The painted wordmark (C49), and the type it falls back to.
 
-   Two shadows: a tight black one so every stroke has an edge against the sky behind it, and
-   a wide warm one that reads as the lantern light the vale is lit by. */
+   The owner's logo is the name now, so what is left here is the fallback: the same clamp
+   this screen shipped with, drawn only when the published file is missing — one word, as
+   large as the window allows, 40px on a handset and 76px on a desktop.
+
+   Two shadows on the type, and the same two as a `drop-shadow` pair on the picture: a tight
+   black one so every stroke has an edge against the sky behind it, and a wide warm one that
+   reads as the lantern light the vale is lit by. On the picture they trace the letterforms
+   rather than the box, which is what `drop-shadow` does and `box-shadow` cannot. */
 .wordmark {
   margin: 0;
   font-family: $font-display;
@@ -159,6 +166,30 @@
   text-shadow:
     0 2px 2px rgba(4, 6, 10, 0.9),
     0 0 34px rgba(214, 148, 88, 0.55);
+}
+
+/* `block` rather than the inline image it would otherwise be: an inline one sits in a line
+   box, and this heading carries a `text-indent` and a letter-spacing meant for the type
+   under it, both of which would nudge the picture off centre. */
+.logo {
+  display: block;
+  /* `margin-inline: auto` is load-bearing, and the flex column above is why: the heading is
+     sized to the picture's *intrinsic* width and then clamped to the column, so the box is
+     560 and the picture 520 — flush left, twenty pixels off the centre the form below it
+     stands on. It reads as a mistake, and it is one. */
+  width: min(100%, 520px);
+  height: auto;
+  margin-inline: auto;
+  filter: drop-shadow(0 2px 2px rgba(4, 6, 10, 0.9)) drop-shadow(0 0 34px rgba(214, 148, 88, 0.55));
+}
+
+/* A short window: the wordmark stands 143px where the type it replaced stood 76, and this
+   screen is a centred column that fills a 720px laptop almost exactly. The picture gives
+   first — it is the one thing here with nothing to lose but scale. */
+@media (max-height: 820px) {
+  .logo {
+    width: min(100%, 420px);
+  }
 }
 
 .tagline {
@@ -196,6 +227,9 @@
 
 .card {
   width: 100%;
+  /* The width the form was designed at, kept while the column around it grew for the
+     wordmark. */
+  max-width: 460px;
 }
 
 /* The library's segmented control paints itself; all this adds is the gap to the form. */

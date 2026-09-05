@@ -269,7 +269,7 @@ chrome needs nothing from it.
 | API latency (p95, on-box) | < 100 ms; battle action < 50 ms + engine < 20 ms | 6–22 ms p95 across the hot reads; engine 0.06 ms/run (`pnpm sim`) |
 | Client first load (cold) | < 1.5 MB JS gz, < 2.5 s to login screen on desktop broadband | **322 KB JS gz** (pixi 160 · index 118 · react 44) — D9, with the whole FantasyUIs layer in it |
 | Painted UI art (FantasyUIs) | no stated budget; measured so there is one | **1.2 MB on the login screen, 1.7 MB through the Haven, 1.9 MB after four screens.** PNGs, so already compressed — gzip does nothing for them |
-| Title-screen backdrop | 300 KB, measured so there is one | **244 KB** — one painted scene at 1600px, faded in after the form is already usable. The master is 2752×1536 and 2.7 MB; `pnpm assets` resizes it (C18) |
+| Title-screen art | 500 KB, measured so there is one | **427 KB** — the backdrop at **244 KB** (one painted scene at 1600px, faded in after the form is already usable; the master is 2752×1536 and 2.7 MB, and `pnpm assets` resizes it, C18) and the wordmark at **183 KB** (840px, cropped to its ink, C49). The wordmark is the reason the row is no longer only the backdrop's: at a strict 2× ceiling it would have been 292 KB and the two together over the old 300 |
 | Champion avatar art | within budget since C16 | 8 avatars, **2.0 MB published** — delivered at 1254×1254 and published at 320px, twice the largest place any is drawn (150px on a champion card, 44px on an arena portrait). Was 14 MB, which was Q6 |
 | Content bundle | < 500 KB gzipped | 708 KB raw → **80 KB gzipped** by nginx (`gzip_types` covers `application/json`) |
 | Battle scene | 60 fps at ×2 zoom on integrated graphics | — |

@@ -2,7 +2,7 @@ import { mkdir, readFile, readdir, rm, rmdir, writeFile } from 'node:fs/promises
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { decode, downscale, encode, isOpaque } from './png';
+import { decode, downscale, encode, isOpaque, trim } from './png';
 import { decode as decodeJpeg, encode as encodeJpeg } from './jpeg';
 
 /**
@@ -77,6 +77,16 @@ interface MediaSet {
    * one that stops.
    */
   format?: 'jpeg';
+  /**
+   * Crop the transparent margin off before anything else.
+   *
+   * For art that is a *shape* rather than a scene — a logo, a wordmark — because the box is
+   * what CSS lays out: an exported logo is centred on the artist's canvas, and published
+   * whole it makes a fifth of the title screen's brand block into nothing that can be
+   * pressed, looked at or spaced against. Only worth asking for where the source has a
+   * margin to lose; a scene fills its canvas and the crop finds nothing.
+   */
+  trim?: boolean;
 }
 
 /**
@@ -108,6 +118,19 @@ const SCENERY_MAX_SIDE = 1600;
  */
 const WALLPAPER_MAX_SIDE = 1600;
 
+/**
+ * The longest side the wordmark is published at.
+ *
+ * 840, against the 520px the title screen draws it at — the scenery's argument rather than
+ * the avatars'. A champion's face is published at twice its largest draw because a card is
+ * a small hard-edged picture where a downscale shows; this is a soft glowing wordmark on a
+ * dark painting, so the last half-multiple is invisible and the file is not: 1120px is 292
+ * KB against a title screen whose whole measured art budget is 300, and 840 is 183.
+ *
+ * The master is 1935 wide before the crop and 1572 after it.
+ */
+const LOGO_MAX_SIDE = 840;
+
 const AUDIO = ['.mp3', '.ogg', '.m4a', '.wav'] as const;
 const IMAGES = ['.png', '.webp', '.jpg', '.jpeg'] as const;
 
@@ -138,6 +161,14 @@ const MEDIA: readonly MediaSet[] = [
     to: 'scenery',
     extensions: IMAGES,
     maxSide: SCENERY_MAX_SIDE,
+  },
+  {
+    label: 'brand',
+    from: 'ui/brand',
+    to: 'brand',
+    extensions: IMAGES,
+    maxSide: LOGO_MAX_SIDE,
+    trim: true,
   },
   {
     label: 'wallpapers',
@@ -246,13 +277,8 @@ async function publishFile(from: string, to: string): Promise<string> {
  * A file it cannot read is a hard error rather than a silent copy: an avatar published at
  * full size would be a 2 MB regression nobody would notice until the next budget pass.
  */
-async function publishImage(
-  from: string,
-  to: string,
-  maxSide: number,
-  format?: MediaSet['format'],
-): Promise<string> {
-  const wanted = resize(from, await readFile(from), maxSide, format);
+async function publishImage(from: string, to: string, how: ImageWork): Promise<string> {
+  const wanted = resize(from, await readFile(from), how);
   const existing = await readFile(to).catch(() => null);
   if (!existing || !existing.equals(wanted)) await writeFile(to, wanted);
   return to;
@@ -270,16 +296,21 @@ async function publishImage(
  * no alpha channel, so converting one would produce a picture that is wrong in a way the
  * tool cannot see and a reviewer might not either — `png.ts`'s own rule.
  */
-function resize(
-  from: string,
-  source: Buffer,
-  maxSide: number,
-  format?: MediaSet['format'],
-): Buffer {
+interface ImageWork {
+  maxSide: number;
+  format?: MediaSet['format'];
+  /** Crop the transparent margin first, so the ceiling applies to the picture. */
+  trim?: boolean;
+}
+
+function resize(from: string, source: Buffer, how: ImageWork): Buffer {
   const sourceIsJpeg = /\.jpe?g$/i.test(from);
   try {
-    const bitmap = downscale(sourceIsJpeg ? decodeJpeg(source) : decode(source), maxSide);
-    if (format === 'jpeg') {
+    const decoded = sourceIsJpeg ? decodeJpeg(source) : decode(source);
+    // Cropped before the ceiling is applied, or the padding spends pixels the picture
+    // wanted: 1120 across a 1935-wide canvas draws a 910-wide wordmark.
+    const bitmap = downscale(how.trim ? trim(decoded) : decoded, how.maxSide);
+    if (how.format === 'jpeg') {
       if (!sourceIsJpeg && !isOpaque(bitmap)) {
         throw new Error('it has transparent pixels, and JPEG has no alpha channel');
       }
@@ -317,7 +348,9 @@ async function publishUnit(entry: UnitManifestEntry): Promise<string[]> {
       (name) => isPng(name) && name.toLowerCase().includes('avatar'),
     );
     written.push(
-      await publishImage(join(source, avatars[0]!), join(target, 'avatar.png'), AVATAR_MAX_SIDE),
+      await publishImage(join(source, avatars[0]!), join(target, 'avatar.png'), {
+        maxSide: AVATAR_MAX_SIDE,
+      }),
     );
   }
   return written;
@@ -367,6 +400,15 @@ async function collect(): Promise<UnitManifestEntry[]> {
  * removes it from the client and nothing else is touched. A set with no source folder
  * publishes nothing and prunes nothing — it must not empty a tree it knows nothing about.
  */
+/** A set's own transforms, so publishing and `--check` cannot ask for different ones. */
+function imageWork(set: MediaSet): ImageWork {
+  return {
+    maxSide: set.maxSide ?? Number.POSITIVE_INFINITY,
+    ...(set.format ? { format: set.format } : {}),
+    ...(set.trim ? { trim: true } : {}),
+  };
+}
+
 async function publishMedia(set: MediaSet, files: MediaFile[]): Promise<void> {
   if (files.length === 0) return;
   const target = join(publicRoot, set.to);
@@ -376,7 +418,7 @@ async function publishMedia(set: MediaSet, files: MediaFile[]): Promise<void> {
     keep.add(
       set.maxSide === undefined
         ? await publishFile(file.from, file.to)
-        : await publishImage(file.from, file.to, set.maxSide, set.format),
+        : await publishImage(file.from, file.to, imageWork(set)),
     );
   }
   await prune(target, keep);
@@ -403,8 +445,7 @@ async function mediaIsCurrent(set: MediaSet, files: MediaFile[]): Promise<boolea
     const name = file.to.slice(target.length + 1);
     if (!published.delete(name)) return false;
     const [source, actual] = await Promise.all([readFile(file.from), readFile(file.to)]);
-    const wanted =
-      set.maxSide === undefined ? source : resize(file.from, source, set.maxSide, set.format);
+    const wanted = set.maxSide === undefined ? source : resize(file.from, source, imageWork(set));
     if (!wanted.equals(actual)) return false;
   }
   return published.size === 0;

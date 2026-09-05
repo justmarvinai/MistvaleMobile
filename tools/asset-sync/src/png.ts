@@ -179,6 +179,64 @@ export function downscale(bitmap: Bitmap, maxSide: number): Bitmap {
 }
 
 /**
+ * The picture with its transparent margin cropped off.
+ *
+ * An exported logo is a wordmark centred on whatever canvas the artist was working in, and
+ * that padding is not neutral once the file is laid out by CSS: the box is what the browser
+ * sizes and spaces, so a fifth of the title screen's brand block would be nothing, and the
+ * gap under the wordmark would be the gap plus a quarter of the picture's height. Mistvale's
+ * own logo arrives at 1935×812 with the ink inside 1572×433.
+ *
+ * **`TRANSPARENT_ENOUGH` is 1 rather than 0, and that is the whole design of this.** The
+ * honest definition of an empty edge is `alpha === 0`, and on this file it crops *nothing*:
+ * the export carries a whisper of alpha 1 across almost the entire canvas, so the strict
+ * rule finds ink at 1919×787 and the margin survives. A pixel at alpha 1 moves a channel by
+ * less than half of one 8-bit step — under any ground, on any display, it is not a thing
+ * anybody can see — so cropping it loses no picture, and refusing to crop it means carrying
+ * a fifth of the file as padding forever. The bar is the smallest one that is above nothing
+ * at all, so anything an eye could resolve is kept.
+ *
+ * Returns the bitmap unchanged when there is nothing to crop — the `downscale` contract, and
+ * for the same reason: an unchanged master must re-encode to the same bytes or the publisher
+ * rewrites a file that was already correct.
+ *
+ * A picture that is transparent to the last pixel throws rather than returning something
+ * empty, because there is no honest crop of nothing and a 1×1 published quietly is exactly
+ * the silently-wrong output this file exists not to produce.
+ */
+const TRANSPARENT_ENOUGH = 1;
+
+export function trim(bitmap: Bitmap): Bitmap {
+  let left = bitmap.width;
+  let top = bitmap.height;
+  let right = -1;
+  let bottom = -1;
+
+  for (let y = 0; y < bitmap.height; y += 1) {
+    for (let x = 0; x < bitmap.width; x += 1) {
+      if (bitmap.data[(y * bitmap.width + x) * 4 + 3]! <= TRANSPARENT_ENOUGH) continue;
+      if (x < left) left = x;
+      if (x > right) right = x;
+      if (y < top) top = y;
+      if (y > bottom) bottom = y;
+    }
+  }
+
+  if (right < 0) throw new Error('nothing to trim to: the image is transparent edge to edge');
+
+  const width = right - left + 1;
+  const height = bottom - top + 1;
+  if (width === bitmap.width && height === bitmap.height) return bitmap;
+
+  const data = new Uint8Array(width * height * 4);
+  for (let y = 0; y < height; y += 1) {
+    const from = ((y + top) * bitmap.width + left) * 4;
+    data.set(bitmap.data.subarray(from, from + width * 4), y * width * 4);
+  }
+  return { width, height, data };
+}
+
+/**
  * Writes an 8-bit PNG — RGB when the bitmap is fully opaque, RGBA when it is not.
  *
  * Two choices here, both measured on the real avatars rather than assumed, because the

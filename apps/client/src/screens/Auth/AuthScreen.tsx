@@ -29,6 +29,12 @@ type AuthMode = 'login' | 'register';
  *
  * Three things about how it is built are worth carrying:
  *
+ * **The name is the owner's painted wordmark**, published by `pnpm assets` like the
+ * backdrop beside it, and it falls back to the typeset name if the file is not there. That
+ * fallback is not politeness: the published tree is gitignored generated output, so a deploy
+ * that skipped `pnpm assets` would otherwise open the game on a blank space where its name
+ * goes — and the type this screen shipped with for a batch is a perfectly good title.
+ *
  * **The backdrop is a static asset rather than content.** Everything else in Mistvale that
  * a player looks at comes out of the database, and this deliberately does not: it is drawn
  * *before* anybody is signed in, so there is no session, no content bundle and nothing to
@@ -55,6 +61,7 @@ export function AuthScreen() {
   const [capsLock, setCapsLock] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [artLoaded, setArtLoaded] = useState(false);
+  const [logoBroken, setLogoBroken] = useState(false);
 
   const submitting = useSessionStore((state) => state.submitting);
   const login = useSessionStore((state) => state.login);
@@ -136,7 +143,21 @@ export function AuthScreen() {
 
       <div className={styles.stage}>
         <header className={styles.brand}>
-          <h1 className={styles.wordmark}>Mistvale</h1>
+          {/* The painted name, or the typeset one. Either way the heading is called
+              "Mistvale" — the `alt` is what names it, so nothing that reads this screen by
+              its heading (a screen reader, a browser spec) can tell which one it got. */}
+          <h1 className={styles.wordmark}>
+            {logoBroken ? (
+              'Mistvale'
+            ) : (
+              <img
+                className={styles.logo}
+                src={LOGO}
+                alt="Mistvale"
+                onError={() => setLogoBroken(true)}
+              />
+            )}
+          </h1>
           <p className={styles.tagline}>The mist keeps what it takes. Call it back.</p>
           <div className={styles.rule} aria-hidden="true">
             <span className={styles.diamond} />
@@ -240,6 +261,9 @@ export function AuthScreen() {
 
 /** Published by `pnpm assets` from `assets/ui/backgrounds/haven_bgs/`. */
 const SCENERY = '/scenery/haven_campaign.jpg';
+
+/** Published by `pnpm assets` from `assets/ui/brand/`, cropped to the ink and 840px wide. */
+const LOGO = '/brand/mistvale_logo.png';
 
 const REMEMBERED = 'mistvale.lastAccount';
 

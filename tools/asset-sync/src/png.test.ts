@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { deflateSync } from 'node:zlib';
-import { decode, downscale, encode, isOpaque, type Bitmap } from './png';
+import { decode, downscale, encode, isOpaque, trim, type Bitmap } from './png';
 
 /**
  * The image codec `pnpm assets` shrinks avatars with.
@@ -136,6 +136,60 @@ function fabricate(over: { depth?: number; colour?: number; interlace?: number }
     chunk('IEND', Buffer.alloc(0)),
   ]);
 }
+
+describe('trim', () => {
+  /**
+   * Cropping the padding off an exported logo, where the threshold is the whole question:
+   * the owner's own file carries alpha 1 across nearly the entire canvas, so a strict
+   * `alpha === 0` rule crops none of it and the picture keeps a fifth of itself as margin.
+   */
+
+  const dot = (width: number, height: number, ink: (x: number, y: number) => number) =>
+    bitmap(width, height, (x, y) => [200, 100, 50, ink(x, y)]);
+
+  it('crops to the ink and keeps every pixel of it', () => {
+    // A 2×2 solid block at (3,1) in an 8×6 field.
+    const cropped = trim(dot(8, 6, (x, y) => (x >= 3 && x <= 4 && y >= 1 && y <= 2 ? 255 : 0)));
+    expect([cropped.width, cropped.height]).toEqual([2, 2]);
+    expect([...cropped.data]).toEqual([
+      200, 100, 50, 255, 200, 100, 50, 255, 200, 100, 50, 255, 200, 100, 50, 255,
+    ]);
+  });
+
+  it('keeps a pixel an eye could resolve and crops one it could not', () => {
+    // Alpha 2 is ink; alpha 1 moves a channel by less than half an 8-bit step and is the
+    // whisper this logo's exporter spreads across the whole canvas.
+    expect(trim(dot(5, 5, (x, y) => (x === 2 && y === 2 ? 2 : 1))).width).toBe(1);
+    expect(trim(dot(5, 5, (x, y) => (x === 2 && y === 2 ? 255 : 1))).height).toBe(1);
+  });
+
+  it('returns the same bitmap when the ink already reaches every edge', () => {
+    // Identity rather than a copy: the publisher compares the bytes it would write, so a
+    // needless re-encode is a needless write and a dev-server watcher event.
+    const full = dot(4, 4, () => 255);
+    expect(trim(full)).toBe(full);
+  });
+
+  it('refuses a picture with nothing in it', () => {
+    expect(() => trim(dot(4, 4, () => 0))).toThrow(/transparent edge to edge/);
+  });
+
+  it('leaves the rows aligned — a crop is where a stride bug shows', () => {
+    // Each ink pixel carries its own coordinate, so a row read at the wrong offset shifts
+    // the picture rather than merely resizing it.
+    const source = bitmap(6, 5, (x, y) =>
+      x >= 1 && x <= 3 && y >= 2 && y <= 3 ? [x * 10, y * 10, 7, 255] : [0, 0, 0, 0],
+    );
+    const cropped = trim(source);
+    expect([cropped.width, cropped.height]).toEqual([3, 2]);
+    for (let y = 0; y < 2; y += 1) {
+      for (let x = 0; x < 3; x += 1) {
+        const at = (y * 3 + x) * 4;
+        expect([cropped.data[at], cropped.data[at + 1]]).toEqual([(x + 1) * 10, (y + 2) * 10]);
+      }
+    }
+  });
+});
 
 describe('isOpaque', () => {
   /**

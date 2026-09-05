@@ -5,6 +5,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the owner's wordmark is the game's name on the title screen (C49)
+
+- **The title screen wears the painted logo** the owner supplied, where it had typeset the
+  name in the display face. It is published by `pnpm assets` like the backdrop beside it
+  (`assets/ui/brand/` → `/brand`), drawn 520px wide over the key art, and carries the same
+  two shadows the type did — a tight black edge and the vale's lantern glow — as
+  `drop-shadow`, which traces the letterforms rather than the box.
+- **It falls back to the type it replaced.** The published tree is gitignored generated
+  output, so a release that skipped `pnpm assets` would otherwise open the game on a blank
+  space where its name goes; a broken picture puts the typeset name back and the heading is
+  called *Mistvale* either way, which is what keeps every reader of this screen — a screen
+  reader, a browser spec — unable to tell which one it got. Guarded both ways.
+- **`pnpm assets` crops a transparent margin** (`trim` on a media set). An exported logo is
+  a wordmark centred on the artist's canvas, and the padding is not neutral once CSS lays
+  the box out: this one arrives 1935×812 with its ink inside 1572×433, so a fifth of the
+  title screen's brand block would have been nothing at all. The threshold is the design —
+  the honest bar is `alpha === 0` and on this file it crops *nothing*, because the export
+  carries a whisper of alpha 1 across almost the whole canvas; a pixel at alpha 1 moves a
+  channel by less than half an 8-bit step, so the bar is the smallest one above nothing.
+- Published at **840px for 183 KB** — the scenery's argument rather than the avatars': a
+  soft glowing wordmark on a dark painting, where the last half-multiple is invisible and
+  the file is not (1120px is 292 KB against a title screen whose whole art budget is 300).
+  Checked at 2× on a HiDPI viewport before the number was chosen.
+
 ### Fixed — the second sweep, at 1440×900 (C48)
 
 - **The hubs' rows now actually share the frame.** C45 said they did — "`1fr` resolves

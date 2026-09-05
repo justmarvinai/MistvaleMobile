@@ -6,6 +6,11 @@ import styles from './BootScreen.module.scss';
  *
  * Shown while the session is being restored, and after a failed boot so the player has
  * a plain explanation and a retry rather than an empty page.
+ *
+ * **The name is typeset here and painted on the title screen** (C49), which is deliberate
+ * rather than an inconsistency waiting to be tidied: this is the screen that has to work
+ * when nothing else does — it is what a failed connection lands on — so it depends on no
+ * file that could be the thing that failed to arrive.
  */
 export function BootScreen({
   message = 'Parting the mist…',

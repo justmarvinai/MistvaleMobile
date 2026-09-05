@@ -17,6 +17,7 @@ apps/client/public/sprites/
 # copy of it in git would be 16 MB nobody can edit. Same rule as the sprites above: the
 # source is committed, the published tree is built.
 apps/client/public/audio/
+apps/client/public/brand/
 apps/client/public/portraits/
 apps/client/public/scenery/
 apps/client/public/wallpapers/

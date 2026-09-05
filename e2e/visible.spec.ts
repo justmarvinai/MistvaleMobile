@@ -240,6 +240,22 @@ test.describe('what a player can actually see', () => {
     );
     expect(art, 'the title backdrop is published — run `pnpm assets`').toBeGreaterThan(0);
 
+    // And so did the wordmark, which is published the same way and asked the same question
+    // for the same reason (C49). It has a fallback the backdrop does not — the typeset name
+    // this screen shipped with — so a missing file here is invisible rather than ugly, which
+    // is exactly why nothing but this would notice it.
+    const logo = await page.evaluate(
+      (src) =>
+        new Promise<number>((resolve) => {
+          const image = new Image();
+          image.onload = () => resolve(image.naturalWidth);
+          image.onerror = () => resolve(0);
+          image.src = src;
+        }),
+      '/brand/mistvale_logo.png',
+    );
+    expect(logo, 'the wordmark is published — run `pnpm assets`').toBeGreaterThan(0);
+
     // 2. The form is drawn *over* it.
     //
     // `expectOnTop` cannot answer this and it is worth knowing why: `elementFromPoint`
@@ -247,14 +263,39 @@ test.describe('what a player can actually see', () => {
     // wordmark as topmost while the painting covers it completely. That is a real gap in
     // this file's own central tool — it answers "can a player click this", not "can a player
     // see it" — so the one screen where a decorative layer sits over everything reads pixels
-    // instead. Measured: 28.5% of the wordmark's box is near-white as shipped, and 0.0% with
-    // the backdrop's stacking order set the way the first cut had it.
+    // instead. Measured: 24.5% of the wordmark's box is near-white with the picture drawn
+    // (28.5% with the type it falls back to), and 0.0% with the backdrop's stacking order set
+    // the way the first cut had it.
     const wordmark = decodePng(await page.getByRole('heading', { name: 'Mistvale' }).screenshot());
     expect(litFraction(wordmark, 150), 'the wordmark is painted, not buried').toBeGreaterThan(0.1);
 
     // And the way in is reachable, which is the question `expectOnTop` is right for.
     await expectOnTop(page, enter, 'the way in');
     await expectOnTop(page, page.getByLabel('Account name', { exact: true }), 'the account field');
+  });
+
+  /**
+   * The name, when the picture is not there.
+   *
+   * The wordmark is published by `pnpm assets` into a gitignored tree (C49), so the state
+   * this covers is a real one: a release that skipped the step, or a file that 404s. The
+   * screen must still be the game's title screen rather than a blank space above a form —
+   * and because the fallback is *silent*, nothing else in the suite would ever say so.
+   */
+  test('the title screen falls back to type when the wordmark is missing', async ({ page }) => {
+    await page.route('**/brand/*', (route) => route.abort());
+    await page.goto('/');
+
+    await expect(page.getByRole('button', { name: /enter the vale/i })).toBeVisible({
+      timeout: 20_000,
+    });
+
+    const heading = page.getByRole('heading', { name: 'Mistvale' });
+    await expect(heading).toBeVisible();
+    // The typeset name, not an empty box with an accessible name on it: `alt` would keep the
+    // heading findable while the screen showed nothing at all.
+    await expect(heading).toHaveText(/mistvale/i);
+    expect(litFraction(decodePng(await heading.screenshot()), 150)).toBeGreaterThan(0.1);
   });
 
   test('the battle screen shows its fight and its controls', async ({ page }) => {
