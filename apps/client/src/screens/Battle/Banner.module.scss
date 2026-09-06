@@ -1,0 +1,69 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+/* The wave announcement, over whichever renderer is running — see `Banner.tsx` for why it
+   is DOM and not canvas text. */
+
+/* Across the upper third of the field, where the canvas drew it (150 of 540 virtual rows),
+   and out of the way of every pointer: the HUD around it is what a player clicks. */
+.banner {
+  position: absolute;
+  top: 26%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Big, and drawn by the browser: the size is a CSS length rather than a texture, so it is
+   as sharp on a 4K display as on a laptop and costs nothing to change. `vw` because the
+   field itself is sized to the window — the canvas text scaled with it, and type that did
+   not would read as small on the display this game is played on. */
+.word {
+  @include display-text(clamp(34px, 4.4vw, 68px));
+  padding: 0 $space-4;
+  color: $parchment;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* The canvas text carried a 5px black stroke, which is what kept it legible over a lit
+     field; the same job, done as four shadows and a glow. */
+  text-shadow:
+    0 2px 0 rgba(4, 6, 10, 0.95),
+    0 -2px 0 rgba(4, 6, 10, 0.95),
+    2px 0 0 rgba(4, 6, 10, 0.95),
+    -2px 0 0 rgba(4, 6, 10, 0.95),
+    0 0 28px rgba(4, 6, 10, 0.9);
+
+  @include motion-safe {
+    animation: announce 1.6s $ease-out forwards;
+  }
+}
+
+.banner[data-mv-banner='defeat'] .word {
+  color: $danger;
+}
+
+/* Arrives fast, holds, leaves slowly — the shape the canvas version had (a hard cut in and
+   a 25-frame fade out), which is what makes it read as an announcement rather than a
+   label. */
+@keyframes announce {
+  0% {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+  9% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}

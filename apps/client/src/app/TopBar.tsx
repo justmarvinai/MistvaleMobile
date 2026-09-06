@@ -194,6 +194,42 @@ export function TopBar({
       'Sigils at the Mistgate, a fresh row of stalls at the Bazaar, another shelf on it. Earned from quests, the Path, events and the calendar.',
   });
 
+  // The four tools, in the order declared above — the same positional lookup as the cells
+  // and stable for the same reason.
+  //
+  // They had no tooltip at all, painted or native (C50): four unlabelled glyphs in the
+  // corner of every screen, one of which signs you out. `aria-label` named them for a
+  // screen reader and said nothing whatever to anybody looking at them.
+  const tools = instance?.el.querySelectorAll<HTMLElement>('.fui-topbar__action');
+  useTooltip(tools?.[0] ?? null, {
+    title: 'Mail',
+    subtitle: waitingMail > 0 ? 'Something is waiting' : 'Nothing waiting',
+    ...(waitingMail > 0
+      ? { stats: [{ label: 'Unread', value: `${waitingMail}`, tone: 'good' as const }] }
+      : {}),
+    flavor:
+      'Gifts, compensation and anything an operator sends. Rewards attached to a message are collected here.',
+    hint: 'A message expires if it is left too long, and its attachment goes with it.',
+  });
+  useTooltip(tools?.[1] ?? null, {
+    title: 'News',
+    subtitle: 'What has changed',
+    flavor: 'Announcements and patch notes from whoever is keeping the vale.',
+  });
+  useTooltip(tools?.[2] ?? null, {
+    title: 'Settings',
+    subtitle: 'Sound, motion and the battlefield',
+    flavor:
+      'Music, effects and the Wardenmaster on their own sliders; reduced motion, colour-blind element glyphs, the simple battlefield, and the speed a fight opens at.',
+  });
+  useTooltip(tools?.[3] ?? null, {
+    title: 'Sign out',
+    subtitle: 'Ends this session',
+    flavor:
+      'Everything you have is on the server, so signing back in finds the vale exactly as you left it.',
+    hint: 'The account name is remembered on this browser. The password is not.',
+  });
+
   if (!player) return null;
 
   return (

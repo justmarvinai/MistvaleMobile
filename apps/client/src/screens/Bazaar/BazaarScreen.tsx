@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
 import { useContentStore } from '../../state/contentStore';
-import { useInventoryStore } from '../../state/inventoryStore';
+import { itemCount, useInventoryStore } from '../../state/inventoryStore';
 import { usePlayerStore } from '../../state/playerStore';
 import { useRosterStore } from '../../state/rosterStore';
 import { useShopStore } from '../../state/shopStore';
@@ -14,6 +14,9 @@ import { Fui } from '@/fui/react';
 import { Heading } from '@/ui/Heading/Heading';
 import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 import { rewardArt } from '../../ui/Rewards/art';
+import { useTip } from '../../ui/Tooltip/useTooltip';
+import { itemTip, relicTip } from '../../ui/Tooltip/tips';
+import type { ChampionDef, ItemDef, ShopSlot } from '@mistvale/shared';
 
 /**
  * The Bazaar.
@@ -37,6 +40,12 @@ export function BazaarScreen(): JSX.Element {
 
   const refreshPlayer = usePlayerStore((state) => state.refresh);
   const refreshInventory = useInventoryStore((state) => state.refresh);
+  // C6's lesson on a second screen: the inventory store is filled by whichever screen
+  // asked for it, and the Bazaar only ever *refreshed* it after a purchase — so a stall's
+  // "Held" would have read zero for everything until something was bought. How many
+  // emblems you already have is exactly the decision a stall asks for.
+  const loadInventory = useInventoryStore((state) => state.load);
+  const inventory = useInventoryStore((state) => state.items);
   const refreshRoster = useRosterStore((state) => state.load);
   const silver = usePlayerStore((state) => state.player?.silver ?? 0);
   const crystals = usePlayerStore((state) => state.player?.crystals ?? 0);
@@ -48,7 +57,8 @@ export function BazaarScreen(): JSX.Element {
 
   useEffect(() => {
     void loadStock(SHOP_KEY);
-  }, [loadStock]);
+    void loadInventory();
+  }, [loadStock, loadInventory]);
 
   // One tick a second, feeding the countdown below.
   useEffect(() => {
@@ -95,11 +105,6 @@ export function BazaarScreen(): JSX.Element {
     msLeft <= 0
       ? 'restocking…'
       : `${Math.floor(msLeft / 60_000)}:${String(Math.floor((msLeft % 60_000) / 1_000)).padStart(2, '0')}`;
-
-  const itemName = (key: string): string =>
-    bundle?.items.find((entry) => entry.key === key)?.name ?? key;
-  const championName = (key: string): string =>
-    bundle?.champions.find((entry) => entry.key === key)?.name ?? key;
 
   return (
     <div className={styles.screen}>
@@ -163,82 +168,125 @@ export function BazaarScreen(): JSX.Element {
         {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.slots} {...highlightable('panel:bazaar-offers')}>
-          {stock.slots.map((slot) => {
-            const wallet = slot.currency === 'silver' ? silver : crystals;
-            const affordable = wallet >= slot.price;
-            const disabled = busy || slot.purchased || slot.slotLocked || !affordable;
-
-            return (
-              <article key={slot.index} className={styles.slot} data-sold={slot.purchased}>
-                <header className={styles.slotHead}>
-                  <span className={styles.slotName}>
-                    {slot.kind === 'champion' ? championName(slot.refKey) : slot.name}
-                  </span>
-                  {slot.quantity > 1 && <span className={styles.qty}>×{slot.quantity}</span>}
-                </header>
-
-                {slot.gear ? (
-                  <RelicCard relic={slot.gear} />
-                ) : (
-                  // A painted socket rather than a sentence: a stall selling three tomes
-                  // and a champion should look like a stall, and "Epic Tome" as body text
-                  // is the thing that made this screen read as a list.
-                  <div className={styles.slotBody}>
-                    <Fui
-                      of={Slot}
-                      className={styles.slotArt}
-                      options={{
-                        size: 'lg',
-                        item: {
-                          icon: slot.kind === 'champion' ? 'hero-vanguard' : rewardArt(slot.refKey),
-                          name:
-                            slot.kind === 'champion'
-                              ? championName(slot.refKey)
-                              : itemName(slot.refKey),
-                          ...(slot.quantity > 1 ? { qty: slot.quantity } : {}),
-                        },
-                      }}
-                      attrs={{
-                        role: 'presentation',
-                        tabindex: undefined,
-                        'aria-label': undefined,
-                        title: undefined,
-                      }}
-                    />
-                    <span className={styles.slotWhat}>
-                      {slot.kind === 'item' ? itemName(slot.refKey) : slot.name}
-                    </span>
-                  </div>
-                )}
-
-                <footer className={styles.slotFoot}>
-                  <span className={affordable ? styles.price : styles.priceShort}>
-                    {slot.price.toLocaleString()}{' '}
-                    {slot.currency === 'silver' ? 'silver' : 'crystals'}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    disabled={disabled}
-                    onClick={() => void act('Bought.', () => buy(SHOP_KEY, slot.index))}
-                  >
-                    {slot.purchased
-                      ? 'Sold'
-                      : slot.slotLocked
-                        ? 'Locked'
-                        : affordable
-                          ? 'Buy'
-                          : 'Too dear'}
-                  </Button>
-                </footer>
-
-                {slot.unavailableReason && !slot.purchased && (
-                  <p className={styles.reason}>{slot.unavailableReason}</p>
-                )}
-              </article>
-            );
-          })}
+          {stock.slots.map((slot) => (
+            <Stall
+              key={slot.index}
+              slot={slot}
+              wallet={slot.currency === 'silver' ? silver : crystals}
+              busy={busy}
+              item={bundle?.items.find((entry) => entry.key === slot.refKey)}
+              champion={bundle?.champions.find((entry) => entry.key === slot.refKey)}
+              held={itemCount(inventory, slot.refKey)}
+              onBuy={() => void act('Bought.', () => buy(SHOP_KEY, slot.index))}
+            />
+          ))}
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * One stall.
+ *
+ * Its own component so it can carry a tooltip, which is a hook — the same reason
+ * `ui/Rewards` has a `Reward` and the mastery board has a `MasteryNode`.
+ *
+ * The tooltip is the owner's report (C50): a stall drew a painted socket and a name, and
+ * hovering "Mistbrew" or "Warden's Ration" said nothing at all about what either is for. A
+ * shop is the one screen where that matters most — it is the only place in the game where a
+ * player spends a currency on something they may never have seen.
+ */
+function Stall({
+  slot,
+  wallet,
+  busy,
+  item,
+  champion,
+  held,
+  onBuy,
+}: {
+  slot: ShopSlot;
+  wallet: number;
+  busy: boolean;
+  item: ItemDef | undefined;
+  champion: ChampionDef | undefined;
+  held: number;
+  onBuy: () => void;
+}): JSX.Element {
+  const affordable = wallet >= slot.price;
+  const disabled = busy || slot.purchased || slot.slotLocked || !affordable;
+  const name = slot.kind === 'champion' ? (champion?.name ?? slot.refKey) : slot.name;
+
+  // Three kinds of thing on one shelf, and each has a builder already: a relic says what
+  // set it is and how far off a bonus, a champion its affinity and role, an item what it is
+  // spent on. The stall carries whichever it is holding — and nothing when the definition
+  // has not loaded, which is a quiet tooltip rather than an empty one.
+  const ref = useTip(
+    slot.gear
+      ? relicTip(slot.gear, { hint: slot.purchased ? undefined : 'Bought as it stands.' })
+      : slot.kind === 'champion' && champion
+        ? {
+            title: champion.name,
+            rarity: champion.rarity,
+            subtitle: champion.title || 'Champion',
+            ...(champion.lore ? { flavor: champion.lore } : {}),
+          }
+        : item
+          ? itemTip(item, { held })
+          : null,
+  );
+
+  return (
+    <article ref={ref} className={styles.slot} data-sold={slot.purchased}>
+      <header className={styles.slotHead}>
+        <span className={styles.slotName}>{name}</span>
+        {slot.quantity > 1 && <span className={styles.qty}>×{slot.quantity}</span>}
+      </header>
+
+      {slot.gear ? (
+        <RelicCard relic={slot.gear} />
+      ) : (
+        // A painted socket rather than a sentence: a stall selling three tomes and a
+        // champion should look like a stall, and "Epic Tome" as body text is the thing that
+        // made this screen read as a list.
+        <div className={styles.slotBody}>
+          <Fui
+            of={Slot}
+            className={styles.slotArt}
+            options={{
+              size: 'lg',
+              item: {
+                icon: slot.kind === 'champion' ? 'hero-vanguard' : rewardArt(slot.refKey),
+                name,
+                ...(slot.quantity > 1 ? { qty: slot.quantity } : {}),
+              },
+            }}
+            attrs={{
+              role: 'presentation',
+              tabindex: undefined,
+              'aria-label': undefined,
+              title: undefined,
+            }}
+          />
+          <span className={styles.slotWhat}>
+            {slot.kind === 'item' ? (item?.name ?? slot.refKey) : name}
+          </span>
+        </div>
+      )}
+
+      <footer className={styles.slotFoot}>
+        <span className={affordable ? styles.price : styles.priceShort}>
+          {slot.price.toLocaleString()} {slot.currency === 'silver' ? 'silver' : 'crystals'}
+        </span>
+        <Button variant="ghost" disabled={disabled} onClick={onBuy}>
+          {slot.purchased ? 'Sold' : slot.slotLocked ? 'Locked' : affordable ? 'Buy' : 'Too dear'}
+        </Button>
+      </footer>
+
+      {slot.unavailableReason && !slot.purchased && (
+        <p className={styles.reason}>{slot.unavailableReason}</p>
+      )}
+    </article>
   );
 }

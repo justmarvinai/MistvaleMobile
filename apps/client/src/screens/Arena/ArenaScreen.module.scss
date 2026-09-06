@@ -283,10 +283,15 @@
   font-size: 0.9rem;
 }
 
+/* Both emblems get the room the profile card's does, for the reason written there: the
+   library's badge hangs its division chip two pixels outside its own box, and a badge at the
+   edge of a scrolling list is how that becomes a scrollbar. */
 .badge {
   flex: none;
+  padding: 0 2px 2px 0;
 }
 
 .offerBadge {
   flex: none;
+  padding: 0 2px 2px 0;
 }

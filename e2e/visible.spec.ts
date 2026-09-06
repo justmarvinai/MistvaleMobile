@@ -657,6 +657,64 @@ test.describe('what a player can actually see', () => {
   });
 
   /**
+   * The wave announcement is type, not a texture.
+   *
+   * The owner's report was that "Wave 3" in the middle of a fight is blurry, and the cause
+   * was where it was drawn: a Pixi `Text` at 34px inside the 960×540 virtual canvas, which
+   * the scene then scales to cover the window — so on a 1920 display every glyph was
+   * rasterised at 34 and blown up to about 68. Nothing about that is fixable on the canvas:
+   * the resolution it would need is not known until the window is measured, and it changes
+   * again when the window is resized.
+   *
+   * Asserted **on the simple battlefield**, because that is where the second half of the
+   * fault was: `DomBattlefield` had no banner of its own, so a player without a graphics
+   * context was told nothing at all when the wave turned over. One announcement over both
+   * renderers — the C28b lesson, two renderers that have to be the same fight.
+   */
+  test('the wave announcement is drawn as text over either battlefield', async ({ page }) => {
+    test.slow();
+    await registerRaw(page, 'e2ebanner', 'Herald');
+    await chooseStarter(page);
+    await setSimpleBattlefield(page);
+
+    await goToScreen(page, 'Campaign');
+    await openCampaignStage(page, '1-1');
+    const teamDialog = page.getByRole('dialog', { name: /stage 1/i });
+    await pickTeam(teamDialog);
+    await teamDialog.getByRole('button', { name: /into the mist/i }).click();
+
+    // Auto only, and no Skip: Skip drops the playback queue, which is exactly the thing
+    // the announcement rides on. The banner lives 1.6 seconds and a three-wave stage
+    // raises two of them, which is comfortably longer than a poll.
+    const auto = page.getByRole('button', { name: /^auto$/i });
+    await auto.waitFor({ timeout: 30_000 });
+    if ((await auto.getAttribute('aria-pressed')) !== 'true') await auto.click();
+
+    const banner = page.locator('[data-mv-banner]');
+    await expect(banner).toBeVisible({ timeout: 90_000 });
+    await expect(banner, 'it says which wave').toHaveText(/^Wave \d+$/);
+
+    // And it is a browser-drawn glyph rather than a picture of one: a real font at a real
+    // size, which is the whole of why it is sharp now.
+    //
+    // Found and measured in **one** evaluation, and polled. An announcement lives 1.6
+    // seconds, so a locator resolved by one assertion is routinely gone by the time the
+    // next one reads it — and `getComputedStyle` on a detached node returns an empty
+    // declaration rather than throwing, so the first cut of this measured `NaN` and only
+    // said so when the suite was slow enough for the gap to matter.
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => {
+            const word = document.querySelector('[data-mv-banner] span');
+            return word ? parseFloat(getComputedStyle(word).fontSize) || 0 : 0;
+          }),
+        { timeout: 90_000, message: 'drawn at a size worth reading' },
+      )
+      .toBeGreaterThan(30);
+  });
+
+  /**
    * The champions are on the board.
    *
    * This is the one thing in the game that no DOM assertion can reach, and it is the thing

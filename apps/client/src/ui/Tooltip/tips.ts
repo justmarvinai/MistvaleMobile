@@ -186,6 +186,62 @@ export function rewardTip(
   };
 }
 
+// ── Items ───────────────────────────────────────────────────────────────────
+
+/**
+ * What a category *is*, in words a player who has never seen one would recognise.
+ *
+ * A table rather than the raw key, because `essence` is not an answer: what somebody
+ * hovering a Lesser Ember Essence wants first is "this is an ascension material", and only
+ * then the sentence saying which champions and where it falls.
+ */
+const ITEM_CATEGORY_LABEL: Readonly<Record<ItemDef['category'], string>> = Object.freeze({
+  sigil: 'Summoning sigil',
+  essence: 'Ascension material',
+  tome: 'Skill tome',
+  emblem: 'Mastery emblem',
+  consumable: 'Consumable',
+  material: 'Material',
+});
+
+/**
+ * An item, as a tooltip.
+ *
+ * The owner's report was that hovering Mistbrew or a Warden's Ration in the Bazaar said
+ * nothing about what they are for, and it was two faults at once: the stalls carried no
+ * tooltip, and every item's `description` was *flavour only* — "Bottled fog with something
+ * bright still moving in it" is lovely and never says you pour it on a champion. The
+ * descriptions were rewritten in the same pass to lead with the use; this is where they are
+ * read.
+ *
+ * `held` is passed where the caller knows it and left out where it does not, rather than
+ * defaulting to zero: "Held 0" on a screen that never looked is a wrong answer, where a
+ * missing line is merely a quiet one.
+ */
+export function itemTip(
+  item: ItemDef,
+  context: { held?: number | undefined; hint?: string | undefined } = {},
+): TooltipOptions {
+  return {
+    title: item.name,
+    rarity: item.rarity,
+    subtitle: ITEM_CATEGORY_LABEL[item.category],
+    ...(context.held !== undefined
+      ? {
+          stats: [
+            {
+              label: 'Held',
+              value: context.held.toLocaleString('en-US'),
+              tone: context.held > 0 ? ('good' as const) : ('plain' as const),
+            },
+          ],
+        }
+      : {}),
+    ...(item.description ? { flavor: item.description } : {}),
+    ...(context.hint ? { hint: context.hint } : {}),
+  };
+}
+
 // ── Champions ───────────────────────────────────────────────────────────────
 
 /**

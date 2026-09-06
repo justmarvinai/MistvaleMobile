@@ -45,6 +45,7 @@ import {
 } from './screens';
 import { useNavStore } from '@/state/navStore';
 import { tabScenery } from '@/ui/tabScenery';
+import { installDragScroll } from '@/ui/dragScroll';
 import { useTutorialStore } from '@/state/tutorialStore';
 import { useLoadoutStore } from '@/state/loadoutStore';
 import { useBattleStore } from '@/state/battleStore';
@@ -287,6 +288,11 @@ function GameShell() {
   useEffect(() => {
     void loadTutorial();
   }, [loadTutorial]);
+
+  // Press and hold to scroll, in every menu that scrolls (C50). One listener on the
+  // document rather than a hook each screen has to remember to call — see `ui/dragScroll`
+  // for why that is the whole design.
+  useEffect(() => installDragScroll(), []);
 
   // Every gate the account has crossed since this browser last looked. The shell re-reads
   // the player snapshot after every action, so a level-up lands here within a request of

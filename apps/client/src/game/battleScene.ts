@@ -204,7 +204,6 @@ export class BattleScene implements Scene {
   private readonly backdrop = new Container();
   private readonly unitsLayer = new Container();
   private readonly floaterLayer = new Container();
-  private readonly bannerLayer = new Container();
 
   private readonly units = new Map<string, UnitVisual>();
   /** Bursts already drawn, by effect id, so one beat is never played twice. */
@@ -224,7 +223,6 @@ export class BattleScene implements Scene {
     return this.units.size;
   }
   private readonly floaters = new Map<number, FloaterVisual>();
-  private banner: { text: Text; life: number } | null = null;
 
   private mistOffset = 0;
   private readonly mist: Graphics;
@@ -239,13 +237,7 @@ export class BattleScene implements Scene {
     this.backdrop.addChild(this.mist);
     // Effects sit above the bodies and below the numbers: a burst should read as landing
     // *on* the unit, and a damage number should never be hidden behind one.
-    this.root.addChild(
-      this.backdrop,
-      this.unitsLayer,
-      this.effectLayer,
-      this.floaterLayer,
-      this.bannerLayer,
-    );
+    this.root.addChild(this.backdrop, this.unitsLayer, this.effectLayer, this.floaterLayer);
     this.drawBackdrop();
   }
 
@@ -390,7 +382,6 @@ export class BattleScene implements Scene {
 
     this.syncEffects(view);
     this.syncFloaters(view);
-    this.syncBanner(view);
   }
 
   private createUnit(unit: VisualUnit): UnitVisual {
@@ -706,26 +697,6 @@ export class BattleScene implements Scene {
     }
   }
 
-  private syncBanner(view: PlaybackView): void {
-    if (!view.banner) return;
-    if (this.banner) {
-      this.bannerLayer.removeChild(this.banner.text);
-      this.banner.text.destroy();
-    }
-    const style = new TextStyle({
-      fontFamily: 'monospace',
-      fontSize: 34,
-      fontWeight: 'bold',
-      fill: view.banner.tone === 'defeat' ? 0xc8412f : 0xe6dccb,
-      stroke: { color: 0x0c0a09, width: 5 },
-    });
-    const text = new Text({ text: view.banner.text, style });
-    text.anchor.set(0.5);
-    text.position.set(VIRTUAL_WIDTH / 2, 150);
-    this.bannerLayer.addChild(text);
-    this.banner = { text, life: 90 };
-  }
-
   update(ticker: Ticker): void {
     const delta = ticker.deltaTime;
 
@@ -817,22 +788,11 @@ export class BattleScene implements Scene {
         this.floaters.delete(id);
       }
     }
-
-    if (this.banner) {
-      this.banner.life -= delta;
-      this.banner.text.alpha = Math.max(0, Math.min(1, this.banner.life / 25));
-      if (this.banner.life <= 0) {
-        this.bannerLayer.removeChild(this.banner.text);
-        this.banner.text.destroy();
-        this.banner = null;
-      }
-    }
   }
 
   destroy(): void {
     this.root.destroy({ children: true });
     this.units.clear();
     this.floaters.clear();
-    this.banner = null;
   }
 }

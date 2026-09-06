@@ -39,6 +39,15 @@ body {
   isolation: isolate;
 }
 
+/* While a menu is being dragged (`ui/dragScroll`). Only the two things a drag has to
+   suppress: the text selection it would otherwise sweep out behind it, and the I-beam.
+   The class is added when the press *becomes* a drag rather than when it starts, so an
+   ordinary click never touches either. */
+body.mv-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
 h1,
 h2,
 h3,

@@ -335,9 +335,28 @@
   font-size: 0.5625rem;
 }
 
+/* The rung's emblem, and two pixels of room for it.
+ *
+ * The owner's report was that this card scrolls and the trophy is slightly cut, and the
+ * cause was smaller than either symptom: the library's `TierBadge` hangs its division chip
+ * *outside* its own box (`right: -2px; bottom: -2px`, which is the ornament working exactly
+ * as drawn), and this holder sat flush against the right edge of a scrolling body. Two
+ * pixels of content past an `overflow: auto` box is a horizontal scrollbar; a horizontal
+ * scrollbar takes ~15px off the body's height, which raises a vertical one; and the vertical
+ * one takes ~15px off the width, which the rightmost element pays — the trophy. A whole
+ * cascade out of an ornament nobody would think to measure.
+ *
+ * It reproduces nowhere in this suite because headless Chromium reserves *zero* pixels for a
+ * scrollbar (C19's finding), so the overflow is real here and the cascade is not: what a
+ * browser can be asked is whether anything sticks out of the body at all, which is the
+ * guard.
+ *
+ * The room belongs to the holder rather than to the badge: the component is vendored, and
+ * an ornament drawn outside its box is a decision the pack is entitled to make. */
 .tier {
   flex: none;
   margin-left: auto;
+  padding: 0 2px 2px 0;
 }
 
 .unblooded {
@@ -346,10 +365,29 @@
   font-size: 0.9rem;
 }
 
+/* One of the four.
+ *
+ * `$card-champion` on the holder and 150 on the card, which is D9's rule and was quietly
+ * broken here: the card was drawn at 118 inside a 150px box, so every tile carried 32px of
+ * dead space the guard could not see — it only refuses a holder laying out a card *and*
+ * something else, and this one holds nothing but the card.
+ *
+ * The name **wraps**, which is the Mistgate's rule (C20) applied for the Mistgate's reason.
+ * The library clamps a name to one line, which is right in a roster — the card is a way in
+ * to a sheet that says the name in full — and wrong here: this is somebody else's card, the
+ * four faces are the whole answer, and there is nothing to click through to. Three of the
+ * four names on a developed account came back as "Aureleth, Voic…". */
 .tile {
   display: flex;
   width: $card-champion;
   padding: 0;
   background: none;
   border: none;
+
+  :global(.fui-champ__name) {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+    line-height: 1.15;
+  }
 }

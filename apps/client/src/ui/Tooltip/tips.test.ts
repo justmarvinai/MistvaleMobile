@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { GearInstance, GearSetDef, ItemDef, RosterChampion } from '@mistvale/shared';
-import { championTip, emptySocketTip, relicTip, rewardTip, statTip } from './tips';
+import { championTip, emptySocketTip, itemTip, relicTip, rewardTip, statTip } from './tips';
 
 /**
  * The sentences the game explains itself with.
@@ -143,6 +143,45 @@ describe('a reward', () => {
     const tip = rewardTip('mystery_thing', 1, { name: 'mystery_thing' });
     expect(tip.title).toBe('mystery_thing');
     expect(tip.stats?.[0]?.value).toBe('1');
+  });
+});
+
+describe('an item', () => {
+  const brew = (over: Partial<ItemDef> = {}): ItemDef =>
+    ({
+      key: 'xp_brew',
+      name: 'Mistbrew',
+      category: 'consumable',
+      rarity: 'uncommon',
+      description: 'Pour it on a champion for experience, on the dialog that feeds them.',
+      icon: '',
+      payload: {},
+      sortOrder: 0,
+      active: true,
+      ...over,
+    }) as unknown as ItemDef;
+
+  it('says what kind of thing it is before it says anything else', () => {
+    // The category key is not an answer: somebody hovering an essence wants "ascension
+    // material" first and the sentence about which champions second.
+    expect(itemTip(brew({ category: 'essence' })).subtitle).toBe('Ascension material');
+    expect(itemTip(brew({ category: 'emblem' })).subtitle).toBe('Mastery emblem');
+    expect(itemTip(brew()).subtitle).toBe('Consumable');
+  });
+
+  it('carries the published description, which is where the use is written', () => {
+    const tip = itemTip(brew());
+    expect(tip.title).toBe('Mistbrew');
+    expect(tip.rarity).toBe('uncommon');
+    expect(tip.flavor).toMatch(/champion/);
+  });
+
+  it('says how many are held only where the caller knows', () => {
+    // "Held 0" on a screen that never asked is a wrong answer; a missing line is a quiet
+    // one. The Bazaar reads the inventory precisely so it can pass this.
+    expect(itemTip(brew(), { held: 12 }).stats?.[0]).toMatchObject({ label: 'Held', value: '12' });
+    expect(itemTip(brew(), { held: 0 }).stats?.[0]).toMatchObject({ value: '0', tone: 'plain' });
+    expect(itemTip(brew()).stats).toBeUndefined();
   });
 });
 

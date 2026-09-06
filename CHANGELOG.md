@@ -5,6 +5,50 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed — the owner's five: the profile card, drag-to-scroll, tooltips and the wave banner (C50)
+
+- **The profile card no longer scrolls, and the Arena trophy is no longer clipped** — and
+  the cause was two pixels. The library's `TierBadge` hangs its division chip *outside* its
+  own box (`right: -2px; bottom: -2px`, which is the ornament working as drawn) and this
+  card put the badge flush against the right edge of an `overflow: auto` body. Two pixels
+  past that box is a horizontal scrollbar; a horizontal scrollbar takes ~15px off the body's
+  height, which raises a vertical one; and the vertical one takes ~15px off the width, which
+  the rightmost element pays — the trophy. The holder allows for the ornament now, here and
+  at the Arena's two badges. Measured: one scroller and 2px of overflow before, **none**
+  after.
+- With it, two things the card had been getting wrong quietly: a showcase champion's **name
+  wraps** rather than truncating (the Mistgate's rule from C20, for the Mistgate's reason —
+  this is somebody else's card, the four faces are the whole answer, and three of four names
+  on a developed account read "Aureleth, Voic…"), and the tiles are drawn at **150** inside
+  the `$card-champion` holder they already had, where a 118px card had been sitting in a
+  150px box since P8g.
+- **Press and hold to scroll, in every menu that scrolls** (`ui/dragScroll`). One listener
+  on the document rather than a hook each screen has to remember to call, because there are
+  dozens of scrollers and the next screen adds one more. Mouse and pen only — touch already
+  has the platform's own inertia — a press stays a click until it travels 5px, the nearest
+  scrollable ancestor wins per axis, and anything that drags itself says so (`data-mv-nodrag`:
+  the Haven's rail, the Wardenmaster's card).
+- **The top bar's four tools say what they are.** Mail, News, Settings and Sign out had no
+  tooltip at all, painted or native: four unlabelled glyphs in the corner of every screen,
+  one of which signs you out.
+- **Items say what they are for.** Two faults at once: the Bazaar's stalls carried no
+  tooltip, and every item's published description was *flavour only* — Mistbrew read
+  "Bottled fog with something bright still moving in it" and never said you pour it on a
+  champion. There is an `itemTip` now (what kind of thing it is, how many are held where the
+  caller knows, and the description), the Bazaar's stalls carry it — a relic tip, a champion
+  tip or an item tip, whichever the stall is holding — and **all 28 published descriptions were rewritten**
+  to lead with the use and keep the flavour after it. A test refuses a description that says
+  nothing a player can act on.
+- The Bazaar had also **never read the player's inventory** — it only refreshed it after a
+  purchase — so a stall's "Held" would have said 0 for everything until something was
+  bought. C6's defect on a second screen.
+- **The wave announcement is sharp.** "Wave 3" was a Pixi `Text` at 34px inside the 960×540
+  virtual canvas, which the scene scales to cover the window — rasterised at 34 and blown up
+  to about 68 on a 1920 display. It is DOM now, over whichever renderer is running, which
+  also closes a second half nobody had reported: `DomBattlefield` had no banner of its own,
+  so a player on the **simple battlefield** was told nothing at all when the wave turned
+  over.
+
 ### Changed — the owner's wordmark is the game's name on the title screen (C49)
 
 - **The title screen wears the painted logo** the owner supplied, where it had typeset the

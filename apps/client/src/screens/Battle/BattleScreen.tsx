@@ -15,6 +15,7 @@ import { getStage, isSceneAttached, setScene, stageFailure } from '../../game/st
 import { blindMessage, blindReason, type BlindReason } from './blindStage';
 import { BossBar, BossSkills, bossOnField } from './BossFrame';
 import { focusUnit, sameRef } from './focus';
+import { Banner } from './Banner';
 import { DomBattlefield } from './DomBattlefield';
 import { UnitOverlay } from './UnitOverlay';
 import { SkillTips } from './SkillTips';
@@ -477,6 +478,10 @@ export function BattleScreen(): JSX.Element {
           pickable={awaitingInput && !busy}
           onPick={pick}
         />
+        {/* "Wave 3", and the sentences a ward answers with. Drawn here rather than into
+            the canvas, which is what made it blurry — and what left the simple
+            battlefield with no announcement at all. */}
+        <Banner banner={view.banner} />
       </div>
 
       <div className={styles.hud}>

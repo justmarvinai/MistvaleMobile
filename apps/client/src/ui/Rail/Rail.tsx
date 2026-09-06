@@ -238,6 +238,9 @@ export function Rail({ label, children, className }: RailProps): JSX.Element {
       <div
         ref={setTrack}
         className={styles.track}
+        // Hands off, `ui/dragScroll` (C50): this track has had its own pointer handling
+        // since C4, and two handlers on one scroller move it twice as far as the pointer.
+        data-mv-nodrag=""
         data-dragging={dragging}
         role="group"
         aria-label={label}

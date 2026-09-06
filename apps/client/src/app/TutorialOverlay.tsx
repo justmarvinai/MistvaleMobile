@@ -197,6 +197,7 @@ export function TutorialOverlay() {
               a card some players cannot move at all. */}
           <div
             className={styles.speaker}
+            data-mv-nodrag=""
             {...handleProps}
             onDoubleClick={resetPosition}
             title="Drag to move · arrow keys to nudge · double-click to put it back"

@@ -970,7 +970,7 @@ export const ITEMS: ItemDefInput[] = [
     'Faded Sigil',
     'sigil',
     'common',
-    'A worn anchor. Calls the least of what the mist holds.',
+    'Summons a champion at the Mistgate, from the Faded pool — Common at worst, Rare at best. A worn anchor: it calls the least of what the mist holds.',
     10,
   ),
   item(
@@ -978,7 +978,7 @@ export const ITEMS: ItemDefInput[] = [
     'Gleaming Sigil',
     'sigil',
     'rare',
-    'Still bright. The mist answers it properly.',
+    'Summons a champion at the Mistgate, from the Gleaming pool — Rare at worst, Legendary at best. Still bright: the mist answers it properly.',
     20,
   ),
   item(
@@ -986,7 +986,7 @@ export const ITEMS: ItemDefInput[] = [
     'Mistwoven Sigil',
     'sigil',
     'epic',
-    'Woven from the fog itself; it calls only its own.',
+    'Summons a champion at the Mistgate, from the Mistwoven pool — Rare at worst, Legendary at best, and a roster of its own. Woven from the fog itself; it calls only its own.',
     30,
   ),
   item(
@@ -994,7 +994,7 @@ export const ITEMS: ItemDefInput[] = [
     'Radiant Sigil',
     'sigil',
     'legendary',
-    'It does not so much call as demand.',
+    'Summons a champion at the Mistgate, from the Radiant pool — Epic or Legendary, never less. It does not so much call as demand.',
     40,
   ),
 
@@ -1003,7 +1003,7 @@ export const ITEMS: ItemDefInput[] = [
     'Lesser Ember Essence',
     'essence',
     'common',
-    'A guttering coal of the Ember breath.',
+    'Ascends an Ember champion, at the first ascensions. Falls in the Ember spring in the Depths. A guttering coal of the Ember breath.',
     50,
   ),
   item(
@@ -1011,7 +1011,7 @@ export const ITEMS: ItemDefInput[] = [
     'Lesser Tide Essence',
     'essence',
     'common',
-    'A cupful of the deep.',
+    'Ascends a Tide champion, at the first ascensions. Falls in the Tide spring in the Depths. A cupful of the deep.',
     51,
   ),
   item(
@@ -1019,7 +1019,7 @@ export const ITEMS: ItemDefInput[] = [
     'Lesser Verdant Essence',
     'essence',
     'common',
-    'Sap from something still growing.',
+    'Ascends a Verdant champion, at the first ascensions. Falls in the Verdant spring in the Depths. Sap from something still growing.',
     52,
   ),
   item(
@@ -1027,7 +1027,7 @@ export const ITEMS: ItemDefInput[] = [
     'Lesser Mist Essence',
     'essence',
     'common',
-    'Fog in a stoppered jar.',
+    'Ascends a Mist champion, at the first ascensions. Falls in the Mist spring in the Depths. Fog in a stoppered jar.',
     53,
   ),
   // Greater and Prime tiers, for ascension levels 3–6 (ECONOMY_BALANCE §6). Element
@@ -1040,13 +1040,20 @@ export const ITEMS: ItemDefInput[] = [
       ['mist', 'Mist', 'Fog that remembers a shape.'],
     ] as const
   ).flatMap(([key, label, lore], index) => [
-    item(`essence_${key}_greater`, `Greater ${label} Essence`, 'essence', 'rare', lore, 54 + index),
+    item(
+      `essence_${key}_greater`,
+      `Greater ${label} Essence`,
+      'essence',
+      'rare',
+      `Ascends a ${label} champion, at the middle ascensions. Falls deeper in the ${label} spring. ${lore}`,
+      54 + index,
+    ),
     item(
       `essence_${key}_prime`,
       `Prime ${label} Essence`,
       'essence',
       'epic',
-      `${lore} Concentrated past what the springs give up willingly.`,
+      `Ascends a ${label} champion, at the last ascensions. Falls at the bottom of the ${label} spring. ${lore} Concentrated past what the springs give up willingly.`,
       58 + index,
     ),
   ]),
@@ -1056,7 +1063,7 @@ export const ITEMS: ItemDefInput[] = [
     'Pure Essence',
     'essence',
     'rare',
-    'Elementally silent, and useful to everyone.',
+    'Ascends any champion of any breath. Wanted alongside the elemental essences from the second ascension onwards, which is what makes it the one every project needs. Elementally silent, and useful to everyone.',
     70,
   ),
 
@@ -1070,7 +1077,7 @@ export const ITEMS: ItemDefInput[] = [
     'Mistbrew',
     'consumable',
     'uncommon',
-    'Bottled fog with something bright still moving in it. Champions drink it and remember fights they never had.',
+    'Pour it on a champion for experience, on the same dialog that feeds them — a level without a fight, and the one way to raise a champion you are not fielding. Bottled fog with something bright still moving in it: champions drink it and remember fights they never had.',
     64,
   ),
   // The awakening material, and the only one. It is the whole simplification: the source
@@ -1082,7 +1089,7 @@ export const ITEMS: ItemDefInput[] = [
     'Waking Shard',
     'material',
     'legendary',
-    'A splinter of something that was never asleep. Held too long, it starts to hold back.',
+    'Awakens a champion — the fourth ladder, opened only once the star rank, the level cap and a full ascension are all finished. Falls in the back half of the Depths and nowhere else. A splinter of something that was never asleep; held too long, it starts to hold back.',
     65,
   ),
 
@@ -1094,18 +1101,32 @@ export const ITEMS: ItemDefInput[] = [
     'Reliquary Dust',
     'material',
     'rare',
-    'What is left when a relic is talked out of the shape it was found in. It remembers being something.',
+    'Rerolls a substat on a relic, in the vault. It has no drop table: dust comes only from dismantling relics, so the ones you get rid of pay to fix the ones you keep. What is left when a relic is talked out of the shape it was found in — it remembers being something.',
     66,
   ),
 
-  item('tome_rare', 'Rare Tome', 'tome', 'rare', 'Teaches a Rare champion a little more.', 70),
-  item('tome_epic', 'Epic Tome', 'tome', 'epic', 'Teaches an Epic champion a little more.', 71),
+  item(
+    'tome_rare',
+    'Rare Tome',
+    'tome',
+    'rare',
+    'Upgrades a skill on a Common, Uncommon or Rare champion — shorter cooldowns and harder hits, on their own sheet. Teaches them a little more than they knew.',
+    70,
+  ),
+  item(
+    'tome_epic',
+    'Epic Tome',
+    'tome',
+    'epic',
+    'Upgrades a skill on an Epic champion — shorter cooldowns and harder hits, on their own sheet. Teaches them a little more than they knew.',
+    71,
+  ),
   item(
     'tome_legendary',
     'Legendary Tome',
     'tome',
     'legendary',
-    'Teaches a Legendary champion a little more.',
+    'Upgrades a skill on a Legendary champion — shorter cooldowns and harder hits, on their own sheet. Teaches them a little more than they knew.',
     72,
   ),
 
@@ -1114,7 +1135,7 @@ export const ITEMS: ItemDefInput[] = [
     'Bronze Emblem',
     'emblem',
     'common',
-    'Mastery training, in its coarsest form.',
+    'Mastery training, spent at a champion’s trainer on the shallowest tiers of the board. Its coarsest form, and the one there is most of.',
     80,
   ),
   item(
@@ -1122,7 +1143,7 @@ export const ITEMS: ItemDefInput[] = [
     'Silver Emblem',
     'emblem',
     'rare',
-    'Mastery training for the committed.',
+    'Mastery training, spent at a champion’s trainer on the middle tiers of the board. For the committed: a board gets expensive well before it gets deep.',
     81,
   ),
   item(
@@ -1130,7 +1151,7 @@ export const ITEMS: ItemDefInput[] = [
     'Gold Emblem',
     'emblem',
     'epic',
-    'Mastery training few champions ever finish.',
+    'Mastery training, spent at a champion’s trainer on the deepest tiers of the board, where the nodes worth building around are. Few champions ever finish one.',
     82,
   ),
 
@@ -1152,7 +1173,7 @@ export const ITEMS: ItemDefInput[] = [
     'Traveller’s Ration',
     'consumable',
     'common',
-    'Restores 30 energy. Kept for accounts that still hold one; nothing pays these now.',
+    'Would restore 30 energy, and there is nowhere to drink it: energy is paid directly now, and nothing hands these out. Kept only for accounts that still hold one.',
     90,
     { energy: 30 },
   ),
@@ -1161,7 +1182,7 @@ export const ITEMS: ItemDefInput[] = [
     'Warden’s Ration',
     'consumable',
     'rare',
-    'Restores 60 energy. Kept for accounts that still hold one; nothing pays these now.',
+    'Would restore 60 energy, and there is nowhere to drink it: energy is paid directly now, and nothing hands these out. Kept only for accounts that still hold one.',
     91,
     { energy: 60 },
   ),

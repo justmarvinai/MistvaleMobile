@@ -274,7 +274,8 @@ function ShowcaseTile({ champion }: { champion: ShowcaseChampion }): JSX.Element
           level: champion.level,
           affinity: champion.element,
           power: champion.power,
-          size: 118,
+          // The roster's own size, and the width of the holder around it (`$card-champion`).
+          size: 150,
         }}
         attrs={{
           'aria-label': [
