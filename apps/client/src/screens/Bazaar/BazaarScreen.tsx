@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { useContentStore } from '../../state/contentStore';
 import { itemCount, useInventoryStore } from '../../state/inventoryStore';
 import { usePlayerStore } from '../../state/playerStore';
@@ -74,11 +75,13 @@ export function BazaarScreen(): JSX.Element {
   }, [stock, msLeft, loadStock]);
 
   const act = async (label: string, action: () => Promise<unknown>): Promise<void> => {
+    // Every action on this screen is a purchase of one kind or another.
     setBusy(true);
     setError(null);
     setNotice(null);
     try {
       await action();
+      playCue(CUE.confirm);
       await Promise.all([refreshPlayer(), refreshInventory(), refreshRoster()]);
       setNotice(label);
     } catch (cause) {

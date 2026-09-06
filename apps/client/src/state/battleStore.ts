@@ -11,7 +11,7 @@ import {
   trimFloaters,
   type PlaybackView,
 } from '../game/playback';
-import { CUE, playCue, type CueName } from '../audio';
+import { CUE, castCue, hitCue, playCue, type CueName } from '../audio';
 import { oneAtATime } from './oneAtATime';
 import { useContentStore } from './contentStore';
 
@@ -155,21 +155,48 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
    * what a listener needs is the shape of the fight — hits, the ones that hurt, healing,
    * a death, a wave, and how it ended.
    */
-  const cueFor = (event: BattleEvent): CueName | null => {
+  const cueFor = (event: BattleEvent, view: PlaybackView): CueName | null => {
+    // The breath a skill leaves with is the caster's, read off the playback's own board —
+    // the server's board is turns ahead of what the player is watching (P10a).
+    const elementOf = (ref: UnitRef): string =>
+      [...view.allies, ...view.enemies].find(
+        (unit) => unit.ref.side === ref.side && unit.ref.slot === ref.slot,
+      )?.element ?? '';
     switch (event.type) {
+      case 'battleStart':
+        return CUE.battleStart;
+      case 'skillUsed':
+        return castCue(elementOf(event.unit));
       case 'damage':
         // Only the first hit of a multi-hit skill announces itself as an event; the rest
-        // are the same action landing, and the throttle catches what this does not.
-        return event.crit ? CUE.crit : event.hitIndex === 0 ? CUE.hit : null;
+        // are the same action landing, and the throttle catches what this does not. Which
+        // impact it is — a crit, a blow with the affinity behind it, a glancing one, or a
+        // shield taking the whole thing — is `hitCue`'s rule, shared and tested.
+        return event.hitIndex === 0 || event.crit ? hitCue(event) : null;
       case 'heal':
-      case 'shieldGained':
         return CUE.heal;
+      case 'shieldGained':
+        return CUE.shield;
       case 'statusApplied':
         return statusKind(event.status) === 'buff' ? CUE.buff : CUE.debuff;
+      case 'statusResisted':
+        return CUE.resist;
       case 'died':
         return CUE.death;
       case 'waveStart':
         return CUE.wave;
+      case 'bossPunish':
+        return CUE.bossWard;
+      case 'bossExposed':
+        return CUE.bossBreak;
+      case 'bossEnraged':
+        return CUE.enrage;
+      case 'bossSummon':
+        return CUE.summonAdds;
+      case 'extraTurn':
+        return CUE.extraTurn;
+      case 'counterattack':
+        return CUE.counter;
       case 'battleEnd':
         return event.outcome === 'victory' ? CUE.victory : CUE.defeat;
       default:
@@ -183,7 +210,11 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
     const [next, ...rest] = pending;
 
     if (!next) {
-      set({ playing: false, awaitingInput: computeAwaiting(get()) });
+      const awaiting = computeAwaiting(get());
+      set({ playing: false, awaitingInput: awaiting });
+      // The fight is waiting on the player: a quiet prompt, once, when the playback has
+      // caught up — not on every turn the server resolves, most of which are not theirs.
+      if (awaiting) playCue(CUE.turn);
       return;
     }
 
@@ -192,7 +223,7 @@ export const useBattleStore = create<BattleStoreState>((set, get) => {
     trimFloaters(view);
     set({ view, pending: rest });
 
-    const cue = cueFor(next);
+    const cue = cueFor(next, view);
     if (cue) playCue(cue);
 
     const delay = eventDuration(next) / speed;

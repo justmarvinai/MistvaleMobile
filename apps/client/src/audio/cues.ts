@@ -5,4 +5,12 @@
  * client detail: the game asks for `ui_press`, content decides what that sounds like, and
  * a seed missing one fails a test instead of leaving a button silent.
  */
-export { CUE, CUE_KEYS, summonCue, type CueName } from '@mistvale/shared';
+export {
+  CUE,
+  CUE_KEYS,
+  castCue,
+  hitCue,
+  relicCue,
+  summonCue,
+  type CueName,
+} from '@mistvale/shared';

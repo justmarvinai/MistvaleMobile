@@ -10,6 +10,7 @@ import {
   type RosterChampion,
 } from '@mistvale/shared';
 import { Button } from '@/ui/Button/Button';
+import { CUE, playCue, type CueName } from '@/audio';
 import { Empty } from '@/ui/Empty/Empty';
 import { Heading } from '@/ui/Heading/Heading';
 import { Panel } from '@/ui/Panel/Panel';
@@ -70,12 +71,13 @@ export function ExpeditionsScreen(): JSX.Element {
     [bundle],
   );
 
-  const act = async (run: () => Promise<void>, said: string): Promise<void> => {
+  const act = async (run: () => Promise<void>, said: string, cue: CueName): Promise<void> => {
     setBusy(true);
     setError(null);
     setNotice(null);
     try {
       await run();
+      playCue(cue);
       setNotice(said);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'That could not be done.');
@@ -131,15 +133,23 @@ export function ExpeditionsScreen(): JSX.Element {
               name={names.get(run.expeditionKey) ?? run.expeditionKey}
               busy={busy}
               onClaim={() =>
-                void act(async () => {
-                  await claim(run.id);
-                  await refreshPlayer();
-                }, 'They are back, and they brought it.')
+                void act(
+                  async () => {
+                    await claim(run.id);
+                    await refreshPlayer();
+                  },
+                  'They are back, and they brought it.',
+                  CUE.claim,
+                )
               }
               onRecall={() =>
-                void act(async () => {
-                  await recall(run.id);
-                }, 'Recalled. They bring nothing back, but they are yours again.')
+                void act(
+                  async () => {
+                    await recall(run.id);
+                  },
+                  'Recalled. They bring nothing back, but they are yours again.',
+                  CUE.back,
+                )
               }
             />
           ))}
@@ -176,6 +186,7 @@ export function ExpeditionsScreen(): JSX.Element {
           onClose={() => setSending(null)}
           onSent={(said) => {
             setSending(null);
+            playCue(CUE.confirm);
             setNotice(said);
           }}
         />

@@ -3,6 +3,7 @@ import type { MailMessage } from '@mistvale/shared';
 import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { Prose } from '../../ui/Prose/Prose';
 import { Rewards, describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
 import { useMailStore } from '../../state/mailStore';
@@ -41,6 +42,7 @@ export function MailScreen(): JSX.Element {
   useEffect(() => {
     if (!lastPaid) return;
     const line = describeRewards(lastPaid, rewardName);
+    playCue(CUE.claim);
     if (line) toast.success(`Collected — ${line}.`);
     clearPaid();
   }, [lastPaid, clearPaid, rewardName]);

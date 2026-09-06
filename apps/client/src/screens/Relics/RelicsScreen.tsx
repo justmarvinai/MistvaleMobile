@@ -3,6 +3,7 @@ import type { GearInstance, GearSlot, Rarity } from '@mistvale/shared';
 import { GEAR_MAX_LEVEL, GEAR_SLOTS, RARITIES, REFORGE_DUST_ITEM } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { gameApi, newActionId } from '../../api/game';
 import { useContentStore } from '../../state/contentStore';
 import { useRosterStore } from '../../state/rosterStore';
@@ -194,6 +195,7 @@ export function RelicsScreen(): JSX.Element {
     setNotice(null);
     try {
       const result = await gameApi.dismantleGear(selection, newActionId());
+      playCue(CUE.dismantle);
       setSelection([]);
       await Promise.all([refresh(), refreshPlayer()]);
       setNotice(
@@ -212,6 +214,7 @@ export function RelicsScreen(): JSX.Element {
     setNotice(null);
     try {
       const result = await gameApi.sellGear(selection, newActionId());
+      playCue(CUE.sell);
       setSelection([]);
       await Promise.all([refresh(), refreshPlayer()]);
       setNotice(`Sold ${result.sold.length} for ${result.paid.toLocaleString()} silver.`);
@@ -240,6 +243,9 @@ export function RelicsScreen(): JSX.Element {
       const ids = selected.filter((piece) => piece.level < forgeTo).map((piece) => piece.id);
       const result = await gameApi.upgradeMany(ids, forgeTo, newActionId());
       const climbed = result.entries.filter((entry) => entry.toLevel > entry.fromLevel).length;
+      // The anvil rings for a run that climbed at all; a run that stopped on an empty purse
+      // before its first strike is the hammer glancing off.
+      playCue(climbed > 0 ? CUE.forgeSuccess : CUE.forgeFail);
       await Promise.all([refresh(), refreshPlayer()]);
       setNotice(
         `${climbed} of ${result.entries.length} climbed — ${result.silverSpent.toLocaleString()} silver.` +

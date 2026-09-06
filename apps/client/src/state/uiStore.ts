@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { CUE, playCue } from '../audio';
 
 /**
  * Ephemeral interface state: toasts now, modals and screen transitions as they arrive.
@@ -52,6 +53,10 @@ export const toast = {
   info: (message: string) => useUiStore.getState().pushToast({ message, tone: 'info' }),
   success: (message: string) => useUiStore.getState().pushToast({ message, tone: 'success' }),
   warning: (message: string) => useUiStore.getState().pushToast({ message, tone: 'warning' }),
-  error: (message: string, requestId?: string) =>
-    useUiStore.getState().pushToast({ message, tone: 'error', requestId, durationMs: 8000 }),
+  // The one place every refusal lands, so it is the one place the refusal sounds: a
+  // server that said no is heard as well as read, whichever screen asked.
+  error: (message: string, requestId?: string) => {
+    playCue(CUE.denied);
+    return useUiStore.getState().pushToast({ message, tone: 'error', requestId, durationMs: 8000 });
+  },
 };

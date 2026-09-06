@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import type { SummonBanner } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
+import { CUE, SUMMON_CUES, warmCues } from '@/audio';
 import { useContentStore } from '../../state/contentStore';
 import { useInventoryStore } from '../../state/inventoryStore';
 import { useRosterStore } from '../../state/rosterStore';
@@ -64,6 +65,9 @@ export function MistgateScreen(): JSX.Element {
   const [oddsOpen, setOddsOpen] = useState(false);
   /** Separate from `oddsOpen`: one is "is the dialog up", the other "is the full pool listed". */
   const [oddsExpanded, setOddsExpanded] = useState(false);
+
+  // Rendered ahead of their first play — the Mistgate's family first: the legendary's five seconds of room is the heaviest render in the catalogue, and a pull should not begin with a hitch.
+  useEffect(() => warmCues(SUMMON_CUES), []);
 
   useEffect(() => {
     void load();
@@ -248,6 +252,7 @@ export function MistgateScreen(): JSX.Element {
                 {...highlightable(`button:summon-${banner.key}`)}
                 size="lg"
                 disabled={!canPullOne || pulling}
+                cue={CUE.confirm}
                 onClick={() => void summon(1)}
               >
                 <span className={styles.summonLabel}>
@@ -255,7 +260,12 @@ export function MistgateScreen(): JSX.Element {
                   <span className={styles.summonCost}>1 {sigilName(1)}</span>
                 </span>
               </Button>
-              <Button size="lg" disabled={!canPullTen || pulling} onClick={() => void summon(10)}>
+              <Button
+                size="lg"
+                disabled={!canPullTen || pulling}
+                cue={CUE.confirm}
+                onClick={() => void summon(10)}
+              >
                 <span className={styles.summonLabel}>
                   <span className={styles.summonCount}>Summon ×10</span>
                   <span className={styles.summonCost}>

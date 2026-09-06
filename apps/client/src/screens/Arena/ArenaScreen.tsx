@@ -5,6 +5,7 @@ import { Fui } from '@/fui/react';
 import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { useArenaStore } from '../../state/arenaStore';
 import { useProfileStore } from '../../state/profileStore';
 import { useContentStore } from '../../state/contentStore';
@@ -97,6 +98,7 @@ export function ArenaScreen(): JSX.Element {
   const claim = async (): Promise<void> => {
     const chest = await claimChest();
     if (chest) {
+      playCue(CUE.claim);
       toast.success(`${ARENA_TIER_LABELS[chest.tier]} chest opened.`);
     }
   };

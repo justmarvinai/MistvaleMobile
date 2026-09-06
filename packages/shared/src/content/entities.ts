@@ -1544,50 +1544,202 @@ export type TutorialStepDef = z.infer<typeof tutorialStepDefSchema>;
 // ── Sound cues ──────────────────────────────────────────────────────────────
 
 /**
- * How a cue is made, when no recording stands behind it.
+ * What a layer of a cue vibrates with.
  *
- * A pixel game's interface sounds are short shaped tones and noise bursts — a click, a
- * coin, a forge clang, a refusal. Describing one takes half a dozen numbers, and doing it
- * that way rather than shipping files means every cue is retunable by an operator, weighs
- * nothing, and needs no licence or attribution. A recording always wins where one exists;
- * this is what plays until then.
+ * The four classic waves, a pulse whose width is a knob, two kinds of noise, and two
+ * sources that are what separates a game sound from a beep: `fm` for bells, coins and
+ * anything that rings, and `metal` for clangs and impacts — five inharmonic partials, which
+ * is what struck metal actually is and what no single oscillator can imitate.
  */
-export const synthVoiceSchema = z.object({
-  /** `tone` is an oscillator, `noise` is filtered white noise — a hit rather than a note. */
-  source: z.enum(['tone', 'noise']).default('tone'),
-  wave: z.enum(['sine', 'square', 'sawtooth', 'triangle']).default('square'),
-  /** Hz at the attack. Ignored by `noise`, which has no pitch to speak of. */
-  startHz: z.number().min(20).max(12_000).default(660),
-  /**
-   * Hz at the end of the sweep. Above `startHz` reads as a question or an opening; below
-   * reads as a thud or a refusal. Equal is a flat beep.
-   */
-  endHz: z.number().min(20).max(12_000).default(660),
-  /** Seconds. Everything here is interface-length; a second is already a long cue. */
-  attack: z.number().min(0).max(1).default(0.004),
-  decay: z.number().min(0.01).max(4).default(0.12),
-  /** Peak gain before the bus applies the player's volume. */
-  gain: z.number().min(0).max(1).default(0.5),
-  /** Low-pass corner. The single knob that separates a bright click from a dull knock. */
-  filterHz: z.number().min(80).max(20_000).default(20_000),
-  /**
-   * Extra voices stacked above the first, as semitone offsets.
-   *
-   * What makes a level-up an arpeggio rather than a beep. Each entry replays the voice
-   * transposed and slightly later, so three numbers buy a chord or a flourish.
-   */
-  overtones: z.array(z.number().int().min(-24).max(24)).max(4).default([]),
-});
-export type SynthVoice = z.infer<typeof synthVoiceSchema>;
+export const SYNTH_SOURCES = [
+  'sine',
+  'triangle',
+  'square',
+  'sawtooth',
+  'pulse',
+  'noise',
+  'pink',
+  'fm',
+  'metal',
+] as const;
+export type SynthSource = (typeof SYNTH_SOURCES)[number];
+
+const curveSchema = z.enum(['linear', 'exp']);
 
 /**
- * One sound the game can make.
+ * One layer of a cue (C51).
  *
- * Named by key rather than by file so the thing that asks — a button, a battle event, a
- * payout — names *what happened* and never how it is produced. Pointing a cue at a
- * recording later is one field, and nothing that plays it changes.
+ * A game sound is never one thing. A sword hit is a click, a thump and a ring; a coin is a
+ * strike and a shimmer; a refusal is a knock with a short dull tail. Every one of those is
+ * two or three of these stacked, each with its own pitch, envelope and filter, and that
+ * stacking — rather than any single parameter — is the difference between the pixel-game
+ * beeps this replaced and something a player hears as *the game* making a noise.
+ *
+ * Everything here has a default, so a layer is legal at `{}` and an operator only writes
+ * what a sound needs. Seconds throughout; Hz where it says Hz; cents where it says cents.
  */
-export const soundCueDefSchema = contentMetaSchema.extend({
+export const synthLayerSchema = z.object({
+  source: z.enum(SYNTH_SOURCES).default('sine'),
+  /**
+   * The source's own knob. Pulse width for `pulse` (0.5 is a square), the modulator's
+   * ratio to the carrier for `fm` (2 is an octave up, 1.41 is a bell), and the spread of
+   * the partials for `metal` (1 is a bar, 1.5 a cracked bell).
+   */
+  shape: z.number().min(0.01).max(16).default(0.5),
+  /** How hard the modulator drives the carrier, for `fm`. Zero is a plain sine. */
+  fmIndex: z.number().min(0).max(24).default(0),
+  pitch: z
+    .object({
+      startHz: z.number().min(16).max(16_000).default(440),
+      endHz: z.number().min(16).max(16_000).default(440),
+      /**
+       * How the sweep moves. `exp` is what a falling thump or a rising whoosh actually
+       * sounds like; `linear` reads as a siren and is rarely what a sound wants.
+       */
+      curve: curveSchema.default('exp'),
+      /** Seconds the sweep takes. Zero spreads it over the whole layer. */
+      glide: z.number().min(0).max(4).default(0),
+      vibratoHz: z.number().min(0).max(40).default(0),
+      vibratoCents: z.number().min(0).max(1200).default(0),
+    })
+    .prefault({}),
+  /**
+   * A one-shot envelope: up, held, down to a shelf, and out. `sustain` is the shelf as a
+   * fraction of the peak; a shelf of zero makes `release` irrelevant, which is most cues.
+   */
+  amp: z
+    .object({
+      attack: z.number().min(0).max(2).default(0.003),
+      hold: z.number().min(0).max(2).default(0),
+      decay: z.number().min(0.005).max(4).default(0.15),
+      sustain: z.number().min(0).max(1).default(0),
+      release: z.number().min(0).max(4).default(0.05),
+      curve: curveSchema.default('exp'),
+    })
+    .prefault({}),
+  /**
+   * A resonant two-pole filter whose corner can move over the layer. A low-pass closing
+   * is the whole of "punchy"; a band-pass on noise is a whoosh; a high-pass takes the
+   * mud out of a click.
+   */
+  filter: z
+    .object({
+      type: z.enum(['none', 'lowpass', 'highpass', 'bandpass']).default('none'),
+      startHz: z.number().min(20).max(20_000).default(20_000),
+      endHz: z.number().min(20).max(20_000).default(20_000),
+      /** Resonance. 0.7 is flat; past 4 it sings at the corner. */
+      q: z.number().min(0.1).max(24).default(0.7),
+      curve: curveSchema.default('exp'),
+    })
+    .prefault({}),
+  /** Copies of the source spread across a detune, for width. One voice is none. */
+  unison: z
+    .object({
+      voices: z.number().int().min(1).max(7).default(1),
+      detuneCents: z.number().min(0).max(100).default(0),
+    })
+    .prefault({}),
+  /**
+   * Extra copies transposed by semitones, entering one after another — a chord or a
+   * flourish in a handful of numbers. What makes a level-up an arpeggio.
+   */
+  harmonics: z.array(z.number().int().min(-36).max(36)).max(6).default([]),
+  /** Milliseconds between the harmonics' entries. */
+  staggerMs: z.number().min(0).max(500).default(45),
+  /** Saturation, 0–1. A little on a thump is weight; a lot on noise is a crunch. */
+  drive: z.number().min(0).max(1).default(0),
+  gain: z.number().min(0).max(1).default(0.5),
+  /** Milliseconds after the cue starts before this layer does. */
+  delayMs: z.number().min(0).max(2000).default(0),
+  /** −1 left … 1 right. */
+  pan: z.number().min(-1).max(1).default(0),
+});
+export type SynthLayer = z.infer<typeof synthLayerSchema>;
+
+/**
+ * A whole cue's design: its layers and the room they play in.
+ *
+ * `space` is the reverb — the single biggest reason a synthesised sound reads as a sound
+ * *in a place* rather than a tone from a speaker — and `echo` a feedback delay for the
+ * few cues that want to ring on. `variation` is what stops five hits in a second sounding
+ * like a machine: each play is nudged in pitch and level, seeded so a test can say what
+ * the fourth one did.
+ */
+export const synthPatchSchema = z.object({
+  layers: z.array(synthLayerSchema).max(8).default([]),
+  space: z
+    .object({
+      /** Wet mix, 0–1. Zero is dry and costs nothing. */
+      reverb: z.number().min(0).max(1).default(0),
+      /** Roughly how many seconds the room rings for. */
+      size: z.number().min(0.1).max(4).default(1.2),
+      /** How much the room swallows the top end, 0–1. */
+      damp: z.number().min(0).max(1).default(0.4),
+      predelayMs: z.number().min(0).max(100).default(12),
+    })
+    .prefault({}),
+  echo: z
+    .object({
+      mix: z.number().min(0).max(1).default(0),
+      timeMs: z.number().min(10).max(1000).default(180),
+      feedback: z.number().min(0).max(0.9).default(0.3),
+    })
+    .prefault({}),
+  variation: z
+    .object({
+      pitchCents: z.number().min(0).max(400).default(0),
+      gainDb: z.number().min(0).max(12).default(0),
+    })
+    .prefault({}),
+  /** How many copies may sound at once before the oldest is cut. */
+  polyphony: z.number().int().min(1).max(8).default(4),
+  /** The cue's own level, before the bus applies the player's fader. */
+  master: z.number().min(0).max(1).default(0.8),
+});
+export type SynthPatch = z.infer<typeof synthPatchSchema>;
+
+/**
+ * The shape a cue's synthesis took before C51: one voice, one filter corner, a stack of
+ * overtones. Kept only so that a row published under it still parses and still sounds,
+ * because the content cache passes a row it cannot parse through untouched and a silent
+ * button is the failure this whole family is built to avoid.
+ */
+const legacyVoiceSchema = z.object({
+  source: z.enum(['tone', 'noise']).default('tone'),
+  wave: z.enum(['sine', 'square', 'sawtooth', 'triangle']).default('square'),
+  startHz: z.number().min(20).max(12_000).default(660),
+  endHz: z.number().min(20).max(12_000).default(660),
+  attack: z.number().min(0).max(1).default(0.004),
+  decay: z.number().min(0.01).max(4).default(0.12),
+  gain: z.number().min(0).max(1).default(0.5),
+  filterHz: z.number().min(80).max(20_000).default(20_000),
+  overtones: z.array(z.number().int().min(-24).max(24)).max(4).default([]),
+});
+
+/**
+ * Lifts a pre-C51 cue into a patch.
+ *
+ * One layer, as faithfully as the old shape can be read: the wave becomes the source, the
+ * sweep the pitch, the corner a static low-pass, the overtones harmonics. It will not
+ * sound *good* — that is what the re-voiced seed is for — but it sounds like what it did,
+ * which is what a row nobody has re-published is owed.
+ */
+export function liftLegacyVoice(voice: z.infer<typeof legacyVoiceSchema>): SynthPatch {
+  const layer: SynthLayer = synthLayerSchema.parse({
+    source: voice.source === 'noise' ? 'noise' : voice.wave,
+    pitch: { startHz: voice.startHz, endHz: voice.endHz, curve: 'linear' },
+    amp: { attack: voice.attack, decay: voice.decay },
+    filter:
+      voice.filterHz < 20_000
+        ? { type: 'lowpass', startHz: voice.filterHz, endHz: voice.filterHz, q: 0.5 }
+        : {},
+    harmonics: voice.overtones,
+    gain: voice.gain,
+  });
+  return synthPatchSchema.parse({ layers: [layer], master: 1 });
+}
+
+const soundCueBaseSchema = contentMetaSchema.extend({
   /**
    * Which fader this answers to. `ui` rides the effects slider with the rest; it is a
    * separate bus so a future "interface sounds only" preference has somewhere to go.
@@ -1599,8 +1751,9 @@ export const soundCueDefSchema = contentMetaSchema.extend({
    *
    * The upgrade path, and the reason the cue is the unit rather than the sound: drop files
    * into `assets/`, run `pnpm assets`, point the cues at what it published, and the synth
-   * stops being used for those without a line of code moving. The two music tracks are the
-   * first entries to use it.
+   * stops being used for those without a line of code moving. The two music tracks use
+   * it; since C51 the mixer plays a *cue* from a file as readily as a track, so a recorded
+   * effects pack is the same one field per cue.
    *
    * Long enough for a real filename, because the owner's are descriptive rather than terse
    * and a path that will not fit is a track that cannot be pointed at.
@@ -1609,11 +1762,12 @@ export const soundCueDefSchema = contentMetaSchema.extend({
   /**
    * Play it round again when it ends.
    *
-   * Only meaningful for a `sample`: a synthesised cue is a few hundred milliseconds of
-   * shaped tone and looping one would be a fault alarm. Music sets it; nothing else does.
+   * Only meaningful for a `sample`: a synthesised cue is under two seconds of shaped sound
+   * and looping one would be a fault alarm. Music sets it; nothing else does.
    */
   loop: z.boolean().default(false),
-  voice: synthVoiceSchema.prefault({}),
+  /** How the cue is made when no recording stands behind it. */
+  patch: synthPatchSchema.prefault({}),
   /**
    * Ignore a repeat inside this many milliseconds.
    *
@@ -1624,4 +1778,31 @@ export const soundCueDefSchema = contentMetaSchema.extend({
   throttleMs: z.number().int().min(0).max(2000).default(40),
   active: z.boolean().default(true),
 });
+
+/**
+ * One sound the game can make.
+ *
+ * Named by key rather than by file so the thing that asks — a button, a battle event, a
+ * payout — names *what happened* and never how it is produced. Pointing a cue at a
+ * recording later is one field, and nothing that plays it changes.
+ *
+ * The `preprocess` is the pre-C51 lift: a row still carrying `voice` and no `patch` is read
+ * as the one-layer patch it described. Rows the seed re-publishes lose `voice`; anything
+ * an operator authored keeps sounding until they re-voice it.
+ */
+export const soundCueDefSchema = z.preprocess((raw) => {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+  const row = raw as Record<string, unknown>;
+  if (!('voice' in row)) return row;
+  const { voice: legacy, ...rest } = row;
+  // Lifted whenever there is nothing else to play — not only when `patch` is absent. The
+  // plain seed backfills a missing top-level field with its default, which for `patch` is
+  // *no layers*, so a row can carry an old `voice` beside an empty new `patch`; read
+  // literally that is a silent cue, and it is exactly the row an operator authored under
+  // the old contract and never re-published.
+  const patch = rest.patch as { layers?: unknown[] } | undefined;
+  if (patch?.layers && patch.layers.length > 0) return rest;
+  const voice = legacyVoiceSchema.safeParse(legacy);
+  return voice.success ? { ...rest, patch: liftLegacyVoice(voice.data) } : rest;
+}, soundCueBaseSchema);
 export type SoundCueDef = z.infer<typeof soundCueDefSchema>;

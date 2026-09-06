@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { REFORGE_DUST_ITEM, type GearInstance, type ReforgeQuote } from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { gameApi, newActionId } from '../../api/game';
 import { usePlayerStore } from '../../state/playerStore';
 import { itemCount, useInventoryStore } from '../../state/inventoryStore';
@@ -90,6 +91,7 @@ export function Reforge({
         from: `${statLabel(result.before.stat)} +${result.before.value}${result.before.percent ? '%' : ''}`,
         to: `${statLabel(result.after.stat)} +${result.after.value}${result.after.percent ? '%' : ''}`,
       });
+      playCue(CUE.reforge);
       // Setting the relic re-runs the quote, which is what re-prices the next reroll.
       setCurrent(result.gear);
       await onChanged();

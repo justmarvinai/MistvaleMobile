@@ -9,6 +9,7 @@ import { Rewards, describeRewards, useRewardName } from '../../ui/Rewards/Reward
 import { useQuestStore } from '../../state/questStore';
 import { useContentStore } from '../../state/contentStore';
 import { toast } from '../../state/uiStore';
+import { CUE, playCue } from '@/audio';
 import { Ledger, type LedgerEntry } from '../../ui/Ledger/Ledger';
 import { FirstWins } from './FirstWins';
 import styles from './QuestsScreen.module.scss';
@@ -60,6 +61,7 @@ export function QuestsScreen(): JSX.Element {
   // landed, which a changing number cannot.
   useEffect(() => {
     if (!lastPaid) return;
+    playCue(CUE.claim);
     const line = describeRewards(lastPaid, rewardName);
     if (line) toast.success(`Claimed — ${line}.`);
     clearPaid();

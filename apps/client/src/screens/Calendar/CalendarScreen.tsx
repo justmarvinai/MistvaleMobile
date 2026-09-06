@@ -7,6 +7,7 @@ import { Empty } from '../../ui/Empty/Empty';
 import { Panel } from '../../ui/Panel/Panel';
 import { ScreenInfo } from '../../ui/ScreenInfo/ScreenInfo';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { Modal } from '../../ui/Modal/Modal';
 import { describeRewards, useRewardName } from '../../ui/Rewards/Rewards';
 import { rewardArt } from '../../ui/Rewards/art';
@@ -56,6 +57,7 @@ export function CalendarScreen(): JSX.Element {
 
   useEffect(() => {
     if (!lastPayout) return;
+    playCue(CUE.claim);
     // The champion first, then the relics, then the coins — in the order the player cares.
     if (lastPayout.champions.length > 0) {
       toast.success(`${lastPayout.champions.map(championName).join(', ')} joins you.`);

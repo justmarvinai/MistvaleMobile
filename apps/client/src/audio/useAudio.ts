@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { MUSIC } from '@mistvale/shared';
+import { useEffect, useRef } from 'react';
+import { CUE, CUE_KEYS, MUSIC } from '@mistvale/shared';
 import { mixer } from './mixer';
 import { mediaUrl, music, narration } from './tracks';
 import { useContentStore } from '@/state/contentStore';
@@ -55,11 +55,34 @@ export function useAudio(): void {
     else music.stop();
   }, [inBattle, cues]);
 
+  /**
+   * The account's level turning over.
+   *
+   * Read off the snapshot rather than off any one action, because a level arrives out of
+   * a fight, a mission chain or a claim, and the shell re-reads the player after every one
+   * of them. The first observation is remembered silently — somebody signing in at level
+   * thirty is not owed a fanfare for it — and forgotten on sign-out, so the next account
+   * on this browser is measured against itself.
+   */
+  const level = usePlayerStore((state) => state.player?.level ?? null);
+  const lastLevel = useRef<number | null>(null);
+  useEffect(() => {
+    if (level === null) {
+      lastLevel.current = null;
+      return;
+    }
+    if (lastLevel.current !== null && level > lastLevel.current) mixer.play(CUE.levelUp);
+    lastLevel.current = level;
+  }, [level]);
+
   useEffect(() => {
     const unlock = (): void => {
       mixer.unlock();
       music.unlock();
       narration.unlock();
+      // Every cue the client can ask for, rendered in idle time now rather than on the
+      // frame the player first presses each button; the mixer paces it.
+      mixer.warm(CUE_KEYS);
     };
     window.addEventListener('pointerdown', unlock, { capture: true, once: true, passive: true });
     window.addEventListener('keydown', unlock, { capture: true, once: true, passive: true });

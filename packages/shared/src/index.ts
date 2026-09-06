@@ -37,3 +37,4 @@ export * from './admin';
 export * from './routes';
 export * from './content/index';
 export * from './openapi';
+export * from './audio/synth';

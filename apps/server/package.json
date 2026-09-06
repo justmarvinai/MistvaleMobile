@@ -18,7 +18,8 @@
     "openapi:check": "tsx src/openapi-gen.ts --check",
     "set-rank": "tsx src/scripts/set-rank.ts",
     "seed-bots": "tsx src/scripts/seed-arena-bots.ts",
-    "content:export": "tsx src/content/export.ts"
+    "content:export": "tsx src/content/export.ts",
+    "sounds:render": "tsx src/scripts/render-sounds.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

@@ -4,6 +4,7 @@ import { SegmentedControl } from '@/fui/components/SegmentedControl.ts';
 import { Fui } from '@/fui/react';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { useArenaStore } from '../../state/arenaStore';
 import { AFFINITY_GLYPH } from '../../ui/affinity';
 import styles from './HallOfValor.module.scss';
@@ -132,7 +133,9 @@ export function HallOfValor({ onClose }: { onClose: () => void }): JSX.Element {
                       size="sm"
                       variant={affordable ? 'primary' : 'ghost'}
                       disabled={capped || !affordable || busy !== null}
-                      onClick={() => void upgrade(element, stat)}
+                      onClick={() =>
+                        void upgrade(element, stat).then((ok) => ok && playCue(CUE.mastery))
+                      }
                     >
                       {capped ? 'Mastered' : `${track.nextCost} medals`}
                     </Button>

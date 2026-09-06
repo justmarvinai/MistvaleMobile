@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ROUTES, type PlayerSettings } from '@mistvale/shared';
 import { Modal } from '@/ui/Modal/Modal';
 import { Button } from '@/ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { TextField } from '@/ui/TextField/TextField';
 import { usePlayerStore } from '@/state/playerStore';
 import { useSessionStore } from '@/state/sessionStore';
@@ -40,7 +41,10 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           role="tab"
           aria-selected={tab === 'preferences'}
           className={`${styles.tab} ${tab === 'preferences' ? styles.tabActive : ''}`}
-          onClick={() => setTab('preferences')}
+          onClick={() => {
+            playCue(CUE.tab);
+            setTab('preferences');
+          }}
         >
           Preferences
         </button>
@@ -49,7 +53,10 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           role="tab"
           aria-selected={tab === 'account'}
           className={`${styles.tab} ${tab === 'account' ? styles.tabActive : ''}`}
-          onClick={() => setTab('account')}
+          onClick={() => {
+            playCue(CUE.tab);
+            setTab('account');
+          }}
         >
           Account
         </button>
@@ -193,7 +200,10 @@ function ToggleRow({
         type="checkbox"
         className={styles.checkbox}
         checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
+        onChange={(event) => {
+          playCue(CUE.toggle);
+          onChange(event.target.checked);
+        }}
       />
     </label>
   );

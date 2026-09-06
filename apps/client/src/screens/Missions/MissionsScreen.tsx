@@ -1,3 +1,4 @@
+import { CUE, playCue } from '@/audio';
 import { useEffect, useMemo, useState } from 'react';
 import type { MissionArc } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
@@ -38,6 +39,7 @@ export function MissionsScreen(): JSX.Element {
 
   useEffect(() => {
     if (!lastClaim) return;
+    playCue(CUE.claim);
     const championNames = lastClaim.champions
       .map((key) => bundle?.champions.find((entry) => entry.key === key)?.name ?? key)
       .join(', ');

@@ -1,3 +1,4 @@
+import { CUE, playCue } from '@/audio';
 import { useEffect, useMemo, useState } from 'react';
 import type { ChampionDef, Chronicle, ChronicleEntry, FactionDef } from '@mistvale/shared';
 import { Panel } from '../../ui/Panel/Panel';
@@ -117,7 +118,10 @@ export function ChronicleScreen(): JSX.Element {
                 type="button"
                 className={styles.filter}
                 aria-pressed={filter === entry}
-                onClick={() => setFilter(entry)}
+                onClick={() => {
+                  playCue(CUE.tab);
+                  setFilter(entry);
+                }}
               >
                 {entry === 'all' ? 'Everyone' : entry === 'owned' ? 'Owned' : 'Still missing'}
               </button>

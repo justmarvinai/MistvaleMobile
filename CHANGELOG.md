@@ -5,6 +5,45 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed — the sound of the game (C51)
+
+- **Every interface, battle and reward sound is re-voiced on a real engine.** The owner's
+  word for the twenty-seven synthesised cues was *prototype*, and the diagnosis is simple:
+  one oscillator, one envelope and a one-pole low-pass can make a tone, and a tone is not
+  a sound. `packages/shared/src/audio/synth.ts` is a small synthesiser — nine sources
+  including FM bells and inharmonic `metal`, a one-shot AHDSR, exponential sweeps, a
+  resonant filter whose corner moves, unison, saturation, and a stereo room and echo on the
+  whole cue — and every cue is now two to six **layers** built from a kit (a click, a
+  thump, a bell, a clang, a whoosh, a pad, a shimmer) the way a sound designer builds one:
+  contact, weight, and what kind of thing it was.
+- **Why synthesis rather than a pack:** every recorded source — Kenney, OpenGameArt,
+  freesound, pixabay, archive.org — is refused at this environment's proxy, and the
+  project's own rule admits assets only from `assets/` or a source named in ASSET_GUIDE,
+  so a mirror of unverifiable provenance was never on the table. Nothing third-party,
+  nothing to credit; a recorded pack remains one `sample` field per cue — and that path
+  **actually works now**: the mixer had returned `null` for any cue naming a recording
+  since P10c, so the drop-in the design leaned on would have been a drop-in silence.
+- **The catalogue is 64 cues where it was 27, because two thirds of the old vocabulary was
+  never fired.** No sound when silver landed, a relic dropped, a level turned, a forge
+  struck, a tab changed or the server said no. All of it sounds now: claims, forges,
+  dismantling, reforging, selling, equipping, purchases, ascensions, awakenings, masteries,
+  level-ups and refusals; the fight has a cast per breath, strong, weak, blocked and
+  resisted blows, wards holding and breaking, enrages, adds, counters and extra turns, and
+  a quiet prompt when the fight is waiting on the player.
+- **Measured rather than guessed.** The seed's own test renders every cue and pins, per
+  family, what makes it what it is: a hit arrives inside twelve milliseconds, a coin is
+  bright and a death dark, the interface stays quieter than a blow, the moments ring, and
+  the Mistgate's four landings climb in level and length. `pnpm --filter @mistvale/server
+  sounds:render` writes every cue to WAV with a highlights reel — the art sheet, for ears.
+- The mixer gained stereo cues, a compressor across the effects, a polyphony cap per cue, a
+  seeded nudge of pitch and level per play so five hits are five hits, faders that reach
+  sounds already playing, and idle-time warming of the whole catalogue after the first
+  gesture.
+- A cue's design is a `patch` on the `soundCue` entity, editable in Admin like everything
+  else. A row published under the old `voice` shape is lifted into a one-layer patch as it
+  is read, so an operator-authored cue keeps sounding until it is re-voiced. **This release
+  needs `SEED.sh --replace soundCue`** — the plain seed leaves published rows as they are.
+
 ### Fixed — the owner's five: the profile card, drag-to-scroll, tooltips and the wave banner (C50)
 
 - **The profile card no longer scrolls, and the Arena trophy is no longer clipped** — and

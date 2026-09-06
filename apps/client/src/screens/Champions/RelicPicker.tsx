@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { GearInstance, GearPreview, GearSlot } from '@mistvale/shared';
 import { Modal } from '../../ui/Modal/Modal';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue, type CueName } from '@/audio';
 import { gameApi } from '../../api/game';
 import { useContentStore } from '../../state/contentStore';
 import { useInventoryStore } from '../../state/inventoryStore';
@@ -94,11 +95,12 @@ export function RelicPicker({
     };
   }, [selected, championId]);
 
-  const act = async (action: () => Promise<unknown>): Promise<void> => {
+  const act = async (action: () => Promise<unknown>, cue: CueName): Promise<void> => {
     setBusy(true);
     setError(null);
     try {
       await action();
+      playCue(cue);
       await loadInventory();
       await onChanged();
     } catch (cause) {
@@ -158,7 +160,7 @@ export function RelicPicker({
                   <Button
                     variant="ghost"
                     disabled={busy}
-                    onClick={() => void act(() => gameApi.unequip(worn.id))}
+                    onClick={() => void act(() => gameApi.unequip(worn.id), CUE.unequip)}
                   >
                     Take it off
                   </Button>
@@ -268,7 +270,9 @@ export function RelicPicker({
           </Button>
           <Button
             disabled={!selected || busy}
-            onClick={() => selected && void act(() => gameApi.equip(selected, championId))}
+            onClick={() =>
+              selected && void act(() => gameApi.equip(selected, championId), CUE.equip)
+            }
           >
             Equip
           </Button>

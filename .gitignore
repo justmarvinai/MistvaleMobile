@@ -50,3 +50,6 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# `pnpm --filter @mistvale/server sounds:render` writes here by default: rendered cues, for listening.
+sound-render/

@@ -10311,84 +10311,384 @@
             "default": false,
             "type": "boolean"
           },
-          "voice": {
+          "patch": {
             "type": "object",
             "properties": {
-              "source": {
-                "default": "tone",
-                "type": "string",
-                "enum": [
-                  "tone",
-                  "noise"
-                ]
-              },
-              "wave": {
-                "default": "square",
-                "type": "string",
-                "enum": [
-                  "sine",
-                  "square",
-                  "sawtooth",
-                  "triangle"
-                ]
-              },
-              "startHz": {
-                "default": 660,
-                "type": "number",
-                "minimum": 20,
-                "maximum": 12000
-              },
-              "endHz": {
-                "default": 660,
-                "type": "number",
-                "minimum": 20,
-                "maximum": 12000
-              },
-              "attack": {
-                "default": 0.004,
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
-              },
-              "decay": {
-                "default": 0.12,
-                "type": "number",
-                "minimum": 0.01,
-                "maximum": 4
-              },
-              "gain": {
-                "default": 0.5,
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
-              },
-              "filterHz": {
-                "default": 20000,
-                "type": "number",
-                "minimum": 80,
-                "maximum": 20000
-              },
-              "overtones": {
+              "layers": {
                 "default": [],
-                "maxItems": 4,
+                "maxItems": 8,
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "minimum": -24,
-                  "maximum": 24
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "default": "sine",
+                      "type": "string",
+                      "enum": [
+                        "sine",
+                        "triangle",
+                        "square",
+                        "sawtooth",
+                        "pulse",
+                        "noise",
+                        "pink",
+                        "fm",
+                        "metal"
+                      ]
+                    },
+                    "shape": {
+                      "default": 0.5,
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 16
+                    },
+                    "fmIndex": {
+                      "default": 0,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 24
+                    },
+                    "pitch": {
+                      "type": "object",
+                      "properties": {
+                        "startHz": {
+                          "default": 440,
+                          "type": "number",
+                          "minimum": 16,
+                          "maximum": 16000
+                        },
+                        "endHz": {
+                          "default": 440,
+                          "type": "number",
+                          "minimum": 16,
+                          "maximum": 16000
+                        },
+                        "curve": {
+                          "default": "exp",
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "exp"
+                          ]
+                        },
+                        "glide": {
+                          "default": 0,
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 4
+                        },
+                        "vibratoHz": {
+                          "default": 0,
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 40
+                        },
+                        "vibratoCents": {
+                          "default": 0,
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1200
+                        }
+                      },
+                      "required": [
+                        "startHz",
+                        "endHz",
+                        "curve",
+                        "glide",
+                        "vibratoHz",
+                        "vibratoCents"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "amp": {
+                      "type": "object",
+                      "properties": {
+                        "attack": {
+                          "default": 0.003,
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 2
+                        },
+                        "hold": {
+                          "default": 0,
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 2
+                        },
+                        "decay": {
+                          "default": 0.15,
+                          "type": "number",
+                          "minimum": 0.005,
+                          "maximum": 4
+                        },
+                        "sustain": {
+                          "default": 0,
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "release": {
+                          "default": 0.05,
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 4
+                        },
+                        "curve": {
+                          "default": "exp",
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "exp"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "attack",
+                        "hold",
+                        "decay",
+                        "sustain",
+                        "release",
+                        "curve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "filter": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "default": "none",
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "lowpass",
+                            "highpass",
+                            "bandpass"
+                          ]
+                        },
+                        "startHz": {
+                          "default": 20000,
+                          "type": "number",
+                          "minimum": 20,
+                          "maximum": 20000
+                        },
+                        "endHz": {
+                          "default": 20000,
+                          "type": "number",
+                          "minimum": 20,
+                          "maximum": 20000
+                        },
+                        "q": {
+                          "default": 0.7,
+                          "type": "number",
+                          "minimum": 0.1,
+                          "maximum": 24
+                        },
+                        "curve": {
+                          "default": "exp",
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "exp"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "startHz",
+                        "endHz",
+                        "q",
+                        "curve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "unison": {
+                      "type": "object",
+                      "properties": {
+                        "voices": {
+                          "default": 1,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 7
+                        },
+                        "detuneCents": {
+                          "default": 0,
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100
+                        }
+                      },
+                      "required": [
+                        "voices",
+                        "detuneCents"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "harmonics": {
+                      "default": [],
+                      "maxItems": 6,
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": -36,
+                        "maximum": 36
+                      }
+                    },
+                    "staggerMs": {
+                      "default": 45,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 500
+                    },
+                    "drive": {
+                      "default": 0,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "gain": {
+                      "default": 0.5,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "delayMs": {
+                      "default": 0,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 2000
+                    },
+                    "pan": {
+                      "default": 0,
+                      "type": "number",
+                      "minimum": -1,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "source",
+                    "shape",
+                    "fmIndex",
+                    "pitch",
+                    "amp",
+                    "filter",
+                    "unison",
+                    "harmonics",
+                    "staggerMs",
+                    "drive",
+                    "gain",
+                    "delayMs",
+                    "pan"
+                  ],
+                  "additionalProperties": false
                 }
+              },
+              "space": {
+                "type": "object",
+                "properties": {
+                  "reverb": {
+                    "default": 0,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "size": {
+                    "default": 1.2,
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 4
+                  },
+                  "damp": {
+                    "default": 0.4,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "predelayMs": {
+                    "default": 12,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "reverb",
+                  "size",
+                  "damp",
+                  "predelayMs"
+                ],
+                "additionalProperties": false
+              },
+              "echo": {
+                "type": "object",
+                "properties": {
+                  "mix": {
+                    "default": 0,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "timeMs": {
+                    "default": 180,
+                    "type": "number",
+                    "minimum": 10,
+                    "maximum": 1000
+                  },
+                  "feedback": {
+                    "default": 0.3,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 0.9
+                  }
+                },
+                "required": [
+                  "mix",
+                  "timeMs",
+                  "feedback"
+                ],
+                "additionalProperties": false
+              },
+              "variation": {
+                "type": "object",
+                "properties": {
+                  "pitchCents": {
+                    "default": 0,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 400
+                  },
+                  "gainDb": {
+                    "default": 0,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 12
+                  }
+                },
+                "required": [
+                  "pitchCents",
+                  "gainDb"
+                ],
+                "additionalProperties": false
+              },
+              "polyphony": {
+                "default": 4,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8
+              },
+              "master": {
+                "default": 0.8,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
               }
             },
             "required": [
-              "source",
-              "wave",
-              "startHz",
-              "endHz",
-              "attack",
-              "decay",
-              "gain",
-              "filterHz",
-              "overtones"
+              "layers",
+              "space",
+              "echo",
+              "variation",
+              "polyphony",
+              "master"
             ],
             "additionalProperties": false
           },
@@ -10409,7 +10709,7 @@
           "bus",
           "sample",
           "loop",
-          "voice",
+          "patch",
           "throttleMs",
           "active"
         ],

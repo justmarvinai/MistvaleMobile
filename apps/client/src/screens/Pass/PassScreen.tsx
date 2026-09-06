@@ -3,6 +3,7 @@ import type { ValePassStanding, ValePassTierStanding, ValePassTrack } from '@mis
 import { CountdownTimer } from '@/fui/components/CountdownTimer.ts';
 import { Fui } from '@/fui/react';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue } from '@/audio';
 import { Empty } from '../../ui/Empty/Empty';
 import { Heading } from '../../ui/Heading/Heading';
 import { Panel } from '../../ui/Panel/Panel';
@@ -48,6 +49,7 @@ export function PassScreen(): JSX.Element {
   useEffect(() => {
     if (!lastPaid) return;
     const line = describeRewards(lastPaid, rewardName);
+    playCue(CUE.claim);
     if (line) toast.success(`Collected — ${line}.`);
     clearPaid();
   }, [lastPaid, clearPaid, rewardName]);

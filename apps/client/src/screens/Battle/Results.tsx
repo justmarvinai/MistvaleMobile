@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ARENA_TIERS,
@@ -13,6 +13,7 @@ import type { BattleRewards } from '../../api/game';
 import { ResultScreen } from '@/fui/components/ResultScreen.ts';
 import { useFui, useFuiAttrs } from '@/fui/react';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue, relicCue } from '@/audio';
 import { useDialogLayer } from '../../ui/Modal/dialog';
 import { Rewards } from '../../ui/Rewards/Rewards';
 import { Icon } from '../../ui/Icon/Icon';
@@ -124,6 +125,19 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
     () => buildReport({ arena, titan, practice, won, outcome, rewards }),
     [arena, titan, practice, won, outcome, rewards],
   );
+
+  // A relic that dropped, announced as one — after the verdict has had its beat, and
+  // once for the best of them rather than once per piece.
+  useEffect(() => {
+    if (report.relics.length === 0) return undefined;
+    const best = report.relics.some((relic) => relic.rarity === 'legendary')
+      ? 'legendary'
+      : report.relics.some((relic) => relic.rarity === 'epic')
+        ? 'epic'
+        : 'rare';
+    const handle = window.setTimeout(() => playCue(relicCue(best)), 700);
+    return () => window.clearTimeout(handle);
+  }, [report.relics]);
 
   const { ref, instance } = useFui(
     ResultScreen,
@@ -265,6 +279,7 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
                     <Button
                       variant="secondary"
                       disabled={busy || !affordable || team.length === 0}
+                      cue={CUE.confirm}
                       onClick={() => void fight(stage)}
                     >
                       {cost > 0 ? `Again · ${cost} energy` : 'Again'}
@@ -279,12 +294,13 @@ export function Results({ onLeave }: { onLeave: () => void }): JSX.Element {
                     <Button
                       variant="secondary"
                       disabled={busy || !affordable || team.length === 0}
+                      cue={CUE.confirm}
                       onClick={() => void fight(following)}
                     >
                       {cost > 0 ? `Next · ${cost} energy` : 'Next'}
                     </Button>
                   )}
-                  <Button variant="primary" onClick={onLeave}>
+                  <Button variant="primary" cue={CUE.back} onClick={onLeave}>
                     {report.leave}
                   </Button>
                 </div>

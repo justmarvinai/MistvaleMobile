@@ -1,4 +1,5 @@
 import { useLayoutEffect } from 'react';
+import { CUE, playCue } from '@/audio';
 import { BottomNav } from '@/fui/components/BottomNav.ts';
 import { useFui } from '@/fui/react';
 import { DOCK_SCREENS, isHub, isScreenUnlocked, screensInHub, type ScreenId } from './screens';
@@ -85,7 +86,10 @@ export function Dock({
         const screen = DOCK_SCREENS.find((entry) => entry.id === id);
         // A locked entry is focusable and clickable, so the refusal lives here. `apply`
         // puts the library's own selection back where the router says it is.
-        if (screen && isScreenUnlocked(screen, unlocks)) onNavigate(id as ScreenId);
+        if (screen && isScreenUnlocked(screen, unlocks)) {
+          playCue(CUE.tab);
+          onNavigate(id as ScreenId);
+        }
       },
     },
     (nav, next) => {

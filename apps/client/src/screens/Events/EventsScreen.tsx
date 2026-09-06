@@ -1,3 +1,4 @@
+import { CUE, playCue } from '@/audio';
 import { useEffect, useMemo } from 'react';
 import type { EventStanding } from '@mistvale/shared';
 import { CountdownTimer } from '@/fui/components/CountdownTimer.ts';
@@ -41,6 +42,7 @@ export function EventsScreen(): JSX.Element {
   useEffect(() => {
     if (!lastPaid) return;
     const line = describeRewards(lastPaid, rewardName);
+    playCue(CUE.claim);
     if (line) toast.success(`Claimed — ${line}.`);
     clearPaid();
   }, [lastPaid, clearPaid, rewardName]);

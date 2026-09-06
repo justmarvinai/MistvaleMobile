@@ -10,6 +10,7 @@ import { skillArt } from '../../ui/skillArt';
 import { statLabel } from '../../ui/labels';
 import { setEffect } from '../../ui/setEffect';
 import { Button } from '../../ui/Button/Button';
+import { CUE, playCue, type CueName } from '@/audio';
 import { gameApi, newActionId } from '../../api/game';
 import { useContentStore } from '../../state/contentStore';
 import { useInventoryStore, itemCount } from '../../state/inventoryStore';
@@ -121,7 +122,11 @@ export function ChampionSheet({ championId }: { championId: string }): JSX.Eleme
   );
 
   /** Runs a spend, then re-reads everything it could have moved. */
-  const run = async (label: string, action: () => Promise<unknown>): Promise<void> => {
+  const run = async (
+    label: string,
+    action: () => Promise<unknown>,
+    cue?: CueName,
+  ): Promise<void> => {
     setBusy(true);
     setError(null);
     setNotice(null);
@@ -130,6 +135,7 @@ export function ChampionSheet({ championId }: { championId: string }): JSX.Eleme
       await Promise.all([refreshInventory(), refreshRoster(), refreshPlayer()]);
       reload();
       setNotice(label);
+      if (cue) playCue(cue);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'That did not work.');
     } finally {
@@ -279,9 +285,17 @@ export function ChampionSheet({ championId }: { championId: string }): JSX.Eleme
                 onTake={(id) => {
                   if (id === 'level' || id === 'rank') return setPicking(id);
                   if (id === 'ascension') {
-                    return void run('Ascended.', () => gameApi.ascend(championId, newActionId()));
+                    return void run(
+                      'Ascended.',
+                      () => gameApi.ascend(championId, newActionId()),
+                      CUE.ascend,
+                    );
                   }
-                  return void run('Awakened.', () => gameApi.awaken(championId, newActionId()));
+                  return void run(
+                    'Awakened.',
+                    () => gameApi.awaken(championId, newActionId()),
+                    CUE.awaken,
+                  );
                 }}
               />
             </div>
@@ -488,10 +502,13 @@ export function ChampionSheet({ championId }: { championId: string }): JSX.Eleme
           onClose={() => setPicking(null)}
           onConfirm={async (ids, brews) => {
             setPicking(null);
-            await run(picking === 'level' ? 'Experience granted.' : 'Rank raised.', () =>
-              picking === 'level'
-                ? gameApi.levelUp(championId, ids, brews, newActionId())
-                : gameApi.rankUp(championId, ids, newActionId()),
+            await run(
+              picking === 'level' ? 'Experience granted.' : 'Rank raised.',
+              () =>
+                picking === 'level'
+                  ? gameApi.levelUp(championId, ids, brews, newActionId())
+                  : gameApi.rankUp(championId, ids, newActionId()),
+              picking === 'level' ? CUE.championLevel : CUE.rankUp,
             );
           }}
         />
@@ -505,7 +522,7 @@ export function ChampionSheet({ championId }: { championId: string }): JSX.Eleme
           onClose={() => setSlotPicking(null)}
           onChanged={async () => {
             setSlotPicking(null);
-            await run('Relics changed.', async () => undefined);
+            await run('Relics changed.', async () => undefined, CUE.equip);
           }}
         />
       )}

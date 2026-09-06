@@ -15,6 +15,7 @@ import { getStage, isSceneAttached, setScene, stageFailure } from '../../game/st
 import { blindMessage, blindReason, type BlindReason } from './blindStage';
 import { BossBar, BossSkills, bossOnField } from './BossFrame';
 import { focusUnit, sameRef } from './focus';
+import { BATTLE_CUES, warmCues } from '@/audio';
 import { Banner } from './Banner';
 import { DomBattlefield } from './DomBattlefield';
 import { UnitOverlay } from './UnitOverlay';
@@ -171,6 +172,9 @@ export function BattleScreen(): JSX.Element {
    * picked up by the next lookup and the scene never has to be thrown away.
    */
   const artForRef = useRef(artFor);
+  // Rendered ahead of their first play — a fight's family first: the opening drum and the first cast land inside the first second.
+  useEffect(() => warmCues(BATTLE_CUES), []);
+
   useEffect(() => {
     artForRef.current = artFor;
   }, [artFor]);
