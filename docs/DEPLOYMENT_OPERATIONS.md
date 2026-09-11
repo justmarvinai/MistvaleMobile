@@ -1,5 +1,9 @@
 # Mistvale — Deployment & Operations
 
+> **Setting up a new box?** `VPS_SETUP_GUIDE.md` is the step-by-step runbook — securing the
+> server, DNS, the one deploy command, and the day-two operations. This document is the
+> reference for what the topology *is* and why.
+
 > Status: **Planning.** Target: single VPS — Ubuntu 24.04 LTS, 1 vCPU, 4 GB RAM, 50 GB SSD. No dev/staging instance: `main` (game repo) + Admin Suite edits are production. The scripts below are deliverables of Phase P0 (v1) and hardened through P10.
 
 ## 1. Topology

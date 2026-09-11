@@ -5,6 +5,34 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added — a step-by-step VPS setup runbook (`docs/VPS_SETUP_GUIDE.md`)
+
+- The order you actually type things in to take a freshly-bought Ubuntu 24.04 box to a live
+  game: securing the server by hand first (your own sudo user, SSH keys, root login and
+  password auth off, unattended upgrades), the one DNS record, the single `DEPLOY.sh` command,
+  what it prompts for, how to verify it, and the day-two runbook.
+- Two traps it exists to stop. **`ufw` is enabled by the deploy with 22/80/443 open and
+  everything else closed**, so moving SSH to another port *before* deploying locks you out of
+  your own server unless the port is allowed first. And **OpenSSH uses the first value it finds
+  for a keyword, not the last** — Ubuntu's cloud images ship
+  `sshd_config.d/50-cloud-init.conf` with `PasswordAuthentication yes`, so a hardening drop-in
+  has to sort *before* it (`01-`, not `99-`); the guide verifies the result with `sshd -T`
+  rather than reasoning about load order.
+- `DEPLOYMENT_OPERATIONS.md` stays the reference for what the topology is and why, and now
+  points at the runbook; the README's doc map lists it first for a new box.
+
+### Removed — `docs/FIRST_DEPLOY.md`, superseded by the setup guide
+
+- It was written at P0 and says so: that `/admin` returns 404 because the Admin Panel "does not
+  exist yet", that there is "no gameplay — no champions, battles, campaign or summoning", and
+  that password reset "lands with the Admin Suite in Phase A0/A5". All three have been false for
+  ten phases. Its whole security section was one bullet, and it advised editing `sshd_config`
+  directly, which is the precedence trap above.
+- Everything in it that was still true is in `VPS_SETUP_GUIDE.md`: the sixteen deploy steps,
+  `OPS_SESSION_TOKEN` for `STATUS.sh`'s full payload, proving the backups ran after the first
+  night, and that rotating the session pepper signs everyone out. Two runbooks disagreeing about
+  whether the box gets hardened is worse than one that does it.
+
 ### Changed — the sound of the game (C51)
 
 - **Every interface, battle and reward sound is re-voiced on a real engine.** The owner's
